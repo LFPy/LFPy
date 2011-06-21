@@ -1,0 +1,6 @@
+//geometry information needed for LFPy, geometry g0703P1
+
+nsomasec = 2
+naxonsec = 29
+ndendsec = 52
+napicdendsec = 45

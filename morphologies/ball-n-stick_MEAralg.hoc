@@ -1,0 +1,25 @@
+proc celldef() {
+      topol()
+      subsets()
+      geom()
+      biophys()
+      geom_nseg()
+    }
+    
+    create soma[1], dend[1]
+    
+    //Do not want to have these here...
+    nsomasec = 1
+    naxonsec = 0
+    ndendsec = 1
+    napicdendsec = 0
+    sec_counted = 1
+    
+    
+    
+    proc topol() { local i
+      connect dend(0), soma(0)
+      basic_shape()
+    }
+    proc basic_shape() {
+      soma {pt3dclear() pt3dadd(0, 0, -500.00, 1000.00)     pt3dadd(0, 0, 500.00, 1000.00)}

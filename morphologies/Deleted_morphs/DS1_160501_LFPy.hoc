@@ -1,0 +1,6 @@
+// Stating variables needed for loading geometry in LFPy
+
+nsomasec = 1.
+ndendsec = 36.
+napicdendsec = 0.
+naxonsec = 0.

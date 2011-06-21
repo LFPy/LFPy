@@ -1,0 +1,379 @@
+#!/usr/bin/env python
+cimport numpy as np
+import numpy as np
+#import LFPy
+DTYPE = np.float64
+ctypedef np.float64_t DTYPE_t
+
+
+cpdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] calc_lfp_choose(c,
+                    double x=0, double y=0, double z=0, double sigma=0.3, \
+                    r_limit=None, from_file=False, \
+                    timestep=None, t_indices=None, som_as_point=False):
+    '''Determine which method to use, line-source for soma default'''
+    if som_as_point:
+        return calc_lfp_som_as_point(c, x=x, y=y, z=z, sigma=sigma, \
+                                     r_limit=r_limit, from_file=from_file, \
+                                     t_indices=t_indices)
+    else:
+        return calc_lfp_linesource(c, x=x, y=y, z=z, sigma=sigma, \
+                                   r_limit=r_limit, from_file=from_file, \
+                                   t_indices=t_indices)
+
+cpdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] calc_lfp_linesource(c,
+                        double x=0,
+                        double y=0,
+                        double z=0,
+                        double sigma=0.3, \
+                        r_limit=None,
+                        from_file=False, timestep=None, t_indices=None):
+    """Calculate electric field potential using the line-source method, all
+    compartments treated as line sources, even soma."""
+    #if from_file:
+    #    c = LFPy.tools.load(c)
+
+    #cdef double rx = x
+    #cdef double ry = y
+    #cdef double rz = z
+    
+    # Handling the r_limits. If a r_limit is a single value, an array r_limit
+    # of shape c.diam is returned.
+    if type(r_limit) == int or type(r_limit) == float:
+        r_limit = np.ones(np.shape(c.diam))*abs(r_limit)
+    elif np.shape(r_limit) != np.shape(c.diam):
+        raise Exception, 'r_limit is neither a float- or int- value, nor is \
+            r_limit.shape() equal to c.diam.shape()'
+    
+    cdef np.ndarray[DTYPE_t, ndim=2, negative_indices=False] currmem
+    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] xstart, xend, \
+        ystart, yend, zstart, zend, r_lims, deltaS, h, r2, l, \
+        Ememi, Ememii, Ememiii, Emem
+    cdef np.ndarray[long, ndim=1, negative_indices=False] i, ii, iii
+    
+    if timestep != None:
+        currmem = c.imem[:, timestep]
+    if t_indices != None:
+        currmem = c.imem[:, t_indices]
+    else:
+        currmem = c.imem
+    
+    
+    #some variables for h, r2, r_soma calculations
+    xstart = c.xstart
+    xend = c.xend
+    ystart = c.ystart
+    yend = c.yend
+    zstart = c.zstart
+    zend = c.zend
+    
+    
+    deltaS = deltaS_calc(xstart, xend, ystart, yend, zstart, zend)
+    h = h_calc(xstart, xend, ystart, yend, zstart, zend, deltaS, x, y, z)
+    r2 = r2_calc(xend, yend, zend, x, y, z, h)
+    if np.any(r2 < 0):
+        raise Exception
+    
+    
+    r_lims = r_limit
+    r2 = check_rlimit(r2, r_lims, h, deltaS)
+    
+    l = h + deltaS
+    
+    #case i, h < 0, l < 0
+    [i] = np.where((h < 0) & (l < 1))
+    #case ii, h < 0, l > 0
+    [ii] = np.where((h < 0) & (l >= 0))
+    #case iii, h > 0, l > 0
+    [iii] = np.where((h >= 0) & (l >= 1))
+    
+    Ememi = Ememi_calc(i, currmem, sigma, deltaS, l, r2, h)
+    Ememii = Ememii_calc(ii, currmem, sigma, deltaS, l, r2, h)
+    Ememiii = Ememiii_calc(iii, currmem, sigma, deltaS, l, r2, h)
+
+    Emem = Ememi.transpose() + Ememiii.transpose() + Ememii.transpose()
+    
+    return Emem
+
+
+cpdef np.ndarray[DTYPE_t, ndim=1] calc_lfp_som_as_point(c,
+                          double x=0, double y=0, double z=0, double sigma=0.3, 
+                          r_limit=None, from_file=False,
+                          timestep=None, t_indices=None):
+    '''Calculate electric field potential using the line-source method,
+    soma is treated as point/sphere source'''
+    
+    #if from_file:
+    #    c = LFPy.tools.load(c)
+
+    #Handling the r_limits. If a r_limit is a single value,
+    #an array r_limit of shape c.diam is returned.
+    if type(r_limit) != type(np.array([])):
+        r_limit = np.array(r_limit)
+    if r_limit.shape == ():
+        s_limit = r_limit
+        r_limit = np.ones(c.diam.size) * abs(r_limit)
+    elif r_limit.shape == (2, ):
+        s_limit = abs(r_limit[0])
+        r_limit = np.ones(c.diam.size) * abs(r_limit[1])	
+    elif r_limit.shape == c.diam.shape:
+        s_limit = r_limit[0]
+        r_limit = r_limit
+    else:
+        raise Exception,  'r_limit is neither a float- or int- value, \
+            on the form r_limit=[s_limit, r_limit],  \
+            nor is shape(r_limit) equal to shape(c.diam)!'
+    
+    cdef np.ndarray[DTYPE_t, ndim=2] currmem
+    cdef np.ndarray[DTYPE_t, ndim=1] xstart, xend, \
+        ystart, yend, zstart, zend, deltaS, h, r2, l, \
+        Ememi, Ememii, Ememiii, Emem
+    cdef np.ndarray[long, ndim=1] i, ii, iii
+    cdef double xmid, ymid, zmid
+    
+    
+    if timestep != None:
+        currmem = c.imem[:, timestep]
+    if t_indices != None:
+        currmem = c.imem[:, t_indices]
+    else:
+        currmem = c.imem
+    
+    #some variables for h, r2, r_soma calculations
+    xstart = c.xstart
+    xmid = c.xmid[0]
+    xend = c.xend
+    ystart = c.ystart
+    ymid = c.ymid[0]
+    yend = c.yend
+    zstart = c.zstart
+    zmid = c.zmid[0]
+    zend = c.zend
+    
+    
+    deltaS = deltaS_calc(xstart, xend, ystart, yend, zstart, zend)
+    h = h_calc(xstart, xend, ystart, yend, zstart, zend, deltaS, x, y, z)
+    r2 = r2_calc(xend, yend, zend, x, y, z, h)
+    r_soma = r_soma_calc(xmid, ymid, zmid, x, y, z)
+    if r_soma < s_limit:
+        print 'Adjusting r-distance to soma segment from %g to %g' \
+                % (r_soma, s_limit)
+        r_soma = s_limit
+    
+    # Check that no segment is close the electrode than r_limit
+    if np.sum(np.nonzero( r2 < r_limit*r_limit )) > 0:
+        for idx in np.nonzero( r2[1:] < r_limit[1:] * r_limit[1:] )[0]+1:
+            if (h[idx] < r_limit[idx]) and \
+            ((deltaS[idx] + h[idx]) > -r_limit[idx]):
+                print 'Adjusting distance to segment ', str(idx), ' from ',\
+                str(np.sqrt(r2[idx])), ' to ', str(r_limit[idx]), '.'
+                r2[idx] = r_limit[idx] * r_limit[idx]
+    
+    l = h + deltaS
+    
+    hnegi = h < 0
+    hposi = h >= 0
+    lnegi = l < 0
+    lposi = l >= 0
+    
+    # Ensuring that soma is not treated as line-source
+    hnegi[0] = hposi[0] = lnegi[0] = lposi[0] = False
+    
+    #Line sources
+    #case i,  h < 0,  l < 0
+    [i] = np.where(hnegi & lnegi)
+    #case ii,  h < 0,  l > 0
+    [ii] = np.where(hnegi & lposi)
+    #case iii,  h > 0,  l > 0
+    [iii] = np.where(hposi & lposi)
+
+    Ememi = Ememi_calc(i, currmem, sigma, deltaS, l, r2, h)
+    Ememii = Ememii_calc(ii, currmem, sigma, deltaS, l, r2, h)
+    Ememiii = Ememiii_calc(iii, currmem, sigma, deltaS, l, r2, h)
+    
+    #Potential contribution from soma
+    Emem0 = currmem[0] / (4 * np.pi * sigma * r_soma)
+    
+    #Summarizing all potential contributions
+    Emem = Emem0 + Ememi + Ememiii + Ememii
+        
+    return Emem.transpose()
+
+    
+cdef double r_soma_calc(double xmid, double ymid, double zmid,
+                        double x, double y, double z) except? -2:
+    '''calculate the distance to soma midpoint'''
+    r_soma = np.sqrt((x - xmid)*(x - xmid) + (y - ymid)*(y - ymid) + \
+        (z - zmid)*(z - zmid))
+    
+    return r_soma
+
+
+cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] check_rlimit(
+                 np.ndarray[DTYPE_t, ndim=1, negative_indices=False] r2,
+                 np.ndarray[DTYPE_t, ndim=1, negative_indices=False] r_limit,
+                 np.ndarray[DTYPE_t, ndim=1, negative_indices=False] h,
+                 np.ndarray[DTYPE_t, ndim=1, negative_indices=False] deltaS):
+    # Check that no segment is close the electrode than r_limit
+    cdef int idx
+    if np.sum(np.nonzero( r2 < r_limit*r_limit )) > 0:
+        for idx in np.nonzero( r2 < r_limit*r_limit )[0]:
+            if (h[idx] < r_limit[idx]) and ((deltaS[idx]+h[idx])>-r_limit[idx]):
+                print 'Adjusting distance to segment ',str(idx),' from ', \
+                     str(np.sqrt(r2[idx])),' to ',str(r_limit[idx]),'.'
+                r2[idx] = r_limit[idx]**2
+    return r2
+
+
+cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] Ememi_calc(
+               np.ndarray[long, ndim=1, negative_indices=False] i,
+               np.ndarray[DTYPE_t, ndim=2, negative_indices=False] currmem,
+               double sigma,
+               np.ndarray[DTYPE_t, ndim=1, negative_indices=False] deltaS,
+               np.ndarray[DTYPE_t, ndim=1, negative_indices=False] l,
+               np.ndarray[DTYPE_t, ndim=1, negative_indices=False] r2,
+               np.ndarray[DTYPE_t, ndim=1, negative_indices=False] h):
+    '''Subroutine used by calc_lfp_som_as_point()'''
+    cdef np.ndarray[DTYPE_t, ndim=2, negative_indices=False] currmem_iT = \
+        currmem[i].T
+    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] deltaS_i = \
+        deltaS[i]
+    
+    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] l_i = l[i]
+    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] r2_i = r2[i]
+    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] h_i = h[i]
+    
+    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] aa = 1 / ( 4 *
+                                                    np.pi * sigma * deltaS_i)
+    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] bb = np.sqrt(h_i *
+                                                    h_i + r2_i) - h_i
+    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] cc = np.sqrt(l_i *
+                                                    l_i + r2_i) - l_i
+    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] dd = aa * \
+                                                    np.log(bb / cc)
+    
+    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] Emem_i = \
+        np.dot(currmem_iT, dd)
+
+    return Emem_i
+
+
+cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] Ememii_calc(
+                np.ndarray[long, ndim=1, negative_indices=False] ii,
+                np.ndarray[DTYPE_t, ndim=2, negative_indices=False] currmem,
+                double sigma,
+                np.ndarray[DTYPE_t, ndim=1, negative_indices=False] deltaS,
+                np.ndarray[DTYPE_t, ndim=1, negative_indices=False] l,
+                np.ndarray[DTYPE_t, ndim=1, negative_indices=False] r2,
+                np.ndarray[DTYPE_t, ndim=1, negative_indices=False] h):
+    '''Subroutine used by calc_lfp_som_as_point()'''
+    cdef np.ndarray[DTYPE_t, ndim=2, negative_indices=False] currmem_iiT = \
+        currmem[ii].transpose()
+    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] deltaS_ii = \
+        deltaS[ii]
+    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] l_ii = l[ii]
+    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] r2_ii = r2[ii]
+    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] h_ii = h[ii]
+    
+    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] aa = 1 / (4 *
+                                                np.pi * sigma * deltaS_ii)
+    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] bb = np.sqrt(
+                                                h_ii*h_ii + r2_ii) - h_ii
+    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] cc = (l_ii +
+                                        np.sqrt(l_ii*l_ii + r2_ii)) / r2_ii
+    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] dd = aa * \
+                                        np.log(bb * cc)
+    
+    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] Emem_ii = \
+                                        np.dot(currmem_iiT, dd)
+    
+    return Emem_ii
+
+
+cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] Ememiii_calc(
+                 np.ndarray[long, ndim=1, negative_indices=False] iii,
+                 np.ndarray[DTYPE_t, ndim=2, negative_indices=False] currmem,
+                 double sigma,
+                 np.ndarray[DTYPE_t, ndim=1, negative_indices=False] deltaS,
+                 np.ndarray[DTYPE_t, ndim=1, negative_indices=False] l,
+                 np.ndarray[DTYPE_t, ndim=1, negative_indices=False] r2,
+                 np.ndarray[DTYPE_t, ndim=1, negative_indices=False] h):
+    '''Subroutine used by calc_lfp_som_as_point()'''
+    cdef np.ndarray[DTYPE_t, ndim=2, negative_indices=False] currmem_iiiT = \
+        currmem[iii].T
+    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] l_iii = l[iii]
+    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] r2_iii = r2[iii]
+    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] h_iii = h[iii]
+    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] deltaS_iii = \
+        deltaS[iii]
+    
+    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] aa = 1 / (4 *
+                                                np.pi * sigma * deltaS_iii)
+    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] bb = np.sqrt(
+                                                l_iii*l_iii + r2_iii) + l_iii
+    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] cc = np.sqrt(
+                                                h_iii*h_iii + r2_iii) + h_iii
+    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] dd = aa * \
+                                                np.log(bb / cc)
+    
+    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] Emem_iii = \
+                                                np.dot(currmem_iiiT, dd)
+
+    return Emem_iii
+
+
+cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] deltaS_calc(
+                np.ndarray[DTYPE_t, ndim=1, negative_indices=False] xstart,
+                np.ndarray[DTYPE_t, ndim=1, negative_indices=False] xend,
+                np.ndarray[DTYPE_t, ndim=1, negative_indices=False] ystart,
+                np.ndarray[DTYPE_t, ndim=1, negative_indices=False] yend,
+                np.ndarray[DTYPE_t, ndim=1, negative_indices=False] zstart,
+                np.ndarray[DTYPE_t, ndim=1, negative_indices=False] zend):
+    '''Subroutine used by calc_lfp_som_as_point()'''
+    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] deltaS = \
+    np.sqrt( (xstart - xend)*(xstart - xend) \
+        + (ystart - yend)*(ystart - yend) + (zstart-zend)*(zstart-zend))
+    
+    return deltaS
+
+
+cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] h_calc(
+                np.ndarray[DTYPE_t, ndim=1, negative_indices=False] xstart,
+                np.ndarray[DTYPE_t, ndim=1, negative_indices=False] xend,
+                np.ndarray[DTYPE_t, ndim=1, negative_indices=False] ystart,
+                np.ndarray[DTYPE_t, ndim=1, negative_indices=False] yend,
+                np.ndarray[DTYPE_t, ndim=1, negative_indices=False] zstart,
+                np.ndarray[DTYPE_t, ndim=1, negative_indices=False] zend,
+                np.ndarray[DTYPE_t, ndim=1, negative_indices=False] deltaS,
+                double x, double y, double z):
+    '''Subroutine used by calc_lfp_som_as_point()'''
+    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] h = \
+        np.zeros(xstart.size)
+    cdef int i, j
+    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] aa, bb
+    cdef double cc
+    aa = np.zeros(3)
+    bb = np.zeros(3)
+    for i in xrange(1, xstart.shape[0]):
+        aa[0] = x - xend[i]
+        aa[1] = y - yend[i]
+        aa[2] = z - zend[i]
+        bb[0] = xend[i] - xstart[i]
+        bb[1] = yend[i] - ystart[i]
+        bb[2] = zend[i] - zstart[i]
+        cc = np.dot(aa, bb)
+        h[i] = cc / deltaS[i]
+    return h
+
+
+cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] r2_calc(
+            np.ndarray[DTYPE_t, ndim=1] xend,
+            np.ndarray[DTYPE_t, ndim=1, negative_indices=False] yend,
+            np.ndarray[DTYPE_t, ndim=1, negative_indices=False] zend,
+            double x, double y, double z,
+            np.ndarray[DTYPE_t, ndim=1, negative_indices=False] h):
+    '''Subroutine used by calc_lfp_*()'''
+    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] r2 = \
+        (x-xend)*(x-xend) + (y-yend)*(y-yend) + (z-zend)*(z-zend) - h*h
+    
+    return abs(r2)
+

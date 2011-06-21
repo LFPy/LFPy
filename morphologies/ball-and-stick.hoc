@@ -1,0 +1,18 @@
+nsomasec = 1
+naxonsec = 0
+ndendsec = 1
+napicdendsec = 0
+sec_counted = 1
+
+{create soma[1]}
+{create dend[1]}
+
+{access soma[0.]}
+{pt3dclear()}
+{pt3dadd(0,0,-20,20)}
+{pt3dadd(0,0,0,20)}
+
+{soma[0.] connect dend[0.](0), 1}
+{access dend[0.]}
+{pt3dadd(0,0,0,2)}
+{pt3dadd(0,0,1000,2)}
