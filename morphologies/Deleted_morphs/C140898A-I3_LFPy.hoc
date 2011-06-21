@@ -1,6 +1,0 @@
-// Stating variables needed for loading geometry in LFPy
-
-nsomasec = 1
-naxonsec = 343
-ndendsec = 64
-napicdendsec = 0
