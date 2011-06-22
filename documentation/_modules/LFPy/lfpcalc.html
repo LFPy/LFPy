@@ -1,0 +1,354 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>LFPy.lfpcalc &mdash; LFPy v0.1 documentation</title>
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="LFPy v0.1 documentation" href="../../index.html" />
+    <link rel="up" title="LFPy" href="../LFPy.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">LFPy v0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../LFPy.html" accesskey="U">LFPy</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for LFPy.lfpcalc</h1><div class="highlight"><pre>
+<span class="c">#!/usr/bin/env python</span>
+<span class="kn">import</span> <span class="nn">pylab</span> <span class="kn">as</span> <span class="nn">pl</span>
+<span class="kn">import</span> <span class="nn">LFPy</span>
+
+<div class="viewcode-block" id="calc_lfp_choose"><a class="viewcode-back" href="../../classes.html#LFPy.lfpcalc.calc_lfp_choose">[docs]</a><span class="k">def</span> <span class="nf">calc_lfp_choose</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> \
+                    <span class="n">r_limit</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">from_file</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> \
+                    <span class="n">timestep</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">t_indices</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">som_as_point</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Determine which method to use, line-source for soma default&#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="n">som_as_point</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">calc_lfp_som_as_point</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="n">z</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="n">sigma</span><span class="p">,</span> \
+                                     <span class="n">r_limit</span><span class="o">=</span><span class="n">r_limit</span><span class="p">,</span> <span class="n">from_file</span><span class="o">=</span><span class="n">from_file</span><span class="p">,</span> \
+                                     <span class="n">t_indices</span><span class="o">=</span><span class="n">t_indices</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">calc_lfp_linesource</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="n">z</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="n">sigma</span><span class="p">,</span> \
+                                   <span class="n">r_limit</span><span class="o">=</span><span class="n">r_limit</span><span class="p">,</span> <span class="n">from_file</span><span class="o">=</span><span class="n">from_file</span><span class="p">,</span> \
+                                   <span class="n">t_indices</span><span class="o">=</span><span class="n">t_indices</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="calc_lfp_linesource"><a class="viewcode-back" href="../../classes.html#LFPy.lfpcalc.calc_lfp_linesource">[docs]</a><span class="k">def</span> <span class="nf">calc_lfp_linesource</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> \
+                        <span class="n">r_limit</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">from_file</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">timestep</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">t_indices</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Calculate electric field potential using the line-source method, all</span>
+<span class="sd">    compartments treated as line sources, even soma.&#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="n">from_file</span><span class="p">:</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">LFPy</span><span class="o">.</span><span class="n">tools</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+
+    <span class="c"># Handling the r_limits. If a r_limit is a single value, an array r_limit</span>
+    <span class="c"># of shape c.diam is returned.</span>
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">r_limit</span><span class="p">)</span> <span class="o">==</span> <span class="nb">int</span> <span class="ow">or</span> <span class="nb">type</span><span class="p">(</span><span class="n">r_limit</span><span class="p">)</span> <span class="o">==</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="n">r_limit</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">diam</span><span class="p">))</span><span class="o">*</span><span class="nb">abs</span><span class="p">(</span><span class="n">r_limit</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">pl</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">r_limit</span><span class="p">)</span> <span class="o">!=</span> <span class="n">pl</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">diam</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">,</span> <span class="s">&#39;r_limit is neither a float- or int- value, nor is </span><span class="se">\</span>
+<span class="s">            r_limit.shape() equal to c.diam.shape()&#39;</span>
+
+    <span class="k">if</span> <span class="n">timestep</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">currmem</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">imem</span><span class="p">[:,</span> <span class="n">timestep</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">t_indices</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">currmem</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">imem</span><span class="p">[:,</span> <span class="n">t_indices</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">currmem</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">imem</span>
+
+    <span class="c">#some variables for h, r2, r_soma calculations</span>
+    <span class="n">xstart</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">xstart</span>
+    <span class="n">xend</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">xend</span>
+    <span class="n">ystart</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">ystart</span>
+    <span class="n">yend</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">yend</span>
+    <span class="n">zstart</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">zstart</span>
+    <span class="n">zend</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">zend</span>
+
+    <span class="n">deltaS</span> <span class="o">=</span> <span class="n">_deltaS_calc</span><span class="p">(</span><span class="n">xstart</span><span class="p">,</span> <span class="n">xend</span><span class="p">,</span> <span class="n">ystart</span><span class="p">,</span> <span class="n">yend</span><span class="p">,</span> <span class="n">zstart</span><span class="p">,</span> <span class="n">zend</span><span class="p">)</span>
+    <span class="n">h</span> <span class="o">=</span> <span class="n">_h_calc</span><span class="p">(</span><span class="n">xstart</span><span class="p">,</span> <span class="n">xend</span><span class="p">,</span> <span class="n">ystart</span><span class="p">,</span> <span class="n">yend</span><span class="p">,</span> <span class="n">zstart</span><span class="p">,</span> <span class="n">zend</span><span class="p">,</span> <span class="n">deltaS</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span>
+    <span class="n">r2</span> <span class="o">=</span> <span class="n">_r2_calc</span><span class="p">(</span><span class="n">xend</span><span class="p">,</span> <span class="n">yend</span><span class="p">,</span> <span class="n">zend</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">h</span><span class="p">)</span>
+
+    <span class="n">r2</span> <span class="o">=</span> <span class="n">_check_rlimit</span><span class="p">(</span><span class="n">r2</span><span class="p">,</span> <span class="n">r_limit</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">deltaS</span><span class="p">)</span>
+
+    <span class="n">l</span> <span class="o">=</span> <span class="n">h</span> <span class="o">+</span> <span class="n">deltaS</span>
+
+    <span class="n">hnegi</span> <span class="o">=</span> <span class="n">h</span> <span class="o">&lt;</span> <span class="mi">0</span>
+    <span class="n">hposi</span> <span class="o">=</span> <span class="n">h</span> <span class="o">&gt;=</span> <span class="mi">0</span>
+    <span class="n">lnegi</span> <span class="o">=</span> <span class="n">l</span> <span class="o">&lt;</span> <span class="mi">0</span>
+    <span class="n">lposi</span> <span class="o">=</span> <span class="n">l</span> <span class="o">&gt;=</span> <span class="mi">0</span>
+
+    <span class="c">#case i, h &lt; 0, l &lt; 0</span>
+    <span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">hnegi</span> <span class="o">&amp;</span> <span class="n">lnegi</span><span class="p">)</span>
+    <span class="c">#case ii, h &lt; 0, l &gt; 0</span>
+    <span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">hnegi</span> <span class="o">&amp;</span> <span class="n">lposi</span><span class="p">)</span>
+    <span class="c">#case iii, h &gt; 0, l &gt; 0</span>
+    <span class="p">[</span><span class="n">iii</span><span class="p">]</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">hposi</span> <span class="o">&amp;</span> <span class="n">lposi</span><span class="p">)</span>
+
+    <span class="n">Ememi</span> <span class="o">=</span> <span class="n">_Ememi_calc</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">currmem</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">deltaS</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">r2</span><span class="p">,</span> <span class="n">h</span><span class="p">)</span>
+    <span class="n">Ememii</span> <span class="o">=</span> <span class="n">_Ememii_calc</span><span class="p">(</span><span class="n">ii</span><span class="p">,</span> <span class="n">currmem</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">deltaS</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">r2</span><span class="p">,</span> <span class="n">h</span><span class="p">)</span>
+    <span class="n">Ememiii</span> <span class="o">=</span> <span class="n">_Ememiii_calc</span><span class="p">(</span><span class="n">iii</span><span class="p">,</span> <span class="n">currmem</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">deltaS</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">r2</span><span class="p">,</span> <span class="n">h</span><span class="p">)</span>
+
+    <span class="n">Emem</span> <span class="o">=</span> <span class="n">Ememi</span> <span class="o">+</span> <span class="n">Ememii</span> <span class="o">+</span> <span class="n">Ememiii</span>
+
+    <span class="k">return</span> <span class="n">Emem</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="calc_lfp_som_as_point"><a class="viewcode-back" href="../../classes.html#LFPy.lfpcalc.calc_lfp_som_as_point">[docs]</a><span class="k">def</span> <span class="nf">calc_lfp_som_as_point</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> \
+                          <span class="n">r_limit</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">from_file</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">timestep</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">t_indices</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Calculate electric field potential using the line-source method,</span>
+<span class="sd">    soma is treated as point/sphere source&#39;&#39;&#39;</span>
+
+    <span class="k">if</span> <span class="n">from_file</span><span class="p">:</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">LFPy</span><span class="o">.</span><span class="n">tools</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+
+    <span class="c">#Handling the r_limits. If a r_limit is a single value,</span>
+    <span class="c">#an array r_limit of shape c.diam is returned.</span>
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">r_limit</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">type</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">array</span><span class="p">([])):</span>
+        <span class="n">r_limit</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">r_limit</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">r_limit</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">():</span>
+        <span class="n">s_limit</span> <span class="o">=</span> <span class="n">r_limit</span>
+        <span class="n">r_limit</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">diam</span><span class="o">.</span><span class="n">size</span><span class="p">)</span> <span class="o">*</span> <span class="nb">abs</span><span class="p">(</span><span class="n">r_limit</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">r_limit</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="p">):</span>
+        <span class="n">s_limit</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">r_limit</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">r_limit</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">diam</span><span class="o">.</span><span class="n">size</span><span class="p">)</span> <span class="o">*</span> <span class="nb">abs</span><span class="p">(</span><span class="n">r_limit</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="k">elif</span> <span class="n">r_limit</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="n">c</span><span class="o">.</span><span class="n">diam</span><span class="o">.</span><span class="n">shape</span><span class="p">:</span>
+        <span class="n">s_limit</span> <span class="o">=</span> <span class="n">r_limit</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">r_limit</span> <span class="o">=</span> <span class="n">r_limit</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">,</span>  <span class="s">&#39;r_limit is neither a float- or int- value, </span><span class="se">\</span>
+<span class="s">            on the form r_limit=[s_limit, r_limit],  </span><span class="se">\</span>
+<span class="s">            nor is shape(r_limit) equal to shape(c.diam)!&#39;</span>
+
+    <span class="k">if</span> <span class="n">timestep</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">currmem</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">imem</span><span class="p">[:,</span> <span class="n">timestep</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">t_indices</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">currmem</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">imem</span><span class="p">[:,</span> <span class="n">t_indices</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">currmem</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">imem</span>
+
+    <span class="c">#some variables for h, r2, r_soma calculations</span>
+    <span class="n">xstart</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">xstart</span>
+    <span class="n">xmid</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">xmid</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">xend</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">xend</span>
+    <span class="n">ystart</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">ystart</span>
+    <span class="n">ymid</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">ymid</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">yend</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">yend</span>
+    <span class="n">zstart</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">zstart</span>
+    <span class="n">zmid</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">zmid</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">zend</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">zend</span>
+
+
+    <span class="n">deltaS</span> <span class="o">=</span> <span class="n">_deltaS_calc</span><span class="p">(</span><span class="n">xstart</span><span class="p">,</span> <span class="n">xend</span><span class="p">,</span> <span class="n">ystart</span><span class="p">,</span> <span class="n">yend</span><span class="p">,</span> <span class="n">zstart</span><span class="p">,</span> <span class="n">zend</span><span class="p">)</span>
+    <span class="n">h</span> <span class="o">=</span> <span class="n">_h_calc</span><span class="p">(</span><span class="n">xstart</span><span class="p">,</span> <span class="n">xend</span><span class="p">,</span> <span class="n">ystart</span><span class="p">,</span> <span class="n">yend</span><span class="p">,</span> <span class="n">zstart</span><span class="p">,</span> <span class="n">zend</span><span class="p">,</span> <span class="n">deltaS</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span>
+    <span class="n">r2</span> <span class="o">=</span> <span class="n">_r2_calc</span><span class="p">(</span><span class="n">xend</span><span class="p">,</span> <span class="n">yend</span><span class="p">,</span> <span class="n">zend</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">h</span><span class="p">)</span>
+    <span class="n">r_soma</span> <span class="o">=</span> <span class="n">_r_soma_calc</span><span class="p">(</span><span class="n">xmid</span><span class="p">,</span> <span class="n">ymid</span><span class="p">,</span> <span class="n">zmid</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">r_soma</span> <span class="o">&lt;</span> <span class="n">s_limit</span><span class="p">:</span>
+        <span class="k">print</span> <span class="s">&#39;Adjusting r-distance to soma segment from </span><span class="si">%g</span><span class="s"> to </span><span class="si">%g</span><span class="s">&#39;</span> \
+                <span class="o">%</span> <span class="p">(</span><span class="n">r_soma</span><span class="p">,</span> <span class="n">s_limit</span><span class="p">)</span>
+        <span class="n">r_soma</span> <span class="o">=</span> <span class="n">s_limit</span>
+
+    <span class="c"># Check that no segment is close the electrode than r_limit</span>
+    <span class="k">if</span> <span class="n">pl</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span> <span class="n">r2</span> <span class="o">&lt;</span> <span class="n">r_limit</span><span class="o">*</span><span class="n">r_limit</span> <span class="p">))</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">pl</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span> <span class="n">r2</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">&lt;</span> <span class="n">r_limit</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">*</span> <span class="n">r_limit</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">h</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">r_limit</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span> <span class="ow">and</span> \
+            <span class="p">((</span><span class="n">deltaS</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">+</span> <span class="n">h</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span> <span class="o">&gt;</span> <span class="o">-</span><span class="n">r_limit</span><span class="p">[</span><span class="n">idx</span><span class="p">]):</span>
+                <span class="k">print</span> <span class="s">&#39;Adjusting distance to segment &#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">idx</span><span class="p">),</span> <span class="s">&#39; from &#39;</span><span class="p">,</span>\
+                <span class="nb">str</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">r2</span><span class="p">[</span><span class="n">idx</span><span class="p">])),</span> <span class="s">&#39; to &#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">r_limit</span><span class="p">[</span><span class="n">idx</span><span class="p">]),</span> <span class="s">&#39;.&#39;</span>
+                <span class="n">r2</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">r_limit</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">*</span> <span class="n">r_limit</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+
+    <span class="n">l</span> <span class="o">=</span> <span class="n">h</span> <span class="o">+</span> <span class="n">deltaS</span>
+
+    <span class="n">hnegi</span> <span class="o">=</span> <span class="n">h</span> <span class="o">&lt;</span> <span class="mi">0</span>
+    <span class="n">hposi</span> <span class="o">=</span> <span class="n">h</span> <span class="o">&gt;=</span> <span class="mi">0</span>
+    <span class="n">lnegi</span> <span class="o">=</span> <span class="n">l</span> <span class="o">&lt;</span> <span class="mi">0</span>
+    <span class="n">lposi</span> <span class="o">=</span> <span class="n">l</span> <span class="o">&gt;=</span> <span class="mi">0</span>
+
+    <span class="c"># Ensuring that soma is not treated as line-source</span>
+    <span class="n">hnegi</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">hposi</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">lnegi</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">lposi</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="bp">False</span>
+
+    <span class="c">#Line sources</span>
+    <span class="c">#case i,  h &lt; 0,  l &lt; 0</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">hnegi</span> <span class="o">&amp;</span> <span class="n">lnegi</span><span class="p">)</span>
+    <span class="c">#case ii,  h &lt; 0,  l &gt; 0</span>
+    <span class="n">ii</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">hnegi</span> <span class="o">&amp;</span> <span class="n">lposi</span><span class="p">)</span>
+    <span class="c">#case iii,  h &gt; 0,  l &gt; 0</span>
+    <span class="n">iii</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">hposi</span> <span class="o">&amp;</span> <span class="n">lposi</span><span class="p">)</span>
+
+    <span class="n">Ememi</span> <span class="o">=</span> <span class="n">_Ememi_calc</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">currmem</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">deltaS</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">r2</span><span class="p">,</span> <span class="n">h</span><span class="p">)</span>
+    <span class="n">Ememii</span> <span class="o">=</span> <span class="n">_Ememii_calc</span><span class="p">(</span><span class="n">ii</span><span class="p">,</span> <span class="n">currmem</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">deltaS</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">r2</span><span class="p">,</span> <span class="n">h</span><span class="p">)</span>
+    <span class="n">Ememiii</span> <span class="o">=</span> <span class="n">_Ememiii_calc</span><span class="p">(</span><span class="n">iii</span><span class="p">,</span> <span class="n">currmem</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">deltaS</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">r2</span><span class="p">,</span> <span class="n">h</span><span class="p">)</span>
+
+    <span class="c">#Potential contribution from soma</span>
+    <span class="n">Emem0</span> <span class="o">=</span> <span class="n">currmem</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">pl</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">sigma</span> <span class="o">*</span> <span class="n">r_soma</span><span class="p">)</span>
+
+    <span class="c">#Summarizing all potential contributions</span>
+    <span class="n">Emem</span> <span class="o">=</span> <span class="n">Emem0</span> <span class="o">+</span> <span class="n">Ememi</span> <span class="o">+</span> <span class="n">Ememiii</span> <span class="o">+</span> <span class="n">Ememii</span>
+
+    <span class="k">return</span> <span class="n">Emem</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
+</div>
+<span class="k">def</span> <span class="nf">_Ememi_calc</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">currmem</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">deltaS</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">r2</span><span class="p">,</span> <span class="n">h</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Subroutine used by calc_lfp_som_as_point()&#39;&#39;&#39;</span>
+    <span class="n">currmem_iT</span> <span class="o">=</span> <span class="n">currmem</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
+    <span class="n">deltaS_i</span> <span class="o">=</span> <span class="n">deltaS</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+    <span class="n">l_i</span> <span class="o">=</span> <span class="n">l</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+    <span class="n">r2_i</span> <span class="o">=</span> <span class="n">r2</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+    <span class="n">h_i</span> <span class="o">=</span> <span class="n">h</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+    <span class="c">#sigma = sigma</span>
+
+    <span class="n">aa</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">pl</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">sigma</span> <span class="o">*</span> <span class="n">deltaS_i</span><span class="p">)</span>
+    <span class="n">bb</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">h_i</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">r2_i</span><span class="p">)</span> <span class="o">-</span> <span class="n">h_i</span>
+    <span class="n">cc</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">l_i</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">r2_i</span><span class="p">)</span> <span class="o">-</span> <span class="n">l_i</span>
+    <span class="n">dd</span> <span class="o">=</span> <span class="n">aa</span> <span class="o">*</span> <span class="n">log</span><span class="p">(</span><span class="n">bb</span> <span class="o">/</span> <span class="n">cc</span><span class="p">)</span>
+
+    <span class="n">Emem_i</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">currmem_iT</span><span class="p">,</span> <span class="n">dd</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">Emem_i</span>
+
+<span class="k">def</span> <span class="nf">_Ememii_calc</span><span class="p">(</span><span class="n">ii</span><span class="p">,</span> <span class="n">currmem</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">deltaS</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">r2</span><span class="p">,</span> <span class="n">h</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Subroutine used by calc_lfp_som_as_point()&#39;&#39;&#39;</span>
+    <span class="n">currmem_iiT</span> <span class="o">=</span> <span class="n">currmem</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
+    <span class="n">deltaS_ii</span> <span class="o">=</span> <span class="n">deltaS</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
+    <span class="n">l_ii</span> <span class="o">=</span> <span class="n">l</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
+    <span class="n">r2_ii</span> <span class="o">=</span> <span class="n">r2</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
+    <span class="n">h_ii</span> <span class="o">=</span> <span class="n">h</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
+
+    <span class="n">aa</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">pl</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">sigma</span> <span class="o">*</span> <span class="n">deltaS_ii</span><span class="p">)</span>
+    <span class="n">bb</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">h_ii</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">r2_ii</span><span class="p">)</span> <span class="o">-</span> <span class="n">h_ii</span>
+    <span class="n">cc</span> <span class="o">=</span> <span class="p">(</span><span class="n">l_ii</span> <span class="o">+</span> <span class="n">pl</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">l_ii</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">r2_ii</span><span class="p">))</span> <span class="o">/</span> <span class="n">r2_ii</span>
+    <span class="n">dd</span> <span class="o">=</span> <span class="n">aa</span> <span class="o">*</span> <span class="n">pl</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">bb</span> <span class="o">*</span> <span class="n">cc</span><span class="p">)</span>
+
+    <span class="n">Emem_ii</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">currmem_iiT</span><span class="p">,</span> <span class="n">dd</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">Emem_ii</span>
+
+<span class="k">def</span> <span class="nf">_Ememiii_calc</span><span class="p">(</span><span class="n">iii</span><span class="p">,</span> <span class="n">currmem</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">deltaS</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">r2</span><span class="p">,</span> <span class="n">h</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Subroutine used by calc_lfp_som_as_point()&#39;&#39;&#39;</span>
+    <span class="n">currmem_iiiT</span> <span class="o">=</span> <span class="n">currmem</span><span class="p">[</span><span class="n">iii</span><span class="p">]</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
+    <span class="n">l_iii</span> <span class="o">=</span> <span class="n">l</span><span class="p">[</span><span class="n">iii</span><span class="p">]</span>
+    <span class="n">r2_iii</span> <span class="o">=</span> <span class="n">r2</span><span class="p">[</span><span class="n">iii</span><span class="p">]</span>
+    <span class="n">h_iii</span> <span class="o">=</span> <span class="n">h</span><span class="p">[</span><span class="n">iii</span><span class="p">]</span>
+    <span class="n">deltaS_iii</span> <span class="o">=</span> <span class="n">deltaS</span><span class="p">[</span><span class="n">iii</span><span class="p">]</span>
+
+    <span class="n">aa</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">pl</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">sigma</span> <span class="o">*</span> <span class="n">deltaS_iii</span><span class="p">)</span>
+    <span class="n">bb</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">l_iii</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">r2_iii</span><span class="p">)</span> <span class="o">+</span> <span class="n">l_iii</span>
+    <span class="n">cc</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">h_iii</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">r2_iii</span><span class="p">)</span> <span class="o">+</span> <span class="n">h_iii</span>
+    <span class="n">dd</span> <span class="o">=</span> <span class="n">aa</span> <span class="o">*</span> <span class="n">pl</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">bb</span> <span class="o">/</span> <span class="n">cc</span><span class="p">)</span>
+
+    <span class="n">Emem_iii</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">currmem_iiiT</span><span class="p">,</span> <span class="n">dd</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">Emem_iii</span>
+
+<span class="k">def</span> <span class="nf">_deltaS_calc</span><span class="p">(</span><span class="n">xstart</span><span class="p">,</span> <span class="n">xend</span><span class="p">,</span> <span class="n">ystart</span><span class="p">,</span> <span class="n">yend</span><span class="p">,</span> <span class="n">zstart</span><span class="p">,</span> <span class="n">zend</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Subroutine used by calc_lfp_som_as_point()&#39;&#39;&#39;</span>
+    <span class="n">deltaS</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span> <span class="p">(</span><span class="n">xstart</span> <span class="o">-</span> <span class="n">xend</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">ystart</span> <span class="o">-</span> <span class="n">yend</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> \
+        <span class="p">(</span><span class="n">zstart</span><span class="o">-</span><span class="n">zend</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">deltaS</span>
+
+<span class="k">def</span> <span class="nf">_h_calc</span><span class="p">(</span><span class="n">xstart</span><span class="p">,</span> <span class="n">xend</span><span class="p">,</span> <span class="n">ystart</span><span class="p">,</span> <span class="n">yend</span><span class="p">,</span> <span class="n">zstart</span><span class="p">,</span> <span class="n">zend</span><span class="p">,</span> <span class="n">deltaS</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Subroutine used by calc_lfp_som_as_point()&#39;&#39;&#39;</span>
+    <span class="n">h</span>  <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">xstart</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">xstart</span><span class="o">.</span><span class="n">size</span><span class="p">):</span>
+        <span class="n">aa</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="o">-</span> <span class="n">xend</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">y</span> <span class="o">-</span> <span class="n">yend</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">z</span> <span class="o">-</span> <span class="n">zend</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span>
+        <span class="n">bb</span> <span class="o">=</span> <span class="p">[</span><span class="n">xend</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">xstart</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">yend</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">ystart</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> \
+          <span class="n">zend</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">zstart</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span>
+        <span class="n">cc</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">aa</span><span class="p">,</span> <span class="n">bb</span><span class="p">)</span>
+        <span class="n">h</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">cc</span> <span class="o">/</span> <span class="n">deltaS</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">h</span>
+
+<span class="k">def</span> <span class="nf">_r2_calc</span><span class="p">(</span><span class="n">xend</span><span class="p">,</span> <span class="n">yend</span><span class="p">,</span> <span class="n">zend</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">h</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Subroutine used by calc_lfp_*()&#39;&#39;&#39;</span>
+    <span class="n">r2</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span><span class="o">-</span><span class="n">xend</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">y</span><span class="o">-</span><span class="n">yend</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">z</span><span class="o">-</span><span class="n">zend</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="n">h</span><span class="o">**</span><span class="mi">2</span>
+    
+    <span class="k">return</span> <span class="nb">abs</span><span class="p">(</span><span class="n">r2</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">_check_rlimit</span><span class="p">(</span><span class="n">r2</span><span class="p">,</span> <span class="n">r_limit</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">deltaS</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Check that no segment is close the electrode than r_limit&#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="n">pl</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span> <span class="n">r2</span> <span class="o">&lt;</span> <span class="n">r_limit</span><span class="o">*</span><span class="n">r_limit</span> <span class="p">))</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">pl</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span> <span class="n">r2</span> <span class="o">&lt;</span> <span class="n">r_limit</span><span class="o">*</span><span class="n">r_limit</span> <span class="p">)[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">h</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">r_limit</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span> <span class="ow">and</span> <span class="p">((</span><span class="n">deltaS</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">+</span><span class="n">h</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span><span class="o">&gt;-</span><span class="n">r_limit</span><span class="p">[</span><span class="n">idx</span><span class="p">]):</span>
+                <span class="k">print</span> <span class="s">&#39;Adjusting distance to segment &#39;</span><span class="p">,</span><span class="nb">str</span><span class="p">(</span><span class="n">idx</span><span class="p">),</span><span class="s">&#39; from &#39;</span><span class="p">,</span> \
+                     <span class="nb">str</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">r2</span><span class="p">[</span><span class="n">idx</span><span class="p">])),</span><span class="s">&#39; to &#39;</span><span class="p">,</span><span class="nb">str</span><span class="p">(</span><span class="n">r_limit</span><span class="p">[</span><span class="n">idx</span><span class="p">]),</span><span class="s">&#39;.&#39;</span>
+                <span class="n">r2</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">r_limit</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span>
+    <span class="k">return</span> <span class="n">r2</span>
+
+<span class="k">def</span> <span class="nf">_r_soma_calc</span><span class="p">(</span><span class="n">xmid</span><span class="p">,</span> <span class="n">ymid</span><span class="p">,</span> <span class="n">zmid</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;calculate the distance to soma midpoint&#39;&#39;&#39;</span>
+    <span class="n">r_soma</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">x</span> <span class="o">-</span> <span class="n">xmid</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">y</span> <span class="o">-</span> <span class="n">ymid</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> \
+        <span class="p">(</span><span class="n">z</span> <span class="o">-</span> <span class="n">zmid</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">r_soma</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">LFPy v0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../LFPy.html" >LFPy</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, Espen Hagen.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+    </div>
+  </body>
+</html>

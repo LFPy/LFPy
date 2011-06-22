@@ -1,5 +1,6 @@
-#from numpy import zeros, size
-from pylab import random_integers
+#!/usr/bin/env python
+'''Copyright (C) 2011 Computational Neuroscience Group, UMB.
+All rights reserved.'''
 import numpy
 import pylab as pl
 
@@ -7,7 +8,7 @@ import pylab as pl
 def get_rand_spike_times(synpos,nspikes,tstart,tstop):
     spiketimes = numpy.zeros([size(synpos),nspikes])
     for i in range(0,numpy.size(synpos)):
-        spiketimes[i,:] = random_integers(tstart,tstop,nspikes)
+        spiketimes[i,:] = pl.random_integers(tstart,tstop,nspikes)
     return spiketimes
 
 def stationary_poisson(nsyn,lambd,tstart,tstop):

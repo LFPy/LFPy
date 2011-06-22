@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+'''Copyright (C) 2011 Computational Neuroscience Group, UMB.
+All rights reserved.'''
 cimport numpy as np
 import numpy as np
 #import LFPy

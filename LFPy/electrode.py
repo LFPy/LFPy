@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+'''Copyright (C) 2011 Computational Neuroscience Group, UMB.
+All rights reserved.'''
 import pylab as pl
 import sys
 import LFPy.lfpcalc as lfpcalc
@@ -11,63 +13,63 @@ class Electrode(object):
     object or dictionaries/lists containing these as input,  i.e.
 
     Example script (electrode "similar" to Thomas Recording tetrode);
-
-    from pylab import *
-    import LFPy
-
-    morphology = 'L5_Mainen96_LFPy.hoc'
-    electrode = {
-        'sigma' : 0.3   # infinite homogenous extracellular conductivity
-        'x' : pl.array([0, -1, pl.sin(pl.pi/6), pl.sin(pl.pi/6)])*25.,
-        'y' : pl.array([0, 0, -pl.cos(pl.pi/6), pl.cos(pl.pi/6)])*25.,
-        'z' : pl.array([-50., 0, 0, 0]),   # x, y, z-coordinates
-        'color' : 'g',          #plots color,  opt.
-        'marker' : 'o',                 #plot marker,  opt.
-        'tetr_r' : 25.,                 #optional,  for plotting
-        'N' : pl.array([    [0, 0, -1],
-                            [-1*pl.cos(pl.pi/9), 0, -1*pl.sin(pl.pi/9)],
-                            [pl.sin(pl.pi/6)*pl.cos(pl.pi/9), \
-                                -pl.cos(pl.pi/9)*pl.cos(pl.pi/9), \
-                                -1*pl.sin(pl.pi/9)],
-                            [-pl.sin(pl.pi/6)*pl.cos(pl.pi/9), \
-                                -pl.cos(pl.pi/9)*pl.cos(pl.pi/9), \
-                                1*pl.sin(pl.pi/9)]]),
-                        # opt. electrode contact surface normals
-        'r' : 7.,       # opt. electrode contact radius
-        'n' : 20,       # opt. n random points on electrode contact for avrg.
-        'r_z': pl.array([[-1E199, -50.0001, -50, 75, 1E99], [0, 0, 7, 48, 48]]),
-        # opt. radius of electrode as function of z
-        'colors' : ['r', 'g', 'b', 'y'] #opt. color of electrode points in plots
-        'perCellLFP' : False, #opt storing LFP-contrib from all cells
-    }
-    c = LFPy.Cell(morphology=morphology)
-    s = LFPy.Synapse(c, idx = 0)
-    s.set_spike_times(c, sptimes=pl.array([10, 20]))
-
-    c.simulate(tstopms=50, rec_v=True)
-
-    el = LFPy.Electrode(c, **electrode)
-    el.calc_lfp_threaded()
-    LFP_dist = el.LFP
-
-    el['N']
-    el['LFP']
-    el.calc_lfp_threaded()
-    LFP_point = el.LFP
-
-    LFP_diff = LFP_point - LFP_dist
-
-    figure()
-    for i in xrange(el.x.size):
-        plot(c.tvec, LFP_dist[i, ], label='dist,  el. %i' % i)
-    for i in xrange(el.x.size):
-        plot(c.tvec, LFP_point[i, ], linestyle='--', label='point,  el. %i' % i)
-    legend()
-
-    figure()
-    for i in xrange(el.x.size):
-        plot(c.tvec, LFP_diff[i, ],  label='el. %i' % i)
-    legend()
+    ::
+        from pylab import *
+        import LFPy
+    
+        morphology = 'L5_Mainen96_LFPy.hoc'
+        electrode = {
+            'sigma' : 0.3   # infinite homogenous extracellular conductivity
+            'x' : pl.array([0, -1, pl.sin(pl.pi/6), pl.sin(pl.pi/6)])*25.,
+            'y' : pl.array([0, 0, -pl.cos(pl.pi/6), pl.cos(pl.pi/6)])*25.,
+            'z' : pl.array([-50., 0, 0, 0]),   # x, y, z-coordinates
+            'color' : 'g',          #plots color,  opt.
+            'marker' : 'o',                 #plot marker,  opt.
+            'tetr_r' : 25.,                 #optional,  for plotting
+            'N' : pl.array([    [0, 0, -1],
+                                [-1*pl.cos(pl.pi/9), 0, -1*pl.sin(pl.pi/9)],
+                                [pl.sin(pl.pi/6)*pl.cos(pl.pi/9), \
+                                    -pl.cos(pl.pi/9)*pl.cos(pl.pi/9), \
+                                    -1*pl.sin(pl.pi/9)],
+                                [-pl.sin(pl.pi/6)*pl.cos(pl.pi/9), \
+                                    -pl.cos(pl.pi/9)*pl.cos(pl.pi/9), \
+                                    1*pl.sin(pl.pi/9)]]),
+                            # opt. electrode contact surface normals
+            'r' : 7.,       # opt. electrode contact radius
+            'n' : 20,       # opt. n random points on electrode contact for avrg.
+            'r_z': pl.array([[-1E199, -50.0001, -50, 75, 1E99], [0, 0, 7, 48, 48]]),
+            # opt. radius of electrode as function of z
+            'colors' : ['r', 'g', 'b', 'y'] #opt. color of electrode points in plots
+            'perCellLFP' : False, #opt storing LFP-contrib from all cells
+        }
+        c = LFPy.Cell(morphology=morphology)
+        s = LFPy.Synapse(c, idx = 0)
+        s.set_spike_times(c, sptimes=pl.array([10, 20]))
+    
+        c.simulate(tstopms=50, rec_v=True)
+    
+        el = LFPy.Electrode(c, **electrode)
+        el.calc_lfp_threaded()
+        LFP_dist = el.LFP
+    
+        el['N']
+        el['LFP']
+        el.calc_lfp_threaded()
+        LFP_point = el.LFP
+    
+        LFP_diff = LFP_point - LFP_dist
+    
+        figure()
+        for i in xrange(el.x.size):
+            plot(c.tvec, LFP_dist[i, ], label='dist,  el. %i' % i)
+        for i in xrange(el.x.size):
+            plot(c.tvec, LFP_point[i, ], linestyle='--', label='point,  el. %i' % i)
+        legend()
+    
+        figure()
+        for i in xrange(el.x.size):
+            plot(c.tvec, LFP_diff[i, ],  label='el. %i' % i)
+        legend()
     '''
     def __init__(self, cell, sigma=0.3, x=100, y=0, z=0,
                  color='g', marker='o',

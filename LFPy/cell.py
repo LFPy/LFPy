@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+'''Copyright (C) 2011 Computational Neuroscience Group, UMB.
+All rights reserved.'''
+
 import os
 import neuron
 import numpy as np
@@ -28,7 +31,36 @@ dll_filename = os.path.join(installpath,
 neuron.h.nrn_load_dll(dll_filename)
 
 class Cell(object):
-    ''' The main cell class used in LFPy'''
+    ''' The main cell class used in LFPy
+    
+    Inputs:
+    ::
+        morphology : morphology file;
+        default_dir : if True will look for morphology in the default folder,
+        otherwise full path to morphology must be provided;
+        
+        v_init : initial potential;
+        passive : passive mechs are initialized if True;
+        Ra : axial resistance;
+        rm : memnbrane resistivity;
+        cm : membrane capacitance;
+        e_pas : passive mechanism reversal potential;
+        
+        timeres_NEURON : internal dt for NEURON simulation;
+        timeres_python : overall dt for python simulation;
+        
+        tstartms : initialization time for simulation <= 0 ms
+        tstopms : stop time for simulation > 0 ms
+        
+        nsegs_method : method for setting the number of segments;
+        max_nsegs_length : max segment length for method 'fixed_length';
+        lambda_f : AC frequency for method 'lambda_f';
+        
+        custom_code : list of model specific code files goes here ([*.py/.hoc]);
+        verbose : switching verbose output on/off
+        play_in_soma :
+        soma_trace :
+    '''
     def __init__(self, morphology, 
                     default_dir=True, 
                     v_init=-65.,
