@@ -181,7 +181,7 @@ def _Ememi_calc(i, currmem, sigma, deltaS, l, r2, h):
     aa = 1 / ( 4 * pl.pi * sigma * deltaS_i)
     bb = pl.sqrt(h_i**2 + r2_i) - h_i
     cc = pl.sqrt(l_i**2 + r2_i) - l_i
-    dd = aa * log(bb / cc)
+    dd = aa * pl.log(bb / cc)
 
     Emem_i = pl.dot(currmem_iT, dd)
 

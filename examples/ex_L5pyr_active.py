@@ -62,10 +62,8 @@ def plotstuff():
     pl.xlabel(r'y [$\mu$m]')
 
 def insert_synapses(synparams, section, n, spTimesFun, args):
-    #find all compartments indices in section
-    allidx = c.get_idx(section=section)
     #find n compartments to insert synapses onto
-    idx = allidx[pl.randint(0, allidx.size, size=n)]
+    idx = c.get_rand_idx_area_norm(section=section, nidx=n)
 
     #Insert synapses in an iterative fashion
     for i in idx:
@@ -73,7 +71,7 @@ def insert_synapses(synparams, section, n, spTimesFun, args):
 
         # Some input spike train using the function call
         spiketimes = spTimesFun(args[0], args[1])
-        
+
         # Create synapse(s) and setting times using the Synapse class in LFPy
         s = LFPy.Synapse(c,**synparams)
         s.set_spike_times(c, spiketimes)
@@ -97,7 +95,7 @@ cellparams = {          #various cell parameters,
     'timeres_NEURON' : 2**-3,   #[ms] dt's should be in powers of 2 for both,
     'timeres_python' : 2**-3,   #need binary representation
     'tstartms' : -100,  #start time of simulation, recorders start at t=0
-    'tstopms' : 100,   #stop simulation at 1000 ms. these can be overridden
+    'tstopms' : 1000,   #stop simulation at 1000 ms. these can be overridden
                         #by setting these arguments in cell.simulation()
     'custom_code'  : ['my_active_declarations.hoc'],    #Custom .hoc/.py-scripts
 }
@@ -135,19 +133,19 @@ synparams_GABA_A = {         #Inhibitory synapse parameters
 #where to insert, how many, and which input statistics
 insert_synapses_AMPA_args = {
     'section' : 'apicdend',
-    'n' : 125,
+    'n' : 100,
     'spTimesFun' : LFPy.inputgenerators.stationary_gamma,
     'args' : [cellparams['tstartms'], cellparams['tstopms']]
 }
 insert_synapses_NMDA_args = {
     'section' : 'alldend',
-    'n' : 15,
+    'n' : 10,
     'spTimesFun' : LFPy.inputgenerators.stationary_gamma,
     'args' : [cellparams['tstartms'], cellparams['tstopms'], 5, 20]
 }
 insert_synapses_GABA_A_args = {
     'section' : 'dend',
-    'n' : 80,
+    'n' : 100,
     'spTimesFun' : LFPy.inputgenerators.stationary_gamma,
     'args' : [cellparams['tstartms'], cellparams['tstopms']]
 }
@@ -186,10 +184,6 @@ insert_synapses(synparams_GABA_A, **insert_synapses_GABA_A_args)
 
 #perform NEURON simulation, results saved as attributes in the c instance
 c.simulate(**simulateparams)
-
-pl.plot(c.tvec, c.somav)
-
-raise Exception
 
 #initialize electrode geometry, then calculate the LFP, using LFPy.Electrode cl.
 e = LFPy.Electrode(c,**electrodeparams)

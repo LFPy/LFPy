@@ -62,17 +62,14 @@ def plotstuff():
     pl.xlabel(r'y [$\mu$m]')
 
 def insert_synapses(synparams, section, n, spTimesFun, args):
-    #find all compartments indices in section
-    allidx = c.get_idx(section=section)
     #find n compartments to insert synapses onto
-    idx = allidx[pl.randint(0, allidx.size, size=n)]
+    idx = c.get_rand_idx_area_norm(section=section, nidx=n)
 
     #Insert synapses in an iterative fashion
     for i in idx:
         synparams.update({'idx' : int(i)})
 
         # Some input spike train using the function call
-        
         spiketimes = spTimesFun(args[0], args[1])
 
         # Create synapse(s) and setting times using the Synapse class in LFPy
@@ -136,19 +133,19 @@ synparams_GABA_A = {         #Inhibitory synapse parameters
 #where to insert, how many, and which input statistics
 insert_synapses_AMPA_args = {
     'section' : 'apicdend',
-    'n' : 125,
+    'n' : 100,
     'spTimesFun' : LFPy.inputgenerators.stationary_gamma,
     'args' : [cellparams['tstartms'], cellparams['tstopms']]
 }
 insert_synapses_NMDA_args = {
     'section' : 'alldend',
-    'n' : 15,
+    'n' : 10,
     'spTimesFun' : LFPy.inputgenerators.stationary_gamma,
     'args' : [cellparams['tstartms'], cellparams['tstopms']]
 }
 insert_synapses_GABA_A_args = {
     'section' : 'dend',
-    'n' : 80,
+    'n' : 100,
     'spTimesFun' : LFPy.inputgenerators.stationary_gamma,
     'args' : [cellparams['tstartms'], cellparams['tstopms']]
 }
@@ -179,8 +176,6 @@ pl.close('all')   #close open figures
 
 #Initialize cell instance, using the LFPy.Cell class
 c = LFPy.Cell(**cellparams)
-
-
 
 #Insert synapses
 insert_synapses(synparams_AMPA, **insert_synapses_AMPA_args)
