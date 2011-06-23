@@ -15,7 +15,8 @@ This is the documentation for LFPy
 
 ..  toctree::
     :maxdepth: 3
-    
+
+    information
     classes
 
    

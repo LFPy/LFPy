@@ -7,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Requirements &mdash; LFPy v0.1 documentation</title>
+    <title>module LFPy &mdash; LFPy v0.1 documentation</title>
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript">
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="top" title="LFPy v0.1 documentation" href="index.html" />
-    <link rel="prev" title="Welcome to LFPy’s documentation!" href="index.html" /> 
+    <link rel="prev" title="Requirements" href="information.html" /> 
   </head>
   <body>
     <div class="related">
@@ -36,7 +36,7 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="index.html" title="Welcome to LFPy’s documentation!"
+          <a href="information.html" title="Requirements"
              accesskey="P">previous</a> |</li>
         <li><a href="index.html">LFPy v0.1 documentation</a> &raquo;</li> 
       </ul>
@@ -47,105 +47,7 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <div class="section" id="requirements">
-<h1>Requirements<a class="headerlink" href="#requirements" title="Permalink to this headline">¶</a></h1>
-<p>The basic requirements for the release branch of LFPy is as follows</p>
-<ol class="arabic">
-<li><p class="first">Subversion, in order to download the code from the repository</p>
-</li>
-<li><p class="first">Python, seems to work fine with recent python since 2.6.x (2.6.6 or newer recommended), 2.7.x works fine.</p>
-</li>
-<li><p class="first">Python modules numpy, scipy, matplotlit</p>
-</li>
-<li><p class="first">NEURON (from www.neuron.yale.edu) compiled as a python module, so the following should execute without error in the terminal:</p>
-<div class="highlight-python"><pre>ipython
-&gt;&gt;&gt; import neuron
-&gt;&gt;&gt; neuron.test()</pre>
-</div>
-</li>
-<li><p class="first">Cython (C-extencions for python, cython.org) to speed up simulations of extracellular fields</p>
-</li>
-</ol>
-</div>
-<div class="section" id="installation">
-<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
-<ol class="arabic">
-<li><p class="first">In a terminal, <tt class="docutils literal"><span class="pre">'cd'</span></tt> to a directory where you want your LFPy files to be, as an example this could be &#8216;/home/yourname/work&#8217;.</p>
-</li>
-<li><p class="first">Download LFPy using SVN by typing:</p>
-<div class="highlight-python"><pre>svn checkout https://bebiservice.umb.no/svn-private/LFPy-release</pre>
-</div>
-<p>This will create a folder named &#8216;LFPy-release&#8217;  in the current folder containing all files belonging to the LFPy package.</p>
-</li>
-<li><p class="first">Now you need to add the following lines to your &#8216;.bashrc&#8217; or &#8216;.bash_profile&#8217; or similar file:</p>
-<div class="highlight-python"><pre>LFPYPATH="/home/yourname/work/LFPy-release/"
-PYTHONPATH="${PYTHONPATH}:${LFPYPATH}"
-export LFPYPATH
-export PYTHONPATH</pre>
-</div>
-<p>Change the exact path to where you downloaded the files in previous steps. This is to make the LFPy installation available everywhere (as we don&#8217;t install LFPy as a &#8220;proper&#8221; python module at the moment)</p>
-</li>
-<li><p class="first">In order to speed up LFP-calculations, the Cython code (lfpycalc.pyx) need to be compiled every time it has been updated from the terminal;</p>
-<div class="highlight-python"><pre>cd $LFPYPATH/LFPy
-python setup.py build_ext -i</pre>
-</div>
-<p>Otherwise the corresponding .py files will be used, which is slower.</p>
-</li>
-<li><p class="first">Now try if it all works. In a python shell in a fresh terminal, try</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">LFPy</span>
-</pre></div>
-</div>
-<p>if there are no complaints, it should be all done!</p>
-</li>
-<li><p class="first">There are some basic usage examples provided in</p>
-<div class="highlight-python"><pre>$LFPYPATH/examples/</pre>
-</div>
-<p>To execute:</p>
-<div class="highlight-python"><pre>cd $LFPYPATH/examples/
-python script.py
-#or
-ipython
-&gt;&gt;&gt;run script.py</pre>
-</div>
-</li>
-</ol>
-</div>
-<div class="section" id="units">
-<h1>Units<a class="headerlink" href="#units" title="Permalink to this headline">¶</a></h1>
-<p>As of now, units follow the NEURON conventions.
-The units in LFPy for given quantities are:</p>
-<table border="1" class="docutils">
-<colgroup>
-<col width="54%" />
-<col width="46%" />
-</colgroup>
-<thead valign="bottom">
-<tr><th class="head">What</th>
-<th class="head">unit</th>
-</tr>
-</thead>
-<tbody valign="top">
-<tr><td>Potentials</td>
-<td>[mV]</td>
-</tr>
-<tr><td>Currents</td>
-<td>[nA]</td>
-</tr>
-<tr><td>conductance</td>
-<td>[S/cm2]</td>
-</tr>
-<tr><td>capacitance</td>
-<td>[muF/cm2]</td>
-</tr>
-<tr><td>Coordinates</td>
-<td>[mum]</td>
-</tr>
-</tbody>
-</table>
-<p>Note: resistance, conductance and capacitance are usually specific values, i.e per membrane area (lowercase r_m, g, c_m)
-Depending on the mechanism files, some may use different units altogether, but this should be taken care of internally by NEURON, right?.</p>
-</div>
-<div class="section" id="module-LFPy">
+  <div class="section" id="module-LFPy">
 <span id="module-lfpy"></span><h1>module <a class="reference internal" href="#module-LFPy" title="LFPy"><tt class="xref py py-mod docutils literal"><span class="pre">LFPy</span></tt></a><a class="headerlink" href="#module-LFPy" title="Permalink to this headline">¶</a></h1>
 <p>Initialization of LFPy, a module for simulating extracellular potentials.</p>
 <p>Developed by: 
@@ -206,8 +108,8 @@ lambda_f : AC frequency for method 'lambda_f';
 
 custom_code : list of model specific code files goes here ([*.py/.hoc]);
 verbose : switching verbose output on/off
-play_in_soma :
-soma_trace :</pre>
+play_in_soma : if True, play somatrace in soma
+soma_trace :  filename somatrace, two columns, space-sep: t &amp; v</pre>
 </div>
 <dl class="method">
 <dt id="LFPy.Cell.calc_icap">
@@ -624,20 +526,20 @@ the electrode surface are random,  within the given radius</p>
 All rights reserved.</p>
 <dl class="function">
 <dt id="LFPy.lfpcalc.calc_lfp_choose">
-<tt class="descclassname">LFPy.lfpcalc.</tt><tt class="descname">calc_lfp_choose</tt><big>(</big><em>c</em>, <em>x=0</em>, <em>y=0</em>, <em>z=0</em>, <em>sigma=0.3</em>, <em>r_limit=None</em>, <em>from_file=False</em>, <em>timestep=None</em>, <em>t_indices=None</em>, <em>som_as_point=False</em><big>)</big><a class="reference internal" href="_modules/LFPy/lfpcalc.html#calc_lfp_choose"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LFPy.lfpcalc.calc_lfp_choose" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">LFPy.lfpcalc.</tt><tt class="descname">calc_lfp_choose</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/LFPy/lfpcalc.html#calc_lfp_choose"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LFPy.lfpcalc.calc_lfp_choose" title="Permalink to this definition">¶</a></dt>
 <dd><p>Determine which method to use, line-source for soma default</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="LFPy.lfpcalc.calc_lfp_linesource">
-<tt class="descclassname">LFPy.lfpcalc.</tt><tt class="descname">calc_lfp_linesource</tt><big>(</big><em>c</em>, <em>x=0</em>, <em>y=0</em>, <em>z=0</em>, <em>sigma=0.3</em>, <em>r_limit=None</em>, <em>from_file=False</em>, <em>timestep=None</em>, <em>t_indices=None</em><big>)</big><a class="reference internal" href="_modules/LFPy/lfpcalc.html#calc_lfp_linesource"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LFPy.lfpcalc.calc_lfp_linesource" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">LFPy.lfpcalc.</tt><tt class="descname">calc_lfp_linesource</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/LFPy/lfpcalc.html#calc_lfp_linesource"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LFPy.lfpcalc.calc_lfp_linesource" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate electric field potential using the line-source method, all
 compartments treated as line sources, even soma.</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="LFPy.lfpcalc.calc_lfp_som_as_point">
-<tt class="descclassname">LFPy.lfpcalc.</tt><tt class="descname">calc_lfp_som_as_point</tt><big>(</big><em>c</em>, <em>x=0</em>, <em>y=0</em>, <em>z=0</em>, <em>sigma=0.3</em>, <em>r_limit=None</em>, <em>from_file=False</em>, <em>timestep=None</em>, <em>t_indices=None</em><big>)</big><a class="reference internal" href="_modules/LFPy/lfpcalc.html#calc_lfp_som_as_point"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LFPy.lfpcalc.calc_lfp_som_as_point" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">LFPy.lfpcalc.</tt><tt class="descname">calc_lfp_som_as_point</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/LFPy/lfpcalc.html#calc_lfp_som_as_point"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LFPy.lfpcalc.calc_lfp_som_as_point" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate electric field potential using the line-source method,
 soma is treated as point/sphere source</p>
 </dd></dl>
@@ -712,10 +614,7 @@ tstop</p>
         <div class="sphinxsidebarwrapper">
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
-<li><a class="reference internal" href="#">Requirements</a></li>
-<li><a class="reference internal" href="#installation">Installation</a></li>
-<li><a class="reference internal" href="#units">Units</a></li>
-<li><a class="reference internal" href="#module-LFPy">module <tt class="docutils literal"><span class="pre">LFPy</span></tt></a><ul>
+<li><a class="reference internal" href="#">module <tt class="docutils literal"><span class="pre">LFPy</span></tt></a><ul>
 <li><a class="reference internal" href="#class-cell">class <tt class="docutils literal"><span class="pre">Cell</span></tt></a></li>
 <li><a class="reference internal" href="#class-synapse">class <tt class="docutils literal"><span class="pre">Synapse</span></tt></a></li>
 <li><a class="reference internal" href="#class-pointprocess">class <tt class="docutils literal"><span class="pre">PointProcess</span></tt></a></li>
@@ -728,8 +627,8 @@ tstop</p>
 </ul>
 
   <h4>Previous topic</h4>
-  <p class="topless"><a href="index.html"
-                        title="previous chapter">Welcome to LFPy&#8217;s documentation!</a></p>
+  <p class="topless"><a href="information.html"
+                        title="previous chapter">Requirements</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/classes.txt"
@@ -762,7 +661,7 @@ tstop</p>
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="index.html" title="Welcome to LFPy’s documentation!"
+          <a href="information.html" title="Requirements"
              >previous</a> |</li>
         <li><a href="index.html">LFPy v0.1 documentation</a> &raquo;</li> 
       </ul>

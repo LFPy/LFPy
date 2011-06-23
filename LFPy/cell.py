@@ -58,8 +58,8 @@ class Cell(object):
         
         custom_code : list of model specific code files goes here ([*.py/.hoc]);
         verbose : switching verbose output on/off
-        play_in_soma :
-        soma_trace :
+        play_in_soma : if True, play somatrace in soma
+        soma_trace :  filename somatrace, two columns, space-sep: t & v
     '''
     def __init__(self, morphology, 
                     default_dir=True, 
@@ -82,34 +82,35 @@ class Cell(object):
         '''initialization of the Cell object.
         
         Inputs:
-        morphology : morphology file;
-        default_dir : if True will look for morphology in the default folder,
-        otherwise full path to morphology must be provided;
-        
-        v_init : initial potential;
-        passive : passive mechs are initialized if True;
-        Ra : axial resistance;
-        rm : memnbrane resistivity;
-        cm : membrane capacitance;
-        e_pas : passive mechanism reversal potential;
-        
-        timeres_NEURON : internal dt for NEURON simulation;
-        timeres_python : overall dt for python simulation;
-        
-        tstartms : initialization time for simulation <= 0 ms
-        tstopms : stop time for simulation > 0 ms
-        
-        nsegs_method : method for setting the number of segments;
-        max_nsegs_length : max segment length for method 'fixed_length';
-        lambda_f : AC frequency for method 'lambda_f';
-        
-        custom_code : list of model specific code files goes here ([*.py/.hoc]);
-        verbose : switching verbose output on/off
-        play_in_soma :
-        soma_trace : 
+        ::
+            morphology : morphology file;
+            default_dir : if True will look for morphology in the default folder,
+            otherwise full path to morphology must be provided;
+            
+            v_init : initial potential;
+            passive : passive mechs are initialized if True;
+            Ra : axial resistance;
+            rm : memnbrane resistivity;
+            cm : membrane capacitance;
+            e_pas : passive mechanism reversal potential;
+            
+            timeres_NEURON : internal dt for NEURON simulation;
+            timeres_python : overall dt for python simulation;
+            
+            tstartms : initialization time for simulation <= 0 ms
+            tstopms : stop time for simulation > 0 ms
+            
+            nsegs_method : method for setting the number of segments;
+            max_nsegs_length : max segment length for method 'fixed_length';
+            lambda_f : AC frequency for method 'lambda_f';
+            
+            custom_code : list of model specific code files goes here ([*.py/.hoc]);
+            verbose : switching verbose output on/off
+            play_in_soma : if True, play somatrace in soma
+            soma_trace : filename somatrace, two columns, space-sep: t & v
         '''
 
-        #Embedding neuron into the cell object
+        #Loading NEURON standard library and custom LFPy codes
         neuron.h.load_file('stdlib.hoc')
         neuron.h.xopen(os.path.join(installpath, 'neuron', 'LFPy.hoc'))
 
