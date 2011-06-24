@@ -135,8 +135,11 @@ class Cell(object):
                 val=float(str(val))
                 rotation[var]=val
         else:
-            rotation = {}
-
+            rotation = {
+                'x' : 0,
+                'y' : 0,
+            }
+        
         self.timeres_python = timeres_python
         self.timeres_NEURON = timeres_NEURON
         
@@ -149,6 +152,8 @@ class Cell(object):
         self.pointprocess_idx = []
 
         self.v_init = v_init
+        
+        self.default_rotation = rotation
         
         if passive:
             #Set passive properties, insert passive on all compartments
@@ -164,17 +169,12 @@ class Cell(object):
                 neuron.h.xopen(codefile)
                 #neuron.h.xopen(os.path.join(installpath, 'examples', codefile))
             elif codefile.split('.')[-1] == 'py':
-                run(codefile)
+                execfile(codefile)
             else:
                 raise Exception, '%s not a .hoc- nor .py-file' % codefile
         
         # Make NEURON calculate i_membrane
         self.set_extracellular()
-        
-        
-        #if active:
-        #    neuron.h.xopen(installpath + '/neuron/active_MS.hoc')
-        #    neuron.h.set_active()
 
         if nsegs_method == 'lambda100':
             self.set_nsegs_lambda100()
@@ -192,7 +192,6 @@ class Cell(object):
         self.collect_geometry()
         self.set_pos()
 
-        self.default_rotation = rotation
         self.rotate_xyz(self.default_rotation)
         
         # Optional part for cases with play in soma

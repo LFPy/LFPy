@@ -82,7 +82,14 @@ class Electrode(object):
         self.z = z
         self.color = color
         self.marker = marker
-        self.N = N
+        if N != None:
+            if N.shape[-1] == 3:
+                self.N = N
+            else:
+                self.N = N.T
+                if N.shape[-1] != 3:
+                    raise Exception, 'N.shape must be (n contacts, 1, 3)!'
+            
         self.r = r
         self.n = n
         self.r_z = r_z
