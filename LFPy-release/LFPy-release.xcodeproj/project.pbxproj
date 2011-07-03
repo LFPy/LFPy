@@ -1,0 +1,67 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXGroup section */
+		BDA6E0F013B4C425000D0C38 = {
+			isa = PBXGroup;
+			children = (
+			);
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXProject section */
+		BDA6E0F213B4C425000D0C38 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				ORGANIZATIONNAME = umb;
+			};
+			buildConfigurationList = BDA6E0F513B4C425000D0C38 /* Build configuration list for PBXProject "LFPy-release" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = BDA6E0F013B4C425000D0C38;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+			);
+		};
+/* End PBXProject section */
+
+/* Begin XCBuildConfiguration section */
+		BDA6E0F713B4C425000D0C38 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+			};
+			name = Debug;
+		};
+		BDA6E0F813B4C425000D0C38 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		BDA6E0F513B4C425000D0C38 /* Build configuration list for PBXProject "LFPy-release" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BDA6E0F713B4C425000D0C38 /* Debug */,
+				BDA6E0F813B4C425000D0C38 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = BDA6E0F213B4C425000D0C38 /* Project object */;
+}

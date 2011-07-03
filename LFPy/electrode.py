@@ -89,6 +89,8 @@ class Electrode(object):
                 self.N = N.T
                 if N.shape[-1] != 3:
                     raise Exception, 'N.shape must be (n contacts, 1, 3)!'
+        else:
+            self.N = N
             
         self.r = r
         self.n = n

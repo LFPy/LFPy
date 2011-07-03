@@ -50,6 +50,9 @@ class Synapse:
     def collect_current(self, cell):
         self.i = numpy.array(cell.synireclist.o(self.hocidx))
     
+    def collect_potential(self, cell):
+        self.v = numpy.array(cell.synvreclist.o(self.hocidx))
+
     def update_pos(self, cell):
         '''aligning coordinate of point-process to geometry'''
         self.x = cell.xmid[self.idx]

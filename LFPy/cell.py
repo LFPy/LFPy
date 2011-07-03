@@ -249,7 +249,8 @@ class Cell(object):
         for sec in neuron.h.allseclist:
             sec.insert('extracellular')
     
-    def set_synapse(self, idx, syntype, record_current=False,
+    def set_synapse(self, idx, syntype,
+                    record_current=False, record_potential=False,
                     tau=None, tau1=None, tau2=None, e=None, weight=None,
                     g=None, pkamp=None, freq=None, delay=None, dur=None):
         '''Insert syntype synapse on compartment with index idx, **kwargs
@@ -259,6 +260,8 @@ class Cell(object):
             self.synlist = neuron.h.List()
         if not hasattr(self, 'synireclist'):
             self.synireclist = neuron.h.List()
+        if not hasattr(self, 'synvreclist'):
+            self.synvreclist = neuron.h.List()
         if not hasattr(self, 'netconlist'):
             self.netconlist = neuron.h.List()
         if not hasattr(self, 'sptimeslist'):
@@ -312,6 +315,13 @@ class Cell(object):
                                                       self.timeres_python+1))
                         synirec.record(syn._ref_i, self.timeres_python)
                         self.synireclist.append(synirec)
+                    
+                    #record potential
+                    if record_potential:
+                        synvrec = neuron.h.Vector(int(self.tstopms /
+                                                      self.timeres_python+1))
+                        synvrec.record(seg._ref_v, self.timeres_python)
+                        self.synvreclist.append(synvrec)
                     
                 i += 1
         
