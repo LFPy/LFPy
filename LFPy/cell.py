@@ -76,7 +76,9 @@ class Cell(object):
                     nsegs_method='lambda100', 
                     max_nsegs_length=30, 
                     lambda_f = 100, 
-                    custom_code=[], 
+                    custom_code=[],
+                    custom_fun = [],
+                    custom_fun_args = [],
                     play_in_soma=False, 
                     soma_trace='', verbose=False):
         '''initialization of the Cell object.
@@ -162,16 +164,21 @@ class Cell(object):
             self.cm = cm
             self.e_pas = e_pas
             self.set_passive()
-        
+                
         # load custom codes
-        for codefile in custom_code:
-            if codefile.split('.')[-1] == 'hoc':
-                neuron.h.xopen(codefile)
+        for code in custom_code:
+            if code.split('.')[-1] == 'hoc':
+                neuron.h.xopen(code)
                 #neuron.h.xopen(os.path.join(installpath, 'examples', codefile))
-            elif codefile.split('.')[-1] == 'py':
-                execfile(codefile)
+            elif code.split('.')[-1] == 'py':
+                exec(code)
             else:
                 raise Exception, '%s not a .hoc- nor .py-file' % codefile
+        
+        i = 0
+        for fun in custom_fun:
+            fun(**custom_fun_args[i])
+            i += 1
         
         # Make NEURON calculate i_membrane
         self.set_extracellular()
@@ -536,7 +543,7 @@ class Cell(object):
 
         return poss_idx[idx]
 
-    def simulate(self, rec_v=False, rec_ipas=False, rec_icap=False, 
+    def simulate(self, rec_i=True, rec_v=False, rec_ipas=False, rec_icap=False, 
                  rec_isyn=False, rec_vsyn=False, rec_istim=False,
                  tstartms=None, tstopms=None):
         '''Start NEURON simulation and record variables.'''
@@ -547,8 +554,9 @@ class Cell(object):
         
         self.set_soma_volt_recorder()
         self.set_time_recorder()
-        self.set_imem_recorders()
         
+        if rec_i:
+            self.set_imem_recorders()        
         if rec_v:
             self.set_voltage_recorders()
         if rec_ipas:
@@ -556,6 +564,7 @@ class Cell(object):
         if rec_icap:
             self.set_icap_recorders()
 
+        #run fadvance until t >= tstopms
         self.run_simulation()
 
         #fixing tvec
@@ -567,7 +576,8 @@ class Cell(object):
 
         self.somav = np.array(self.somav)
         
-        self.calc_imem()
+        if rec_i:
+            self.calc_imem()
                 
         if rec_ipas:
             self.calc_ipas()
@@ -647,6 +657,13 @@ class Cell(object):
         
         cvode = neuron.h.CVode()
         
+        if neuron.h.dt <= 1E-8:
+            cvode.active(1)
+            cvode.atol(0.001)
+        else:
+            cvode.active(0)
+        
+        
         #initialize state
         neuron.h.finitialize(self.v_init)
             
@@ -676,6 +693,7 @@ class Cell(object):
             counter += 1.
             if np.mod(counter, interval) == 0:
                 print 't = %.0f' % neuron.h.t
+        
         
     def loadspikes(self):
         '''initialize spiketimes from netcon if they exist'''
