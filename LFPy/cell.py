@@ -80,7 +80,8 @@ class Cell(object):
                     custom_fun = [],
                     custom_fun_args = [],
                     play_in_soma=False, 
-                    soma_trace='', verbose=False):
+                    soma_trace='',
+                    verbose=False):
         '''initialization of the Cell object.
         
         Inputs:
@@ -111,7 +112,8 @@ class Cell(object):
             play_in_soma : if True, play somatrace in soma
             soma_trace : filename somatrace, two columns, space-sep: t & v
         '''
-
+        self.verbose = verbose
+        
         #Loading NEURON standard library and custom LFPy codes
         neuron.h.load_file('stdlib.hoc')
         neuron.h.xopen(os.path.join(installpath, 'neuron', 'LFPy.hoc'))
@@ -194,7 +196,8 @@ class Cell(object):
             print 'No nsegs_method applied (%s)' % nsegs_method
 
         self.calc_totnsegs()
-        print "Total number of segments = ", self.totnsegs
+        if self.verbose:
+            print "Total number of segments = ", self.totnsegs
 
         self.collect_geometry()
         self.set_pos()

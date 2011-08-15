@@ -44,10 +44,10 @@ proc create_sectionlists() { // Loads geometry and creates sectionlists with sec
 		}
 	}
 	
-	if (nsomasec > 0) {print "soma ", nsomasec}
-	if (naxonsec > 0) {print "axon ", naxonsec}
-	if (ndendsec > 0) {print "dend ", ndendsec}
-	if (napicdendsec > 0) {print "apicdend ", napicdendsec}
+	//if (nsomasec > 0) {print "soma ", nsomasec}
+	//if (naxonsec > 0) {print "axon ", naxonsec}
+	//if (ndendsec > 0) {print "dend ", ndendsec}
+	//if (napicdendsec > 0) {print "apicdend ", napicdendsec}
 	
 	// create SectionList for sections belonging to axon, dendrite and apical dendrite
 	somalist = new SectionList()

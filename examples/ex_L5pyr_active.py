@@ -28,7 +28,7 @@ def plotstuff():
 
     pl.subplot(325)
     absmaxLFP = abs(pl.array([e.LFP.max(),e.LFP.min()])).max()
-    pl.imshow(e.LFP,vmax=absmaxLFP,vmin=-absmaxLFP,origin='lower',
+    pl.imshow(e.LFP,vmax=absmaxLFP/5,vmin=-absmaxLFP/5,origin='lower',
            extent=(c.tvec[0],c.tvec[-1],e.z[0],e.z[-1]),cmap='jet_r',
            interpolation='nearest')
     pl.colorbar()
@@ -154,7 +154,7 @@ N = pl.empty((16, 3))
 for i in xrange(N.shape[0]): N[i,] = [1, 0, 0] #normal unit vec. to contacts
 electrodeparams = {             #parameters for electrode class
     'sigma' : 0.3,              #Extracellular potential
-    'x' : pl.zeros(16)+50,      #Coordinates of electrode contacts
+    'x' : pl.zeros(16)+25,      #Coordinates of electrode contacts
     'y' : pl.zeros(16),
     'z' : pl.linspace(-500,1000,16),
     'n' : 20,
