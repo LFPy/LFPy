@@ -74,7 +74,7 @@ class Electrode(object):
     def __init__(self, cell, sigma=0.3, x=100, y=0, z=0,
                  color='g', marker='o',
                  N=None, r=None, n=0, r_z=None, colors=None,
-                 perCellLFP = False):
+                 perCellLFP = False, method='linesource'):
         '''Initialize class Electrode'''
         self.sigma = sigma
         self.x = x

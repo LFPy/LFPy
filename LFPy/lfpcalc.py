@@ -4,19 +4,22 @@ All rights reserved.'''
 import pylab as pl
 import LFPy
 
-def calc_lfp_choose(c, x=0, y=0, z=0, sigma=0.3, \
-                    r_limit=None, from_file=False, \
-                    timestep=None, t_indices=None, som_as_point=False):
+def calc_lfp_choose(c, x=0, y=0, z=0, sigma=0.3,
+                    r_limit=None, from_file=False,
+                    timestep=None, t_indices=None, method='linesource'):
     '''Determine which method to use, line-source for soma default'''
-    if som_as_point:
-        return calc_lfp_som_as_point(c, x=x, y=y, z=z, sigma=sigma, \
-                                     r_limit=r_limit, from_file=from_file, \
+    if method == 'som_as_point':
+        return calc_lfp_som_as_point(c, x=x, y=y, z=z, sigma=sigma,
+                                     r_limit=r_limit, from_file=from_file,
                                      t_indices=t_indices)
-    else:
-        return calc_lfp_linesource(c, x=x, y=y, z=z, sigma=sigma, \
-                                   r_limit=r_limit, from_file=from_file, \
+    elif method == 'linesource':
+        return calc_lfp_linesource(c, x=x, y=y, z=z, sigma=sigma,
+                                   r_limit=r_limit, from_file=from_file,
                                    t_indices=t_indices)
-
+    elif method == 'pointsource':
+        return calc_lfp_pointsource(c, x=x, y=y, z=z, sigma=sigma,
+                                    r_limit=r_limit, from_file=from_file,
+                                    t_indices=t_indices)
 
 def calc_lfp_linesource(c, x=0, y=0, z=0, sigma=0.3, \
                         r_limit=None, from_file=False, timestep=None, t_indices=None):
@@ -261,3 +264,40 @@ def _r_soma_calc(xmid, ymid, zmid, x, y, z):
         (z - zmid)**2)
 
     return r_soma
+
+def calc_lfp_pointsource(c, x=0, y=0, z=0, sigma=0.3, \
+                        r_limit=None, from_file=False, timestep=None, t_indices=None):
+    '''Calculate local field potentials using the point-source equation on all 
+    compartments'''
+    if from_file:
+        c = LFPy.tools.load(c)
+
+    # Handling the r_limits. If a r_limit is a single value, an array r_limit
+    # of shape c.diam is returned.
+    if type(r_limit) == int or type(r_limit) == float:
+        r_limit = pl.ones(pl.shape(c.diam))*abs(r_limit)
+    elif pl.shape(r_limit) != pl.shape(c.diam):
+        raise Exception, 'r_limit is neither a float- or int- value, nor is \
+            r_limit.shape() equal to c.diam.shape()'
+
+    if timestep != None:
+        currmem = c.imem[:, timestep]
+    if t_indices != None:
+        currmem = c.imem[:, t_indices]
+    else:
+        currmem = c.imem
+    
+    r2 = (c.xmid - x)**2 + (c.ymid - y)**2 + (c.zmid - z)**2
+    r2 = _check_rlimit_point(r2, r_limit)
+    r = pl.sqrt(r2)
+    
+    Emem = 1 / (4 * pl.pi * sigma) * pl.dot(currmem.T, r)
+    
+    return Emem.transpose()
+
+def _check_rlimit_point(r2, r_limit):
+    '''Correct r2 so that r2 >= r_limit for all values'''
+    [inds] = pl.where(r2 < r_limit)
+    r2[inds] = r_limit[inds]
+    
+    return r2
