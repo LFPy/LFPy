@@ -165,7 +165,7 @@ class Cell(object):
             self.rm = rm
             self.cm = cm
             self.e_pas = e_pas
-            self.set_passive()
+            self._set_passive()
         
         # load custom codes
         for code in custom_code:
@@ -183,23 +183,23 @@ class Cell(object):
             i += 1
         
         # Make NEURON calculate i_membrane
-        self.set_extracellular()
+        self._set_extracellular()
         
         if nsegs_method == 'lambda100':
-            self.set_nsegs_lambda100()
-            print "Settings nsegs using lambda100"
+            self._set_nsegs_lambda100()
         elif nsegs_method == 'lambda_f':
-            self.set_nsegs_lambda_f(lambda_f)
+            self._set_nsegs_lambda_f(lambda_f)
         elif nsegs_method == 'fixed_length':
-            self.set_nsegs_fixed_length(max_nsegs_length)
+            self._set_nsegs_fixed_length(max_nsegs_length)
         else:
             print 'No nsegs_method applied (%s)' % nsegs_method
         
-        self.calc_totnsegs()
+        self._calc_totnsegs()
+        
         if self.verbose:
             print "Total number of segments = ", self.totnsegs
         
-        self.collect_geometry()
+        self._collect_geometry()
         self.set_pos()
         
         self.rotate_xyz(self.default_rotation)
@@ -210,21 +210,23 @@ class Cell(object):
         if play_in_soma:
             self.soma_trace=soma_trace
     
-    def set_nsegs_lambda_f(self, frequency):
+    def _set_nsegs_lambda_f(self, frequency):
         '''set the number of segments for section according to the d_lambda-rule
         for a given input frequency'''
         for sec in neuron.h.allseclist:
             sec.nseg = int((sec.L / (0.1 * neuron.h.lambda_f(frequency)) + .9)
-                / 2 )*2 +1
+                / 2 )*2 + 1
+        if self.verbose:
+            print "set nsegs using lambda-rule with frequency %i." % frequency
         #if we want to have back nseg=1 for somalist, uncomment the following
         #for sec in neuron.h.somalist:
         #    sec.nseg = 1
     
-    def set_nsegs_lambda100(self):
+    def _set_nsegs_lambda100(self):
         '''set the numbers of segments using d_lambda(100)'''
-        self.set_nsegs_lambda_f(100)
+        self._set_nsegs_lambda_f(100)
     
-    def set_nsegs_fixed_length(self, maxlength):
+    def _set_nsegs_fixed_length(self, maxlength):
         '''set nseg for sections so that not any compartment L >= maxlength'''
         for sec in neuron.h.allseclist:
             sec.nseg = int(sec.L / maxlength) + 1
@@ -232,19 +234,20 @@ class Cell(object):
         #for sec in neuron.h.somalist:
         #    sec.nseg = 1
     
-    def calc_totnsegs(self):
+    def _calc_totnsegs(self):
+        '''Calculate the number of segments in the allseclist'''
         i = 0
         for sec in neuron.h.allseclist:
             i += sec.nseg
         
         self.totnsegs = i
     
-    def check_currents(self):
+    def _check_currents(self):
         '''Check that the sum of all membrane and electrode currents over all
         compartments is sufficiently close to zero'''
         raise NotImplementedError, 'this function need to be written'
     
-    def set_passive(self):
+    def _set_passive(self):
         '''insert passive mechanism on all compartments'''
         for sec in neuron.h.allseclist:
             sec.insert('pas')
@@ -253,7 +256,7 @@ class Cell(object):
             sec.g_pas = 1. / self.rm
             sec.e_pas = self.e_pas
     
-    def set_extracellular(self):
+    def _set_extracellular(self):
         '''insert extracellular mechanism on all sections
         to access i_membrane'''
         for sec in neuron.h.allseclist:
@@ -469,11 +472,11 @@ class Cell(object):
         
         return self.stimlist.count() - 1
     
-    def collect_geometry(self):
+    def _collect_geometry(self):
         '''Collects x, y, z-coordinates from NEURON'''
-        self.collect_geometry_neuron()
+        self._collect_geometry_neuron()
         
-        self.calc_midpoints()
+        self._calc_midpoints()
         
         self.somaidx = self.get_idx(section='som')
         
@@ -495,7 +498,7 @@ class Cell(object):
             self.somapos[1] = ymids.mean()
             self.somapos[2] = zmids.mean()
     
-    def collect_geometry_neuron(self):
+    def _collect_geometry_neuron(self):
         '''looping over allseclist to determine area, diam, xyz-start- and
         endpoints, embed geometry to cell object.'''
         
@@ -545,7 +548,7 @@ class Cell(object):
         self.area = np.array(areavec)
         self.diam = np.array(diamvec)
     
-    def calc_midpoints(self):
+    def _calc_midpoints(self):
         '''calculate midpoints of each compartment'''
         self.xmid = .5*(self.xstart+self.xend)
         self.ymid = .5*(self.ystart+self.yend)
@@ -581,6 +584,8 @@ class Cell(object):
     
     #move to tools.py
     def get_closest_idx(self, x=0, y=0, z=0, section='allsec'):
+        '''Get the index number of a segment in specified section which midpoint is 
+        closest to the coordinates defined by the user'''
         idx = self.get_idx(section)
         dist = np.sqrt((self.xmid[idx] - x)**2 + \
             (self.ymid[idx] - y)**2 + (self.zmid[idx] - z)**2)
@@ -610,24 +615,28 @@ class Cell(object):
         if tstopms != None:
             self.tstopms = tstopms
         
-        self.set_soma_volt_recorder()
-        self.set_time_recorder()
+        self._set_soma_volt_recorder()
+        self._set_time_recorder()
         
         if rec_i:
-            self.set_imem_recorders()
+            self._set_imem_recorders()
         if rec_v:
-            self.set_voltage_recorders()
+            self._set_voltage_recorders()
         if rec_ipas:
-            self.set_ipas_recorders()
+            self._set_ipas_recorders()
         if rec_icap:
-            self.set_icap_recorders()
+            self._set_icap_recorders()
         
         #run fadvance until t >= tstopms
-        self.run_simulation()
+        self._run_simulation()
         
-        #fixing tvec
+        #fixing tvec, need to be monotonically increasing, from 0-tstopms 
         if self.tstartms != None:
-            self.tvec = np.array(self.tvec) + self.timeres_NEURON
+            self.tvec = np.array(self.tvec)
+            if self.tvec[0] > -self.timeres_NEURON and self.tvec[0] < self.timeres_NEURON:
+                pass
+            else:
+                self.tvec += self.timeres_NEURON
         else:
             self.tvec = np.array(self.tvec)
             self.tvec[1:] = self.tvec[1:] + self.timeres_NEURON
@@ -635,28 +644,28 @@ class Cell(object):
         self.somav = np.array(self.somav)
         
         if rec_i:
-            self.calc_imem()
+            self._calc_imem()
         
         if rec_ipas:
-            self.calc_ipas()
+            self._calc_ipas()
         
         if rec_icap:
-            self.calc_icap()
+            self._calc_icap()
         
         if rec_v:
-            self.collect_vmem()
+            self._collect_vmem()
         
         if rec_isyn:
-            self.collect_isyn()
+            self._collect_isyn()
         
         if rec_vsyn:
-            self.collect_vsyn()
+            self._collect_vsyn()
         
         if rec_istim:
-            self.collect_istim()
+            self._collect_istim()
 
     
-    def calc_imem(self):
+    def _calc_imem(self):
         '''fetching the vectors from the memireclist and calculate self.imem
         containing all the membrane currents.'''
         self.imem = np.array(self.memireclist)
@@ -665,26 +674,30 @@ class Cell(object):
         self.memireclist = None
         del self.memireclist
     
-    def calc_ipas(self):
+    def _calc_ipas(self):
+        '''Get the passive currents'''
         self.ipas = np.array(self.memipasreclist)
         for i in xrange(self.ipas.shape[0]):
             self.ipas[i, ] *= self.area[i] * 1E-2
         self.memipasreclist = None
         del self.memipasreclist
     
-    def calc_icap(self):
+    def _calc_icap(self):
+        '''Get the capacitive currents'''
         self.icap = np.array(self.memicapreclist)
         for i in xrange(self.icap.shape[0]):
             self.icap[i, ] *= self.area[i] * 1E-2
         self.memicapreclist = None
         del self.memicapreclist
     
-    def collect_vmem(self):
+    def _collect_vmem(self):
+        '''Get the membrane currents'''
         self.vmem = np.array(self.memvreclist)
         self.memvreclist = None
         del self.memvreclist
     
-    def collect_isyn(self):
+    def _collect_isyn(self):
+        '''Get the synaptic currents'''
         for i in xrange(len(self.synapses)):
             if self.synapses[i].record_current:
                 self.synapses[i].collect_current(self)
@@ -693,13 +706,15 @@ class Cell(object):
         self.synireclist = None
         del self.synireclist
     
-    def collect_vsyn(self):
+    def _collect_vsyn(self):
+        '''Collect the membrane voltage of segments with synapses'''
         for i in xrange(len(self.synapses)):
             self.synapses[i].collect_potential(self)
         self.synvreclist = None
         del self.synvreclist
     
-    def collect_istim(self):
+    def _collect_istim(self):
+        '''Get the pointprocess currents'''
         for i in xrange(len(self.pointprocesses)):
             if self.pointprocesses[i].record_current:
                 self.pointprocesses[i].collect_current(self)
@@ -708,7 +723,7 @@ class Cell(object):
         self.stimireclist = None
         del self.stimireclist
     
-    def run_simulation(self):
+    def _run_simulation(self):
         '''Running the actual simulation in NEURON, simulations in NEURON
         is now interruptable.'''
         neuron.h.dt = self.timeres_NEURON
@@ -760,12 +775,12 @@ class Cell(object):
                 for ii in xrange(int(self.sptimeslist.o(i).size)):
                     self.netconlist.o(i).event(self.sptimeslist.o(i)[ii])
     
-    def set_time_recorder(self):
+    def _set_time_recorder(self):
         '''Initialize time-vector recorder in NEURON'''
         self.tvec = neuron.h.Vector(int(self.tstopms/self.timeres_python+1))
         self.tvec.record(neuron.h._ref_t, self.timeres_python)
     
-    def set_soma_volt_recorder(self):
+    def _set_soma_volt_recorder(self):
         '''record somatic crossmembrane potential'''
         self.somav = neuron.h.Vector(int(self.tstopms/self.timeres_python+1))
         if neuron.h.nsomasec == 0:
@@ -776,7 +791,7 @@ class Cell(object):
             i, j = divmod(neuron.h.nsomasec, 2)
             self.somav.record(neuron.h.soma[int(i)](j/2)._ref_v, self.timeres_python)
     
-    def set_imem_recorders(self):
+    def _set_imem_recorders(self):
         '''record membrane currents for all compartments'''
         self.memireclist = neuron.h.List()
         for sec in neuron.h.allseclist:
@@ -785,7 +800,7 @@ class Cell(object):
                 memirec.record(seg._ref_i_membrane, self.timeres_python)
                 self.memireclist.append(memirec)
     
-    def set_ipas_recorders(self):
+    def _set_ipas_recorders(self):
         '''record passive (ohmic) membrane currents for all compartments'''
         self.memipasreclist = neuron.h.List()
         for sec in neuron.h.allseclist:
@@ -794,7 +809,7 @@ class Cell(object):
                 memipasrec.record(seg._ref_i_pas, self.timeres_python)
                 self.memipasreclist.append(memipasrec)
     
-    def set_icap_recorders(self):
+    def _set_icap_recorders(self):
         '''record passive (ohmic) membrane currents for all compartments'''
         self.memicapreclist = neuron.h.List()
         for sec in neuron.h.allseclist:
@@ -803,7 +818,7 @@ class Cell(object):
                 memicaprec.record(seg._ref_i_cap, self.timeres_python)
                 self.memicapreclist.append(memicaprec)
     
-    def set_voltage_recorders(self):
+    def _set_voltage_recorders(self):
         '''record membrane potentials for all compartments'''
         self.memvreclist = neuron.h.List()
         for sec in neuron.h.allseclist:
@@ -812,14 +827,14 @@ class Cell(object):
                 memvrec.record(seg._ref_v, self.timeres_python)
                 self.memvreclist.append(memvrec)
     
-    #MOVE!
-    def calc_ireturn(self):
-        self.ireturn = copy.copy(self.imem)
-        
-        for i in xrange(len(self.synapses)):
-            idx = self.synapses[i].idx
-            self.ireturn[idx] -= self.synapses[i].i
-            #print 'Calc ireturn, idx', str(idx)
+#    #MOVE! EH Commented out, don't know of any use of this
+#    def calc_ireturn(self):
+#        self.ireturn = copy.copy(self.imem)
+#        
+#        for i in xrange(len(self.synapses)):
+#            idx = self.synapses[i].idx
+#            self.ireturn[idx] -= self.synapses[i].i
+#            #print 'Calc ireturn, idx', str(idx)
     
     def set_pos(self, xpos=0, ypos=0, zpos=0):
         self.orig_pos = False
@@ -840,8 +855,8 @@ class Cell(object):
         self.yend = self.yend - diffy
         self.zend = self.zend - diffz
         
-        self.calc_midpoints()
-        self.update_synapse_positions()
+        self._calc_midpoints()
+        self._update_synapse_positions()
     
     def cellpickler(self, filename):
         '''Save data in cell to file, using cPickle.'''
@@ -849,7 +864,7 @@ class Cell(object):
         cPickle.dump(self, filen, protocol=2)
         filen.close()
     
-    def update_synapse_positions(self):
+    def _update_synapse_positions(self):
         '''update synapse positions after rotation of morphology'''
         for i in xrange(len(self.synapses)):
             self.synapses[i].update_pos(self)
@@ -919,7 +934,7 @@ class Cell(object):
             pass
             #print 'Geometry not rotated around z-axis'
     
-    def squeeze_me_macaroni(self):
+    def _squeeze_me_macaroni(self):
         '''Reducing the dimensions of the morphology matrices'''
         self.xstart = np.squeeze(np.array(self.xstart))
         self.xend = np.squeeze(np.array(self.xend))
@@ -950,9 +965,9 @@ class Cell(object):
         self.yend = rel_end[:, 1] + self.somapos[1]
         self.zend = rel_end[:, 2] + self.somapos[2]
         
-        self.squeeze_me_macaroni()
-        self.calc_midpoints()
-        self.update_synapse_positions()
+        self._squeeze_me_macaroni()
+        self._calc_midpoints()
+        self._update_synapse_positions()
     
     def get_rand_prob_area_norm(self, section='allsec', z_min=-10000, z_max=10000):
         '''Return the probability (0-1) for synaptic coupling on compartments in section
