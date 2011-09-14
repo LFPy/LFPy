@@ -6,6 +6,7 @@ import pylab as pl
 
 
 def get_rand_spike_times(synpos,nspikes,tstart,tstop):
+    '''return synpos times nspikes random spike times on the interval [tstart, tstop]'''
     spiketimes = numpy.zeros([size(synpos),nspikes])
     for i in range(0,numpy.size(synpos)):
         spiketimes[i,:] = pl.random_integers(tstart,tstop,nspikes)
