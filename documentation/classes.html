@@ -82,7 +82,7 @@ All rights reserved.</p>
 <h2>class <a class="reference internal" href="#LFPy.Cell" title="LFPy.Cell"><tt class="xref py py-class docutils literal"><span class="pre">Cell</span></tt></a><a class="headerlink" href="#class-cell" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="LFPy.Cell">
-<em class="property">class </em><tt class="descclassname">LFPy.</tt><tt class="descname">Cell</tt><big>(</big><em>morphology</em>, <em>default_dir=True</em>, <em>v_init=-65.0</em>, <em>Ra=150</em>, <em>rm=30000</em>, <em>cm=1.0</em>, <em>e_pas=-65.0</em>, <em>passive=True</em>, <em>timeres_NEURON=0.125</em>, <em>timeres_python=0.125</em>, <em>tstartms=0</em>, <em>tstopms=100</em>, <em>nsegs_method='lambda100'</em>, <em>max_nsegs_length=30</em>, <em>lambda_f=100</em>, <em>custom_code=</em><span class="optional">[</span><span class="optional">]</span>, <em>play_in_soma=False</em>, <em>soma_trace=''</em>, <em>verbose=False</em><big>)</big><a class="headerlink" href="#LFPy.Cell" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">LFPy.</tt><tt class="descname">Cell</tt><big>(</big><em>morphology</em>, <em>default_dir=True</em>, <em>v_init=-65.0</em>, <em>Ra=150</em>, <em>rm=30000</em>, <em>cm=1.0</em>, <em>e_pas=-65.0</em>, <em>passive=True</em>, <em>timeres_NEURON=0.125</em>, <em>timeres_python=0.125</em>, <em>tstartms=0</em>, <em>tstopms=100</em>, <em>nsegs_method='lambda100'</em>, <em>max_nsegs_length=30</em>, <em>lambda_f=100</em>, <em>custom_code=</em><span class="optional">[</span><span class="optional">]</span>, <em>custom_fun=</em><span class="optional">[</span><span class="optional">]</span>, <em>custom_fun_args=</em><span class="optional">[</span><span class="optional">]</span>, <em>play_in_soma=False</em>, <em>soma_trace=''</em>, <em>verbose=False</em><big>)</big><a class="headerlink" href="#LFPy.Cell" title="Permalink to this definition">¶</a></dt>
 <dd><p>The main cell class used in LFPy</p>
 <p>Inputs:</p>
 <div class="highlight-python"><pre>morphology : morphology file;
@@ -112,88 +112,17 @@ play_in_soma : if True, play somatrace in soma
 soma_trace :  filename somatrace, two columns, space-sep: t &amp; v</pre>
 </div>
 <dl class="method">
-<dt id="LFPy.Cell.calc_icap">
-<tt class="descname">calc_icap</tt><big>(</big><big>)</big><a class="headerlink" href="#LFPy.Cell.calc_icap" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="LFPy.Cell.calc_imem">
-<tt class="descname">calc_imem</tt><big>(</big><big>)</big><a class="headerlink" href="#LFPy.Cell.calc_imem" title="Permalink to this definition">¶</a></dt>
-<dd><p>fetching the vectors from the memireclist and calculate self.imem
-containing all the membrane currents.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="LFPy.Cell.calc_ipas">
-<tt class="descname">calc_ipas</tt><big>(</big><big>)</big><a class="headerlink" href="#LFPy.Cell.calc_ipas" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="LFPy.Cell.calc_ireturn">
-<tt class="descname">calc_ireturn</tt><big>(</big><big>)</big><a class="headerlink" href="#LFPy.Cell.calc_ireturn" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="LFPy.Cell.calc_midpoints">
-<tt class="descname">calc_midpoints</tt><big>(</big><big>)</big><a class="headerlink" href="#LFPy.Cell.calc_midpoints" title="Permalink to this definition">¶</a></dt>
-<dd><p>calculate midpoints of each compartment</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="LFPy.Cell.calc_totnsegs">
-<tt class="descname">calc_totnsegs</tt><big>(</big><big>)</big><a class="headerlink" href="#LFPy.Cell.calc_totnsegs" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
 <dt id="LFPy.Cell.cellpickler">
 <tt class="descname">cellpickler</tt><big>(</big><em>filename</em><big>)</big><a class="headerlink" href="#LFPy.Cell.cellpickler" title="Permalink to this definition">¶</a></dt>
 <dd><p>Save data in cell to file, using cPickle.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="LFPy.Cell.check_currents">
-<tt class="descname">check_currents</tt><big>(</big><big>)</big><a class="headerlink" href="#LFPy.Cell.check_currents" title="Permalink to this definition">¶</a></dt>
-<dd><p>Check that the sum of all membrane and electrode currents over all
-compartments is sufficiently close to zero</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="LFPy.Cell.collect_geometry">
-<tt class="descname">collect_geometry</tt><big>(</big><big>)</big><a class="headerlink" href="#LFPy.Cell.collect_geometry" title="Permalink to this definition">¶</a></dt>
-<dd><p>Collects x, y, z-coordinates from NEURON</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="LFPy.Cell.collect_geometry_neuron">
-<tt class="descname">collect_geometry_neuron</tt><big>(</big><big>)</big><a class="headerlink" href="#LFPy.Cell.collect_geometry_neuron" title="Permalink to this definition">¶</a></dt>
-<dd><p>looping over allseclist to determine area, diam, xyz-start- and
-endpoints, embed geometry to cell object.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="LFPy.Cell.collect_istim">
-<tt class="descname">collect_istim</tt><big>(</big><big>)</big><a class="headerlink" href="#LFPy.Cell.collect_istim" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="LFPy.Cell.collect_isyn">
-<tt class="descname">collect_isyn</tt><big>(</big><big>)</big><a class="headerlink" href="#LFPy.Cell.collect_isyn" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="LFPy.Cell.collect_vmem">
-<tt class="descname">collect_vmem</tt><big>(</big><big>)</big><a class="headerlink" href="#LFPy.Cell.collect_vmem" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="LFPy.Cell.collect_vsyn">
-<tt class="descname">collect_vsyn</tt><big>(</big><big>)</big><a class="headerlink" href="#LFPy.Cell.collect_vsyn" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
 <dt id="LFPy.Cell.get_closest_idx">
 <tt class="descname">get_closest_idx</tt><big>(</big><em>x=0</em>, <em>y=0</em>, <em>z=0</em>, <em>section='allsec'</em><big>)</big><a class="headerlink" href="#LFPy.Cell.get_closest_idx" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Get the index number of a segment in specified section which midpoint is 
+closest to the coordinates defined by the user</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="LFPy.Cell.get_idx">
@@ -234,69 +163,12 @@ sum(prob)=1 over all compartments in section. Prob. determined by area.</p>
 <dl class="method">
 <dt id="LFPy.Cell.rotate_xyz">
 <tt class="descname">rotate_xyz</tt><big>(</big><em>rotation</em><big>)</big><a class="headerlink" href="#LFPy.Cell.rotate_xyz" title="Permalink to this definition">¶</a></dt>
-<dd><p>Rotate geometry using rotation matrices, takes dict with rot. angles, 
+<dd><p>Rotate geometry using rotation matrices, takes dict with rot. angles,
 where {&#8216;x&#8217; : ... } etc. are the rotation angles around respective axes.
 All rotation angles are optional.</p>
 <p>Usage:
 rotation = {&#8216;x&#8217; : 1.233, &#8216;y : 0.236, &#8216;z&#8217; : np.pi}
 c.rotate_xyz(rotation)</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="LFPy.Cell.run_simulation">
-<tt class="descname">run_simulation</tt><big>(</big><big>)</big><a class="headerlink" href="#LFPy.Cell.run_simulation" title="Permalink to this definition">¶</a></dt>
-<dd><p>Running the actual simulation in NEURON, simulations in NEURON
-is now interruptable.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="LFPy.Cell.set_extracellular">
-<tt class="descname">set_extracellular</tt><big>(</big><big>)</big><a class="headerlink" href="#LFPy.Cell.set_extracellular" title="Permalink to this definition">¶</a></dt>
-<dd><p>insert extracellular mechanism on all sections
-to access i_membrane</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="LFPy.Cell.set_icap_recorders">
-<tt class="descname">set_icap_recorders</tt><big>(</big><big>)</big><a class="headerlink" href="#LFPy.Cell.set_icap_recorders" title="Permalink to this definition">¶</a></dt>
-<dd><p>record passive (ohmic) membrane currents for all compartments</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="LFPy.Cell.set_imem_recorders">
-<tt class="descname">set_imem_recorders</tt><big>(</big><big>)</big><a class="headerlink" href="#LFPy.Cell.set_imem_recorders" title="Permalink to this definition">¶</a></dt>
-<dd><p>record membrane currents for all compartments</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="LFPy.Cell.set_ipas_recorders">
-<tt class="descname">set_ipas_recorders</tt><big>(</big><big>)</big><a class="headerlink" href="#LFPy.Cell.set_ipas_recorders" title="Permalink to this definition">¶</a></dt>
-<dd><p>record passive (ohmic) membrane currents for all compartments</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="LFPy.Cell.set_nsegs_fixed_length">
-<tt class="descname">set_nsegs_fixed_length</tt><big>(</big><em>maxlength</em><big>)</big><a class="headerlink" href="#LFPy.Cell.set_nsegs_fixed_length" title="Permalink to this definition">¶</a></dt>
-<dd><p>set nseg for sections so that not any compartment L &gt;= maxlength</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="LFPy.Cell.set_nsegs_lambda100">
-<tt class="descname">set_nsegs_lambda100</tt><big>(</big><big>)</big><a class="headerlink" href="#LFPy.Cell.set_nsegs_lambda100" title="Permalink to this definition">¶</a></dt>
-<dd><p>set the numbers of segments using d_lambda(100)</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="LFPy.Cell.set_nsegs_lambda_f">
-<tt class="descname">set_nsegs_lambda_f</tt><big>(</big><em>frequency</em><big>)</big><a class="headerlink" href="#LFPy.Cell.set_nsegs_lambda_f" title="Permalink to this definition">¶</a></dt>
-<dd><p>set the number of segments for section according to the d_lambda-rule
-for a given input frequency</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="LFPy.Cell.set_passive">
-<tt class="descname">set_passive</tt><big>(</big><big>)</big><a class="headerlink" href="#LFPy.Cell.set_passive" title="Permalink to this definition">¶</a></dt>
-<dd><p>insert passive mechanism on all compartments</p>
 </dd></dl>
 
 <dl class="method">
@@ -320,46 +192,16 @@ idx, pptype, <a href="#id1"><span class="problematic" id="id2">**</span></a>kwar
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="LFPy.Cell.set_soma_volt_recorder">
-<tt class="descname">set_soma_volt_recorder</tt><big>(</big><big>)</big><a class="headerlink" href="#LFPy.Cell.set_soma_volt_recorder" title="Permalink to this definition">¶</a></dt>
-<dd><p>record somatic crossmembrane potential</p>
-</dd></dl>
-
-<dl class="method">
 <dt id="LFPy.Cell.set_synapse">
-<tt class="descname">set_synapse</tt><big>(</big><em>idx</em>, <em>syntype</em>, <em>record_current=False</em>, <em>tau=None</em>, <em>tau1=None</em>, <em>tau2=None</em>, <em>e=None</em>, <em>weight=None</em>, <em>g=None</em>, <em>pkamp=None</em>, <em>freq=None</em>, <em>delay=None</em>, <em>dur=None</em><big>)</big><a class="headerlink" href="#LFPy.Cell.set_synapse" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_synapse</tt><big>(</big><em>idx</em>, <em>syntype</em>, <em>record_current=False</em>, <em>record_potential=False</em>, <em>weight=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#LFPy.Cell.set_synapse" title="Permalink to this definition">¶</a></dt>
 <dd><p>Insert syntype synapse on compartment with index idx, <a href="#id3"><span class="problematic" id="id4">**</span></a>kwargs
 passed on from class Synapse.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="LFPy.Cell.set_time_recorder">
-<tt class="descname">set_time_recorder</tt><big>(</big><big>)</big><a class="headerlink" href="#LFPy.Cell.set_time_recorder" title="Permalink to this definition">¶</a></dt>
-<dd><p>Initialize time-vector recorder in NEURON</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="LFPy.Cell.set_voltage_recorders">
-<tt class="descname">set_voltage_recorders</tt><big>(</big><big>)</big><a class="headerlink" href="#LFPy.Cell.set_voltage_recorders" title="Permalink to this definition">¶</a></dt>
-<dd><p>record membrane potentials for all compartments</p>
-</dd></dl>
-
-<dl class="method">
 <dt id="LFPy.Cell.simulate">
-<tt class="descname">simulate</tt><big>(</big><em>rec_v=False</em>, <em>rec_ipas=False</em>, <em>rec_icap=False</em>, <em>rec_isyn=False</em>, <em>rec_vsyn=False</em>, <em>rec_istim=False</em>, <em>tstartms=None</em>, <em>tstopms=None</em><big>)</big><a class="headerlink" href="#LFPy.Cell.simulate" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">simulate</tt><big>(</big><em>rec_i=True</em>, <em>rec_v=False</em>, <em>rec_ipas=False</em>, <em>rec_icap=False</em>, <em>rec_isyn=False</em>, <em>rec_vsyn=False</em>, <em>rec_istim=False</em>, <em>tstartms=None</em>, <em>tstopms=None</em><big>)</big><a class="headerlink" href="#LFPy.Cell.simulate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Start NEURON simulation and record variables.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="LFPy.Cell.squeeze_me_macaroni">
-<tt class="descname">squeeze_me_macaroni</tt><big>(</big><big>)</big><a class="headerlink" href="#LFPy.Cell.squeeze_me_macaroni" title="Permalink to this definition">¶</a></dt>
-<dd><p>Reducing the dimensions of the morphology matrices</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="LFPy.Cell.update_synapse_positions">
-<tt class="descname">update_synapse_positions</tt><big>(</big><big>)</big><a class="headerlink" href="#LFPy.Cell.update_synapse_positions" title="Permalink to this definition">¶</a></dt>
-<dd><p>update synapse positions after rotation of morphology</p>
 </dd></dl>
 
 </dd></dl>
@@ -374,6 +216,11 @@ passed on from class Synapse.</p>
 <dl class="method">
 <dt id="LFPy.Synapse.collect_current">
 <tt class="descname">collect_current</tt><big>(</big><em>cell</em><big>)</big><a class="headerlink" href="#LFPy.Synapse.collect_current" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="LFPy.Synapse.collect_potential">
+<tt class="descname">collect_potential</tt><big>(</big><em>cell</em><big>)</big><a class="headerlink" href="#LFPy.Synapse.collect_potential" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -557,9 +404,10 @@ All rights reserved.</p>
 
 <dl class="function">
 <dt id="LFPy.tools.noise_brown">
-<tt class="descclassname">LFPy.tools.</tt><tt class="descname">noise_brown</tt><big>(</big><em>t</em>, <em>n=1</em>, <em>weight=1</em><big>)</big><a class="reference internal" href="_modules/LFPy/tools.html#noise_brown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LFPy.tools.noise_brown" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">LFPy.tools.</tt><tt class="descname">noise_brown</tt><big>(</big><em>t</em>, <em>n=1</em>, <em>weight=1</em>, <em>cutDC=False</em><big>)</big><a class="reference internal" href="_modules/LFPy/tools.html#noise_brown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LFPy.tools.noise_brown" title="Permalink to this definition">¶</a></dt>
 <dd><p>return 1/f^2 noise of shape(n, t.size) obtained by taking the
-cumulative sum of gaussian white noise, with rms weight</p>
+cumulative sum of gaussian white noise, with rms weight. If cutDC=True,
+the noise is high-pass filtered with a very low cutoff frequency</p>
 </dd></dl>
 
 </div>
