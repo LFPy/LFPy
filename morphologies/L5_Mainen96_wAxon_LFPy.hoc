@@ -4333,7 +4333,7 @@ create iseg,hill,myelin[n_axon_seg],node[n_axon_seg]
 
 soma {
 	 equiv_diam = sqrt(area(.5)/(4*PI))
-	 print(equiv_diam)
+	 //print(equiv_diam)
 	 //nseg = 1
 	 // area = equiv_diam^2*4*PI
 }
