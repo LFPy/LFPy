@@ -17,7 +17,6 @@ def calc_lfp_choose(c, x=0, y=0, z=0, sigma=0.3,
                                    r_limit=r_limit, from_file=from_file,
                                    t_indices=t_indices)
     elif method == 'pointsource':
-        print 'using pointsource-method'
         return calc_lfp_pointsource(c, x=x, y=y, z=z, sigma=sigma,
                                     r_limit=r_limit, from_file=from_file,
                                     t_indices=t_indices)
