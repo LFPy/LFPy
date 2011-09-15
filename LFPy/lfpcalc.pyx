@@ -409,7 +409,7 @@ cpdef calc_lfp_pointsource(c, x=0, y=0, z=0, sigma=0.3, \
     r2 = _check_rlimit_point(r2, r_limit)
     r = np.sqrt(r2)
 
-    Emem = 1 / (4 * np.pi * sigma) * np.dot(currmem.T, r)
+    Emem = 1 / (4 * np.pi * sigma) * np.dot(currmem.T, 1/r)
 
     return Emem.transpose()
 

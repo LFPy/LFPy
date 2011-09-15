@@ -74,7 +74,7 @@ class Electrode(object):
     def __init__(self, cell, sigma=0.3, x=100, y=0, z=0,
                  color='g', marker='o',
                  N=None, r=None, n=0, r_z=None, colors=None,
-                 perCellLFP = False, method='linesource'):
+                 perCellLFP=False, method='linesource'):
         '''Initialize class Electrode'''
         self.sigma = sigma
         self.x = x
@@ -98,6 +98,8 @@ class Electrode(object):
         self.colors = colors
         
         self.perCellLFP = perCellLFP
+        
+        self.method = method
 
         self.import_c(cell)
         
@@ -248,6 +250,7 @@ class Electrode(object):
         variables = {
             'sigma' : self.sigma,
             't_indices' : t_indices,
+            'method' : self.method,
         }
 
         #iterate over elements in the task queue
@@ -485,6 +488,7 @@ class Electrode(object):
             variables = {
                 'sigma' : self.sigma,
                 't_indices' : t_indices,
+                'method' : self.method,
             }
             if self.n != None and self.N != None and self.r != None:
                 variables.update({
@@ -577,6 +581,7 @@ class Electrode(object):
                         'r_limit' : r_limit,
                         'sigma' : sigma,
                         't_indices' : t_indices,
+                        'method' : self.method,
                     }
                     lfp_e[j, ] = lfpcalc.calc_lfp_choose(c, **variables)
 
