@@ -132,7 +132,7 @@ synparams_GABA_A = {         #Inhibitory synapse parameters
 }
 #where to insert, how many, and which input statistics
 insert_synapses_AMPA_args = {
-    'section' : 'apicdend',
+    'section' : 'apic',
     'n' : 100,
     'spTimesFun' : LFPy.inputgenerators.stationary_gamma,
     'args' : [cellparams['tstartms'], cellparams['tstopms']]

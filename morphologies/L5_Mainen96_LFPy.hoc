@@ -29,7 +29,7 @@ create    soma[1],\
           dend8[5],\
           dend9[5],\
           dend10[11],\
-			apic[83] //dend11[83]
+		  apic[83] //dend11[83]
 
 
 
@@ -4239,7 +4239,7 @@ CONNECTIONS:
        63    1
        65    1
        66    1
-v       66    1
+       66    1
        65    1
        58    1
        70    1

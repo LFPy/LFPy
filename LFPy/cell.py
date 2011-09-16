@@ -118,6 +118,7 @@ class Cell(object):
         neuron.h.load_file('stdlib.hoc')
         neuron.h.xopen(os.path.join(installpath, 'neuron', 'LFPy.hoc'))
         
+        #Set path to morphology file
         if default_dir:
             morpho_file = os.path.join(morpho_path, morphology)
         else:
@@ -125,10 +126,13 @@ class Cell(object):
         
         if os.path.isfile(morpho_file):
             self.morphology_file = morpho_file
-            neuron.h.load_geometry(morpho_file)
+            #neuron.h.load_geometry(morpho_file)
+            self._load_geometry()
         else:
             raise Exception, "%s does not exist!" % morpho_file
         
+        #Check if there exist corresponding file
+        #with rotation angles
         if os.path.isfile(morpho_file[0:-4]+'.rot'):
             rotation_file = morpho_file[0:-4]+'.rot'
             rotation_data = open(rotation_file)
@@ -144,6 +148,7 @@ class Cell(object):
                 'y' : 0,
             }
         
+        #Some parameters and lists initialised
         self.timeres_python = timeres_python
         self.timeres_NEURON = timeres_NEURON
         
@@ -166,6 +171,9 @@ class Cell(object):
             self.cm = cm
             self.e_pas = e_pas
             self._set_passive()
+        else:
+            if self.verbose:
+                print 'No passive properties added'
         
         # load custom codes
         for code in custom_code:
@@ -177,14 +185,16 @@ class Cell(object):
             else:
                 raise Exception, '%s not a .hoc- nor .py-file' % codefile
         
+        # run custom functions with arguments
         i = 0
         for fun in custom_fun:
             fun(**custom_fun_args[i])
             i += 1
         
-        # Make NEURON calculate i_membrane
+        # Make NEURON calculate i_membrane using the extracellular mech
         self._set_extracellular()
         
+        #Number of segments
         if nsegs_method == 'lambda100':
             self._set_nsegs_lambda100()
         elif nsegs_method == 'lambda_f':
@@ -199,9 +209,9 @@ class Cell(object):
         if self.verbose:
             print "Total number of segments = ", self.totnsegs
         
+        #Gather geometry, set position and rotation of morphology
         self._collect_geometry()
         self.set_pos()
-        
         self.rotate_xyz(self.default_rotation)
         
         # Optional part for cases with play in soma
@@ -209,11 +219,110 @@ class Cell(object):
         self.play_in_soma = play_in_soma
         if play_in_soma:
             self.soma_trace=soma_trace
+
+    def _load_geometry(self):
+        '''Load the morphology file in NEURON'''
+        if hasattr(neuron.h, 'sec_counted'):
+            neuron.h.sec_counted = 0
+        else:
+            neuron.h('sec_counted = 0')
+        
+        neuron.h('objref axonlist, dendlist, apicdendlist, somalist, allseclist, alldendlist')
+        neuron.h.somalist=None
+        neuron.h.dendlist=None
+        neuron.h.axonlist=None
+        neuron.h.apicdendlist=None
+        neuron.h('forall delete_section()')
+        
+        neuron.h.load_file(1, self.morphology_file)
+        neuron.h.define_shape()
+        self._create_sectionlists()
+        
+    def _create_sectionlists(self):
+        '''Create sectionlists for different kinds of sections'''
+        self.somalist = neuron.h.SectionList()
+        self.axonlist = neuron.h.SectionList()
+        self.dendlist = neuron.h.SectionList()
+        self.apiclist = neuron.h.SectionList()
+        
+        if neuron.h.sec_counted == 0:
+            self.nsomasec = 0
+            naxonsec = 0
+            ndendsec = 0
+            napicsec = 0
+            #Place sections in lists
+            for sec in neuron.h.allsec():
+                if sec.name()[:4] == 'soma':
+                    self.nsomasec += 1
+                    self.somalist.append(sec)
+                elif sec.name()[:4] == 'axon':
+                    naxonsec += 1
+                    self.axonlist.append(sec)
+                elif sec.name()[:4] == 'dend':
+                    ndendsec += 1
+                    self.dendlist.append(sec)
+                elif sec.name()[:4] == 'apic':
+                    napicsec += 1
+                    self.apiclist.append(sec)
+        elif neuron.h.sec_counted == 1:
+            self.nsomasec = neuron.h.nsomasec
+            naxonsec = neuron.h.naxonsec
+            ndendsec = neuron.h.ndendsec
+            napicsec = neuron.h.napicdendsec
+            #Place sections in lists
+            for sec in neuron.h.soma:
+                self.somalist.append(sec)
+            for sec in neuron.h.dendlist:
+                self.dendlist.append(sec)
+            for sec in neuron.h.allsec():
+                if sec.name()[:4] == 'apic':
+                    self.apiclist.append(sec)
+            try:
+                for sec in neuron.h.axonlist:
+                    self.axonlist.append(sec)
+            except:
+                pass
+        
+        #list with all sections
+        self.allseclist = neuron.h.SectionList()
+        for sec in self.somalist:
+            self.allseclist.append(sec)
+        for sec in self.dendlist:
+            self.allseclist.append(sec)
+        for sec in self.apiclist:
+            self.allseclist.append(sec)
+        for sec in self.axonlist:
+            self.allseclist.append(sec)
+        
+        #list with all dendritic sections
+        self.alldendlist = neuron.h.SectionList()
+        for sec in self.dendlist:
+            self.alldendlist.append(sec)
+        for sec in self.apiclist:
+            self.alldendlist.append(sec)
+    
+    def _get_idx(self, seclist):
+        '''Return boolean vector which indexes where segments in seclist 
+        matches segments in self.allseclist, rewritten from 
+        LFPy.hoc function get_idx()'''
+        if self.allseclist == seclist:
+            return np.ones(self.totnsegs)
+        else:
+            idxvec = np.zeros(self.totnsegs)
+            i = 0
+            for sec in self.allseclist:
+                for seg in sec:
+                    for secl in seclist:
+                        if sec.name() == secl.name():
+                            idxvec[i] = 1
+                    i += 1
+            
+            return idxvec
     
     def _set_nsegs_lambda_f(self, frequency):
         '''set the number of segments for section according to the d_lambda-rule
         for a given input frequency'''
-        for sec in neuron.h.allseclist:
+        for sec in self.allseclist:
             sec.nseg = int((sec.L / (0.1 * neuron.h.lambda_f(frequency)) + .9)
                 / 2 )*2 + 1
         if self.verbose:
@@ -228,7 +337,7 @@ class Cell(object):
     
     def _set_nsegs_fixed_length(self, maxlength):
         '''set nseg for sections so that not any compartment L >= maxlength'''
-        for sec in neuron.h.allseclist:
+        for sec in self.allseclist:
             sec.nseg = int(sec.L / maxlength) + 1
         #if we want to have back nseg=1 for somalist, uncomment the following
         #for sec in neuron.h.somalist:
@@ -237,7 +346,7 @@ class Cell(object):
     def _calc_totnsegs(self):
         '''Calculate the number of segments in the allseclist'''
         i = 0
-        for sec in neuron.h.allseclist:
+        for sec in self.allseclist:
             i += sec.nseg
         
         self.totnsegs = i
@@ -249,7 +358,7 @@ class Cell(object):
     
     def _set_passive(self):
         '''insert passive mechanism on all compartments'''
-        for sec in neuron.h.allseclist:
+        for sec in self.allseclist:
             sec.insert('pas')
             sec.Ra = self.Ra
             sec.cm = self.cm
@@ -259,7 +368,7 @@ class Cell(object):
     def _set_extracellular(self):
         '''insert extracellular mechanism on all sections
         to access i_membrane'''
-        for sec in neuron.h.allseclist:
+        for sec in self.allseclist:
             sec.insert('extracellular')
     
     # Old code with hard-coded synapse types
@@ -362,7 +471,7 @@ class Cell(object):
         i = 0 
         cmd1 = 'syn = neuron.h.'
         cmd2 = '(seg.x, sec=sec)'
-        for sec in neuron.h.allseclist:
+        for sec in self.allseclist:
             for seg in sec:
                 if i == idx:
                     command = cmd1 + syntype + cmd2  
@@ -414,7 +523,7 @@ class Cell(object):
             self.stimireclist = neuron.h.List()
         
         i = 0
-        for sec in neuron.h.allseclist:
+        for sec in self.allseclist:
             for seg in sec:
                 if i == idx:
                     if pptype == 'SEClamp':
@@ -475,11 +584,10 @@ class Cell(object):
     def _collect_geometry(self):
         '''Collects x, y, z-coordinates from NEURON'''
         self._collect_geometry_neuron()
-        
         self._calc_midpoints()
         
-        self.somaidx = self.get_idx(section='som')
-        
+        self.somaidx = self.get_idx(section='soma')
+                
         if self.somaidx.size == 0:
             pass
             #print 'There is no soma!'
@@ -515,7 +623,7 @@ class Cell(object):
         counter = 0
         
         #loop over all compartments
-        for sec in neuron.h.allseclist:
+        for sec in self.allseclist:
             if neuron.h.n3d() > 0:
                 #length of sections
                 xlength = neuron.h.x3d(neuron.h.n3d() - 1) - neuron.h.x3d(0)
@@ -553,35 +661,49 @@ class Cell(object):
         self.xmid = .5*(self.xstart+self.xend)
         self.ymid = .5*(self.ystart+self.yend)
         self.zmid = .5*(self.zstart+self.zend)
-    
+
+# OLD VERSION:
+#    def get_idx(self, section='allsec', z_min=-10000, z_max=10000):
+#        '''Returns neuron idx of segments'''
+#        if section=='allsec':
+#            neuron.h.get_idx(neuron.h.allseclist, self.totnsegs)
+#        elif section=='som' or section=='soma':
+#            neuron.h.get_idx(neuron.h.somalist, self.totnsegs)
+#        elif section=='dend':
+#            neuron.h.get_idx(neuron.h.dendlist, self.totnsegs)
+#        elif section=='apicdend' or section=='apic':
+#            neuron.h.get_idx(neuron.h.apicdendlist, self.totnsegs)
+#        elif section=='alldend':
+#            neuron.h.get_idx(neuron.h.alldendlist, self.totnsegs)
+#        elif section=='ax' or section=='axon':
+#            neuron.h.get_idx(neuron.h.axonlist, self.totnsegs)
+#        else:
+#            raise Exception, "%s is not a valid section list" % section
+#        
+#        idx = np.where(np.array(neuron.h.idxvec))[0]
+#        
+#        sel_z_idx = np.where(np.logical_and(self.zmid[idx] > z_min,
+#                                                self.zmid[idx]<z_max))
+#        return idx[sel_z_idx]
+
     def get_idx(self, section='allsec', z_min=-10000, z_max=10000):
-        '''Returns neuron idx of segments'''
-        if section=='allsec':
-            neuron.h.get_idx(neuron.h.allseclist, self.totnsegs)
-        elif section=='som' or section=='soma':
-            neuron.h.get_idx(neuron.h.somalist, self.totnsegs)
-        elif section=='dend':
-            neuron.h.get_idx(neuron.h.dendlist, self.totnsegs)
-        elif section=='apicdend':
-            neuron.h.get_idx(neuron.h.apicdendlist, self.totnsegs)
-        elif section=='alldend':
-            neuron.h.get_idx(neuron.h.alldendlist, self.totnsegs)
-        elif section=='ax' or section=='axon':
-            neuron.h.get_idx(neuron.h.axonlist, self.totnsegs)
-        #check if these is needed;
-        elif section=='dendritic':
-            neuron.h.get_idx(neuron.h.dendritic, self.totnsegs)
-        elif section=='dendritic_no_prim_dend':
-            neuron.h.get_idx(neuron.h.dendritic_no_prim_dend, self.totnsegs)
+        '''Returns neuron idx of segments on interval [z_min, z_max]'''
+        if section == 'allsec': seclist = self.allseclist
+        elif section == 'soma': seclist = self.somalist
+        elif section == 'dend': seclist = self.dendlist
+        elif section == 'apic': seclist = self.apiclist
+        elif section == 'alldend': seclist = self.alldendlist
+        elif section == 'axon': seclist = self.axonlist
         else:
-            raise Exception, "%s is not a valid section list" % section
+            sections = ['allsec', 'soma', 'alldend', 'dend', 'apic', 'axon']
+            raise Exception, "section %s is not any of %s" % (section, str(sections))
         
-        idx = np.where(np.array(neuron.h.idxvec))[0]
+        idx = np.where(self._get_idx(seclist))[0]
         
         sel_z_idx = np.where(np.logical_and(self.zmid[idx] > z_min,
-                                                self.zmid[idx]<z_max))
+                                                self.zmid[idx] < z_max))
         return idx[sel_z_idx]
-    
+                
     #move to tools.py
     def get_closest_idx(self, x=0, y=0, z=0, section='allsec'):
         '''Get the index number of a segment in specified section which midpoint is 
@@ -783,18 +905,18 @@ class Cell(object):
     def _set_soma_volt_recorder(self):
         '''record somatic crossmembrane potential'''
         self.somav = neuron.h.Vector(int(self.tstopms/self.timeres_python+1))
-        if neuron.h.nsomasec == 0:
+        if self.nsomasec == 0:
             pass
-        elif neuron.h.nsomasec == 1:
+        elif self.nsomasec == 1:
             self.somav.record(neuron.h.soma[0](0.5)._ref_v, self.timeres_python)
-        elif neuron.h.nsomasec > 1:
-            i, j = divmod(neuron.h.nsomasec, 2)
+        elif self.nsomasec > 1:
+            i, j = divmod(self.nsomasec, 2)
             self.somav.record(neuron.h.soma[int(i)](j/2)._ref_v, self.timeres_python)
     
     def _set_imem_recorders(self):
         '''record membrane currents for all compartments'''
         self.memireclist = neuron.h.List()
-        for sec in neuron.h.allseclist:
+        for sec in self.allseclist:
             for seg in sec:
                 memirec = neuron.h.Vector(int(self.tstopms/self.timeres_python+1))
                 memirec.record(seg._ref_i_membrane, self.timeres_python)
@@ -803,7 +925,7 @@ class Cell(object):
     def _set_ipas_recorders(self):
         '''record passive (ohmic) membrane currents for all compartments'''
         self.memipasreclist = neuron.h.List()
-        for sec in neuron.h.allseclist:
+        for sec in self.allseclist:
             for seg in sec:
                 memipasrec = neuron.h.Vector(int(self.tstopms/self.timeres_python+1))
                 memipasrec.record(seg._ref_i_pas, self.timeres_python)
@@ -812,7 +934,7 @@ class Cell(object):
     def _set_icap_recorders(self):
         '''record passive (ohmic) membrane currents for all compartments'''
         self.memicapreclist = neuron.h.List()
-        for sec in neuron.h.allseclist:
+        for sec in self.allseclist:
             for seg in sec:
                 memicaprec = neuron.h.Vector(int(self.tstopms/self.timeres_python+1))
                 memicaprec.record(seg._ref_i_cap, self.timeres_python)
@@ -821,7 +943,7 @@ class Cell(object):
     def _set_voltage_recorders(self):
         '''record membrane potentials for all compartments'''
         self.memvreclist = neuron.h.List()
-        for sec in neuron.h.allseclist:
+        for sec in self.allseclist:
             for seg in sec:
                 memvrec = neuron.h.Vector(int(self.tstopms/self.timeres_python+1))
                 memvrec.record(seg._ref_v, self.timeres_python)

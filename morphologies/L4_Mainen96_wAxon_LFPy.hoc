@@ -2221,6 +2221,7 @@ for i=0, n_axon_seg-1  {
  }
 }
 
+objref axonlist
 axonlist = new SectionList()
 
 iseg axonlist.append()

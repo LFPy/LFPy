@@ -4,7 +4,9 @@
 //create soma[1], dendrite[1], apical_dendrite[1], axon[1], iseg[1]//just so NEURON does not complain about nonexisting sections
 // ------------------------------------------------------------------------
 
+/*
 NSTACK = 10000
+
 
 create soma[1], axon[1], dend[1], apic[1]
 
@@ -14,6 +16,9 @@ dend {delete_section()}
 apic {delete_section()} // Just so NEURON does not complain about nonexisting sections
 
 objref axonlist, dendlist, apicdendlist, somalist, allseclist, alldendlist
+*/
+
+/*
 
 proc load_geometry() {
 	
@@ -27,7 +32,9 @@ proc load_geometry() {
 	create_sectionlists()
 
 }
+*/
 
+/*
 proc create_sectionlists() { // Loads geometry and creates sectionlists with sections of main parts of the neuron
 	if (sec_counted == 0) {
 		// Count number of sections of each type
@@ -83,8 +90,10 @@ proc create_sectionlists() { // Loads geometry and creates sectionlists with sec
  	forsec dendlist alldendlist.append()
  	forsec apicdendlist alldendlist.append()
 }
+*/
 
 // ------------------------------------------------------------------------
+/*
 objref idxvec
 proc get_idx() {//Takes sectionlist,totnsegs
 	idxvec = new Vector($2)
@@ -100,9 +109,11 @@ proc get_idx() {//Takes sectionlist,totnsegs
 	}
 	
 }
+*/
 
 // -----------------------------------------------------------------------------
 
+/*
 objref input_curr_vec_list, input_curr_vec, input_curr_tvec_list,input_curr_tvec
 objref input_curr_syn, input_curr_syn_list
 input_curr_vec_list = new List()
@@ -132,7 +143,9 @@ func set_input_curr() { //Takes idx
 		}
 	}
 }
+*/
 
+/*
 // ------ PLAY IN SOMA --------------
 objref soma_tvec, soma_trace
 
@@ -145,7 +158,9 @@ proc play_in_soma() {
     
     soma_trace.play(&soma.v(0.5), soma_tvec)
 }
+*/
 
+/*
 // --------------------------------------------------------------
 // Spines
 // --------------------------------------------------------------
@@ -183,3 +198,4 @@ proc add_spines() { local a
     }
     define_shape()
 }
+*/

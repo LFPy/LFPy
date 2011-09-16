@@ -26,9 +26,13 @@ gkca_soma = gkca
 
 objref dendritic
 dendritic = new SectionList()
-forsec somalist dendritic.append()
-forsec dendlist dendritic.append()
-forsec apicdendlist dendritic.append()
+//forsec somalist dendritic.append()
+//forsec dendlist dendritic.append()
+//forsec apicdendlist dendritic.append()
+forall ifsec "soma" dendritic.append()
+forall ifsec "dend" dendritic.append()
+forall ifsec "apic" dendritic.append()
+
 
 // Insert active channels
 proc set_active() {

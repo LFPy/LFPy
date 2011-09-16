@@ -360,7 +360,8 @@ class Electrode(object):
             done_queue.put([i, LFP])
     
     def __lfp_el_pos_calc_dist_threaded(self, c, r_limit, sigma=0.3, radius=10,
-                n=10, m=50, N=None, t_indices=None, NUMBER_OF_PROCESSES=None,
+                n=10, m=50, N=None, t_indices=None, NUMBER_OF_PROCESSES=None, 
+                method='linesource',
                 __name__='__main__'):
         '''Calc. of LFP over an n-point integral approximation over flat
         electrode surface with radius r. The locations of these n points on
@@ -385,7 +386,7 @@ class Electrode(object):
             for i in xrange(NUMBER_OF_PROCESSES):
                 Process(target=self.__lfp_el_pos_calc_dist_thread,
                     args=(dist_task_queue, c, r_limit, sigma, radius, n, m, N,
-                    t_indices, dist_done_queue)).start()
+                    t_indices, method, dist_done_queue)).start()
             for i in xrange(TASKS.size):
                 [circl, offset, tempLFP[i,]] = dist_done_queue.get()
                 if type(circl) == type({}) and type(offsets) == type({}):
@@ -401,7 +402,7 @@ class Electrode(object):
         return offsets, circle, lfp_el_pos
 
     def __lfp_el_pos_calc_dist_thread(self, dist_task_queue, c, r_limit, sigma,
-            radius, n, m, N, t_indices, dist_done_queue):
+            radius, n, m, N, t_indices, method, dist_done_queue):
         '''spawn thread called by self.__lfp_el_pos_calc_dist_threaded()'''
         for i in iter(dist_task_queue.get, 'STOP'):
             lfp_el_pos = pl.zeros(self.LFP.shape)
@@ -448,6 +449,7 @@ class Electrode(object):
                         'r_limit' : r_limit,
                         'sigma' : sigma,
                         't_indices' : t_indices,
+                        'method' : self.method,
                     }
                     lfp_e[j, ] = lfpcalc.calc_lfp_choose(c, **variables)
 
