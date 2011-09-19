@@ -316,7 +316,6 @@ class Cell(object):
                         if sec.name() == secl.name():
                             idxvec[i] = 1
                     i += 1
-            
             return idxvec
     
     def _set_nsegs_lambda_f(self, frequency):
@@ -1120,7 +1119,7 @@ class Cell(object):
         prob = self.area[idx]/sum(self.area[idx])
         return prob
     
-    #MOVE
+    #Consider moving this to its own class
     def set_play_in_soma(self, t_on=np.array([0])):
         '''Set mechanisms for playing soma trace at time(s) t_on,
         where t_on is a np.array'''
@@ -1171,7 +1170,7 @@ class Cell(object):
             #    somaTraceVec.play(seg._ref_v, somaTvecVec)
         
         #call hoc function that insert trace on soma
-        neuron.h.play_in_soma(somaTvecVec, somaTraceVec)
+        self._play_in_soma(somaTvecVec, somaTraceVec)
             
     def _play_in_soma(self, somaTvecVec, somaTraceVec):
         '''Replacement of LFPy.hoc "proc play_in_soma()",
