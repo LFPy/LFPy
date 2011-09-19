@@ -5,7 +5,6 @@ All rights reserved.'''
 import os
 import neuron
 import numpy as np
-import copy
 import cPickle
 
 #LFPy-specific mechanisms
@@ -56,7 +55,7 @@ class Cell(object):
         max_nsegs_length : max segment length for method 'fixed_length';
         lambda_f : AC frequency for method 'lambda_f';
         
-        custom_code : list of model specific code files goes here ([*.py/.hoc]);
+        custom_code : list of model specific code files ([*.py/.hoc]);
         verbose : switching verbose output on/off
         play_in_soma : if True, play somatrace in soma
         soma_trace :  filename somatrace, two columns, space-sep: t & v
@@ -77,8 +76,8 @@ class Cell(object):
                     max_nsegs_length=30,
                     lambda_f = 100,
                     custom_code=[],
-                    custom_fun = [],
-                    custom_fun_args = [],
+                    custom_fun=[],
+                    custom_fun_args=[],
                     play_in_soma=False,
                     soma_trace='',
                     verbose=False):
@@ -87,7 +86,7 @@ class Cell(object):
         Inputs:
         ::
             morphology : morphology file;
-            default_dir : if True will look for morphology in the default folder,
+            default_dir : if True, look for morphology in the default folder,
             otherwise full path to morphology must be provided;
             
             v_init : initial potential;
@@ -107,16 +106,16 @@ class Cell(object):
             max_nsegs_length : max segment length for method 'fixed_length';
             lambda_f : AC frequency for method 'lambda_f';
             
-            custom_code : list of model specific code files goes here ([*.py/.hoc]);
+            custom_code : list of model specific code files ([*.py/.hoc]);
             verbose : switching verbose output on/off
             play_in_soma : if True, play somatrace in soma
             soma_trace : filename somatrace, two columns, space-sep: t & v
         '''
         self.verbose = verbose
         
-        #Loading NEURON standard library and custom LFPy codes
+        #Loading NEURON standard library
         neuron.h.load_file('stdlib.hoc')
-        neuron.h.xopen(os.path.join(installpath, 'neuron', 'LFPy.hoc'))
+        #neuron.h.xopen(os.path.join(installpath, 'neuron', 'LFPy.hoc'))
         
         #Set path to morphology file
         if default_dir:
@@ -136,12 +135,12 @@ class Cell(object):
         if os.path.isfile(morpho_file[0:-4]+'.rot'):
             rotation_file = morpho_file[0:-4]+'.rot'
             rotation_data = open(rotation_file)
-            rotation={}
+            rotation = {}
             for line in rotation_data:
-                var, val=line.split('=')
-                val=val.strip()
-                val=float(str(val))
-                rotation[var]=val
+                var, val = line.split('=')
+                val = val.strip()
+                val = float(str(val))
+                rotation[var] = val
         else:
             rotation = {
                 'x' : 0,
@@ -179,7 +178,6 @@ class Cell(object):
         for code in custom_code:
             if code.split('.')[-1] == 'hoc':
                 neuron.h.xopen(code)
-                #neuron.h.xopen(os.path.join(installpath, 'examples', codefile))
             elif code.split('.')[-1] == 'py':
                 exec(code)
             else:
@@ -218,7 +216,7 @@ class Cell(object):
         # MOVE!!!!!!!!
         self.play_in_soma = play_in_soma
         if play_in_soma:
-            self.soma_trace=soma_trace
+            self.soma_trace = soma_trace
 
     def _load_geometry(self):
         '''Load the morphology file in NEURON'''
@@ -227,11 +225,13 @@ class Cell(object):
         else:
             neuron.h('sec_counted = 0')
         
-        neuron.h('objref axonlist, dendlist, apicdendlist, somalist, allseclist, alldendlist')
-        neuron.h.somalist=None
-        neuron.h.dendlist=None
-        neuron.h.axonlist=None
-        neuron.h.apicdendlist=None
+        #Not sure if all of these are needed, just precautions
+        neuron.h('objref axonlist, dendlist, apicdendlist')
+        neuron.h('objref somalist, allseclist, alldendlist')
+        neuron.h.somalist = None
+        neuron.h.dendlist = None
+        neuron.h.axonlist = None
+        neuron.h.apicdendlist = None
         neuron.h('forall delete_section()')
         
         neuron.h.load_file(1, self.morphology_file)
@@ -247,28 +247,28 @@ class Cell(object):
         
         if neuron.h.sec_counted == 0:
             self.nsomasec = 0
-            naxonsec = 0
-            ndendsec = 0
-            napicsec = 0
+            #naxonsec = 0
+            #ndendsec = 0
+            #napicsec = 0
             #Place sections in lists
             for sec in neuron.h.allsec():
                 if sec.name()[:4] == 'soma':
                     self.nsomasec += 1
                     self.somalist.append(sec)
                 elif sec.name()[:4] == 'axon':
-                    naxonsec += 1
+                    #naxonsec += 1
                     self.axonlist.append(sec)
                 elif sec.name()[:4] == 'dend':
-                    ndendsec += 1
+                    #ndendsec += 1
                     self.dendlist.append(sec)
                 elif sec.name()[:4] == 'apic':
-                    napicsec += 1
+                    #napicsec += 1
                     self.apiclist.append(sec)
         elif neuron.h.sec_counted == 1:
             self.nsomasec = neuron.h.nsomasec
-            naxonsec = neuron.h.naxonsec
-            ndendsec = neuron.h.ndendsec
-            napicsec = neuron.h.napicdendsec
+            #naxonsec = neuron.h.naxonsec
+            #ndendsec = neuron.h.ndendsec
+            #napicsec = neuron.h.napicdendsec
             #Place sections in lists
             for sec in neuron.h.soma:
                 self.somalist.append(sec)
@@ -320,17 +320,14 @@ class Cell(object):
             return idxvec
     
     def _set_nsegs_lambda_f(self, frequency):
-        '''set the number of segments for section according to the d_lambda-rule
-        for a given input frequency'''
+        '''set the number of segments for section according to the 
+        d_lambda-rule for a given input frequency'''
         for sec in self.allseclist:
             sec.nseg = int((sec.L / (0.1 * neuron.h.lambda_f(frequency)) + .9)
                 / 2 )*2 + 1
         if self.verbose:
             print "set nsegs using lambda-rule with frequency %i." % frequency
-        #if we want to have back nseg=1 for somalist, uncomment the following
-        #for sec in neuron.h.somalist:
-        #    sec.nseg = 1
-    
+   
     def _set_nsegs_lambda100(self):
         '''set the numbers of segments using d_lambda(100)'''
         self._set_nsegs_lambda_f(100)
@@ -339,9 +336,6 @@ class Cell(object):
         '''set nseg for sections so that not any compartment L >= maxlength'''
         for sec in self.allseclist:
             sec.nseg = int(sec.L / maxlength) + 1
-        #if we want to have back nseg=1 for somalist, uncomment the following
-        #for sec in neuron.h.somalist:
-        #    sec.nseg = 1
     
     def _calc_totnsegs(self):
         '''Calculate the number of segments in the allseclist'''
@@ -425,7 +419,7 @@ class Cell(object):
     #                     syn.dur = dur
     #                     self.synlist.append(syn)
     #                 else:
-    #                     raise Exception, '%s not valid synapse type' % syntype
+    #                     raise Exception, '%s not valid synapse type' %syntype
     #                 
     #                 #create NetCon
     #                 netstim = neuron.h.NetStim()
@@ -634,14 +628,20 @@ class Cell(object):
                     areavec.x[counter] = neuron.h.area(seg.x)
                     diamvec.x[counter] = seg.diam
                     
-                    xstartvec.x[counter] = neuron.h.x3d(0) + xlength * (seg.x - 1./2./sec.nseg)
-                    xendvec.x[counter] = neuron.h.x3d(0) + xlength * (seg.x + 1./2./sec.nseg)
+                    xstartvec.x[counter] = neuron.h.x3d(0) + \
+                        xlength * (seg.x - 1./2./sec.nseg)
+                    xendvec.x[counter] = neuron.h.x3d(0) + \
+                        xlength * (seg.x + 1./2./sec.nseg)
                     
-                    ystartvec.x[counter] = neuron.h.y3d(0) + ylength * (seg.x - 1./2./sec.nseg)
-                    yendvec.x[counter] = neuron.h.y3d(0) + ylength * (seg.x + 1./2./sec.nseg)
+                    ystartvec.x[counter] = neuron.h.y3d(0) + \
+                        ylength * (seg.x - 1./2./sec.nseg)
+                    yendvec.x[counter] = neuron.h.y3d(0) + \
+                        ylength * (seg.x + 1./2./sec.nseg)
                     
-                    zstartvec.x[counter] = neuron.h.z3d(0) + zlength * (seg.x - 1./2./sec.nseg)
-                    zendvec.x[counter] = neuron.h.z3d(0) + zlength * (seg.x + 1./2./sec.nseg)
+                    zstartvec.x[counter] = neuron.h.z3d(0) + \
+                        zlength * (seg.x - 1./2./sec.nseg)
+                    zendvec.x[counter] = neuron.h.z3d(0) + \
+                        zlength * (seg.x + 1./2./sec.nseg)
                     
                     counter += 1
         
@@ -688,15 +688,22 @@ class Cell(object):
 
     def get_idx(self, section='allsec', z_min=-10000, z_max=10000):
         '''Returns neuron idx of segments on interval [z_min, z_max]'''
-        if section == 'allsec': seclist = self.allseclist
-        elif section == 'soma': seclist = self.somalist
-        elif section == 'dend': seclist = self.dendlist
-        elif section == 'apic': seclist = self.apiclist
-        elif section == 'alldend': seclist = self.alldendlist
-        elif section == 'axon': seclist = self.axonlist
+        if section == 'allsec': 
+            seclist = self.allseclist
+        elif section == 'soma': 
+            seclist = self.somalist
+        elif section == 'dend': 
+            seclist = self.dendlist
+        elif section == 'apic': 
+            seclist = self.apiclist
+        elif section == 'alldend': 
+            seclist = self.alldendlist
+        elif section == 'axon': 
+            seclist = self.axonlist
         else:
             sections = ['allsec', 'soma', 'alldend', 'dend', 'apic', 'axon']
-            raise Exception, "section %s is not any of %s" % (section, str(sections))
+            raise Exception, "section %s is not any of %s" % (section, 
+                                                              str(sections))
         
         idx = np.where(self._get_idx(seclist))[0]
         
@@ -706,8 +713,8 @@ class Cell(object):
                 
     #move to tools.py
     def get_closest_idx(self, x=0, y=0, z=0, section='allsec'):
-        '''Get the index number of a segment in specified section which midpoint is 
-        closest to the coordinates defined by the user'''
+        '''Get the index number of a segment in specified section which 
+        midpoint is closest to the coordinates defined by the user'''
         idx = self.get_idx(section)
         dist = np.sqrt((self.xmid[idx] - x)**2 + \
             (self.ymid[idx] - y)**2 + (self.zmid[idx] - z)**2)
@@ -719,6 +726,9 @@ class Cell(object):
     
     def get_rand_idx_area_norm(self, section='allsec', nidx=1,
                                z_min=-10000, z_max=10000):
+        '''Return nidx segment indices in section with random probability
+        normalized to the membrane area of segment on 
+        interval [z_min, z_max]'''
         poss_idx = self.get_idx(section=section, z_min=z_min, z_max = z_max)
         idx = np.empty(nidx, dtype=int)
         
@@ -752,10 +762,11 @@ class Cell(object):
         #run fadvance until t >= tstopms
         self._run_simulation()
         
-        #fixing tvec, need to be monotonically increasing, from 0-tstopms 
+        #fixing tvec, need to be monotonically increasing, from 0-tstopms
         if self.tstartms != None:
             self.tvec = np.array(self.tvec)
-            if self.tvec[0] > -self.timeres_NEURON and self.tvec[0] < self.timeres_NEURON:
+            if self.tvec[0] > -self.timeres_NEURON and self.tvec[0] < \
+                    self.timeres_NEURON:
                 pass
             else:
                 self.tvec += self.timeres_NEURON
@@ -904,21 +915,25 @@ class Cell(object):
     
     def _set_soma_volt_recorder(self):
         '''record somatic crossmembrane potential'''
-        self.somav = neuron.h.Vector(int(self.tstopms/self.timeres_python+1))
+        self.somav = neuron.h.Vector(int(self.tstopms / 
+                                         self.timeres_python+1))
         if self.nsomasec == 0:
             pass
         elif self.nsomasec == 1:
-            self.somav.record(neuron.h.soma[0](0.5)._ref_v, self.timeres_python)
+            self.somav.record(neuron.h.soma[0](0.5)._ref_v, 
+                              self.timeres_python)
         elif self.nsomasec > 1:
             i, j = divmod(self.nsomasec, 2)
-            self.somav.record(neuron.h.soma[int(i)](j/2)._ref_v, self.timeres_python)
+            self.somav.record(neuron.h.soma[int(i)](j/2)._ref_v, 
+                              self.timeres_python)
     
     def _set_imem_recorders(self):
         '''record membrane currents for all compartments'''
         self.memireclist = neuron.h.List()
         for sec in self.allseclist:
             for seg in sec:
-                memirec = neuron.h.Vector(int(self.tstopms/self.timeres_python+1))
+                memirec = neuron.h.Vector(int(self.tstopms / 
+                                              self.timeres_python+1))
                 memirec.record(seg._ref_i_membrane, self.timeres_python)
                 self.memireclist.append(memirec)
     
@@ -927,7 +942,8 @@ class Cell(object):
         self.memipasreclist = neuron.h.List()
         for sec in self.allseclist:
             for seg in sec:
-                memipasrec = neuron.h.Vector(int(self.tstopms/self.timeres_python+1))
+                memipasrec = neuron.h.Vector(int(self.tstopms / 
+                                                 self.timeres_python+1))
                 memipasrec.record(seg._ref_i_pas, self.timeres_python)
                 self.memipasreclist.append(memipasrec)
     
@@ -936,7 +952,8 @@ class Cell(object):
         self.memicapreclist = neuron.h.List()
         for sec in self.allseclist:
             for seg in sec:
-                memicaprec = neuron.h.Vector(int(self.tstopms/self.timeres_python+1))
+                memicaprec = neuron.h.Vector(int(self.tstopms / 
+                                                 self.timeres_python+1))
                 memicaprec.record(seg._ref_i_cap, self.timeres_python)
                 self.memicapreclist.append(memicaprec)
     
@@ -945,7 +962,8 @@ class Cell(object):
         self.memvreclist = neuron.h.List()
         for sec in self.allseclist:
             for seg in sec:
-                memvrec = neuron.h.Vector(int(self.tstopms/self.timeres_python+1))
+                memvrec = neuron.h.Vector(int(self.tstopms / 
+                                              self.timeres_python+1))
                 memvrec.record(seg._ref_v, self.timeres_python)
                 self.memvreclist.append(memvrec)
     
@@ -959,6 +977,8 @@ class Cell(object):
 #            #print 'Calc ireturn, idx', str(idx)
     
     def set_pos(self, xpos=0, ypos=0, zpos=0):
+        '''Move the geometry so that midpoint of soma section is
+        in (xpos, ypos, zpos)'''
         self.orig_pos = False
         
         diffx = self.somapos[0]-xpos
@@ -1091,16 +1111,19 @@ class Cell(object):
         self._calc_midpoints()
         self._update_synapse_positions()
     
-    def get_rand_prob_area_norm(self, section='allsec', z_min=-10000, z_max=10000):
-        '''Return the probability (0-1) for synaptic coupling on compartments in section
-        sum(prob)=1 over all compartments in section. Prob. determined by area.'''
+    def get_rand_prob_area_norm(self, section='allsec', 
+                                z_min=-10000, z_max=10000):
+        '''Return the probability (0-1) for synaptic coupling on compartments
+        in section sum(prob)=1 over all compartments in section.
+        Prob. determined by area.'''
         idx = self.get_idx(section=section, z_min=z_min, z_max = z_max)
         prob = self.area[idx]/sum(self.area[idx])
         return prob
     
     #MOVE
     def set_play_in_soma(self, t_on=np.array([0])):
-        '''Set mechanisms for playing soma trace at time(s) t_on. t_on is a np.array'''
+        '''Set mechanisms for playing soma trace at time(s) t_on,
+        where t_on is a np.array'''
         if type(t_on) != np.ndarray:
             t_on = np.array(t_on)
         
@@ -1130,9 +1153,12 @@ class Cell(object):
             np.concatenate((somaTvec, somaTvec0 + t_on[i]))
             np.concatenate((somaTrace, trace))
         
-        somaTvec1 = np.interp(np.arange(somaTvec[0], somaTvec[-1], self.timeres_NEURON), somaTvec, somaTvec)
-        somaTrace1 = np.interp(np.arange(somaTvec[0], somaTvec[-1], self.timeres_NEURON),
-                              somaTvec, somaTrace)
+        somaTvec1 = np.interp(np.arange(somaTvec[0], somaTvec[-1], 
+                                self.timeres_NEURON),
+                                somaTvec, somaTvec)
+        somaTrace1 = np.interp(np.arange(somaTvec[0], somaTvec[-1],
+                                self.timeres_NEURON),
+                                somaTvec, somaTrace)
         
         somaTvecVec = neuron.h.Vector(somaTvec1)
         somaTraceVec = neuron.h.Vector(somaTrace1)
@@ -1147,4 +1173,16 @@ class Cell(object):
         #call hoc function that insert trace on soma
         neuron.h.play_in_soma(somaTvecVec, somaTraceVec)
             
-            
+    def _play_in_soma(self, somaTvecVec, somaTraceVec):
+        '''Replacement of LFPy.hoc "proc play_in_soma()",
+        seems necessary that this function lives in hoc'''
+        neuron.h('objref soma_tvec, soma_trace')
+        
+        neuron.h('soma_tvec = new Vector()')
+        neuron.h('soma_trace = new Vector()')
+        
+        neuron.h.soma_tvec.from_python(somaTvecVec)
+        neuron.h.soma_trace.from_python(somaTraceVec)
+        
+        neuron.h('soma_trace.play(&soma.v(0.5), soma_tvec)')
+
