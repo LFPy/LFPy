@@ -106,7 +106,7 @@ nsegs_method : method for setting the number of segments;
 max_nsegs_length : max segment length for method 'fixed_length';
 lambda_f : AC frequency for method 'lambda_f';
 
-custom_code : list of model specific code files goes here ([*.py/.hoc]);
+custom_code : list of model specific code files ([*.py/.hoc]);
 verbose : switching verbose output on/off
 play_in_soma : if True, play somatrace in soma
 soma_trace :  filename somatrace, two columns, space-sep: t &amp; v</pre>
@@ -120,26 +120,30 @@ soma_trace :  filename somatrace, two columns, space-sep: t &amp; v</pre>
 <dl class="method">
 <dt id="LFPy.Cell.get_closest_idx">
 <tt class="descname">get_closest_idx</tt><big>(</big><em>x=0</em>, <em>y=0</em>, <em>z=0</em>, <em>section='allsec'</em><big>)</big><a class="headerlink" href="#LFPy.Cell.get_closest_idx" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get the index number of a segment in specified section which midpoint is 
-closest to the coordinates defined by the user</p>
+<dd><p>Get the index number of a segment in specified section which 
+midpoint is closest to the coordinates defined by the user</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="LFPy.Cell.get_idx">
 <tt class="descname">get_idx</tt><big>(</big><em>section='allsec'</em>, <em>z_min=-10000</em>, <em>z_max=10000</em><big>)</big><a class="headerlink" href="#LFPy.Cell.get_idx" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns neuron idx of segments</p>
+<dd><p>Returns neuron idx of segments on interval [z_min, z_max]</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="LFPy.Cell.get_rand_idx_area_norm">
 <tt class="descname">get_rand_idx_area_norm</tt><big>(</big><em>section='allsec'</em>, <em>nidx=1</em>, <em>z_min=-10000</em>, <em>z_max=10000</em><big>)</big><a class="headerlink" href="#LFPy.Cell.get_rand_idx_area_norm" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Return nidx segment indices in section with random probability
+normalized to the membrane area of segment on 
+interval [z_min, z_max]</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="LFPy.Cell.get_rand_prob_area_norm">
 <tt class="descname">get_rand_prob_area_norm</tt><big>(</big><em>section='allsec'</em>, <em>z_min=-10000</em>, <em>z_max=10000</em><big>)</big><a class="headerlink" href="#LFPy.Cell.get_rand_prob_area_norm" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return the probability (0-1) for synaptic coupling on compartments in section
-sum(prob)=1 over all compartments in section. Prob. determined by area.</p>
+<dd><p>Return the probability (0-1) for synaptic coupling on compartments
+in section sum(prob)=1 over all compartments in section.
+Prob. determined by area.</p>
 </dd></dl>
 
 <dl class="method">
@@ -174,7 +178,8 @@ c.rotate_xyz(rotation)</p>
 <dl class="method">
 <dt id="LFPy.Cell.set_play_in_soma">
 <tt class="descname">set_play_in_soma</tt><big>(</big><em>t_on=array([0])</em><big>)</big><a class="headerlink" href="#LFPy.Cell.set_play_in_soma" title="Permalink to this definition">¶</a></dt>
-<dd><p>Set mechanisms for playing soma trace at time(s) t_on. t_on is a np.array</p>
+<dd><p>Set mechanisms for playing soma trace at time(s) t_on,
+where t_on is a np.array</p>
 </dd></dl>
 
 <dl class="method">
@@ -189,7 +194,9 @@ idx, pptype, <a href="#id1"><span class="problematic" id="id2">**</span></a>kwar
 <dl class="method">
 <dt id="LFPy.Cell.set_pos">
 <tt class="descname">set_pos</tt><big>(</big><em>xpos=0</em>, <em>ypos=0</em>, <em>zpos=0</em><big>)</big><a class="headerlink" href="#LFPy.Cell.set_pos" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Move the geometry so that midpoint of soma section is
+in (xpos, ypos, zpos)</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="LFPy.Cell.set_synapse">
@@ -264,9 +271,9 @@ Electrode currents go here, whics make membrane currents not sum to zero</p>
 <h2>class <a class="reference internal" href="#LFPy.Electrode" title="LFPy.Electrode"><tt class="xref py py-class docutils literal"><span class="pre">Electrode</span></tt></a><a class="headerlink" href="#class-electrode" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="LFPy.Electrode">
-<em class="property">class </em><tt class="descclassname">LFPy.</tt><tt class="descname">Electrode</tt><big>(</big><em>cell</em>, <em>sigma=0.3</em>, <em>x=100</em>, <em>y=0</em>, <em>z=0</em>, <em>color='g'</em>, <em>marker='o'</em>, <em>N=None</em>, <em>r=None</em>, <em>n=0</em>, <em>r_z=None</em>, <em>colors=None</em>, <em>perCellLFP=False</em><big>)</big><a class="headerlink" href="#LFPy.Electrode" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">LFPy.</tt><tt class="descname">Electrode</tt><big>(</big><em>cell</em>, <em>sigma=0.3</em>, <em>x=100</em>, <em>y=0</em>, <em>z=0</em>, <em>color='g'</em>, <em>marker='o'</em>, <em>N=None</em>, <em>r=None</em>, <em>n=0</em>, <em>r_z=None</em>, <em>colors=None</em>, <em>perCellLFP=False</em>, <em>method='linesource'</em><big>)</big><a class="headerlink" href="#LFPy.Electrode" title="Permalink to this definition">¶</a></dt>
 <dd><p>Main electrode class used in LFPy.
-The class takes dict.electrode geometries as input, or may produce it itself
+The class takes dict.electrode geometries as input, or may produce itself
 by means of calling functions self.el_pos*(). It also takes LFPy.cell.Cell
 object or dictionaries/lists containing these as input,  i.e.</p>
 <p>Example script (electrode &#8220;similar&#8221; to Thomas Recording tetrode);</p>
@@ -382,6 +389,13 @@ All rights reserved.</p>
 <tt class="descclassname">LFPy.lfpcalc.</tt><tt class="descname">calc_lfp_linesource</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/LFPy/lfpcalc.html#calc_lfp_linesource"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LFPy.lfpcalc.calc_lfp_linesource" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate electric field potential using the line-source method, all
 compartments treated as line sources, even soma.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="LFPy.lfpcalc.calc_lfp_pointsource">
+<tt class="descclassname">LFPy.lfpcalc.</tt><tt class="descname">calc_lfp_pointsource</tt><big>(</big><big>)</big><a class="headerlink" href="#LFPy.lfpcalc.calc_lfp_pointsource" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate local field potentials using the point-source equation on all
+compartments</p>
 </dd></dl>
 
 <dl class="function">
