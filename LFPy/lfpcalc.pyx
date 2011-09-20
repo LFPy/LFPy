@@ -16,15 +16,15 @@ cpdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] calc_lfp_choose(c,
     if method == 'som_as_point':
         return calc_lfp_som_as_point(c, x=x, y=y, z=z, sigma=sigma,
                                      r_limit=r_limit, from_file=from_file,
-                                     t_indices=t_indices)
+                                     timestep=timestep, t_indices=t_indices)
     elif method == 'linesource':
         return calc_lfp_linesource(c, x=x, y=y, z=z, sigma=sigma,
                                    r_limit=r_limit, from_file=from_file,
-                                   t_indices=t_indices)
+                                   timestep=timestep, t_indices=t_indices)
     elif method == 'pointsource':
         return calc_lfp_pointsource(c, x=x, y=y, z=z, sigma=sigma,
                                     r_limit=r_limit, from_file=from_file,
-                                    t_indices=t_indices)
+                                    timestep=timestep, t_indices=t_indices)
 
 cpdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] calc_lfp_linesource(c,
                         double x=0,
@@ -413,7 +413,7 @@ cpdef calc_lfp_pointsource(c, x=0, y=0, z=0, sigma=0.3, \
 
     return Emem.transpose()
 
-cpdef _check_rlimit_point(r2, r_limit):
+cdef _check_rlimit_point(r2, r_limit):
     '''Correct r2 so that r2 >= r_limit for all values'''
     [inds] = np.where(r2 < r_limit)
     r2[inds] = r_limit[inds]

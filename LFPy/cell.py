@@ -247,9 +247,6 @@ class Cell(object):
         
         if neuron.h.sec_counted == 0:
             self.nsomasec = 0
-            #naxonsec = 0
-            #ndendsec = 0
-            #napicsec = 0
             #Place sections in lists
             for sec in neuron.h.allsec():
                 if sec.name()[:4] == 'soma':
@@ -266,9 +263,6 @@ class Cell(object):
                     self.apiclist.append(sec)
         elif neuron.h.sec_counted == 1:
             self.nsomasec = neuron.h.nsomasec
-            #naxonsec = neuron.h.naxonsec
-            #ndendsec = neuron.h.ndendsec
-            #napicsec = neuron.h.napicdendsec
             #Place sections in lists
             for sec in neuron.h.soma:
                 self.somalist.append(sec)
@@ -363,87 +357,7 @@ class Cell(object):
         to access i_membrane'''
         for sec in self.allseclist:
             sec.insert('extracellular')
-    
-    # Old code with hard-coded synapse types
-    # To be removed when we make sure current version works fine
-    # def set_synapse(self, idx, syntype,
-    #                 record_current=False, record_potential=False,
-    #                 tau=None, tau1=None, tau2=None, e=None, weight=None,
-    #                 g=None, pkamp=None, freq=None, delay=None, dur=None):
-    #     '''Insert syntype synapse on compartment with index idx, **kwargs
-    #     passed on from class Synapse.'''
-    #     
-    #     if not hasattr(self, 'synlist'):
-    #         self.synlist = neuron.h.List()
-    #     if not hasattr(self, 'synireclist'):
-    #         self.synireclist = neuron.h.List()
-    #     if not hasattr(self, 'synvreclist'):
-    #         self.synvreclist = neuron.h.List()
-    #     if not hasattr(self, 'netconlist'):
-    #         self.netconlist = neuron.h.List()
-    #     if not hasattr(self, 'sptimeslist'):
-    #         self.sptimeslist = neuron.h.List()
-    #     
-    #     i = 0
-    #     for sec in neuron.h.allseclist:
-    #         for seg in sec:
-    #             if i == idx:
-    #                 if syntype == 'ExpSyn':
-    #                     syn = neuron.h.ExpSyn(seg.x, sec=sec)
-    #                     syn.tau = tau
-    #                     syn.e = e
-    #                     self.synlist.append(syn)
-    #                 elif syntype == 'Exp2Syn':
-    #                     syn = neuron.h.Exp2Syn(seg.x, sec=sec)
-    #                     syn.tau1 = tau1
-    #                     syn.tau2 = tau2
-    #                     syn.e = e
-    #                     self.synlist.append(syn)
-    #                 elif syntype == 'AlphaSyn':
-    #                     syn = neuron.h.AlphaSyn(seg.x, sec=sec)
-    #                     syn.tau = tau
-    #                     syn.g = g
-    #                     syn.e = e
-    #                     self.synlist.append(syn)
-    #                 elif syntype == 'AlphaISyn':
-    #                     syn = neuron.h.AlphaISyn(seg.x, sec=sec)
-    #                     syn.tau = tau
-    #                     self.synlist.append(syn)
-    #                 elif syntype == 'SinSyn':
-    #                     syn = neuron.h.SinSyn(seg.x, sec=sec)
-    #                     syn.pkamp = pkamp
-    #                     syn.freq = freq
-    #                     syn.phase = phase
-    #                     syn.delay = delay
-    #                     syn.dur = dur
-    #                     self.synlist.append(syn)
-    #                 else:
-    #                     raise Exception, '%s not valid synapse type' %syntype
-    #                 
-    #                 #create NetCon
-    #                 netstim = neuron.h.NetStim()
-    #                 nc = neuron.h.NetCon(netstim, syn)
-    #                 nc.weight[0] = weight
-    #                 self.netconlist.append(nc)
-    #                 
-    #                 #record currents
-    #                 if record_current:
-    #                     synirec = neuron.h.Vector(int(self.tstopms /
-    #                                                   self.timeres_python+1))
-    #                     synirec.record(syn._ref_i, self.timeres_python)
-    #                     self.synireclist.append(synirec)
-    #                 
-    #                 #record potential
-    #                 if record_potential:
-    #                     synvrec = neuron.h.Vector(int(self.tstopms /
-    #                                                   self.timeres_python+1))
-    #                     synvrec.record(seg._ref_v, self.timeres_python)
-    #                     self.synvreclist.append(synvrec)
-    #             
-    #             i += 1
-    #     
-    #     return self.synlist.count() - 1      
-        
+            
     def set_synapse(self, idx, syntype,
                     record_current=False, record_potential=False,
                     weight=None, **kwargs):
@@ -660,30 +574,6 @@ class Cell(object):
         self.xmid = .5*(self.xstart+self.xend)
         self.ymid = .5*(self.ystart+self.yend)
         self.zmid = .5*(self.zstart+self.zend)
-
-# OLD VERSION:
-#    def get_idx(self, section='allsec', z_min=-10000, z_max=10000):
-#        '''Returns neuron idx of segments'''
-#        if section=='allsec':
-#            neuron.h.get_idx(neuron.h.allseclist, self.totnsegs)
-#        elif section=='som' or section=='soma':
-#            neuron.h.get_idx(neuron.h.somalist, self.totnsegs)
-#        elif section=='dend':
-#            neuron.h.get_idx(neuron.h.dendlist, self.totnsegs)
-#        elif section=='apicdend' or section=='apic':
-#            neuron.h.get_idx(neuron.h.apicdendlist, self.totnsegs)
-#        elif section=='alldend':
-#            neuron.h.get_idx(neuron.h.alldendlist, self.totnsegs)
-#        elif section=='ax' or section=='axon':
-#            neuron.h.get_idx(neuron.h.axonlist, self.totnsegs)
-#        else:
-#            raise Exception, "%s is not a valid section list" % section
-#        
-#        idx = np.where(np.array(neuron.h.idxvec))[0]
-#        
-#        sel_z_idx = np.where(np.logical_and(self.zmid[idx] > z_min,
-#                                                self.zmid[idx]<z_max))
-#        return idx[sel_z_idx]
 
     def get_idx(self, section='allsec', z_min=-10000, z_max=10000):
         '''Returns neuron idx of segments on interval [z_min, z_max]'''

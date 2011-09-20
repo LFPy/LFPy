@@ -8,7 +8,7 @@ from multiprocessing import Process, Queue, freeze_support, cpu_count
 
 class Electrode(object):
     '''Main electrode class used in LFPy.
-    The class takes dict.electrode geometries as input, or may produce it itself
+    The class takes dict.electrode geometries as input, or may produce itself
     by means of calling functions self.el_pos*(). It also takes LFPy.cell.Cell
     object or dictionaries/lists containing these as input,  i.e.
 
@@ -295,11 +295,14 @@ class Electrode(object):
                                     'z' : self.z[i] + self.r_drift['z'][i],
                                     'timestep' : j
                                 })
-                                LFP[i, j] = lfpcalc.calc_lfp_choose(self.c[k], **variables)
+                                LFP[i, j] = lfpcalc.calc_lfp_choose(self.c[k], 
+                                                                    **variables)
                         else:
-                            LFP[i, ] = lfpcalc.calc_lfp_choose(self.c[k], **variables)
+                            LFP[i, ] = lfpcalc.calc_lfp_choose(self.c[k], 
+                                                               **variables)
                 else:
-                    LFP = self.__calc_lfp_simple_threaded(self.c[k], LFP, **variables)
+                    LFP = self.__calc_lfp_simple_threaded(self.c[k], LFP, 
+                                                          **variables)
                 circle = None,
                 offsets = None
                 
@@ -312,11 +315,11 @@ class Electrode(object):
         __name__='__main__'
         if __name__ == '__main__':              # This is important, apparently
             output = {}                         # results saved in dict
-            freeze_support()                    # let NUMBER_OF_PROCESSES function calls
-                                                # finish before new jobs are queued
+            freeze_support()                    # let NUMBER_OF_PROCESSES calls
+                                                # finish before new jobs are qd
             NUMBER_OF_PROCESSES = cpu_count()   # Using all available cores
             task_queue = Queue()                # queue for tasks
-            done_queue = Queue()                # simulation results end up here
+            done_queue = Queue()                # simulation results put here
             
             TASKS = pl.arange(self.x.size)
             
@@ -331,8 +334,8 @@ class Electrode(object):
             for i in xrange(NUMBER_OF_PROCESSES):
                 task_queue.put('STOP')
             
-            task_queue.close()      # No more jobs can be sent to the queues, seems
-            done_queue.close()      # necessary for consecutive parallel jobs in script
+            task_queue.close()      # No more jobs can be sent to the queues,
+            done_queue.close()      # necessary for consecutive parallel jobs
             
             return LFP
     

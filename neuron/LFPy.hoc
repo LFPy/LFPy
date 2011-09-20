@@ -1,3 +1,5 @@
+/* This file is no longer used, just kept here for future reference!!!!!!!!!!!!!*/
+
 // Main .hoc-file for LFPy. H Linden 15.9.2008
 
 // ------------------------------------------------------------------------
@@ -161,6 +163,8 @@ proc play_in_soma() {
 */
 
 /*
+This should now be in model scripts, i.e my_active_declarations
+
 // --------------------------------------------------------------
 // Spines
 // --------------------------------------------------------------

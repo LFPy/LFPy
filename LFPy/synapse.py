@@ -66,10 +66,10 @@ class PointProcess:
     def __init__(self, cell, idx, pptype='SEClamp',
                  color='p', marker='*', record_current=False, **kwargs):
         ''' Will insert pptype on
-        cell-instace, pass the corresponding kwargs onto
+        cell-instance, pass the corresponding kwargs onto
         cell.set_point_process.
         
-        Refer to NEURON dokumentation @ neuron.yale.edu for kwargs
+        Refer to NEURON documentation @ neuron.yale.edu for kwargs
         
         'cell' is the cell instance.
         

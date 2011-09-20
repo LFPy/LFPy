@@ -11,18 +11,19 @@ def calc_lfp_choose(c, x=0, y=0, z=0, sigma=0.3,
     if method == 'som_as_point':
         return calc_lfp_som_as_point(c, x=x, y=y, z=z, sigma=sigma,
                                      r_limit=r_limit, from_file=from_file,
-                                     t_indices=t_indices)
+                                     timestep=timestep, t_indices=t_indices)
     elif method == 'linesource':
         return calc_lfp_linesource(c, x=x, y=y, z=z, sigma=sigma,
                                    r_limit=r_limit, from_file=from_file,
-                                   t_indices=t_indices)
+                                   timestep=timestep, t_indices=t_indices)
     elif method == 'pointsource':
         return calc_lfp_pointsource(c, x=x, y=y, z=z, sigma=sigma,
                                     r_limit=r_limit, from_file=from_file,
-                                    t_indices=t_indices)
+                                    timestep=timestep, t_indices=t_indices)
 
-def calc_lfp_linesource(c, x=0, y=0, z=0, sigma=0.3, \
-                        r_limit=None, from_file=False, timestep=None, t_indices=None):
+def calc_lfp_linesource(c, x=0, y=0, z=0, sigma=0.3,
+                        r_limit=None, from_file=False, 
+                        timestep=None, t_indices=None):
     '''Calculate electric field potential using the line-source method, all
     compartments treated as line sources, even soma.'''
     if from_file:
@@ -79,8 +80,9 @@ def calc_lfp_linesource(c, x=0, y=0, z=0, sigma=0.3, \
 
     return Emem.transpose()
 
-def calc_lfp_som_as_point(c, x=0, y=0, z=0, sigma=0.3, \
-                          r_limit=None, from_file=False, timestep=None, t_indices=None):
+def calc_lfp_som_as_point(c, x=0, y=0, z=0, sigma=0.3,
+                          r_limit=None, from_file=False, 
+                          timestep=None, t_indices=None):
     '''Calculate electric field potential using the line-source method,
     soma is treated as point/sphere source'''
 
@@ -138,7 +140,7 @@ def calc_lfp_som_as_point(c, x=0, y=0, z=0, sigma=0.3, \
         for idx in pl.nonzero( r2[1:] < r_limit[1:] * r_limit[1:] )[0]+1:
             if (h[idx] < r_limit[idx]) and \
             ((deltaS[idx] + h[idx]) > -r_limit[idx]):
-                print 'Adjusting distance to segment ', str(idx), ' from ',\
+                print 'Adjusting distance to segment ', str(idx), ' from ', \
                 str(pl.sqrt(r2[idx])), ' to ', str(r_limit[idx]), '.'
                 r2[idx] = r_limit[idx] * r_limit[idx]
 
@@ -252,9 +254,10 @@ def _check_rlimit(r2, r_limit, h, deltaS):
     '''Check that no segment is close the electrode than r_limit'''
     if pl.sum(pl.nonzero( r2 < r_limit*r_limit )) > 0:
         for idx in pl.nonzero( r2 < r_limit*r_limit )[0]:
-            if (h[idx] < r_limit[idx]) and ((deltaS[idx]+h[idx])>-r_limit[idx]):
-                print 'Adjusting distance to segment ',str(idx),' from ', \
-                     str(pl.sqrt(r2[idx])),' to ',str(r_limit[idx]),'.'
+            if (h[idx] < r_limit[idx]) and ((deltaS[idx]+h[idx]) >
+                                             -r_limit[idx]):
+                print 'Adjusting distance to segment ', str(idx), ' from ', \
+                     str(pl.sqrt(r2[idx])), ' to ', str(r_limit[idx]), '.'
                 r2[idx] = r_limit[idx]**2
     return r2
 
@@ -265,9 +268,10 @@ def _r_soma_calc(xmid, ymid, zmid, x, y, z):
 
     return r_soma
 
-def calc_lfp_pointsource(c, x=0, y=0, z=0, sigma=0.3, \
-                        r_limit=None, from_file=False, timestep=None, t_indices=None):
-    '''Calculate local field potentials using the point-source equation on all 
+def calc_lfp_pointsource(c, x=0, y=0, z=0, sigma=0.3,
+                        r_limit=None, from_file=False, 
+                        timestep=None, t_indices=None):
+    '''Calculate local field potentials using the point-source equation on all
     compartments'''
     if from_file:
         c = LFPy.tools.load(c)
