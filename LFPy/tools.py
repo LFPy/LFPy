@@ -12,22 +12,23 @@ def load(filename):
     filen.close()
     return obj
 
-def noise_brown(t, n=1, weight=1, cutDC=False):
-    '''return 1/f^2 noise of shape(n, t.size) obtained by taking the
-    cumulative sum of gaussian white noise, with rms weight. If cutDC=True,
-    the noise is high-pass filtered with a very low cutoff frequency'''
-    noise = []
-    if cutDC:
-        fcut = 4./t.size
-        [b, a] = ss.butter(1, fcut, btype='high')
-        
-    for i in xrange(n):
-        x = pl.normal(size=t.size+10000).cumsum()
-        if cutDC:
-            x = ss.lfilter(b, a, x)
-        x /= pl.rms_flat(x)
-        x *= weight
-        noise.append(x[10000:])
-        
-    return pl.array(noise)
+def noise_brown(timevector, nrows=1, weight=1, highpassfilter=False):
+    '''return 1/f^2 noise of shape(nrows, timevector.size) obtained by taking 
+    the cumulative sum of gaussian white noise, with rms weight. If 
+    highpassfilter=True, the noise is high-pass filtered with a very low cutoff
+    frequency'''
+    if highpassfilter:
+        fcut = 4./timevector.size
+        [coeff_b, coeff_a] = ss.butter(1, fcut, btype='high')
+    
+    noise = pl.empty((nrows, timevector.size))    
+    for i in xrange(nrows):
+        signal = pl.normal(size=timevector.size+10000).cumsum()
+        if highpassfilter:
+            signal = ss.lfilter(coeff_b, coeff_a, signal)
+        signal /= pl.rms_flat(signal)
+        signal *= weight
+        noise[i, :] = signal[10000:]
+    
+    return noise
     

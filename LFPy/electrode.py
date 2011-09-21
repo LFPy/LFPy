@@ -101,9 +101,9 @@ class Electrode(object):
         
         self.method = method
 
-        self.import_c(cell)
+        self._import_c(cell)
         
-        self.test_imem_sum()
+        self._test_imem_sum()
 
         print 'Class LFPy.Electrode() loaded!'
 
@@ -113,7 +113,7 @@ class Electrode(object):
             '''just some empty class'''
             pass
 
-    def import_c(self, cell):
+    def _import_c(self, cell):
         '''Keeps the relevant variables for LFP-calculation from cell'''
         #keeping these variables:
         variables = [
@@ -169,7 +169,7 @@ class Electrode(object):
         
         self.nCells = pl.array(self.c.keys()).size
     
-    def test_imem_sum(self):
+    def _test_imem_sum(self):
         '''test that the membrane currents sum to zero'''
         for k in self.c:
             sum_imem = abs(self.c[k].imem.sum()) / self.c[k].imem.size
@@ -222,7 +222,7 @@ class Electrode(object):
             for task in TASKS:
                 task_queue.put(task)
             for i in xrange(NUMBER_OF_PROCESSES):
-                Process(target=self.__calc_lfp_thread,
+                Process(target=self._calc_lfp_thread,
                     args=(task_queue, t_indices, NUMBER_OF_PROCESSES,
                           done_queue)).start()
             for i in xrange(TASKS.size):
@@ -238,7 +238,7 @@ class Electrode(object):
         
         self.LFP = LFP_temp.sum(axis=0)
 
-    def __calc_lfp_thread(self, task_queue, t_indices,
+    def _calc_lfp_thread(self, task_queue, t_indices,
                           NUMBER_OF_PROCESSES, done_queue):
         '''Single thread, calculating LFP from single cell.
         Should be called by calc_lfp_threaded'''
@@ -268,11 +268,11 @@ class Electrode(object):
                 #Calling function which will calculate LFP, distributed
                 if sys.version_info < (2, 6, 6): #fix for older Pythons
                     del variables['NUMBER_OF_PROCESSES']
-                    [circle, offsets, LFP] = self.lfp_el_pos_calc_dist(
+                    [circle, offsets, LFP] = self._lfp_el_pos_calc_dist(
                         self.c[k], **variables)
                 else:
                     [circle, offsets, LFP] = \
-                    self.__lfp_el_pos_calc_dist_threaded(self.c[k], **variables)
+                    self._lfp_el_pos_calc_dist_threaded(self.c[k], **variables)
                 done_queue.put([circle, offsets, k, LFP])
             #case for no averaging
             else:
@@ -301,7 +301,7 @@ class Electrode(object):
                             LFP[i, ] = lfpcalc.calc_lfp_choose(self.c[k], 
                                                                **variables)
                 else:
-                    LFP = self.__calc_lfp_simple_threaded(self.c[k], LFP, 
+                    LFP = self._calc_lfp_simple_threaded(self.c[k], LFP, 
                                                           **variables)
                 circle = None,
                 offsets = None
@@ -310,7 +310,7 @@ class Electrode(object):
             print 'Calculated potential contribution, cell %i.' % k
         
     
-    def __calc_lfp_simple_threaded(self, c, LFP, **variables):
+    def _calc_lfp_simple_threaded(self, c, LFP, **variables):
 
         __name__='__main__'
         if __name__ == '__main__':              # This is important, apparently
@@ -326,7 +326,7 @@ class Electrode(object):
             for task in TASKS:
                 task_queue.put(int(task))       
             for i in xrange(NUMBER_OF_PROCESSES):
-                Process(target=self.__calc_lfp_simple_thread,
+                Process(target=self._calc_lfp_simple_thread,
                         args=(task_queue, done_queue, c, variables)).start()
             for n in xrange(TASKS.size):
                 [i, lfp] = done_queue.get()
@@ -339,7 +339,7 @@ class Electrode(object):
             
             return LFP
     
-    def __calc_lfp_simple_thread(self, task_queue,
+    def _calc_lfp_simple_thread(self, task_queue,
                                  done_queue, c, variables):
         for i in iter(task_queue.get, 'STOP'):
             variables.update({
@@ -362,7 +362,7 @@ class Electrode(object):
                 
             done_queue.put([i, LFP])
     
-    def __lfp_el_pos_calc_dist_threaded(self, c, r_limit, sigma=0.3, radius=10,
+    def _lfp_el_pos_calc_dist_threaded(self, c, r_limit, sigma=0.3, radius=10,
                 n=10, m=50, N=None, t_indices=None, NUMBER_OF_PROCESSES=None, 
                 method='linesource',
                 __name__='__main__'):
@@ -387,7 +387,7 @@ class Electrode(object):
             for task in TASKS:
                 dist_task_queue.put(task)
             for i in xrange(NUMBER_OF_PROCESSES):
-                Process(target=self.__lfp_el_pos_calc_dist_thread,
+                Process(target=self._lfp_el_pos_calc_dist_thread,
                     args=(dist_task_queue, c, r_limit, sigma, radius, n, m, N,
                     t_indices, method, dist_done_queue)).start()
             for i in xrange(TASKS.size):
@@ -404,9 +404,9 @@ class Electrode(object):
         lfp_el_pos = tempLFP.sum(axis=0)
         return offsets, circle, lfp_el_pos
 
-    def __lfp_el_pos_calc_dist_thread(self, dist_task_queue, c, r_limit, sigma,
+    def _lfp_el_pos_calc_dist_thread(self, dist_task_queue, c, r_limit, sigma,
             radius, n, m, N, t_indices, method, dist_done_queue):
-        '''spawn thread called by self.__lfp_el_pos_calc_dist_threaded()'''
+        '''spawn thread called by self._lfp_el_pos_calc_dist_threaded()'''
         for i in iter(dist_task_queue.get, 'STOP'):
             lfp_el_pos = pl.zeros(self.LFP.shape)
             offsets = {}
@@ -504,7 +504,7 @@ class Electrode(object):
                     't_indices' : t_indices,
                     })
                 [self.circle, self.offsets, LFP_temp[k, :, :]] = \
-                    self.lfp_el_pos_calc_dist(self.c[k], **variables)
+                    self._lfp_el_pos_calc_dist(self.c[k], **variables)
             else:
                 variables.update({
                     'r_limit' : self.c[k].diam/2
@@ -535,7 +535,7 @@ class Electrode(object):
         
         self.LFP = LFP_temp.sum(axis=0)
 
-    def lfp_el_pos_calc_dist(self, c, r_limit, sigma=0.3, radius=10, n=10,
+    def _lfp_el_pos_calc_dist(self, c, r_limit, sigma=0.3, radius=10, n=10,
                              m=50, N=None, t_indices=None):
         '''Calc. of LFP over an n-point integral approximation over flat
         electrode surface with radius r. The locations of these n points on
