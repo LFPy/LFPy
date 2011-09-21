@@ -73,7 +73,7 @@ def insert_synapses(synparams, section, n, spTimesFun, args):
         spiketimes = spTimesFun(args[0], args[1])
 
         # Create synapse(s) and setting times using the Synapse class in LFPy
-        s = LFPy.Synapse(c,**synparams)
+        s = LFPy.PointProcessSynapse(c,**synparams)
         s.set_spike_times(c, spiketimes)
 
 ################################################################################

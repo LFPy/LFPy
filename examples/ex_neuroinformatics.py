@@ -24,7 +24,7 @@ synapseParameters = {
     'record_current' : True                 # syn. current record
 }
 
-synapse = LFPy.Synapse(cell, **synapseParameters)
+synapse = LFPy.PointProcessSynapse(cell, **synapseParameters)
 synapse.set_spike_times(cell, pl.array([10, 15, 20, 25]))
 
 cell.simulate(rec_isyn=True)                # run cell simulation
