@@ -3,7 +3,27 @@
 All rights reserved.'''
 import numpy
 
-class Synapse:
+class PointProcess:
+    '''Superclass on top of PointProcessSynapse, PointProcessElectrode, 
+    just to set some common variables'''
+    def __init__(self, cell, idx, color='k', marker='o', 
+                 record_current=False, **kwargs):
+        '''cell is an LFPy.Cell object, idx index of segment. This class
+        set some variables and extracts carthesian coordinates of segment'''
+        self.idx = idx
+        self.color = color
+        self.marker = marker
+        self.record_current = record_current
+        self.kwargs = kwargs
+        self.update_pos(cell)
+
+    def update_pos(self, cell):
+        '''Extract coordinate of point-process to geometry'''
+        self.x = cell.xmid[self.idx]
+        self.y = cell.ymid[self.idx]
+        self.z = cell.zmid[self.idx]
+        
+class PointProcessSynapse(PointProcess):
     '''The synapse class, pointprocesses that spawn membrane currents'''
     def __init__(self, cell, idx, syntype, color='r', marker='o',
                  record_current=False, **kwargs):
@@ -25,41 +45,39 @@ class Synapse:
             'e' : 10,                   #reversal potential +10 mV
             'weight' : 0.001,           #NetCon weight aka max conductance
             }
-        LFPy.Synapse(cell,**synparams)
+        LFPy.PointProcessSynapse(cell,**synparams)
         '''
-        self.idx = idx
+        PointProcess.__init__(self, cell, idx, color, marker, record_current, 
+                              **kwargs)
+            
         self.syntype = syntype
-        self.color = color
-        self.marker = marker
-        self.record_current = record_current
-        self.kwargs = kwargs
-        
-        self.update_pos(cell)
-        
         self.hocidx = int(cell.set_synapse(idx, syntype,
                                            record_current, **kwargs))
-        
         cell.synapses.append(self)
-        
         cell.synidx.append(idx)
 
     def set_spike_times(self, cell , sptimes=numpy.zeros(0)):
+        '''Set the spike times'''
         self.sptimes = sptimes
         cell.sptimeslist.append(sptimes)
         
     def collect_current(self, cell):
+        '''Collect synapse current'''
         self.i = numpy.array(cell.synireclist.o(self.hocidx))
     
     def collect_potential(self, cell):
+        '''Collect membrane potential of segment with synapse'''
         self.v = numpy.array(cell.synvreclist.o(self.hocidx))
 
-    def update_pos(self, cell):
-        '''aligning coordinate of point-process to geometry'''
-        self.x = cell.xmid[self.idx]
-        self.y = cell.ymid[self.idx]
-        self.z = cell.zmid[self.idx]
-
-class PointProcess:
+class Synapse(PointProcessSynapse):
+    def __init__(self, cell, idx, syntype, color='r', marker='o',
+                 record_current=False, **kwargs):
+        PointProcessSynapse.__init__(self, cell, idx, syntype, color, marker, 
+                                     record_current, **kwargs)
+        print 'LFPy.Synapse pending Deprecation,'
+        print 'use LFPy.PointProcessSynapse instead'
+        
+class PointProcessElectrode(PointProcess):
     '''Class for NEURON point processes, ie VClamp, SEClamp and ICLamp,
     SinIClamp, ChirpIClamp with arguments.
     Electrode currents go here, whics make membrane currents not sum to zero'''
@@ -85,29 +103,20 @@ class PointProcess:
             'delay' : 10,
             'rs' : 1,
             }
-        LFPy.PointProcess(cell,**pointprocparams)
+        LFPy.PointProcessElectrode(cell,**pointprocparams)
         '''
-        self.idx = idx
+        PointProcess.__init__(self, cell, idx, color, marker, record_current)
         self.pptype = pptype
-        self.color = color
-        self.marker = marker
-        self.record_current = record_current
-        self.kwargs = kwargs
-
-        self.update_pos(cell)
-        
         self.hocidx = int(cell.set_point_process(idx, pptype,
                                                  record_current, **kwargs))
-        
         cell.pointprocesses.append(self)
         cell.pointprocess_idx.append(idx)
 
     def collect_current(self, cell):
         '''Fetch electrode current from recorder list'''
         self.i = numpy.array(cell.stimireclist.o(self.hocidx))
-        
-    def update_pos(self, cell):
-        '''aligning coordinate of point-process to geometry'''
-        self.x = cell.xmid[self.idx]
-        self.y = cell.ymid[self.idx]
-        self.z = cell.zmid[self.idx]
+    
+    def collect_potential(self, cell):
+        '''Collect membrane potential of segment with PointProcess'''
+        self.v = numpy.array(cell.synvreclist.o(self.hocidx))
+    

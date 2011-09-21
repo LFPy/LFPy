@@ -13,8 +13,8 @@ All rights reserved.
 
 :Classes:
   * Cell - The neuron object itself laying on top of NEURON
-  * Synapse - Convenience class for inserting synapses onto Cell objects
-  * PointProcess - Convenience class for inserting electrodes onto Cell objects
+  * PointProcessSynapse - Convenience class for inserting synapses onto Cell objects
+  * PointProcessElectrode - Convenience class for inserting electrodes onto Cell objects
   * Electrode - Class for performing simulations of extracellular potentials
 
 :Modules:
@@ -24,7 +24,8 @@ All rights reserved.
 '''
 
 from cell import Cell
-from synapse import Synapse, PointProcess
+from pointprocess import Synapse, PointProcess, \
+    PointProcessSynapse, PointProcessElectrode
 from electrode import Electrode
 
 import tools
