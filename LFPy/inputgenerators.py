@@ -4,22 +4,23 @@ All rights reserved.'''
 import numpy
 import pylab as pl
 
-
-def get_rand_spike_times(synpos,nspikes,tstart,tstop):
-    '''return synpos times nspikes random spike times on the interval [tstart, tstop]'''
-    spiketimes = numpy.zeros([size(synpos),nspikes])
-    for i in range(0,numpy.size(synpos)):
-        spiketimes[i,:] = pl.random_integers(tstart,tstop,nspikes)
+def get_rand_spike_times(synpos, nspikes, tstart, tstop):
+    '''return synpos times nspikes random spike times on the 
+    interval [tstart, tstop]'''
+    spiketimes = pl.zeros([pl.size(synpos), nspikes])
+    for i in xrange(pl.size(synpos)):
+        spiketimes[i, :] = pl.random_integers(tstart, tstop, nspikes)
     return spiketimes
 
-def stationary_poisson(nsyn,lambd,tstart,tstop):
-    ''' Generates nsyn stationary possion processes with rate lambda between tstart and tstop'''
+def stationary_poisson(nsyn, lambd, tstart, tstop):
+    ''' Generates nsyn stationary possion processes with rate lambda 
+    between tstart and tstop'''
     interval_s = (tstop-tstart)*.001
     spiketimes = []
     for i in xrange(nsyn):
         spikecount = numpy.random.poisson(interval_s*lambd)
         spikevec = numpy.empty(spikecount)
-        if spikecount==0:
+        if spikecount == 0:
             spiketimes.append(spikevec)
         else:
             spikevec = tstart + (tstop-tstart)*numpy.random.random(spikecount)
@@ -43,7 +44,8 @@ def stationary_gamma(tstart, tstop, k=2, theta=10):
     return spiketimes
 
 
-def test_spiketimes(nsyn,spiketime):
+def test_spiketimes(spiketime):
+    '''Test and sort spiketimes'''
     spiketimes = []
     spikecount = 1
     spikevec = numpy.empty(spikecount)
@@ -51,22 +53,25 @@ def test_spiketimes(nsyn,spiketime):
     spiketimes.append(numpy.sort(spikevec))
     return spiketimes
 
-def get_normal_spike_times(nsyn,mu,sigma,tstart,tstop):
-    ''' Generates nsyn normal-distributed processes with mean mu and deviation sigma'''
+def get_normal_spike_times(nsyn, mu, sigma, tstart, tstop):
+    ''' Generates nsyn normal-distributed processes with mean mu and 
+    deviation sigma'''
     spiketimes = []
     spikecount = nsyn
     spikevec = numpy.empty(spikecount)
-    spikevec = numpy.random.normal(mu,sigma)
-    while (numpy.squeeze(spikevec) <= tstart) and (numpy.squeeze(spikevec) >= tstop):
-        spikevec = numpy.random.normal(mu,sigma)
+    spikevec = numpy.random.normal(mu, sigma)
+    while (numpy.squeeze(spikevec) <= tstart) and \
+            (numpy.squeeze(spikevec) >= tstop):
+        spikevec = numpy.random.normal(mu, sigma)
     
     spiketimes.append(numpy.sort(spikevec))
     return spiketimes
 
-def get_normal_input_times(n,mu,sigma,tstart,tstop):
-    ''' generates n normal-distributed prosesses with mean mu and deviation sigma'''
-    times = numpy.random.normal(mu,sigma,n)
+def get_normal_input_times(n, mu, sigma, tstart, tstop):
+    ''' generates n normal-distributed prosesses with mean mu and 
+    deviation sigma'''
+    times = numpy.random.normal(mu, sigma, n)
     for i in xrange(n):
         while times[i] <= tstart or times[i] >= tstop:
-            times[i] = numpy.random.normal(mu,sigma)
+            times[i] = numpy.random.normal(mu, sigma)
     return times
