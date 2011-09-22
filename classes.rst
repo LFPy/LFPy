@@ -11,11 +11,11 @@ module :mod:`LFPy`
         :members:
         :undoc-members:
     
-    #class :class:`PointProcess`
-    #===========================
-    #.. autoclass:: PointProcess
-    #    :members:
-    #    :undoc-members:
+    class :class:`PointProcess`
+    ===========================
+    .. autoclass:: PointProcess
+        :members:
+        :undoc-members:
 
     class :class:`PointProcessSynapse`
     ======================
