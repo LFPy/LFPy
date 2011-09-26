@@ -78,8 +78,6 @@ class Cell(object):
                     custom_code=[],
                     custom_fun=[],
                     custom_fun_args=[],
-                    play_in_soma=False,
-                    soma_trace='',
                     verbose=False):
         '''initialization of the Cell object.
         
@@ -107,15 +105,13 @@ class Cell(object):
             lambda_f : AC frequency for method 'lambda_f';
             
             custom_code : list of model specific code files ([*.py/.hoc]);
+            custom_fun : list of py-functions with model specs;
+            custom_fun_args : list of arguments passed to custom_fun;
             verbose : switching verbose output on/off
-            play_in_soma : if True, play somatrace in soma
-            soma_trace : filename somatrace, two columns, space-sep: t & v
         '''
         self.verbose = verbose
         
-        #Loading NEURON standard library
-        neuron.h.load_file('stdlib.hoc')
-        #neuron.h.xopen(os.path.join(installpath, 'neuron', 'LFPy.hoc'))
+        neuron.h.load_file('stdlib.hoc')    #NEURON std. library
         
         #Set path to morphology file
         if default_dir:
@@ -125,27 +121,9 @@ class Cell(object):
         
         if os.path.isfile(morpho_file):
             self.morphology_file = morpho_file
-            #neuron.h.load_geometry(morpho_file)
             self._load_geometry()
         else:
             raise Exception, "%s does not exist!" % morpho_file
-        
-        #Check if there exist corresponding file
-        #with rotation angles
-        if os.path.isfile(morpho_file[0:-4]+'.rot'):
-            rotation_file = morpho_file[0:-4]+'.rot'
-            rotation_data = open(rotation_file)
-            rotation = {}
-            for line in rotation_data:
-                var, val = line.split('=')
-                val = val.strip()
-                val = float(str(val))
-                rotation[var] = val
-        else:
-            rotation = {
-                'x' : 0,
-                'y' : 0,
-            }
         
         #Some parameters and lists initialised
         self.timeres_python = timeres_python
@@ -161,7 +139,7 @@ class Cell(object):
         
         self.v_init = v_init
         
-        self.default_rotation = rotation
+        self.default_rotation = self._get_rotation()
         
         if passive:
             #Set passive properties, insert passive on all compartments
@@ -174,36 +152,15 @@ class Cell(object):
             if self.verbose:
                 print 'No passive properties added'
         
-        # load custom codes
-        for code in custom_code:
-            if code.split('.')[-1] == 'hoc':
-                neuron.h.xopen(code)
-            elif code.split('.')[-1] == 'py':
-                exec(code)
-            else:
-                raise Exception, '%s not a .hoc- nor .py-file' % codefile
+        #run user specified code and functions
+        self._run_custom_codes(custom_code, custom_fun, custom_fun_args)
         
-        # run custom functions with arguments
-        i = 0
-        for fun in custom_fun:
-            fun(**custom_fun_args[i])
-            i += 1
-        
-        # Make NEURON calculate i_membrane using the extracellular mech
+        #Insert extracellular mech on all segments
         self._set_extracellular()
         
-        #Number of segments
-        if nsegs_method == 'lambda100':
-            self._set_nsegs_lambda100()
-        elif nsegs_method == 'lambda_f':
-            self._set_nsegs_lambda_f(lambda_f)
-        elif nsegs_method == 'fixed_length':
-            self._set_nsegs_fixed_length(max_nsegs_length)
-        else:
-            print 'No nsegs_method applied (%s)' % nsegs_method
-        
+        #set number of segments accd to rule, and calculate the number
+        self._set_nsegs(nsegs_method, lambda_f, max_nsegs_length)
         self._calc_totnsegs()
-        
         if self.verbose:
             print "Total number of segments = ", self.totnsegs
         
@@ -212,12 +169,6 @@ class Cell(object):
         self.set_pos()
         self.rotate_xyz(self.default_rotation)
         
-        # Optional part for cases with play in soma
-        # MOVE!!!!!!!!
-        self.play_in_soma = play_in_soma
-        if play_in_soma:
-            self.soma_trace = soma_trace
-
     def _load_geometry(self):
         '''Load the morphology file in NEURON'''
         if hasattr(neuron.h, 'sec_counted'):
@@ -238,6 +189,52 @@ class Cell(object):
         neuron.h.define_shape()
         self._create_sectionlists()
         
+    def _run_custom_codes(self, custom_code, custom_fun, custom_fun_args):
+        '''execute custom model code and functions with arguments'''
+        # load custom codes
+        for code in custom_code:
+            if code.split('.')[-1] == 'hoc':
+                neuron.h.xopen(code)
+            elif code.split('.')[-1] == 'py':
+                exec(code)
+            else:
+                raise Exception, '%s not a .hoc- nor .py-file' % code
+        
+        # run custom functions with arguments
+        i = 0
+        for fun in custom_fun:
+            fun(**custom_fun_args[i])
+            i += 1
+    
+    def _set_nsegs(self, nsegs_method, lambda_f, max_nsegs_length):
+        if nsegs_method == 'lambda100':
+            self._set_nsegs_lambda100()
+        elif nsegs_method == 'lambda_f':
+            self._set_nsegs_lambda_f(lambda_f)
+        elif nsegs_method == 'fixed_length':
+            self._set_nsegs_fixed_length(max_nsegs_length)
+        else:
+            print 'No nsegs_method applied (%s)' % nsegs_method
+    
+    def _get_rotation(self):
+        '''Check if there exist corresponding file
+        with rotation angles'''
+        if os.path.isfile(self.morphology_file[0:-4]+'.rot'):
+            rotation_file = self.morphology_file[0:-4]+'.rot'
+            rotation_data = open(rotation_file)
+            rotation = {}
+            for line in rotation_data:
+                var, val = line.split('=')
+                val = val.strip()
+                val = float(str(val))
+                rotation[var] = val
+        else:
+            rotation = {
+                'x' : 0,
+                'y' : 0,
+            }
+        return rotation
+
     def _create_sectionlists(self):
         '''Create sectionlists for different kinds of sections'''
         self.somalist = neuron.h.SectionList()
@@ -880,7 +877,8 @@ class Cell(object):
             rel_end = rel_end * rotation_x
             
             self.real_positions(rel_start, rel_end)
-            #print 'Rotated geometry %g radians around x-axis' % (-theta)
+            if self.verbose:
+                print 'Rotated geometry %g radians around x-axis' % (-theta)
         else:
             pass
             #print 'Geometry not rotated around x-axis'
@@ -898,8 +896,8 @@ class Cell(object):
             rel_end = rel_end * rotation_y
             
             self.real_positions(rel_start, rel_end)
-            
-            #print 'Rotated geometry %g radians around y-axis' % (-phi)
+            if self.verbose:
+                print 'Rotated geometry %g radians around y-axis' % (-phi)
         else:
             pass
             #print 'Geometry not rotated around y-axis'
@@ -917,8 +915,8 @@ class Cell(object):
             rel_end = rel_end * rotation_z
             
             self.real_positions(rel_start, rel_end)
-            
-            #print 'Rotated geometry %g radians around z-axis' % (-gamma)
+            if self.verbose:
+                print 'Rotated geometry %g radians around z-axis' % (-gamma)
         else:
             pass
             #print 'Geometry not rotated around z-axis'
@@ -967,69 +965,3 @@ class Cell(object):
         prob = self.area[idx]/sum(self.area[idx])
         return prob
     
-    #Consider moving this to its own class
-    def set_play_in_soma(self, t_on=np.array([0])):
-        '''Set mechanisms for playing soma trace at time(s) t_on,
-        where t_on is a np.array'''
-        if type(t_on) != np.ndarray:
-            t_on = np.array(t_on)
-        
-        f = file(self.soma_trace)
-        x = []
-        for line in f.readlines():
-            x.append(map(float, line.split()))
-        x = np.array(x)
-        X = x.T
-        f.close()
-        
-        #time and values for trace, shifting
-        tTrace = X[0, ]
-        tTrace -= tTrace[0]
-        
-        trace = X[1, ]
-        trace -= trace[0]
-        trace += self.e_pas
-        
-        #creating trace
-        somaTvec0 = tTrace
-        somaTvec0 += t_on[0]
-        somaTvec = somaTvec0
-        somaTrace = trace
-        
-        for i in xrange(1, t_on.size):
-            np.concatenate((somaTvec, somaTvec0 + t_on[i]))
-            np.concatenate((somaTrace, trace))
-        
-        somaTvec1 = np.interp(np.arange(somaTvec[0], somaTvec[-1], 
-                                self.timeres_NEURON),
-                                somaTvec, somaTvec)
-        somaTrace1 = np.interp(np.arange(somaTvec[0], somaTvec[-1],
-                                self.timeres_NEURON),
-                                somaTvec, somaTrace)
-        
-        somaTvecVec = neuron.h.Vector(somaTvec1)
-        somaTraceVec = neuron.h.Vector(somaTrace1)
-        
-        for sec in neuron.h.somalist:
-            #ensure that soma is perfect capacitor
-            sec.cm = 1E9
-            #Why the fuck doesnt this work:
-            #for seg in sec:
-            #    somaTraceVec.play(seg._ref_v, somaTvecVec)
-        
-        #call hoc function that insert trace on soma
-        self._play_in_soma(somaTvecVec, somaTraceVec)
-            
-    def _play_in_soma(self, somaTvecVec, somaTraceVec):
-        '''Replacement of LFPy.hoc "proc play_in_soma()",
-        seems necessary that this function lives in hoc'''
-        neuron.h('objref soma_tvec, soma_trace')
-        
-        neuron.h('soma_tvec = new Vector()')
-        neuron.h('soma_trace = new Vector()')
-        
-        neuron.h.soma_tvec.from_python(somaTvecVec)
-        neuron.h.soma_trace.from_python(somaTraceVec)
-        
-        neuron.h('soma_trace.play(&soma.v(0.5), soma_tvec)')
-
