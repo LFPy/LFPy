@@ -410,15 +410,9 @@ class Cell(object):
                 i += 1
 
         return self.synlist.count() - 1
-    
+
     def set_point_process(self, idx, pptype, record_current=False,
-                          amp=None, dur=None, delay=None,
-                          amp1=None, dur1=None,
-                          amp2=None, dur2=None,
-                          amp3=None, dur3=None,
-                          rs=None,
-                          pkamp=None, freq=None, phase=None,
-                          chirp_rate=None):
+                          **kwargs):
         '''Insert pptype-electrode type pointprocess on compartment numbered
         idx on cell object, with keyword arguments according to types:
         SEClamp, VClamp, IClamp, SinIClamp, ChirpIClamp.
@@ -430,52 +424,16 @@ class Cell(object):
             self.stimireclist = neuron.h.List()
         
         i = 0
+        cmd1 = 'stim = neuron.h.'
+        cmd2 = '(seg.x, sec=sec)'
         for sec in self.allseclist:
             for seg in sec:
                 if i == idx:
-                    if pptype == 'SEClamp':
-                        stim = neuron.h.SEClamp(seg.x, sec=sec)
-                        stim.amp1 = amp1
-                        stim.dur1 = dur1
-                        stim.amp2 = amp2
-                        stim.dur2 = dur2
-                        stim.amp3 = amp3
-                        stim.dur3 = dur3
-                        stim.rs = rs
-                        self.stimlist.append(stim)
-                    elif pptype == 'VClamp':
-                        stim = neuron.h.VClamp(seg.x, sec=sec)
-                        stim.dur[0] = dur[0]
-                        stim.dur[1] = dur[1]
-                        stim.dur[2] = dur[2]
-                        stim.amp[0] = amp[0]
-                        stim.amp[1] = amp[1]
-                        stim.amp[2] = amp[2]
-                        self.stimlist.append(stim)
-                    elif pptype == 'IClamp':
-                        stim = neuron.h.IClamp(seg.x, sec=sec)
-                        stim.amp = amp
-                        stim.dur = dur
-                        stim.delay = delay
-                        self.stimlist.append(stim)
-                    elif pptype == 'SinIClamp':
-                        stim = neuron.h.SinIClamp(seg.x, sec=sec)
-                        stim.pkamp = pkamp
-                        stim.dur = dur
-                        stim.delay = delay
-                        stim.freq = freq
-                        stim.phase = phase
-                        self.stimlist.append(stim)
-                    elif pptype == 'ChirpIClamp':
-                        stim = neuron.h.ChirpIClamp(seg.x, sec=sec)
-                        stim.pkamp = pkamp
-                        stim.dur = dur
-                        stim.delay = delay
-                        stim.freq = freq
-                        stim.chirp_rate = chirp_rate
-                        self.stimlist.append(stim)
-                    else:
-                        raise Exception, '%s not valid pointprocess' % pptype
+                    command = cmd1 + pptype + cmd2  
+                    exec(command)
+                    for param in kwargs.keys():
+                        exec('stim.' + param + '=' + str(kwargs[param]))
+                    self.stimlist.append(stim)
                     
                     #record current
                     if record_current:
