@@ -8,26 +8,26 @@ import numpy as np
 import cPickle
 
 #LFPy-specific mechanisms
-installpath = os.getenv('LFPYPATH')
-morpho_path = os.path.join(installpath, 'morphologies')
+INSTALLPATH = os.getenv('LFPYPATH')
+MORPHO_PATH = os.path.join(INSTALLPATH, 'morphologies')
 
-_known_architectures = ['i386', 'i686', 'x86_64', 'umac', 'ppc']
-architecture = None
-for arch in _known_architectures:
-    if os.path.isdir(os.path.join(installpath, 'neuron', arch)):
-        architecture = arch
+KNOWN_ARCHITECTURES = ['i386', 'i686', 'x86_64', 'umac', 'ppc']
+ARCHITECTURE = None
+for arch in KNOWN_ARCHITECTURES:
+    if os.path.isdir(os.path.join(INSTALLPATH, 'neuron', arch)):
+        ARCHITECTURE = arch
         break
-if architecture is None:
-    errmsg = '\n'.join(['LFPy cannot find compiled neuron mechanisms!',
-    'Try running nrnivmodl in %s' %os.path.join(installpath, 'neuron'),
+if ARCHITECTURE is None:
+    ERRMSG = '\n'.join(['LFPy cannot find compiled neuron mechanisms!',
+    'Try running nrnivmodl in %s' %os.path.join(INSTALLPATH, 'neuron'),
     'LFPy knows about the following architectures:',
-    str(_known_architectures)])
-    raise Exception, errmsg
+    str(KNOWN_ARCHITECTURES)])
+    raise Exception, ERRMSG
 
 #loading the default LFPy mechanisms
-dll_filename = os.path.join(installpath,
-    'neuron', architecture, '.libs', 'libnrnmech.so')
-neuron.h.nrn_load_dll(dll_filename)
+DLL_FILENAME = os.path.join(INSTALLPATH,
+    'neuron', ARCHITECTURE, '.libs', 'libnrnmech.so')
+neuron.h.nrn_load_dll(DLL_FILENAME)
 
 class Cell(object):
     ''' The main cell class used in LFPy
@@ -75,9 +75,9 @@ class Cell(object):
                     nsegs_method='lambda100',
                     max_nsegs_length=30,
                     lambda_f = 100,
-                    custom_code=[],
-                    custom_fun=[],
-                    custom_fun_args=[],
+                    custom_code=None,
+                    custom_fun=None,
+                    custom_fun_args=None,
                     verbose=False):
         '''initialization of the Cell object.
         
@@ -115,7 +115,7 @@ class Cell(object):
         
         #Set path to morphology file
         if default_dir:
-            morpho_file = os.path.join(morpho_path, morphology)
+            morpho_file = os.path.join(MORPHO_PATH, morphology)
         else:
             morpho_file = morphology
         
@@ -160,7 +160,7 @@ class Cell(object):
         
         #set number of segments accd to rule, and calculate the number
         self._set_nsegs(nsegs_method, lambda_f, max_nsegs_length)
-        self._calc_totnsegs()
+        self.totnsegs = self._calc_totnsegs()
         if self.verbose:
             print "Total number of segments = ", self.totnsegs
         
@@ -202,11 +202,14 @@ class Cell(object):
         
         # run custom functions with arguments
         i = 0
-        for fun in custom_fun:
-            fun(**custom_fun_args[i])
-            i += 1
+        if custom_fun != None:
+            for fun in custom_fun:
+                fun(**custom_fun_args[i])
+                i +=  1
     
     def _set_nsegs(self, nsegs_method, lambda_f, max_nsegs_length):
+        '''Set number of segments per section according to lambda-rule,
+        or according to maximum length of segments'''
         if nsegs_method == 'lambda100':
             self._set_nsegs_lambda100()
         elif nsegs_method == 'lambda_f':
@@ -250,13 +253,10 @@ class Cell(object):
                     self.nsomasec += 1
                     self.somalist.append(sec)
                 elif sec.name()[:4] == 'axon':
-                    #naxonsec += 1
                     self.axonlist.append(sec)
                 elif sec.name()[:4] == 'dend':
-                    #ndendsec += 1
                     self.dendlist.append(sec)
                 elif sec.name()[:4] == 'apic':
-                    #napicsec += 1
                     self.apiclist.append(sec)
         elif neuron.h.sec_counted == 1:
             self.nsomasec = neuron.h.nsomasec
@@ -333,7 +333,7 @@ class Cell(object):
         for sec in self.allseclist:
             i += sec.nseg
         
-        self.totnsegs = i
+        return i
     
     def _check_currents(self):
         '''Check that the sum of all membrane and electrode currents over all
@@ -583,14 +583,8 @@ class Cell(object):
         return poss_idx[idx]
     
     def simulate(self, rec_i=True, rec_v=False, rec_ipas=False, rec_icap=False,
-                 rec_isyn=False, rec_vsyn=False, rec_istim=False,
-                 tstartms=None, tstopms=None):
+                 rec_isyn=False, rec_vsyn=False, rec_istim=False):
         '''Start NEURON simulation and record variables.'''
-        if tstartms != None:
-            self.tstartms = tstartms
-        if tstopms != None:
-            self.tstopms = tstopms
-        
         self._set_soma_volt_recorder()
         self._set_time_recorder()
         
@@ -810,15 +804,6 @@ class Cell(object):
                                               self.timeres_python+1))
                 memvrec.record(seg._ref_v, self.timeres_python)
                 self.memvreclist.append(memvrec)
-    
-#    #MOVE! EH Commented out, don't know of any use of this
-#    def calc_ireturn(self):
-#        self.ireturn = copy.copy(self.imem)
-#        
-#        for i in xrange(len(self.synapses)):
-#            idx = self.synapses[i].idx
-#            self.ireturn[idx] -= self.synapses[i].i
-#            #print 'Calc ireturn, idx', str(idx)
     
     def set_pos(self, xpos=0, ypos=0, zpos=0):
         '''Move the geometry so that midpoint of soma section is

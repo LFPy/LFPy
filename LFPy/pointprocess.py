@@ -122,22 +122,23 @@ class PointProcessElectrode(PointProcess):
         self.v = numpy.array(cell.synvreclist.o(self.hocidx))
 
 class PointProcessPlayInSoma:
+    '''class implementation of Eivind's playback alghorithm'''
     def __init__(self, soma_trace):
         '''Class for playing back somatic trace at specific time points
         into soma as boundary condition for the membrane voltage'''
         self.soma_trace = soma_trace
     
-    def set_play_in_soma(self, cell, t_on=np.array([0])):
+    def set_play_in_soma(self, cell, t_on=numpy.array([0])):
         '''Set mechanisms for playing soma trace at time(s) t_on,
-        where t_on is a np.array'''
-        if type(t_on) != np.ndarray:
-            t_on = np.array(t_on)
+        where t_on is a numpy.array'''
+        if type(t_on) != numpy.ndarray:
+            t_on = numpy.array(t_on)
         
         f = file(self.soma_trace)
         x = []
         for line in f.readlines():
             x.append(map(float, line.split()))
-        x = np.array(x)
+        x = numpy.array(x)
         X = x.T
         f.close()
         
@@ -156,13 +157,13 @@ class PointProcessPlayInSoma:
         somaTrace = trace
         
         for i in xrange(1, t_on.size):
-            np.concatenate((somaTvec, somaTvec0 + t_on[i]))
-            np.concatenate((somaTrace, trace))
+            numpy.concatenate((somaTvec, somaTvec0 + t_on[i]))
+            numpy.concatenate((somaTrace, trace))
         
-        somaTvec1 = np.interp(np.arange(somaTvec[0], somaTvec[-1], 
+        somaTvec1 = numpy.interp(numpy.arange(somaTvec[0], somaTvec[-1], 
                                 cell.timeres_NEURON),
                                 somaTvec, somaTvec)
-        somaTrace1 = np.interp(np.arange(somaTvec[0], somaTvec[-1],
+        somaTrace1 = numpy.interp(numpy.arange(somaTvec[0], somaTvec[-1],
                                 cell.timeres_NEURON),
                                 somaTvec, somaTrace)
         

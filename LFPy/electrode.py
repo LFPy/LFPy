@@ -3,8 +3,7 @@
 All rights reserved.'''
 import pylab as pl
 import sys
-import LFPy.lfpcalc as lfpcalc
-import LFPy.tools as tools
+from LFPy import lfpcalc, tools
 from multiprocessing import Process, Queue, freeze_support, cpu_count
 
 class Electrode(object):
