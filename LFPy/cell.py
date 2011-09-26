@@ -192,13 +192,14 @@ class Cell(object):
     def _run_custom_codes(self, custom_code, custom_fun, custom_fun_args):
         '''execute custom model code and functions with arguments'''
         # load custom codes
-        for code in custom_code:
-            if code.split('.')[-1] == 'hoc':
-                neuron.h.xopen(code)
-            elif code.split('.')[-1] == 'py':
-                exec(code)
-            else:
-                raise Exception, '%s not a .hoc- nor .py-file' % code
+        if custom_code != None:
+            for code in custom_code:
+                if code.split('.')[-1] == 'hoc':
+                    neuron.h.xopen(code)
+                elif code.split('.')[-1] == 'py':
+                    exec(code)
+                else:
+                    raise Exception, '%s not a .hoc- nor .py-file' % code
         
         # run custom functions with arguments
         i = 0
@@ -555,7 +556,6 @@ class Cell(object):
                                                 self.zmid[idx] < z_max))
         return idx[sel_z_idx]
                 
-    #move to tools.py
     def get_closest_idx(self, x=0, y=0, z=0, section='allsec'):
         '''Get the index number of a segment in specified section which 
         midpoint is closest to the coordinates defined by the user'''
@@ -566,7 +566,6 @@ class Cell(object):
         mindist = np.where(dist == np.min(dist))
         
         return int(idx[mindist])
-
     
     def get_rand_idx_area_norm(self, section='allsec', nidx=1,
                                z_min=-10000, z_max=10000):
@@ -634,7 +633,6 @@ class Cell(object):
         
         if rec_istim:
             self._collect_istim()
-
     
     def _calc_imem(self):
         '''fetching the vectors from the memireclist and calculate self.imem
@@ -701,12 +699,12 @@ class Cell(object):
         
         cvode = neuron.h.CVode()
         
+        #don't know if this is the way to do, but needed for variable dt method
         if neuron.h.dt <= 1E-8:
             cvode.active(1)
             cvode.atol(0.001)
         else:
             cvode.active(0)
-        
         
         #initialize state
         neuron.h.finitialize(self.v_init)
@@ -717,7 +715,6 @@ class Cell(object):
         else:
             neuron.h.fcurrent()
         neuron.h.frecord_init()
-        
         
         #Starting simulation at t != 0
         if self.tstartms != None:
@@ -736,8 +733,7 @@ class Cell(object):
             neuron.h.fadvance()
             counter += 1.
             if np.mod(counter, interval) == 0:
-                print 't = %.0f' % neuron.h.t
-        
+                print 't = %.0f' % neuron.h.t    
     
     def loadspikes(self):
         '''initialize spiketimes from netcon if they exist'''
