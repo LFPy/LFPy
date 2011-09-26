@@ -182,14 +182,18 @@ class Electrode(object):
         
         self.nCells = pl.array(self.c.keys()).size
     
-    def _test_imem_sum(self):
+    def _test_imem_sum(self, tolerance=1E-12):
         '''test that the membrane currents sum to zero'''
         for k in self.c:
-            sum_imem = abs(self.c[k].imem.sum()) / self.c[k].imem.size
-            if sum_imem > 1E-15:
-                print 'sum(|c[%i].imem|) / c[%i].imem.size = %.3e > 1E-15,'\
-                                                             % (k, k, sum_imem)
-                print 'Currents do not sum toward zero!'
+            sum_imem = self.c[k].imem.sum(axis=0)
+            if abs(sum_imem).max() >= tolerance:
+                print 'Membrane currents do not sum towards zero! They should!'
+                [inds] = pl.where((abs(sum_imem) >= tolerance))
+                for i in inds:
+                    print 'membrane current sum cell %i, timestep %i: %.3e' \
+                        % (k, i, sum_imem[i])
+            else:
+                pass
 
     def calc_lfp_threaded(self, t_indices=None, __name__='__main__',
                           NUMBER_OF_PROCESSES=None, ):
@@ -549,7 +553,8 @@ class Electrode(object):
         self.LFP = LFP_temp.sum(axis=0)
 
     def _lfp_el_pos_calc_dist(self, c, r_limit, sigma=0.3, radius=10, n=10,
-                             m=50, N=None, t_indices=None):
+                             m=50, N=None, t_indices=None, 
+                             method='linesource'):
         '''Calc. of LFP over an n-point integral approximation over flat
         electrode surface with radius r. The locations of these n points on
         the electrode surface are random,  within the given radius'''
@@ -599,7 +604,7 @@ class Electrode(object):
                         'r_limit' : r_limit,
                         'sigma' : sigma,
                         't_indices' : t_indices,
-                        'method' : self.method,
+                        'method' : method,
                     }
                     lfp_e[j, ] = lfpcalc.calc_lfp_choose(c, **variables)
 
