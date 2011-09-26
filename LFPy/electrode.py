@@ -4,6 +4,7 @@ All rights reserved.'''
 import pylab as pl
 import sys
 import LFPy.lfpcalc as lfpcalc
+import LFPy.tools as tools
 from multiprocessing import Process, Queue, freeze_support, cpu_count
 
 class Electrode(object):
@@ -41,6 +42,8 @@ class Electrode(object):
             # opt. radius of electrode as function of z
             'colors' : ['r', 'g', 'b', 'y'] #opt. color of electrode points in plots
             'perCellLFP' : False, #opt storing LFP-contrib from all cells
+            'from_file' : False, #option for importing cpickled cell objects
+            'cellfile' : None, #path to file with cell object(s)
         }
         c = LFPy.Cell(morphology=morphology)
         s = LFPy.Synapse(c, idx = 0)
@@ -74,7 +77,8 @@ class Electrode(object):
     def __init__(self, cell, sigma=0.3, x=100, y=0, z=0,
                  color='g', marker='o',
                  N=None, r=None, n=0, r_z=None, colors=None,
-                 perCellLFP=False, method='linesource'):
+                 perCellLFP=False, method='linesource', 
+                 from_file=False, cellfile=None):
         '''Initialize class Electrode'''
         self.sigma = sigma
         self.x = x
@@ -96,10 +100,19 @@ class Electrode(object):
         self.n = n
         self.r_z = r_z
         self.colors = colors
-        
         self.perCellLFP = perCellLFP
         
         self.method = method
+
+        if from_file:
+            if type(cellfile) == type(str()):
+                cell = tools.load(cellfile)
+            elif type(cellfile) == type([]):
+                cell = []
+                for fil in cellfile:
+                    cell.append(tools.load(fil))
+            else:
+                raise ValueError, 'cell either string or list of strings'
 
         self._import_c(cell)
         

@@ -10,29 +10,30 @@ ctypedef np.float64_t DTYPE_t
 
 cpdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] calc_lfp_choose(c,
                     double x=0, double y=0, double z=0, double sigma=0.3,
-                    r_limit=None, from_file=False, \
+                    r_limit=None, #from_file=False,
                     timestep=None, t_indices=None, method='linesource'):
     '''Determine which method to use, line-source for soma default'''
     if method == 'som_as_point':
         return calc_lfp_som_as_point(c, x=x, y=y, z=z, sigma=sigma,
-                                     r_limit=r_limit, from_file=from_file,
+                                     r_limit=r_limit, #from_file=from_file,
                                      timestep=timestep, t_indices=t_indices)
     elif method == 'linesource':
         return calc_lfp_linesource(c, x=x, y=y, z=z, sigma=sigma,
-                                   r_limit=r_limit, from_file=from_file,
+                                   r_limit=r_limit, #from_file=from_file,
                                    timestep=timestep, t_indices=t_indices)
     elif method == 'pointsource':
         return calc_lfp_pointsource(c, x=x, y=y, z=z, sigma=sigma,
-                                    r_limit=r_limit, from_file=from_file,
+                                    r_limit=r_limit, #from_file=from_file,
                                     timestep=timestep, t_indices=t_indices)
 
 cpdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] calc_lfp_linesource(c,
                         double x=0,
                         double y=0,
                         double z=0,
-                        double sigma=0.3, \
+                        double sigma=0.3,
                         r_limit=None,
-                        from_file=False, timestep=None, t_indices=None):
+                        #from_file=False, 
+                        timestep=None, t_indices=None):
     """Calculate electric field potential using the line-source method, all
     compartments treated as line sources, even soma."""
     #if from_file:
@@ -103,7 +104,7 @@ cpdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] calc_lfp_linesource(c,
 
 cpdef np.ndarray[DTYPE_t, ndim=1] calc_lfp_som_as_point(c,
                           double x=0, double y=0, double z=0, double sigma=0.3,
-                          r_limit=None, from_file=False,
+                          r_limit=None, #from_file=False,
                           timestep=None, t_indices=None):
     '''Calculate electric field potential using the line-source method,
     soma is treated as point/sphere source'''
@@ -383,8 +384,9 @@ cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] r2_calc(
 
     return abs(r2)
 
-cpdef calc_lfp_pointsource(c, x=0, y=0, z=0, sigma=0.3, \
-                        r_limit=None, from_file=False, timestep=None, t_indices=None):
+cpdef calc_lfp_pointsource(c, x=0, y=0, z=0, sigma=0.3,
+                        r_limit=None, #from_file=False, 
+                        timestep=None, t_indices=None):
     '''Calculate local field potentials using the point-source equation on all
     compartments'''
     #if from_file:

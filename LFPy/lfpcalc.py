@@ -1,24 +1,24 @@
 #!/usr/bin/env python
 '''Copyright (C) 2011 Computational Neuroscience Group, UMB.
 All rights reserved.'''
-import pylab as pl
-import LFPy
+import numpy as np
+#import LFPy
 
 def calc_lfp_choose(c, x=0, y=0, z=0, sigma=0.3,
-                    r_limit=None, from_file=False,
+                    r_limit=None, #from_file=False,
                     timestep=None, t_indices=None, method='linesource'):
     '''Determine which method to use, line-source for soma default'''
     if method == 'som_as_point':
         return calc_lfp_som_as_point(c, x=x, y=y, z=z, sigma=sigma,
-                                     r_limit=r_limit, from_file=from_file,
+                                     r_limit=r_limit, #from_file=from_file,
                                      timestep=timestep, t_indices=t_indices)
     elif method == 'linesource':
         return calc_lfp_linesource(c, x=x, y=y, z=z, sigma=sigma,
-                                   r_limit=r_limit, from_file=from_file,
+                                   r_limit=r_limit, #from_file=from_file,
                                    timestep=timestep, t_indices=t_indices)
     elif method == 'pointsource':
         return calc_lfp_pointsource(c, x=x, y=y, z=z, sigma=sigma,
-                                    r_limit=r_limit, from_file=from_file,
+                                    r_limit=r_limit, #from_file=from_file,
                                     timestep=timestep, t_indices=t_indices)
 
 def calc_lfp_linesource(c, x=0, y=0, z=0, sigma=0.3,
@@ -26,17 +26,17 @@ def calc_lfp_linesource(c, x=0, y=0, z=0, sigma=0.3,
                         timestep=None, t_indices=None):
     '''Calculate electric field potential using the line-source method, all
     compartments treated as line sources, even soma.'''
-    if from_file:
-        c = LFPy.tools.load(c)
+    #if from_file:
+    #    c = LFPy.tools.load(c)
 
     # Handling the r_limits. If a r_limit is a single value, an array r_limit
     # of shape c.diam is returned.
     if type(r_limit) == int or type(r_limit) == float:
-        r_limit = pl.ones(pl.shape(c.diam))*abs(r_limit)
-    elif pl.shape(r_limit) != pl.shape(c.diam):
+        r_limit = np.ones(np.shape(c.diam))*abs(r_limit)
+    elif np.shape(r_limit) != np.shape(c.diam):
         raise Exception, 'r_limit is neither a float- or int- value, nor is \
             r_limit.shape() equal to c.diam.shape()'
-
+    
     if timestep != None:
         currmem = c.imem[:, timestep]
     if t_indices != None:
@@ -51,13 +51,13 @@ def calc_lfp_linesource(c, x=0, y=0, z=0, sigma=0.3,
     yend = c.yend
     zstart = c.zstart
     zend = c.zend
-
+    
     deltaS = _deltaS_calc(xstart, xend, ystart, yend, zstart, zend)
     h = _h_calc(xstart, xend, ystart, yend, zstart, zend, deltaS, x, y, z)
     r2 = _r2_calc(xend, yend, zend, x, y, z, h)
 
     r2 = _check_rlimit(r2, r_limit, h, deltaS)
-
+    
     l = h + deltaS
 
     hnegi = h < 0
@@ -66,18 +66,19 @@ def calc_lfp_linesource(c, x=0, y=0, z=0, sigma=0.3,
     lposi = l >= 0
 
     #case i, h < 0, l < 0
-    [i] = pl.where(hnegi & lnegi)
+    [i] = np.where(hnegi & lnegi)
     #case ii, h < 0, l > 0
-    [ii] = pl.where(hnegi & lposi)
+    [ii] = np.where(hnegi & lposi)
     #case iii, h > 0, l > 0
-    [iii] = pl.where(hposi & lposi)
+    [iii] = np.where(hposi & lposi)
 
     Ememi = _Ememi_calc(i, currmem, sigma, deltaS, l, r2, h)
     Ememii = _Ememii_calc(ii, currmem, sigma, deltaS, l, r2, h)
     Ememiii = _Ememiii_calc(iii, currmem, sigma, deltaS, l, r2, h)
-
+    
+    
     Emem = Ememi + Ememii + Ememiii
-
+    
     return Emem.transpose()
 
 def calc_lfp_som_as_point(c, x=0, y=0, z=0, sigma=0.3,
@@ -86,19 +87,19 @@ def calc_lfp_som_as_point(c, x=0, y=0, z=0, sigma=0.3,
     '''Calculate electric field potential using the line-source method,
     soma is treated as point/sphere source'''
 
-    if from_file:
-        c = LFPy.tools.load(c)
+    #if from_file:
+    #    c = LFPy.tools.load(c)
 
     #Handling the r_limits. If a r_limit is a single value,
     #an array r_limit of shape c.diam is returned.
-    if type(r_limit) != type(pl.array([])):
-        r_limit = pl.array(r_limit)
+    if type(r_limit) != type(np.array([])):
+        r_limit = np.array(r_limit)
     if r_limit.shape == ():
         s_limit = r_limit
-        r_limit = pl.ones(c.diam.size) * abs(r_limit)
+        r_limit = np.ones(c.diam.size) * abs(r_limit)
     elif r_limit.shape == (2, ):
         s_limit = abs(r_limit[0])
-        r_limit = pl.ones(c.diam.size) * abs(r_limit[1])
+        r_limit = np.ones(c.diam.size) * abs(r_limit[1])
     elif r_limit.shape == c.diam.shape:
         s_limit = r_limit[0]
         r_limit = r_limit
@@ -136,12 +137,12 @@ def calc_lfp_som_as_point(c, x=0, y=0, z=0, sigma=0.3,
         r_soma = s_limit
 
     # Check that no segment is close the electrode than r_limit
-    if pl.sum(pl.nonzero( r2 < r_limit*r_limit )) > 0:
-        for idx in pl.nonzero( r2[1:] < r_limit[1:] * r_limit[1:] )[0]+1:
+    if np.sum(np.nonzero( r2 < r_limit*r_limit )) > 0:
+        for idx in np.nonzero( r2[1:] < r_limit[1:] * r_limit[1:] )[0]+1:
             if (h[idx] < r_limit[idx]) and \
             ((deltaS[idx] + h[idx]) > -r_limit[idx]):
                 print 'Adjusting distance to segment ', str(idx), ' from ', \
-                str(pl.sqrt(r2[idx])), ' to ', str(r_limit[idx]), '.'
+                str(np.sqrt(r2[idx])), ' to ', str(r_limit[idx]), '.'
                 r2[idx] = r_limit[idx] * r_limit[idx]
 
     l = h + deltaS
@@ -156,18 +157,18 @@ def calc_lfp_som_as_point(c, x=0, y=0, z=0, sigma=0.3,
 
     #Line sources
     #case i,  h < 0,  l < 0
-    i = pl.where(hnegi & lnegi)
+    i = np.where(hnegi & lnegi)
     #case ii,  h < 0,  l > 0
-    ii = pl.where(hnegi & lposi)
+    ii = np.where(hnegi & lposi)
     #case iii,  h > 0,  l > 0
-    iii = pl.where(hposi & lposi)
+    iii = np.where(hposi & lposi)
 
     Ememi = _Ememi_calc(i, currmem, sigma, deltaS, l, r2, h)
     Ememii = _Ememii_calc(ii, currmem, sigma, deltaS, l, r2, h)
     Ememiii = _Ememiii_calc(iii, currmem, sigma, deltaS, l, r2, h)
 
     #Potential contribution from soma
-    Emem0 = currmem[0]/(4 * pl.pi * sigma * r_soma)
+    Emem0 = currmem[0]/(4 * np.pi * sigma * r_soma)
 
     #Summarizing all potential contributions
     Emem = Emem0 + Ememi + Ememiii + Ememii
@@ -183,13 +184,13 @@ def _Ememi_calc(i, currmem, sigma, deltaS, l, r2, h):
     h_i = h[i]
     #sigma = sigma
 
-    aa = 1 / ( 4 * pl.pi * sigma * deltaS_i)
-    bb = pl.sqrt(h_i**2 + r2_i) - h_i
-    cc = pl.sqrt(l_i**2 + r2_i) - l_i
-    dd = aa * pl.log(bb / cc)
-
-    Emem_i = pl.dot(currmem_iT, dd)
-
+    aa = 1 / ( 4 * np.pi * sigma * deltaS_i)
+    bb = np.sqrt(h_i**2 + r2_i) - h_i
+    cc = np.sqrt(l_i**2 + r2_i) - l_i
+    dd = aa * np.log(bb / cc)
+    
+    Emem_i = np.dot(currmem_iT, dd)
+    
     return Emem_i
 
 def _Ememii_calc(ii, currmem, sigma, deltaS, l, r2, h):
@@ -200,12 +201,12 @@ def _Ememii_calc(ii, currmem, sigma, deltaS, l, r2, h):
     r2_ii = r2[ii]
     h_ii = h[ii]
 
-    aa = 1 / (4 * pl.pi * sigma * deltaS_ii)
-    bb = pl.sqrt(h_ii**2 + r2_ii) - h_ii
-    cc = (l_ii + pl.sqrt(l_ii**2 + r2_ii)) / r2_ii
-    dd = aa * pl.log(bb * cc)
+    aa = 1 / (4 * np.pi * sigma * deltaS_ii)
+    bb = np.sqrt(h_ii**2 + r2_ii) - h_ii
+    cc = (l_ii + np.sqrt(l_ii**2 + r2_ii)) / r2_ii
+    dd = aa * np.log(bb * cc)
 
-    Emem_ii = pl.dot(currmem_iiT, dd)
+    Emem_ii = np.dot(currmem_iiT, dd)
 
     return Emem_ii
 
@@ -217,30 +218,30 @@ def _Ememiii_calc(iii, currmem, sigma, deltaS, l, r2, h):
     h_iii = h[iii]
     deltaS_iii = deltaS[iii]
 
-    aa = 1 / (4 * pl.pi * sigma * deltaS_iii)
-    bb = pl.sqrt(l_iii**2 + r2_iii) + l_iii
-    cc = pl.sqrt(h_iii**2 + r2_iii) + h_iii
-    dd = aa * pl.log(bb / cc)
+    aa = 1 / (4 * np.pi * sigma * deltaS_iii)
+    bb = np.sqrt(l_iii**2 + r2_iii) + l_iii
+    cc = np.sqrt(h_iii**2 + r2_iii) + h_iii
+    dd = aa * np.log(bb / cc)
 
-    Emem_iii = pl.dot(currmem_iiiT, dd)
+    Emem_iii = np.dot(currmem_iiiT, dd)
 
     return Emem_iii
 
 def _deltaS_calc(xstart, xend, ystart, yend, zstart, zend):
     '''Subroutine used by calc_lfp_som_as_point()'''
-    deltaS = pl.sqrt( (xstart - xend)**2 + (ystart - yend)**2 + \
+    deltaS = np.sqrt( (xstart - xend)**2 + (ystart - yend)**2 + \
         (zstart-zend)**2)
 
     return deltaS
 
 def _h_calc(xstart, xend, ystart, yend, zstart, zend, deltaS, x, y, z):
     '''Subroutine used by calc_lfp_som_as_point()'''
-    h  = pl.zeros(xstart.size)
+    h  = np.zeros(xstart.size)
     for i in xrange(1, xstart.size):
         aa = [x - xend[i], y - yend[i], z - zend[i]]
         bb = [xend[i] - xstart[i], yend[i] - ystart[i], \
           zend[i] - zstart[i]]
-        cc = pl.dot(aa, bb)
+        cc = np.dot(aa, bb)
         h[i] = cc / deltaS[i]
     return h
 
@@ -252,18 +253,18 @@ def _r2_calc(xend, yend, zend, x, y, z, h):
 
 def _check_rlimit(r2, r_limit, h, deltaS):
     '''Check that no segment is close the electrode than r_limit'''
-    if pl.sum(pl.nonzero( r2 < r_limit*r_limit )) > 0:
-        for idx in pl.nonzero( r2 < r_limit*r_limit )[0]:
+    if np.sum(np.nonzero( r2 < r_limit*r_limit )) > 0:
+        for idx in np.nonzero( r2 < r_limit*r_limit )[0]:
             if (h[idx] < r_limit[idx]) and ((deltaS[idx]+h[idx]) >
                                              -r_limit[idx]):
                 print 'Adjusting distance to segment ', str(idx), ' from ', \
-                     str(pl.sqrt(r2[idx])), ' to ', str(r_limit[idx]), '.'
+                     str(np.sqrt(r2[idx])), ' to ', str(r_limit[idx]), '.'
                 r2[idx] = r_limit[idx]**2
     return r2
 
 def _r_soma_calc(xmid, ymid, zmid, x, y, z):
     '''calculate the distance to soma midpoint'''
-    r_soma = pl.sqrt((x - xmid)**2 + (y - ymid)**2 + \
+    r_soma = np.sqrt((x - xmid)**2 + (y - ymid)**2 + \
         (z - zmid)**2)
 
     return r_soma
@@ -273,14 +274,14 @@ def calc_lfp_pointsource(c, x=0, y=0, z=0, sigma=0.3,
                         timestep=None, t_indices=None):
     '''Calculate local field potentials using the point-source equation on all
     compartments'''
-    if from_file:
-        c = LFPy.tools.load(c)
+    #if from_file:
+    #    c = LFPy.tools.load(c)
 
     # Handling the r_limits. If a r_limit is a single value, an array r_limit
     # of shape c.diam is returned.
     if type(r_limit) == int or type(r_limit) == float:
-        r_limit = pl.ones(pl.shape(c.diam))*abs(r_limit)
-    elif pl.shape(r_limit) != pl.shape(c.diam):
+        r_limit = np.ones(np.shape(c.diam))*abs(r_limit)
+    elif np.shape(r_limit) != np.shape(c.diam):
         raise Exception, 'r_limit is neither a float- or int- value, nor is \
             r_limit.shape() equal to c.diam.shape()'
 
@@ -293,15 +294,15 @@ def calc_lfp_pointsource(c, x=0, y=0, z=0, sigma=0.3,
     
     r2 = (c.xmid - x)**2 + (c.ymid - y)**2 + (c.zmid - z)**2
     r2 = _check_rlimit_point(r2, r_limit)
-    r = pl.sqrt(r2)
+    r = np.sqrt(r2)
     
-    Emem = 1 / (4 * pl.pi * sigma) * pl.dot(currmem.T, 1/r)
+    Emem = 1 / (4 * np.pi * sigma) * np.dot(currmem.T, 1/r)
     
     return Emem.transpose()
 
 def _check_rlimit_point(r2, r_limit):
     '''Correct r2 so that r2 >= r_limit for all values'''
-    [inds] = pl.where(r2 < r_limit)
+    [inds] = np.where(r2 < r_limit)
     r2[inds] = r_limit[inds]
     
     return r2
