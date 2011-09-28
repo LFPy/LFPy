@@ -827,8 +827,15 @@ class Cell(object):
     
     def cellpickler(self, filename):
         '''Save data in cell to file, using cPickle.'''
+        #remove hoc objects from cell object
+        cell = self
+        for varname in dir(cell):
+            if type(getattr(cell, varname)) == type(neuron.h.List()):
+                delattr(cell, varname)
+                print 'deleted %s before pickling' % varname
+            
         filen = open(filename, 'wb')
-        cPickle.dump(self, filen, protocol=2)
+        cPickle.dump(cell, filen, protocol=2)
         filen.close()
     
     def _update_synapse_positions(self):
