@@ -22,7 +22,7 @@ def calc_lfp_choose(c, x=0, y=0, z=0, sigma=0.3,
                                     timestep=timestep, t_indices=t_indices)
 
 def calc_lfp_linesource(c, x=0, y=0, z=0, sigma=0.3,
-                        r_limit=None, from_file=False, 
+                        r_limit=None, #from_file=False, 
                         timestep=None, t_indices=None):
     '''Calculate electric field potential using the line-source method, all
     compartments treated as line sources, even soma.'''
@@ -71,7 +71,7 @@ def calc_lfp_linesource(c, x=0, y=0, z=0, sigma=0.3,
     [ii] = np.where(hnegi & lposi)
     #case iii, h > 0, l > 0
     [iii] = np.where(hposi & lposi)
-
+    
     Ememi = _Ememi_calc(i, currmem, sigma, deltaS, l, r2, h)
     Ememii = _Ememii_calc(ii, currmem, sigma, deltaS, l, r2, h)
     Ememiii = _Ememiii_calc(iii, currmem, sigma, deltaS, l, r2, h)
@@ -82,7 +82,7 @@ def calc_lfp_linesource(c, x=0, y=0, z=0, sigma=0.3,
     return Emem.transpose()
 
 def calc_lfp_som_as_point(c, x=0, y=0, z=0, sigma=0.3,
-                          r_limit=None, from_file=False, 
+                          r_limit=None, #from_file=False, 
                           timestep=None, t_indices=None):
     '''Calculate electric field potential using the line-source method,
     soma is treated as point/sphere source'''
@@ -162,7 +162,7 @@ def calc_lfp_som_as_point(c, x=0, y=0, z=0, sigma=0.3,
     ii = np.where(hnegi & lposi)
     #case iii,  h > 0,  l > 0
     iii = np.where(hposi & lposi)
-
+    
     Ememi = _Ememi_calc(i, currmem, sigma, deltaS, l, r2, h)
     Ememii = _Ememii_calc(ii, currmem, sigma, deltaS, l, r2, h)
     Ememiii = _Ememiii_calc(iii, currmem, sigma, deltaS, l, r2, h)
@@ -176,74 +176,74 @@ def calc_lfp_som_as_point(c, x=0, y=0, z=0, sigma=0.3,
     return Emem.transpose()
 
 def _Ememi_calc(i, currmem, sigma, deltaS, l, r2, h):
-    '''Subroutine used by calc_lfp_som_as_point()'''
+    '''Subroutine used by calc_lfp_*()'''
     currmem_iT = currmem[i].transpose()
     deltaS_i = deltaS[i]
     l_i = l[i]
     r2_i = r2[i]
     h_i = h[i]
-    #sigma = sigma
-
-    aa = 1 / ( 4 * np.pi * sigma * deltaS_i)
+    
+    aa = 4 * np.pi * sigma * deltaS_i
     bb = np.sqrt(h_i**2 + r2_i) - h_i
     cc = np.sqrt(l_i**2 + r2_i) - l_i
-    dd = aa * np.log(bb / cc)
+    dd = np.log(bb / cc) / aa
     
     Emem_i = np.dot(currmem_iT, dd)
     
     return Emem_i
 
 def _Ememii_calc(ii, currmem, sigma, deltaS, l, r2, h):
-    '''Subroutine used by calc_lfp_som_as_point()'''
+    '''Subroutine used by calc_lfp_*()'''
     currmem_iiT = currmem[ii].transpose()
     deltaS_ii = deltaS[ii]
     l_ii = l[ii]
     r2_ii = r2[ii]
     h_ii = h[ii]
 
-    aa = 1 / (4 * np.pi * sigma * deltaS_ii)
+    aa = 4 * np.pi * sigma * deltaS_ii
     bb = np.sqrt(h_ii**2 + r2_ii) - h_ii
     cc = (l_ii + np.sqrt(l_ii**2 + r2_ii)) / r2_ii
-    dd = aa * np.log(bb * cc)
-
+    dd = np.log(bb * cc) / aa
+    
     Emem_ii = np.dot(currmem_iiT, dd)
-
+    
     return Emem_ii
-
+    
 def _Ememiii_calc(iii, currmem, sigma, deltaS, l, r2, h):
-    '''Subroutine used by calc_lfp_som_as_point()'''
+    '''Subroutine used by calc_lfp_*()'''
     currmem_iiiT = currmem[iii].transpose()
     l_iii = l[iii]
     r2_iii = r2[iii]
     h_iii = h[iii]
     deltaS_iii = deltaS[iii]
 
-    aa = 1 / (4 * np.pi * sigma * deltaS_iii)
+    aa = 4 * np.pi * sigma * deltaS_iii
     bb = np.sqrt(l_iii**2 + r2_iii) + l_iii
     cc = np.sqrt(h_iii**2 + r2_iii) + h_iii
-    dd = aa * np.log(bb / cc)
+    dd = np.log(bb / cc) / aa
 
     Emem_iii = np.dot(currmem_iiiT, dd)
-
+    
     return Emem_iii
 
 def _deltaS_calc(xstart, xend, ystart, yend, zstart, zend):
-    '''Subroutine used by calc_lfp_som_as_point()'''
+    '''Subroutine used by calc_lfp_*()'''
     deltaS = np.sqrt( (xstart - xend)**2 + (ystart - yend)**2 + \
         (zstart-zend)**2)
 
     return deltaS
 
 def _h_calc(xstart, xend, ystart, yend, zstart, zend, deltaS, x, y, z):
-    '''Subroutine used by calc_lfp_som_as_point()'''
-    h  = np.zeros(xstart.size)
-    for i in xrange(1, xstart.size):
-        aa = [x - xend[i], y - yend[i], z - zend[i]]
-        bb = [xend[i] - xstart[i], yend[i] - ystart[i], \
-          zend[i] - zstart[i]]
-        cc = np.dot(aa, bb)
-        h[i] = cc / deltaS[i]
-    return h
+    '''Subroutine used by calc_lfp_*()'''
+    aa = np.array([x - xend, y - yend, z-zend])
+    bb = np.array([xend - xstart, yend - ystart, zend - zstart])
+    try:
+        cc = np.dot(aa.T, bb).diagonal()
+    except:
+        raise ValueError
+    hh = cc / deltaS
+    hh[0] = 0
+    return hh
 
 def _r2_calc(xend, yend, zend, x, y, z, h):
     '''Subroutine used by calc_lfp_*()'''
@@ -270,7 +270,7 @@ def _r_soma_calc(xmid, ymid, zmid, x, y, z):
     return r_soma
 
 def calc_lfp_pointsource(c, x=0, y=0, z=0, sigma=0.3,
-                        r_limit=None, from_file=False, 
+                        r_limit=None, #from_file=False, 
                         timestep=None, t_indices=None):
     '''Calculate local field potentials using the point-source equation on all
     compartments'''

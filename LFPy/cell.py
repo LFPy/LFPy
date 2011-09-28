@@ -142,7 +142,7 @@ class Cell(object):
         self.default_rotation = self._get_rotation()
         
         if passive:
-            #Set passive properties, insert passive on all compartments
+            #Set passive properties, insert passive on all segments
             self.Ra = Ra
             self.rm = rm
             self.cm = cm
@@ -324,7 +324,7 @@ class Cell(object):
         self._set_nsegs_lambda_f(100)
     
     def _set_nsegs_fixed_length(self, maxlength):
-        '''set nseg for sections so that not any compartment L >= maxlength'''
+        '''set nseg for sections so that not any segment L >= maxlength'''
         for sec in self.allseclist:
             sec.nseg = int(sec.L / maxlength) + 1
     
@@ -338,11 +338,11 @@ class Cell(object):
     
     def _check_currents(self):
         '''Check that the sum of all membrane and electrode currents over all
-        compartments is sufficiently close to zero'''
+        segments is sufficiently close to zero'''
         raise NotImplementedError, 'this function need to be written'
     
     def _set_passive(self):
-        '''insert passive mechanism on all compartments'''
+        '''insert passive mechanism on all segments'''
         for sec in self.allseclist:
             sec.insert('pas')
             sec.Ra = self.Ra
@@ -359,7 +359,7 @@ class Cell(object):
     def set_synapse(self, idx, syntype,
                     record_current=False, record_potential=False,
                     weight=None, **kwargs):
-        '''Insert syntype synapse on compartment with index idx, **kwargs
+        '''Insert syntype synapse on segment with index idx, **kwargs
         passed on from class Synapse.'''
 
         if not hasattr(self, 'synlist'):
@@ -411,7 +411,7 @@ class Cell(object):
 
     def set_point_process(self, idx, pptype, record_current=False,
                           **kwargs):
-        '''Insert pptype-electrode type pointprocess on compartment numbered
+        '''Insert pptype-electrode type pointprocess on segment numbered
         idx on cell object, with keyword arguments according to types:
         SEClamp, VClamp, IClamp, SinIClamp, ChirpIClamp.
         idx, pptype, **kwargs is passed on from PointProcess class.'''
@@ -485,7 +485,7 @@ class Cell(object):
         
         counter = 0
         
-        #loop over all compartments
+        #loop over all segments
         for sec in self.allseclist:
             if neuron.h.n3d() > 0:
                 #length of sections
@@ -526,7 +526,7 @@ class Cell(object):
         self.diam = np.array(diamvec)
     
     def _calc_midpoints(self):
-        '''calculate midpoints of each compartment'''
+        '''calculate midpoints of each segment'''
         self.xmid = .5*(self.xstart+self.xend)
         self.ymid = .5*(self.ystart+self.yend)
         self.zmid = .5*(self.zstart+self.zend)
@@ -762,7 +762,7 @@ class Cell(object):
                               self.timeres_python)
     
     def _set_imem_recorders(self):
-        '''record membrane currents for all compartments'''
+        '''record membrane currents for all segments'''
         self.memireclist = neuron.h.List()
         for sec in self.allseclist:
             for seg in sec:
@@ -772,7 +772,7 @@ class Cell(object):
                 self.memireclist.append(memirec)
     
     def _set_ipas_recorders(self):
-        '''record passive (ohmic) membrane currents for all compartments'''
+        '''record passive (ohmic) membrane currents for all segments'''
         self.memipasreclist = neuron.h.List()
         for sec in self.allseclist:
             for seg in sec:
@@ -782,7 +782,7 @@ class Cell(object):
                 self.memipasreclist.append(memipasrec)
     
     def _set_icap_recorders(self):
-        '''record passive (ohmic) membrane currents for all compartments'''
+        '''record passive (ohmic) membrane currents for all segments'''
         self.memicapreclist = neuron.h.List()
         for sec in self.allseclist:
             for seg in sec:
@@ -792,7 +792,7 @@ class Cell(object):
                 self.memicapreclist.append(memicaprec)
     
     def _set_voltage_recorders(self):
-        '''record membrane potentials for all compartments'''
+        '''record membrane potentials for all segments'''
         self.memvreclist = neuron.h.List()
         for sec in self.allseclist:
             for seg in sec:
@@ -852,12 +852,12 @@ class Cell(object):
                 [0, np.cos(theta), -np.sin(theta)],
                 [0, np.sin(theta), np.cos(theta)]])
             
-            rel_start, rel_end = self.rel_positions()
+            rel_start, rel_end = self._rel_positions()
             
             rel_start = rel_start * rotation_x
             rel_end = rel_end * rotation_x
             
-            self.real_positions(rel_start, rel_end)
+            self._real_positions(rel_start, rel_end)
             if self.verbose:
                 print 'Rotated geometry %g radians around x-axis' % (-theta)
         else:
@@ -871,12 +871,12 @@ class Cell(object):
                 [0, 1, 0],
                 [-np.sin(phi), 0, np.cos(phi)]])
             
-            rel_start, rel_end = self.rel_positions()
+            rel_start, rel_end = self._rel_positions()
             
             rel_start = rel_start * rotation_y
             rel_end = rel_end * rotation_y
             
-            self.real_positions(rel_start, rel_end)
+            self._real_positions(rel_start, rel_end)
             if self.verbose:
                 print 'Rotated geometry %g radians around y-axis' % (-phi)
         else:
@@ -890,12 +890,12 @@ class Cell(object):
                     [np.sin(gamma), np.cos(gamma), 0],
                     [0, 0, 1]])
             
-            rel_start, rel_end = self.rel_positions()
+            rel_start, rel_end = self._rel_positions()
             
             rel_start = rel_start * rotation_z
             rel_end = rel_end * rotation_z
             
-            self.real_positions(rel_start, rel_end)
+            self._real_positions(rel_start, rel_end)
             if self.verbose:
                 print 'Rotated geometry %g radians around z-axis' % (-gamma)
         else:
@@ -913,7 +913,7 @@ class Cell(object):
         self.zstart = np.squeeze(np.array(self.zstart))
         self.zend = np.squeeze(np.array(self.zend))
     
-    def rel_positions(self):
+    def _rel_positions(self):
         '''morphology relative to soma position'''
         rel_start = np.transpose(np.array([self.xstart-self.somapos[0], \
                                                 self.ystart-self.somapos[1], \
@@ -923,7 +923,7 @@ class Cell(object):
                                                 self.zend-self.somapos[2]]))
         return rel_start, rel_end
     
-    def real_positions(self, rel_start, rel_end):
+    def _real_positions(self, rel_start, rel_end):
         '''Morphology coordinates relative to Origo'''
         self.xstart = rel_start[:, 0] + self.somapos[0]
         self.ystart = rel_start[:, 1] + self.somapos[1]
@@ -939,10 +939,35 @@ class Cell(object):
     
     def get_rand_prob_area_norm(self, section='allsec', 
                                 z_min=-10000, z_max=10000):
-        '''Return the probability (0-1) for synaptic coupling on compartments
-        in section sum(prob)=1 over all compartments in section.
+        '''Return the probability (0-1) for synaptic coupling on segments
+        in section sum(prob)=1 over all segments in section.
         Prob. determined by area.'''
         idx = self.get_idx(section=section, z_min=z_min, z_max = z_max)
         prob = self.area[idx]/sum(self.area[idx])
         return prob
     
+    def get_intersegment_vector(self, idx0=0, idx1=0):
+        '''return the distance between midpoints of two segments with index
+        idx0 and idx1. The argument returned is a vector [x, y, z], where
+        x = self.xmid[idx1] - self.xmid[idx0] etc'''
+        vector = []
+        try:
+            if idx1 < 0 or idx0 < 0:
+                raise Exception
+            vector.append(self.xmid[idx1] - self.xmid[idx0])
+            vector.append(self.ymid[idx1] - self.ymid[idx0])
+            vector.append(self.zmid[idx1] - self.zmid[idx0])
+            return vector
+        except:
+            ERRMSG = 'idx0 and idx1 must be ints on [0, %i]' % self.totnsegs
+            raise ValueError, ERRMSG
+        
+    def get_intersegment_distance(self, idx0=0, idx1=0):
+        '''return the euclidian distance between midpoints of two segments 
+        with index idx0 and idx1.'''
+        try:
+            vector = np.array(self.get_intersegment_vector(idx0, idx1))
+            return np.sqrt((vector**2).sum())
+        except:
+            ERRMSG = 'idx0 and idx1 must be ints on [0, %i]' % self.totnsegs
+            raise ValueError, ERRMSG

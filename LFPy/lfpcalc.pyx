@@ -249,17 +249,17 @@ cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] Ememi_calc(
     cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] r2_i = r2[i]
     cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] h_i = h[i]
 
-    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] aa = 1 / ( 4 *
-                                                    np.pi * sigma * deltaS_i)
+    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] aa = 4 * \
+                                                    np.pi * sigma * deltaS_i
     cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] bb = np.sqrt(h_i *
                                                     h_i + r2_i) - h_i
     cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] cc = np.sqrt(l_i *
                                                     l_i + r2_i) - l_i
-    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] dd = aa * \
-                                                    np.log(bb / cc)
+    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] dd = \
+                                                    np.log(bb / cc) / aa
 
     cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] Emem_i = \
-        np.dot(currmem_iT, dd)
+		        					np.dot(currmem_iT, dd)
 
     return Emem_i
 
@@ -281,18 +281,18 @@ cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] Ememii_calc(
     cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] r2_ii = r2[ii]
     cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] h_ii = h[ii]
 
-    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] aa = 1 / (4 *
-                                                np.pi * sigma * deltaS_ii)
+    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] aa = 4 * \
+                                                np.pi * sigma * deltaS_ii
     cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] bb = np.sqrt(
                                                 h_ii*h_ii + r2_ii) - h_ii
     cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] cc = (l_ii +
                                         np.sqrt(l_ii*l_ii + r2_ii)) / r2_ii
-    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] dd = aa * \
-                                        np.log(bb * cc)
+    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] dd = \
+                                        np.log(bb * cc) / aa
 
     cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] Emem_ii = \
-                                        np.dot(currmem_iiT, dd)
-
+								np.dot(currmem_iiT, dd)
+										
     return Emem_ii
 
 
@@ -313,18 +313,18 @@ cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] Ememiii_calc(
     cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] deltaS_iii = \
         deltaS[iii]
 
-    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] aa = 1 / (4 *
-                                                np.pi * sigma * deltaS_iii)
+    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] aa = 4 * \
+                                                np.pi * sigma * deltaS_iii
     cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] bb = np.sqrt(
                                                 l_iii*l_iii + r2_iii) + l_iii
     cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] cc = np.sqrt(
                                                 h_iii*h_iii + r2_iii) + h_iii
-    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] dd = aa * \
-                                                np.log(bb / cc)
+    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] dd = \
+                                                np.log(bb / cc) / aa
 
     cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] Emem_iii = \
-                                                np.dot(currmem_iiiT, dd)
-
+    							np.dot(currmem_iiiT, dd)
+                                
     return Emem_iii
 
 
@@ -353,24 +353,15 @@ cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] h_calc(
                 np.ndarray[DTYPE_t, ndim=1, negative_indices=False] deltaS,
                 double x, double y, double z):
     '''Subroutine used by calc_lfp_som_as_point()'''
-    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] h = \
-        np.zeros(xstart.size)
-    cdef int i, j
-    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] aa, bb
-    cdef double cc
-    aa = np.zeros(3)
-    bb = np.zeros(3)
-    for i in xrange(1, xstart.shape[0]):
-        aa[0] = x - xend[i]
-        aa[1] = y - yend[i]
-        aa[2] = z - zend[i]
-        bb[0] = xend[i] - xstart[i]
-        bb[1] = yend[i] - ystart[i]
-        bb[2] = zend[i] - zstart[i]
-        cc = np.dot(aa, bb)
-        h[i] = cc / deltaS[i]
-    return h
+    cdef np.ndarray[DTYPE_t, ndim=2, negative_indices=False] aa, bb
+    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] cc, hh
 
+    aa = np.array([x - xend, y - yend, z-zend])
+    bb = np.array([xend - xstart, yend - ystart, zend - zstart])
+    cc = np.dot(aa.T, bb).diagonal() 
+    hh = cc / deltaS
+    hh[0] = 0
+    return hh
 
 cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] r2_calc(
             np.ndarray[DTYPE_t, ndim=1] xend,

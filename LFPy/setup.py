@@ -11,7 +11,7 @@ setup(
         include_dirs=[numpy.get_include()]
         ),
         #Extension("electrode",
-        #["electrode.pyx"],
+        #["electrode.py"],
         #include_dirs=[numpy.get_include()]
         #),
         #Extension("cell",

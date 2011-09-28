@@ -490,7 +490,7 @@ class Electrode(object):
                 
             
             dist_done_queue.put([circle, offsets, lfp_el_pos])
-
+    
     def calc_lfp(self, t_indices=None):
         '''Calculate LFP on electrode geometry from all cell instances.
         Will chose distributed calculated if electrode contain 'n', 'N', and 'r'
