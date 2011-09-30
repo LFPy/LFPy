@@ -12,7 +12,8 @@ Copyright (C) 2011 Computational Neuroscience Group, UMB.
 All rights reserved.
 
 :Classes:
-  * Cell - The neuron object itself laying on top of NEURON
+  * Cell - The pythonic neuron object itself laying on top of NEURON
+  * CellWithElectrode - Subclass of Cell that calculate LFP at every fadvance
   * PointProcessSynapse - Convenience class for inserting synapses onto Cell objects
   * PointProcessElectrode - Convenience class for inserting electrodes onto Cell objects
   * Electrode - Class for performing simulations of extracellular potentials
@@ -26,7 +27,8 @@ All rights reserved.
 from cell import Cell
 from pointprocess import Synapse, PointProcess, \
     PointProcessSynapse, PointProcessElectrode
-from electrode import Electrode
+from electrode import Electrode, ElectrodeThreaded, ElectrodeSetup
+from cellwithelectrode import CellWithElectrode
 
 import tools
 import inputgenerators

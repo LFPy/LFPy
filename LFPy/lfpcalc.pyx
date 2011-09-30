@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 '''Copyright (C) 2011 Computational Neuroscience Group, UMB.
 All rights reserved.'''
-cimport numpy as np
 import numpy as np
+cimport numpy as np
 #import LFPy
 DTYPE = np.float64
 ctypedef np.float64_t DTYPE_t

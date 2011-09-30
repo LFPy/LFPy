@@ -126,6 +126,13 @@ class Cell(object):
             raise Exception, "%s does not exist!" % morpho_file
         
         #Some parameters and lists initialised
+        if timeres_python not in 2.**np.arange(-16, -1) or timeres_NEURON \
+                not in 2.**np.arange(-16, -1):
+            print 'timeres_python and timeres_NEURON not a power of 2, less \
+            numerical accuracy may occur. Initialization will continue.'
+        if timeres_python < timeres_NEURON:
+            raise ValueError, 'timeres_python = %.3e < timeres_NEURON = %.3e' \
+                                        % (timeres_python, timeres_NEURON)
         self.timeres_python = timeres_python
         self.timeres_NEURON = timeres_NEURON
         

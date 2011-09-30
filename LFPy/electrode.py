@@ -6,7 +6,7 @@ import sys
 from LFPy import lfpcalc, tools
 from multiprocessing import Process, Queue, freeze_support, cpu_count
 
-class Electrode(object):
+class ElectrodeSetup(object):
     '''Main electrode class used in LFPy.
     The class takes dict.electrode geometries as input, or may produce itself
     by means of calling functions self.el_pos*(). It also takes LFPy.cell.Cell
@@ -77,7 +77,7 @@ class Electrode(object):
                  color='g', marker='o',
                  N=None, r=None, n=0, r_z=None, colors=None,
                  perCellLFP=False, method='linesource', 
-                 from_file=False, cellfile=None):
+                 from_file=False, cellfile=None, verbose=False):
         '''Initialize class Electrode'''
         self.sigma = sigma
         self.x = x
@@ -102,6 +102,7 @@ class Electrode(object):
         self.perCellLFP = perCellLFP
         
         self.method = method
+        self.verbose = verbose
 
         if from_file:
             if type(cellfile) == type(str()):
@@ -115,9 +116,13 @@ class Electrode(object):
 
         self._import_c(cell)
         
-        self._test_imem_sum()
-
-        print 'Class LFPy.Electrode() loaded!'
+                
+        #test that currents sum towards zero        
+        try:
+            self._test_imem_sum()
+        except:
+            pass
+        
 
     class cell():
         '''empty object that cell-specific variables are stored in'''
@@ -158,15 +163,15 @@ class Electrode(object):
             cell = celldict
         
         self.c = {}
-        if str(type(cell)) == "<class 'LFPy.cell.Cell'>" or \
-                    str(type(cell)) == "<class 'cell.Cell'>":
+        if str(type(cell))[:12] == "<class 'LFPy.cell.Cell'>"[:12] or \
+                    str(type(cell))[:12] == "<class 'cell.Cell'>"[:12]:
             self.c[0] = self.cell()
             for v in variables:
                 setattr(self.c[0], v, getattr(cell, v))
         elif type(cell) == dict:
             for k in cell:
-                if str(type(cell[k])) != "<class 'LFPy.cell.Cell'>":
-                    raise Exception, "Error! <type(cell[%s])> something else \
+                if str(type(cell[k]))[:12] != "<class 'LFPy.cell.Cell'>"[:12]:
+                    raise Exception,  "Error! <type(cell[%s])> something else \
                     than <LFPy.cell.Cell object>" % str(k)
                 self.c[k] = self.cell()
                 for v in variables:
@@ -194,6 +199,20 @@ class Electrode(object):
             else:
                 pass
 
+class ElectrodeThreaded(ElectrodeSetup):
+    '''This is an electrode implementation that uses Python multiprocessing to
+    distribute the LFP calculations on different cpu-cores'''
+    def __init__(self, cell, sigma=0.3, x=100, y=0, z=0,
+                 color='g', marker='o',
+                 N=None, r=None, n=0, r_z=None, colors=None,
+                 perCellLFP=False, method='linesource', 
+                 from_file=False, cellfile=None):
+        '''Initialization of class ElectrodeThreaded, with electrode setup
+        inherited from class ElectrodeSetup'''
+        ElectrodeSetup.__init__(self, cell, sigma, x, y, z, color, marker,
+                                 N, r, n, r_z, colors, perCellLFP, method,
+                                 from_file, cellfile)
+            
     def calc_lfp_threaded(self, t_indices=None, __name__='__main__',
                           NUMBER_OF_PROCESSES=None, ):
         '''Calculate LFP on electrode geometry from all cell instances.
@@ -323,7 +342,8 @@ class Electrode(object):
                 offsets = None
                 
                 done_queue.put([circle, offsets, k, LFP])
-            print 'Calculated potential contribution, cell %i.' % k
+            if self.verbose:
+                print 'Calculated potential contribution, cell %i.' % k
         
     
     def _calc_lfp_simple_threaded(self, c, LFP, **variables):
@@ -490,7 +510,19 @@ class Electrode(object):
                 
             
             dist_done_queue.put([circle, offsets, lfp_el_pos])
-    
+
+class Electrode(ElectrodeSetup):
+    def __init__(self, cell, sigma=0.3, x=100, y=0, z=0,
+                 color='g', marker='o',
+                 N=None, r=None, n=0, r_z=None, colors=None,
+                 perCellLFP=False, method='linesource', 
+                 from_file=False, cellfile=None):
+        '''This is the regular implementation of the Electrode class
+        that calculates the LFP serially using one core'''
+        ElectrodeSetup.__init__(self, cell, sigma, x, y, z, color, marker,
+                                N, r, n, r_z, colors, perCellLFP,
+                                method, from_file, cellfile)
+        
     def calc_lfp(self, t_indices=None):
         '''Calculate LFP on electrode geometry from all cell instances.
         Will chose distributed calculated if electrode contain 'n', 'N', and 'r'
@@ -545,7 +577,8 @@ class Electrode(object):
                         LFP_temp[k, i, ] = LFP_temp[k, i, ] + \
                                 lfpcalc.calc_lfp_choose(self.c[k], **variables)
 
-            print 'Calculated potential contribution, cell %i.' % k
+            if self.verbose:
+                print 'Calculated potential contribution, cell %i.' % k
         if self.perCellLFP:
             self.CellLFP = LFP_temp
         
