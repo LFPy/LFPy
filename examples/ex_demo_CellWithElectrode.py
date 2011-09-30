@@ -28,7 +28,7 @@ cellParameters = {
 cell = LFPy.CellWithElectrode(**cellParameters)
 
 synapseParameters = {
-    'idx' : cell.get_closest_idx(x=0, y=0, z=0), # compartment
+    'idx' : cell.get_closest_idx(x=0, y=0, z=800), # compartment
     'e' : 0,                                # reversal potential
     'syntype' : 'ExpSyn',                   # synapse type
     'tau' : 2,                              # syn. time constant
