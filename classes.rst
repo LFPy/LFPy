@@ -10,6 +10,12 @@ module :mod:`LFPy`
     .. autoclass:: Cell
         :members:
         :undoc-members:
+
+    class :class:`CellWithElectrode`
+    ================================
+    .. autoclass:: CellWithElectrode
+        :members:
+        :undoc-members:
     
     class :class:`PointProcess`
     ===========================
@@ -18,20 +24,32 @@ module :mod:`LFPy`
         :undoc-members:
 
     class :class:`PointProcessSynapse`
-    ======================
+    ==================================
     .. autoclass:: PointProcessSynapse
         :members:
         :undoc-members:
 
     class :class:`PointProcessElectrode`
-    ======================
+    ====================================
     .. autoclass:: PointProcessElectrode
+        :members:
+        :undoc-members:
+
+    class :class:`ElectrodeSetup`
+    =============================
+    .. autoclass:: ElectrodeSetup
         :members:
         :undoc-members:
 
     class :class:`Electrode`
     ========================
     .. autoclass:: Electrode
+        :members:
+        :undoc-members:
+
+    class :class:`ElectrodeThreaded`
+    ================================
+    .. autoclass:: ElectrodeThreaded
         :members:
         :undoc-members:
 

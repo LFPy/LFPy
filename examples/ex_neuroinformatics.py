@@ -37,7 +37,7 @@ electrodeParameters = {
 }
 
 electrode = LFPy.Electrode(cell, **electrodeParameters)
-electrode.calc_lfp_threaded()               # run LFP simulation
+electrode.calc_lfp()               # run LFP simulation
 
 
 def plotstuff():

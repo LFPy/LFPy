@@ -71,8 +71,7 @@ class ElectrodeSetup(object):
         figure()
         for i in xrange(el.x.size):
             plot(c.tvec, LFP_diff[i, ],  label='el. %i' % i)
-        legend()
-    '''
+        legend()'''
     def __init__(self, cell, sigma=0.3, x=100, y=0, z=0,
                  color='g', marker='o',
                  N=None, r=None, n=0, r_z=None, colors=None,
@@ -512,13 +511,15 @@ class ElectrodeThreaded(ElectrodeSetup):
             dist_done_queue.put([circle, offsets, lfp_el_pos])
 
 class Electrode(ElectrodeSetup):
+    '''This is the regular implementation of the Electrode class
+    that calculates the LFP serially using a single core'''
     def __init__(self, cell, sigma=0.3, x=100, y=0, z=0,
                  color='g', marker='o',
                  N=None, r=None, n=0, r_z=None, colors=None,
                  perCellLFP=False, method='linesource', 
                  from_file=False, cellfile=None):
         '''This is the regular implementation of the Electrode class
-        that calculates the LFP serially using one core'''
+        that calculates the LFP serially using a single core'''
         ElectrodeSetup.__init__(self, cell, sigma, x, y, z, color, marker,
                                 N, r, n, r_z, colors, perCellLFP,
                                 method, from_file, cellfile)

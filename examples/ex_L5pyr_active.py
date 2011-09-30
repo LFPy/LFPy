@@ -187,7 +187,8 @@ c.simulate(**simulateparams)
 
 #initialize electrode geometry, then calculate the LFP, using LFPy.Electrode cl.
 e = LFPy.Electrode(c,**electrodeparams)
-e.calc_lfp_threaded()
+#e.calc_lfp_threaded()
+e.calc_lfp()
 
 #plotting some variables and geometry, saving output to .pdf.
 plotstuff()

@@ -47,7 +47,7 @@
    <h1 id="index">Index</h1>
 
    <div class="genindex-jumpbox">
-   <a href="#C"><strong>C</strong></a> | <a href="#E"><strong>E</strong></a> | <a href="#G"><strong>G</strong></a> | <a href="#L"><strong>L</strong></a> | <a href="#N"><strong>N</strong></a> | <a href="#P"><strong>P</strong></a> | <a href="#R"><strong>R</strong></a> | <a href="#S"><strong>S</strong></a> | <a href="#T"><strong>T</strong></a> 
+   <a href="#C"><strong>C</strong></a> | <a href="#E"><strong>E</strong></a> | <a href="#G"><strong>G</strong></a> | <a href="#L"><strong>L</strong></a> | <a href="#N"><strong>N</strong></a> | <a href="#P"><strong>P</strong></a> | <a href="#R"><strong>R</strong></a> | <a href="#S"><strong>S</strong></a> | <a href="#T"><strong>T</strong></a> | <a href="#U"><strong>U</strong></a> 
    </div>
 <h2 id="C">C</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
@@ -57,11 +57,12 @@
     <dt><a href="classes.html#LFPy.lfpcalc.calc_lfp_linesource">calc_lfp_linesource() (in module LFPy.lfpcalc)</a></dt>
     <dt><a href="classes.html#LFPy.lfpcalc.calc_lfp_pointsource">calc_lfp_pointsource() (in module LFPy.lfpcalc)</a></dt>
     <dt><a href="classes.html#LFPy.lfpcalc.calc_lfp_som_as_point">calc_lfp_som_as_point() (in module LFPy.lfpcalc)</a></dt>
+    <dt><a href="classes.html#LFPy.ElectrodeThreaded.calc_lfp_threaded">calc_lfp_threaded() (LFPy.ElectrodeThreaded method)</a></dt>
 </dl></td>
   <td style="width: 33%" valign="top"><dl>
-    <dt><a href="classes.html#LFPy.Electrode.calc_lfp_threaded">calc_lfp_threaded() (LFPy.Electrode method)</a></dt>
     <dt><a href="classes.html#LFPy.Cell">Cell (class in LFPy)</a></dt>
     <dt><a href="classes.html#LFPy.Cell.cellpickler">cellpickler() (LFPy.Cell method)</a></dt>
+    <dt><a href="classes.html#LFPy.CellWithElectrode">CellWithElectrode (class in LFPy)</a></dt>
     <dt><a href="classes.html#LFPy.PointProcessElectrode.collect_current">collect_current() (LFPy.PointProcessElectrode method)</a></dt>
     <dd><dl>
       <dt><a href="classes.html#LFPy.PointProcessSynapse.collect_current">(LFPy.PointProcessSynapse method)</a></dt>
@@ -77,9 +78,11 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%" valign="top"><dl>
     <dt><a href="classes.html#LFPy.Electrode">Electrode (class in LFPy)</a></dt>
+    <dt><a href="classes.html#LFPy.ElectrodeSetup">ElectrodeSetup (class in LFPy)</a></dt>
 </dl></td>
   <td style="width: 33%" valign="top"><dl>
-    <dt><a href="classes.html#LFPy.Electrode.cell">Electrode.cell (class in LFPy)</a></dt>
+    <dt><a href="classes.html#LFPy.ElectrodeSetup.cell">ElectrodeSetup.cell (class in LFPy)</a></dt>
+    <dt><a href="classes.html#LFPy.ElectrodeThreaded">ElectrodeThreaded (class in LFPy)</a></dt>
 </dl></td>
 </tr></table>
 
@@ -88,10 +91,12 @@
   <td style="width: 33%" valign="top"><dl>
     <dt><a href="classes.html#LFPy.Cell.get_closest_idx">get_closest_idx() (LFPy.Cell method)</a></dt>
     <dt><a href="classes.html#LFPy.Cell.get_idx">get_idx() (LFPy.Cell method)</a></dt>
+    <dt><a href="classes.html#LFPy.Cell.get_intersegment_distance">get_intersegment_distance() (LFPy.Cell method)</a></dt>
+    <dt><a href="classes.html#LFPy.Cell.get_intersegment_vector">get_intersegment_vector() (LFPy.Cell method)</a></dt>
     <dt><a href="classes.html#LFPy.inputgenerators.get_normal_input_times">get_normal_input_times() (in module LFPy.inputgenerators)</a></dt>
-    <dt><a href="classes.html#LFPy.inputgenerators.get_normal_spike_times">get_normal_spike_times() (in module LFPy.inputgenerators)</a></dt>
 </dl></td>
   <td style="width: 33%" valign="top"><dl>
+    <dt><a href="classes.html#LFPy.inputgenerators.get_normal_spike_times">get_normal_spike_times() (in module LFPy.inputgenerators)</a></dt>
     <dt><a href="classes.html#LFPy.Cell.get_rand_idx_area_norm">get_rand_idx_area_norm() (LFPy.Cell method)</a></dt>
     <dt><a href="classes.html#LFPy.Cell.get_rand_prob_area_norm">get_rand_prob_area_norm() (LFPy.Cell method)</a></dt>
     <dt><a href="classes.html#LFPy.inputgenerators.get_rand_spike_times">get_rand_spike_times() (in module LFPy.inputgenerators)</a></dt>
@@ -122,6 +127,7 @@
 <h2 id="P">P</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%" valign="top"><dl>
+    <dt><a href="classes.html#LFPy.PointProcess">PointProcess (class in LFPy)</a></dt>
     <dt><a href="classes.html#LFPy.PointProcessElectrode">PointProcessElectrode (class in LFPy)</a></dt>
 </dl></td>
   <td style="width: 33%" valign="top"><dl>
@@ -132,10 +138,6 @@
 <h2 id="R">R</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%" valign="top"><dl>
-    <dt><a href="classes.html#LFPy.Cell.real_positions">real_positions() (LFPy.Cell method)</a></dt>
-    <dt><a href="classes.html#LFPy.Cell.rel_positions">rel_positions() (LFPy.Cell method)</a></dt>
-</dl></td>
-  <td style="width: 33%" valign="top"><dl>
     <dt><a href="classes.html#LFPy.Cell.rotate_xyz">rotate_xyz() (LFPy.Cell method)</a></dt>
 </dl></td>
 </tr></table>
@@ -143,14 +145,16 @@
 <h2 id="S">S</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%" valign="top"><dl>
-    <dt><a href="classes.html#LFPy.Cell.set_play_in_soma">set_play_in_soma() (LFPy.Cell method)</a></dt>
     <dt><a href="classes.html#LFPy.Cell.set_point_process">set_point_process() (LFPy.Cell method)</a></dt>
     <dt><a href="classes.html#LFPy.Cell.set_pos">set_pos() (LFPy.Cell method)</a></dt>
     <dt><a href="classes.html#LFPy.PointProcessSynapse.set_spike_times">set_spike_times() (LFPy.PointProcessSynapse method)</a></dt>
+    <dt><a href="classes.html#LFPy.Cell.set_synapse">set_synapse() (LFPy.Cell method)</a></dt>
 </dl></td>
   <td style="width: 33%" valign="top"><dl>
-    <dt><a href="classes.html#LFPy.Cell.set_synapse">set_synapse() (LFPy.Cell method)</a></dt>
     <dt><a href="classes.html#LFPy.Cell.simulate">simulate() (LFPy.Cell method)</a></dt>
+    <dd><dl>
+      <dt><a href="classes.html#LFPy.CellWithElectrode.simulate">(LFPy.CellWithElectrode method)</a></dt>
+  </dl></dd>
     <dt><a href="classes.html#LFPy.inputgenerators.stationary_gamma">stationary_gamma() (in module LFPy.inputgenerators)</a></dt>
     <dt><a href="classes.html#LFPy.inputgenerators.stationary_poisson">stationary_poisson() (in module LFPy.inputgenerators)</a></dt>
 </dl></td>
@@ -160,6 +164,13 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%" valign="top"><dl>
     <dt><a href="classes.html#LFPy.inputgenerators.test_spiketimes">test_spiketimes() (in module LFPy.inputgenerators)</a></dt>
+</dl></td>
+</tr></table>
+
+<h2 id="U">U</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%" valign="top"><dl>
+    <dt><a href="classes.html#LFPy.PointProcess.update_pos">update_pos() (LFPy.PointProcess method)</a></dt>
 </dl></td>
 </tr></table>
 

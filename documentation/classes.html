@@ -62,7 +62,8 @@ All rights reserved.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field"><th class="field-name">Classes:</th><td class="field-body"><ul class="first simple">
-<li>Cell - The neuron object itself laying on top of NEURON</li>
+<li>Cell - The pythonic neuron object itself laying on top of NEURON</li>
+<li>CellWithElectrode - Subclass of Cell that calculate LFP at every fadvance</li>
 <li>PointProcessSynapse - Convenience class for inserting synapses onto Cell objects</li>
 <li>PointProcessElectrode - Convenience class for inserting electrodes onto Cell objects</li>
 <li>Electrode - Class for performing simulations of extracellular potentials</li>
@@ -82,7 +83,7 @@ All rights reserved.</p>
 <h2>class <a class="reference internal" href="#LFPy.Cell" title="LFPy.Cell"><tt class="xref py py-class docutils literal"><span class="pre">Cell</span></tt></a><a class="headerlink" href="#class-cell" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="LFPy.Cell">
-<em class="property">class </em><tt class="descclassname">LFPy.</tt><tt class="descname">Cell</tt><big>(</big><em>morphology</em>, <em>default_dir=True</em>, <em>v_init=-65.0</em>, <em>Ra=150</em>, <em>rm=30000</em>, <em>cm=1.0</em>, <em>e_pas=-65.0</em>, <em>passive=True</em>, <em>timeres_NEURON=0.125</em>, <em>timeres_python=0.125</em>, <em>tstartms=0</em>, <em>tstopms=100</em>, <em>nsegs_method='lambda100'</em>, <em>max_nsegs_length=30</em>, <em>lambda_f=100</em>, <em>custom_code=</em><span class="optional">[</span><span class="optional">]</span>, <em>custom_fun=</em><span class="optional">[</span><span class="optional">]</span>, <em>custom_fun_args=</em><span class="optional">[</span><span class="optional">]</span>, <em>play_in_soma=False</em>, <em>soma_trace=''</em>, <em>verbose=False</em><big>)</big><a class="headerlink" href="#LFPy.Cell" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">LFPy.</tt><tt class="descname">Cell</tt><big>(</big><em>morphology</em>, <em>default_dir=True</em>, <em>v_init=-65.0</em>, <em>Ra=150</em>, <em>rm=30000</em>, <em>cm=1.0</em>, <em>e_pas=-65.0</em>, <em>passive=True</em>, <em>timeres_NEURON=0.125</em>, <em>timeres_python=0.125</em>, <em>tstartms=0</em>, <em>tstopms=100</em>, <em>nsegs_method='lambda100'</em>, <em>max_nsegs_length=30</em>, <em>lambda_f=100</em>, <em>custom_code=None</em>, <em>custom_fun=None</em>, <em>custom_fun_args=None</em>, <em>verbose=False</em><big>)</big><a class="headerlink" href="#LFPy.Cell" title="Permalink to this definition">¶</a></dt>
 <dd><p>The main cell class used in LFPy</p>
 <p>Inputs:</p>
 <div class="highlight-python"><pre>morphology : morphology file;
@@ -131,6 +132,21 @@ midpoint is closest to the coordinates defined by the user</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="LFPy.Cell.get_intersegment_distance">
+<tt class="descname">get_intersegment_distance</tt><big>(</big><em>idx0=0</em>, <em>idx1=0</em><big>)</big><a class="headerlink" href="#LFPy.Cell.get_intersegment_distance" title="Permalink to this definition">¶</a></dt>
+<dd><p>return the euclidian distance between midpoints of two segments 
+with index idx0 and idx1.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="LFPy.Cell.get_intersegment_vector">
+<tt class="descname">get_intersegment_vector</tt><big>(</big><em>idx0=0</em>, <em>idx1=0</em><big>)</big><a class="headerlink" href="#LFPy.Cell.get_intersegment_vector" title="Permalink to this definition">¶</a></dt>
+<dd><p>return the distance between midpoints of two segments with index
+idx0 and idx1. The argument returned is a vector [x, y, z], where
+x = self.xmid[idx1] - self.xmid[idx0] etc</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="LFPy.Cell.get_rand_idx_area_norm">
 <tt class="descname">get_rand_idx_area_norm</tt><big>(</big><em>section='allsec'</em>, <em>nidx=1</em>, <em>z_min=-10000</em>, <em>z_max=10000</em><big>)</big><a class="headerlink" href="#LFPy.Cell.get_rand_idx_area_norm" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return nidx segment indices in section with random probability
@@ -141,8 +157,8 @@ interval [z_min, z_max]</p>
 <dl class="method">
 <dt id="LFPy.Cell.get_rand_prob_area_norm">
 <tt class="descname">get_rand_prob_area_norm</tt><big>(</big><em>section='allsec'</em>, <em>z_min=-10000</em>, <em>z_max=10000</em><big>)</big><a class="headerlink" href="#LFPy.Cell.get_rand_prob_area_norm" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return the probability (0-1) for synaptic coupling on compartments
-in section sum(prob)=1 over all compartments in section.
+<dd><p>Return the probability (0-1) for synaptic coupling on segments
+in section sum(prob)=1 over all segments in section.
 Prob. determined by area.</p>
 </dd></dl>
 
@@ -150,18 +166,6 @@ Prob. determined by area.</p>
 <dt id="LFPy.Cell.loadspikes">
 <tt class="descname">loadspikes</tt><big>(</big><big>)</big><a class="headerlink" href="#LFPy.Cell.loadspikes" title="Permalink to this definition">¶</a></dt>
 <dd><p>initialize spiketimes from netcon if they exist</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="LFPy.Cell.real_positions">
-<tt class="descname">real_positions</tt><big>(</big><em>rel_start</em>, <em>rel_end</em><big>)</big><a class="headerlink" href="#LFPy.Cell.real_positions" title="Permalink to this definition">¶</a></dt>
-<dd><p>Morphology coordinates relative to Origo</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="LFPy.Cell.rel_positions">
-<tt class="descname">rel_positions</tt><big>(</big><big>)</big><a class="headerlink" href="#LFPy.Cell.rel_positions" title="Permalink to this definition">¶</a></dt>
-<dd><p>morphology relative to soma position</p>
 </dd></dl>
 
 <dl class="method">
@@ -176,16 +180,9 @@ c.rotate_xyz(rotation)</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="LFPy.Cell.set_play_in_soma">
-<tt class="descname">set_play_in_soma</tt><big>(</big><em>t_on=array([0])</em><big>)</big><a class="headerlink" href="#LFPy.Cell.set_play_in_soma" title="Permalink to this definition">¶</a></dt>
-<dd><p>Set mechanisms for playing soma trace at time(s) t_on,
-where t_on is a np.array</p>
-</dd></dl>
-
-<dl class="method">
 <dt id="LFPy.Cell.set_point_process">
-<tt class="descname">set_point_process</tt><big>(</big><em>idx</em>, <em>pptype</em>, <em>record_current=False</em>, <em>amp=None</em>, <em>dur=None</em>, <em>delay=None</em>, <em>amp1=None</em>, <em>dur1=None</em>, <em>amp2=None</em>, <em>dur2=None</em>, <em>amp3=None</em>, <em>dur3=None</em>, <em>rs=None</em>, <em>pkamp=None</em>, <em>freq=None</em>, <em>phase=None</em>, <em>chirp_rate=None</em><big>)</big><a class="headerlink" href="#LFPy.Cell.set_point_process" title="Permalink to this definition">¶</a></dt>
-<dd><p>Insert pptype-electrode type pointprocess on compartment numbered
+<tt class="descname">set_point_process</tt><big>(</big><em>idx</em>, <em>pptype</em>, <em>record_current=False</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#LFPy.Cell.set_point_process" title="Permalink to this definition">¶</a></dt>
+<dd><p>Insert pptype-electrode type pointprocess on segment numbered
 idx on cell object, with keyword arguments according to types:
 SEClamp, VClamp, IClamp, SinIClamp, ChirpIClamp.
 idx, pptype, <a href="#id1"><span class="problematic" id="id2">**</span></a>kwargs is passed on from PointProcess class.</p>
@@ -201,23 +198,50 @@ in (xpos, ypos, zpos)</p>
 <dl class="method">
 <dt id="LFPy.Cell.set_synapse">
 <tt class="descname">set_synapse</tt><big>(</big><em>idx</em>, <em>syntype</em>, <em>record_current=False</em>, <em>record_potential=False</em>, <em>weight=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#LFPy.Cell.set_synapse" title="Permalink to this definition">¶</a></dt>
-<dd><p>Insert syntype synapse on compartment with index idx, <a href="#id3"><span class="problematic" id="id4">**</span></a>kwargs
+<dd><p>Insert syntype synapse on segment with index idx, <a href="#id3"><span class="problematic" id="id4">**</span></a>kwargs
 passed on from class Synapse.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="LFPy.Cell.simulate">
-<tt class="descname">simulate</tt><big>(</big><em>rec_i=True</em>, <em>rec_v=False</em>, <em>rec_ipas=False</em>, <em>rec_icap=False</em>, <em>rec_isyn=False</em>, <em>rec_vsyn=False</em>, <em>rec_istim=False</em>, <em>tstartms=None</em>, <em>tstopms=None</em><big>)</big><a class="headerlink" href="#LFPy.Cell.simulate" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">simulate</tt><big>(</big><em>rec_i=True</em>, <em>rec_v=False</em>, <em>rec_ipas=False</em>, <em>rec_icap=False</em>, <em>rec_isyn=False</em>, <em>rec_vsyn=False</em>, <em>rec_istim=False</em><big>)</big><a class="headerlink" href="#LFPy.Cell.simulate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Start NEURON simulation and record variables.</p>
 </dd></dl>
 
 </dd></dl>
 
-<p>#class <tt class="xref py py-class docutils literal"><span class="pre">PointProcess</span></tt>
-#===========================
-#.. autoclass:: PointProcess
-#    :members:
-#    :undoc-members:</p>
+</div>
+<div class="section" id="class-cellwithelectrode">
+<h2>class <a class="reference internal" href="#LFPy.CellWithElectrode" title="LFPy.CellWithElectrode"><tt class="xref py py-class docutils literal"><span class="pre">CellWithElectrode</span></tt></a><a class="headerlink" href="#class-cellwithelectrode" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="LFPy.CellWithElectrode">
+<em class="property">class </em><tt class="descclassname">LFPy.</tt><tt class="descname">CellWithElectrode</tt><a class="headerlink" href="#LFPy.CellWithElectrode" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="LFPy.CellWithElectrode.simulate">
+<tt class="descname">simulate</tt><big>(</big><big>)</big><a class="headerlink" href="#LFPy.CellWithElectrode.simulate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Start NEURON simulation and record variables.
+<a href="#id5"><span class="problematic" id="id6">**</span></a>kwargs are the electrode parameters corresponding to the
+input to the class LFPy.Electrode</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="class-pointprocess">
+<h2>class <a class="reference internal" href="#LFPy.PointProcess" title="LFPy.PointProcess"><tt class="xref py py-class docutils literal"><span class="pre">PointProcess</span></tt></a><a class="headerlink" href="#class-pointprocess" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="LFPy.PointProcess">
+<em class="property">class </em><tt class="descclassname">LFPy.</tt><tt class="descname">PointProcess</tt><big>(</big><em>cell</em>, <em>idx</em>, <em>color='k'</em>, <em>marker='o'</em>, <em>record_current=False</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#LFPy.PointProcess" title="Permalink to this definition">¶</a></dt>
+<dd><p>Superclass on top of PointProcessSynapse, PointProcessElectrode, 
+just to set some common variables</p>
+<dl class="method">
+<dt id="LFPy.PointProcess.update_pos">
+<tt class="descname">update_pos</tt><big>(</big><em>cell</em><big>)</big><a class="headerlink" href="#LFPy.PointProcess.update_pos" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extract coordinate of point-process to geometry</p>
+</dd></dl>
+
+</dd></dl>
+
 </div>
 <div class="section" id="class-pointprocesssynapse">
 <h2>class <a class="reference internal" href="#LFPy.PointProcessSynapse" title="LFPy.PointProcessSynapse"><tt class="xref py py-class docutils literal"><span class="pre">PointProcessSynapse</span></tt></a><a class="headerlink" href="#class-pointprocesssynapse" title="Permalink to this headline">¶</a></h2>
@@ -269,11 +293,11 @@ Electrode currents go here, whics make membrane currents not sum to zero</p>
 </dd></dl>
 
 </div>
-<div class="section" id="class-electrode">
-<h2>class <a class="reference internal" href="#LFPy.Electrode" title="LFPy.Electrode"><tt class="xref py py-class docutils literal"><span class="pre">Electrode</span></tt></a><a class="headerlink" href="#class-electrode" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="class-electrodesetup">
+<h2>class <a class="reference internal" href="#LFPy.ElectrodeSetup" title="LFPy.ElectrodeSetup"><tt class="xref py py-class docutils literal"><span class="pre">ElectrodeSetup</span></tt></a><a class="headerlink" href="#class-electrodesetup" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
-<dt id="LFPy.Electrode">
-<em class="property">class </em><tt class="descclassname">LFPy.</tt><tt class="descname">Electrode</tt><big>(</big><em>cell</em>, <em>sigma=0.3</em>, <em>x=100</em>, <em>y=0</em>, <em>z=0</em>, <em>color='g'</em>, <em>marker='o'</em>, <em>N=None</em>, <em>r=None</em>, <em>n=0</em>, <em>r_z=None</em>, <em>colors=None</em>, <em>perCellLFP=False</em>, <em>method='linesource'</em><big>)</big><a class="headerlink" href="#LFPy.Electrode" title="Permalink to this definition">¶</a></dt>
+<dt id="LFPy.ElectrodeSetup">
+<em class="property">class </em><tt class="descclassname">LFPy.</tt><tt class="descname">ElectrodeSetup</tt><big>(</big><em>cell</em>, <em>sigma=0.3</em>, <em>x=100</em>, <em>y=0</em>, <em>z=0</em>, <em>color='g'</em>, <em>marker='o'</em>, <em>N=None</em>, <em>r=None</em>, <em>n=0</em>, <em>r_z=None</em>, <em>colors=None</em>, <em>perCellLFP=False</em>, <em>method='linesource'</em>, <em>from_file=False</em>, <em>cellfile=None</em>, <em>verbose=False</em><big>)</big><a class="headerlink" href="#LFPy.ElectrodeSetup" title="Permalink to this definition">¶</a></dt>
 <dd><p>Main electrode class used in LFPy.
 The class takes dict.electrode geometries as input, or may produce itself
 by means of calling functions self.el_pos*(). It also takes LFPy.cell.Cell
@@ -302,6 +326,8 @@ electrode = {
     # opt. radius of electrode as function of z
     'colors' : ['r', 'g', 'b', 'y'] #opt. color of electrode points in plots
     'perCellLFP' : False, #opt storing LFP-contrib from all cells
+    'from_file' : False, #option for importing cpickled cell objects
+    'cellfile' : None, #path to file with cell object(s)
 }
 c = LFPy.Cell(morphology=morphology)
 s = LFPy.Synapse(c, idx = 0)
@@ -332,6 +358,22 @@ for i in xrange(el.x.size):
     plot(c.tvec, LFP_diff[i, ],  label='el. %i' % i)
 legend()</pre>
 </div>
+<dl class="class">
+<dt id="LFPy.ElectrodeSetup.cell">
+<em class="property">class </em><tt class="descname">cell</tt><a class="headerlink" href="#LFPy.ElectrodeSetup.cell" title="Permalink to this definition">¶</a></dt>
+<dd><p>empty object that cell-specific variables are stored in</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="class-electrode">
+<h2>class <a class="reference internal" href="#LFPy.Electrode" title="LFPy.Electrode"><tt class="xref py py-class docutils literal"><span class="pre">Electrode</span></tt></a><a class="headerlink" href="#class-electrode" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="LFPy.Electrode">
+<em class="property">class </em><tt class="descclassname">LFPy.</tt><tt class="descname">Electrode</tt><big>(</big><em>cell</em>, <em>sigma=0.3</em>, <em>x=100</em>, <em>y=0</em>, <em>z=0</em>, <em>color='g'</em>, <em>marker='o'</em>, <em>N=None</em>, <em>r=None</em>, <em>n=0</em>, <em>r_z=None</em>, <em>colors=None</em>, <em>perCellLFP=False</em>, <em>method='linesource'</em>, <em>from_file=False</em>, <em>cellfile=None</em><big>)</big><a class="headerlink" href="#LFPy.Electrode" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the regular implementation of the Electrode class
+that calculates the LFP serially using a single core</p>
 <dl class="method">
 <dt id="LFPy.Electrode.calc_lfp">
 <tt class="descname">calc_lfp</tt><big>(</big><em>t_indices=None</em><big>)</big><a class="headerlink" href="#LFPy.Electrode.calc_lfp" title="Permalink to this definition">¶</a></dt>
@@ -339,18 +381,22 @@ legend()</pre>
 Will chose distributed calculated if electrode contain &#8216;n&#8217;, &#8216;N&#8217;, and &#8216;r&#8217;</p>
 </dd></dl>
 
+</dd></dl>
+
+</div>
+<div class="section" id="class-electrodethreaded">
+<h2>class <a class="reference internal" href="#LFPy.ElectrodeThreaded" title="LFPy.ElectrodeThreaded"><tt class="xref py py-class docutils literal"><span class="pre">ElectrodeThreaded</span></tt></a><a class="headerlink" href="#class-electrodethreaded" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="LFPy.ElectrodeThreaded">
+<em class="property">class </em><tt class="descclassname">LFPy.</tt><tt class="descname">ElectrodeThreaded</tt><big>(</big><em>cell</em>, <em>sigma=0.3</em>, <em>x=100</em>, <em>y=0</em>, <em>z=0</em>, <em>color='g'</em>, <em>marker='o'</em>, <em>N=None</em>, <em>r=None</em>, <em>n=0</em>, <em>r_z=None</em>, <em>colors=None</em>, <em>perCellLFP=False</em>, <em>method='linesource'</em>, <em>from_file=False</em>, <em>cellfile=None</em><big>)</big><a class="headerlink" href="#LFPy.ElectrodeThreaded" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is an electrode implementation that uses Python multiprocessing to
+distribute the LFP calculations on different cpu-cores</p>
 <dl class="method">
-<dt id="LFPy.Electrode.calc_lfp_threaded">
-<tt class="descname">calc_lfp_threaded</tt><big>(</big><em>t_indices=None</em>, <em>__name__='__main__'</em>, <em>NUMBER_OF_PROCESSES=None</em><big>)</big><a class="headerlink" href="#LFPy.Electrode.calc_lfp_threaded" title="Permalink to this definition">¶</a></dt>
+<dt id="LFPy.ElectrodeThreaded.calc_lfp_threaded">
+<tt class="descname">calc_lfp_threaded</tt><big>(</big><em>t_indices=None</em>, <em>__name__='__main__'</em>, <em>NUMBER_OF_PROCESSES=None</em><big>)</big><a class="headerlink" href="#LFPy.ElectrodeThreaded.calc_lfp_threaded" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate LFP on electrode geometry from all cell instances.
 Will choose distributed calculated if electrode contain &#8216;n&#8217;, &#8216;N&#8217;, and
 &#8216;r&#8217;. Will try to distribute jobs to available processes</p>
-</dd></dl>
-
-<dl class="class">
-<dt id="LFPy.Electrode.cell">
-<em class="property">class </em><tt class="descname">cell</tt><a class="headerlink" href="#LFPy.Electrode.cell" title="Permalink to this definition">¶</a></dt>
-<dd><p>empty object that cell-specific variables are stored in</p>
 </dd></dl>
 
 </dd></dl>
@@ -435,7 +481,7 @@ interval [tstart, tstop]</p>
 
 <dl class="function">
 <dt id="LFPy.inputgenerators.stationary_gamma">
-<tt class="descclassname">LFPy.inputgenerators.</tt><tt class="descname">stationary_gamma</tt><big>(</big><em>tstart</em>, <em>tstop</em>, <em>k=2</em>, <em>theta=10</em>, <em>tmax=10000.0</em><big>)</big><a class="reference internal" href="_modules/LFPy/inputgenerators.html#stationary_gamma"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LFPy.inputgenerators.stationary_gamma" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">LFPy.inputgenerators.</tt><tt class="descname">stationary_gamma</tt><big>(</big><em>tstart</em>, <em>tstop</em>, <em>k=2</em>, <em>theta=10</em>, <em>tmax=100000.0</em><big>)</big><a class="reference internal" href="_modules/LFPy/inputgenerators.html#stationary_gamma"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LFPy.inputgenerators.stationary_gamma" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generates spiketimes with interspike interval statistics according
 to gamma-distribution with &#8216;shape&#8217; k amd &#8216;scale&#8217; theta between tstart and
 tstop. Spiketimes up to tmax is reached, only up to tstop are returned</p>
@@ -467,9 +513,13 @@ between tstart and tstop</p>
   <ul>
 <li><a class="reference internal" href="#">module <tt class="docutils literal"><span class="pre">LFPy</span></tt></a><ul>
 <li><a class="reference internal" href="#class-cell">class <tt class="docutils literal"><span class="pre">Cell</span></tt></a></li>
+<li><a class="reference internal" href="#class-cellwithelectrode">class <tt class="docutils literal"><span class="pre">CellWithElectrode</span></tt></a></li>
+<li><a class="reference internal" href="#class-pointprocess">class <tt class="docutils literal"><span class="pre">PointProcess</span></tt></a></li>
 <li><a class="reference internal" href="#class-pointprocesssynapse">class <tt class="docutils literal"><span class="pre">PointProcessSynapse</span></tt></a></li>
 <li><a class="reference internal" href="#class-pointprocesselectrode">class <tt class="docutils literal"><span class="pre">PointProcessElectrode</span></tt></a></li>
+<li><a class="reference internal" href="#class-electrodesetup">class <tt class="docutils literal"><span class="pre">ElectrodeSetup</span></tt></a></li>
 <li><a class="reference internal" href="#class-electrode">class <tt class="docutils literal"><span class="pre">Electrode</span></tt></a></li>
+<li><a class="reference internal" href="#class-electrodethreaded">class <tt class="docutils literal"><span class="pre">ElectrodeThreaded</span></tt></a></li>
 <li><a class="reference internal" href="#module-LFPy.lfpcalc">submodule <tt class="docutils literal"><span class="pre">lfpcalc</span></tt></a></li>
 <li><a class="reference internal" href="#module-LFPy.tools">submodule <tt class="docutils literal"><span class="pre">tools</span></tt></a></li>
 <li><a class="reference internal" href="#module-LFPy.inputgenerators">submodule <tt class="docutils literal"><span class="pre">inputgenerators</span></tt></a></li>

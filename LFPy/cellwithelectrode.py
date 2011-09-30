@@ -3,9 +3,16 @@ import neuron
 from LFPy import Cell, Electrode
 
 class CellWithElectrode(Cell):
+    '''Subclass of LFPy.Cell with some changes to simulate() and
+    _run_simulation(), to facilitate the usage of class Electrode to
+    construct a coefficient matrix that is multiplied with the membrane
+    currents at every timestep to obtain the LFP'''
     def __init__(self, **kwargs):
-        '''Clone of LFPy.Cell before monkeypatching.
-        Same kwargs as class Cell'''
+        '''Clone of LFPy.Cell before monkeypatching the simulate() and
+        _run_simulation() functions. simulate() accepts kwargs that is passed
+        on to LFPy.Electrode, but uses a subclass of LFPy.Electrode under the
+        hood.
+        Class CellWithElectrode accepts the same kwargs as class Cell'''
         Cell.__init__(self, **kwargs)
         
         if self.timeres_NEURON != self.timeres_python:
