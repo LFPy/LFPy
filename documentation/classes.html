@@ -84,7 +84,8 @@ All rights reserved.</p>
 <dl class="class">
 <dt id="LFPy.Cell">
 <em class="property">class </em><tt class="descclassname">LFPy.</tt><tt class="descname">Cell</tt><big>(</big><em>morphology</em>, <em>default_dir=True</em>, <em>v_init=-65.0</em>, <em>Ra=150</em>, <em>rm=30000</em>, <em>cm=1.0</em>, <em>e_pas=-65.0</em>, <em>passive=True</em>, <em>timeres_NEURON=0.125</em>, <em>timeres_python=0.125</em>, <em>tstartms=0</em>, <em>tstopms=100</em>, <em>nsegs_method='lambda100'</em>, <em>max_nsegs_length=30</em>, <em>lambda_f=100</em>, <em>custom_code=None</em>, <em>custom_fun=None</em>, <em>custom_fun_args=None</em>, <em>verbose=False</em><big>)</big><a class="headerlink" href="#LFPy.Cell" title="Permalink to this definition">¶</a></dt>
-<dd><p>The main cell class used in LFPy.</p>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>The main cell class used in LFPy.</p>
 <p>Arguments:</p>
 <div class="highlight-python"><pre>morphology : morphology file;
 default_dir : if True will look for morphology in the default folder,
@@ -112,7 +113,8 @@ custom_fun: list of model specific functions to be called with args:
 custom_fun_args: list of arguments passed to custom_fun functions
 verbose : switching verbose output on/off</pre>
 </div>
-<p>Usage of cell class:</p>
+<p>Usage of cell class:
+.. testcode:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">LFPy</span>
 <span class="n">cellParameters</span> <span class="o">=</span> <span class="p">{</span>                          
     <span class="s">&#39;morphology&#39;</span> <span class="p">:</span> <span class="s">&#39;L5_Mainen96_LFPy.hoc&#39;</span><span class="p">,</span>
@@ -332,21 +334,7 @@ kwargs  : pointprocess specific variables passed on to cell/neuron</pre>
 See <a class="reference external" href="http://www.neuron.yale.edu/neuron/static/docs/help/neuron/neuron/mech.html#pointprocesses">http://www.neuron.yale.edu/neuron/static/docs/help/neuron/neuron/mech.html#pointprocesses</a>
 for details, or corresponding mod-files.</p>
 <p>Usage:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="o">...</span>
-<span class="n">cell</span> <span class="o">=</span> <span class="n">LFPy</span><span class="o">.</span><span class="n">Cell</span><span class="p">(</span><span class="o">**</span><span class="n">cellParameters</span><span class="p">)</span>
-
-<span class="n">synapseParameters</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s">&#39;idx&#39;</span> <span class="p">:</span> <span class="n">cell</span><span class="o">.</span><span class="n">get_closest_idx</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="mi">800</span><span class="p">),</span>
-    <span class="s">&#39;e&#39;</span> <span class="p">:</span> <span class="mi">0</span><span class="p">,</span>                                <span class="c"># reversal potential</span>
-    <span class="s">&#39;syntype&#39;</span> <span class="p">:</span> <span class="s">&#39;ExpSyn&#39;</span><span class="p">,</span>                   <span class="c"># synapse type</span>
-    <span class="s">&#39;tau&#39;</span> <span class="p">:</span> <span class="mi">2</span><span class="p">,</span>                              <span class="c"># syn. time constant</span>
-    <span class="s">&#39;weight&#39;</span> <span class="p">:</span> <span class="mf">0.01</span><span class="p">,</span>                       <span class="c"># syn. weight</span>
-    <span class="s">&#39;record_current&#39;</span> <span class="p">:</span> <span class="bp">True</span>                 <span class="c"># syn. current record</span>
-<span class="p">}</span>
-
-<span class="n">synapse</span> <span class="o">=</span> <span class="n">LFPy</span><span class="o">.</span><span class="n">PointProcessSynapse</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="o">**</span><span class="n">synapseParameters</span><span class="p">)</span>
-<span class="n">synapse</span><span class="o">.</span><span class="n">set_spike_times</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="n">pl</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">10</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">25</span><span class="p">]))</span>
-<span class="n">cell</span><span class="o">.</span><span class="n">simulatee</span><span class="p">(</span><span class="n">rec_isyn</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre>
 </pre></div>
 </div>
 <dl class="method">
@@ -380,29 +368,25 @@ for details, or corresponding mod-files.</p>
 SinIClamp, ChirpIClamp with arguments.
 Electrode currents go here, whics make membrane currents not sum to zero.</p>
 <p>Refer to NEURON documentation &#64; neuron.yale.edu for kwargs</p>
-<p>&#8216;cell&#8217; is the cell instance.</p>
-<dl class="docutils">
-<dt>Usage:</dt>
-<dd><dl class="first last docutils">
-<dt>::</dt>
-<dd><dl class="first docutils">
-<dt>pointprocparams = {</dt>
-<dd>&#8216;idx&#8217; : 0,                  #index number of compartment
-&#8216;color&#8217; : &#8216;p&#8217;,              #color, for plotting
-&#8216;marker&#8217; : &#8216;*&#8217;              #marker for plotting
-&#8216;record_current&#8217; : True     #record electrode currents
-&#8216;pptype&#8217; : &#8216;IClamp&#8217;,        #type of pointprocess
-&#8216;amp&#8217; : 1,                  #the rest is kwargs
-&#8216;dur&#8217; : 10,
-&#8216;delay&#8217; : 10,
-&#8216;rs&#8217; : 1,
-}</dd>
-</dl>
-<p class="last">LFPy.PointProcessElectrode(cell,**pointprocparams)</p>
-</dd>
-</dl>
-</dd>
-</dl>
+<p>cell is the cell instance.</p>
+<p>Usage:
+.. testcode:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">LFPy</span>
+<span class="n">cell</span> <span class="o">=</span> <span class="n">LFPy</span><span class="o">.</span><span class="n">Cell</span><span class="p">(</span><span class="n">morphology</span><span class="o">=</span><span class="s">&#39;L5_Mainen96_LFPy.hoc&#39;</span><span class="p">)</span>
+<span class="n">pointprocparams</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s">&#39;idx&#39;</span> <span class="p">:</span> <span class="mi">0</span><span class="p">,</span>                  <span class="c">#index number of compartment</span>
+    <span class="s">&#39;color&#39;</span> <span class="p">:</span> <span class="s">&#39;p&#39;</span><span class="p">,</span>              <span class="c">#color, for plotting</span>
+    <span class="s">&#39;marker&#39;</span> <span class="p">:</span> <span class="s">&#39;*&#39;</span><span class="p">,</span>             <span class="c">#marker for plotting</span>
+    <span class="s">&#39;record_current&#39;</span> <span class="p">:</span> <span class="bp">True</span><span class="p">,</span>    <span class="c">#record electrode currents</span>
+    <span class="s">&#39;pptype&#39;</span> <span class="p">:</span> <span class="s">&#39;IClamp&#39;</span><span class="p">,</span>        <span class="c">#type of pointprocess</span>
+    <span class="s">&#39;amp&#39;</span> <span class="p">:</span> <span class="mi">1</span><span class="p">,</span>                  <span class="c">#the rest is kwargs</span>
+    <span class="s">&#39;dur&#39;</span> <span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+    <span class="s">&#39;delay&#39;</span> <span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+    <span class="s">&#39;rs&#39;</span> <span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="p">}</span>
+<span class="n">LFPy</span><span class="o">.</span><span class="n">PointProcessElectrode</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span><span class="o">**</span><span class="n">pointprocparams</span><span class="p">)</span>
+</pre></div>
+</div>
 <dl class="method">
 <dt id="LFPy.PointProcessElectrode.collect_current">
 <tt class="descname">collect_current</tt><big>(</big><em>cell</em><big>)</big><a class="headerlink" href="#LFPy.PointProcessElectrode.collect_current" title="Permalink to this definition">¶</a></dt>
@@ -422,7 +406,7 @@ Electrode currents go here, whics make membrane currents not sum to zero.</p>
 <h2>class <a class="reference internal" href="#LFPy.ElectrodeSetup" title="LFPy.ElectrodeSetup"><tt class="xref py py-class docutils literal"><span class="pre">ElectrodeSetup</span></tt></a><a class="headerlink" href="#class-electrodesetup" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="LFPy.ElectrodeSetup">
-<em class="property">class </em><tt class="descclassname">LFPy.</tt><tt class="descname">ElectrodeSetup</tt><big>(</big><em>cell</em>, <em>sigma=0.3</em>, <em>x=100</em>, <em>y=0</em>, <em>z=0</em>, <em>N=None</em>, <em>r=None</em>, <em>n=0</em>, <em>r_z=None</em>, <em>colors=None</em>, <em>perCellLFP=False</em>, <em>method='linesource'</em>, <em>color='g'</em>, <em>marker='o'</em>, <em>from_file=False</em>, <em>cellfile=None</em>, <em>verbose=False</em><big>)</big><a class="headerlink" href="#LFPy.ElectrodeSetup" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">LFPy.</tt><tt class="descname">ElectrodeSetup</tt><big>(</big><em>cell</em>, <em>sigma=0.3</em>, <em>x=100</em>, <em>y=0</em>, <em>z=0</em>, <em>N=None</em>, <em>r=None</em>, <em>n=0</em>, <em>r_z=None</em>, <em>perCellLFP=False</em>, <em>method='linesource'</em>, <em>color='g'</em>, <em>marker='o'</em>, <em>from_file=False</em>, <em>cellfile=None</em>, <em>verbose=False</em><big>)</big><a class="headerlink" href="#LFPy.ElectrodeSetup" title="Permalink to this definition">¶</a></dt>
 <dd><p>Electrode superclass, does import a LFPy.cell.Cell object or either list
 or dictionary containing such Cell objects. Keyword arguments determine
 properties of latter LFP-calculations</p>
@@ -452,7 +436,7 @@ verbose : Flag for verbose output        </pre>
 <h2>class <a class="reference internal" href="#LFPy.Electrode" title="LFPy.Electrode"><tt class="xref py py-class docutils literal"><span class="pre">Electrode</span></tt></a><a class="headerlink" href="#class-electrode" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="LFPy.Electrode">
-<em class="property">class </em><tt class="descclassname">LFPy.</tt><tt class="descname">Electrode</tt><big>(</big><em>cell</em>, <em>sigma=0.3</em>, <em>x=100</em>, <em>y=0</em>, <em>z=0</em>, <em>color='g'</em>, <em>marker='o'</em>, <em>N=None</em>, <em>r=None</em>, <em>n=0</em>, <em>r_z=None</em>, <em>colors=None</em>, <em>perCellLFP=False</em>, <em>method='linesource'</em>, <em>from_file=False</em>, <em>cellfile=None</em><big>)</big><a class="headerlink" href="#LFPy.Electrode" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">LFPy.</tt><tt class="descname">Electrode</tt><big>(</big><em>cell</em>, <em>sigma=0.3</em>, <em>x=100</em>, <em>y=0</em>, <em>z=0</em>, <em>N=None</em>, <em>r=None</em>, <em>n=0</em>, <em>r_z=None</em>, <em>perCellLFP=False</em>, <em>method='linesource'</em>, <em>color='g'</em>, <em>marker='o'</em>, <em>from_file=False</em>, <em>cellfile=None</em><big>)</big><a class="headerlink" href="#LFPy.Electrode" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">LFPy.electrode.ElectrodeSetup</span></tt></p>
 <p>Electrode class with inheritance from LFPy.ElectrodeSetup able to actually
 calculate local field potentials from LFPy.Cell objects. <a href="#id7"><span class="problematic" id="id8">**</span></a>kwargs are passed
@@ -519,9 +503,9 @@ Will chose distributed calculated if electrode contain &#8216;n&#8217;, &#8216;N
 <h2>class <a class="reference internal" href="#LFPy.ElectrodeThreaded" title="LFPy.ElectrodeThreaded"><tt class="xref py py-class docutils literal"><span class="pre">ElectrodeThreaded</span></tt></a><a class="headerlink" href="#class-electrodethreaded" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="LFPy.ElectrodeThreaded">
-<em class="property">class </em><tt class="descclassname">LFPy.</tt><tt class="descname">ElectrodeThreaded</tt><big>(</big><em>cell</em>, <em>sigma=0.3</em>, <em>x=100</em>, <em>y=0</em>, <em>z=0</em>, <em>color='g'</em>, <em>marker='o'</em>, <em>N=None</em>, <em>r=None</em>, <em>n=0</em>, <em>r_z=None</em>, <em>colors=None</em>, <em>perCellLFP=False</em>, <em>method='linesource'</em>, <em>from_file=False</em>, <em>cellfile=None</em><big>)</big><a class="headerlink" href="#LFPy.ElectrodeThreaded" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">LFPy.electrode.Electrode</span></tt></p>
-<p>class with inheritance from class Electrode, calculating LFPs using
+<em class="property">class </em><tt class="descclassname">LFPy.</tt><tt class="descname">ElectrodeThreaded</tt><big>(</big><em>cell</em>, <em>sigma=0.3</em>, <em>x=100</em>, <em>y=0</em>, <em>z=0</em>, <em>N=None</em>, <em>r=None</em>, <em>n=0</em>, <em>r_z=None</em>, <em>colors=None</em>, <em>perCellLFP=False</em>, <em>method='linesource'</em>, <em>color='g'</em>, <em>marker='o'</em>, <em>from_file=False</em>, <em>cellfile=None</em><big>)</big><a class="headerlink" href="#LFPy.ElectrodeThreaded" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">LFPy.electrode.ElectrodeSetup</span></tt></p>
+<p>class with inheritance from class ElectrodeSetup, calculating LFPs using
 available cpu-cores.</p>
 <p>Usage:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">electrode</span> <span class="o">=</span> <span class="n">LFPy</span><span class="o">.</span><span class="n">ElectrodeThreaded</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>

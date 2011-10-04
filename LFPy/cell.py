@@ -65,7 +65,7 @@ class Cell(object):
         verbose : switching verbose output on/off
     
     Usage of cell class:
-    ::
+    .. testcode::
         import LFPy
         cellParameters = {                          
             'morphology' : 'L5_Mainen96_LFPy.hoc',
@@ -674,9 +674,9 @@ class Cell(object):
     
     def _collect_isyn(self):
         '''Get the synaptic currents'''
-        for i in xrange(len(self.synapses)):
-            if self.synapses[i].record_current:
-                self.synapses[i].collect_current(self)
+        for syn in self.synapses:
+            if syn.record_current:
+                syn.collect_current(self)
             else:
                 raise Exception, 'must set record_current=True for synapse'
         self.synireclist = None

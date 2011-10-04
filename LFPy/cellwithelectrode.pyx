@@ -234,6 +234,8 @@ class ElectrodeDetermineCoeffs(Electrode):
         self.c[0].tvec = np.arange(totnsegs) * self.dt
         self.calc_lfp()
         self.electrodecoeffs = self.LFP
+        del self.c[0].imem
+        del self.LFP
         
     def _import_c(self, cell):
         '''Keeps the relevant variables for LFP-calculation from cell'''

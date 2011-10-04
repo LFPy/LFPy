@@ -20,8 +20,10 @@ class PointProcess:
     '''
     def __init__(self, cell, idx, color='k', marker='o', 
                  record_current=False, **kwargs):
-        '''cell is an LFPy.Cell object, idx index of segment. This class
-        set some variables and extracts carthesian coordinates of segment'''
+        '''
+        cell is an LFPy.Cell object, idx index of segment. This class
+        set some variables and extracts carthesian coordinates of segment
+        '''
         self.idx = idx
         self.color = color
         self.marker = marker
@@ -30,7 +32,9 @@ class PointProcess:
         self.update_pos(cell)
 
     def update_pos(self, cell):
-        '''Extract coordinate of point-process to geometry'''
+        '''
+        Extract coordinate of point-process to geometry
+        '''
         self.x = cell.xmid[self.idx]
         self.y = cell.ymid[self.idx]
         self.z = cell.zmid[self.idx]
@@ -42,10 +46,10 @@ class PointProcessSynapse(PointProcess):
     for details, or corresponding mod-files.
     
     Usage:
-    ::
-        ...
-        cell = LFPy.Cell(**cellParameters)
-        
+    
+    .. testcode::
+        import LFPy
+        cell = LFPy.Cell(morphology='L5_Mainen96_LFPy.hoc')
         synapseParameters = {
             'idx' : cell.get_closest_idx(x=0, y=0, z=800),
             'e' : 0,                                # reversal potential
@@ -54,32 +58,14 @@ class PointProcessSynapse(PointProcess):
             'weight' : 0.01,                       # syn. weight
             'record_current' : True                 # syn. current record
         }
-        
         synapse = LFPy.PointProcessSynapse(cell, **synapseParameters)
         synapse.set_spike_times(cell, pl.array([10, 15, 20, 25]))
         cell.simulate(rec_isyn=True)
     '''
     def __init__(self, cell, idx, syntype, color='r', marker='o',
                  record_current=False, **kwargs):
-        '''cell - cell instance, idx - index of compartment where synapse is
-        inserted, syntype - NetCon-enabled synapse mech, color - color in plot,
-        marker - marker for plot, record_current - switch for enabling current
-        recording, **kwargs - syntype specific arguments passed onto
-        cell.set_synapse
-        
-        Usage:
-        synparams = {
-            'idx' : 0,                  #index number of compartment
-            'color' : 'p',              #color, for plotting
-            'marker' : 'o'              #marker for plotting
-            'record_current' : True     #record synapse currents
-            'pptype' : 'Exp2Syn',       #type of synapse
-            'tau1' : 0.5,               #time-constant, rise, Exp2Syn specific
-            'tau2' : 1,                 #ditto, decay
-            'e' : 10,                   #reversal potential +10 mV
-            'weight' : 0.001,           #NetCon weight aka max conductance
-            }
-        LFPy.PointProcessSynapse(cell,**synparams)
+        '''
+        Initialization of class PointProcessSynapse
         '''
         PointProcess.__init__(self, cell, idx, color, marker, record_current, 
                               **kwargs)
@@ -112,21 +98,24 @@ class Synapse(PointProcessSynapse):
         print 'use LFPy.PointProcessSynapse instead'
         
 class PointProcessElectrode(PointProcess):
-    '''Class for NEURON point processes, ie VClamp, SEClamp and ICLamp,
+    '''
+    Class for NEURON point processes, ie VClamp, SEClamp and ICLamp,
     SinIClamp, ChirpIClamp with arguments.
     Electrode currents go here, whics make membrane currents not sum to zero.
     
     Refer to NEURON documentation @ neuron.yale.edu for kwargs
         
-    'cell' is the cell instance.
+    cell is the cell instance.
         
     Usage:
-    ::
+    .. testcode::
+        import LFPy
+        cell = LFPy.Cell(morphology='L5_Mainen96_LFPy.hoc')
         pointprocparams = {
             'idx' : 0,                  #index number of compartment
             'color' : 'p',              #color, for plotting
-            'marker' : '*'              #marker for plotting
-            'record_current' : True     #record electrode currents
+            'marker' : '*',             #marker for plotting
+            'record_current' : True,    #record electrode currents
             'pptype' : 'IClamp',        #type of pointprocess
             'amp' : 1,                  #the rest is kwargs
             'dur' : 10,
@@ -150,23 +139,33 @@ class PointProcessElectrode(PointProcess):
         cell.pointprocess_idx.append(idx)
 
     def collect_current(self, cell):
-        '''Fetch electrode current from recorder list'''
+        '''
+        Fetch electrode current from recorder list
+        '''
         self.i = numpy.array(cell.stimireclist.o(self.hocidx))
     
     def collect_potential(self, cell):
-        '''Collect membrane potential of segment with PointProcess'''
+        '''
+        Collect membrane potential of segment with PointProcess
+        '''
         self.v = numpy.array(cell.synvreclist.o(self.hocidx))
 
 class PointProcessPlayInSoma:
-    '''class implementation of Eivind's playback alghorithm'''
+    '''
+    class implementation of Eivind's playback alghorithm
+    '''
     def __init__(self, soma_trace):
-        '''Class for playing back somatic trace at specific time points
-        into soma as boundary condition for the membrane voltage'''
+        '''
+        Class for playing back somatic trace at specific time points
+        into soma as boundary condition for the membrane voltage
+        '''
         self.soma_trace = soma_trace
     
     def set_play_in_soma(self, cell, t_on=numpy.array([0])):
-        '''Set mechanisms for playing soma trace at time(s) t_on,
-        where t_on is a numpy.array'''
+        '''
+        Set mechanisms for playing soma trace at time(s) t_on,
+        where t_on is a numpy.array
+        '''
         if type(t_on) != numpy.ndarray:
             t_on = numpy.array(t_on)
         
@@ -217,8 +216,10 @@ class PointProcessPlayInSoma:
         self._play_in_soma(somaTvecVec, somaTraceVec)
             
     def _play_in_soma(self, somaTvecVec, somaTraceVec):
-        '''Replacement of LFPy.hoc "proc play_in_soma()",
-        seems necessary that this function lives in hoc'''
+        '''
+        Replacement of LFPy.hoc "proc play_in_soma()",
+        seems necessary that this function lives in hoc
+        '''
         neuron.h('objref soma_tvec, soma_trace')
         
         neuron.h('soma_tvec = new Vector()')

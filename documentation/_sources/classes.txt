@@ -2,12 +2,14 @@ module :mod:`LFPy`
 ==================
 .. automodule:: LFPy
     :members:
+    :show-inheritance:
     :undoc-members:
     
     class :class:`Cell`
     ===================
     .. autoclass:: Cell
         :members:
+        :show-inheritance:
         :undoc-members:
 
     class :class:`CellWithElectrode`

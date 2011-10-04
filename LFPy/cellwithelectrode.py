@@ -74,6 +74,7 @@ class CellWithElectrode(Cell):
         '''Start NEURON simulation and record variables.
         **kwargs are the electrode parameters corresponding to the
         input to the class LFPy.Electrode'''
+        print rec_i
         self._set_soma_volt_recorder()
         self._set_time_recorder()
         
