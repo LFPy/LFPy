@@ -27,7 +27,7 @@ class ElectrodeSetup(object):
         verbose : Flag for verbose output        
     '''
     def __init__(self, cell, sigma=0.3, x=100, y=0, z=0,
-                 N=None, r=None, n=0, r_z=None, colors=None,
+                 N=None, r=None, n=0, r_z=None,
                  perCellLFP=False, method='linesource', 
                  color='g', marker='o',
                  from_file=False, cellfile=None, verbose=False):
@@ -51,7 +51,6 @@ class ElectrodeSetup(object):
         self.r = r
         self.n = n
         self.r_z = r_z
-        self.colors = colors
         self.perCellLFP = perCellLFP
         
         self.method = method
@@ -209,15 +208,15 @@ class Electrode(ElectrodeSetup):
     '''
 
     def __init__(self, cell, sigma=0.3, x=100, y=0, z=0,
-                 color='g', marker='o',
-                 N=None, r=None, n=0, r_z=None, colors=None,
+                 N=None, r=None, n=0, r_z=None,
                  perCellLFP=False, method='linesource', 
+                 color='g', marker='o',
                  from_file=False, cellfile=None):
         '''This is the regular implementation of the Electrode class
         that calculates the LFP serially using a single core'''
-        ElectrodeSetup.__init__(self, cell, sigma, x, y, z, color, marker,
-                                N, r, n, r_z, colors, perCellLFP,
-                                method, from_file, cellfile)
+        ElectrodeSetup.__init__(self, cell, sigma, x, y, z,
+                                N, r, n, r_z, perCellLFP,
+                                method, color, marker, from_file, cellfile)
         
     def calc_lfp(self, t_indices=None):
         '''Calculate LFP on electrode geometry from all cell instances.
@@ -356,9 +355,9 @@ class Electrode(ElectrodeSetup):
         return circle,  offsets,  lfp_el_pos
 
 
-class ElectrodeThreaded(Electrode):
+class ElectrodeThreaded(ElectrodeSetup):
     '''
-    class with inheritance from class Electrode, calculating LFPs using
+    class with inheritance from class ElectrodeSetup, calculating LFPs using
     available cpu-cores.
     
     Usage:
@@ -368,15 +367,15 @@ class ElectrodeThreaded(Electrode):
     '''
     
     def __init__(self, cell, sigma=0.3, x=100, y=0, z=0,
-                 color='g', marker='o',
                  N=None, r=None, n=0, r_z=None, colors=None,
                  perCellLFP=False, method='linesource', 
+                 color='g', marker='o',
                  from_file=False, cellfile=None):
         '''Initialization of class ElectrodeThreaded, with electrode setup
-        inherited from class Electrode'''
-        Electrode.__init__(self, cell, sigma, x, y, z, color, marker,
-                                 N, r, n, r_z, colors, perCellLFP, method,
-                                 from_file, cellfile)
+        inherited from class ElectrodeSetup'''
+        ElectrodeSetup.__init__(self, cell, sigma, x, y, z,
+                                N, r, n, r_z, perCellLFP,
+                                method, color, marker, from_file, cellfile)
             
     def calc_lfp_threaded(self, t_indices=None, __name__='__main__',
                           NUMBER_OF_PROCESSES=None, ):
