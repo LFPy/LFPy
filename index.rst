@@ -1,9 +1,7 @@
 .. LFPy documentation master file, created by
-   sphinx-quickstart on Wed Jun 22 09:38:54 2011.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
-
+    sphinx-quickstart on Mon Oct  3 13:36:41 2011.
+    You can adapt this file completely to your liking, but it should at least
+    contain the root `toctree` directive.
 
 Welcome to LFPy's documentation!
 ================================
@@ -12,14 +10,13 @@ Welcome to LFPy's documentation!
 
 This is the documentation for LFPy
 
+Contents:
 
-..  toctree::
-    :maxdepth: 3
-
+.. toctree::
+    :maxdepth: 2
+   
     information
     classes
-
-   
 
 Indices and tables
 ==================

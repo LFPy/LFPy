@@ -1,6 +1,8 @@
 #!/usr/bin/env python
-'''Copyright (C) 2011 Computational Neuroscience Group, UMB.
-All rights reserved.'''
+'''
+Copyright (C) 2011 Computational Neuroscience Group, UMB.
+All rights reserved.
+'''
 
 import os
 import neuron
@@ -17,6 +19,7 @@ for arch in KNOWN_ARCHITECTURES:
     if os.path.isdir(os.path.join(INSTALLPATH, 'neuron', arch)):
         ARCHITECTURE = arch
         break
+
 if ARCHITECTURE is None:
     ERRMSG = '\n'.join(['LFPy cannot find compiled neuron mechanisms!',
     'Try running nrnivmodl in %s' %os.path.join(INSTALLPATH, 'neuron'),
@@ -30,35 +33,52 @@ DLL_FILENAME = os.path.join(INSTALLPATH,
 neuron.h.nrn_load_dll(DLL_FILENAME)
 
 class Cell(object):
-    ''' The main cell class used in LFPy
+    '''
+    The main cell class used in LFPy.
     
-    Inputs:
+    Arguments:
     ::
         morphology : morphology file;
         default_dir : if True will look for morphology in the default folder,
         otherwise full path to morphology must be provided;
-        
+    
         v_init : initial potential;
         passive : passive mechs are initialized if True;
         Ra : axial resistance;
         rm : memnbrane resistivity;
         cm : membrane capacitance;
         e_pas : passive mechanism reversal potential;
-        
+    
         timeres_NEURON : internal dt for NEURON simulation;
         timeres_python : overall dt for python simulation;
-        
+    
         tstartms : initialization time for simulation <= 0 ms
         tstopms : stop time for simulation > 0 ms
-        
+    
         nsegs_method : method for setting the number of segments;
         max_nsegs_length : max segment length for method 'fixed_length';
         lambda_f : AC frequency for method 'lambda_f';
-        
+    
         custom_code : list of model specific code files ([*.py/.hoc]);
+        custom_fun: list of model specific functions to be called with args:
+        custom_fun_args: list of arguments passed to custom_fun functions
         verbose : switching verbose output on/off
-        play_in_soma : if True, play somatrace in soma
-        soma_trace :  filename somatrace, two columns, space-sep: t & v
+    
+    Usage of cell class:
+    ::
+        import LFPy
+        cellParameters = {                          
+            'morphology' : 'L5_Mainen96_LFPy.hoc',
+            'rm' : 30000,
+            'cm' : 1.0,
+            'Ra' : 150,
+            'timeres_NEURON' : 0.1,
+            'timeres_python' : 0.1,
+            'tstartms' : -50,
+            'tstopms' : 50,
+        }
+        cell = LFPy.Cell(**cellParameters)
+        cell.simulate()
     '''
     def __init__(self, morphology,
                     default_dir=True,
@@ -80,34 +100,6 @@ class Cell(object):
                     custom_fun_args=None,
                     verbose=False):
         '''initialization of the Cell object.
-        
-        Inputs:
-        ::
-            morphology : morphology file;
-            default_dir : if True, look for morphology in the default folder,
-            otherwise full path to morphology must be provided;
-            
-            v_init : initial potential;
-            passive : passive mechs are initialized if True;
-            Ra : axial resistance;
-            rm : memnbrane resistivity;
-            cm : membrane capacitance;
-            e_pas : passive mechanism reversal potential;
-            
-            timeres_NEURON : internal dt for NEURON simulation;
-            timeres_python : overall dt for python simulation;
-            
-            tstartms : initialization time for simulation <= 0 ms
-            tstopms : stop time for simulation > 0 ms
-            
-            nsegs_method : method for setting the number of segments;
-            max_nsegs_length : max segment length for method 'fixed_length';
-            lambda_f : AC frequency for method 'lambda_f';
-            
-            custom_code : list of model specific code files ([*.py/.hoc]);
-            custom_fun : list of py-functions with model specs;
-            custom_fun_args : list of arguments passed to custom_fun;
-            verbose : switching verbose output on/off
         '''
         self.verbose = verbose
         
@@ -366,8 +358,10 @@ class Cell(object):
     def set_synapse(self, idx, syntype,
                     record_current=False, record_potential=False,
                     weight=None, **kwargs):
-        '''Insert syntype synapse on segment with index idx, **kwargs
-        passed on from class Synapse.'''
+        '''
+        Insert syntype synapse on segment with index idx, **kwargs
+        passed on from class PointProcessSynapse.
+        '''
 
         if not hasattr(self, 'synlist'):
             self.synlist = neuron.h.List()
@@ -416,12 +410,13 @@ class Cell(object):
 
         return self.synlist.count() - 1
 
-    def set_point_process(self, idx, pptype, record_current=False,
-                          **kwargs):
-        '''Insert pptype-electrode type pointprocess on segment numbered
+    def set_point_process(self, idx, pptype, record_current=False, **kwargs):
+        '''
+        Insert pptype-electrode type pointprocess on segment numbered
         idx on cell object, with keyword arguments according to types:
         SEClamp, VClamp, IClamp, SinIClamp, ChirpIClamp.
-        idx, pptype, **kwargs is passed on from PointProcess class.'''
+        idx, pptype, **kwargs is passed on from PointProcessElectrode class.
+        '''
         
         if not hasattr(self, 'stimlist'):
             self.stimlist = neuron.h.List()
@@ -539,7 +534,8 @@ class Cell(object):
         self.zmid = .5*(self.zstart+self.zend)
 
     def get_idx(self, section='allsec', z_min=-10000, z_max=10000):
-        '''Returns neuron idx of segments on interval [z_min, z_max]'''
+        '''Returns neuron idx of segments on interval [z_min, z_max]
+        '''
         if section == 'allsec': 
             seclist = self.allseclist
         elif section == 'soma': 
@@ -565,7 +561,8 @@ class Cell(object):
                 
     def get_closest_idx(self, x=0, y=0, z=0, section='allsec'):
         '''Get the index number of a segment in specified section which 
-        midpoint is closest to the coordinates defined by the user'''
+        midpoint is closest to the coordinates defined by the user
+        '''
         idx = self.get_idx(section)
         dist = np.sqrt((self.xmid[idx] - x)**2 + \
             (self.ymid[idx] - y)**2 + (self.zmid[idx] - z)**2)
@@ -578,7 +575,8 @@ class Cell(object):
                                z_min=-10000, z_max=10000):
         '''Return nidx segment indices in section with random probability
         normalized to the membrane area of segment on 
-        interval [z_min, z_max]'''
+        interval [z_min, z_max]
+        '''
         poss_idx = self.get_idx(section=section, z_min=z_min, z_max = z_max)
         idx = np.empty(nidx, dtype=int)
         
@@ -590,7 +588,8 @@ class Cell(object):
     
     def simulate(self, rec_i=True, rec_v=False, rec_ipas=False, rec_icap=False,
                  rec_isyn=False, rec_vsyn=False, rec_istim=False):
-        '''Start NEURON simulation and record variables.'''
+        '''Start NEURON simulation and record variables.
+        '''
         self._set_soma_volt_recorder()
         self._set_time_recorder()
         
@@ -643,7 +642,8 @@ class Cell(object):
     
     def _calc_imem(self):
         '''fetching the vectors from the memireclist and calculate self.imem
-        containing all the membrane currents.'''
+        containing all the membrane currents.
+        '''
         self.imem = np.array(self.memireclist)
         for i in xrange(self.imem.shape[0]):
             self.imem[i, ] *= self.area[i] * 1E-2
@@ -833,8 +833,8 @@ class Cell(object):
         self._update_synapse_positions()
     
     def cellpickler(self, filename):
-        '''Save data in cell to file, using cPickle.'''
-        #remove hoc objects from cell object
+        '''Save data in cell to filename, using cPickle. It will however destroy
+        any neuron.h objects upon saving, as they cannot be pickled'''
         cell = self
         for varname in dir(cell):
             if type(getattr(cell, varname)) == type(neuron.h.List()):
@@ -856,8 +856,10 @@ class Cell(object):
         All rotation angles are optional.
         
         Usage:
-        rotation = {'x' : 1.233, 'y : 0.236, 'z' : np.pi}
-        c.rotate_xyz(rotation)
+        ::
+            cell = LFPy.Cell(**kwargs)
+            rotation = {'x' : 1.233, 'y : 0.236, 'z' : np.pi}
+            cell.rotate_xyz(rotation)
         '''
         if np.isscalar(rotation.get('x'))==True:
             rot_x = rotation.get('x')

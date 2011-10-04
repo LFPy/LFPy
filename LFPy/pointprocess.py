@@ -5,8 +5,19 @@ import numpy
 import neuron
 
 class PointProcess:
-    '''Superclass on top of PointProcessSynapse, PointProcessElectrode, 
-    just to set some common variables'''
+    '''
+    Superclass on top of PointProcessSynapse, PointProcessElectrode, 
+    just to import and set some common variables.
+    
+    Arguments:
+    ::
+        cell    : LFPy.Cell object
+        idx     : index of segment
+        color   : opt. color in plot
+        marker  : opt. marker in plot
+        record_current : Must be set True for recording of pointprocess currents
+        kwargs  : pointprocess specific variables passed on to cell/neuron
+    '''
     def __init__(self, cell, idx, color='k', marker='o', 
                  record_current=False, **kwargs):
         '''cell is an LFPy.Cell object, idx index of segment. This class
@@ -25,7 +36,29 @@ class PointProcess:
         self.z = cell.zmid[self.idx]
         
 class PointProcessSynapse(PointProcess):
-    '''The synapse class, pointprocesses that spawn membrane currents'''
+    '''
+    The synapse class, pointprocesses that spawn membrane currents.
+    See http://www.neuron.yale.edu/neuron/static/docs/help/neuron/neuron/mech.html#pointprocesses
+    for details, or corresponding mod-files.
+    
+    Usage:
+    ::
+        ...
+        cell = LFPy.Cell(**cellParameters)
+        
+        synapseParameters = {
+            'idx' : cell.get_closest_idx(x=0, y=0, z=800),
+            'e' : 0,                                # reversal potential
+            'syntype' : 'ExpSyn',                   # synapse type
+            'tau' : 2,                              # syn. time constant
+            'weight' : 0.01,                       # syn. weight
+            'record_current' : True                 # syn. current record
+        }
+        
+        synapse = LFPy.PointProcessSynapse(cell, **synapseParameters)
+        synapse.set_spike_times(cell, pl.array([10, 15, 20, 25]))
+        cell.simulate(rec_isyn=True)
+    '''
     def __init__(self, cell, idx, syntype, color='r', marker='o',
                  record_current=False, **kwargs):
         '''cell - cell instance, idx - index of compartment where synapse is
@@ -81,18 +114,14 @@ class Synapse(PointProcessSynapse):
 class PointProcessElectrode(PointProcess):
     '''Class for NEURON point processes, ie VClamp, SEClamp and ICLamp,
     SinIClamp, ChirpIClamp with arguments.
-    Electrode currents go here, whics make membrane currents not sum to zero'''
-    def __init__(self, cell, idx, pptype='SEClamp',
-                 color='p', marker='*', record_current=False, **kwargs):
-        ''' Will insert pptype on
-        cell-instance, pass the corresponding kwargs onto
-        cell.set_point_process.
+    Electrode currents go here, whics make membrane currents not sum to zero.
+    
+    Refer to NEURON documentation @ neuron.yale.edu for kwargs
         
-        Refer to NEURON documentation @ neuron.yale.edu for kwargs
+    'cell' is the cell instance.
         
-        'cell' is the cell instance.
-        
-        Usage:
+    Usage:
+    ::
         pointprocparams = {
             'idx' : 0,                  #index number of compartment
             'color' : 'p',              #color, for plotting
@@ -105,6 +134,13 @@ class PointProcessElectrode(PointProcess):
             'rs' : 1,
             }
         LFPy.PointProcessElectrode(cell,**pointprocparams)
+    '''    
+    def __init__(self, cell, idx, pptype='SEClamp',
+                 color='p', marker='*', record_current=False, **kwargs):
+        '''
+        Will insert pptype on
+        cell-instance, pass the corresponding kwargs onto
+        cell.set_point_process.
         '''
         PointProcess.__init__(self, cell, idx, color, marker, record_current)
         self.pptype = pptype

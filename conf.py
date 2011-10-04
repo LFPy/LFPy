@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # LFPy documentation build configuration file, created by
-# sphinx-quickstart on Wed Jun 22 09:38:54 2011.
+# sphinx-quickstart on Mon Oct  3 13:36:41 2011.
 #
 # This file is execfile()d with the current directory set to its containing dir.
 #
@@ -25,7 +25,7 @@ import sys, os
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.viewcode']
+extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest', 'sphinx.ext.viewcode']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -48,7 +48,7 @@ copyright = u'2011, Espen Hagen'
 # built documents.
 #
 # The short X.Y version.
-version = '0'
+version = '0.1'
 # The full version, including alpha/beta/rc tags.
 release = '0.1'
 
@@ -147,7 +147,7 @@ html_static_path = ['_static']
 #html_split_index = False
 
 # If true, links to the reST sources are added to the pages.
-html_show_sourcelink = True
+#html_show_sourcelink = True
 
 # If true, "Created using Sphinx" is shown in the HTML footer. Default is True.
 #html_show_sphinx = True

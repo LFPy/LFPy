@@ -7,10 +7,60 @@ DTYPE = np.float64
 ctypedef np.float64_t DTYPE_t
 
 class CellWithElectrode(Cell):
-    '''Subclass of LFPy.Cell with some changes to simulate() and
+    '''
+    Subclass of LFPy.Cell with some changes to simulate() and
     _run_simulation(), to facilitate the usage of class Electrode to
     construct a coefficient matrix that is multiplied with the membrane
-    currents at every timestep to obtain the LFP'''
+    currents at every timestep to obtain the LFP, thus the membrane
+    currents are not stored unless rec_i=True in simulate()
+    
+    Usage:
+    ::
+        import LFPy
+        import pylab as pl
+        
+        N = pl.empty((16, 3))
+        for i in xrange(N.shape[0]): N[i,] = [1, 0, 0] #normal unit vec. to contacts
+        electrodeParameters = {             #parameters for electrode class
+            'sigma' : 0.3,              #Extracellular potential
+            'x' : pl.zeros(16)+25,      #Coordinates of electrode contacts
+            'y' : pl.zeros(16),
+            'z' : pl.linspace(-500,1000,16),
+            'n' : 20,
+            'r' : 10,
+            'N' : N,
+        }
+        
+        cellParameters = {                          
+            'morphology' : 'L5_Mainen96_LFPy.hoc',  # morphology file
+            'rm' : 30000,                           # membrane resistivity
+            'cm' : 1.0,                             # membrane capacitance
+            'Ra' : 150,                             # axial resistivity
+            'timeres_NEURON' : 2**-4,                # dt for NEURON sim.
+            'timeres_python' : 2**-4,                 # dt for python output
+            'tstartms' : -50,                         # start t of simulation
+            'tstopms' : 50,                        # end t of simulation
+        }
+        
+        cell = LFPy.CellWithElectrode(**cellParameters)
+        
+        synapseParameters = {
+            'idx' : cell.get_closest_idx(x=0, y=0, z=800), # compartment
+            'e' : 0,                                # reversal potential
+            'syntype' : 'ExpSyn',                   # synapse type
+            'tau' : 2,                              # syn. time constant
+            'weight' : 0.01,                       # syn. weight
+            'record_current' : True                 # syn. current record
+        }
+        
+        synapse = LFPy.PointProcessSynapse(cell, **synapseParameters)
+        synapse.set_spike_times(cell, pl.array([10, 15, 20, 25]))
+        
+        cell.simulate(rec_isyn=True, **electrodeParameters)
+        
+        pl.matshow(cell.LFP)
+    '''
+    
     def __init__(self, **kwargs):
         '''Clone of LFPy.Cell before monkeypatching the simulate() and
         _run_simulation() functions. simulate() accepts kwargs that is passed
