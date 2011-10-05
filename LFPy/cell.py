@@ -836,9 +836,9 @@ class Cell(object):
         '''destroy any NEURON hoc objects in cell instance'''
         for varname in dir(self):
             if type(getattr(self, varname)) == type(neuron.h.List()):
-                delattr(self, varname)
+                setattr(self, varname, None)
                 if self.verbose:
-                    print 'deleted %s from cell instance' % varname
+                    print 'None-typed %s in cell instance' % varname
         
     
     def cellpickler(self, filename):

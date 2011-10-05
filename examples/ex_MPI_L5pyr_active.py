@@ -89,10 +89,8 @@ def cellsim(cellposition={'xpos' : 0, 'ypos' : 0, 'zpos' : 0}):
     #perform NEURON simulation, results saved as attributes in the cell instance
     simulateParameters.update(electrodeParameters)
     cell.simulate(**simulateParameters)
-    #NEURON hoc objects cannot be pickled
-    cell.strip_hoc_objects()
     
-    return cell
+    return cell.LFP
 
 ################################################################################
 # Define parameters, using dictionaries
@@ -225,7 +223,7 @@ if not master_mode and size > 1:
 #master will send parameters to workers and receive simulation results unordered
 if master_mode:
     #container for simulation results
-    cells = []
+    outputs = []
     #using MPI
     if size > 1:
         dest = 1 #counter on [1, size-1]
@@ -238,8 +236,8 @@ if master_mode:
                 dest = 1
         #receiving simulation results from any worker, storing in container
         for i in xrange(POPULATION_SIZE):
-            cell = comm.recv(source=MPI.ANY_SOURCE)
-            cells.append(cell)
+            output = comm.recv(source=MPI.ANY_SOURCE)
+            outputs.append(output)
         
         #killing workers
         for i in xrange(1, size):
@@ -249,9 +247,9 @@ if master_mode:
     else:
         for i in xrange(POPULATION_SIZE):
             parameters = cellpositions[i]
-            cell = cellsim(parameters)
-            cells.append(cell)
+            output = cellsim(parameters)
+            outputs.append(output)
     
-    print cells
+    print outputs
     
     print 'execution time: %.3f seconds' %  (time()-t0)

@@ -133,8 +133,8 @@ class CellWithElectrode(Cell):
         ElectrodeDetermineCoeffs'''
         
         #initialize electrode, get coefficient array, initialize LFP
-        electrode = ElectrodeDetermineCoeffs(cell=self, **kwargs)
-        self.electrodecoeffs = electrode.electrodecoeffs
+        self.electrode = ElectrodeDetermineCoeffs(cell=self, **kwargs)
+        self.electrodecoeffs = self.electrode.electrodecoeffs
                 
         neuron.h.dt = self.timeres_NEURON
         
@@ -213,7 +213,6 @@ class CellWithElectrode(Cell):
         LFP[j, ] = np.dot(electrodecoeffs, imem)
         
         self.LFP = LFP.T
-
     
 class ElectrodeDetermineCoeffs(Electrode):
     def __init__(self, **kwargs):
