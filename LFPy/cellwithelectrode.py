@@ -74,7 +74,6 @@ class CellWithElectrode(Cell):
         '''Start NEURON simulation and record variables.
         **kwargs are the electrode parameters corresponding to the
         input to the class LFPy.Electrode'''
-        print rec_i
         self._set_soma_volt_recorder()
         self._set_time_recorder()
         
@@ -131,8 +130,8 @@ class CellWithElectrode(Cell):
         ElectrodeDetermineCoeffs'''
         
         #initialize electrode, get coefficient array, initialize LFP
-        self.electrode = ElectrodeDetermineCoeffs(cell=self, **kwargs)
-        self.electrodecoeffs = self.electrode.electrodecoeffs
+        electrode = ElectrodeDetermineCoeffs(cell=self, **kwargs)
+        self.electrodecoeffs = electrode.electrodecoeffs
         LFP = []
                 
         neuron.h.dt = self.timeres_NEURON
