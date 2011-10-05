@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 
-# importing some modules, setting some matplotlib values for pl.plot.
+from mpi4py import MPI
 import pylab as pl
+from time import time
 import LFPy
-pl.rcParams.update({'font.size' : 10, 'figure.figsize' : [16,9],'wspace' : 0.5 ,'hspace' : 0.5})
 
-#seed for random generation
-pl.seed(9876543210)
+#seed for random generation (dont want this with MPI)
+#pl.seed(9876543210)
 
 
 ################################################################################
@@ -61,7 +61,7 @@ def plotstuff():
     pl.title('Morphology (YZ)')
     pl.xlabel(r'y [$\mu$m]')
 
-def insert_synapses(synparams, section, n, spTimesFun, args):
+def insert_synapses(cell, synparams, section, n, spTimesFun, args):
     #find n compartments to insert synapses onto
     idx = cell.get_rand_idx_area_norm(section=section, nidx=n)
 
@@ -75,6 +75,24 @@ def insert_synapses(synparams, section, n, spTimesFun, args):
         # Create synapse(s) and setting times using the Synapse class in LFPy
         s = LFPy.PointProcessSynapse(cell,**synparams)
         s.set_spike_times(cell, spiketimes)
+
+def cellsim(cellposition={'xpos' : 0, 'ypos' : 0, 'zpos' : 0}):
+
+    #Initialize cell instance, using the LFPy.Cell class
+    cell = LFPy.CellWithElectrode(**cellParameters)
+    cell.set_pos(**cellposition)
+    #Insert synapses
+    insert_synapses(cell, synparams_AMPA, **insert_synapses_AMPA_args)
+    insert_synapses(cell, synparams_NMDA, **insert_synapses_NMDA_args)
+    insert_synapses(cell, synparams_GABA_A, **insert_synapses_GABA_A_args)
+    
+    #perform NEURON simulation, results saved as attributes in the cell instance
+    simulateParameters.update(electrodeParameters)
+    cell.simulate(**simulateParameters)
+    #NEURON hoc objects cannot be pickled
+    cell.strip_hoc_objects()
+    
+    return cell
 
 ################################################################################
 # Define parameters, using dictionaries
@@ -94,8 +112,8 @@ cellParameters = {          #various cell parameters,
     'lambda_f' : 100,
     'timeres_NEURON' : 2**-3,   #[ms] dt's should be in powers of 2 for both,
     'timeres_python' : 2**-3,   #need binary representation
-    'tstartms' : -100,  #start time of simulation, recorders start at t=0
-    'tstopms' : 100,   #stop simulation at 1000 ms. these can be overridden
+    'tstartms' : 0,  #start time of simulation, recorders start at t=0
+    'tstopms' : 50,   #stop simulation at 1000 ms. these can be overridden
                         #by setting these arguments in cell.simulation()
     'custom_code'  : ['my_active_declarations.hoc'],    #Custom .hoc/.py-scripts
 }
@@ -150,14 +168,14 @@ insert_synapses_GABA_A_args = {
     'args' : [cellParameters['tstartms'], cellParameters['tstopms']]
 }
 
-N = pl.empty((16, 3))
+N = pl.empty((62, 3))
 for i in xrange(N.shape[0]): N[i,] = [1, 0, 0] #normal unit vec. to contacts
 electrodeParameters = {             #parameters for electrode class
     'sigma' : 0.3,              #Extracellular potential
-    'x' : pl.zeros(16)+25,      #Coordinates of electrode contacts
-    'y' : pl.zeros(16),
-    'z' : pl.linspace(-500,1000,16),
-    'n' : 20,
+    'x' : pl.zeros(62)+25,      #Coordinates of electrode contacts
+    'y' : pl.zeros(62),
+    'z' : pl.linspace(-500,1000,62),
+    'n' : 2,
     'r' : 10,
     'N' : N,
 }
@@ -174,14 +192,67 @@ simulateParameters = {      #parameters for NEURON simulation
 
 pl.close('all')   #close open figures
 
-#Initialize cell instance, using the LFPy.Cell class
-cell = LFPy.CellWithElectrode(**cellParameters)
+t0 = time()
 
-#Insert synapses
-insert_synapses(synparams_AMPA, **insert_synapses_AMPA_args)
-insert_synapses(synparams_NMDA, **insert_synapses_NMDA_args)
-insert_synapses(synparams_GABA_A, **insert_synapses_GABA_A_args)
+POPULATION_SIZE = 7
 
-#perform NEURON simulation, results saved as attributes in the cell instance
-simulateParameters.update(electrodeParameters)
-cell.simulate(**simulateParameters)
+cellpositions = [
+    {'xpos' : -20, 'ypos' : 0, 'zpos' : -150},
+    {'xpos' : 0, 'ypos' : 20, 'zpos' : -100},
+    {'xpos' : 20, 'ypos' : 0, 'zpos' : -50},
+    {'xpos' : 0, 'ypos' : -20, 'zpos' : 0},
+    {'xpos' : -20, 'ypos' : 0, 'zpos' : 50},
+    {'xpos' : 0, 'ypos' : 20, 'zpos' : 100},
+    {'xpos' : 20, 'ypos' : 0, 'zpos' : 150},
+]
+
+#Initialization of MPI stuff
+comm = MPI.COMM_WORLD
+size = comm.Get_size()
+rank = comm.Get_rank()
+master_mode = comm.rank == 0
+print 'size %i, rank %i, master_mode: %s' % (size, rank, str(master_mode))
+
+#workers
+if not master_mode and size > 1:
+    while(True):
+        #receive parameters from master
+        parameters = comm.recv(source=0)
+        if parameters == None:
+            break
+        else:
+            #send simulation results to master
+            comm.send(cellsim(parameters), dest=0)
+
+#master will send parameters to workers and receive simulation results unordered
+if master_mode:
+    #container for simulation results
+    cells = []
+    #using MPI
+    if size > 1:
+        dest = 1 #counter on [1, size-1]
+        #sending parameters to workers
+        for i in xrange(POPULATION_SIZE):
+            parameters = cellpositions[i]
+            comm.send(parameters, dest=dest)
+            dest += 1
+            if dest >= size:
+                dest = 1
+        #receiving simulation results from any worker, storing in container
+        for i in xrange(POPULATION_SIZE):
+            cell = comm.recv(source=MPI.ANY_SOURCE)
+            cells.append(cell)
+    #serial mode
+    else:
+        for i in xrange(POPULATION_SIZE):
+            parameters = cellpositions[i]
+            cell = cellsim(parameters)
+            cells.append(cell)
+    
+    LFP = pl.array(LFP)
+    populationLFP = LFP.sum(axis=0)
+    
+    for i in xrange(1, size):
+        comm.send(None, dest=i)
+    
+    print 'execution time: %.3f seconds' %  (time()-t0)

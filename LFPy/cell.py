@@ -832,17 +832,21 @@ class Cell(object):
         self._calc_midpoints()
         self._update_synapse_positions()
     
+    def strip_hoc_objects(self):
+        '''destroy any NEURON hoc objects in cell instance'''
+        for varname in dir(self):
+            if type(getattr(self, varname)) == type(neuron.h.List()):
+                delattr(self, varname)
+                if self.verbose:
+                    print 'deleted %s from cell instance' % varname
+        
+    
     def cellpickler(self, filename):
         '''Save data in cell to filename, using cPickle. It will however destroy
         any neuron.h objects upon saving, as they cannot be pickled'''
-        cell = self
-        for varname in dir(cell):
-            if type(getattr(cell, varname)) == type(neuron.h.List()):
-                delattr(cell, varname)
-                print 'deleted %s before pickling' % varname
-            
+        self.strip_hoc_objects()
         filen = open(filename, 'wb')
-        cPickle.dump(cell, filen, protocol=2)
+        cPickle.dump(self, filen, protocol=2)
         filen.close()
     
     def _update_synapse_positions(self):
