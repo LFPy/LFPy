@@ -91,7 +91,6 @@ def cellsim(cellposition={'xpos' : 0, 'ypos' : 0, 'zpos' : 0}):
     cell.simulate(**simulateParameters)
     #NEURON hoc objects cannot be pickled
     cell.strip_hoc_objects()
-    del cell.electrode
     
     return cell
 
