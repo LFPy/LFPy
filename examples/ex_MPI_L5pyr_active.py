@@ -91,6 +91,7 @@ def cellsim(cellposition={'xpos' : 0, 'ypos' : 0, 'zpos' : 0}):
     cell.simulate(**simulateParameters)
     #NEURON hoc objects cannot be pickled
     cell.strip_hoc_objects()
+    del cell.electrode
     
     return cell
 
@@ -190,8 +191,6 @@ simulateParameters = {      #parameters for NEURON simulation
 # Main simulation procedure
 ################################################################################
 
-pl.close('all')   #close open figures
-
 t0 = time()
 
 POPULATION_SIZE = 7
@@ -213,7 +212,7 @@ rank = comm.Get_rank()
 master_mode = comm.rank == 0
 print 'size %i, rank %i, master_mode: %s' % (size, rank, str(master_mode))
 
-#workers
+#initialize workers
 if not master_mode and size > 1:
     while(True):
         #receive parameters from master
@@ -242,6 +241,11 @@ if master_mode:
         for i in xrange(POPULATION_SIZE):
             cell = comm.recv(source=MPI.ANY_SOURCE)
             cells.append(cell)
+        
+        #killing workers
+        for i in xrange(1, size):
+            comm.send(None, dest=i)
+    
     #serial mode
     else:
         for i in xrange(POPULATION_SIZE):
@@ -249,10 +253,6 @@ if master_mode:
             cell = cellsim(parameters)
             cells.append(cell)
     
-    LFP = pl.array(LFP)
-    populationLFP = LFP.sum(axis=0)
-    
-    for i in xrange(1, size):
-        comm.send(None, dest=i)
+    print cells
     
     print 'execution time: %.3f seconds' %  (time()-t0)
