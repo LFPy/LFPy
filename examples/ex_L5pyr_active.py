@@ -70,7 +70,7 @@ def insert_synapses(synparams, section, n, spTimesFun, args):
         synparams.update({'idx' : int(i)})
 
         # Some input spike train using the function call
-        spiketimes = spTimesFun(args[0], args[1])
+        spiketimes = spTimesFun(args[0], args[1], args[2], args[3])
 
         # Create synapse(s) and setting times using the Synapse class in LFPy
         s = LFPy.PointProcessSynapse(c,**synparams)
@@ -135,7 +135,7 @@ insert_synapses_AMPA_args = {
     'section' : 'apic',
     'n' : 100,
     'spTimesFun' : LFPy.inputgenerators.stationary_gamma,
-    'args' : [cellparams['tstartms'], cellparams['tstopms']]
+    'args' : [cellparams['tstartms'], cellparams['tstopms'], 2, 10]
 }
 insert_synapses_NMDA_args = {
     'section' : 'alldend',
@@ -147,7 +147,7 @@ insert_synapses_GABA_A_args = {
     'section' : 'dend',
     'n' : 100,
     'spTimesFun' : LFPy.inputgenerators.stationary_gamma,
-    'args' : [cellparams['tstartms'], cellparams['tstopms']]
+    'args' : [cellparams['tstartms'], cellparams['tstopms'], 2, 10]
 }
 
 N = pl.empty((16, 3))
@@ -185,6 +185,10 @@ insert_synapses(synparams_GABA_A, **insert_synapses_GABA_A_args)
 #perform NEURON simulation, results saved as attributes in the c instance
 c.simulate(**simulateparams)
 
+pl.figure()
+pl.plot(c.tvec, c.somav)
+
+raise Exception
 #initialize electrode geometry, then calculate the LFP, using LFPy.Electrode cl.
 e = LFPy.Electrode(c,**electrodeparams)
 #e.calc_lfp_threaded()

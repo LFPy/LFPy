@@ -92,17 +92,7 @@ class CellWithElectrode(Cell):
         #run fadvance until t >= tstopms
         self._run_simulation(**kwargs)
         
-        #fixing tvec, need to be monotonically increasing, from 0-tstopms
-        if self.tstartms != None:
-            self.tvec = np.array(self.tvec)
-            if self.tvec[0] > -self.timeres_NEURON and self.tvec[0] < \
-                    self.timeres_NEURON:
-                pass
-            else:
-                self.tvec += self.timeres_NEURON
-        else:
-            self.tvec = np.array(self.tvec)
-            self.tvec[1:] = self.tvec[1:] + self.timeres_NEURON
+        self._collect_tvec()
         
         self.somav = np.array(self.somav)
         
@@ -208,8 +198,9 @@ class CellWithElectrode(Cell):
         i = 0
         for sec in self.allseclist:
             for seg in sec:
-                imem[i] = seg.i_membrane * area[i] * 1E-2
+                imem[i] = seg.i_membrane
                 i += 1
+        imem *= area * 1E-2
         LFP[j, ] = np.dot(electrodecoeffs, imem)
         
         self.LFP = LFP.T

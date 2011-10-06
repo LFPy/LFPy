@@ -28,19 +28,20 @@ def stationary_poisson(nsyn, lambd, tstart, tstop):
 
     return spiketimes
 
-def stationary_gamma(tstart, tstop, k=2, theta=10, tmax=1E5):
+def stationary_gamma(tstart, tstop, k=2, theta=10, tmin = -1E3, tmax=1E5):
     ''' Generates spiketimes with interspike interval statistics according
     to gamma-distribution with 'shape' k amd 'scale' theta between tstart and
-    tstop. Spiketimes up to tmax is reached, only up to tstop are returned'''
+    tstop. Spiketimes from tmin up to tmax is calculated,
+    times between 0 and tstop are returned'''
     
     if tstop > tmax:
         tmax = tstop
     
-    t = tstart
+    t = tmin
     spiketimes = []
     while t <= tmax:
         t = t + pl.gamma(shape = k, scale = theta)
-        if t <= tstop:
+        if t >= tmin and t <= tstop:
             spiketimes.append(t)
     
     spiketimes = pl.array(spiketimes)

@@ -9,7 +9,7 @@ electrodeParameters = {             #parameters for electrode class
     'x' : pl.zeros(16)+25,      #Coordinates of electrode contacts
     'y' : pl.zeros(16),
     'z' : pl.linspace(-500,1000,16),
-    'n' : 20,
+    'n' : 2,
     'r' : 10,
     'N' : N,
 }
@@ -78,18 +78,18 @@ def plotstuff():
     cb = pl.colorbar()
     cb.set_label('LFP ($\mu$V)')
     
-    #pl.subplot(122)
-    #for i in xrange(cell.xend.size):
-    #    pl.plot([cell.xstart[i],cell.xend[i]],[cell.zstart[i],cell.zend[i]],color='k')
-    #for i in xrange(len(cell.synapses)):
-    #    pl.plot([cell.synapses[i].x],[cell.synapses[i].z],\
-    #        color=cell.synapses[i].color,marker=cell.synapses[i].marker, markersize=10)
-    #for i in xrange(electrodeParameters['x'].size):
-    #    pl.plot(electrodeParameters['x'][i],electrodeParameters['z'][i],color='g',marker='o')
-    #pl.axis('equal')
-    #pl.title('Morphology')
-    #pl.xlabel(r'x ($\mu$m)')
-    #pl.ylabel(r'z ($\mu$m)')
-    #
+    pl.subplot(122)
+    for i in xrange(cell.xend.size):
+        pl.plot([cell.xstart[i],cell.xend[i]],[cell.zstart[i],cell.zend[i]],color='k')
+    for i in xrange(len(cell.synapses)):
+        pl.plot([cell.synapses[i].x],[cell.synapses[i].z],\
+            color=cell.synapses[i].color,marker=cell.synapses[i].marker, markersize=10)
+    for i in xrange(electrodeParameters['x'].size):
+        pl.plot(electrodeParameters['x'][i],electrodeParameters['z'][i],color='g',marker='o')
+    pl.axis('equal')
+    pl.title('Morphology')
+    pl.xlabel(r'x ($\mu$m)')
+    pl.ylabel(r'z ($\mu$m)')
+    
 
 plotstuff()

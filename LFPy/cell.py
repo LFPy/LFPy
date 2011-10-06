@@ -605,17 +605,7 @@ class Cell(object):
         #run fadvance until t >= tstopms
         self._run_simulation()
         
-        #fixing tvec, need to be monotonically increasing, from 0-tstopms
-        if self.tstartms != None:
-            self.tvec = np.array(self.tvec)
-            if self.tvec[0] > -self.timeres_NEURON and self.tvec[0] < \
-                    self.timeres_NEURON:
-                pass
-            else:
-                self.tvec += self.timeres_NEURON
-        else:
-            self.tvec = np.array(self.tvec)
-            self.tvec[1:] = self.tvec[1:] + self.timeres_NEURON
+        self._collect_tvec()
         
         self.somav = np.array(self.somav)
         
@@ -639,6 +629,21 @@ class Cell(object):
         
         if rec_istim:
             self._collect_istim()
+    
+    def _collect_tvec(self):
+        '''set the tvec to be a monotonically increasing nparray'''
+        #fixing tvec, need to be monotonically increasing, from 0-tstopms
+        self.tvec = np.array(self.tvec)
+        if self.tstartms == 0:
+            self.tvec[1:] = self.tvec[1:] + self.timeres_NEURON
+        elif self.tstartms != None:
+            if self.tvec[0] > -self.timeres_NEURON and self.tvec[0] < \
+                    self.timeres_NEURON:
+                pass
+            else:
+                self.tvec += self.timeres_NEURON
+        else:
+            self.tvec[1:] = self.tvec[1:] + self.timeres_NEURON
     
     def _calc_imem(self):
         '''fetching the vectors from the memireclist and calculate self.imem
@@ -860,7 +865,7 @@ class Cell(object):
         All rotation angles are optional.
         
         Usage:
-        ::
+        .. testcode::
             cell = LFPy.Cell(**kwargs)
             rotation = {'x' : 1.233, 'y : 0.236, 'z' : np.pi}
             cell.rotate_xyz(rotation)
@@ -881,8 +886,8 @@ class Cell(object):
             if self.verbose:
                 print 'Rotated geometry %g radians around x-axis' % (-theta)
         else:
-            pass
-            #print 'Geometry not rotated around x-axis'
+            if self.verbose:
+                print 'Geometry not rotated around x-axis'
         
         if np.isscalar(rotation.get('y'))==True:
             rot_y = rotation.get('y')
@@ -900,8 +905,8 @@ class Cell(object):
             if self.verbose:
                 print 'Rotated geometry %g radians around y-axis' % (-phi)
         else:
-            pass
-            #print 'Geometry not rotated around y-axis'
+            if self.verbose:
+                print 'Geometry not rotated around y-axis'
         
         if np.isscalar(rotation.get('z'))==True:
             rot_z = rotation.get('z')
@@ -919,8 +924,8 @@ class Cell(object):
             if self.verbose:
                 print 'Rotated geometry %g radians around z-axis' % (-gamma)
         else:
-            pass
-            #print 'Geometry not rotated around z-axis'
+            if self.verbose:
+                print 'Geometry not rotated around z-axis'
     
     def _squeeze_me_macaroni(self):
         '''Reducing the dimensions of the morphology matrices'''

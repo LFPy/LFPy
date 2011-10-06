@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 from mpi4py import MPI
 import pylab as pl
 from time import time
@@ -8,6 +7,23 @@ import LFPy
 #seed for random generation (dont want this with MPI)
 #pl.seed(9876543210)
 
+'''
+This is an example using LFPy and MPI to run several cell models similar to
+ex_L5pyr_active.py in parallel, with cells positioned different in space.
+
+To execute this scripts in parallel issue in the terminal::
+$ mpirun -n 8 python ex_MPI_L5pyr_active.py
+
+On Stallo the job may be submitted using the corresponding .sh script::
+$ qsub ex_MPI_L5pyr_active.sh
+
+or using an interactive session:
+$ export LD_PRELOAD=libmkl_intel_lp64.so:libmkl_intel_thread.so:libmkl_core.so:libguide.so
+$ mpirun -n 8 -x LD_PRELOAD python ex_MPI_L5pyr_active.py
+
+Note that -n 2 don't get speedups, because one core is used to send and receive
+and not for actual simulations.
+'''
 
 ################################################################################
 # A couple of function declarations
@@ -70,7 +86,7 @@ def insert_synapses(cell, synparams, section, n, spTimesFun, args):
         synparams.update({'idx' : int(i)})
 
         # Some input spike train using the function call
-        spiketimes = spTimesFun(args[0], args[1])
+        spiketimes = spTimesFun(args[0], args[1], args[2], args[3])
 
         # Create synapse(s) and setting times using the Synapse class in LFPy
         s = LFPy.PointProcessSynapse(cell,**synparams)
@@ -90,7 +106,9 @@ def cellsim(cellposition={'xpos' : 0, 'ypos' : 0, 'zpos' : 0}):
     simulateParameters.update(electrodeParameters)
     cell.simulate(**simulateParameters)
     
-    return cell.LFP
+    #for some reason, returning the cell-object is problematic, so some arrays
+    #are returned
+    return [cell.tvec, cell.somav, cell.LFP]
 
 ################################################################################
 # Define parameters, using dictionaries
@@ -110,8 +128,8 @@ cellParameters = {          #various cell parameters,
     'lambda_f' : 100,
     'timeres_NEURON' : 2**-3,   #[ms] dt's should be in powers of 2 for both,
     'timeres_python' : 2**-3,   #need binary representation
-    'tstartms' : 0,  #start time of simulation, recorders start at t=0
-    'tstopms' : 50,   #stop simulation at 1000 ms. these can be overridden
+    'tstartms' : -100,  #start time of simulation, recorders start at t=0
+    'tstopms' : 200,   #stop simulation at 1000 ms. these can be overridden
                         #by setting these arguments in cell.simulation()
     'custom_code'  : ['my_active_declarations.hoc'],    #Custom .hoc/.py-scripts
 }
@@ -151,7 +169,7 @@ insert_synapses_AMPA_args = {
     'section' : 'apic',
     'n' : 100,
     'spTimesFun' : LFPy.inputgenerators.stationary_gamma,
-    'args' : [cellParameters['tstartms'], cellParameters['tstopms']]
+    'args' : [cellParameters['tstartms'], cellParameters['tstopms'], 2, 20]
 }
 insert_synapses_NMDA_args = {
     'section' : 'alldend',
@@ -163,7 +181,7 @@ insert_synapses_GABA_A_args = {
     'section' : 'dend',
     'n' : 100,
     'spTimesFun' : LFPy.inputgenerators.stationary_gamma,
-    'args' : [cellParameters['tstartms'], cellParameters['tstopms']]
+    'args' : [cellParameters['tstartms'], cellParameters['tstopms'], 2, 20]
 }
 
 N = pl.empty((62, 3))
@@ -222,7 +240,7 @@ if not master_mode and size > 1:
 
 #master will send parameters to workers and receive simulation results unordered
 if master_mode:
-    #container for simulation results
+    #init container for simulation results
     outputs = []
     #using MPI
     if size > 1:
@@ -250,6 +268,31 @@ if master_mode:
             output = cellsim(parameters)
             outputs.append(output)
     
-    print outputs
-    
     print 'execution time: %.3f seconds' %  (time()-t0)
+    
+    #plot some output
+    pl.figure()
+    i = 0
+    for output in outputs:
+        pl.plot(output[0], output[1], label='cell %i' % i)
+        i += 1
+    pl.xlabel('time (ms)')
+    pl.ylabel(r'$V_mathrm{soma}$ (mV)')
+    pl.legend()
+    pl.savefig('ex_MPI_somatraces.pdf')
+    
+    
+    LFPsum = pl.zeros(outputs[0][2].shape)
+    for output in outputs:
+        LFPsum += output[2]
+    pl.figure()
+    pl.imshow(LFPsum, origin='bottom', cmap='jet_r',
+              vmin=-abs(LFPsum).max(), vmax=abs(LFPsum).max(),
+              interpolation='nearest')
+    pl.axis('tight')
+    pl.colorbar()
+    pl.title('Extracellular Field Potentials')
+    pl.savefig('ex_MPI_LFPs.pdf')
+    
+        
+    
