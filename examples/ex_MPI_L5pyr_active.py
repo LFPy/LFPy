@@ -191,7 +191,7 @@ electrodeParameters = {             #parameters for electrode class
     'x' : pl.zeros(62)+25,      #Coordinates of electrode contacts
     'y' : pl.zeros(62),
     'z' : pl.linspace(-500,1000,62),
-    'n' : 2,
+    'n' : 20,
     'r' : 10,
     'N' : N,
 }
