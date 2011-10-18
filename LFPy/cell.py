@@ -220,7 +220,8 @@ class Cell(object):
         elif nsegs_method == 'fixed_length':
             self._set_nsegs_fixed_length(max_nsegs_length)
         else:
-            print 'No nsegs_method applied (%s)' % nsegs_method
+            if self.verbose:
+                print 'No nsegs_method applied (%s)' % nsegs_method
     
     def _get_rotation(self):
         '''Check if there exist corresponding file
