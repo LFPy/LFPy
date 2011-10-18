@@ -104,25 +104,69 @@ class PointProcessElectrode(PointProcess):
     Electrode currents go here, whics make membrane currents not sum to zero.
     
     Refer to NEURON documentation @ neuron.yale.edu for kwargs
-        
-    cell is the cell instance.
-        
+            
     Usage:
     .. testcode::
         import LFPy
-        cell = LFPy.Cell(morphology='L5_Mainen96_LFPy.hoc')
-        pointprocparams = {
-            'idx' : 0,                  #index number of compartment
-            'color' : 'p',              #color, for plotting
-            'marker' : '*',             #marker for plotting
-            'record_current' : True,    #record electrode currents
-            'pptype' : 'IClamp',        #type of pointprocess
-            'amp' : 1,                  #the rest is kwargs
-            'dur' : 10,
-            'delay' : 10,
-            'rs' : 1,
+        import pylab as pl
+        
+        pointprocesses = [
+            {
+                'idx' : 0,
+                'record_current' : True,
+                'pptype' : 'IClamp',
+                'amp' : 1,
+                'dur' : 20,
+                'delay' : 10,
+            },
+            {
+                'idx' : 0,
+                'record_current' : True,
+                'pptype' : 'VClamp',
+                'amp[0]' : -65,
+                'dur[0]' : 10,
+                'amp[1]' : 0,
+                'dur[1]' : 20,
+                'amp[2]' : -65,
+                'dur[2]' : 10,
+            },
+            {
+                'idx' : 0,
+                'record_current' : True,
+                'pptype' : 'SEClamp',
+                'dur1' : 10,
+                'amp1' : -65,
+                'dur2' : 20,
+                'amp2' : 0,
+                'dur3' : 10,
+                'amp3' : -65,
+            },
+            {
+                'idx' : 0,
+                'record_current' : True,
+                'pptype' : 'SinIClamp',
+                'delay' : 5,
+                'dur' : 200,
+                'pkamp' : 1,
+                'freq' : 100,
+            },
+            {
+                'idx' : 0,
+                'record_current' : True,
+                'pptype' : 'ChirpIClamp',
+                'delay' : 5,
+                'dur' : 200,
+                'pkamp' : 1,
+                'freq' : 0,
+                'chirp_rate' : 1,
             }
-        LFPy.PointProcessElectrode(cell,**pointprocparams)
+        
+        ]
+        
+        for pointprocess in pointprocesses:
+            cell = LFPy.Cell(morphology='L5_Mainen96_LFPy.hoc')
+            pp = LFPy.PointProcessElectrode(cell, **pointprocess)
+            cell.simulate(rec_istim=True)
     '''    
     def __init__(self, cell, idx, pptype='SEClamp',
                  color='p', marker='*', record_current=False, **kwargs):
