@@ -1,0 +1,39 @@
+Results of doctest builder run on 2011-10-04 14:05:05
+=====================================================
+
+Document: classes
+-----------------
+13 items passed all tests:
+   1 tests in # reversal potential
+    'syntype' : 'ExpSyn'
+   1 tests in # syn. time constant
+    'weight' : 0.01
+   1 tests in # syn. weight
+    'record_current' : True                 # syn. current record
+}
+synapse = LFPy.PointProcessSynapse(cell
+   1 tests in # synapse type
+    'tau' : 2
+   1 tests in 'e' : 0
+   1 tests in **synapseParameters)
+synapse.set_spike_times(cell
+   1 tests in 15
+   1 tests in 20
+   1 tests in 25]))
+cell.simulate(rec_isyn=True)
+   1 tests in import LFPy
+cell = LFPy.Cell(morphology='L5_Mainen96_LFPy.hoc')
+synapseParameters = {
+    'idx' : cell.get_closest_idx(x=0
+   1 tests in pl.array([10
+   1 tests in y=0
+   1 tests in z=800)
+13 tests in 13 items.
+13 passed and 0 failed.
+Test passed.
+
+Doctest summary
+===============
+   13 tests
+    0 failures in tests
+    0 failures in setup code

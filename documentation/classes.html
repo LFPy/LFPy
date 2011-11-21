@@ -3,13 +3,16 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>module LFPy &mdash; LFPy v0.1 documentation</title>
+    <title>module LFPy &mdash; LFPy 0.1 documentation</title>
+    
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
@@ -22,7 +25,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="LFPy v0.1 documentation" href="index.html" />
+    <link rel="top" title="LFPy 0.1 documentation" href="index.html" />
     <link rel="prev" title="Requirements" href="information.html" /> 
   </head>
   <body>
@@ -38,7 +41,7 @@
         <li class="right" >
           <a href="information.html" title="Requirements"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">LFPy v0.1 documentation</a> &raquo;</li> 
+        <li><a href="index.html">LFPy 0.1 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -61,7 +64,7 @@ All rights reserved.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Classes:</th><td class="field-body"><ul class="first simple">
+<tr class="field-odd field"><th class="field-name">Classes:</th><td class="field-body"><ul class="first simple">
 <li>Cell - The pythonic neuron object itself laying on top of NEURON</li>
 <li>CellWithElectrode - Subclass of Cell that calculate LFP at every fadvance</li>
 <li>PointProcessSynapse - Convenience class for inserting synapses onto Cell objects</li>
@@ -70,7 +73,7 @@ All rights reserved.</p>
 </ul>
 </td>
 </tr>
-<tr class="field"><th class="field-name">Modules:</th><td class="field-body"><ul class="first last simple">
+<tr class="field-even field"><th class="field-name">Modules:</th><td class="field-body"><ul class="first last simple">
 <li>lfpcalc - functions used by Electrode class</li>
 <li>tools - some convenient functions</li>
 <li>inputgenerators - functions for synaptic input time generation</li>
@@ -193,7 +196,8 @@ Prob. determined by area.</p>
 <dd><p>Rotate geometry using rotation matrices, takes dict with rot. angles,
 where {&#8216;x&#8217; : ... } etc. are the rotation angles around respective axes.
 All rotation angles are optional.</p>
-<p>Usage:</p>
+<p>Usage:
+.. testcode:</p>
 <div class="highlight-python"><pre>cell = LFPy.Cell(**kwargs)
 rotation = {'x' : 1.233, 'y : 0.236, 'z' : np.pi}
 cell.rotate_xyz(rotation)</pre>
@@ -227,6 +231,12 @@ passed on from class PointProcessSynapse.</p>
 <dt id="LFPy.Cell.simulate">
 <tt class="descname">simulate</tt><big>(</big><em>rec_i=True</em>, <em>rec_v=False</em>, <em>rec_ipas=False</em>, <em>rec_icap=False</em>, <em>rec_isyn=False</em>, <em>rec_vsyn=False</em>, <em>rec_istim=False</em><big>)</big><a class="headerlink" href="#LFPy.Cell.simulate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Start NEURON simulation and record variables.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="LFPy.Cell.strip_hoc_objects">
+<tt class="descname">strip_hoc_objects</tt><big>(</big><big>)</big><a class="headerlink" href="#LFPy.Cell.strip_hoc_objects" title="Permalink to this definition">¶</a></dt>
+<dd><p>destroy any NEURON hoc objects in cell instance</p>
 </dd></dl>
 
 </dd></dl>
@@ -368,23 +378,68 @@ for details, or corresponding mod-files.</p>
 SinIClamp, ChirpIClamp with arguments.
 Electrode currents go here, whics make membrane currents not sum to zero.</p>
 <p>Refer to NEURON documentation &#64; neuron.yale.edu for kwargs</p>
-<p>cell is the cell instance.</p>
 <p>Usage:
 .. testcode:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">LFPy</span>
-<span class="n">cell</span> <span class="o">=</span> <span class="n">LFPy</span><span class="o">.</span><span class="n">Cell</span><span class="p">(</span><span class="n">morphology</span><span class="o">=</span><span class="s">&#39;L5_Mainen96_LFPy.hoc&#39;</span><span class="p">)</span>
-<span class="n">pointprocparams</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s">&#39;idx&#39;</span> <span class="p">:</span> <span class="mi">0</span><span class="p">,</span>                  <span class="c">#index number of compartment</span>
-    <span class="s">&#39;color&#39;</span> <span class="p">:</span> <span class="s">&#39;p&#39;</span><span class="p">,</span>              <span class="c">#color, for plotting</span>
-    <span class="s">&#39;marker&#39;</span> <span class="p">:</span> <span class="s">&#39;*&#39;</span><span class="p">,</span>             <span class="c">#marker for plotting</span>
-    <span class="s">&#39;record_current&#39;</span> <span class="p">:</span> <span class="bp">True</span><span class="p">,</span>    <span class="c">#record electrode currents</span>
-    <span class="s">&#39;pptype&#39;</span> <span class="p">:</span> <span class="s">&#39;IClamp&#39;</span><span class="p">,</span>        <span class="c">#type of pointprocess</span>
-    <span class="s">&#39;amp&#39;</span> <span class="p">:</span> <span class="mi">1</span><span class="p">,</span>                  <span class="c">#the rest is kwargs</span>
-    <span class="s">&#39;dur&#39;</span> <span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
-    <span class="s">&#39;delay&#39;</span> <span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
-    <span class="s">&#39;rs&#39;</span> <span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+<span class="kn">import</span> <span class="nn">pylab</span> <span class="kn">as</span> <span class="nn">pl</span>
+
+<span class="n">pointprocesses</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">{</span>
+        <span class="s">&#39;idx&#39;</span> <span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="s">&#39;record_current&#39;</span> <span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+        <span class="s">&#39;pptype&#39;</span> <span class="p">:</span> <span class="s">&#39;IClamp&#39;</span><span class="p">,</span>
+        <span class="s">&#39;amp&#39;</span> <span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="s">&#39;dur&#39;</span> <span class="p">:</span> <span class="mi">20</span><span class="p">,</span>
+        <span class="s">&#39;delay&#39;</span> <span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s">&#39;idx&#39;</span> <span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="s">&#39;record_current&#39;</span> <span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+        <span class="s">&#39;pptype&#39;</span> <span class="p">:</span> <span class="s">&#39;VClamp&#39;</span><span class="p">,</span>
+        <span class="s">&#39;amp[0]&#39;</span> <span class="p">:</span> <span class="o">-</span><span class="mi">65</span><span class="p">,</span>
+        <span class="s">&#39;dur[0]&#39;</span> <span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+        <span class="s">&#39;amp[1]&#39;</span> <span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="s">&#39;dur[1]&#39;</span> <span class="p">:</span> <span class="mi">20</span><span class="p">,</span>
+        <span class="s">&#39;amp[2]&#39;</span> <span class="p">:</span> <span class="o">-</span><span class="mi">65</span><span class="p">,</span>
+        <span class="s">&#39;dur[2]&#39;</span> <span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s">&#39;idx&#39;</span> <span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="s">&#39;record_current&#39;</span> <span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+        <span class="s">&#39;pptype&#39;</span> <span class="p">:</span> <span class="s">&#39;SEClamp&#39;</span><span class="p">,</span>
+        <span class="s">&#39;dur1&#39;</span> <span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+        <span class="s">&#39;amp1&#39;</span> <span class="p">:</span> <span class="o">-</span><span class="mi">65</span><span class="p">,</span>
+        <span class="s">&#39;dur2&#39;</span> <span class="p">:</span> <span class="mi">20</span><span class="p">,</span>
+        <span class="s">&#39;amp2&#39;</span> <span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="s">&#39;dur3&#39;</span> <span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+        <span class="s">&#39;amp3&#39;</span> <span class="p">:</span> <span class="o">-</span><span class="mi">65</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s">&#39;idx&#39;</span> <span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="s">&#39;record_current&#39;</span> <span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+        <span class="s">&#39;pptype&#39;</span> <span class="p">:</span> <span class="s">&#39;SinIClamp&#39;</span><span class="p">,</span>
+        <span class="s">&#39;delay&#39;</span> <span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+        <span class="s">&#39;dur&#39;</span> <span class="p">:</span> <span class="mi">200</span><span class="p">,</span>
+        <span class="s">&#39;pkamp&#39;</span> <span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="s">&#39;freq&#39;</span> <span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s">&#39;idx&#39;</span> <span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="s">&#39;record_current&#39;</span> <span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+        <span class="s">&#39;pptype&#39;</span> <span class="p">:</span> <span class="s">&#39;ChirpIClamp&#39;</span><span class="p">,</span>
+        <span class="s">&#39;delay&#39;</span> <span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+        <span class="s">&#39;dur&#39;</span> <span class="p">:</span> <span class="mi">200</span><span class="p">,</span>
+        <span class="s">&#39;pkamp&#39;</span> <span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="s">&#39;freq&#39;</span> <span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="s">&#39;chirp_rate&#39;</span> <span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
     <span class="p">}</span>
-<span class="n">LFPy</span><span class="o">.</span><span class="n">PointProcessElectrode</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span><span class="o">**</span><span class="n">pointprocparams</span><span class="p">)</span>
+
+<span class="p">]</span>
+
+<span class="k">for</span> <span class="n">pointprocess</span> <span class="ow">in</span> <span class="n">pointprocesses</span><span class="p">:</span>
+    <span class="n">cell</span> <span class="o">=</span> <span class="n">LFPy</span><span class="o">.</span><span class="n">Cell</span><span class="p">(</span><span class="n">morphology</span><span class="o">=</span><span class="s">&#39;L5_Mainen96_LFPy.hoc&#39;</span><span class="p">)</span>
+    <span class="n">pp</span> <span class="o">=</span> <span class="n">LFPy</span><span class="o">.</span><span class="n">PointProcessElectrode</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="o">**</span><span class="n">pointprocess</span><span class="p">)</span>
+    <span class="n">cell</span><span class="o">.</span><span class="n">simulate</span><span class="p">(</span><span class="n">rec_istim</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
 </pre></div>
 </div>
 <dl class="method">
@@ -529,13 +584,13 @@ Will choose distributed calculated if electrode contain &#8216;n&#8217;, &#8216;
 All rights reserved.</p>
 <dl class="function">
 <dt id="LFPy.lfpcalc.calc_lfp_choose">
-<tt class="descclassname">LFPy.lfpcalc.</tt><tt class="descname">calc_lfp_choose</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/LFPy/lfpcalc.html#calc_lfp_choose"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LFPy.lfpcalc.calc_lfp_choose" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">LFPy.lfpcalc.</tt><tt class="descname">calc_lfp_choose</tt><big>(</big><big>)</big><a class="headerlink" href="#LFPy.lfpcalc.calc_lfp_choose" title="Permalink to this definition">¶</a></dt>
 <dd><p>Determine which method to use, line-source for soma default</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="LFPy.lfpcalc.calc_lfp_linesource">
-<tt class="descclassname">LFPy.lfpcalc.</tt><tt class="descname">calc_lfp_linesource</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/LFPy/lfpcalc.html#calc_lfp_linesource"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LFPy.lfpcalc.calc_lfp_linesource" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">LFPy.lfpcalc.</tt><tt class="descname">calc_lfp_linesource</tt><big>(</big><big>)</big><a class="headerlink" href="#LFPy.lfpcalc.calc_lfp_linesource" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate electric field potential using the line-source method, all
 compartments treated as line sources, even soma.</p>
 </dd></dl>
@@ -549,7 +604,7 @@ compartments</p>
 
 <dl class="function">
 <dt id="LFPy.lfpcalc.calc_lfp_som_as_point">
-<tt class="descclassname">LFPy.lfpcalc.</tt><tt class="descname">calc_lfp_som_as_point</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/LFPy/lfpcalc.html#calc_lfp_som_as_point"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LFPy.lfpcalc.calc_lfp_som_as_point" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">LFPy.lfpcalc.</tt><tt class="descname">calc_lfp_som_as_point</tt><big>(</big><big>)</big><a class="headerlink" href="#LFPy.lfpcalc.calc_lfp_som_as_point" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate electric field potential using the line-source method,
 soma is treated as point/sphere source</p>
 </dd></dl>
@@ -602,10 +657,11 @@ interval [tstart, tstop]</p>
 
 <dl class="function">
 <dt id="LFPy.inputgenerators.stationary_gamma">
-<tt class="descclassname">LFPy.inputgenerators.</tt><tt class="descname">stationary_gamma</tt><big>(</big><em>tstart</em>, <em>tstop</em>, <em>k=2</em>, <em>theta=10</em>, <em>tmax=100000.0</em><big>)</big><a class="reference internal" href="_modules/LFPy/inputgenerators.html#stationary_gamma"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LFPy.inputgenerators.stationary_gamma" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">LFPy.inputgenerators.</tt><tt class="descname">stationary_gamma</tt><big>(</big><em>tstart</em>, <em>tstop</em>, <em>k=2</em>, <em>theta=10</em>, <em>tmin=-1000.0</em>, <em>tmax=100000.0</em><big>)</big><a class="reference internal" href="_modules/LFPy/inputgenerators.html#stationary_gamma"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LFPy.inputgenerators.stationary_gamma" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generates spiketimes with interspike interval statistics according
 to gamma-distribution with &#8216;shape&#8217; k amd &#8216;scale&#8217; theta between tstart and
-tstop. Spiketimes up to tmax is reached, only up to tstop are returned</p>
+tstop. Spiketimes from tmin up to tmax is calculated,
+times between 0 and tstop are returned</p>
 </dd></dl>
 
 <dl class="function">
@@ -659,7 +715,7 @@ between tstart and tstop</p>
 <div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" size="18" />
+      <input type="text" name="q" />
       <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
@@ -685,12 +741,12 @@ between tstart and tstop</p>
         <li class="right" >
           <a href="information.html" title="Requirements"
              >previous</a> |</li>
-        <li><a href="index.html">LFPy v0.1 documentation</a> &raquo;</li> 
+        <li><a href="index.html">LFPy 0.1 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2011, Espen Hagen.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
     </div>
   </body>
 </html>

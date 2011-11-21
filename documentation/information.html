@@ -1,0 +1,220 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Requirements &mdash; LFPy 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="LFPy 0.1 documentation" href="index.html" />
+    <link rel="next" title="module LFPy" href="classes.html" />
+    <link rel="prev" title="Welcome to LFPy’s documentation!" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="classes.html" title="module LFPy"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to LFPy’s documentation!"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">LFPy 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="requirements">
+<h1>Requirements<a class="headerlink" href="#requirements" title="Permalink to this headline">¶</a></h1>
+<p>The basic requirements for the release branch of LFPy is as follows</p>
+<ol class="arabic">
+<li><p class="first">Subversion, in order to download the code from the repository</p>
+</li>
+<li><p class="first">Python, seems to work fine with recent python since 2.6.x (2.6.6 or newer recommended), 2.7.x works fine.</p>
+</li>
+<li><p class="first">Python modules numpy, scipy, matplotlit</p>
+</li>
+<li><p class="first">NEURON (from www.neuron.yale.edu) compiled as a python module, so the following should execute without error in the terminal:</p>
+<div class="highlight-python"><pre>ipython
+&gt;&gt;&gt; import neuron
+&gt;&gt;&gt; neuron.test()</pre>
+</div>
+</li>
+<li><p class="first">Cython (C-extencions for python, cython.org) to speed up simulations of extracellular fields</p>
+</li>
+</ol>
+</div>
+<div class="section" id="installation">
+<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
+<ol class="arabic">
+<li><p class="first">In a terminal, <tt class="docutils literal"><span class="pre">'cd'</span></tt> to a directory where you want your LFPy files to be, as an example this could be &#8216;/home/yourname/work&#8217;.</p>
+</li>
+<li><p class="first">Download LFPy using SVN by typing:</p>
+<div class="highlight-python"><pre>svn checkout https://bebiservice.umb.no/svn-private/LFPy-release</pre>
+</div>
+<p>This will create a folder named &#8216;LFPy-release&#8217;  in the current folder containing all files belonging to the LFPy package.</p>
+</li>
+<li><p class="first">Now you need to add the following lines to your &#8216;.bashrc&#8217; or &#8216;.bash_profile&#8217; or similar file:</p>
+<div class="highlight-python"><pre>LFPYPATH="/home/yourname/work/LFPy-release/"
+PYTHONPATH="${PYTHONPATH}:${LFPYPATH}"
+export LFPYPATH
+export PYTHONPATH</pre>
+</div>
+<p>Change the exact path to where you downloaded the files in previous steps. This is to make the LFPy installation available everywhere (as we don&#8217;t install LFPy as a &#8220;proper&#8221; python module at the moment)</p>
+</li>
+<li><p class="first">In order to speed up LFP-calculations, the Cython code (lfpycalc.pyx) need to be compiled every time it has been updated from the terminal;</p>
+<div class="highlight-python"><pre>cd $LFPYPATH/LFPy
+python setup.py build_ext -i</pre>
+</div>
+<p>Otherwise the corresponding .py files will be used, which is slower.</p>
+</li>
+<li><p class="first">Now try if it all works. In a python shell in a fresh terminal, try</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">LFPy</span>
+</pre></div>
+</div>
+<p>if there are no complaints, it should be all done!</p>
+</li>
+<li><p class="first">There are some basic usage examples provided in</p>
+<div class="highlight-python"><pre>$LFPYPATH/examples/</pre>
+</div>
+<p>To execute:</p>
+<div class="highlight-python"><pre>cd $LFPYPATH/examples/
+python script.py
+#or
+ipython
+&gt;&gt;&gt;run script.py</pre>
+</div>
+</li>
+</ol>
+</div>
+<div class="section" id="units">
+<h1>Units<a class="headerlink" href="#units" title="Permalink to this headline">¶</a></h1>
+<p>As of now, units follow the NEURON conventions.
+The units in LFPy for given quantities are:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="54%" />
+<col width="46%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">What</th>
+<th class="head">unit</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>Potentials</td>
+<td>[mV]</td>
+</tr>
+<tr class="row-odd"><td>Currents</td>
+<td>[nA]</td>
+</tr>
+<tr class="row-even"><td>conductance</td>
+<td>[S/cm2]</td>
+</tr>
+<tr class="row-odd"><td>capacitance</td>
+<td>[muF/cm2]</td>
+</tr>
+<tr class="row-even"><td>Coordinates</td>
+<td>[mum]</td>
+</tr>
+</tbody>
+</table>
+<p>Note: resistance, conductance and capacitance are usually specific values, i.e per membrane area (lowercase r_m, g, c_m)
+Depending on the mechanism files, some may use different units altogether, but this should be taken care of internally by NEURON, right?.</p>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Requirements</a></li>
+<li><a class="reference internal" href="#installation">Installation</a></li>
+<li><a class="reference internal" href="#units">Units</a></li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">Welcome to LFPy&#8217;s documentation!</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="classes.html"
+                        title="next chapter">module <tt class="docutils literal docutils literal"><span class="pre">LFPy</span></tt></a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/information.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="classes.html" title="module LFPy"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to LFPy’s documentation!"
+             >previous</a> |</li>
+        <li><a href="index.html">LFPy 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, Espen Hagen.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+  </body>
+</html>
