@@ -756,7 +756,8 @@ class Cell(object):
         if hasattr(self, 'synlist'):
             for i in xrange(int(self.synlist.count())):
                 for ii in xrange(int(self.sptimeslist.o(i).size)):
-                    self.netconlist.o(i).event(self.sptimeslist.o(i)[ii])
+                    self.netconlist.o(i).event(float(self.sptimeslist.o(i)[ii]))
+                    #self.netconlist.o(i).event(self.sptimeslist.o(i)[ii])
     
     def _set_time_recorder(self):
         '''Initialize time-vector recorder in NEURON'''

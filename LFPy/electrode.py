@@ -271,7 +271,6 @@ class Electrode(ElectrodeSetup):
                     else:
                         LFP_temp[k, i, ] = LFP_temp[k, i, ] + \
                                 lfpcalc.calc_lfp_choose(self.c[k], **variables)
-
             if self.verbose:
                 print 'Calculated potential contribution, cell %i.' % k
         if self.perCellLFP:
@@ -355,17 +354,13 @@ class Electrode(ElectrodeSetup):
         return circle,  offsets,  lfp_el_pos
 
 
-class ElectrodeThreaded(ElectrodeSetup):
-    '''
-    class with inheritance from class ElectrodeSetup, calculating LFPs using
-    available cpu-cores.
+class ElectrodeThreaded(Electrode):
+    '''Inherit class Electrode, but using multiprocessing to distribute
+    calculations of LFP for each electrode contact
     
-    Usage:
-    ::
-        electrode = LFPy.ElectrodeThreaded(cell, **kwargs)
-        electrode.calc_lfp_threaded()
+    Will only work for case when averaging over electrode geometry area
+    currently
     '''
-    
     def __init__(self, cell, sigma=0.3, x=100, y=0, z=0,
                  N=None, r=None, n=0, r_z=None, colors=None,
                  perCellLFP=False, method='linesource', 
@@ -373,277 +368,89 @@ class ElectrodeThreaded(ElectrodeSetup):
                  from_file=False, cellfile=None):
         '''Initialization of class ElectrodeThreaded, with electrode setup
         inherited from class ElectrodeSetup'''
-        ElectrodeSetup.__init__(self, cell, sigma, x, y, z,
+        Electrode.__init__(self, cell, sigma, x, y, z,
                                 N, r, n, r_z, perCellLFP,
                                 method, color, marker, from_file, cellfile)
-            
-    def calc_lfp_threaded(self, t_indices=None, __name__='__main__',
-                          NUMBER_OF_PROCESSES=None, ):
-        '''Calculate LFP on electrode geometry from all cell instances.
-        Will choose distributed calculated if electrode contain 'n', 'N', and
-        'r'. Will try to distribute jobs to available processes'''
-        #create self.LFP if not already there
-        if hasattr(self, 'LFP'):
-            del self.LFP
-            print 'deleted electrode.LFP, consecutive calls to calc_lfp_th...!'
-        if not hasattr(self,  'LFP'):
-            if t_indices != None:
-                if self.perCellLFP:
-                    LFP_temp = pl.zeros((self.nCells, self.x.size,
-                                         t_indices.size))
-                else:
-                    LFP_temp = pl.zeros((self.nCells, self.x.size,
-                                         t_indices.size))
-                self.LFP = pl.zeros((self.x.size, t_indices.size))
-            else:
-                if self.perCellLFP:
-                    LFP_temp = pl.zeros((self.nCells, self.x.size,
-                                         self.tvec.size))
-                else:
-                    LFP_temp = pl.zeros((self.nCells, self.x.size,
-                                         self.tvec.size))
-                self.LFP = pl.zeros((self.x.size, self.tvec.size))
+    
+    def _lfp_el_pos_calc_dist(self, c, r_limit, sigma=0.3, radius=10, n=10,
+                             m=50, N=None, t_indices=None, 
+                             method='linesource', __name__="__main__"):
+        '''
+        Calc. of LFP over an n-point integral approximation over flat
+        electrode surface with radius r. The locations of these n points on
+        the electrode surface are random,  within the given radius'''
+        lfp_el_pos = pl.zeros(self.LFP.shape)
+        offsets = {}
+        circle = {}
         
-        #multiprocess initialization
-        if __name__ == '__main__':
+        if __name__ == "__main__":
             freeze_support()
-            if NUMBER_OF_PROCESSES == None:
-                NUMBER_OF_PROCESSES = cpu_count() #Number of threads
-            #Creating multiproc. queues for tasks and results
+            NUMBER_OF_PROCESSES = cpu_count()
             task_queue = Queue()
             done_queue = Queue()
 
-            #One task per cell instance
-            TASKS = pl.array(self.c.keys())
-
-            #Distribute TASKS, call Process, fetching results for LFP-calc.
-            #and stopping and closing threads and queues
-            for task in TASKS:
-                task_queue.put(task)
-            for i in xrange(NUMBER_OF_PROCESSES):
-                Process(target=self._calc_lfp_thread,
-                    args=(task_queue, t_indices, NUMBER_OF_PROCESSES,
-                          done_queue)).start()
-            for i in xrange(TASKS.size):
-                [self.circle, self.offsets, n, LFP] = done_queue.get()
-                LFP_temp[n, :, :] = LFP
-            for i in xrange(NUMBER_OF_PROCESSES):
-                task_queue.put('STOP')
-            task_queue.close()
-            done_queue.close()
-        
-        if self.perCellLFP:
-            self.CellLFP = LFP_temp
-        
-        self.LFP = LFP_temp.sum(axis=0)
-
-    def _calc_lfp_thread(self, task_queue, t_indices,
-                          NUMBER_OF_PROCESSES, done_queue):
-        '''Single thread, calculating LFP from single cell.
-        Should be called by calc_lfp_threaded'''
-        #local declaration of LFP, which will be saved in done_queue
-        if t_indices != None:
-            LFP = pl.zeros((self.x.size, t_indices.size))
-        else:
-            LFP = pl.zeros((self.x.size, self.tvec.size))
-        variables = {
-            'sigma' : self.sigma,
-            't_indices' : t_indices,
-            'method' : self.method,
-        }
-
-        #iterate over elements in the task queue
-        for k in iter(task_queue.get, 'STOP'):
-            #choosing spatial averaging for each electrode contact
-            if self.n != None and self.N != None and self.r != None:
-                variables.update({
-                    'r_limit' : self.c[k].diam / 2,
-                    'radius' : self.r,
-                    'n' : self.n,
-                    'N' : self.N,
-                    't_indices' : t_indices,
-                    'NUMBER_OF_PROCESSES' : NUMBER_OF_PROCESSES,
-                    })
-                #Calling function which will calculate LFP, distributed
-                if sys.version_info < (2, 6, 6): #fix for older Pythons
-                    del variables['NUMBER_OF_PROCESSES']
-                    [circle, offsets, LFP] = self._lfp_el_pos_calc_dist(
-                        self.c[k], **variables)
-                else:
-                    [circle, offsets, LFP] = \
-                    self._lfp_el_pos_calc_dist_threaded(self.c[k], **variables)
-                done_queue.put([circle, offsets, k, LFP])
-            #case for no averaging
-            else:
-                variables.update({
-                    'r_limit' : self.c[k].diam / 2
-                    })
-                if sys.version_info < (2, 6, 6): #fix for runs on Stallo
-                    for i in xrange(self.x.size):
-                        variables.update({
-                            'x' : self.x[i],
-                            'y' : self.y[i],
-                            'z' : self.z[i],
-                        })
-                        if hasattr(self, 'r_drift'):
-                            LFP = pl.zeros(self.LFP.shape[1])
-                            for j in xrange(self.LFP.shape[1]):
-                                variables.update({
-                                    'x' : self.x[i] + self.r_drift['x'][i],
-                                    'y' : self.y[i] + self.r_drift['y'][i],
-                                    'z' : self.z[i] + self.r_drift['z'][i],
-                                    'timestep' : j
-                                })
-                                LFP[i, j] = lfpcalc.calc_lfp_choose(self.c[k], 
-                                                                    **variables)
-                        else:
-                            LFP[i, ] = lfpcalc.calc_lfp_choose(self.c[k], 
-                                                               **variables)
-                else:
-                    LFP = self._calc_lfp_simple_threaded(self.c[k], LFP, 
-                                                          **variables)
-                circle = None,
-                offsets = None
-                
-                done_queue.put([circle, offsets, k, LFP])
-            if self.verbose:
-                print 'Calculated potential contribution, cell %i.' % k
-        
-    
-    def _calc_lfp_simple_threaded(self, c, LFP, **variables):
-
-        __name__='__main__'
-        if __name__ == '__main__':              # This is important, apparently
-            output = {}                         # results saved in dict
-            freeze_support()                    # let NUMBER_OF_PROCESSES calls
-                                                # finish before new jobs are qd
-            NUMBER_OF_PROCESSES = cpu_count()   # Using all available cores
-            task_queue = Queue()                # queue for tasks
-            done_queue = Queue()                # simulation results put here
-            
-            TASKS = pl.arange(self.x.size)
+            TASKS = pl.arange(len(self.x))
             
             for task in TASKS:
                 task_queue.put(int(task))       
             for i in xrange(NUMBER_OF_PROCESSES):
-                Process(target=self._calc_lfp_simple_thread,
-                        args=(task_queue, done_queue, c, variables)).start()
+                Process(target=self._lfp_el_pos_calc_dist_i,
+                             args=(task_queue,
+                             c, r_limit, sigma, radius, n,
+                             m, N, t_indices, method,
+                             done_queue)).start()
             for n in xrange(TASKS.size):
-                [i, lfp] = done_queue.get()
-                LFP[i, ] = lfp
+                [index, lfp, offset, circle] = done_queue.get() 
+                lfp_el_pos[index], offsets[index], circle[index] = lfp, offset, circle                
             for i in xrange(NUMBER_OF_PROCESSES):
                 task_queue.put('STOP')
             
-            task_queue.close()      # No more jobs can be sent to the queues,
-            done_queue.close()      # necessary for consecutive parallel jobs
-            
-            return LFP
-    
-    def _calc_lfp_simple_thread(self, task_queue,
-                                 done_queue, c, variables):
-        for i in iter(task_queue.get, 'STOP'):
-            variables.update({
-                        'x' : self.x[i],
-                        'y' : self.y[i],
-                        'z' : self.z[i],
-                    })
-            if hasattr(self, 'r_drift'):
-                LFP = pl.zeros(self.LFP.shape[1])
-                for j in xrange(self.LFP.shape[1]):
-                    variables.update({
-                        'x' : self.x[i] + self.r_drift['x'][i],
-                        'y' : self.y[i] + self.r_drift['y'][i],
-                        'z' : self.z[i] + self.r_drift['z'][i],
-                        'timestep' : j
-                    })
-                    LFP[j] = lfpcalc.calc_lfp_choose(c, **variables)
-            else:
-                LFP = lfpcalc.calc_lfp_choose(c, **variables)
+            task_queue.close()
+            done_queue.close()
+        else:
+            raise Exception, "'__name__' != '__main__'"
                 
-            done_queue.put([i, LFP])
-    
-    def _lfp_el_pos_calc_dist_threaded(self, c, r_limit, sigma=0.3, radius=10,
-                n=10, m=50, N=None, t_indices=None, NUMBER_OF_PROCESSES=None, 
-                method='linesource',
-                __name__='__main__'):
-        '''Calc. of LFP over an n-point integral approximation over flat
-        electrode surface with radius r. The locations of these n points on
-        the electrode surface are random,  within the given radius.
-        The method will spawn a few multiprocessing threads'''
-        offsets = {}
-        circle = {}
-
-        if __name__ == '__main__':
-            freeze_support()
-            if NUMBER_OF_PROCESSES == None:
-                NUMBER_OF_PROCESSES = cpu_count()
-            dist_task_queue = Queue()
-            dist_done_queue = Queue()
-
-            TASKS = pl.arange(self.x.size)
-            tempLFP = pl.zeros((self.x.size, self.LFP.shape[0],
-                                self.LFP.shape[1]))
-            
-            for task in TASKS:
-                dist_task_queue.put(task)
-            for i in xrange(NUMBER_OF_PROCESSES):
-                Process(target=self._lfp_el_pos_calc_dist_thread,
-                    args=(dist_task_queue, c, r_limit, sigma, radius, n, m, N,
-                    t_indices, method, dist_done_queue)).start()
-            for i in xrange(TASKS.size):
-                [circl, offset, tempLFP[i,]] = dist_done_queue.get()
-                if type(circl) == type({}) and type(offsets) == type({}):
-                    circle.update(circl)
-                    offsets.update(offset)
-            for i in xrange(NUMBER_OF_PROCESSES):
-                dist_task_queue.put('STOP')
-
-            dist_task_queue.close()
-            dist_done_queue.close()
+        return circle,  offsets,  lfp_el_pos
         
-        lfp_el_pos = tempLFP.sum(axis=0)
-        return offsets, circle, lfp_el_pos
-
-    def _lfp_el_pos_calc_dist_thread(self, dist_task_queue, c, r_limit, sigma,
-            radius, n, m, N, t_indices, method, dist_done_queue):
-        '''spawn thread called by self._lfp_el_pos_calc_dist_threaded()'''
-        for i in iter(dist_task_queue.get, 'STOP'):
-            lfp_el_pos = pl.zeros(self.LFP.shape)
-            offsets = {}
-            circle = {}
+            
+    def _lfp_el_pos_calc_dist_i(self, task_queue,
+                    c, r_limit, sigma, radius, n, m, N, t_indices, method,
+                    done_queue):       
+        for index in iter(task_queue.get, 'STOP'):
             if n > 1:
                 lfp_e = pl.zeros((n, self.LFP.shape[1]))
-
+    
                 offs = pl.zeros((n, 3))
                 r2 = pl.zeros(n)
+    
                 crcl = pl.zeros((m, 3))
-
+    
                 for j in xrange(n):
                     A = [(pl.rand()-0.5)*radius*2, (pl.rand()-0.5)*radius*2,
-                        (pl.rand()-0.5)*radius*2]
-                    offs[j, ] = pl.cross(N[i, ], A)
+                            (pl.rand()-0.5)*radius*2]
+                    offs[j, ] = pl.cross(N[index, ], A)
                     r2[j] = offs[j, 0]**2 + offs[j, 1]**2 + offs[j, 2]**2
                     while r2[j] > radius**2:
                         A = [(pl.rand()-0.5)*radius*2, (pl.rand()-0.5)*radius*2,
                             (pl.rand()-0.5)*radius*2]
-                        offs[j, ] = pl.cross(N[i, ], A)
+                        offs[j, ] = pl.cross(N[index, ], A)
                         r2[j] = offs[j, 0]**2 + offs[j, 1]**2 + offs[j, 2]**2
-
-                x_n = offs[:, 0] + self.x[i]
-                y_n = offs[:, 1] + self.y[i]
-                z_n = offs[:, 2] + self.z[i]
-
+    
+                x_n = offs[:, 0] + self.x[index]
+                y_n = offs[:, 1] + self.y[index]
+                z_n = offs[:, 2] + self.z[index]
+    
                 for j in xrange(m):
                     B = [(pl.rand()-0.5), (pl.rand()-0.5), (pl.rand()-0.5)]
-                    crcl[j, ] = pl.cross(N[i, ], B)
+                    crcl[j, ] = pl.cross(N[index, ], B)
                     crcl[j, ] = crcl[j, ]/pl.sqrt(crcl[j, 0]**2 +
-                                               crcl[j, 1]**2 + 
+                                               crcl[j, 1]**2 + \
                                                crcl[j, 2]**2)*radius
-
-                crclx = crcl[:, 0] + self.x[i]
-                crcly = crcl[:, 1] + self.y[i]
-                crclz = crcl[:, 2] + self.z[i]
-
+    
+                crclx = crcl[:, 0] + self.x[index]
+                crcly = crcl[:, 1] + self.y[index]
+                crclz = crcl[:, 2] + self.z[index]
+    
                 for j in xrange(n):
                     variables = {
                         'x' : x_n[j],
@@ -652,26 +459,351 @@ class ElectrodeThreaded(ElectrodeSetup):
                         'r_limit' : r_limit,
                         'sigma' : sigma,
                         't_indices' : t_indices,
-                        'method' : self.method,
+                        'method' : method,
                     }
                     lfp_e[j, ] = lfpcalc.calc_lfp_choose(c, **variables)
-
-                lfp_el_pos[i] = lfp_e.mean(axis=0)
-                offsets[i] = {
+    
+                lfp_el_pos = lfp_e.mean(axis=0)
+    
+            else:
+                lfp_el_pos = lfpcalc.calc_lfp_choose(c,
+                    x=self.x[index], y=self.y[index], z=self.z[index], r_limit = r_limit,
+                    sigma=sigma, t_indices=t_indices)
+            offsets = {
                 'x_n' : x_n,
                 'y_n' : y_n,
                 'z_n' : z_n
-                }
-                circle[i] = {
+            }
+            circle = {
                 'x' : crclx,
                 'y' : crcly,
                 'z' : crclz
-                }
-            else:
-                lfp_el_pos[i] = lfpcalc.calc_lfp_choose(c, \
-                    x=self.x[i], y=self.y[i], z=self.z[i], r_limit = r_limit,
-                    sigma=sigma, t_indices=t_indices)
-                
-            
-            dist_done_queue.put([circle, offsets, lfp_el_pos])
+            }
+            done_queue.put([index, lfp_el_pos, offsets, circle])
+
+
+    
+
+
+
+
+#class ElectrodeThreaded(ElectrodeSetup):
+#    '''
+#    class with inheritance from class ElectrodeSetup, calculating LFPs using
+#    available cpu-cores.
+#    
+#    Usage:
+#    ::
+#        electrode = LFPy.ElectrodeThreaded(cell, **kwargs)
+#        electrode.calc_lfp_threaded()
+#    '''
+#    
+#    def __init__(self, cell, sigma=0.3, x=100, y=0, z=0,
+#                 N=None, r=None, n=0, r_z=None, colors=None,
+#                 perCellLFP=False, method='linesource', 
+#                 color='g', marker='o',
+#                 from_file=False, cellfile=None):
+#        '''Initialization of class ElectrodeThreaded, with electrode setup
+#        inherited from class ElectrodeSetup'''
+#        ElectrodeSetup.__init__(self, cell, sigma, x, y, z,
+#                                N, r, n, r_z, perCellLFP,
+#                                method, color, marker, from_file, cellfile)
+#            
+#    def calc_lfp_threaded(self, t_indices=None, __name__='__main__',
+#                          NUMBER_OF_PROCESSES=None, ):
+#        '''Calculate LFP on electrode geometry from all cell instances.
+#        Will choose distributed calculated if electrode contain 'n', 'N', and
+#        'r'. Will try to distribute jobs to available processes'''
+#        #create self.LFP if not already there
+#        if hasattr(self, 'LFP'):
+#            del self.LFP
+#            print 'deleted electrode.LFP, consecutive calls to calc_lfp_th...!'
+#        if not hasattr(self,  'LFP'):
+#            if t_indices != None:
+#                if self.perCellLFP:
+#                    LFP_temp = pl.zeros((self.nCells, self.x.size,
+#                                         t_indices.size))
+#                else:
+#                    LFP_temp = pl.zeros((self.nCells, self.x.size,
+#                                         t_indices.size))
+#                self.LFP = pl.zeros((self.x.size, t_indices.size))
+#            else:
+#                if self.perCellLFP:
+#                    LFP_temp = pl.zeros((self.nCells, self.x.size,
+#                                         self.tvec.size))
+#                else:
+#                    LFP_temp = pl.zeros((self.nCells, self.x.size,
+#                                         self.tvec.size))
+#                self.LFP = pl.zeros((self.x.size, self.tvec.size))
+#        
+#        #multiprocess initialization
+#        if __name__ == '__main__':
+#            freeze_support()
+#            if NUMBER_OF_PROCESSES == None:
+#                NUMBER_OF_PROCESSES = cpu_count() #Number of threads
+#            #Creating multiproc. queues for tasks and results
+#            task_queue = Queue()
+#            done_queue = Queue()
+#
+#            #One task per cell instance
+#            TASKS = pl.array(self.c.keys())
+#
+#            #Distribute TASKS, call Process, fetching results for LFP-calc.
+#            #and stopping and closing threads and queues
+#            for task in TASKS:
+#                task_queue.put(task)
+#            for i in xrange(NUMBER_OF_PROCESSES):
+#                Process(target=self._calc_lfp_thread,
+#                    args=(task_queue, t_indices, NUMBER_OF_PROCESSES,
+#                          done_queue)).start()
+#            for i in xrange(TASKS.size):
+#                [self.circle, self.offsets, n, LFP] = done_queue.get()
+#                LFP_temp[n, :, :] = LFP
+#            for i in xrange(NUMBER_OF_PROCESSES):
+#                task_queue.put('STOP')
+#            task_queue.close()
+#            done_queue.close()
+#        
+#        if self.perCellLFP:
+#            self.CellLFP = LFP_temp
+#        
+#        self.LFP = LFP_temp.sum(axis=0)
+#
+#    def _calc_lfp_thread(self, task_queue, t_indices,
+#                          NUMBER_OF_PROCESSES, done_queue):
+#        '''Single thread, calculating LFP from single cell.
+#        Should be called by calc_lfp_threaded'''
+#        #local declaration of LFP, which will be saved in done_queue
+#        if t_indices != None:
+#            LFP = pl.zeros((self.x.size, t_indices.size))
+#        else:
+#            LFP = pl.zeros((self.x.size, self.tvec.size))
+#        variables = {
+#            'sigma' : self.sigma,
+#            't_indices' : t_indices,
+#            'method' : self.method,
+#        }
+#
+#        #iterate over elements in the task queue
+#        for k in iter(task_queue.get, 'STOP'):
+#            #choosing spatial averaging for each electrode contact
+#            if self.n != None and self.N != None and self.r != None:
+#                variables.update({
+#                    'r_limit' : self.c[k].diam / 2,
+#                    'radius' : self.r,
+#                    'n' : self.n,
+#                    'N' : self.N,
+#                    't_indices' : t_indices,
+#                    'NUMBER_OF_PROCESSES' : NUMBER_OF_PROCESSES,
+#                    })
+#                #Calling function which will calculate LFP, distributed
+#                if sys.version_info < (2, 6, 6): #fix for older Pythons
+#                    del variables['NUMBER_OF_PROCESSES']
+#                    [circle, offsets, LFP] = self._lfp_el_pos_calc_dist(
+#                        self.c[k], **variables)
+#                else:
+#                    [circle, offsets, LFP] = \
+#                    self._lfp_el_pos_calc_dist_threaded(self.c[k], **variables)
+#                done_queue.put([circle, offsets, k, LFP])
+#            #case for no averaging
+#            else:
+#                variables.update({
+#                    'r_limit' : self.c[k].diam / 2
+#                    })
+#                if sys.version_info < (2, 6, 6): #fix for runs on Stallo
+#                    for i in xrange(self.x.size):
+#                        variables.update({
+#                            'x' : self.x[i],
+#                            'y' : self.y[i],
+#                            'z' : self.z[i],
+#                        })
+#                        if hasattr(self, 'r_drift'):
+#                            LFP = pl.zeros(self.LFP.shape[1])
+#                            for j in xrange(self.LFP.shape[1]):
+#                                variables.update({
+#                                    'x' : self.x[i] + self.r_drift['x'][i],
+#                                    'y' : self.y[i] + self.r_drift['y'][i],
+#                                    'z' : self.z[i] + self.r_drift['z'][i],
+#                                    'timestep' : j
+#                                })
+#                                LFP[i, j] = lfpcalc.calc_lfp_choose(self.c[k], 
+#                                                                    **variables)
+#                        else:
+#                            LFP[i, ] = lfpcalc.calc_lfp_choose(self.c[k], 
+#                                                               **variables)
+#                else:
+#                    LFP = self._calc_lfp_simple_threaded(self.c[k], LFP, 
+#                                                          **variables)
+#                circle = None,
+#                offsets = None
+#                
+#                done_queue.put([circle, offsets, k, LFP])
+#            if self.verbose:
+#                print 'Calculated potential contribution, cell %i.' % k
+#        
+#    
+#    def _calc_lfp_simple_threaded(self, c, LFP, **variables):
+#
+#        __name__='__main__'
+#        if __name__ == '__main__':              # This is important, apparently
+#            output = {}                         # results saved in dict
+#            freeze_support()                    # let NUMBER_OF_PROCESSES calls
+#                                                # finish before new jobs are qd
+#            NUMBER_OF_PROCESSES = cpu_count()   # Using all available cores
+#            task_queue = Queue()                # queue for tasks
+#            done_queue = Queue()                # simulation results put here
+#            
+#            TASKS = pl.arange(self.x.size)
+#            
+#            for task in TASKS:
+#                task_queue.put(int(task))       
+#            for i in xrange(NUMBER_OF_PROCESSES):
+#                Process(target=self._calc_lfp_simple_thread,
+#                        args=(task_queue, done_queue, c, variables)).start()
+#            for n in xrange(TASKS.size):
+#                [i, lfp] = done_queue.get()
+#                LFP[i, ] = lfp
+#            for i in xrange(NUMBER_OF_PROCESSES):
+#                task_queue.put('STOP')
+#            
+#            task_queue.close()      # No more jobs can be sent to the queues,
+#            done_queue.close()      # necessary for consecutive parallel jobs
+#            
+#            return LFP
+#    
+#    def _calc_lfp_simple_thread(self, task_queue,
+#                                 done_queue, c, variables):
+#        for i in iter(task_queue.get, 'STOP'):
+#            variables.update({
+#                        'x' : self.x[i],
+#                        'y' : self.y[i],
+#                        'z' : self.z[i],
+#                    })
+#            if hasattr(self, 'r_drift'):
+#                LFP = pl.zeros(self.LFP.shape[1])
+#                for j in xrange(self.LFP.shape[1]):
+#                    variables.update({
+#                        'x' : self.x[i] + self.r_drift['x'][i],
+#                        'y' : self.y[i] + self.r_drift['y'][i],
+#                        'z' : self.z[i] + self.r_drift['z'][i],
+#                        'timestep' : j
+#                    })
+#                    LFP[j] = lfpcalc.calc_lfp_choose(c, **variables)
+#            else:
+#                LFP = lfpcalc.calc_lfp_choose(c, **variables)
+#                
+#            done_queue.put([i, LFP])
+#    
+#    def _lfp_el_pos_calc_dist_threaded(self, c, r_limit, sigma=0.3, radius=10,
+#                n=10, m=50, N=None, t_indices=None, NUMBER_OF_PROCESSES=None, 
+#                method='linesource',
+#                __name__='__main__'):
+#        '''Calc. of LFP over an n-point integral approximation over flat
+#        electrode surface with radius r. The locations of these n points on
+#        the electrode surface are random,  within the given radius.
+#        The method will spawn a few multiprocessing threads'''
+#        offsets = {}
+#        circle = {}
+#
+#        if __name__ == '__main__':
+#            freeze_support()
+#            if NUMBER_OF_PROCESSES == None:
+#                NUMBER_OF_PROCESSES = cpu_count()
+#            dist_task_queue = Queue()
+#            dist_done_queue = Queue()
+#
+#            TASKS = pl.arange(self.x.size)
+#            tempLFP = pl.zeros((self.x.size, self.LFP.shape[0],
+#                                self.LFP.shape[1]))
+#            
+#            for task in TASKS:
+#                dist_task_queue.put(task)
+#            for i in xrange(NUMBER_OF_PROCESSES):
+#                Process(target=self._lfp_el_pos_calc_dist_thread,
+#                    args=(dist_task_queue, c, r_limit, sigma, radius, n, m, N,
+#                    t_indices, method, dist_done_queue)).start()
+#            for i in xrange(TASKS.size):
+#                [circl, offset, tempLFP[i,]] = dist_done_queue.get()
+#                if type(circl) == type({}) and type(offsets) == type({}):
+#                    circle.update(circl)
+#                    offsets.update(offset)
+#            for i in xrange(NUMBER_OF_PROCESSES):
+#                dist_task_queue.put('STOP')
+#
+#            dist_task_queue.close()
+#            dist_done_queue.close()
+#        
+#        lfp_el_pos = tempLFP.sum(axis=0)
+#        return offsets, circle, lfp_el_pos
+#
+#    def _lfp_el_pos_calc_dist_thread(self, dist_task_queue, c, r_limit, sigma,
+#            radius, n, m, N, t_indices, method, dist_done_queue):
+#        '''spawn thread called by self._lfp_el_pos_calc_dist_threaded()'''
+#        for i in iter(dist_task_queue.get, 'STOP'):
+#            lfp_el_pos = pl.zeros(self.LFP.shape)
+#            offsets = {}
+#            circle = {}
+#            if n > 1:
+#                lfp_e = pl.zeros((n, self.LFP.shape[1]))
+#
+#                offs = pl.zeros((n, 3))
+#                r2 = pl.zeros(n)
+#                crcl = pl.zeros((m, 3))
+#
+#                for j in xrange(n):
+#                    A = [(pl.rand()-0.5)*radius*2, (pl.rand()-0.5)*radius*2,
+#                        (pl.rand()-0.5)*radius*2]
+#                    offs[j, ] = pl.cross(N[i, ], A)
+#                    r2[j] = offs[j, 0]**2 + offs[j, 1]**2 + offs[j, 2]**2
+#                    while r2[j] > radius**2:
+#                        A = [(pl.rand()-0.5)*radius*2, (pl.rand()-0.5)*radius*2,
+#                            (pl.rand()-0.5)*radius*2]
+#                        offs[j, ] = pl.cross(N[i, ], A)
+#                        r2[j] = offs[j, 0]**2 + offs[j, 1]**2 + offs[j, 2]**2
+#
+#                x_n = offs[:, 0] + self.x[i]
+#                y_n = offs[:, 1] + self.y[i]
+#                z_n = offs[:, 2] + self.z[i]
+#
+#                for j in xrange(m):
+#                    B = [(pl.rand()-0.5), (pl.rand()-0.5), (pl.rand()-0.5)]
+#                    crcl[j, ] = pl.cross(N[i, ], B)
+#                    crcl[j, ] = crcl[j, ]/pl.sqrt(crcl[j, 0]**2 +
+#                                               crcl[j, 1]**2 + 
+#                                               crcl[j, 2]**2)*radius
+#
+#                crclx = crcl[:, 0] + self.x[i]
+#                crcly = crcl[:, 1] + self.y[i]
+#                crclz = crcl[:, 2] + self.z[i]
+#
+#                for j in xrange(n):
+#                    variables = {
+#                        'x' : x_n[j],
+#                        'y' : y_n[j],
+#                        'z' : z_n[j],
+#                        'r_limit' : r_limit,
+#                        'sigma' : sigma,
+#                        't_indices' : t_indices,
+#                        'method' : self.method,
+#                    }
+#                    lfp_e[j, ] = lfpcalc.calc_lfp_choose(c, **variables)
+#
+#                lfp_el_pos[i] = lfp_e.mean(axis=0)
+#                offsets[i] = {
+#                'x_n' : x_n,
+#                'y_n' : y_n,
+#                'z_n' : z_n
+#                }
+#                circle[i] = {
+#                'x' : crclx,
+#                'y' : crcly,
+#                'z' : crclz
+#                }
+#            else:
+#                lfp_el_pos[i] = lfpcalc.calc_lfp_choose(c, \
+#                    x=self.x[i], y=self.y[i], z=self.z[i], r_limit = r_limit,
+#                    sigma=sigma, t_indices=t_indices)
+#                
+#            
+#            dist_done_queue.put([circle, offsets, lfp_el_pos])
 
