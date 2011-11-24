@@ -55,7 +55,7 @@ class ElectrodeThreaded(Electrode):
             task_queue.close()
             done_queue.close()
         else:
-            raise Exception, "__name__ != '__main__'"
+            raise Exception, "'__name__' != '__main__'"
                 
         return circle,  offsets,  lfp_el_pos
         
@@ -127,7 +127,7 @@ class ElectrodeThreaded(Electrode):
                 'y' : crcly,
                 'z' : crclz
             }
-            done_queue.put(lfp_el_pos, offsets, circle)
+            done_queue.put([i, lfp_el_pos, offsets, circle])
 
 
 
