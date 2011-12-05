@@ -51,9 +51,17 @@ electrodeParameters = {
 elserial = LFPy.Electrode(cell, **electrodeParameters)
 elserial.calc_lfp()               # run LFP simulation
 
+
 electrode = LFPy.ElectrodeThreaded(cell, **electrodeParameters)
 electrode.calc_lfp()               # run LFP simulation
 
+
+pl.matshow(elserial.LFP)
+pl.colorbar()
+pl.matshow(electrode.LFP)
+pl.colorbar()
+pl.matshow(elserial.LFP - electrode.LFP)
+pl.colorbar()
 
 def plotstuff():
     fig = pl.figure()
