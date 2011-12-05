@@ -154,7 +154,7 @@ N = pl.empty((16, 3))
 for i in xrange(N.shape[0]): N[i,] = [1, 0, 0] #normal unit vec. to contacts
 electrodeparams = {             #parameters for electrode class
     'sigma' : 0.3,              #Extracellular potential
-    'x' : pl.zeros(16)+10,      #Coordinates of electrode contacts
+    'x' : pl.zeros(16)+0,      #Coordinates of electrode contacts
     'y' : pl.zeros(16),
     'z' : pl.linspace(-500,1000,16),
     'n' : 20,
@@ -184,9 +184,6 @@ insert_synapses(synparams_GABA_A, **insert_synapses_GABA_A_args)
 
 #perform NEURON simulation, results saved as attributes in the c instance
 c.simulate(**simulateparams)
-
-pl.figure()
-pl.plot(c.tvec, c.somav)
 
 #initialize electrode geometry, then calculate the LFP, using LFPy.Electrode cl.
 e = LFPy.Electrode(c,**electrodeparams)
