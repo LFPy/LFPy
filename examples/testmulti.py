@@ -34,17 +34,17 @@ synapse.set_spike_times(cell, pl.array([10, 15, 20, 25]))
 
 cell.simulate(rec_isyn=True)                # run cell simulation
 
-N = pl.empty((24, 3))
-for i in xrange(N.shape[0]):
-    N[i,] = [1, 0, 0] #normal unit vec. to contacts
+#N = pl.empty((24, 3))
+#for i in xrange(N.shape[0]):
+#    N[i,] = [1, 0, 0] #normal unit vec. to contacts
 electrodeParameters = {
     'sigma' : 0.3,                          # conductivity
     'x' : pl.zeros(24) + 50,                # carthesian coords.
     'y' : pl.zeros(24),                     # of electrode points
     'z' : pl.arange(-200, 1000, 50),
-    'n' : 5,
-    'r' : 10,
-    'N' : N,
+    #'n' : 5,
+    #'r' : 10,
+    #'N' : N,
 }
 
 
