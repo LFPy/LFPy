@@ -2,6 +2,8 @@
 import LFPy
 import pylab as pl
 
+pl.interactive(1)
+
 cellParameters = {                          
     'morphology' : 'L5_Mainen96_LFPy.hoc',  # morphology file
     'rm' : 30000,                           # membrane resistivity

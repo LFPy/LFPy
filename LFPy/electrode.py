@@ -238,6 +238,7 @@ class Electrode(ElectrodeSetup):
                 't_indices' : t_indices,
                 'method' : self.method,
             }
+            
             if self.n != None and self.N != None and self.r != None:
                 variables.update({
                     'r_limit' : self.c[k].diam/2,
@@ -252,25 +253,8 @@ class Electrode(ElectrodeSetup):
                 variables.update({
                     'r_limit' : self.c[k].diam/2
                 })
-                for i in xrange(self.x.size):
-                    variables.update({
-                        'x' : self.x[i],
-                        'y' : self.y[i],
-                        'z' : self.z[i],
-                    })
-                    if hasattr(self, 'r_drift'):
-                        for j in xrange(self.LFP.shape[1]):
-                            variables.update({
-                                'x' : self.x[i] + self.r_drift['x'][i],
-                                'y' : self.y[i] + self.r_drift['y'][i],
-                                'z' : self.z[i] + self.r_drift['z'][i],
-                                'timestep' : j
-                            })
-                            LFP_temp[k, i, j] = LFP_temp[k, i, j] + \
-                                lfpcalc.calc_lfp_choose(self.c[k], **variables)
-                    else:
-                        LFP_temp[k, i, ] = LFP_temp[k, i, ] + \
-                                lfpcalc.calc_lfp_choose(self.c[k], **variables)
+                LFP_temp[k, :, :] = self._loop_over_contacts(k, LFP_temp, variables)
+
             if self.verbose:
                 print 'Calculated potential contribution, cell %i.' % k
         if self.perCellLFP:
@@ -278,6 +262,31 @@ class Electrode(ElectrodeSetup):
         
         self.LFP = LFP_temp.sum(axis=0)
 
+    def _loop_over_contacts(self, k, LFP_temp, variables):
+        '''Loop over electrode contacts, and will return LFP_temp filled'''
+        for i in xrange(self.x.size):
+            variables.update({
+                'x' : self.x[i],
+                'y' : self.y[i],
+                'z' : self.z[i],
+            })
+            if hasattr(self, 'r_drift'):
+                for j in xrange(self.LFP.shape[1]):
+                    variables.update({
+                        'x' : self.x[i] + self.r_drift['x'][i],
+                        'y' : self.y[i] + self.r_drift['y'][i],
+                        'z' : self.z[i] + self.r_drift['z'][i],
+                        'timestep' : j
+                    })
+                    LFP_temp[k, i, j] = LFP_temp[k, i, j] + \
+                        lfpcalc.calc_lfp_choose(self.c[k], **variables)
+            else:
+                LFP_temp[k, i, ] = LFP_temp[k, i, ] + \
+                        lfpcalc.calc_lfp_choose(self.c[k], **variables)
+            
+        return LFP_temp[k, :, :]
+
+    
     def _lfp_el_pos_calc_dist(self, c, r_limit, sigma=0.3, radius=10, n=10,
                              m=50, N=None, t_indices=None, 
                              method='linesource'):
@@ -374,7 +383,8 @@ class ElectrodeThreaded(Electrode):
     
     def _lfp_el_pos_calc_dist(self, c, r_limit, sigma=0.3, radius=10, n=10,
                              m=50, N=None, t_indices=None, 
-                             method='linesource', __name__="__main__"):
+                             method='linesource', __name__="__main__",
+                             NUMBER_OF_PROCESSES=None):
         '''
         Calc. of LFP over an n-point integral approximation over flat
         electrode surface with radius r. The locations of these n points on
@@ -385,7 +395,13 @@ class ElectrodeThreaded(Electrode):
         
         if __name__ == "__main__":
             freeze_support()
-            NUMBER_OF_PROCESSES = cpu_count()
+            if NUMBER_OF_PROCESSES == None:
+                NUMBER_OF_PROCESSES = cpu_count()
+            elif type(NUMBER_OF_PROCESSES) != int:
+                raise ValueError, 'NUMBER_OF_PROCESSES != int, %s' \
+                                                    % str(NUMBER_OF_PROCESSES)
+            else:
+                pass
             task_queue = Queue()
             done_queue = Queue()
 
