@@ -403,11 +403,12 @@ class ElectrodeThreaded(Electrode):
             for task in TASKS:
                 task_queue.put(int(task))       
             for i in xrange(NUMBER_OF_PROCESSES):
-                Process(target=_loop_over_contacts_thread,
+                Process(target=self._loop_over_contacts_thread,
                              args=(task_queue, k, LFP_temp, variables,
                              done_queue)).start()
             for n in xrange(TASKS.size):
-                LFP_temp[k, :, :] += done_queue.get()                 
+                [i, lfp_temp] = done_queue.get()
+                LFP_temp[k, i, :] += lfp_temp                 
             for i in xrange(NUMBER_OF_PROCESSES):
                 task_queue.put('STOP')
             
@@ -420,7 +421,7 @@ class ElectrodeThreaded(Electrode):
 
     def _loop_over_contacts_thread(self, task_queue, k, LFP_temp, variables,
                              done_queue):
-        
+        """thread for each contact point"""
         for i in iter(task_queue.get, 'STOP'):
             variables.update({
                 'x' : self.x[i],
@@ -441,7 +442,7 @@ class ElectrodeThreaded(Electrode):
                 LFP_temp[k, i, ] = LFP_temp[k, i, ] + \
                         lfpcalc.calc_lfp_choose(self.c[k], **variables)
         
-            done_queue.put(LFP_temp[k, i, :])
+            done_queue.put([i, LFP_temp[k, i, :]])
         
     
     def _lfp_el_pos_calc_dist(self, c, r_limit, sigma=0.3, radius=10, n=10,
