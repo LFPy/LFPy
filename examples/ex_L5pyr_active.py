@@ -7,7 +7,7 @@ pl.rcParams.update({'font.size' : 10, 'figure.figsize' : [16,9],'wspace' : 0.5 ,
 
 #seed for random generation
 pl.seed(9876543210)
-
+pl.interactive(1)
 
 ################################################################################
 # A couple of function declarations
@@ -154,7 +154,7 @@ N = pl.empty((16, 3))
 for i in xrange(N.shape[0]): N[i,] = [1, 0, 0] #normal unit vec. to contacts
 electrodeparams = {             #parameters for electrode class
     'sigma' : 0.3,              #Extracellular potential
-    'x' : pl.zeros(16)+25,      #Coordinates of electrode contacts
+    'x' : pl.zeros(16)+10,      #Coordinates of electrode contacts
     'y' : pl.zeros(16),
     'z' : pl.linspace(-500,1000,16),
     'n' : 20,
@@ -188,10 +188,8 @@ c.simulate(**simulateparams)
 pl.figure()
 pl.plot(c.tvec, c.somav)
 
-raise Exception
 #initialize electrode geometry, then calculate the LFP, using LFPy.Electrode cl.
 e = LFPy.Electrode(c,**electrodeparams)
-#e.calc_lfp_threaded()
 e.calc_lfp()
 
 #plotting some variables and geometry, saving output to .pdf.
