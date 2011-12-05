@@ -374,27 +374,29 @@ class ElectrodeThreaded(Electrode):
                  N=None, r=None, n=0, r_z=None, colors=None,
                  perCellLFP=False, method='linesource', 
                  color='g', marker='o',
-                 from_file=False, cellfile=None):
+                 from_file=False, cellfile=None,
+                 NUMBER_OF_PROCESSES=None):
         '''Initialization of class ElectrodeThreaded, with electrode setup
         inherited from class ElectrodeSetup'''
         Electrode.__init__(self, cell, sigma, x, y, z,
                                 N, r, n, r_z, perCellLFP,
                                 method, color, marker, from_file, cellfile)
+        
+        if NUMBER_OF_PROCESSES == None:
+            NUMBER_OF_PROCESSES = cpu_count()
+        elif type(NUMBER_OF_PROCESSES) != int:
+            raise ValueError, 'NUMBER_OF_PROCESSES != int, %s' \
+                                                % str(NUMBER_OF_PROCESSES)
+        self.NUMBER_OF_PROCESSES = NUMBER_OF_PROCESSES
+            
 
     def _loop_over_contacts(self, k, LFP_temp, variables,
-                            __name__='__main__', NUMBER_OF_PROCESSES=None):
+                            __name__='__main__'):
         '''Monkeypatching to include multiprocessing!
         Loop over electrode contacts, and will return LFP_temp filled'''
         
         if __name__ == '__main__':
             freeze_support()
-            if NUMBER_OF_PROCESSES == None:
-                NUMBER_OF_PROCESSES = cpu_count()
-            elif type(NUMBER_OF_PROCESSES) != int:
-                raise ValueError, 'NUMBER_OF_PROCESSES != int, %s' \
-                                                    % str(NUMBER_OF_PROCESSES)
-            else:
-                pass
             task_queue = Queue()
             done_queue = Queue()
 
@@ -402,14 +404,14 @@ class ElectrodeThreaded(Electrode):
             
             for task in TASKS:
                 task_queue.put(int(task))       
-            for i in xrange(NUMBER_OF_PROCESSES):
+            for i in xrange(self.NUMBER_OF_PROCESSES):
                 Process(target=self._loop_over_contacts_thread,
                              args=(task_queue, k, LFP_temp, variables,
                              done_queue)).start()
             for n in xrange(TASKS.size):
                 [i, lfp_temp] = done_queue.get()
                 LFP_temp[k, i, :] += lfp_temp                 
-            for i in xrange(NUMBER_OF_PROCESSES):
+            for i in xrange(self.NUMBER_OF_PROCESSES):
                 task_queue.put('STOP')
             
             task_queue.close()
@@ -447,8 +449,7 @@ class ElectrodeThreaded(Electrode):
     
     def _lfp_el_pos_calc_dist(self, c, r_limit, sigma=0.3, radius=10, n=10,
                              m=50, N=None, t_indices=None, 
-                             method='linesource', __name__="__main__",
-                             NUMBER_OF_PROCESSES=None):
+                             method='linesource', __name__="__main__"):
         '''
         Calc. of LFP over an n-point integral approximation over flat
         electrode surface with radius r. The locations of these n points on
@@ -459,13 +460,6 @@ class ElectrodeThreaded(Electrode):
         
         if __name__ == "__main__":
             freeze_support()
-            if NUMBER_OF_PROCESSES == None:
-                NUMBER_OF_PROCESSES = cpu_count()
-            elif type(NUMBER_OF_PROCESSES) != int:
-                raise ValueError, 'NUMBER_OF_PROCESSES != int, %s' \
-                                                    % str(NUMBER_OF_PROCESSES)
-            else:
-                pass
             task_queue = Queue()
             done_queue = Queue()
 
@@ -473,7 +467,7 @@ class ElectrodeThreaded(Electrode):
             
             for task in TASKS:
                 task_queue.put(int(task))       
-            for i in xrange(NUMBER_OF_PROCESSES):
+            for i in xrange(self.NUMBER_OF_PROCESSES):
                 Process(target=self._lfp_el_pos_calc_dist_i,
                              args=(task_queue,
                              c, r_limit, sigma, radius, n,
@@ -482,7 +476,7 @@ class ElectrodeThreaded(Electrode):
             for n in xrange(TASKS.size):
                 [index, lfp, offset, circle] = done_queue.get() 
                 lfp_el_pos[index], offsets[index], circle[index] = lfp, offset, circle                
-            for i in xrange(NUMBER_OF_PROCESSES):
+            for i in xrange(self.NUMBER_OF_PROCESSES):
                 task_queue.put('STOP')
             
             task_queue.close()
