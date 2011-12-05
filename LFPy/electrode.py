@@ -380,6 +380,69 @@ class ElectrodeThreaded(Electrode):
         Electrode.__init__(self, cell, sigma, x, y, z,
                                 N, r, n, r_z, perCellLFP,
                                 method, color, marker, from_file, cellfile)
+
+    def _loop_over_contacts(self, k, LFP_temp, variables,
+                            __name__='__main__', NUMBER_OF_PROCESSES=None):
+        '''Monkeypatching to include multiprocessing!
+        Loop over electrode contacts, and will return LFP_temp filled'''
+        
+        if __name__ == '__main__':
+            freeze_support()
+            if NUMBER_OF_PROCESSES == None:
+                NUMBER_OF_PROCESSES = cpu_count()
+            elif type(NUMBER_OF_PROCESSES) != int:
+                raise ValueError, 'NUMBER_OF_PROCESSES != int, %s' \
+                                                    % str(NUMBER_OF_PROCESSES)
+            else:
+                pass
+            task_queue = Queue()
+            done_queue = Queue()
+
+            TASKS = pl.arange(len(self.x))
+            
+            for task in TASKS:
+                task_queue.put(int(task))       
+            for i in xrange(NUMBER_OF_PROCESSES):
+                Process(target=_loop_over_contacts_thread,
+                             args=(task_queue, k, LFP_temp, variables,
+                             done_queue)).start()
+            for n in xrange(TASKS.size):
+                LFP_temp[k, :, :] += done_queue.get()                 
+            for i in xrange(NUMBER_OF_PROCESSES):
+                task_queue.put('STOP')
+            
+            task_queue.close()
+            done_queue.close()
+        else:
+            raise Exception, "'__name__' != '__main__'"
+        
+        return LFP_temp[k, :, :]
+
+    def _loop_over_contacts_thread(self, task_queue, k, LFP_temp, variables,
+                             done_queue):
+        
+        for i in iter(task_queue.get, 'STOP'):
+            variables.update({
+                'x' : self.x[i],
+                'y' : self.y[i],
+                'z' : self.z[i],
+            })
+            if hasattr(self, 'r_drift'):
+                for j in xrange(self.LFP.shape[1]):
+                    variables.update({
+                        'x' : self.x[i] + self.r_drift['x'][i],
+                        'y' : self.y[i] + self.r_drift['y'][i],
+                        'z' : self.z[i] + self.r_drift['z'][i],
+                        'timestep' : j
+                    })
+                    LFP_temp[k, i, j] = LFP_temp[k, i, j] + \
+                        lfpcalc.calc_lfp_choose(self.c[k], **variables)
+            else:
+                LFP_temp[k, i, ] = LFP_temp[k, i, ] + \
+                        lfpcalc.calc_lfp_choose(self.c[k], **variables)
+        
+            done_queue.put(LFP_temp[k, i, :])
+        
     
     def _lfp_el_pos_calc_dist(self, c, r_limit, sigma=0.3, radius=10, n=10,
                              m=50, N=None, t_indices=None, 

@@ -8,6 +8,8 @@ pl.rcParams.update({'font.size' : 10, 'figure.figsize' : [16,9],'wspace' : 0.5 ,
 #seed for random generation
 pl.seed(9876543210)
 
+#plot pops up by itself
+pl.interactive(1)
 
 ################################################################################
 # A couple of function declarations
