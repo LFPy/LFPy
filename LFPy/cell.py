@@ -9,9 +9,7 @@ import neuron
 import numpy as np
 import cPickle
 
-#LFPy-specific mechanisms
 INSTALLPATH = os.getenv('LFPYPATH')
-MORPHO_PATH = os.path.join(INSTALLPATH, 'morphologies')
 
 KNOWN_ARCHITECTURES = ['i386', 'i686', 'x86_64', 'umac', 'ppc']
 ARCHITECTURE = None
@@ -38,8 +36,7 @@ class Cell(object):
     
     Arguments:
     ::
-        morphology : morphology file;
-        default_dir : if True will look for morphology in the default folder,
+        morphology : path to morphology file;
         otherwise full path to morphology must be provided;
     
         v_init : initial potential;
@@ -68,7 +65,7 @@ class Cell(object):
     ::
         import LFPy
         cellParameters = {                          
-            'morphology' : 'L5_Mainen96_LFPy.hoc',
+            'morphology' : 'path/to/morphology.hoc',
             'rm' : 30000,
             'cm' : 1.0,
             'Ra' : 150,
@@ -81,7 +78,6 @@ class Cell(object):
         cell.simulate()
     '''
     def __init__(self, morphology,
-                    default_dir=False,
                     v_init=-65.,
                     Ra=150,
                     rm=30000,
@@ -106,17 +102,12 @@ class Cell(object):
         
         neuron.h.load_file('stdlib.hoc')    #NEURON std. library
         
-        #Set path to morphology file
-        if default_dir:
-            morpho_file = os.path.join(MORPHO_PATH, morphology)
-        else:
-            morpho_file = morphology
-        
-        if os.path.isfile(morpho_file):
-            self.morphology_file = morpho_file
+        #load morphology
+        if os.path.isfile(morphology):
+            self.morphology = morphology
             self._load_geometry()
         else:
-            raise Exception, "%s does not exist!" % morpho_file
+            raise Exception, "%s does not exist!" % morphology
         
         #Some parameters and lists initialised
         if timeres_python not in 2.**np.arange(-16, -1) or timeres_NEURON \
@@ -188,7 +179,7 @@ class Cell(object):
         neuron.h.apicdendlist = None
         neuron.h('forall delete_section()')
         
-        neuron.h.load_file(1, self.morphology_file)
+        neuron.h.load_file(1, self.morphology)
         neuron.h.define_shape()
         self._create_sectionlists()
         
@@ -227,8 +218,8 @@ class Cell(object):
     def _get_rotation(self):
         '''Check if there exist corresponding file
         with rotation angles'''
-        if os.path.isfile(self.morphology_file[0:-4]+'.rot'):
-            rotation_file = self.morphology_file[0:-4]+'.rot'
+        if os.path.isfile(self.morphology[0:-4]+'.rot'):
+            rotation_file = self.morphology[0:-4]+'.rot'
             rotation_data = open(rotation_file)
             rotation = {}
             for line in rotation_data:
