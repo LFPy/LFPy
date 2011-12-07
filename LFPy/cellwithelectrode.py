@@ -10,7 +10,6 @@ class CellWithElectrode(Cell):
     currents at every timestep to obtain the LFP, thus the membrane
     currents are not stored unless rec_i=True in simulate()
     
-        
     Usage:
     ::
         import LFPy
@@ -59,11 +58,13 @@ class CellWithElectrode(Cell):
     '''
     
     def __init__(self, **kwargs):
-        '''Clone of LFPy.Cell before monkeypatching the simulate() and
+        '''
+        Clone of LFPy.Cell before monkeypatching the simulate() and
         _run_simulation() functions. simulate() accepts kwargs that is passed
         on to LFPy.Electrode, but uses a subclass of LFPy.Electrode under the
         hood.
-        Class CellWithElectrode accepts the same kwargs as class Cell'''
+        Class CellWithElectrode accepts the same kwargs as class Cell
+        '''
         Cell.__init__(self, **kwargs)
         
         if self.timeres_NEURON != self.timeres_python:
@@ -71,9 +72,11 @@ class CellWithElectrode(Cell):
 
     def simulate(self, rec_i=False, rec_v=False, rec_ipas=False, rec_icap=False,
                  rec_isyn=False, rec_vsyn=False, rec_istim=False, **kwargs):
-        '''Start NEURON simulation and record variables.
+        '''
+        Start NEURON simulation and record variables.
         **kwargs are the electrode parameters corresponding to the
-        input to the class LFPy.Electrode'''
+        input to the class LFPy.Electrode
+        '''
         self._set_soma_volt_recorder()
         self._set_time_recorder()
         

@@ -7,7 +7,7 @@ import neuron
 class PointProcess:
     '''
     Superclass on top of PointProcessSynapse, PointProcessElectrode, 
-    just to import and set some common variables.
+    just to import and set some shared variables.
     
     Arguments:
     ::
@@ -46,8 +46,8 @@ class PointProcessSynapse(PointProcess):
     for details, or corresponding mod-files.
     
     Usage:
-    
-    .. testcode::
+    ::
+        import pylab as pl
         import LFPy
         cell = LFPy.Cell(morphology='L5_Mainen96_LFPy.hoc')
         synapseParameters = {
@@ -106,7 +106,7 @@ class PointProcessElectrode(PointProcess):
     Refer to NEURON documentation @ neuron.yale.edu for kwargs
             
     Usage:
-    .. testcode::
+    ::
         import LFPy
         import pylab as pl
         

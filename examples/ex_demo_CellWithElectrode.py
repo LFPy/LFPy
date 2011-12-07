@@ -2,6 +2,9 @@
 import LFPy
 import pylab as pl
 
+#plot pops up by itself
+pl.interactive(1)
+
 N = pl.empty((16, 3))
 for i in xrange(N.shape[0]): N[i,] = [1, 0, 0] #normal unit vec. to contacts
 electrodeParameters = {             #parameters for electrode class
@@ -15,7 +18,7 @@ electrodeParameters = {             #parameters for electrode class
 }
 
 cellParameters = {                          
-    'morphology' : 'L5_Mainen96_LFPy.hoc',  # morphology file
+    'morphology' : 'morphologies/L5_Mainen96_LFPy.hoc',  # morphology file
     'rm' : 30000,                           # membrane resistivity
     'cm' : 1.0,                             # membrane capacitance
     'Ra' : 150,                             # axial resistivity

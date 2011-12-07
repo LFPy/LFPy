@@ -2,10 +2,11 @@
 import LFPy
 import pylab as pl
 
+#plot will pop up itself
 pl.interactive(1)
 
 cellParameters = {                          
-    'morphology' : 'L5_Mainen96_LFPy.hoc',  # morphology file
+    'morphology' : 'morphologies/L5_Mainen96_LFPy.hoc',  # morphology file
     'rm' : 30000,                           # membrane resistivity
     'cm' : 1.0,                             # membrane capacitance
     'Ra' : 150,                             # axial resistivity

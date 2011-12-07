@@ -392,9 +392,8 @@ class ElectrodeThreaded(Electrode):
 
     def _loop_over_contacts(self, k, LFP_temp, variables,
                             __name__='__main__'):
-        '''Monkeypatching to include multiprocessing!
+        '''Monkeypatching function to use Python multiprocessing!
         Loop over electrode contacts, and will return LFP_temp filled'''
-        
         if __name__ == '__main__':
             freeze_support()
             task_queue = Queue()
@@ -423,7 +422,8 @@ class ElectrodeThreaded(Electrode):
 
     def _loop_over_contacts_thread(self, task_queue, k, LFP_temp, variables,
                              done_queue):
-        """thread for each contact point"""
+        '''thread calculating the LFP in each contact point called from
+        self._loop_over_contacts'''
         for i in iter(task_queue.get, 'STOP'):
             variables.update({
                 'x' : self.x[i],

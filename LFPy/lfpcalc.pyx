@@ -3,27 +3,27 @@
 All rights reserved.'''
 import numpy as np
 cimport numpy as np
-#import LFPy
+
 DTYPE = np.float64
 ctypedef np.float64_t DTYPE_t
 
 
 cpdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] calc_lfp_choose(c,
                     double x=0, double y=0, double z=0, double sigma=0.3,
-                    r_limit=None, #from_file=False,
+                    r_limit=None,
                     timestep=None, t_indices=None, method='linesource'):
     '''Determine which method to use, line-source for soma default'''
     if method == 'som_as_point':
         return calc_lfp_som_as_point(c, x=x, y=y, z=z, sigma=sigma,
-                                     r_limit=r_limit, #from_file=from_file,
+                                     r_limit=r_limit,
                                      timestep=timestep, t_indices=t_indices)
     elif method == 'linesource':
         return calc_lfp_linesource(c, x=x, y=y, z=z, sigma=sigma,
-                                   r_limit=r_limit, #from_file=from_file,
+                                   r_limit=r_limit,
                                    timestep=timestep, t_indices=t_indices)
     elif method == 'pointsource':
         return calc_lfp_pointsource(c, x=x, y=y, z=z, sigma=sigma,
-                                    r_limit=r_limit, #from_file=from_file,
+                                    r_limit=r_limit,
                                     timestep=timestep, t_indices=t_indices)
 
 cpdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] calc_lfp_linesource(c,
@@ -32,17 +32,9 @@ cpdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] calc_lfp_linesource(c,
                         double z=0,
                         double sigma=0.3,
                         r_limit=None,
-                        #from_file=False, 
                         timestep=None, t_indices=None):
     """Calculate electric field potential using the line-source method, all
     compartments treated as line sources, even soma."""
-    #if from_file:
-    #    c = LFPy.tools.load(c)
-
-    #cdef double rx = x
-    #cdef double ry = y
-    #cdef double rz = z
-
     # Handling the r_limits. If a r_limit is a single value, an array r_limit
     # of shape c.diam is returned.
     if type(r_limit) == int or type(r_limit) == float:
@@ -104,14 +96,10 @@ cpdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] calc_lfp_linesource(c,
 
 cpdef np.ndarray[DTYPE_t, ndim=1] calc_lfp_som_as_point(c,
                           double x=0, double y=0, double z=0, double sigma=0.3,
-                          r_limit=None, #from_file=False,
+                          r_limit=None,
                           timestep=None, t_indices=None):
     '''Calculate electric field potential using the line-source method,
     soma is treated as point/sphere source'''
-
-    #if from_file:
-    #    c = LFPy.tools.load(c)
-
     #Handling the r_limits. If a r_limit is a single value,
     #an array r_limit of shape c.diam is returned.
     if type(r_limit) != type(np.array([])):
@@ -259,7 +247,7 @@ cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] Ememi_calc(
                                                     np.log(bb / cc) / aa
 
     cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] Emem_i = \
-		        					np.dot(currmem_iT, dd)
+                                                        np.dot(currmem_iT, dd)
 
     return Emem_i
 
@@ -291,8 +279,7 @@ cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] Ememii_calc(
                                         np.log(bb * cc) / aa
 
     cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] Emem_ii = \
-								np.dot(currmem_iiT, dd)
-										
+                                                        np.dot(currmem_iiT, dd)
     return Emem_ii
 
 
@@ -324,7 +311,6 @@ cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] Ememiii_calc(
 
     cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] Emem_iii = \
     							np.dot(currmem_iiiT, dd)
-                                
     return Emem_iii
 
 
@@ -376,13 +362,10 @@ cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] r2_calc(
     return abs(r2)
 
 cpdef calc_lfp_pointsource(c, x=0, y=0, z=0, sigma=0.3,
-                        r_limit=None, #from_file=False, 
+                        r_limit=None, 
                         timestep=None, t_indices=None):
     '''Calculate local field potentials using the point-source equation on all
     compartments'''
-    #if from_file:
-    #    c = LFPy.tools.load(c)
-
     # Handling the r_limits. If a r_limit is a single value, an array r_limit
     # of shape c.diam is returned.
     if type(r_limit) == int or type(r_limit) == float:

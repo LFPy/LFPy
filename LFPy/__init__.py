@@ -30,5 +30,6 @@ from pointprocess import Synapse, PointProcess, \
 from electrode import Electrode, ElectrodeThreaded, ElectrodeSetup
 from cellwithelectrode import CellWithElectrode
 
+import lfpcalc
 import tools
 import inputgenerators

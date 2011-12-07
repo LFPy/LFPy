@@ -116,8 +116,7 @@ custom_fun: list of model specific functions to be called with args:
 custom_fun_args: list of arguments passed to custom_fun functions
 verbose : switching verbose output on/off</pre>
 </div>
-<p>Usage of cell class:
-.. testcode:</p>
+<p>Usage of cell class:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">LFPy</span>
 <span class="n">cellParameters</span> <span class="o">=</span> <span class="p">{</span>                          
     <span class="s">&#39;morphology&#39;</span> <span class="p">:</span> <span class="s">&#39;L5_Mainen96_LFPy.hoc&#39;</span><span class="p">,</span>
@@ -196,8 +195,7 @@ Prob. determined by area.</p>
 <dd><p>Rotate geometry using rotation matrices, takes dict with rot. angles,
 where {&#8216;x&#8217; : ... } etc. are the rotation angles around respective axes.
 All rotation angles are optional.</p>
-<p>Usage:
-.. testcode:</p>
+<p>Usage:</p>
 <div class="highlight-python"><pre>cell = LFPy.Cell(**kwargs)
 rotation = {'x' : 1.233, 'y : 0.236, 'z' : np.pi}
 cell.rotate_xyz(rotation)</pre>
@@ -316,7 +314,7 @@ input to the class LFPy.Electrode</p>
 <dt id="LFPy.PointProcess">
 <em class="property">class </em><tt class="descclassname">LFPy.</tt><tt class="descname">PointProcess</tt><big>(</big><em>cell</em>, <em>idx</em>, <em>color='k'</em>, <em>marker='o'</em>, <em>record_current=False</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#LFPy.PointProcess" title="Permalink to this definition">¶</a></dt>
 <dd><p>Superclass on top of PointProcessSynapse, PointProcessElectrode, 
-just to import and set some common variables.</p>
+just to import and set some shared variables.</p>
 <p>Arguments:</p>
 <div class="highlight-python"><pre>cell    : LFPy.Cell object
 idx     : index of segment
@@ -344,7 +342,20 @@ kwargs  : pointprocess specific variables passed on to cell/neuron</pre>
 See <a class="reference external" href="http://www.neuron.yale.edu/neuron/static/docs/help/neuron/neuron/mech.html#pointprocesses">http://www.neuron.yale.edu/neuron/static/docs/help/neuron/neuron/mech.html#pointprocesses</a>
 for details, or corresponding mod-files.</p>
 <p>Usage:</p>
-<div class="highlight-python"><div class="highlight"><pre>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">pylab</span> <span class="kn">as</span> <span class="nn">pl</span>
+<span class="kn">import</span> <span class="nn">LFPy</span>
+<span class="n">cell</span> <span class="o">=</span> <span class="n">LFPy</span><span class="o">.</span><span class="n">Cell</span><span class="p">(</span><span class="n">morphology</span><span class="o">=</span><span class="s">&#39;L5_Mainen96_LFPy.hoc&#39;</span><span class="p">)</span>
+<span class="n">synapseParameters</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s">&#39;idx&#39;</span> <span class="p">:</span> <span class="n">cell</span><span class="o">.</span><span class="n">get_closest_idx</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="mi">800</span><span class="p">),</span>
+    <span class="s">&#39;e&#39;</span> <span class="p">:</span> <span class="mi">0</span><span class="p">,</span>                                <span class="c"># reversal potential</span>
+    <span class="s">&#39;syntype&#39;</span> <span class="p">:</span> <span class="s">&#39;ExpSyn&#39;</span><span class="p">,</span>                   <span class="c"># synapse type</span>
+    <span class="s">&#39;tau&#39;</span> <span class="p">:</span> <span class="mi">2</span><span class="p">,</span>                              <span class="c"># syn. time constant</span>
+    <span class="s">&#39;weight&#39;</span> <span class="p">:</span> <span class="mf">0.01</span><span class="p">,</span>                       <span class="c"># syn. weight</span>
+    <span class="s">&#39;record_current&#39;</span> <span class="p">:</span> <span class="bp">True</span>                 <span class="c"># syn. current record</span>
+<span class="p">}</span>
+<span class="n">synapse</span> <span class="o">=</span> <span class="n">LFPy</span><span class="o">.</span><span class="n">PointProcessSynapse</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="o">**</span><span class="n">synapseParameters</span><span class="p">)</span>
+<span class="n">synapse</span><span class="o">.</span><span class="n">set_spike_times</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="n">pl</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">10</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">25</span><span class="p">]))</span>
+<span class="n">cell</span><span class="o">.</span><span class="n">simulate</span><span class="p">(</span><span class="n">rec_isyn</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
 </pre></div>
 </div>
 <dl class="method">
@@ -378,8 +389,7 @@ for details, or corresponding mod-files.</p>
 SinIClamp, ChirpIClamp with arguments.
 Electrode currents go here, whics make membrane currents not sum to zero.</p>
 <p>Refer to NEURON documentation &#64; neuron.yale.edu for kwargs</p>
-<p>Usage:
-.. testcode:</p>
+<p>Usage:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">LFPy</span>
 <span class="kn">import</span> <span class="nn">pylab</span> <span class="kn">as</span> <span class="nn">pl</span>
 
@@ -558,23 +568,12 @@ Will chose distributed calculated if electrode contain &#8216;n&#8217;, &#8216;N
 <h2>class <a class="reference internal" href="#LFPy.ElectrodeThreaded" title="LFPy.ElectrodeThreaded"><tt class="xref py py-class docutils literal"><span class="pre">ElectrodeThreaded</span></tt></a><a class="headerlink" href="#class-electrodethreaded" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="LFPy.ElectrodeThreaded">
-<em class="property">class </em><tt class="descclassname">LFPy.</tt><tt class="descname">ElectrodeThreaded</tt><big>(</big><em>cell</em>, <em>sigma=0.3</em>, <em>x=100</em>, <em>y=0</em>, <em>z=0</em>, <em>N=None</em>, <em>r=None</em>, <em>n=0</em>, <em>r_z=None</em>, <em>colors=None</em>, <em>perCellLFP=False</em>, <em>method='linesource'</em>, <em>color='g'</em>, <em>marker='o'</em>, <em>from_file=False</em>, <em>cellfile=None</em><big>)</big><a class="headerlink" href="#LFPy.ElectrodeThreaded" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">LFPy.electrode.ElectrodeSetup</span></tt></p>
-<p>class with inheritance from class ElectrodeSetup, calculating LFPs using
-available cpu-cores.</p>
-<p>Usage:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">electrode</span> <span class="o">=</span> <span class="n">LFPy</span><span class="o">.</span><span class="n">ElectrodeThreaded</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-<span class="n">electrode</span><span class="o">.</span><span class="n">calc_lfp_threaded</span><span class="p">()</span>
-</pre></div>
-</div>
-<dl class="method">
-<dt id="LFPy.ElectrodeThreaded.calc_lfp_threaded">
-<tt class="descname">calc_lfp_threaded</tt><big>(</big><em>t_indices=None</em>, <em>__name__='__main__'</em>, <em>NUMBER_OF_PROCESSES=None</em><big>)</big><a class="headerlink" href="#LFPy.ElectrodeThreaded.calc_lfp_threaded" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculate LFP on electrode geometry from all cell instances.
-Will choose distributed calculated if electrode contain &#8216;n&#8217;, &#8216;N&#8217;, and
-&#8216;r&#8217;. Will try to distribute jobs to available processes</p>
-</dd></dl>
-
+<em class="property">class </em><tt class="descclassname">LFPy.</tt><tt class="descname">ElectrodeThreaded</tt><big>(</big><em>cell</em>, <em>sigma=0.3</em>, <em>x=100</em>, <em>y=0</em>, <em>z=0</em>, <em>N=None</em>, <em>r=None</em>, <em>n=0</em>, <em>r_z=None</em>, <em>colors=None</em>, <em>perCellLFP=False</em>, <em>method='linesource'</em>, <em>color='g'</em>, <em>marker='o'</em>, <em>from_file=False</em>, <em>cellfile=None</em>, <em>NUMBER_OF_PROCESSES=None</em><big>)</big><a class="headerlink" href="#LFPy.ElectrodeThreaded" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">LFPy.electrode.Electrode</span></tt></p>
+<p>Inherit class Electrode, but using multiprocessing to distribute
+calculations of LFP for each electrode contact</p>
+<p>Will only work for case when averaging over electrode geometry area
+currently</p>
 </dd></dl>
 
 </div>

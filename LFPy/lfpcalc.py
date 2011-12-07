@@ -2,33 +2,29 @@
 '''Copyright (C) 2011 Computational Neuroscience Group, UMB.
 All rights reserved.'''
 import numpy as np
-#import LFPy
 
 def calc_lfp_choose(c, x=0, y=0, z=0, sigma=0.3,
-                    r_limit=None, #from_file=False,
+                    r_limit=None,
                     timestep=None, t_indices=None, method='linesource'):
     '''Determine which method to use, line-source for soma default'''
     if method == 'som_as_point':
         return calc_lfp_som_as_point(c, x=x, y=y, z=z, sigma=sigma,
-                                     r_limit=r_limit, #from_file=from_file,
+                                     r_limit=r_limit,
                                      timestep=timestep, t_indices=t_indices)
     elif method == 'linesource':
         return calc_lfp_linesource(c, x=x, y=y, z=z, sigma=sigma,
-                                   r_limit=r_limit, #from_file=from_file,
+                                   r_limit=r_limit,
                                    timestep=timestep, t_indices=t_indices)
     elif method == 'pointsource':
         return calc_lfp_pointsource(c, x=x, y=y, z=z, sigma=sigma,
-                                    r_limit=r_limit, #from_file=from_file,
+                                    r_limit=r_limit,
                                     timestep=timestep, t_indices=t_indices)
 
 def calc_lfp_linesource(c, x=0, y=0, z=0, sigma=0.3,
-                        r_limit=None, #from_file=False, 
+                        r_limit=None,
                         timestep=None, t_indices=None):
     '''Calculate electric field potential using the line-source method, all
     compartments treated as line sources, even soma.'''
-    #if from_file:
-    #    c = LFPy.tools.load(c)
-
     # Handling the r_limits. If a r_limit is a single value, an array r_limit
     # of shape c.diam is returned.
     if type(r_limit) == int or type(r_limit) == float:
@@ -82,14 +78,10 @@ def calc_lfp_linesource(c, x=0, y=0, z=0, sigma=0.3,
     return Emem.transpose()
 
 def calc_lfp_som_as_point(c, x=0, y=0, z=0, sigma=0.3,
-                          r_limit=None, #from_file=False, 
+                          r_limit=None,
                           timestep=None, t_indices=None):
     '''Calculate electric field potential using the line-source method,
     soma is treated as point/sphere source'''
-
-    #if from_file:
-    #    c = LFPy.tools.load(c)
-
     #Handling the r_limits. If a r_limit is a single value,
     #an array r_limit of shape c.diam is returned.
     if type(r_limit) != type(np.array([])):
@@ -270,13 +262,10 @@ def _r_soma_calc(xmid, ymid, zmid, x, y, z):
     return r_soma
 
 def calc_lfp_pointsource(c, x=0, y=0, z=0, sigma=0.3,
-                        r_limit=None, #from_file=False, 
+                        r_limit=None, 
                         timestep=None, t_indices=None):
     '''Calculate local field potentials using the point-source equation on all
     compartments'''
-    #if from_file:
-    #    c = LFPy.tools.load(c)
-
     # Handling the r_limits. If a r_limit is a single value, an array r_limit
     # of shape c.diam is returned.
     if type(r_limit) == int or type(r_limit) == float:

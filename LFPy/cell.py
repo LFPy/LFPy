@@ -29,7 +29,7 @@ if ARCHITECTURE is None:
 
 #loading the default LFPy mechanisms
 DLL_FILENAME = os.path.join(INSTALLPATH,
-    'neuron', ARCHITECTURE, '.libs', 'libnrnmech.so')
+                            'neuron', ARCHITECTURE, '.libs', 'libnrnmech.so')
 neuron.h.nrn_load_dll(DLL_FILENAME)
 
 class Cell(object):
@@ -65,7 +65,7 @@ class Cell(object):
         verbose : switching verbose output on/off
     
     Usage of cell class:
-    .. testcode::
+    ::
         import LFPy
         cellParameters = {                          
             'morphology' : 'L5_Mainen96_LFPy.hoc',
@@ -81,7 +81,7 @@ class Cell(object):
         cell.simulate()
     '''
     def __init__(self, morphology,
-                    default_dir=True,
+                    default_dir=False,
                     v_init=-65.,
                     Ra=150,
                     rm=30000,
@@ -99,7 +99,8 @@ class Cell(object):
                     custom_fun=None,
                     custom_fun_args=None,
                     verbose=False):
-        '''initialization of the Cell object.
+        '''
+        initialization of the Cell object.
         '''
         self.verbose = verbose
         
@@ -865,12 +866,13 @@ class Cell(object):
             self.synapses[i].update_pos(self)
     
     def rotate_xyz(self, rotation):
-        '''Rotate geometry using rotation matrices, takes dict with rot. angles,
+        '''
+        Rotate geometry using rotation matrices, takes dict with rot. angles,
         where {'x' : ... } etc. are the rotation angles around respective axes.
         All rotation angles are optional.
         
         Usage:
-        .. testcode::
+        ::
             cell = LFPy.Cell(**kwargs)
             rotation = {'x' : 1.233, 'y : 0.236, 'z' : np.pi}
             cell.rotate_xyz(rotation)

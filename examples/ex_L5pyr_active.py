@@ -85,7 +85,7 @@ def insert_synapses(synparams, section, n, spTimesFun, args):
 ################################################################################
 
 cellparams = {          #various cell parameters,
-    'morphology' : 'L5_Mainen96_wAxon_LFPy.hoc', #Mainen&Sejnowski, Nature, 1996
+    'morphology' : 'morphologies/L5_Mainen96_wAxon_LFPy.hoc', #Mainen&Sejnowski, Nature, 1996
     'rm' : 30000,       #membrane resistance
     'cm' : 1.0,        #membrane capacitance
     'Ra' : 150,         #axial resistance
@@ -156,7 +156,7 @@ N = pl.empty((16, 3))
 for i in xrange(N.shape[0]): N[i,] = [1, 0, 0] #normal unit vec. to contacts
 electrodeparams = {             #parameters for electrode class
     'sigma' : 0.3,              #Extracellular potential
-    'x' : pl.zeros(16)+0,      #Coordinates of electrode contacts
+    'x' : pl.zeros(16)+25,      #Coordinates of electrode contacts
     'y' : pl.zeros(16),
     'z' : pl.linspace(-500,1000,16),
     'n' : 20,

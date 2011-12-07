@@ -85,7 +85,7 @@ def insert_synapses(synparams, section, n, spTimesFun, args):
 ################################################################################
 
 cellparams = {          #various cell parameters,
-    'morphology' : 'L5_Mainen96_wAxon_LFPy.hoc', #Mainen&Sejnowski, Nature, 1996
+    'morphology' : 'morphologies/L5_Mainen96_wAxon_LFPy.hoc', #Mainen&Sejnowski, Nature, 1996
     'rm' : 30000,       #membrane resistance
     'cm' : 1.0,        #membrane capacitance
     'Ra' : 150,         #axial resistance
