@@ -10,10 +10,10 @@ setup(
         ["lfpcalc.pyx"],
         include_dirs=[numpy.get_include()]
         ),
-        #Extension("electrode",
-        #["electrode.py"],
-        #include_dirs=[numpy.get_include()]
-        #),
+        Extension("electrodethreaded",
+        ["electrodethreaded.pyx"],
+        include_dirs=[numpy.get_include()]
+        ),
         #Extension("cell",
         #["cell.py"],
         #include_dirs=[numpy.get_include()]

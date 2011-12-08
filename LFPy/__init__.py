@@ -27,7 +27,8 @@ All rights reserved.
 from cell import Cell
 from pointprocess import Synapse, PointProcess, \
     PointProcessSynapse, PointProcessElectrode
-from electrode import Electrode, ElectrodeThreaded, ElectrodeSetup
+from electrode import Electrode, ElectrodeSetup
+from electrodethreaded import ElectrodeThreaded
 from cellwithelectrode import CellWithElectrode
 
 import lfpcalc

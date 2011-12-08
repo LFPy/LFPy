@@ -27,7 +27,7 @@ class ElectrodeSetup(object):
         verbose : Flag for verbose output        
     '''
     def __init__(self, cell, sigma=0.3, x=100, y=0, z=0,
-                 N=None, r=None, n=0, r_z=None,
+                 N=None, r=None, n=None, r_z=None,
                  perCellLFP=False, method='linesource', 
                  color='g', marker='o',
                  from_file=False, cellfile=None, verbose=False):
@@ -240,6 +240,11 @@ class Electrode(ElectrodeSetup):
             }
             
             if self.n != None and self.N != None and self.r != None:
+                if self.n <= 1:
+                    raise ValueError, "n = %i must be larger that 1" % self.n
+                else:
+                    pass
+                    
                 variables.update({
                     'r_limit' : self.c[k].diam/2,
                     'radius' : self.r,
@@ -253,7 +258,7 @@ class Electrode(ElectrodeSetup):
                 variables.update({
                     'r_limit' : self.c[k].diam/2
                 })
-                LFP_temp[k, :, :] = self._loop_over_contacts(k, LFP_temp, variables)
+                LFP_temp[k, :, :] = self._loop_over_contacts(k, variables)
 
             if self.verbose:
                 print 'Calculated potential contribution, cell %i.' % k
@@ -262,8 +267,12 @@ class Electrode(ElectrodeSetup):
         
         self.LFP = LFP_temp.sum(axis=0)
 
-    def _loop_over_contacts(self, k, LFP_temp, variables):
+    def _loop_over_contacts(self, k, variables):
         '''Loop over electrode contacts, and will return LFP_temp filled'''
+        if variables['t_indices'] != None:
+            LFP_temp = pl.zeros((self.x.size, variables['t_indices'].size))
+        else:
+            LFP_temp = pl.zeros((self.x.size, self.tvec.size))
         for i in xrange(self.x.size):
             variables.update({
                 'x' : self.x[i],
@@ -278,13 +287,13 @@ class Electrode(ElectrodeSetup):
                         'z' : self.z[i] + self.r_drift['z'][i],
                         'timestep' : j
                     })
-                    LFP_temp[k, i, j] = LFP_temp[k, i, j] + \
+                    LFP_temp[i, j] = LFP_temp[i, j] + \
                         lfpcalc.calc_lfp_choose(self.c[k], **variables)
             else:
-                LFP_temp[k, i, ] = LFP_temp[k, i, ] + \
+                LFP_temp[i, :] = LFP_temp[i, :] + \
                         lfpcalc.calc_lfp_choose(self.c[k], **variables)
             
-        return LFP_temp[k, :, :]
+        return LFP_temp
 
     
     def _lfp_el_pos_calc_dist(self, k, r_limit, sigma=0.3, radius=10, n=10,
@@ -363,199 +372,4 @@ class Electrode(ElectrodeSetup):
         return circle,  offsets,  lfp_el_pos
 
 
-class ElectrodeThreaded(Electrode):
-    '''Inherit class Electrode, but using multiprocessing to distribute
-    calculations of LFP for each electrode contact
-    
-    Will only work for case when averaging over electrode geometry area
-    currently
-    '''
-    def __init__(self, cell, sigma=0.3, x=100, y=0, z=0,
-                 N=None, r=None, n=0, r_z=None, colors=None,
-                 perCellLFP=False, method='linesource', 
-                 color='g', marker='o',
-                 from_file=False, cellfile=None,
-                 NUMBER_OF_PROCESSES=None):
-        '''Initialization of class ElectrodeThreaded, with electrode setup
-        inherited from class ElectrodeSetup'''
-        Electrode.__init__(self, cell, sigma, x, y, z,
-                                N, r, n, r_z, perCellLFP,
-                                method, color, marker, from_file, cellfile)
-        #set the numbers of processes to use, if none use all available cores
-        if NUMBER_OF_PROCESSES == None:
-            NUMBER_OF_PROCESSES = cpu_count()
-        elif type(NUMBER_OF_PROCESSES) != int:
-            raise ValueError, 'NUMBER_OF_PROCESSES != int, %s' \
-                                                % str(NUMBER_OF_PROCESSES)
-        self.NUMBER_OF_PROCESSES = NUMBER_OF_PROCESSES
-            
-
-    def _loop_over_contacts(self, k, LFP_temp, variables,
-                            __name__='__main__'):
-        '''Monkeypatching function to use Python multiprocessing!
-        Loop over electrode contacts, and will return LFP_temp filled'''
-        if __name__ == '__main__':
-            freeze_support()
-            task_queue = Queue()
-            done_queue = Queue()
-
-            TASKS = pl.arange(len(self.x))
-            
-            for task in TASKS:
-                task_queue.put(int(task))       
-            for i in xrange(self.NUMBER_OF_PROCESSES):
-                Process(target=self._loop_over_contacts_thread,
-                             args=(task_queue, k, LFP_temp, variables,
-                             done_queue)).start()
-            for n in xrange(TASKS.size):
-                [i, lfp_temp] = done_queue.get()
-                LFP_temp[k, i, :] += lfp_temp                 
-            for i in xrange(self.NUMBER_OF_PROCESSES):
-                task_queue.put('STOP')
-            
-            task_queue.close()
-            done_queue.close()
-        else:
-            raise Exception, "'__name__' != '__main__'"
-        
-        return LFP_temp[k, :, :]
-
-    def _loop_over_contacts_thread(self, task_queue, k, LFP_temp, variables,
-                             done_queue):
-        '''thread calculating the LFP in each contact point called from
-        self._loop_over_contacts'''
-        for i in iter(task_queue.get, 'STOP'):
-            variables.update({
-                'x' : self.x[i],
-                'y' : self.y[i],
-                'z' : self.z[i],
-            })
-            if hasattr(self, 'r_drift'):
-                for j in xrange(self.LFP.shape[1]):
-                    variables.update({
-                        'x' : self.x[i] + self.r_drift['x'][i],
-                        'y' : self.y[i] + self.r_drift['y'][i],
-                        'z' : self.z[i] + self.r_drift['z'][i],
-                        'timestep' : j
-                    })
-                    LFP_temp[k, i, j] = LFP_temp[k, i, j] + \
-                        lfpcalc.calc_lfp_choose(self.c[k], **variables)
-            else:
-                LFP_temp[k, i, ] = LFP_temp[k, i, ] + \
-                        lfpcalc.calc_lfp_choose(self.c[k], **variables)
-        
-            done_queue.put([i, LFP_temp[k, i, :]])
-        
-    
-    def _lfp_el_pos_calc_dist(self, k, r_limit, sigma=0.3, radius=10, n=10,
-                             m=50, N=None, t_indices=None, 
-                             method='linesource', __name__="__main__"):
-        '''
-        Calc. of LFP over an n-point integral approximation over flat
-        electrode surface with radius r. The locations of these n points on
-        the electrode surface are random,  within the given radius'''
-        lfp_el_pos = pl.zeros(self.LFP.shape)
-        offsets = {}
-        circle = {}
-        
-        if __name__ == "__main__":
-            freeze_support()
-            task_queue = Queue()
-            done_queue = Queue()
-
-            TASKS = pl.arange(len(self.x))
-            
-            for task in TASKS:
-                task_queue.put(int(task))       
-            for i in xrange(self.NUMBER_OF_PROCESSES):
-                Process(target=self._lfp_el_pos_calc_dist_i,
-                             args=(task_queue,
-                             k, r_limit, sigma, radius, n,
-                             m, N, t_indices, method,
-                             done_queue)).start()
-            for n in xrange(TASKS.size):
-                [index, lfp, offset, circle] = done_queue.get() 
-                lfp_el_pos[index], offsets[index], circle[index] = lfp, offset, circle                
-            for i in xrange(self.NUMBER_OF_PROCESSES):
-                task_queue.put('STOP')
-            
-            task_queue.close()
-            done_queue.close()
-        else:
-            raise Exception, "'__name__' != '__main__'"
-                
-        return circle,  offsets,  lfp_el_pos
-        
-            
-    def _lfp_el_pos_calc_dist_i(self, task_queue,
-                    k, r_limit, sigma, radius, n, m, N, t_indices, method,
-                    done_queue):
-        '''
-        Multiprocessing thread used by self_lfp_el_pos_calc_dist(), distributing
-        calculations of the LFP on each contact point
-        '''
-        for index in iter(task_queue.get, 'STOP'):
-            if n > 1:
-                lfp_e = pl.zeros((n, self.LFP.shape[1]))
-    
-                offs = pl.zeros((n, 3))
-                r2 = pl.zeros(n)
-    
-                crcl = pl.zeros((m, 3))
-    
-                for j in xrange(n):
-                    A = [(pl.rand()-0.5)*radius*2, (pl.rand()-0.5)*radius*2,
-                            (pl.rand()-0.5)*radius*2]
-                    offs[j, ] = pl.cross(N[index, ], A)
-                    r2[j] = offs[j, 0]**2 + offs[j, 1]**2 + offs[j, 2]**2
-                    while r2[j] > radius**2:
-                        A = [(pl.rand()-0.5)*radius*2, (pl.rand()-0.5)*radius*2,
-                            (pl.rand()-0.5)*radius*2]
-                        offs[j, ] = pl.cross(N[index, ], A)
-                        r2[j] = offs[j, 0]**2 + offs[j, 1]**2 + offs[j, 2]**2
-    
-                x_n = offs[:, 0] + self.x[index]
-                y_n = offs[:, 1] + self.y[index]
-                z_n = offs[:, 2] + self.z[index]
-    
-                for j in xrange(m):
-                    B = [(pl.rand()-0.5), (pl.rand()-0.5), (pl.rand()-0.5)]
-                    crcl[j, ] = pl.cross(N[index, ], B)
-                    crcl[j, ] = crcl[j, ]/pl.sqrt(crcl[j, 0]**2 +
-                                               crcl[j, 1]**2 + \
-                                               crcl[j, 2]**2)*radius
-    
-                crclx = crcl[:, 0] + self.x[index]
-                crcly = crcl[:, 1] + self.y[index]
-                crclz = crcl[:, 2] + self.z[index]
-    
-                for j in xrange(n):
-                    variables = {
-                        'x' : x_n[j],
-                        'y' : y_n[j],
-                        'z' : z_n[j],
-                        'r_limit' : r_limit,
-                        'sigma' : sigma,
-                        't_indices' : t_indices,
-                        'method' : method,
-                    }
-                    lfp_e[j, ] = lfpcalc.calc_lfp_choose(self.c[k], **variables)
-    
-                lfp_el_pos = lfp_e.mean(axis=0)
-    
-            else:
-                lfp_el_pos = lfpcalc.calc_lfp_choose(self.c[k],
-                    x=self.x[index], y=self.y[index], z=self.z[index], r_limit = r_limit,
-                    sigma=sigma, t_indices=t_indices)
-            offsets = {
-                'x_n' : x_n,
-                'y_n' : y_n,
-                'z_n' : z_n
-            }
-            circle = {
-                'x' : crclx,
-                'y' : crcly,
-                'z' : crclz
-            }
-            done_queue.put([index, lfp_el_pos, offsets, circle])
 

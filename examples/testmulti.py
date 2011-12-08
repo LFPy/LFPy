@@ -15,7 +15,7 @@ cellParameters = {
     'timeres_NEURON' : 0.1,                # dt for NEURON sim.
     'timeres_python' : 0.1,                 # dt for python output
     'tstartms' : -50,                         # start t of simulation
-    'tstopms' : 50,                        # end t of simulation
+    'tstopms' : 50,                   # end t of simulation
 }
 
 cell = LFPy.Cell(**cellParameters)
@@ -42,7 +42,7 @@ electrodeParameters = {
     'x' : pl.zeros(24) + 50,                # carthesian coords.
     'y' : pl.zeros(24),                     # of electrode points
     'z' : pl.arange(-200, 1000, 50),
-    'n' : 5,
+    'n' : 20,
     'r' : 10,
     'N' : N,
 }
