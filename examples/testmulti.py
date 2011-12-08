@@ -8,7 +8,7 @@ from multiprocessing import Process, Queue, freeze_support, cpu_count
 pl.interactive(1)
 
 cellParameters = {                          
-    'morphology' : 'L5_Mainen96_LFPy.hoc',  # morphology file
+    'morphology' : 'morphologies/L5_Mainen96_LFPy.hoc',  # morphology file
     'rm' : 30000,                           # membrane resistivity
     'cm' : 1.0,                             # membrane capacitance
     'Ra' : 150,                             # axial resistivity
@@ -34,23 +34,22 @@ synapse.set_spike_times(cell, pl.array([10, 15, 20, 25]))
 
 cell.simulate(rec_isyn=True)                # run cell simulation
 
-#N = pl.empty((24, 3))
-#for i in xrange(N.shape[0]):
-#    N[i,] = [1, 0, 0] #normal unit vec. to contacts
+N = pl.empty((24, 3))
+for i in xrange(N.shape[0]):
+    N[i,] = [1, 0, 0] #normal unit vec. to contacts
 electrodeParameters = {
     'sigma' : 0.3,                          # conductivity
     'x' : pl.zeros(24) + 50,                # carthesian coords.
     'y' : pl.zeros(24),                     # of electrode points
     'z' : pl.arange(-200, 1000, 50),
-    #'n' : 5,
-    #'r' : 10,
-    #'N' : N,
+    'n' : 5,
+    'r' : 10,
+    'N' : N,
 }
 
 
 elserial = LFPy.Electrode(cell, **electrodeParameters)
 elserial.calc_lfp()               # run LFP simulation
-
 
 electrode = LFPy.ElectrodeThreaded(cell, **electrodeParameters)
 electrode.calc_lfp()               # run LFP simulation

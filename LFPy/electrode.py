@@ -248,7 +248,7 @@ class Electrode(ElectrodeSetup):
                     't_indices' : t_indices,
                     })
                 [self.circle, self.offsets, LFP_temp[k, :, :]] = \
-                    self._lfp_el_pos_calc_dist(self.c[k], **variables)
+                    self._lfp_el_pos_calc_dist(k, **variables)
             else:
                 variables.update({
                     'r_limit' : self.c[k].diam/2
@@ -287,7 +287,7 @@ class Electrode(ElectrodeSetup):
         return LFP_temp[k, :, :]
 
     
-    def _lfp_el_pos_calc_dist(self, c, r_limit, sigma=0.3, radius=10, n=10,
+    def _lfp_el_pos_calc_dist(self, k, r_limit, sigma=0.3, radius=10, n=10,
                              m=50, N=None, t_indices=None, 
                              method='linesource'):
         '''
@@ -342,12 +342,12 @@ class Electrode(ElectrodeSetup):
                         't_indices' : t_indices,
                         'method' : method,
                     }
-                    lfp_e[j, ] = lfpcalc.calc_lfp_choose(c, **variables)
+                    lfp_e[j, ] = lfpcalc.calc_lfp_choose(self.c[k], **variables)
 
                 lfp_el_pos[i] = lfp_e.mean(axis=0)
 
             else:
-                lfp_el_pos[i] = lfpcalc.calc_lfp_choose(c, \
+                lfp_el_pos[i] = lfpcalc.calc_lfp_choose(self.c[k], \
                     x=self.x[i], y=self.y[i], z=self.z[i], r_limit = r_limit, \
                     sigma=sigma, t_indices=t_indices)
             offsets[i] = {
@@ -381,7 +381,7 @@ class ElectrodeThreaded(Electrode):
         Electrode.__init__(self, cell, sigma, x, y, z,
                                 N, r, n, r_z, perCellLFP,
                                 method, color, marker, from_file, cellfile)
-        
+        #set the numbers of processes to use, if none use all available cores
         if NUMBER_OF_PROCESSES == None:
             NUMBER_OF_PROCESSES = cpu_count()
         elif type(NUMBER_OF_PROCESSES) != int:
@@ -447,7 +447,7 @@ class ElectrodeThreaded(Electrode):
             done_queue.put([i, LFP_temp[k, i, :]])
         
     
-    def _lfp_el_pos_calc_dist(self, c, r_limit, sigma=0.3, radius=10, n=10,
+    def _lfp_el_pos_calc_dist(self, k, r_limit, sigma=0.3, radius=10, n=10,
                              m=50, N=None, t_indices=None, 
                              method='linesource', __name__="__main__"):
         '''
@@ -470,7 +470,7 @@ class ElectrodeThreaded(Electrode):
             for i in xrange(self.NUMBER_OF_PROCESSES):
                 Process(target=self._lfp_el_pos_calc_dist_i,
                              args=(task_queue,
-                             c, r_limit, sigma, radius, n,
+                             k, r_limit, sigma, radius, n,
                              m, N, t_indices, method,
                              done_queue)).start()
             for n in xrange(TASKS.size):
@@ -488,8 +488,12 @@ class ElectrodeThreaded(Electrode):
         
             
     def _lfp_el_pos_calc_dist_i(self, task_queue,
-                    c, r_limit, sigma, radius, n, m, N, t_indices, method,
-                    done_queue):       
+                    k, r_limit, sigma, radius, n, m, N, t_indices, method,
+                    done_queue):
+        '''
+        Multiprocessing thread used by self_lfp_el_pos_calc_dist(), distributing
+        calculations of the LFP on each contact point
+        '''
         for index in iter(task_queue.get, 'STOP'):
             if n > 1:
                 lfp_e = pl.zeros((n, self.LFP.shape[1]))
@@ -535,12 +539,12 @@ class ElectrodeThreaded(Electrode):
                         't_indices' : t_indices,
                         'method' : method,
                     }
-                    lfp_e[j, ] = lfpcalc.calc_lfp_choose(c, **variables)
+                    lfp_e[j, ] = lfpcalc.calc_lfp_choose(self.c[k], **variables)
     
                 lfp_el_pos = lfp_e.mean(axis=0)
     
             else:
-                lfp_el_pos = lfpcalc.calc_lfp_choose(c,
+                lfp_el_pos = lfpcalc.calc_lfp_choose(self.c[k],
                     x=self.x[index], y=self.y[index], z=self.z[index], r_limit = r_limit,
                     sigma=sigma, t_indices=t_indices)
             offsets = {

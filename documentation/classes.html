@@ -86,12 +86,11 @@ All rights reserved.</p>
 <h2>class <a class="reference internal" href="#LFPy.Cell" title="LFPy.Cell"><tt class="xref py py-class docutils literal"><span class="pre">Cell</span></tt></a><a class="headerlink" href="#class-cell" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="LFPy.Cell">
-<em class="property">class </em><tt class="descclassname">LFPy.</tt><tt class="descname">Cell</tt><big>(</big><em>morphology</em>, <em>default_dir=True</em>, <em>v_init=-65.0</em>, <em>Ra=150</em>, <em>rm=30000</em>, <em>cm=1.0</em>, <em>e_pas=-65.0</em>, <em>passive=True</em>, <em>timeres_NEURON=0.125</em>, <em>timeres_python=0.125</em>, <em>tstartms=0</em>, <em>tstopms=100</em>, <em>nsegs_method='lambda100'</em>, <em>max_nsegs_length=30</em>, <em>lambda_f=100</em>, <em>custom_code=None</em>, <em>custom_fun=None</em>, <em>custom_fun_args=None</em>, <em>verbose=False</em><big>)</big><a class="headerlink" href="#LFPy.Cell" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">LFPy.</tt><tt class="descname">Cell</tt><big>(</big><em>morphology</em>, <em>v_init=-65.0</em>, <em>Ra=150</em>, <em>rm=30000</em>, <em>cm=1.0</em>, <em>e_pas=-65.0</em>, <em>passive=True</em>, <em>timeres_NEURON=0.125</em>, <em>timeres_python=0.125</em>, <em>tstartms=0</em>, <em>tstopms=100</em>, <em>nsegs_method='lambda100'</em>, <em>max_nsegs_length=30</em>, <em>lambda_f=100</em>, <em>custom_code=None</em>, <em>custom_fun=None</em>, <em>custom_fun_args=None</em>, <em>verbose=False</em><big>)</big><a class="headerlink" href="#LFPy.Cell" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
 <p>The main cell class used in LFPy.</p>
 <p>Arguments:</p>
-<div class="highlight-python"><pre>morphology : morphology file;
-default_dir : if True will look for morphology in the default folder,
+<div class="highlight-python"><pre>morphology : path to morphology file;
 otherwise full path to morphology must be provided;
 
 v_init : initial potential;
@@ -119,7 +118,7 @@ verbose : switching verbose output on/off</pre>
 <p>Usage of cell class:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">LFPy</span>
 <span class="n">cellParameters</span> <span class="o">=</span> <span class="p">{</span>                          
-    <span class="s">&#39;morphology&#39;</span> <span class="p">:</span> <span class="s">&#39;L5_Mainen96_LFPy.hoc&#39;</span><span class="p">,</span>
+    <span class="s">&#39;morphology&#39;</span> <span class="p">:</span> <span class="s">&#39;path/to/morphology.hoc&#39;</span><span class="p">,</span>
     <span class="s">&#39;rm&#39;</span> <span class="p">:</span> <span class="mi">30000</span><span class="p">,</span>
     <span class="s">&#39;cm&#39;</span> <span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
     <span class="s">&#39;Ra&#39;</span> <span class="p">:</span> <span class="mi">150</span><span class="p">,</span>
