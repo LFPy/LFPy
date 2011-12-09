@@ -273,6 +273,7 @@ class Electrode(ElectrodeSetup):
             LFP_temp = pl.zeros((self.x.size, variables['t_indices'].size))
         else:
             LFP_temp = pl.zeros((self.x.size, self.tvec.size))
+            
         for i in xrange(self.x.size):
             variables.update({
                 'x' : self.x[i],

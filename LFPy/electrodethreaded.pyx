@@ -37,10 +37,16 @@ class ElectrodeThreaded(Electrode):
         self.NUMBER_OF_PROCESSES = NUMBER_OF_PROCESSES
             
 
-    def _loop_over_contacts(self, k, LFP_temp, variables,
-                            __name__='__main__'):
+    def _loop_over_contacts(self, k, variables,
+                            __name__='__main__'
+                            ):
         '''Monkeypatching function to use Python multiprocessing!
         Loop over electrode contacts, and will return LFP_temp filled'''
+        if variables['t_indices'] != None:
+            LFP_temp = np.zeros((self.x.size, variables['t_indices'].size))
+        else:
+            LFP_temp = np.zeros((self.x.size, self.tvec.size))
+
         if __name__ == '__main__':
             freeze_support()
             task_queue = Queue()
@@ -52,11 +58,11 @@ class ElectrodeThreaded(Electrode):
                 task_queue.put(int(task))       
             for i in xrange(self.NUMBER_OF_PROCESSES):
                 Process(target=self._loop_over_contacts_thread,
-                             args=(task_queue, k, LFP_temp, variables,
+                             args=(task_queue, k, variables,
                              done_queue)).start()
             for n in xrange(TASKS.size):
                 [i, lfp_temp] = done_queue.get()
-                LFP_temp[k, i, :] += lfp_temp                 
+                LFP_temp[i, :] += lfp_temp                 
             for i in xrange(self.NUMBER_OF_PROCESSES):
                 task_queue.put('STOP')
             
@@ -65,12 +71,17 @@ class ElectrodeThreaded(Electrode):
         else:
             raise Exception, "'__name__' != '__main__'"
         
-        return LFP_temp[k, :, :]
+        return LFP_temp
 
-    def _loop_over_contacts_thread(self, task_queue, k, LFP_temp, variables,
+    def _loop_over_contacts_thread(self, task_queue, k, variables,
                              done_queue):
         '''thread calculating the LFP in each contact point called from
         self._loop_over_contacts'''
+        if variables['t_indices'] != None:
+            LFP_temp = np.zeros((self.x.size, variables['t_indices'].size))
+        else:
+            LFP_temp = np.zeros((self.x.size, self.tvec.size))
+
         for i in iter(task_queue.get, 'STOP'):
             variables.update({
                 'x' : self.x[i],
@@ -85,13 +96,13 @@ class ElectrodeThreaded(Electrode):
                         'z' : self.z[i] + self.r_drift['z'][i],
                         'timestep' : j
                     })
-                    LFP_temp[k, i, j] = LFP_temp[k, i, j] + \
+                    LFP_temp[i, j] = LFP_temp[i, j] + \
                         lfpcalc.calc_lfp_choose(self.c[k], **variables)
             else:
-                LFP_temp[k, i, ] = LFP_temp[k, i, ] + \
+                LFP_temp[i, :] = LFP_temp[i, :] + \
                         lfpcalc.calc_lfp_choose(self.c[k], **variables)
         
-            done_queue.put([i, LFP_temp[k, i, :]])
+            done_queue.put([i, LFP_temp[i, :]])
         
     
     def _lfp_el_pos_calc_dist(self, int k,
@@ -99,7 +110,8 @@ class ElectrodeThreaded(Electrode):
                              double sigma=0.3, double radius=10, int n=10,
                              int m=50, N=None, t_indices=None, 
                              str method='linesource',
-                             str __name__="__main__"):
+                             str __name__="__main__"
+                             ):
         '''
         Calc. of LFP over an n-point integral approximation over flat
         electrode surface with radius r. The locations of these n points on
@@ -205,8 +217,7 @@ class ElectrodeThreaded(Electrode):
                     }
                     lfp_e[j, ] = lfpcalc.calc_lfp_choose(self.c[k], **variables)
     
-                lfp_el_pos = lfp_e.mean(axis=0)
-    
+                lfp_el_pos = lfp_e.mean(axis=0)    
             else:
                 lfp_el_pos = lfpcalc.calc_lfp_choose(self.c[k],
                     x=self.x[index], y=self.y[index], z=self.z[index], r_limit = r_limit,
