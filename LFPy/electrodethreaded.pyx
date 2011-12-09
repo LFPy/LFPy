@@ -37,11 +37,16 @@ class ElectrodeThreaded(Electrode):
         self.NUMBER_OF_PROCESSES = NUMBER_OF_PROCESSES
             
 
-    def _loop_over_contacts(self, k, variables,
+    def _loop_over_contacts(self, int k, variables,
                             __name__='__main__'
                             ):
         '''Monkeypatching function to use Python multiprocessing!
         Loop over electrode contacts, and will return LFP_temp filled'''
+
+        cdef np.ndarray[DTYPE_t, ndim=2] LFP_temp
+        cdef np.ndarray[long, ndim=1] TASKS
+        cdef int i, task
+
         if variables['t_indices'] != None:
             LFP_temp = np.zeros((self.x.size, variables['t_indices'].size))
         else:
@@ -73,10 +78,15 @@ class ElectrodeThreaded(Electrode):
         
         return LFP_temp
 
-    def _loop_over_contacts_thread(self, task_queue, k, variables,
+    def _loop_over_contacts_thread(self, task_queue,
+                                   int k, variables,
                              done_queue):
         '''thread calculating the LFP in each contact point called from
         self._loop_over_contacts'''
+        
+        cdef np.ndarray[DTYPE_t, ndim=2] LFP_temp
+        cdef int i, j
+        
         if variables['t_indices'] != None:
             LFP_temp = np.zeros((self.x.size, variables['t_indices'].size))
         else:
