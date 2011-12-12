@@ -495,7 +495,7 @@ class Cell(object):
                 for seg in sec:
                     areavec.x[counter] = neuron.h.area(seg.x)
                     diamvec.x[counter] = seg.diam
-                    lengthvec.x[counter] = seg.L
+                    lengthvec.x[counter] = sec.L/sec.nseg
                     
                     xstartvec.x[counter] = neuron.h.x3d(0) + \
                         xlength * (seg.x - 1./2./sec.nseg)
