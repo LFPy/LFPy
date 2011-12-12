@@ -211,12 +211,13 @@ class Electrode(ElectrodeSetup):
                  N=None, r=None, n=0, r_z=None,
                  perCellLFP=False, method='linesource', 
                  color='g', marker='o',
-                 from_file=False, cellfile=None):
+                 from_file=False, cellfile=None, verbose=False):
         '''This is the regular implementation of the Electrode class
         that calculates the LFP serially using a single core'''
         ElectrodeSetup.__init__(self, cell, sigma, x, y, z,
                                 N, r, n, r_z, perCellLFP,
-                                method, color, marker, from_file, cellfile)
+                                method, color, marker, from_file,
+                                cellfile, verbose)
         
     def calc_lfp(self, t_indices=None):
         '''Calculate LFP on electrode geometry from all cell instances.

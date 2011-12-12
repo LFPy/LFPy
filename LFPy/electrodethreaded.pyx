@@ -180,7 +180,8 @@ class ElectrodeThreaded(Electrode):
         '''
         cdef int index, j
         cdef np.ndarray[DTYPE_t, ndim=2] lfp_e, crcl, offs
-        cdef np.ndarray[DTYPE_t, ndim=1] r2, A, B, x_n, y_n, z_n, crclx, crcly, crclz, lfp_el_pos 
+        cdef np.ndarray[DTYPE_t, ndim=1] r2, A, B, x_n, y_n, z_n, \
+                                            crclx, crcly, crclz, lfp_el_pos 
         
         for index in iter(task_queue.get, 'STOP'):
             if n > 1:
@@ -190,12 +191,14 @@ class ElectrodeThreaded(Electrode):
                 crcl = np.zeros((m, 3))
     
                 for j in xrange(n):
-                    A = np.array([(np.random.rand()-0.5)*radius*2, (np.random.rand()-0.5)*radius*2,
+                    A = np.array([(np.random.rand()-0.5)*radius*2,
+                            (np.random.rand()-0.5)*radius*2,
                             (np.random.rand()-0.5)*radius*2])
                     offs[j, ] = np.cross(N[index, ], A)
                     r2[j] = offs[j, 0]**2 + offs[j, 1]**2 + offs[j, 2]**2
                     while r2[j] > radius**2:
-                        A = np.array([(np.random.rand()-0.5)*radius*2, (np.random.rand()-0.5)*radius*2,
+                        A = np.array([(np.random.rand()-0.5)*radius*2,
+                            (np.random.rand()-0.5)*radius*2,
                             (np.random.rand()-0.5)*radius*2])
                         offs[j, ] = np.cross(N[index, ], A)
                         r2[j] = offs[j, 0]**2 + offs[j, 1]**2 + offs[j, 2]**2
@@ -205,7 +208,8 @@ class ElectrodeThreaded(Electrode):
                 z_n = offs[:, 2] + self.z[index]
     
                 for j in xrange(m):
-                    B = np.array([(np.random.rand()-0.5), (np.random.rand()-0.5), (np.random.rand()-0.5)])
+                    B = np.array([(np.random.rand()-0.5),
+                        (np.random.rand()-0.5), (np.random.rand()-0.5)])
                     crcl[j, ] = np.cross(N[index, ], B)
                     crcl[j, ] = crcl[j, ]/np.sqrt(crcl[j, 0]**2 +
                                                crcl[j, 1]**2 + \
@@ -230,7 +234,8 @@ class ElectrodeThreaded(Electrode):
                 lfp_el_pos = lfp_e.mean(axis=0)    
             else:
                 lfp_el_pos = lfpcalc.calc_lfp_choose(self.c[k],
-                    x=self.x[index], y=self.y[index], z=self.z[index], r_limit = r_limit,
+                    x=self.x[index], y=self.y[index], z=self.z[index],
+                    r_limit = r_limit,
                     sigma=sigma, t_indices=t_indices)
             offsets = {
                 'x_n' : x_n,
