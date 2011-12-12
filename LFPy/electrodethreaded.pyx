@@ -22,12 +22,13 @@ class ElectrodeThreaded(Electrode):
                  perCellLFP=False, method='linesource', 
                  color='g', marker='o',
                  from_file=False, cellfile=None,
-                 NUMBER_OF_PROCESSES=None):
+                 NUMBER_OF_PROCESSES=None, verbose=False):
         '''Initialization of class ElectrodeThreaded, with electrode setup
         inherited from class ElectrodeSetup'''
         Electrode.__init__(self, cell, sigma, x, y, z,
                                 N, r, n, r_z, perCellLFP,
-                                method, color, marker, from_file, cellfile)
+                                method, color, marker, from_file,
+                                cellfile, verbose)
         #set the numbers of processes to use, if none use all available cores
         if NUMBER_OF_PROCESSES == None:
             NUMBER_OF_PROCESSES = cpu_count()
