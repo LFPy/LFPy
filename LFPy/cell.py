@@ -473,6 +473,7 @@ class Cell(object):
         
         areavec = neuron.h.Vector(self.totnsegs)
         diamvec = neuron.h.Vector(self.totnsegs)
+        lengthvec = neuron.h.Vector(self.totnsegs)
         
         xstartvec = neuron.h.Vector(self.totnsegs)
         xendvec = neuron.h.Vector(self.totnsegs)
@@ -494,6 +495,7 @@ class Cell(object):
                 for seg in sec:
                     areavec.x[counter] = neuron.h.area(seg.x)
                     diamvec.x[counter] = seg.diam
+                    lengthvec.x[counter] = seg.L
                     
                     xstartvec.x[counter] = neuron.h.x3d(0) + \
                         xlength * (seg.x - 1./2./sec.nseg)
@@ -522,6 +524,7 @@ class Cell(object):
         
         self.area = np.array(areavec)
         self.diam = np.array(diamvec)
+        self.length = np.array(lengthvec)
     
     def _calc_midpoints(self):
         '''calculate midpoints of each segment'''
