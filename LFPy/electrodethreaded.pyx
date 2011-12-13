@@ -190,7 +190,10 @@ class ElectrodeThreaded(Electrode):
                 offs = np.zeros((n, 3))
                 r2 = np.zeros(n)
                 crcl = np.zeros((m, 3))
-    
+                
+                #assert the same random numbers are drawn every time
+                np.random.seed(self.seedvalue)
+                
                 for j in xrange(n):
                     A = np.array([(np.random.rand()-0.5)*radius*2,
                             (np.random.rand()-0.5)*radius*2,

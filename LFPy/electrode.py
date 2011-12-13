@@ -24,13 +24,15 @@ class ElectrodeSetup(object):
         marker  : marker of electrode contact points in plots
         from_file   : if True, load cell object from file
         cellfile    : path to cell pickle
-        verbose : Flag for verbose output        
+        verbose : Flag for verbose output
+        seedvalue : fixed seed when finding random position on contact with r >0
     '''
     def __init__(self, cell, sigma=0.3, x=100, y=0, z=0,
                  N=None, r=None, n=None, r_z=None,
                  perCellLFP=False, method='linesource', 
                  color='g', marker='o',
-                 from_file=False, cellfile=None, verbose=False):
+                 from_file=False, cellfile=None, verbose=False,
+                 seedvalue=None):
         '''Initialize class ElectrodeSetup'''
         self.sigma = sigma
         self.x = x
@@ -55,6 +57,7 @@ class ElectrodeSetup(object):
         
         self.method = method
         self.verbose = verbose
+        self.seedvalue = seedvalue
 
         if from_file:
             if type(cellfile) == type(str()):
@@ -211,13 +214,15 @@ class Electrode(ElectrodeSetup):
                  N=None, r=None, n=0, r_z=None,
                  perCellLFP=False, method='linesource', 
                  color='g', marker='o',
-                 from_file=False, cellfile=None, verbose=False):
+                 from_file=False, cellfile=None, verbose=False,
+                 seedvalue=12345):
         '''This is the regular implementation of the Electrode class
         that calculates the LFP serially using a single core'''
         ElectrodeSetup.__init__(self, cell, sigma, x, y, z,
                                 N, r, n, r_z, perCellLFP,
                                 method, color, marker, from_file,
-                                cellfile, verbose)
+                                cellfile, verbose, seedvalue)
+        
         
     def calc_lfp(self, t_indices=None):
         '''Calculate LFP on electrode geometry from all cell instances.
@@ -307,7 +312,7 @@ class Electrode(ElectrodeSetup):
         '''
         Calc. of LFP over an n-point integral approximation over flat
         electrode surface with radius r. The locations of these n points on
-        the electrode surface are random,  within the given radius'''
+        the electrode surface are random,  within the given radius. The '''
         lfp_el_pos = pl.zeros(self.LFP.shape)
         offsets = {}
         circle = {}
@@ -319,7 +324,9 @@ class Electrode(ElectrodeSetup):
                 r2 = pl.zeros(n)
 
                 crcl = pl.zeros((m, 3))
-
+                
+                #assert the same random numbers are drawn every time
+                pl.seed(self.seedvalue)
                 for j in xrange(n):
                     A = [(pl.rand()-0.5)*radius*2, (pl.rand()-0.5)*radius*2,
                             (pl.rand()-0.5)*radius*2]
