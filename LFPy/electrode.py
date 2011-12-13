@@ -223,39 +223,42 @@ class Electrode(ElectrodeSetup):
         '''Calculate LFP on electrode geometry from all cell instances.
         Will chose distributed calculated if electrode contain 'n', 'N', and 'r'
         '''
-        for k in self.c.iterkeys():
-            if not hasattr(self,  'LFP'):
-                if t_indices != None:
-                    self.LFP = pl.zeros((self.x.size, t_indices.size))
-                else:
-                    self.LFP = pl.zeros((self.x.size, self.tvec.size))
+        if not hasattr(self,  'LFP'):
             if t_indices != None:
-                LFP_temp = pl.zeros((self.nCells, self.x.size, t_indices.size))
+                self.LFP = pl.zeros((self.x.size, t_indices.size))
             else:
-                LFP_temp = pl.zeros((self.nCells, self.x.size, self.tvec.size))
-                
-            variables = {
-                'sigma' : self.sigma,
-                't_indices' : t_indices,
-                'method' : self.method,
-            }
+                self.LFP = pl.zeros((self.x.size, self.tvec.size))
+        if t_indices != None:
+            LFP_temp = pl.zeros((self.nCells, self.x.size, t_indices.size))
+        else:
+            LFP_temp = pl.zeros((self.nCells, self.x.size, self.tvec.size))
             
-            if self.n != None and self.N != None and self.r != None:
-                if self.n <= 1:
-                    raise ValueError, "n = %i must be larger that 1" % self.n
-                else:
-                    pass
-                    
+        variables = {
+            'sigma' : self.sigma,
+            't_indices' : t_indices,
+            'method' : self.method,
+        }
+        
+        if self.n != None and self.N != None and self.r != None:
+            if self.n <= 1:
+                raise ValueError, "n = %i must be larger that 1" % self.n
+            else:
                 variables.update({
-                    'r_limit' : self.c[k].diam/2,
                     'radius' : self.r,
                     'n' : self.n,
                     'N' : self.N,
                     't_indices' : t_indices,
                     })
+
+
+            for k in self.c.iterkeys():                    
+                variables.update({
+                    'r_limit' : self.c[k].diam/2,
+                    })
                 [self.circle, self.offsets, LFP_temp[k, :, :]] = \
                     self._lfp_el_pos_calc_dist(k, **variables)
-            else:
+        else:
+            for k in self.c.iterkeys():
                 variables.update({
                     'r_limit' : self.c[k].diam/2
                 })
