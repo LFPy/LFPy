@@ -262,15 +262,16 @@ class Electrode(ElectrodeSetup):
                     })
                 [self.circle, self.offsets, LFP_temp[k, :, :]] = \
                     self._lfp_el_pos_calc_dist(k, **variables)
+                if self.verbose:
+                    print 'Calculated potential contribution, cell %i.' % k
         else:
             for k in self.c.iterkeys():
                 variables.update({
                     'r_limit' : self.c[k].diam/2
                 })
                 LFP_temp[k, :, :] = self._loop_over_contacts(k, variables)
-
-            if self.verbose:
-                print 'Calculated potential contribution, cell %i.' % k
+                if self.verbose:
+                    print 'Calculated potential contribution, cell %i.' % k
         if self.perCellLFP:
             self.CellLFP = LFP_temp
         
