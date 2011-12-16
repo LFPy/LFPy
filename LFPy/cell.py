@@ -997,3 +997,70 @@ class Cell(object):
         except:
             ERRMSG = 'idx0 and idx1 must be ints on [0, %i]' % self.totnsegs
             raise ValueError, ERRMSG
+    
+    
+    def get_idx_children(self, parent="soma[0]"):
+        '''
+        Get the idx of parent's children sections, i.e. compartments ids
+        of sections connected to parent-argument'''
+        idxvec = np.zeros(self.totnsegs)
+        secnamelist = []
+        childseclist = []
+        #filling list of sectionnames for all sections, one entry per segment
+        for sec in self.allseclist:
+            for seg in sec:
+                secnamelist.append(sec.name())
+        #filling list of children section-names
+        sref = neuron.h.SectionRef(parent)
+        for sec in sref.child:
+            childseclist.append(sec.name())
+        #idxvec=1 where both coincide
+        i = 0
+        for sec in secnamelist:
+            for childsec in childseclist:
+                if sec == childsec:
+                    idxvec[i] += 1
+            i += 1
+            
+        [idx] = np.where(idxvec)
+        return idx
+
+    def get_idx_parent_children(self, parent="soma[0]"):
+        '''
+        Get the idx of parent and children sections, i.e. compartments ids
+        of sections connected to parent-argument'''
+        idxvec = np.zeros(self.totnsegs)
+        secnamelist = []
+        childseclist = [parent]
+        #filling list of sectionnames for all sections, one entry per segment
+        for sec in self.allseclist:
+            for seg in sec:
+                secnamelist.append(sec.name())
+        #filling list of children section-names
+        sref = neuron.h.SectionRef(parent)
+        for sec in sref.child:
+            childseclist.append(sec.name())
+        #idxvec=1 where both coincide
+        i = 0
+        for sec in secnamelist:
+            for childsec in childseclist:
+                if sec == childsec:
+                    idxvec[i] += 1
+            i += 1
+            
+        [idx] = np.where(idxvec)
+        return idx
+    
+    def get_idx_section(self, section="soma[0]"):
+        '''Get the idx of segments in any section-argument, uses hoc naming
+        instead of general terms as in self.get_idx()'''
+        idxvec = np.zeros(self.totnsegs)
+        secnamelist = []
+        i = 0
+        for sec in self.allseclist:
+            for seg in sec:
+                if sec.name() == section:
+                    idxvec[i] += 1
+                i += 1
+        [idx] = np.where(idxvec)
+        return idx
