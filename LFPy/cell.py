@@ -972,7 +972,7 @@ class Cell(object):
         prob = self.area[idx] / sum(self.area[idx])
         return prob
 
-    def get_rand_prob_area_norm_from_idx(self, idx=pl.array([0]), 
+    def get_rand_prob_area_norm_from_idx(self, idx=np.array([0]), 
                                 z_min=-10000, z_max=10000):
         '''Return the probability (0-1) for synaptic coupling on segments
         in idx-array.
