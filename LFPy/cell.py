@@ -969,8 +969,18 @@ class Cell(object):
         in section sum(prob)=1 over all segments in section.
         Prob. determined by area.'''
         idx = self.get_idx(section=section, z_min=z_min, z_max = z_max)
-        prob = self.area[idx]/sum(self.area[idx])
+        prob = self.area[idx] / sum(self.area[idx])
         return prob
+
+    def get_rand_prob_area_norm_from_idx(self, idx=pl.array([0]), 
+                                z_min=-10000, z_max=10000):
+        '''Return the probability (0-1) for synaptic coupling on segments
+        in idx-array.
+        Normalised probability determined by area of segments.'''
+        prob = self.area[idx] / sum(self.area[idx])
+        return prob
+
+
     
     def get_intersegment_vector(self, idx0=0, idx1=0):
         '''return the distance between midpoints of two segments with index
