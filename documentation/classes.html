@@ -152,6 +152,27 @@ midpoint is closest to the coordinates defined by the user</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="LFPy.Cell.get_idx_children">
+<tt class="descname">get_idx_children</tt><big>(</big><em>parent='soma[0]'</em><big>)</big><a class="headerlink" href="#LFPy.Cell.get_idx_children" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the idx of parent&#8217;s children sections, i.e. compartments ids
+of sections connected to parent-argument</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="LFPy.Cell.get_idx_parent_children">
+<tt class="descname">get_idx_parent_children</tt><big>(</big><em>parent='soma[0]'</em><big>)</big><a class="headerlink" href="#LFPy.Cell.get_idx_parent_children" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the idx of parent and children sections, i.e. compartments ids
+of sections connected to parent-argument</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="LFPy.Cell.get_idx_section">
+<tt class="descname">get_idx_section</tt><big>(</big><em>section='soma[0]'</em><big>)</big><a class="headerlink" href="#LFPy.Cell.get_idx_section" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the idx of segments in any section-argument, uses hoc naming
+instead of general terms as in self.get_idx()</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="LFPy.Cell.get_intersegment_distance">
 <tt class="descname">get_intersegment_distance</tt><big>(</big><em>idx0=0</em>, <em>idx1=0</em><big>)</big><a class="headerlink" href="#LFPy.Cell.get_intersegment_distance" title="Permalink to this definition">¶</a></dt>
 <dd><p>return the euclidian distance between midpoints of two segments 
@@ -180,6 +201,14 @@ interval [z_min, z_max]</p>
 <dd><p>Return the probability (0-1) for synaptic coupling on segments
 in section sum(prob)=1 over all segments in section.
 Prob. determined by area.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="LFPy.Cell.get_rand_prob_area_norm_from_idx">
+<tt class="descname">get_rand_prob_area_norm_from_idx</tt><big>(</big><em>idx=array([0])</em>, <em>z_min=-10000</em>, <em>z_max=10000</em><big>)</big><a class="headerlink" href="#LFPy.Cell.get_rand_prob_area_norm_from_idx" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the probability (0-1) for synaptic coupling on segments
+in idx-array.
+Normalised probability determined by area of segments.</p>
 </dd></dl>
 
 <dl class="method">
@@ -470,7 +499,7 @@ Electrode currents go here, whics make membrane currents not sum to zero.</p>
 <h2>class <a class="reference internal" href="#LFPy.ElectrodeSetup" title="LFPy.ElectrodeSetup"><tt class="xref py py-class docutils literal"><span class="pre">ElectrodeSetup</span></tt></a><a class="headerlink" href="#class-electrodesetup" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="LFPy.ElectrodeSetup">
-<em class="property">class </em><tt class="descclassname">LFPy.</tt><tt class="descname">ElectrodeSetup</tt><big>(</big><em>cell</em>, <em>sigma=0.3</em>, <em>x=100</em>, <em>y=0</em>, <em>z=0</em>, <em>N=None</em>, <em>r=None</em>, <em>n=0</em>, <em>r_z=None</em>, <em>perCellLFP=False</em>, <em>method='linesource'</em>, <em>color='g'</em>, <em>marker='o'</em>, <em>from_file=False</em>, <em>cellfile=None</em>, <em>verbose=False</em><big>)</big><a class="headerlink" href="#LFPy.ElectrodeSetup" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">LFPy.</tt><tt class="descname">ElectrodeSetup</tt><big>(</big><em>cell</em>, <em>sigma=0.3</em>, <em>x=100</em>, <em>y=0</em>, <em>z=0</em>, <em>N=None</em>, <em>r=None</em>, <em>n=None</em>, <em>r_z=None</em>, <em>perCellLFP=False</em>, <em>method='linesource'</em>, <em>color='g'</em>, <em>marker='o'</em>, <em>from_file=False</em>, <em>cellfile=None</em>, <em>verbose=False</em>, <em>seedvalue=None</em><big>)</big><a class="headerlink" href="#LFPy.ElectrodeSetup" title="Permalink to this definition">¶</a></dt>
 <dd><p>Electrode superclass, does import a LFPy.cell.Cell object or either list
 or dictionary containing such Cell objects. Keyword arguments determine
 properties of latter LFP-calculations</p>
@@ -485,7 +514,8 @@ color   : color of electrode contact points in plots
 marker  : marker of electrode contact points in plots
 from_file   : if True, load cell object from file
 cellfile    : path to cell pickle
-verbose : Flag for verbose output        </pre>
+verbose : Flag for verbose output
+seedvalue : fixed seed when finding random position on contact with r &gt;0</pre>
 </div>
 <dl class="class">
 <dt id="LFPy.ElectrodeSetup.cell">
@@ -500,7 +530,7 @@ verbose : Flag for verbose output        </pre>
 <h2>class <a class="reference internal" href="#LFPy.Electrode" title="LFPy.Electrode"><tt class="xref py py-class docutils literal"><span class="pre">Electrode</span></tt></a><a class="headerlink" href="#class-electrode" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="LFPy.Electrode">
-<em class="property">class </em><tt class="descclassname">LFPy.</tt><tt class="descname">Electrode</tt><big>(</big><em>cell</em>, <em>sigma=0.3</em>, <em>x=100</em>, <em>y=0</em>, <em>z=0</em>, <em>N=None</em>, <em>r=None</em>, <em>n=0</em>, <em>r_z=None</em>, <em>perCellLFP=False</em>, <em>method='linesource'</em>, <em>color='g'</em>, <em>marker='o'</em>, <em>from_file=False</em>, <em>cellfile=None</em><big>)</big><a class="headerlink" href="#LFPy.Electrode" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">LFPy.</tt><tt class="descname">Electrode</tt><big>(</big><em>cell</em>, <em>sigma=0.3</em>, <em>x=100</em>, <em>y=0</em>, <em>z=0</em>, <em>N=None</em>, <em>r=None</em>, <em>n=0</em>, <em>r_z=None</em>, <em>perCellLFP=False</em>, <em>method='linesource'</em>, <em>color='g'</em>, <em>marker='o'</em>, <em>from_file=False</em>, <em>cellfile=None</em>, <em>verbose=False</em>, <em>seedvalue=12345</em><big>)</big><a class="headerlink" href="#LFPy.Electrode" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">LFPy.electrode.ElectrodeSetup</span></tt></p>
 <p>Electrode class with inheritance from LFPy.ElectrodeSetup able to actually
 calculate local field potentials from LFPy.Cell objects. <a href="#id7"><span class="problematic" id="id8">**</span></a>kwargs are passed
@@ -567,7 +597,7 @@ Will chose distributed calculated if electrode contain &#8216;n&#8217;, &#8216;N
 <h2>class <a class="reference internal" href="#LFPy.ElectrodeThreaded" title="LFPy.ElectrodeThreaded"><tt class="xref py py-class docutils literal"><span class="pre">ElectrodeThreaded</span></tt></a><a class="headerlink" href="#class-electrodethreaded" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="LFPy.ElectrodeThreaded">
-<em class="property">class </em><tt class="descclassname">LFPy.</tt><tt class="descname">ElectrodeThreaded</tt><big>(</big><em>cell</em>, <em>sigma=0.3</em>, <em>x=100</em>, <em>y=0</em>, <em>z=0</em>, <em>N=None</em>, <em>r=None</em>, <em>n=0</em>, <em>r_z=None</em>, <em>colors=None</em>, <em>perCellLFP=False</em>, <em>method='linesource'</em>, <em>color='g'</em>, <em>marker='o'</em>, <em>from_file=False</em>, <em>cellfile=None</em>, <em>NUMBER_OF_PROCESSES=None</em><big>)</big><a class="headerlink" href="#LFPy.ElectrodeThreaded" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">LFPy.</tt><tt class="descname">ElectrodeThreaded</tt><a class="headerlink" href="#LFPy.ElectrodeThreaded" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">LFPy.electrode.Electrode</span></tt></p>
 <p>Inherit class Electrode, but using multiprocessing to distribute
 calculations of LFP for each electrode contact</p>

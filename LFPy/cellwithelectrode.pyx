@@ -200,14 +200,16 @@ class CellWithElectrode(Cell):
             if np.mod(counter, interval) == 0:
                 print 't = %.0f' % neuron.h.t
         
-        #calculate LFP after final fadvance()
-        i = 0
-        for sec in self.allseclist:
-            for seg in sec:
-                imem[i] = seg.i_membrane
-                i += 1
-        imem *= area * 1E-2
-        LFP[j, ] = np.dot(electrodecoeffs, imem)
+        if tstopms / self.timeres_python == j:
+            #calculate LFP after final fadvance() unless j == 
+            i = 0
+            for sec in self.allseclist:
+                for seg in sec:
+                    imem[i] = seg.i_membrane
+                    i += 1
+            imem *= area * 1E-2
+            
+            LFP[j, ] = np.dot(electrodecoeffs, imem)
         
         self.LFP = LFP.T
     

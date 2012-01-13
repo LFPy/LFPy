@@ -97,7 +97,7 @@ cellparams = {          #various cell parameters,
     'timeres_NEURON' : 2**-3,   #[ms] dt's should be in powers of 2 for both,
     'timeres_python' : 2**-3,   #need binary representation
     'tstartms' : -100,  #start time of simulation, recorders start at t=0
-    'tstopms' : 100,   #stop simulation at 1000 ms. these can be overridden
+    'tstopms' : 1000,   #stop simulation at 1000 ms. these can be overridden
                         #by setting these arguments in cell.simulation()
     'custom_code'  : [],    #Custom .hoc/.py-scripts that define cell objects
 }
@@ -189,7 +189,6 @@ c.simulate(**simulateparams)
 
 #initialize electrode geometry, then calculate the LFP, using LFPy.Electrode cl.
 e = LFPy.Electrode(c,**electrodeparams)
-#e.calc_lfp_threaded()
 e.calc_lfp()
 
 #plotting some variables and geometry, saving output to .pdf.

@@ -4,7 +4,7 @@ from LFPy import Electrode, lfpcalc
 import pylab as pl
 from multiprocessing import Process, Queue, freeze_support, cpu_count
 
-
+pl.seed(123435)
 pl.interactive(1)
 
 cellParameters = {                          
@@ -19,13 +19,13 @@ cellParameters = {
 }
 
 cells = []
-for i in xrange(2):
+for i in xrange(4):
     cell = LFPy.Cell(**cellParameters)
     #cell.set_pos(pl.rand()*50-25, pl.rand()*50-25, pl.rand()*50-25)
     #cell.rotate_xyz({"z" : pl.rand(2*pl.pi)})
     
     synapseParameters = {
-        'idx' : pl.randint(cell.totnsegs), #cell.get_closest_idx(x=0, y=0, z=800), # compartment
+        'idx' : cell.get_closest_idx(x=0, y=0, z=800), # compartment
         'e' : 0,                                # reversal potential
         'syntype' : 'ExpSyn',                   # synapse type
         'tau' : 2,                              # syn. time constant
@@ -50,11 +50,11 @@ electrodeParameters = {
     'x' : pl.zeros(24)+50,              # carthesian coords.
     'y' : pl.zeros(24),                     # of electrode points
     'z' : pl.arange(-200, 1000, 50),
-    'n' : 5,
-    'r' : 5,
-    'N' : N,
+    #'n' : 5,
+    #'r' : 5,
+    #'N' : N,
     'verbose' : True,
-    "perCellLFP" : True,
+    #'perCellLFP' : True,
 }
 
 
@@ -117,6 +117,7 @@ pl.colorbar()
 #        pl.title('Morphology')
 #        pl.xlabel(r'x ($\mu$m)')
 #        pl.ylabel(r'z ($\mu$m)')
+pl.hold()
 
 
 #plotstuff()

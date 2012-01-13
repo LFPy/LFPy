@@ -642,8 +642,10 @@ class Cell(object):
             else:
                 self.tvec += self.timeres_NEURON
         else:
+            print 'adding %.3f to tvec' % self.timeres_NEURON
             self.tvec[1:] = self.tvec[1:] + self.timeres_NEURON
-    
+        
+
     def _calc_imem(self):
         '''fetching the vectors from the memireclist and calculate self.imem
         containing all the membrane currents.
@@ -756,7 +758,8 @@ class Cell(object):
     
     def _set_time_recorder(self):
         '''Initialize time-vector recorder in NEURON'''
-        self.tvec = neuron.h.Vector(int(self.tstopms/self.timeres_python+1))
+        #self.tvec = neuron.h.Vector(int(self.tstopms/self.timeres_python+1))
+        self.tvec = neuron.h.Vector() #Later NEURON versions dont double
         self.tvec.record(neuron.h._ref_t, self.timeres_python)
     
     def _set_soma_volt_recorder(self):
