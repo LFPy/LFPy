@@ -10,10 +10,10 @@ cellParameters = {
     'rm' : 30000,                           # membrane resistivity
     'cm' : 1.0,                             # membrane capacitance
     'Ra' : 150,                             # axial resistivity
-    'timeres_NEURON' : 0.1,                # dt for NEURON sim.
+    'timeres_NEURON' : 0.1,                 # dt for NEURON sim.
     'timeres_python' : 0.1,                 # dt for python output
-    'tstartms' : -50,                         # start t of simulation
-    'tstopms' : 50,                        # end t of simulation
+    'tstartms' : -50,                       # start t of simulation
+    'tstopms' : 50,                         # end t of simulation
 }
 
 cell = LFPy.Cell(**cellParameters)

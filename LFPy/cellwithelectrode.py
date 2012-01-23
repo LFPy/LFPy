@@ -2,6 +2,7 @@ import numpy as np
 import neuron
 from LFPy import Cell, Electrode
 
+
 class CellWithElectrode(Cell):
     '''
     Subclass of LFPy.Cell with some changes to simulate() and
@@ -90,7 +91,8 @@ class CellWithElectrode(Cell):
             self._set_icap_recorders()
         
         #run fadvance until t >= tstopms
-        self._run_simulation(**kwargs)
+        #self._run_simulation(**kwargs)
+        self = _run_simulation(self, **kwargs)
         
         self._collect_tvec()
         
@@ -188,7 +190,8 @@ class CellWithElectrode(Cell):
         LFP.append(np.dot(self.electrodecoeffs, imem))
         
         self.LFP = np.array(LFP).T
-    
+        self.electrode.LFP = self.LFP
+   
 class ElectrodeDetermineCoeffs(Electrode):
     def __init__(self, **kwargs):
         '''Uses Electrodesetup class, and exludes loading of cell.imem 

@@ -211,7 +211,8 @@ class CellWithElectrode(Cell):
             
             LFP[j, ] = np.dot(electrodecoeffs, imem)
         
-        self.LFP = LFP.T
+        self.electrode.LFP = LFP.T
+        self.LFP = self.electrode.LFP
     
 class ElectrodeDetermineCoeffs(Electrode):
     def __init__(self, **kwargs):

@@ -14,12 +14,8 @@ setup(
         ["electrodethreaded.pyx"],
         include_dirs=[numpy.get_include()]
         ),
-        #Extension("cell",
-        #["cell.py"],
-        #include_dirs=[numpy.get_include()]
-        #),
         Extension("cellwithelectrode",
         ["cellwithelectrode.pyx"],
         include_dirs=[numpy.get_include()]
-        )
+        ),
 ])
