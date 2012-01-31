@@ -69,14 +69,8 @@ class RecExtElectrodeSetup(object):
             else:
                 raise ValueError, 'cell either string or list of strings'
 
-        self._import_c(cell)
-        
-                
-        #test that currents sum towards zero        
-        try:
-            self._test_imem_sum()
-        except:
-            pass
+        if cell is not None:
+            self._import_c(cell)
         
 
     class cell():
@@ -139,7 +133,12 @@ class RecExtElectrodeSetup(object):
         setattr(self, 'tvec', self.c[self.c.keys()[0]].tvec)
         setattr(self, 'dt', self.c[self.c.keys()[0]].timeres_python)
         
-        self.nCells = pl.array(self.c.keys()).size
+        self.nCells = pl.array(self.c.keys()).size 
+        #test that currents sum towards zero        
+        try:
+            self._test_imem_sum()
+        except:
+            pass
     
     def _test_imem_sum(self, tolerance=1E-12):
         '''test that the membrane currents sum to zero'''
@@ -168,7 +167,7 @@ class RecExtElectrode(RecExtElectrodeSetup):
         
         N = pl.empty((16, 3))
         for i in xrange(N.shape[0]): N[i,] = [1, 0, 0] #normal unit vec. to contacts
-        electrodeParameters = {             #parameters for electrode class
+        electrodeParameters = {             #parameters for RecExtElectrode class
             'sigma' : 0.3,              #Extracellular potential
             'x' : pl.zeros(16)+25,      #Coordinates of electrode contacts
             'y' : pl.zeros(16),
@@ -210,7 +209,7 @@ class RecExtElectrode(RecExtElectrodeSetup):
         pl.matshow(electrode.LFP)
     '''
 
-    def __init__(self, cell, sigma=0.3, x=100, y=0, z=0,
+    def __init__(self, cell=None, sigma=0.3, x=100, y=0, z=0,
                  N=None, r=None, n=0, r_z=None,
                  perCellLFP=False, method='linesource', 
                  color='g', marker='o',
@@ -224,10 +223,13 @@ class RecExtElectrode(RecExtElectrodeSetup):
                                 cellfile, verbose, seedvalue)
         
         
-    def calc_lfp(self, t_indices=None):
+    def calc_lfp(self, t_indices=None, cell=None):
         '''Calculate LFP on electrode geometry from all cell instances.
         Will chose distributed calculated if electrode contain 'n', 'N', and 'r'
         '''
+        if not hasattr(self, 'c'):
+            self._import_c(cell)
+       
         if not hasattr(self,  'LFP'):
             if t_indices != None:
                 self.LFP = pl.zeros((self.x.size, t_indices.size))

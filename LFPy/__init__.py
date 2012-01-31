@@ -27,7 +27,7 @@ All rights reserved.
 from cell import Cell
 from pointprocess import Synapse, PointProcess, \
     PointProcessSynapse, PointProcessElectrode
-from electrode import RecExtElectrode, RecExtElectrodeSetup
+from recextelectrode import RecExtElectrode, RecExtElectrodeSetup
 from electrodethreaded import ElectrodeThreaded
 from cellwithelectrode import CellWithElectrode
 

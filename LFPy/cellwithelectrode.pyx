@@ -21,7 +21,7 @@ class CellWithElectrode(Cell):
         
         N = pl.empty((16, 3))
         for i in xrange(N.shape[0]): N[i,] = [1, 0, 0] #normal unit vec. to contacts
-        electrodeParameters = {             #parameters for electrode class
+        electrodeParameters = {             #parameters for RecExtElectrode class
             'sigma' : 0.3,              #Extracellular potential
             'x' : pl.zeros(16)+25,      #Coordinates of electrode contacts
             'y' : pl.zeros(16),
