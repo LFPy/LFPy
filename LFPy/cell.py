@@ -585,14 +585,16 @@ class Cell(object):
         
         return poss_idx[idx]
     
-    def simulate(self, electrode=None, rec_imem=False, rec_vmem=False, rec_ipas=False, rec_icap=False,
+    def simulate(self, electrode=None, rec_imem=False, rec_vmem=False,
+                 rec_ipas=False, rec_icap=False,
                  rec_isyn=False, rec_vmemsyn=False, rec_istim=False):
         '''
         This is the main function running the simulation of the NEURON model.
         Start NEURON simulation and record variables specified by arguments.
         
-        Arguments::
-            electrode:  Either an RecExtElectrode object or a list of such
+        Arguments:
+        ::
+            electrode:  Either an LFPy.RecExtElectrode object or a list of such
                         If supplied, LFPs will calculated at every time step
                         and accessible as electrode.LFP. If a list of objects
                         is given, accessible as electrode[0].LFP etc
@@ -718,7 +720,6 @@ class Cell(object):
             electrode.LFP = []
         self.tvec = tvec
             
-                
         neuron.h.dt = self.timeres_NEURON
         
         cvode = neuron.h.CVode()
@@ -755,7 +756,6 @@ class Cell(object):
         
         #temp vector to store membrane currents at each timestep
         imem = np.empty(self.totnsegs)
-        
         
         if type(electrode) == type([]):
             while neuron.h.t < self.tstopms:
@@ -809,7 +809,6 @@ class Cell(object):
             electrode.LFP.append(np.dot(electrode.electrodecoeffs, imem))
             
             electrode.LFP = np.array(electrode.LFP).T
-
 
     def _collect_tvec(self):
         '''set the tvec to be a monotonically increasing nparray'''

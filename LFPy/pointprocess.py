@@ -6,7 +6,7 @@ import neuron
 
 class PointProcess:
     '''
-    Superclass on top of PointProcessSynapse, PointProcessElectrode, 
+    Superclass on top of Synapse, StimIntraElectrode, 
     just to import and set some shared variables.
     
     Arguments:
@@ -39,17 +39,31 @@ class PointProcess:
         self.y = cell.ymid[self.idx]
         self.z = cell.zmid[self.idx]
         
-class PointProcessSynapse(PointProcess):
+class Synapse(PointProcess):
     '''
     The synapse class, pointprocesses that spawn membrane currents.
     See http://www.neuron.yale.edu/neuron/static/docs/help/neuron/neuron/mech.html#pointprocesses
     for details, or corresponding mod-files.
     
+    This class is ment to be used with synaptic mechanisms, giving rise to
+    non-specific currents that will be part of the membrane currents. Thus,
+    the membrane currents will sum to zero over all neuron segments.
+    
     Usage:
     ::
-        import pylab as pl
+        #!/usr/bin/env python
+
         import LFPy
-        cell = LFPy.Cell(morphology='L5_Mainen96_LFPy.hoc')
+        import pylab as pl
+        
+        pl.interactive(1)
+        
+        cellParameters = {
+            'morphology' :  'morphologies/L5_Mainen96_LFPy.hoc',
+            'tstopms' :     50, 
+        }
+        cell = LFPy.Cell(**cellParameters)
+
         synapseParameters = {
             'idx' : cell.get_closest_idx(x=0, y=0, z=800),
             'e' : 0,                                # reversal potential
@@ -58,14 +72,22 @@ class PointProcessSynapse(PointProcess):
             'weight' : 0.01,                       # syn. weight
             'record_current' : True                 # syn. current record
         }
-        synapse = LFPy.PointProcessSynapse(cell, **synapseParameters)
+        synapse = LFPy.Synapse(cell, **synapseParameters)
         synapse.set_spike_times(cell, pl.array([10, 15, 20, 25]))
         cell.simulate(rec_isyn=True)
+        
+        pl.subplot(211)
+        pl.plot(cell.tvec, synapse.i)
+        pl.title('Synapse current (nA)')
+        pl.subplot(212)
+        pl.plot(cell.tvec, cell.somav)
+        pl.title('Somatic potential (mV)')
+        
     '''
     def __init__(self, cell, idx, syntype, color='r', marker='o',
                  record_current=False, **kwargs):
         '''
-        Initialization of class PointProcessSynapse
+        Initialization of class Synapse
         '''
         PointProcess.__init__(self, cell, idx, color, marker, record_current, 
                               **kwargs)
@@ -89,19 +111,13 @@ class PointProcessSynapse(PointProcess):
         '''Collect membrane potential of segment with synapse'''
         self.v = numpy.array(cell.synvreclist.o(self.hocidx))
 
-class Synapse(PointProcessSynapse):
-    def __init__(self, cell, idx, syntype, color='r', marker='o',
-                 record_current=False, **kwargs):
-        PointProcessSynapse.__init__(self, cell, idx, syntype, color, marker, 
-                                     record_current, **kwargs)
-        print 'LFPy.Synapse pending Deprecation,'
-        print 'use LFPy.PointProcessSynapse instead'
         
-class PointProcessElectrode(PointProcess):
+class StimIntraElectrode(PointProcess):
     '''
     Class for NEURON point processes, ie VClamp, SEClamp and ICLamp,
     SinIClamp, ChirpIClamp with arguments.
-    Electrode currents go here, whics make membrane currents not sum to zero.
+    Electrode currents go here, so called specific currents.
+    Membrane currents will no longer sum to zero if these mechanisms are used.
     
     Refer to NEURON documentation @ neuron.yale.edu for kwargs
             
@@ -109,6 +125,8 @@ class PointProcessElectrode(PointProcess):
     ::
         import LFPy
         import pylab as pl
+
+        pl.interactive(1)
         
         pointprocesses = [
             {
@@ -164,9 +182,21 @@ class PointProcessElectrode(PointProcess):
         ]
         
         for pointprocess in pointprocesses:
-            cell = LFPy.Cell(morphology='L5_Mainen96_LFPy.hoc')
-            pp = LFPy.PointProcessElectrode(cell, **pointprocess)
+            cell = LFPy.Cell(morphology='morphologies/L5_Mainen96_LFPy.hoc')
+            stimulus = LFPy.StimIntraElectrode(cell, **pointprocess)
             cell.simulate(rec_istim=True)
+            
+            pl.subplot(211)
+            pl.plot(cell.tvec, stimulus.i, label=pointprocess['pptype'])
+            pl.legend(loc='best')
+            pl.title('Stimulus currents (nA)')
+            
+            pl.subplot(212)
+            pl.plot(cell.tvec, cell.somav, label=pointprocess['pptype'])
+            pl.legend(loc='best')
+            pl.title('Somatic potential (mV)')
+            
+        
     '''    
     def __init__(self, cell, idx, pptype='SEClamp',
                  color='p', marker='*', record_current=False, **kwargs):

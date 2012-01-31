@@ -23,8 +23,7 @@ All rights reserved.
   * inputgenerators - functions for synaptic input time generation
 '''
 
-from pointprocess import Synapse, PointProcess, \
-    PointProcessSynapse, PointProcessElectrode
+from pointprocess import Synapse, PointProcess, StimIntraElectrode
 from recextelectrode import RecExtElectrode, RecExtElectrodeSetup
 from cell import Cell
 from electrodethreaded import ElectrodeThreaded

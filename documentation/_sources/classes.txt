@@ -18,23 +18,23 @@ module :mod:`LFPy`
         :members:
         :undoc-members:
 
-    class :class:`PointProcessSynapse`
+    class :class:`Synapse`
     ==================================
-    .. autoclass:: PointProcessSynapse
+    .. autoclass:: Synapse
         :members:
         :show-inheritance:
         :undoc-members:
 
-    class :class:`PointProcessElectrode`
+    class :class:`StimIntraElectrode`
     ====================================
-    .. autoclass:: PointProcessElectrode
+    .. autoclass:: StimIntraElectrode
         :members:
         :show-inheritance:
         :undoc-members:
 
     class :class:`RecExtElectrodeSetup`
     =============================
-    .. autoclass:: ElectrodeSetup
+    .. autoclass:: RecExtElectrodeSetup
         :members:
         :undoc-members:
 
