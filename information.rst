@@ -5,15 +5,17 @@ The basic requirements for the release branch of LFPy is as follows
 
 1.  Subversion, in order to download the code from the repository
 2.  Python, seems to work fine with recent python since 2.6.x (2.6.6 or newer recommended), 2.7.x works fine.
-3.  Python modules numpy, scipy, matplotlit
-4.  NEURON (from www.neuron.yale.edu) compiled as a python module, so the following should execute without error in the terminal:
+3.  Python modules numpy, scipy, matplotlib
+4.  NEURON (from www.neuron.yale.edu) compiled as a Python module, so the following should execute without error in the terminal:
     ::
         ipython
         >>> import neuron
         >>> neuron.test()
    
-5.  Cython (C-extencions for python, cython.org) to speed up simulations of extracellular fields.
-    Cython version 0.11 known to fail, works with version >= 0.14.
+5.  Cython (C-extensions for python, cython.org) to speed up simulations of extracellular fields
+
+In Ubuntu 10.4LTS you may use Synaptic to install subversion, python2.6-dev, numpy, scipy and matplotlib. Note that the cython version in Ubuntu repositories (0.11) will not work, please install the current version from cython.org (tested with 0.15.1). The easiest way to install NEURON as a Python module is to download a .deb package from Eilif Muller's webpage (http://neuralensemble.org/people/eilifmuller/software.html). (The command to compile NEURON
+mechanisms is then /opt/nrn/i686/bin/nrnivmodl)
 
 Installation
 ============
@@ -39,15 +41,17 @@ Installation
         cd $LFPYPATH/LFPy
         python setup.py build_ext -i
 
-    Otherwise the corresponding .py files will be used, which is slower.
+    Otherwise the corresponding .py files will be used, which is slower. 
+    
+5.  Compile the NEURON mechanisms in LFPy-release/neuron (using nrnivmodl).
 
-5.  Now try if it all works. In a python shell in a fresh terminal, try
+6.  Now try if it all works. In a python shell in a fresh terminal, try
     ::
         import LFPy
 
     if there are no complaints, it should be all done!
 
-6.  There are some basic usage examples provided in 
+7.  There are some basic usage examples provided in 
     ::
         $LFPYPATH/examples/
 
