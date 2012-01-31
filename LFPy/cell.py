@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 '''
-Copyright (C) 2011 Computational Neuroscience Group, UMB.
+Copyright (C) 2012 Computational Neuroscience Group, UMB.
 All rights reserved.
 '''
 
@@ -38,12 +38,11 @@ class Cell(object):
     Arguments:
     ::
         morphology : path to morphology file;
-        otherwise full path to morphology must be provided;
     
         v_init : initial potential;
         passive : passive mechs are initialized if True;
         Ra : axial resistance;
-        rm : memnbrane resistivity;
+        rm : membrane resistivity;
         cm : membrane capacitance;
         e_pas : passive mechanism reversal potential;
     
@@ -57,8 +56,8 @@ class Cell(object):
         max_nsegs_length : max segment length for method 'fixed_length';
         lambda_f : AC frequency for method 'lambda_f';
     
-        custom_code : list of model specific code files ([*.py/.hoc]);
-        custom_fun: list of model specific functions to be called with args:
+        custom_code : list of model-specific code files ([.py/.hoc]);
+        custom_fun: list of model-specific functions to be called with args:
         custom_fun_args: list of arguments passed to custom_fun functions
         verbose : switching verbose output on/off
     
@@ -97,7 +96,7 @@ class Cell(object):
                     custom_fun_args=None,
                     verbose=False):
         '''
-        initialization of the Cell object.
+        Initialization of the Cell object.
         '''
         self.verbose = verbose
         
@@ -165,10 +164,10 @@ class Cell(object):
         self.rotate_xyz(self.default_rotation)
         
     def _load_geometry(self):
-        '''Load the morphology file in NEURON'''
-        if hasattr(neuron.h, 'sec_counted'):
+        '''Load the morphology .hoc file in NEURON''' 
+        try: 
             neuron.h.sec_counted = 0
-        else:
+        except LookupError:
             neuron.h('sec_counted = 0')
         
         #Not sure if all of these are needed, just precautions
@@ -185,7 +184,7 @@ class Cell(object):
         self._create_sectionlists()
         
     def _run_custom_codes(self, custom_code, custom_fun, custom_fun_args):
-        '''execute custom model code and functions with arguments'''
+        '''Execute custom model code and functions with arguments'''
         # load custom codes
         if custom_code != None:
             for code in custom_code:
@@ -204,7 +203,7 @@ class Cell(object):
                 i +=  1
     
     def _set_nsegs(self, nsegs_method, lambda_f, max_nsegs_length):
-        '''Set number of segments per section according to lambda-rule,
+        '''Set number of segments per section according to the lambda-rule,
         or according to maximum length of segments'''
         if nsegs_method == 'lambda100':
             self._set_nsegs_lambda100()
@@ -217,7 +216,7 @@ class Cell(object):
                 print 'No nsegs_method applied (%s)' % nsegs_method
     
     def _get_rotation(self):
-        '''Check if there exist corresponding file
+        '''Check if there exists a corresponding file
         with rotation angles'''
         if os.path.isfile(self.morphology[0:-4]+'.rot'):
             rotation_file = self.morphology[0:-4]+'.rot'
@@ -236,7 +235,7 @@ class Cell(object):
         return rotation
 
     def _create_sectionlists(self):
-        '''Create sectionlists for different kinds of sections'''
+        '''Create section lists for different kinds of sections'''
         self.somalist = neuron.h.SectionList()
         self.axonlist = neuron.h.SectionList()
         self.dendlist = neuron.h.SectionList()
@@ -307,7 +306,7 @@ class Cell(object):
             return idxvec
     
     def _set_nsegs_lambda_f(self, frequency):
-        '''set the number of segments for section according to the 
+        '''Set the number of segments for section according to the 
         d_lambda-rule for a given input frequency'''
         for sec in self.allseclist:
             sec.nseg = int((sec.L / (0.1 * neuron.h.lambda_f(frequency)) + .9)
@@ -316,11 +315,11 @@ class Cell(object):
             print "set nsegs using lambda-rule with frequency %i." % frequency
    
     def _set_nsegs_lambda100(self):
-        '''set the numbers of segments using d_lambda(100)'''
+        '''Set the numbers of segments using d_lambda(100)'''
         self._set_nsegs_lambda_f(100)
     
     def _set_nsegs_fixed_length(self, maxlength):
-        '''set nseg for sections so that not any segment L >= maxlength'''
+        '''Set nseg for sections so that every segment L < maxlength'''
         for sec in self.allseclist:
             sec.nseg = int(sec.L / maxlength) + 1
     
@@ -338,7 +337,7 @@ class Cell(object):
         raise NotImplementedError, 'this function need to be written'
     
     def _set_passive(self):
-        '''insert passive mechanism on all segments'''
+        '''Insert passive mechanism on all segments'''
         for sec in self.allseclist:
             sec.insert('pas')
             sec.Ra = self.Ra
@@ -347,7 +346,7 @@ class Cell(object):
             sec.e_pas = self.e_pas
     
     def _set_extracellular(self):
-        '''insert extracellular mechanism on all sections
+        '''Insert extracellular mechanism on all sections
         to access i_membrane'''
         for sec in self.allseclist:
             sec.insert('extracellular')
@@ -356,8 +355,8 @@ class Cell(object):
                     record_current=False, record_potential=False,
                     weight=None, **kwargs):
         '''
-        Insert syntype synapse on segment with index idx, **kwargs
-        passed on from class PointProcessSynapse.
+        Insert syntype (e.g. ExpSyn) synapse on segment with index idx, 
+        **kwargs passed on from class PointProcessSynapse.
         '''
 
         if not hasattr(self, 'synlist'):
@@ -469,8 +468,8 @@ class Cell(object):
             self.somapos[2] = zmids.mean()
     
     def _collect_geometry_neuron(self):
-        '''looping over allseclist to determine area, diam, xyz-start- and
-        endpoints, embed geometry to cell object.'''
+        '''Loop over allseclist to determine area, diam, xyz-start- and
+        endpoints, embed geometry to cell object'''
         
         areavec = neuron.h.Vector(self.totnsegs)
         diamvec = neuron.h.Vector(self.totnsegs)
@@ -528,7 +527,7 @@ class Cell(object):
         self.length = np.array(lengthvec)
     
     def _calc_midpoints(self):
-        '''calculate midpoints of each segment'''
+        '''Calculate midpoints of each segment'''
         self.xmid = .5*(self.xstart+self.xend)
         self.ymid = .5*(self.ystart+self.yend)
         self.zmid = .5*(self.zstart+self.zend)

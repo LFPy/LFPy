@@ -8,12 +8,11 @@ Group of Computational Neuroscience (compneuro.umb.no),
 Department of Mathematical Sciences and Technology,
 Norwegian University of Life Sciences.
 
-Copyright (C) 2011 Computational Neuroscience Group, UMB.
+Copyright (C) 2012 Computational Neuroscience Group, UMB.
 All rights reserved.
 
 :Classes:
   * Cell - The pythonic neuron object itself laying on top of NEURON
-  * CellWithElectrode - Subclass of Cell that calculate LFP at every fadvance
   * PointProcessSynapse - Convenience class for inserting synapses onto Cell objects
   * PointProcessElectrode - Convenience class for inserting electrodes onto Cell objects
   * RecExtElectrode - Class for performing simulations of extracellular potentials
