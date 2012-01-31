@@ -609,8 +609,7 @@ class Cell(object):
         #run fadvance until t >= tstopms
         if electrode == None:
             if not rec_imem:
-                print "rec_imem = %b, membrane currents will not be recorded!" \
-                                  % rec_imem
+                print "rec_imem = %s, membrane currents will not be recorded!" % str(rec_imem)
             self._run_simulation()
         else:
             if self.timeres_NEURON != self.timeres_python:
@@ -696,16 +695,16 @@ class Cell(object):
         tvec = self.tvec            
         self.tvec = np.arange(self.totnsegs) * self.timeres_python
         if type(electrode) == type([]):
-            self.electrodecoeffs = []
             for el in electrode:
                 el.calc_lfp(cell=self)
-                self.electrodecoeffs.append(el.LFP)
+                el.electrodecoeffs = el.LFP
+                el.LFP = []
         else:
             electrode.calc_lfp(cell=self)
-            self.electrodecoeffs = electrode.LFP
+            electrode.electrodecoeffs = electrode.LFP
+            electrode.LFP = []
         self.tvec = tvec
             
-        LFP = []
                 
         neuron.h.dt = self.timeres_NEURON
         
@@ -744,30 +743,59 @@ class Cell(object):
         #temp vector to store membrane currents at each timestep
         imem = np.empty(self.totnsegs)
         
-        while neuron.h.t < self.tstopms:
-            if neuron.h.t >= 0:
-                i = 0
-                for sec in self.allseclist:
-                    for seg in sec:
-                        imem[i] = seg.i_membrane * self.area[i] * 1E-2
-                        i += 1
-                LFP.append(np.dot(self.electrodecoeffs, imem))
+        
+        if type(electrode) == type([]):
+            while neuron.h.t < self.tstopms:
+                if neuron.h.t >= 0:
+                    i = 0
+                    for sec in self.allseclist:
+                        for seg in sec:
+                            imem[i] = seg.i_membrane * self.area[i] * 1E-2
+                            i += 1
+                    for el in electrode:
+                        el.LFP.append(np.dot(el.electrodecoeffs, imem))
+                
+                neuron.h.fadvance()
+                counter += 1.
+                if np.mod(counter, interval) == 0:
+                    print 't = %.0f' % neuron.h.t
             
-            neuron.h.fadvance()
-            counter += 1.
-            if np.mod(counter, interval) == 0:
-                print 't = %.0f' % neuron.h.t
-        
-        #calculate LFP after final fadvance()
-        i = 0
-        for sec in self.allseclist:
-            for seg in sec:
-                imem[i] = seg.i_membrane * self.area[i] * 1E-2
-                i += 1
-        
-        LFP.append(np.dot(self.electrodecoeffs, imem))
-        
-        electrode.LFP = np.array(LFP).T
+            #calculate LFP after final fadvance()
+            i = 0
+            for sec in self.allseclist:
+                for seg in sec:
+                    imem[i] = seg.i_membrane * self.area[i] * 1E-2
+                    i += 1
+            
+            for el in electrode:
+                
+                el.LFP.append(np.dot(el.electrodecoeffs, imem))
+                el.LFP = np.array(el.LFP).T
+        else:
+            while neuron.h.t < self.tstopms:
+                if neuron.h.t >= 0:
+                    i = 0
+                    for sec in self.allseclist:
+                        for seg in sec:
+                            imem[i] = seg.i_membrane * self.area[i] * 1E-2
+                            i += 1
+                    electrode.LFP.append(np.dot(electrode.electrodecoeffs, imem))
+                
+                neuron.h.fadvance()
+                counter += 1.
+                if np.mod(counter, interval) == 0:
+                    print 't = %.0f' % neuron.h.t
+            
+            #calculate LFP after final fadvance()
+            i = 0
+            for sec in self.allseclist:
+                for seg in sec:
+                    imem[i] = seg.i_membrane * self.area[i] * 1E-2
+                    i += 1
+            
+            electrode.LFP.append(np.dot(electrode.electrodecoeffs, imem))
+            
+            electrode.LFP = np.array(electrode.LFP).T
 
 
     def _collect_tvec(self):
