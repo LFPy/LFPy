@@ -626,7 +626,7 @@ class Cell(object):
             if not rec_imem:
                 print "rec_imem = %s, membrane currents will not be recorded!" \
                                   % str(rec_imem)
-            _run_simulation()
+            _run_simulation(self)
         else:
             if self.timeres_NEURON != self.timeres_python:
                 raise ValueError, 'timeres_NEURON != timeres_python'
