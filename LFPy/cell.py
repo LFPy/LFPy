@@ -39,27 +39,27 @@ class Cell(object):
     ::
         morphology : path to morphology file;
     
-        v_init : initial potential;
-        passive : passive mechs are initialized if True;
-        Ra : axial resistance;
-        rm : membrane resistivity;
-        cm : membrane capacitance;
-        e_pas : passive mechanism reversal potential;
+        v_init: initial potential;
+        passive: passive mechs are initialized if True;
+        Ra: axial resistance;
+        rm: membrane resistivity;
+        cm: membrane capacitance;
+        e_pas: passive mechanism reversal potential;
     
-        timeres_NEURON : internal dt for NEURON simulation;
-        timeres_python : overall dt for python simulation;
+        timeres_NEURON: internal dt for NEURON simulation;
+        timeres_python: overall dt for python simulation;
     
-        tstartms : initialization time for simulation <= 0 ms
-        tstopms : stop time for simulation > 0 ms
+        tstartms: initialization time for simulation <= 0 ms
+        tstopms: stop time for simulation > 0 ms
     
-        nsegs_method : method for setting the number of segments;
-        max_nsegs_length : max segment length for method 'fixed_length';
-        lambda_f : AC frequency for method 'lambda_f';
+        nsegs_method: method for setting the number of segments;
+        max_nsegs_length: max segment length for method 'fixed_length';
+        lambda_f: AC frequency for method 'lambda_f';
     
-        custom_code : list of model-specific code files ([.py/.hoc]);
+        custom_code: list of model-specific code files ([.py/.hoc]);
         custom_fun: list of model-specific functions to be called with args:
         custom_fun_args: list of arguments passed to custom_fun functions
-        verbose : switching verbose output on/off
+        verbose: switching verbose output on/off
     
     Usage of cell class:
     ::
@@ -594,10 +594,10 @@ class Cell(object):
         
         Arguments:
         ::
-            electrode:  Either an LFPy.RecExtElectrode object or a list of such
-                        If supplied, LFPs will calculated at every time step
+            electrode:  Either an LFPy.RecExtElectrode object or a list of such.
+                        If supplied, LFPs will be calculated at every time step
                         and accessible as electrode.LFP. If a list of objects
-                        is given, accessible as electrode[0].LFP etc
+                        is given, accessible as electrode[0].LFP etc.
             rec_imem:   If true, segment membrane currents will be recorded
                         If no electrode argument is given, it is necessary to
                         set rec_imem=True in order to calculate LFP later on.
@@ -657,8 +657,7 @@ class Cell(object):
             self._collect_istim()
     
     def _run_simulation(self):
-        '''Running the actual simulation in NEURON, simulations in NEURON
-        is now interruptable.'''
+        '''Running the actual simulation in NEURON.'''
         neuron.h.dt = self.timeres_NEURON
         
         cvode = neuron.h.CVode()
@@ -700,9 +699,9 @@ class Cell(object):
                 print 't = %.0f' % neuron.h.t    
 
     def _run_simulation_with_electrode(self, electrode):
-        '''Running the actual simulation in NEURON, simulations in NEURON
-        is now interruptable. electrode argument used to determine coefficient
-        matrix, and calculate the LFP on every timestep.'''
+        '''Running the actual simulation in NEURON.
+        electrode argument used to determine coefficient
+        matrix, and calculate the LFP on every time step.'''
         
         # Use electrode object(s) to calculate coefficient matrices for LFP
         # calculations. If electrode is a list, then
@@ -811,7 +810,7 @@ class Cell(object):
             electrode.LFP = np.array(electrode.LFP).T
 
     def _collect_tvec(self):
-        '''set the tvec to be a monotonically increasing nparray'''
+        '''Set the tvec to be a monotonically increasing numpy array'''
         #fixing tvec, need to be monotonically increasing, from 0-tstopms
         self.tvec = np.array(self.tvec)
         if self.tstartms == 0:
@@ -828,7 +827,7 @@ class Cell(object):
         
 
     def _calc_imem(self):
-        '''fetching the vectors from the memireclist and calculate self.imem
+        '''Fetch the vectors from the memireclist and calculate self.imem
         containing all the membrane currents.
         '''
         self.imem = np.array(self.memireclist)
@@ -887,7 +886,7 @@ class Cell(object):
         del self.stimireclist
        
     def loadspikes(self):
-        '''initialize spiketimes from netcon if they exist'''
+        '''Initialize spiketimes from netcon if they exist'''
         if hasattr(self, 'synlist'):
             for i in xrange(int(self.synlist.count())):
                 for ii in xrange(int(self.sptimeslist.o(i).size)):
@@ -901,7 +900,7 @@ class Cell(object):
         self.tvec.record(neuron.h._ref_t, self.timeres_python)
     
     def _set_soma_volt_recorder(self):
-        '''record somatic crossmembrane potential'''
+        '''Record somatic membrane potential'''
         self.somav = neuron.h.Vector(int(self.tstopms / 
                                          self.timeres_python+1))
         if self.nsomasec == 0:
@@ -915,7 +914,7 @@ class Cell(object):
                               self.timeres_python)
     
     def _set_imem_recorders(self):
-        '''record membrane currents for all segments'''
+        '''Record membrane currents for all segments'''
         self.memireclist = neuron.h.List()
         for sec in self.allseclist:
             for seg in sec:
@@ -925,7 +924,7 @@ class Cell(object):
                 self.memireclist.append(memirec)
     
     def _set_ipas_recorders(self):
-        '''record passive (ohmic) membrane currents for all segments'''
+        '''Record passive membrane currents for all segments'''
         self.memipasreclist = neuron.h.List()
         for sec in self.allseclist:
             for seg in sec:
@@ -935,7 +934,7 @@ class Cell(object):
                 self.memipasreclist.append(memipasrec)
     
     def _set_icap_recorders(self):
-        '''record passive (ohmic) membrane currents for all segments'''
+        '''Record capacitive membrane currents for all segments'''
         self.memicapreclist = neuron.h.List()
         for sec in self.allseclist:
             for seg in sec:
@@ -945,7 +944,7 @@ class Cell(object):
                 self.memicapreclist.append(memicaprec)
     
     def _set_voltage_recorders(self):
-        '''record membrane potentials for all segments'''
+        '''Record membrane potentials for all segments'''
         self.memvreclist = neuron.h.List()
         for sec in self.allseclist:
             for seg in sec:
@@ -979,7 +978,7 @@ class Cell(object):
         self._update_synapse_positions()
     
     def strip_hoc_objects(self):
-        '''destroy any NEURON hoc objects in cell instance'''
+        '''Destroy any NEURON hoc objects in cell instance'''
         for varname in dir(self):
             if type(getattr(self, varname)) == type(neuron.h.List()):
                 setattr(self, varname, None)
@@ -996,7 +995,7 @@ class Cell(object):
         filen.close()
     
     def _update_synapse_positions(self):
-        '''update synapse positions after rotation of morphology'''
+        '''Update synapse positions after rotation of morphology'''
         for i in xrange(len(self.synapses)):
             self.synapses[i].update_pos(self)
     
@@ -1081,7 +1080,7 @@ class Cell(object):
         self.zend = np.squeeze(np.array(self.zend))
     
     def _rel_positions(self):
-        '''morphology relative to soma position'''
+        '''Morphology relative to soma position'''
         rel_start = np.transpose(np.array([self.xstart-self.somapos[0], \
                                                 self.ystart-self.somapos[1], \
                                                 self.zstart-self.somapos[2]]))
@@ -1124,7 +1123,7 @@ class Cell(object):
 
     
     def get_intersegment_vector(self, idx0=0, idx1=0):
-        '''return the distance between midpoints of two segments with index
+        '''Return the distance between midpoints of two segments with index
         idx0 and idx1. The argument returned is a vector [x, y, z], where
         x = self.xmid[idx1] - self.xmid[idx0] etc'''
         vector = []
@@ -1140,8 +1139,8 @@ class Cell(object):
             raise ValueError, ERRMSG
         
     def get_intersegment_distance(self, idx0=0, idx1=0):
-        '''return the euclidian distance between midpoints of two segments 
-        with index idx0 and idx1.'''
+        '''Return the Euclidean distance between midpoints of two segments 
+        with indices idx0 and idx1.'''
         try:
             vector = np.array(self.get_intersegment_vector(idx0, idx1))
             return np.sqrt((vector**2).sum())
