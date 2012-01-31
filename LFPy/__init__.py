@@ -13,8 +13,8 @@ All rights reserved.
 
 :Classes:
   * Cell - The pythonic neuron object itself laying on top of NEURON
-  * PointProcessSynapse - Convenience class for inserting synapses onto Cell objects
-  * PointProcessElectrode - Convenience class for inserting electrodes onto Cell objects
+  * Synapse - Convenience class for inserting synapses onto Cell objects
+  * StimIntraElectrode - Convenience class for inserting electrodes onto Cell objects
   * RecExtElectrode - Class for performing simulations of extracellular potentials
 
 :Modules:
@@ -32,3 +32,4 @@ from cellwithelectrode import CellWithElectrode
 import lfpcalc
 import tools
 import inputgenerators
+import run_simulation
