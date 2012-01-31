@@ -8,9 +8,12 @@ from multiprocessing import Process, Queue, freeze_support, cpu_count
 
 class RecExtElectrodeSetup(object):
     '''
-    RecExtElectrode superclass, does import a LFPy.cell.Cell object or either list
-    or dictionary containing such Cell objects. Keyword arguments determine
-    properties of latter LFP-calculations
+    RecExtElectrode superclass. 
+    If (optional) cell argument is given then the it is imported,
+    otherwise the cell argument has to be passed later on to calc_lfp.
+    The argument cell can be an LFPy.cell.Cell object 
+    or either a list or a dictionary containing such Cell objects. 
+    Keyword arguments determine properties of later LFP-calculations
     
     Arguments:
     ::
@@ -74,9 +77,9 @@ class RecExtElectrodeSetup(object):
         
 
     class cell():
-        '''empty object that cell-specific variables are stored in'''
+        '''Empty object that cell-specific variables are stored in'''
         def __init__(self):
-            '''just some empty class'''
+            '''Just a container'''
             pass
 
     def _import_c(self, cell):
@@ -141,7 +144,7 @@ class RecExtElectrodeSetup(object):
             pass
     
     def _test_imem_sum(self, tolerance=1E-12):
-        '''test that the membrane currents sum to zero'''
+        '''Test that the membrane currents sum to zero'''
         for k in self.c:
             sum_imem = self.c[k].imem.sum(axis=0)
             if pl.any(sum_imem == pl.ones(self.c[k].totnsegs)):

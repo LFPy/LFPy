@@ -6,14 +6,14 @@ import pylab as pl
 import scipy.signal as ss
 
 def load(filename):
-    '''generic loading of cPickled objects from file'''
+    '''Generic loading of cPickled objects from file'''
     filen = open(filename,'rb')
     obj = cPickle.load(filen)
     filen.close()
     return obj
 
 def noise_brown(timevector, nrows=1, weight=1, highpassfilter=False):
-    '''return 1/f^2 noise of shape(nrows, timevector.size) obtained by taking 
+    '''Return 1/f^2 noise of shape(nrows, timevector.size) obtained by taking 
     the cumulative sum of gaussian white noise, with rms weight. If 
     highpassfilter=True, the noise is high-pass filtered with a very low cutoff
     frequency'''
