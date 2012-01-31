@@ -69,12 +69,12 @@ All rights reserved.</p>
 <li>CellWithElectrode - Subclass of Cell that calculate LFP at every fadvance</li>
 <li>PointProcessSynapse - Convenience class for inserting synapses onto Cell objects</li>
 <li>PointProcessElectrode - Convenience class for inserting electrodes onto Cell objects</li>
-<li>Electrode - Class for performing simulations of extracellular potentials</li>
+<li>RecExtElectrode - Class for performing simulations of extracellular potentials</li>
 </ul>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Modules:</th><td class="field-body"><ul class="first last simple">
-<li>lfpcalc - functions used by Electrode class</li>
+<li>lfpcalc - functions used by RecExtElectrode class</li>
 <li>tools - some convenient functions</li>
 <li>inputgenerators - functions for synaptic input time generation</li>
 </ul>
@@ -255,82 +255,18 @@ passed on from class PointProcessSynapse.</p>
 
 <dl class="method">
 <dt id="LFPy.Cell.simulate">
-<tt class="descname">simulate</tt><big>(</big><em>rec_i=True</em>, <em>rec_v=False</em>, <em>rec_ipas=False</em>, <em>rec_icap=False</em>, <em>rec_isyn=False</em>, <em>rec_vsyn=False</em>, <em>rec_istim=False</em><big>)</big><a class="headerlink" href="#LFPy.Cell.simulate" title="Permalink to this definition">¶</a></dt>
-<dd><p>Start NEURON simulation and record variables.</p>
+<tt class="descname">simulate</tt><big>(</big><em>electrode=None</em>, <em>rec_imem=False</em>, <em>rec_vmem=False</em>, <em>rec_ipas=False</em>, <em>rec_icap=False</em>, <em>rec_isyn=False</em>, <em>rec_vmemsyn=False</em>, <em>rec_istim=False</em><big>)</big><a class="headerlink" href="#LFPy.Cell.simulate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Start NEURON simulation and record variables.
+Arguments:</p>
+<div class="highlight-python"><pre>electrode: either an RecExtElectrode object or a list of such
+rec_imem</pre>
+</div>
 </dd></dl>
 
 <dl class="method">
 <dt id="LFPy.Cell.strip_hoc_objects">
 <tt class="descname">strip_hoc_objects</tt><big>(</big><big>)</big><a class="headerlink" href="#LFPy.Cell.strip_hoc_objects" title="Permalink to this definition">¶</a></dt>
 <dd><p>destroy any NEURON hoc objects in cell instance</p>
-</dd></dl>
-
-</dd></dl>
-
-</div>
-<div class="section" id="class-cellwithelectrode">
-<h2>class <a class="reference internal" href="#LFPy.CellWithElectrode" title="LFPy.CellWithElectrode"><tt class="xref py py-class docutils literal"><span class="pre">CellWithElectrode</span></tt></a><a class="headerlink" href="#class-cellwithelectrode" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
-<dt id="LFPy.CellWithElectrode">
-<em class="property">class </em><tt class="descclassname">LFPy.</tt><tt class="descname">CellWithElectrode</tt><a class="headerlink" href="#LFPy.CellWithElectrode" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">LFPy.cell.Cell</span></tt></p>
-<p>Subclass of LFPy.Cell with some changes to simulate() and
-_run_simulation(), to facilitate the usage of class Electrode to
-construct a coefficient matrix that is multiplied with the membrane
-currents at every timestep to obtain the LFP, thus the membrane
-currents are not stored unless rec_i=True in simulate()</p>
-<p>Usage:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">LFPy</span>
-<span class="kn">import</span> <span class="nn">pylab</span> <span class="kn">as</span> <span class="nn">pl</span>
-
-<span class="n">N</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="mi">16</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
-<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">N</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span> <span class="n">N</span><span class="p">[</span><span class="n">i</span><span class="p">,]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="c">#normal unit vec. to contacts</span>
-<span class="n">electrodeParameters</span> <span class="o">=</span> <span class="p">{</span>             <span class="c">#parameters for electrode class</span>
-    <span class="s">&#39;sigma&#39;</span> <span class="p">:</span> <span class="mf">0.3</span><span class="p">,</span>              <span class="c">#Extracellular potential</span>
-    <span class="s">&#39;x&#39;</span> <span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">16</span><span class="p">)</span><span class="o">+</span><span class="mi">25</span><span class="p">,</span>      <span class="c">#Coordinates of electrode contacts</span>
-    <span class="s">&#39;y&#39;</span> <span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">16</span><span class="p">),</span>
-    <span class="s">&#39;z&#39;</span> <span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">500</span><span class="p">,</span><span class="mi">1000</span><span class="p">,</span><span class="mi">16</span><span class="p">),</span>
-    <span class="s">&#39;n&#39;</span> <span class="p">:</span> <span class="mi">20</span><span class="p">,</span>
-    <span class="s">&#39;r&#39;</span> <span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
-    <span class="s">&#39;N&#39;</span> <span class="p">:</span> <span class="n">N</span><span class="p">,</span>
-<span class="p">}</span>
-
-<span class="n">cellParameters</span> <span class="o">=</span> <span class="p">{</span>                          
-    <span class="s">&#39;morphology&#39;</span> <span class="p">:</span> <span class="s">&#39;L5_Mainen96_LFPy.hoc&#39;</span><span class="p">,</span>  <span class="c"># morphology file</span>
-    <span class="s">&#39;rm&#39;</span> <span class="p">:</span> <span class="mi">30000</span><span class="p">,</span>                           <span class="c"># membrane resistivity</span>
-    <span class="s">&#39;cm&#39;</span> <span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>                             <span class="c"># membrane capacitance</span>
-    <span class="s">&#39;Ra&#39;</span> <span class="p">:</span> <span class="mi">150</span><span class="p">,</span>                             <span class="c"># axial resistivity</span>
-    <span class="s">&#39;timeres_NEURON&#39;</span> <span class="p">:</span> <span class="mi">2</span><span class="o">**-</span><span class="mi">4</span><span class="p">,</span>                <span class="c"># dt for NEURON sim.</span>
-    <span class="s">&#39;timeres_python&#39;</span> <span class="p">:</span> <span class="mi">2</span><span class="o">**-</span><span class="mi">4</span><span class="p">,</span>                 <span class="c"># dt for python output</span>
-    <span class="s">&#39;tstartms&#39;</span> <span class="p">:</span> <span class="o">-</span><span class="mi">50</span><span class="p">,</span>                         <span class="c"># start t of simulation</span>
-    <span class="s">&#39;tstopms&#39;</span> <span class="p">:</span> <span class="mi">50</span><span class="p">,</span>                        <span class="c"># end t of simulation</span>
-<span class="p">}</span>
-
-<span class="n">cell</span> <span class="o">=</span> <span class="n">LFPy</span><span class="o">.</span><span class="n">CellWithElectrode</span><span class="p">(</span><span class="o">**</span><span class="n">cellParameters</span><span class="p">)</span>
-
-<span class="n">synapseParameters</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s">&#39;idx&#39;</span> <span class="p">:</span> <span class="n">cell</span><span class="o">.</span><span class="n">get_closest_idx</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="mi">800</span><span class="p">),</span> <span class="c"># compartment</span>
-    <span class="s">&#39;e&#39;</span> <span class="p">:</span> <span class="mi">0</span><span class="p">,</span>                                <span class="c"># reversal potential</span>
-    <span class="s">&#39;syntype&#39;</span> <span class="p">:</span> <span class="s">&#39;ExpSyn&#39;</span><span class="p">,</span>                   <span class="c"># synapse type</span>
-    <span class="s">&#39;tau&#39;</span> <span class="p">:</span> <span class="mi">2</span><span class="p">,</span>                              <span class="c"># syn. time constant</span>
-    <span class="s">&#39;weight&#39;</span> <span class="p">:</span> <span class="mf">0.01</span><span class="p">,</span>                       <span class="c"># syn. weight</span>
-    <span class="s">&#39;record_current&#39;</span> <span class="p">:</span> <span class="bp">True</span>                 <span class="c"># syn. current record</span>
-<span class="p">}</span>
-
-<span class="n">synapse</span> <span class="o">=</span> <span class="n">LFPy</span><span class="o">.</span><span class="n">PointProcessSynapse</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="o">**</span><span class="n">synapseParameters</span><span class="p">)</span>
-<span class="n">synapse</span><span class="o">.</span><span class="n">set_spike_times</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="n">pl</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">10</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">25</span><span class="p">]))</span>
-
-<span class="n">cell</span><span class="o">.</span><span class="n">simulate</span><span class="p">(</span><span class="n">rec_isyn</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="o">**</span><span class="n">electrodeParameters</span><span class="p">)</span>
-
-<span class="n">pl</span><span class="o">.</span><span class="n">matshow</span><span class="p">(</span><span class="n">cell</span><span class="o">.</span><span class="n">LFP</span><span class="p">)</span>
-</pre></div>
-</div>
-<dl class="method">
-<dt id="LFPy.CellWithElectrode.simulate">
-<tt class="descname">simulate</tt><big>(</big><big>)</big><a class="headerlink" href="#LFPy.CellWithElectrode.simulate" title="Permalink to this definition">¶</a></dt>
-<dd><p>Start NEURON simulation and record variables.
-<a href="#id5"><span class="problematic" id="id6">**</span></a>kwargs are the electrode parameters corresponding to the
-input to the class LFPy.Electrode</p>
 </dd></dl>
 
 </dd></dl>
@@ -495,53 +431,25 @@ Electrode currents go here, whics make membrane currents not sum to zero.</p>
 </dd></dl>
 
 </div>
-<div class="section" id="class-electrodesetup">
-<h2>class <a class="reference internal" href="#LFPy.ElectrodeSetup" title="LFPy.ElectrodeSetup"><tt class="xref py py-class docutils literal"><span class="pre">ElectrodeSetup</span></tt></a><a class="headerlink" href="#class-electrodesetup" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
-<dt id="LFPy.ElectrodeSetup">
-<em class="property">class </em><tt class="descclassname">LFPy.</tt><tt class="descname">ElectrodeSetup</tt><big>(</big><em>cell</em>, <em>sigma=0.3</em>, <em>x=100</em>, <em>y=0</em>, <em>z=0</em>, <em>N=None</em>, <em>r=None</em>, <em>n=None</em>, <em>r_z=None</em>, <em>perCellLFP=False</em>, <em>method='linesource'</em>, <em>color='g'</em>, <em>marker='o'</em>, <em>from_file=False</em>, <em>cellfile=None</em>, <em>verbose=False</em>, <em>seedvalue=None</em><big>)</big><a class="headerlink" href="#LFPy.ElectrodeSetup" title="Permalink to this definition">¶</a></dt>
-<dd><p>Electrode superclass, does import a LFPy.cell.Cell object or either list
-or dictionary containing such Cell objects. Keyword arguments determine
-properties of latter LFP-calculations</p>
-<p>Arguments:</p>
-<div class="highlight-python"><pre>sigma   : extracellular conductivity
-x, y, z : coordinates or arrays of coordinates. Must be same length
-N       : Normal vector [x, y, z] of contact surface, default None
-r       : radius of contact surface, default None
-n       : if N != None and r &gt; 0, the number of points to use for each
-          contact point in order to calculate average
-color   : color of electrode contact points in plots
-marker  : marker of electrode contact points in plots
-from_file   : if True, load cell object from file
-cellfile    : path to cell pickle
-verbose : Flag for verbose output
-seedvalue : fixed seed when finding random position on contact with r &gt;0</pre>
+<div class="section" id="class-recextelectrodesetup">
+<h2>class <tt class="xref py py-class docutils literal"><span class="pre">RecExtElectrodeSetup</span></tt><a class="headerlink" href="#class-recextelectrodesetup" title="Permalink to this headline">¶</a></h2>
 </div>
+<div class="section" id="class-recextelectrode">
+<h2>class <a class="reference internal" href="#LFPy.RecExtElectrode" title="LFPy.RecExtElectrode"><tt class="xref py py-class docutils literal"><span class="pre">RecExtElectrode</span></tt></a><a class="headerlink" href="#class-recextelectrode" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
-<dt id="LFPy.ElectrodeSetup.cell">
-<em class="property">class </em><tt class="descname">cell</tt><a class="headerlink" href="#LFPy.ElectrodeSetup.cell" title="Permalink to this definition">¶</a></dt>
-<dd><p>empty object that cell-specific variables are stored in</p>
-</dd></dl>
-
-</dd></dl>
-
-</div>
-<div class="section" id="class-electrode">
-<h2>class <a class="reference internal" href="#LFPy.Electrode" title="LFPy.Electrode"><tt class="xref py py-class docutils literal"><span class="pre">Electrode</span></tt></a><a class="headerlink" href="#class-electrode" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
-<dt id="LFPy.Electrode">
-<em class="property">class </em><tt class="descclassname">LFPy.</tt><tt class="descname">Electrode</tt><big>(</big><em>cell</em>, <em>sigma=0.3</em>, <em>x=100</em>, <em>y=0</em>, <em>z=0</em>, <em>N=None</em>, <em>r=None</em>, <em>n=0</em>, <em>r_z=None</em>, <em>perCellLFP=False</em>, <em>method='linesource'</em>, <em>color='g'</em>, <em>marker='o'</em>, <em>from_file=False</em>, <em>cellfile=None</em>, <em>verbose=False</em>, <em>seedvalue=12345</em><big>)</big><a class="headerlink" href="#LFPy.Electrode" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">LFPy.electrode.ElectrodeSetup</span></tt></p>
-<p>Electrode class with inheritance from LFPy.ElectrodeSetup able to actually
-calculate local field potentials from LFPy.Cell objects. <a href="#id7"><span class="problematic" id="id8">**</span></a>kwargs are passed
-on to LFPy.ElectrodeSetup</p>
+<dt id="LFPy.RecExtElectrode">
+<em class="property">class </em><tt class="descclassname">LFPy.</tt><tt class="descname">RecExtElectrode</tt><big>(</big><em>cell=None</em>, <em>sigma=0.3</em>, <em>x=100</em>, <em>y=0</em>, <em>z=0</em>, <em>N=None</em>, <em>r=None</em>, <em>n=0</em>, <em>r_z=None</em>, <em>perCellLFP=False</em>, <em>method='linesource'</em>, <em>color='g'</em>, <em>marker='o'</em>, <em>from_file=False</em>, <em>cellfile=None</em>, <em>verbose=False</em>, <em>seedvalue=12345</em><big>)</big><a class="headerlink" href="#LFPy.RecExtElectrode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">LFPy.recextelectrode.RecExtElectrodeSetup</span></tt></p>
+<p>RecExtElectrode class with inheritance from LFPy.RecExtElectrodeSetup 
+able to actually calculate local field potentials from LFPy.Cell objects. 
+<a href="#id5"><span class="problematic" id="id6">**</span></a>kwargs are passed on to LFPy.RecExtElectrodeSetup</p>
 <p>Usage:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">LFPy</span>
 <span class="kn">import</span> <span class="nn">pylab</span> <span class="kn">as</span> <span class="nn">pl</span>
 
 <span class="n">N</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="mi">16</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">N</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span> <span class="n">N</span><span class="p">[</span><span class="n">i</span><span class="p">,]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="c">#normal unit vec. to contacts</span>
-<span class="n">electrodeParameters</span> <span class="o">=</span> <span class="p">{</span>             <span class="c">#parameters for electrode class</span>
+<span class="n">electrodeParameters</span> <span class="o">=</span> <span class="p">{</span>             <span class="c">#parameters for RecExtElectrode class</span>
     <span class="s">&#39;sigma&#39;</span> <span class="p">:</span> <span class="mf">0.3</span><span class="p">,</span>              <span class="c">#Extracellular potential</span>
     <span class="s">&#39;x&#39;</span> <span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">16</span><span class="p">)</span><span class="o">+</span><span class="mi">25</span><span class="p">,</span>      <span class="c">#Coordinates of electrode contacts</span>
     <span class="s">&#39;y&#39;</span> <span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">16</span><span class="p">),</span>
@@ -578,31 +486,18 @@ on to LFPy.ElectrodeSetup</p>
 
 <span class="n">cell</span><span class="o">.</span><span class="n">simulate</span><span class="p">()</span>
 
-<span class="n">electrode</span> <span class="o">=</span> <span class="n">LFPy</span><span class="o">.</span><span class="n">Electrode</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="o">**</span><span class="n">electrodeParameters</span><span class="p">)</span>
+<span class="n">electrode</span> <span class="o">=</span> <span class="n">LFPy</span><span class="o">.</span><span class="n">RecExtElectrode</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="o">**</span><span class="n">electrodeParameters</span><span class="p">)</span>
 <span class="n">electrode</span><span class="o">.</span><span class="n">calc_lfp</span><span class="p">()</span>
 <span class="n">pl</span><span class="o">.</span><span class="n">matshow</span><span class="p">(</span><span class="n">electrode</span><span class="o">.</span><span class="n">LFP</span><span class="p">)</span>
 </pre></div>
 </div>
 <dl class="method">
-<dt id="LFPy.Electrode.calc_lfp">
-<tt class="descname">calc_lfp</tt><big>(</big><em>t_indices=None</em><big>)</big><a class="headerlink" href="#LFPy.Electrode.calc_lfp" title="Permalink to this definition">¶</a></dt>
+<dt id="LFPy.RecExtElectrode.calc_lfp">
+<tt class="descname">calc_lfp</tt><big>(</big><em>t_indices=None</em>, <em>cell=None</em><big>)</big><a class="headerlink" href="#LFPy.RecExtElectrode.calc_lfp" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate LFP on electrode geometry from all cell instances.
 Will chose distributed calculated if electrode contain &#8216;n&#8217;, &#8216;N&#8217;, and &#8216;r&#8217;</p>
 </dd></dl>
 
-</dd></dl>
-
-</div>
-<div class="section" id="class-electrodethreaded">
-<h2>class <a class="reference internal" href="#LFPy.ElectrodeThreaded" title="LFPy.ElectrodeThreaded"><tt class="xref py py-class docutils literal"><span class="pre">ElectrodeThreaded</span></tt></a><a class="headerlink" href="#class-electrodethreaded" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
-<dt id="LFPy.ElectrodeThreaded">
-<em class="property">class </em><tt class="descclassname">LFPy.</tt><tt class="descname">ElectrodeThreaded</tt><a class="headerlink" href="#LFPy.ElectrodeThreaded" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">LFPy.electrode.Electrode</span></tt></p>
-<p>Inherit class Electrode, but using multiprocessing to distribute
-calculations of LFP for each electrode contact</p>
-<p>Will only work for case when averaging over electrode geometry area
-currently</p>
 </dd></dl>
 
 </div>
@@ -718,13 +613,11 @@ between tstart and tstop</p>
   <ul>
 <li><a class="reference internal" href="#">module <tt class="docutils literal"><span class="pre">LFPy</span></tt></a><ul>
 <li><a class="reference internal" href="#class-cell">class <tt class="docutils literal"><span class="pre">Cell</span></tt></a></li>
-<li><a class="reference internal" href="#class-cellwithelectrode">class <tt class="docutils literal"><span class="pre">CellWithElectrode</span></tt></a></li>
 <li><a class="reference internal" href="#class-pointprocess">class <tt class="docutils literal"><span class="pre">PointProcess</span></tt></a></li>
 <li><a class="reference internal" href="#class-pointprocesssynapse">class <tt class="docutils literal"><span class="pre">PointProcessSynapse</span></tt></a></li>
 <li><a class="reference internal" href="#class-pointprocesselectrode">class <tt class="docutils literal"><span class="pre">PointProcessElectrode</span></tt></a></li>
-<li><a class="reference internal" href="#class-electrodesetup">class <tt class="docutils literal"><span class="pre">ElectrodeSetup</span></tt></a></li>
-<li><a class="reference internal" href="#class-electrode">class <tt class="docutils literal"><span class="pre">Electrode</span></tt></a></li>
-<li><a class="reference internal" href="#class-electrodethreaded">class <tt class="docutils literal"><span class="pre">ElectrodeThreaded</span></tt></a></li>
+<li><a class="reference internal" href="#class-recextelectrodesetup">class <tt class="docutils literal"><span class="pre">RecExtElectrodeSetup</span></tt></a></li>
+<li><a class="reference internal" href="#class-recextelectrode">class <tt class="docutils literal"><span class="pre">RecExtElectrode</span></tt></a></li>
 <li><a class="reference internal" href="#module-LFPy.lfpcalc">submodule <tt class="docutils literal"><span class="pre">lfpcalc</span></tt></a></li>
 <li><a class="reference internal" href="#module-LFPy.tools">submodule <tt class="docutils literal"><span class="pre">tools</span></tt></a></li>
 <li><a class="reference internal" href="#module-LFPy.inputgenerators">submodule <tt class="docutils literal"><span class="pre">inputgenerators</span></tt></a></li>

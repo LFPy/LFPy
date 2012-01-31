@@ -62,17 +62,19 @@
 </li>
 <li><p class="first">Python, seems to work fine with recent python since 2.6.x (2.6.6 or newer recommended), 2.7.x works fine.</p>
 </li>
-<li><p class="first">Python modules numpy, scipy, matplotlit</p>
+<li><p class="first">Python modules numpy, scipy, matplotlib</p>
 </li>
-<li><p class="first">NEURON (from www.neuron.yale.edu) compiled as a python module, so the following should execute without error in the terminal:</p>
+<li><p class="first">NEURON (from www.neuron.yale.edu) compiled as a Python module, so the following should execute without error in the terminal:</p>
 <div class="highlight-python"><pre>ipython
 &gt;&gt;&gt; import neuron
 &gt;&gt;&gt; neuron.test()</pre>
 </div>
 </li>
-<li><p class="first">Cython (C-extencions for python, cython.org) to speed up simulations of extracellular fields</p>
+<li><p class="first">Cython (C-extensions for python, cython.org) to speed up simulations of extracellular fields</p>
 </li>
 </ol>
+<p>In Ubuntu 10.4LTS you may use Synaptic to install subversion, python2.6-dev, numpy, scipy and matplotlib. Note that the cython version in Ubuntu repositories (0.11) will not work, please install the current version from cython.org (tested with 0.15.1). The easiest way to install NEURON as a Python module is to download a .deb package from Eilif Muller&#8217;s webpage (<a class="reference external" href="http://neuralensemble.org/people/eilifmuller/software.html">http://neuralensemble.org/people/eilifmuller/software.html</a>). (The command to compile NEURON
+mechanisms is then /opt/nrn/i686/bin/nrnivmodl)</p>
 </div>
 <div class="section" id="installation">
 <h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
@@ -97,6 +99,8 @@ export PYTHONPATH</pre>
 python setup.py build_ext -i</pre>
 </div>
 <p>Otherwise the corresponding .py files will be used, which is slower.</p>
+</li>
+<li><p class="first">Compile the NEURON mechanisms in LFPy-release/neuron (using nrnivmodl).</p>
 </li>
 <li><p class="first">Now try if it all works. In a python shell in a fresh terminal, try</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">LFPy</span>

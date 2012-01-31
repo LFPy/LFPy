@@ -642,6 +642,134 @@ class Cell(object):
         if rec_istim:
             self._collect_istim()
     
+    def _run_simulation(self):
+        '''Running the actual simulation in NEURON, simulations in NEURON
+        is now interruptable.'''
+        neuron.h.dt = self.timeres_NEURON
+        
+        cvode = neuron.h.CVode()
+        
+        #don't know if this is the way to do, but needed for variable dt method
+        if neuron.h.dt <= 1E-8:
+            cvode.active(1)
+            cvode.atol(0.001)
+        else:
+            cvode.active(0)
+        
+        #initialize state
+        neuron.h.finitialize(self.v_init)
+        
+        #initialize current- and record
+        if cvode.active():
+            cvode.re_init()
+        else:
+            neuron.h.fcurrent()
+        neuron.h.frecord_init()
+        
+        #Starting simulation at t != 0
+        if self.tstartms != None:
+            neuron.h.t = self.tstartms
+        
+        self.loadspikes()
+        
+        #print sim.time at intervals
+        counter = 0.
+        if self.tstopms > 1000:
+            interval = 1 / self.timeres_NEURON * 100
+        else:
+            interval = 1 / self.timeres_NEURON * 10
+        
+        while neuron.h.t < self.tstopms:
+            neuron.h.fadvance()
+            counter += 1.
+            if np.mod(counter, interval) == 0:
+                print 't = %.0f' % neuron.h.t    
+
+    def _run_simulation_with_electrode(self, electrode):
+        '''Running the actual simulation in NEURON, simulations in NEURON
+        is now interruptable. electrode argument used to determine coefficient
+        matrix'''
+        
+        # Use electrode object(s) to calculate coefficient matrices for LFP
+        # calculations. If electrode is a list, then
+        self.imem = np.eye(self.totnsegs)
+        tvec = self.tvec            
+        self.tvec = np.arange(self.totnsegs) * self.timeres_python
+        if type(electrode) == type([]):
+            self.electrodecoeffs = []
+            for el in electrode:
+                el.calc_lfp(cell=self)
+                self.electrodecoeffs.append(el.LFP)
+        else:
+            electrode.calc_lfp(cell=self)
+            self.electrodecoeffs = electrode.LFP
+        self.tvec = tvec
+            
+        LFP = []
+                
+        neuron.h.dt = self.timeres_NEURON
+        
+        cvode = neuron.h.CVode()
+        
+        #don't know if this is the way to do, but needed for variable dt method
+        if neuron.h.dt <= 1E-8:
+            cvode.active(1)
+            cvode.atol(0.001)
+        else:
+            cvode.active(0)
+        
+        #initialize state
+        neuron.h.finitialize(self.v_init)
+        
+        #initialize current- and record
+        if cvode.active():
+            cvode.re_init()
+        else:
+            neuron.h.fcurrent()
+        neuron.h.frecord_init()
+        
+        #Starting simulation at t != 0
+        if self.tstartms != None:
+            neuron.h.t = self.tstartms
+        
+        self.loadspikes()
+        
+        #print sim.time at intervals
+        counter = 0.
+        if self.tstopms > 1000:
+            interval = 1 / self.timeres_NEURON * 100
+        else:
+            interval = 1 / self.timeres_NEURON * 10
+        
+        #temp vector to store membrane currents at each timestep
+        imem = np.empty(self.totnsegs)
+        
+        while neuron.h.t < self.tstopms:
+            if neuron.h.t >= 0:
+                i = 0
+                for sec in self.allseclist:
+                    for seg in sec:
+                        imem[i] = seg.i_membrane * self.area[i] * 1E-2
+                        i += 1
+                LFP.append(np.dot(self.electrodecoeffs, imem))
+            
+            neuron.h.fadvance()
+            counter += 1.
+            if np.mod(counter, interval) == 0:
+                print 't = %.0f' % neuron.h.t
+        
+        #calculate LFP after final fadvance()
+        i = 0
+        for sec in self.allseclist:
+            for seg in sec:
+                imem[i] = seg.i_membrane * self.area[i] * 1E-2
+                i += 1
+        
+        LFP.append(np.dot(self.electrodecoeffs, imem))
+        
+        electrode.LFP = np.array(LFP).T
+
+
     def _collect_tvec(self):
         '''set the tvec to be a monotonically increasing nparray'''
         #fixing tvec, need to be monotonically increasing, from 0-tstopms
@@ -717,156 +845,7 @@ class Cell(object):
                 raise Exception, 'must set record_current=True for pointp.'
         self.stimireclist = None
         del self.stimireclist
-    
-    def _run_simulation(self):
-        '''Running the actual simulation in NEURON, simulations in NEURON
-        is now interruptable.'''
-        neuron.h.dt = self.timeres_NEURON
-        
-        cvode = neuron.h.CVode()
-        
-        #don't know if this is the way to do, but needed for variable dt method
-        if neuron.h.dt <= 1E-8:
-            cvode.active(1)
-            cvode.atol(0.001)
-        else:
-            cvode.active(0)
-        
-        #initialize state
-        neuron.h.finitialize(self.v_init)
-        
-        #initialize current- and record
-        if cvode.active():
-            cvode.re_init()
-        else:
-            neuron.h.fcurrent()
-        neuron.h.frecord_init()
-        
-        #Starting simulation at t != 0
-        if self.tstartms != None:
-            neuron.h.t = self.tstartms
-        
-        self.loadspikes()
-        
-        #print sim.time at intervals
-        counter = 0.
-        if self.tstopms > 1000:
-            interval = 1 / self.timeres_NEURON * 100
-        else:
-            interval = 1 / self.timeres_NEURON * 10
-        
-        while neuron.h.t < self.tstopms:
-            neuron.h.fadvance()
-            counter += 1.
-            if np.mod(counter, interval) == 0:
-                print 't = %.0f' % neuron.h.t    
-
-    def _run_simulation_with_electrode(self, electrode):
-        '''Running the actual simulation in NEURON, simulations in NEURON
-        is now interruptable. kwargs are passed on to class 
-        ElectrodeDetermineCoeffs'''
-        
-        #class ElectrodeDetermineCoeffs(RecExtElectrode):
-        #    def __init__(self, **kwargs):
-        #        '''Uses Electrodesetup class, and exludes loading of cell.imem 
-        #        and cell.tvec.
-        #        The class works by faking membrane currents as an eye matrix with 
-        #        size N X N where N is the number of segments, used to create the 
-        #        electrodecoeffs matrix, which may then give the LFP when doing
-        #        the dot-product electrodecoeffs * i_membrane at every timestep
-        #        '''
-        #        #RecExtElectrode.__init__(self, **kwargs)
-        #        
-        #        #Non default procedure for class
-        #        #totnsegs = kwargs['cell'].totnsegs
-        #        #self.dt = kwargs['cell'].timeres_NEURON
-        #        #self.tvec = np.arange(totnsegs) * self.dt
-        #        self.imem = np.eye(totnsegs)
-        #        self.tvec = np.arange(totnsegs) * self.dt
-        #        self.calc_lfp()
-        #        self.electrodecoeffs = self.LFP
-
-        
-        
-        # Use electrode object(s) to calculate coefficient matrices for LFP
-        # calculations. If electrode is a list, then
-        if type(electrode) == type([]):
-            raise NotImplementedError, "cant deal with this"
-        else:
-            self.imem = np.eye(self.totnsegs)
-            tvec = self.tvec            
-            self.tvec = np.arange(self.totnsegs) * self.timeres_python
-            electrode.calc_lfp(cell=self)
-            self.electrodecoeffs = electrode.LFP
-            self.tvec = tvec
-            
-        ##initialize electrode, get coefficient array, initialize LFP
-        #self.electrode = ElectrodeDetermineCoeffs(cell=self, **kwargs)
-        #self.electrodecoeffs = self.electrode.electrodecoeffs
-        LFP = []
-                
-        neuron.h.dt = self.timeres_NEURON
-        
-        cvode = neuron.h.CVode()
-        
-        #don't know if this is the way to do, but needed for variable dt method
-        if neuron.h.dt <= 1E-8:
-            cvode.active(1)
-            cvode.atol(0.001)
-        else:
-            cvode.active(0)
-        
-        #initialize state
-        neuron.h.finitialize(self.v_init)
-        
-        #initialize current- and record
-        if cvode.active():
-            cvode.re_init()
-        else:
-            neuron.h.fcurrent()
-        neuron.h.frecord_init()
-        
-        #Starting simulation at t != 0
-        if self.tstartms != None:
-            neuron.h.t = self.tstartms
-        
-        self.loadspikes()
-        
-        #print sim.time at intervals
-        counter = 0.
-        if self.tstopms > 1000:
-            interval = 1 / self.timeres_NEURON * 100
-        else:
-            interval = 1 / self.timeres_NEURON * 10
-        
-        #temp vector to store membrane currents at each timestep
-        imem = np.empty(self.totnsegs)
-        
-        while neuron.h.t < self.tstopms:
-            if neuron.h.t >= 0:
-                i = 0
-                for sec in self.allseclist:
-                    for seg in sec:
-                        imem[i] = seg.i_membrane * self.area[i] * 1E-2
-                        i += 1
-                LFP.append(np.dot(self.electrodecoeffs, imem))
-            
-            neuron.h.fadvance()
-            counter += 1.
-            if np.mod(counter, interval) == 0:
-                print 't = %.0f' % neuron.h.t
-        
-        #calculate LFP after final fadvance()
-        i = 0
-        for sec in self.allseclist:
-            for seg in sec:
-                imem[i] = seg.i_membrane * self.area[i] * 1E-2
-                i += 1
-        
-        LFP.append(np.dot(self.electrodecoeffs, imem))
-        
-        electrode.LFP = np.array(LFP).T
-            
+       
     def loadspikes(self):
         '''initialize spiketimes from netcon if they exist'''
         if hasattr(self, 'synlist'):

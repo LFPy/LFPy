@@ -12,13 +12,6 @@ module :mod:`LFPy`
         :show-inheritance:
         :undoc-members:
 
-    class :class:`CellWithElectrode`
-    ================================
-    .. autoclass:: CellWithElectrode
-        :members:
-        :show-inheritance:
-        :undoc-members:
-    
     class :class:`PointProcess`
     ===========================
     .. autoclass:: PointProcess
@@ -39,25 +32,19 @@ module :mod:`LFPy`
         :show-inheritance:
         :undoc-members:
 
-    class :class:`ElectrodeSetup`
+    class :class:`RecExtElectrodeSetup`
     =============================
     .. autoclass:: ElectrodeSetup
         :members:
         :undoc-members:
 
-    class :class:`Electrode`
+    class :class:`RecExtElectrode`
     ========================
-    .. autoclass:: Electrode
+    .. autoclass:: RecExtElectrode
         :members:
         :show-inheritance:
         :undoc-members:
 
-    class :class:`ElectrodeThreaded`
-    ================================
-    .. autoclass:: ElectrodeThreaded
-        :members:
-        :show-inheritance:
-        :undoc-members:
 
     submodule :mod:`lfpcalc`
     ========================
