@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import LFPy
-from LFPy import Electrode, lfpcalc
+from LFPy import RecExtElectrode, lfpcalc
 import pylab as pl
 from multiprocessing import Process, Queue, freeze_support, cpu_count
 
@@ -58,10 +58,10 @@ electrodeParameters = {
 }
 
 
-#elserial = LFPy.Electrode(cells, **electrodeParameters)
+#elserial = LFPy.RecExtElectrode(cells, **electrodeParameters)
 #elserial.calc_lfp()               # run LFP simulation
 
-electrode = LFPy.Electrode(cells, **electrodeParameters)
+electrode = LFPy.RecExtElectrode(cells, **electrodeParameters)
 electrode.calc_lfp()               # run LFP simulation
 
 

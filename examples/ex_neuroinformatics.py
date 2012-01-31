@@ -39,7 +39,7 @@ electrodeParameters = {
     'z' : pl.arange(-200, 1000, 50),
 }
 
-electrode = LFPy.Electrode(cell, **electrodeParameters)
+electrode = LFPy.RecExtElectrode(cell, **electrodeParameters)
 electrode.calc_lfp()               # run LFP simulation
 
 

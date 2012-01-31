@@ -16,10 +16,10 @@ All rights reserved.
   * CellWithElectrode - Subclass of Cell that calculate LFP at every fadvance
   * PointProcessSynapse - Convenience class for inserting synapses onto Cell objects
   * PointProcessElectrode - Convenience class for inserting electrodes onto Cell objects
-  * Electrode - Class for performing simulations of extracellular potentials
+  * RecExtElectrode - Class for performing simulations of extracellular potentials
 
 :Modules:
-  * lfpcalc - functions used by Electrode class
+  * lfpcalc - functions used by RecExtElectrode class
   * tools - some convenient functions
   * inputgenerators - functions for synaptic input time generation
 '''
@@ -27,7 +27,7 @@ All rights reserved.
 from cell import Cell
 from pointprocess import Synapse, PointProcess, \
     PointProcessSynapse, PointProcessElectrode
-from electrode import Electrode, ElectrodeSetup
+from electrode import RecExtElectrode, RecExtElectrodeSetup
 from electrodethreaded import ElectrodeThreaded
 from cellwithelectrode import CellWithElectrode
 

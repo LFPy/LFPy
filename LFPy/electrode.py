@@ -6,9 +6,9 @@ import sys
 from LFPy import lfpcalc, tools
 from multiprocessing import Process, Queue, freeze_support, cpu_count
 
-class ElectrodeSetup(object):
+class RecExtElectrodeSetup(object):
     '''
-    Electrode superclass, does import a LFPy.cell.Cell object or either list
+    RecExtElectrode superclass, does import a LFPy.cell.Cell object or either list
     or dictionary containing such Cell objects. Keyword arguments determine
     properties of latter LFP-calculations
     
@@ -27,13 +27,13 @@ class ElectrodeSetup(object):
         verbose : Flag for verbose output
         seedvalue : fixed seed when finding random position on contact with r >0
     '''
-    def __init__(self, cell, sigma=0.3, x=100, y=0, z=0,
+    def __init__(self, cell=None, sigma=0.3, x=100, y=0, z=0,
                  N=None, r=None, n=None, r_z=None,
                  perCellLFP=False, method='linesource', 
                  color='g', marker='o',
                  from_file=False, cellfile=None, verbose=False,
                  seedvalue=None):
-        '''Initialize class ElectrodeSetup'''
+        '''Initialize class RecExtElectrodeSetup'''
         self.sigma = sigma
         self.x = x
         self.y = y
@@ -155,11 +155,11 @@ class ElectrodeSetup(object):
                 pass
 
 
-class Electrode(ElectrodeSetup):
+class RecExtElectrode(RecExtElectrodeSetup):
     '''
-    Electrode class with inheritance from LFPy.ElectrodeSetup able to actually
-    calculate local field potentials from LFPy.Cell objects. **kwargs are passed
-    on to LFPy.ElectrodeSetup
+    RecExtElectrode class with inheritance from LFPy.RecExtElectrodeSetup 
+    able to actually calculate local field potentials from LFPy.Cell objects. 
+    **kwargs are passed on to LFPy.RecExtElectrodeSetup
     
     Usage:
     ::
@@ -205,7 +205,7 @@ class Electrode(ElectrodeSetup):
         
         cell.simulate()
         
-        electrode = LFPy.Electrode(cell, **electrodeParameters)
+        electrode = LFPy.RecExtElectrode(cell, **electrodeParameters)
         electrode.calc_lfp()
         pl.matshow(electrode.LFP)
     '''
@@ -216,9 +216,9 @@ class Electrode(ElectrodeSetup):
                  color='g', marker='o',
                  from_file=False, cellfile=None, verbose=False,
                  seedvalue=12345):
-        '''This is the regular implementation of the Electrode class
+        '''This is the regular implementation of the RecExtElectrode class
         that calculates the LFP serially using a single core'''
-        ElectrodeSetup.__init__(self, cell, sigma, x, y, z,
+        RecExtElectrodeSetup.__init__(self, cell, sigma, x, y, z,
                                 N, r, n, r_z, perCellLFP,
                                 method, color, marker, from_file,
                                 cellfile, verbose, seedvalue)

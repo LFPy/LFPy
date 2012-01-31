@@ -187,8 +187,8 @@ insert_synapses(synparams_GABA_A, **insert_synapses_GABA_A_args)
 #perform NEURON simulation, results saved as attributes in the c instance
 c.simulate(**simulateparams)
 
-#initialize electrode geometry, then calculate the LFP, using LFPy.Electrode cl.
-e = LFPy.Electrode(c,**electrodeparams)
+#initialize electrode geometry, then calculate the LFP, using LFPy.RecExtElectrode cl.
+e = LFPy.RecExtElectrode(c,**electrodeparams)
 e.calc_lfp()
 
 #plotting some variables and geometry, saving output to .pdf.

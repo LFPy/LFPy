@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 '''Copyright (C) 2011 Computational Neuroscience Group, UMB.
 All rights reserved.'''
-from LFPy import Electrode, lfpcalc
+from LFPy import RecExtElectrode, lfpcalc
 from multiprocessing import Process, Queue, freeze_support, cpu_count
 import numpy as np
 cimport numpy as np
@@ -10,8 +10,8 @@ DTYPE = np.float64
 ctypedef np.float64_t DTYPE_t
 
 
-class ElectrodeThreaded(Electrode):
-    '''Inherit class Electrode, but using multiprocessing to distribute
+class ElectrodeThreaded(RecExtElectrode):
+    '''Inherit class RecExtElectrode, but using multiprocessing to distribute
     calculations of LFP for each electrode contact
     
     Will only work for case when averaging over electrode geometry area
@@ -25,8 +25,8 @@ class ElectrodeThreaded(Electrode):
                  NUMBER_OF_PROCESSES=None, verbose=False,
                  seedvalue=12345):
         '''Initialization of class ElectrodeThreaded, with electrode setup
-        inherited from class ElectrodeSetup'''
-        Electrode.__init__(self, cell, sigma, x, y, z,
+        inherited from class RecExtElectrodeSetup'''
+        RecExtElectrode.__init__(self, cell, sigma, x, y, z,
                                 N, r, n, r_z, perCellLFP,
                                 method, color, marker, from_file,
                                 cellfile, verbose, seedvalue)

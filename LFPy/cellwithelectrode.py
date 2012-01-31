@@ -1,12 +1,12 @@
 import numpy as np
 import neuron
-from LFPy import Cell, Electrode
+from LFPy import Cell, RecExtElectrode
 
 
 class CellWithElectrode(Cell):
     '''
     Subclass of LFPy.Cell with some changes to simulate() and
-    _run_simulation(), to facilitate the usage of class Electrode to
+    _run_simulation(), to facilitate the usage of class RecExtElectrode to
     construct a coefficient matrix that is multiplied with the membrane
     currents at every timestep to obtain the LFP, thus the membrane
     currents are not stored unless rec_i=True in simulate()
@@ -62,7 +62,7 @@ class CellWithElectrode(Cell):
         '''
         Clone of LFPy.Cell before monkeypatching the simulate() and
         _run_simulation() functions. simulate() accepts kwargs that is passed
-        on to LFPy.Electrode, but uses a subclass of LFPy.Electrode under the
+        on to LFPy.RecExtElectrode, but uses a subclass of LFPy.RecExtElectrode under the
         hood.
         Class CellWithElectrode accepts the same kwargs as class Cell
         '''
@@ -76,7 +76,7 @@ class CellWithElectrode(Cell):
         '''
         Start NEURON simulation and record variables.
         **kwargs are the electrode parameters corresponding to the
-        input to the class LFPy.Electrode
+        input to the class LFPy.RecExtElectrode
         '''
         self._set_soma_volt_recorder()
         self._set_time_recorder()
@@ -192,7 +192,7 @@ class CellWithElectrode(Cell):
         self.LFP = np.array(LFP).T
         self.electrode.LFP = self.LFP
    
-class ElectrodeDetermineCoeffs(Electrode):
+class ElectrodeDetermineCoeffs(RecExtElectrode):
     def __init__(self, **kwargs):
         '''Uses Electrodesetup class, and exludes loading of cell.imem 
         and cell.tvec.
@@ -201,7 +201,7 @@ class ElectrodeDetermineCoeffs(Electrode):
         electrodecoeffs matrix, which may then give the LFP when doing
         the dot-product electrodecoeffs * i_membrane at every timestep
         '''
-        Electrode.__init__(self, **kwargs)
+        RecExtElectrode.__init__(self, **kwargs)
         
         #Non default procedure for class
         totnsegs = kwargs['cell'].totnsegs
