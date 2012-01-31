@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-'''Copyright (C) 2011 Computational Neuroscience Group, UMB.
+'''Copyright (C) 2012 Computational Neuroscience Group, UMB.
 All rights reserved.'''
 import cPickle
 import pylab as pl

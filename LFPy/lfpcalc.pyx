@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-'''Copyright (C) 2011 Computational Neuroscience Group, UMB.
+'''Copyright (C) 2012 Computational Neuroscience Group, UMB.
 All rights reserved.'''
 import numpy as np
 cimport numpy as np
@@ -196,7 +196,7 @@ cpdef np.ndarray[DTYPE_t, ndim=1] calc_lfp_som_as_point(c,
 
 cdef double r_soma_calc(double xmid, double ymid, double zmid,
                         double x, double y, double z) except? -2:
-    '''calculate the distance to soma midpoint'''
+    '''Calculate the distance to the soma midpoint'''
     r_soma = np.sqrt((x - xmid)*(x - xmid) + (y - ymid)*(y - ymid) + \
         (z - zmid)*(z - zmid))
 
