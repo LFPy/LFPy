@@ -9,4 +9,4 @@ setup(
     packages = ['LFPy'],
     author = "The LFPy Community",
     description = "A simulation environment for LFP built on NEURON",
-     )
+    )

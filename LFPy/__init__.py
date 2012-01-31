@@ -24,10 +24,10 @@ All rights reserved.
   * inputgenerators - functions for synaptic input time generation
 '''
 
-from cell import Cell
 from pointprocess import Synapse, PointProcess, \
     PointProcessSynapse, PointProcessElectrode
 from recextelectrode import RecExtElectrode, RecExtElectrodeSetup
+from cell import Cell
 from electrodethreaded import ElectrodeThreaded
 from cellwithelectrode import CellWithElectrode
 

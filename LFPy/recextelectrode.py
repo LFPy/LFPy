@@ -144,14 +144,17 @@ class RecExtElectrodeSetup(object):
         '''test that the membrane currents sum to zero'''
         for k in self.c:
             sum_imem = self.c[k].imem.sum(axis=0)
-            if abs(sum_imem).max() >= tolerance:
-                print 'Membrane currents do not sum towards zero! They should!'
-                [inds] = pl.where((abs(sum_imem) >= tolerance))
-                for i in inds:
-                    print 'membrane current sum cell %i, timestep %i: %.3e' \
-                        % (k, i, sum_imem[i])
-            else:
+            if pl.any(sum_imem == pl.ones(self.c[k].totnsegs)):
                 pass
+            else:
+                if abs(sum_imem).max() >= tolerance:
+                    print 'Membrane currents do not sum towards zero! They should!'
+                    [inds] = pl.where((abs(sum_imem) >= tolerance))
+                    for i in inds:
+                        print 'membrane current sum cell %i, timestep %i: %.3e' \
+                            % (k, i, sum_imem[i])
+                else:
+                    pass
 
 
 class RecExtElectrode(RecExtElectrodeSetup):

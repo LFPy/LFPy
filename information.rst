@@ -12,7 +12,8 @@ The basic requirements for the release branch of LFPy is as follows
         >>> import neuron
         >>> neuron.test()
    
-5.  Cython (C-extencions for python, cython.org) to speed up simulations of extracellular fields
+5.  Cython (C-extencions for python, cython.org) to speed up simulations of extracellular fields.
+    Cython version 0.11 known to fail, works with version >= 0.14.
 
 Installation
 ============
