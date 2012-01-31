@@ -13,8 +13,8 @@ class PointProcess:
     ::
         cell    : LFPy.Cell object
         idx     : index of segment
-        color   : opt. color in plot
-        marker  : opt. marker in plot
+        color   : color in plot (optional) 
+        marker  : marker in plot (optional) 
         record_current : Must be set True for recording of pointprocess currents
         kwargs  : pointprocess specific variables passed on to cell/neuron
     '''
@@ -22,7 +22,7 @@ class PointProcess:
                  record_current=False, **kwargs):
         '''
         cell is an LFPy.Cell object, idx index of segment. This class
-        set some variables and extracts carthesian coordinates of segment
+        sets some variables and extracts Cartesian coordinates of a segment
         '''
         self.idx = idx
         self.color = color
@@ -33,7 +33,7 @@ class PointProcess:
 
     def update_pos(self, cell):
         '''
-        Extract coordinate of point-process to geometry
+        Extract coordinates of point-process 
         '''
         self.x = cell.xmid[self.idx]
         self.y = cell.ymid[self.idx]
@@ -45,9 +45,8 @@ class Synapse(PointProcess):
     See http://www.neuron.yale.edu/neuron/static/docs/help/neuron/neuron/mech.html#pointprocesses
     for details, or corresponding mod-files.
     
-    This class is ment to be used with synaptic mechanisms, giving rise to
-    non-specific currents that will be part of the membrane currents. Thus,
-    the membrane currents will sum to zero over all neuron segments.
+    This class is meant to be used with synaptic mechanisms, giving rise to
+    currents that will be part of the membrane currents. 
     
     Usage:
     ::
@@ -116,7 +115,7 @@ class StimIntraElectrode(PointProcess):
     '''
     Class for NEURON point processes, ie VClamp, SEClamp and ICLamp,
     SinIClamp, ChirpIClamp with arguments.
-    Electrode currents go here, so called specific currents.
+    Electrode currents go here.
     Membrane currents will no longer sum to zero if these mechanisms are used.
     
     Refer to NEURON documentation @ neuron.yale.edu for kwargs
@@ -226,7 +225,7 @@ class StimIntraElectrode(PointProcess):
 
 class PointProcessPlayInSoma:
     '''
-    class implementation of Eivind's playback alghorithm
+    Class implementation of Eivind's playback alghorithm
     '''
     def __init__(self, soma_trace):
         '''
