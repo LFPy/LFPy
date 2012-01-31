@@ -589,10 +589,23 @@ class Cell(object):
     def simulate(self, electrode=None, rec_imem=False, rec_vmem=False, rec_ipas=False, rec_icap=False,
                  rec_isyn=False, rec_vmemsyn=False, rec_istim=False):
         '''
-        Start NEURON simulation and record variables.
+        This is the main function running the simulation of the NEURON model.
+        Start NEURON simulation and record variables specified by arguments.
+        
         Arguments::
-            electrode: either an RecExtElectrode object or a list of such
-            rec_imem
+            electrode:  Either an RecExtElectrode object or a list of such
+                        If supplied, LFPs will calculated at every time step
+                        and accessible as electrode.LFP. If a list of objects
+                        is given, accessible as electrode[0].LFP etc
+            rec_imem:   If true, segment membrane currents will be recorded
+                        If no electrode argument is given, it is necessary to
+                        set rec_imem=True in order to calculate LFP later on.
+            rec_vmem:   record segment membrane voltages
+            rec_ipas:   record passive segment membrane currents
+            rec_icap:   record capacitive segment membrane currents
+            rec_isyn:   record synaptic currents of from Synapse class instances
+            rec_vmemsyn:    record membrane voltage of segments with Synapse
+            rec_istim:  record currents of StimIntraElectrode
         '''
         self._set_soma_volt_recorder()
         self._set_time_recorder()
@@ -609,7 +622,8 @@ class Cell(object):
         #run fadvance until t >= tstopms
         if electrode == None:
             if not rec_imem:
-                print "rec_imem = %s, membrane currents will not be recorded!" % str(rec_imem)
+                print "rec_imem = %s, membrane currents will not be recorded!" \
+                                  % str(rec_imem)
             self._run_simulation()
         else:
             if self.timeres_NEURON != self.timeres_python:
@@ -687,7 +701,7 @@ class Cell(object):
     def _run_simulation_with_electrode(self, electrode):
         '''Running the actual simulation in NEURON, simulations in NEURON
         is now interruptable. electrode argument used to determine coefficient
-        matrix'''
+        matrix, and calculate the LFP on every timestep.'''
         
         # Use electrode object(s) to calculate coefficient matrices for LFP
         # calculations. If electrode is a list, then
