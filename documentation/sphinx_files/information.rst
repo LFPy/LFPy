@@ -8,6 +8,7 @@ The basic requirements for the release branch of LFPy is as follows
 3.  Python modules numpy, scipy, matplotlib
 4.  NEURON (from www.neuron.yale.edu) compiled as a Python module, so the following should execute without error in the terminal:
     ::
+    
         ipython
         >>> import neuron
         >>> neuron.test()
@@ -29,27 +30,33 @@ New installation instructions:
 
 2.  In LFPy-1.0 run
     ::
+    
         sudo python setup.py install
-    or
-    ::
-        sudo python setup.py install --user
+    
+    or ::
+    
+        python setup.py install --user
+    
     in case you want to install in your home directory (e.g. if you do not have root access).
     
 3.  Now you should be able to 
-    ::
+    ::  
+    
         import LFPy
-     
+    
 
 1.  In a terminal, ``'cd'`` to a directory where you want your LFPy files to be, as an example this could be '/home/yourname/work'. 
 
 2.  Download LFPy using SVN by typing:
-    ::
+    :: 
+    
         svn checkout https://bebiservice.umb.no/svn-private/LFPy-release
 
     This will create a folder named 'LFPy-release'  in the current folder containing all files belonging to the LFPy package.
 
 3.  Now you need to add the following lines to your '.bashrc' or '.bash_profile' or similar file:
-    ::
+    :: 
+    
         LFPYPATH="/home/yourname/work/LFPy-release/"
         PYTHONPATH="${PYTHONPATH}:${LFPYPATH}"
         export LFPYPATH
@@ -58,7 +65,8 @@ New installation instructions:
     Change the exact path to where you downloaded the files in previous steps. This is to make the LFPy installation available everywhere (as we don't install LFPy as a "proper" python module at the moment)
 
 4.  In order to speed up LFP-calculations, the Cython code (lfpycalc.pyx) need to be compiled every time it has been updated from the terminal;
-    ::
+    :: 
+    
         cd $LFPYPATH/LFPy
         python setup.py build_ext -i
 
@@ -68,16 +76,19 @@ New installation instructions:
 
 6.  Now try if it all works. In a python shell in a fresh terminal, try
     ::
+    
         import LFPy
 
     if there are no complaints, it should be all done!
 
 7.  There are some basic usage examples provided in 
     ::
+    
         $LFPYPATH/examples/
 
     To execute:
-    ::
+    :: 
+    
         cd $LFPYPATH/examples/
         python script.py
         #or
