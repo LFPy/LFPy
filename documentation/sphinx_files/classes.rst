@@ -25,9 +25,9 @@ module :mod:`LFPy`
         :show-inheritance:
         :undoc-members:
 
-    class :class:`StimIntraElectrode`
+    class :class:`StimIntElectrode`
     ====================================
-    .. autoclass:: StimIntraElectrode
+    .. autoclass:: StimIntElectrode
         :members:
         :show-inheritance:
         :undoc-members:

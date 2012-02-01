@@ -630,7 +630,6 @@ class Cell(object):
         else:
             if self.timeres_NEURON != self.timeres_python:
                 raise ValueError, 'timeres_NEURON != timeres_python'
-            #self._run_simulation_with_electrode(electrode)
             _run_simulation_with_electrode(self, electrode)
         
         self._collect_tvec()
