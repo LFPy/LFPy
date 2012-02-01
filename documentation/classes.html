@@ -66,9 +66,10 @@ All rights reserved.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Classes:</th><td class="field-body"><ul class="first simple">
 <li>Cell - The pythonic neuron object itself laying on top of NEURON</li>
-<li>PointProcessSynapse - Convenience class for inserting synapses onto Cell objects</li>
-<li>PointProcessElectrode - Convenience class for inserting electrodes onto Cell objects</li>
+<li>Synapse - Convenience class for inserting synapses onto Cell objects</li>
+<li>StimIntraElectrode - Convenience class for inserting electrodes onto Cell objects</li>
 <li>RecExtElectrode - Class for performing simulations of extracellular potentials</li>
+<li>RecExtElectrdoeThreaded - same as above using multiprocessing to distribute contact points across cores</li>
 </ul>
 </td>
 </tr>
@@ -91,27 +92,27 @@ All rights reserved.</p>
 <p>Arguments:</p>
 <div class="highlight-python"><pre>morphology : path to morphology file;
 
-v_init : initial potential;
-passive : passive mechs are initialized if True;
-Ra : axial resistance;
-rm : membrane resistivity;
-cm : membrane capacitance;
-e_pas : passive mechanism reversal potential;
+v_init: initial potential;
+passive: passive mechs are initialized if True;
+Ra: axial resistance;
+rm: membrane resistivity;
+cm: membrane capacitance;
+e_pas: passive mechanism reversal potential;
 
-timeres_NEURON : internal dt for NEURON simulation;
-timeres_python : overall dt for python simulation;
+timeres_NEURON: internal dt for NEURON simulation;
+timeres_python: overall dt for python simulation;
 
-tstartms : initialization time for simulation &lt;= 0 ms
-tstopms : stop time for simulation &gt; 0 ms
+tstartms: initialization time for simulation &lt;= 0 ms
+tstopms: stop time for simulation &gt; 0 ms
 
-nsegs_method : method for setting the number of segments;
-max_nsegs_length : max segment length for method 'fixed_length';
-lambda_f : AC frequency for method 'lambda_f';
+nsegs_method: method for setting the number of segments;
+max_nsegs_length: max segment length for method 'fixed_length';
+lambda_f: AC frequency for method 'lambda_f';
 
-custom_code : list of model-specific code files ([.py/.hoc]);
+custom_code: list of model-specific code files ([.py/.hoc]);
 custom_fun: list of model-specific functions to be called with args:
 custom_fun_args: list of arguments passed to custom_fun functions
-verbose : switching verbose output on/off</pre>
+verbose: switching verbose output on/off</pre>
 </div>
 <p>Usage of cell class:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">LFPy</span>
@@ -173,14 +174,14 @@ instead of general terms as in self.get_idx()</p>
 <dl class="method">
 <dt id="LFPy.Cell.get_intersegment_distance">
 <tt class="descname">get_intersegment_distance</tt><big>(</big><em>idx0=0</em>, <em>idx1=0</em><big>)</big><a class="headerlink" href="#LFPy.Cell.get_intersegment_distance" title="Permalink to this definition">¶</a></dt>
-<dd><p>return the euclidian distance between midpoints of two segments 
-with index idx0 and idx1.</p>
+<dd><p>Return the Euclidean distance between midpoints of two segments 
+with indices idx0 and idx1.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="LFPy.Cell.get_intersegment_vector">
 <tt class="descname">get_intersegment_vector</tt><big>(</big><em>idx0=0</em>, <em>idx1=0</em><big>)</big><a class="headerlink" href="#LFPy.Cell.get_intersegment_vector" title="Permalink to this definition">¶</a></dt>
-<dd><p>return the distance between midpoints of two segments with index
+<dd><p>Return the distance between midpoints of two segments with index
 idx0 and idx1. The argument returned is a vector [x, y, z], where
 x = self.xmid[idx1] - self.xmid[idx0] etc</p>
 </dd></dl>
@@ -212,7 +213,7 @@ Normalised probability determined by area of segments.</p>
 <dl class="method">
 <dt id="LFPy.Cell.loadspikes">
 <tt class="descname">loadspikes</tt><big>(</big><big>)</big><a class="headerlink" href="#LFPy.Cell.loadspikes" title="Permalink to this definition">¶</a></dt>
-<dd><p>initialize spiketimes from netcon if they exist</p>
+<dd><p>Initialize spiketimes from netcon if they exist</p>
 </dd></dl>
 
 <dl class="method">
@@ -257,10 +258,10 @@ in (xpos, ypos, zpos)</p>
 <dd><p>This is the main function running the simulation of the NEURON model.
 Start NEURON simulation and record variables specified by arguments.</p>
 <p>Arguments:</p>
-<div class="highlight-python"><pre>electrode:  Either an LFPy.RecExtElectrode object or a list of such
-            If supplied, LFPs will calculated at every time step
+<div class="highlight-python"><pre>electrode:  Either an LFPy.RecExtElectrode object or a list of such.
+            If supplied, LFPs will be calculated at every time step
             and accessible as electrode.LFP. If a list of objects
-            is given, accessible as electrode[0].LFP etc
+            is given, accessible as electrode[0].LFP etc.
 rec_imem:   If true, segment membrane currents will be recorded
             If no electrode argument is given, it is necessary to
             set rec_imem=True in order to calculate LFP later on.
@@ -276,7 +277,7 @@ rec_istim:  record currents of StimIntraElectrode</pre>
 <dl class="method">
 <dt id="LFPy.Cell.strip_hoc_objects">
 <tt class="descname">strip_hoc_objects</tt><big>(</big><big>)</big><a class="headerlink" href="#LFPy.Cell.strip_hoc_objects" title="Permalink to this definition">¶</a></dt>
-<dd><p>destroy any NEURON hoc objects in cell instance</p>
+<dd><p>Destroy any NEURON hoc objects in cell instance</p>
 </dd></dl>
 
 </dd></dl>
@@ -292,15 +293,15 @@ just to import and set some shared variables.</p>
 <p>Arguments:</p>
 <div class="highlight-python"><pre>cell    : LFPy.Cell object
 idx     : index of segment
-color   : opt. color in plot
-marker  : opt. marker in plot
+color   : color in plot (optional) 
+marker  : marker in plot (optional) 
 record_current : Must be set True for recording of pointprocess currents
 kwargs  : pointprocess specific variables passed on to cell/neuron</pre>
 </div>
 <dl class="method">
 <dt id="LFPy.PointProcess.update_pos">
 <tt class="descname">update_pos</tt><big>(</big><em>cell</em><big>)</big><a class="headerlink" href="#LFPy.PointProcess.update_pos" title="Permalink to this definition">¶</a></dt>
-<dd><p>Extract coordinate of point-process to geometry</p>
+<dd><p>Extract coordinates of point-process</p>
 </dd></dl>
 
 </dd></dl>
@@ -315,9 +316,8 @@ kwargs  : pointprocess specific variables passed on to cell/neuron</pre>
 <p>The synapse class, pointprocesses that spawn membrane currents.
 See <a class="reference external" href="http://www.neuron.yale.edu/neuron/static/docs/help/neuron/neuron/mech.html#pointprocesses">http://www.neuron.yale.edu/neuron/static/docs/help/neuron/neuron/mech.html#pointprocesses</a>
 for details, or corresponding mod-files.</p>
-<p>This class is ment to be used with synaptic mechanisms, giving rise to
-non-specific currents that will be part of the membrane currents. Thus,
-the membrane currents will sum to zero over all neuron segments.</p>
+<p>This class is meant to be used with synaptic mechanisms, giving rise to
+currents that will be part of the membrane currents.</p>
 <p>Usage:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="c">#!/usr/bin/env python</span>
 
@@ -381,7 +381,7 @@ the membrane currents will sum to zero over all neuron segments.</p>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">LFPy.pointprocess.PointProcess</span></tt></p>
 <p>Class for NEURON point processes, ie VClamp, SEClamp and ICLamp,
 SinIClamp, ChirpIClamp with arguments.
-Electrode currents go here, so called specific currents.
+Electrode currents go here.
 Membrane currents will no longer sum to zero if these mechanisms are used.</p>
 <p>Refer to NEURON documentation &#64; neuron.yale.edu for kwargs</p>
 <p>Usage:</p>
@@ -479,9 +479,12 @@ Membrane currents will no longer sum to zero if these mechanisms are used.</p>
 <dl class="class">
 <dt id="LFPy.RecExtElectrodeSetup">
 <em class="property">class </em><tt class="descclassname">LFPy.</tt><tt class="descname">RecExtElectrodeSetup</tt><big>(</big><em>cell=None</em>, <em>sigma=0.3</em>, <em>x=100</em>, <em>y=0</em>, <em>z=0</em>, <em>N=None</em>, <em>r=None</em>, <em>n=None</em>, <em>r_z=None</em>, <em>perCellLFP=False</em>, <em>method='linesource'</em>, <em>color='g'</em>, <em>marker='o'</em>, <em>from_file=False</em>, <em>cellfile=None</em>, <em>verbose=False</em>, <em>seedvalue=None</em><big>)</big><a class="headerlink" href="#LFPy.RecExtElectrodeSetup" title="Permalink to this definition">¶</a></dt>
-<dd><p>RecExtElectrode superclass, does import a LFPy.cell.Cell object or either list
-or dictionary containing such Cell objects. Keyword arguments determine
-properties of latter LFP-calculations</p>
+<dd><p>RecExtElectrode superclass. 
+If (optional) cell argument is given then the it is imported,
+otherwise the cell argument has to be passed later on to calc_lfp.
+The argument cell can be an LFPy.cell.Cell object 
+or either a list or a dictionary containing such Cell objects. 
+Keyword arguments determine properties of later LFP-calculations</p>
 <p>Arguments:</p>
 <div class="highlight-python"><pre>sigma   : extracellular conductivity
 x, y, z : coordinates or arrays of coordinates. Must be same length
@@ -499,7 +502,7 @@ seedvalue : fixed seed when finding random position on contact with r &gt;0</pre
 <dl class="class">
 <dt id="LFPy.RecExtElectrodeSetup.cell">
 <em class="property">class </em><tt class="descname">cell</tt><a class="headerlink" href="#LFPy.RecExtElectrodeSetup.cell" title="Permalink to this definition">¶</a></dt>
-<dd><p>empty object that cell-specific variables are stored in</p>
+<dd><p>Empty object that cell-specific variables are stored in</p>
 </dd></dl>
 
 </dd></dl>
@@ -574,7 +577,7 @@ Will chose distributed calculated if electrode contain &#8216;n&#8217;, &#8216;N
 </div>
 <div class="section" id="module-LFPy.lfpcalc">
 <span id="submodule-lfpcalc"></span><h2>submodule <tt class="xref py py-mod docutils literal"><span class="pre">lfpcalc</span></tt><a class="headerlink" href="#module-LFPy.lfpcalc" title="Permalink to this headline">¶</a></h2>
-<p>Copyright (C) 2011 Computational Neuroscience Group, UMB.
+<p>Copyright (C) 2012 Computational Neuroscience Group, UMB.
 All rights reserved.</p>
 <dl class="function">
 <dt id="LFPy.lfpcalc.calc_lfp_choose">
@@ -606,18 +609,18 @@ soma is treated as point/sphere source</p>
 </div>
 <div class="section" id="module-LFPy.tools">
 <span id="submodule-tools"></span><h2>submodule <tt class="xref py py-mod docutils literal"><span class="pre">tools</span></tt><a class="headerlink" href="#module-LFPy.tools" title="Permalink to this headline">¶</a></h2>
-<p>Copyright (C) 2011 Computational Neuroscience Group, UMB.
+<p>Copyright (C) 2012 Computational Neuroscience Group, UMB.
 All rights reserved.</p>
 <dl class="function">
 <dt id="LFPy.tools.load">
 <tt class="descclassname">LFPy.tools.</tt><tt class="descname">load</tt><big>(</big><em>filename</em><big>)</big><a class="reference internal" href="_modules/LFPy/tools.html#load"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LFPy.tools.load" title="Permalink to this definition">¶</a></dt>
-<dd><p>generic loading of cPickled objects from file</p>
+<dd><p>Generic loading of cPickled objects from file</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="LFPy.tools.noise_brown">
 <tt class="descclassname">LFPy.tools.</tt><tt class="descname">noise_brown</tt><big>(</big><em>timevector</em>, <em>nrows=1</em>, <em>weight=1</em>, <em>highpassfilter=False</em><big>)</big><a class="reference internal" href="_modules/LFPy/tools.html#noise_brown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LFPy.tools.noise_brown" title="Permalink to this definition">¶</a></dt>
-<dd><p>return 1/f^2 noise of shape(nrows, timevector.size) obtained by taking 
+<dd><p>Return 1/f^2 noise of shape(nrows, timevector.size) obtained by taking 
 the cumulative sum of gaussian white noise, with rms weight. If 
 highpassfilter=True, the noise is high-pass filtered with a very low cutoff
 frequency</p>
@@ -626,34 +629,34 @@ frequency</p>
 </div>
 <div class="section" id="module-LFPy.inputgenerators">
 <span id="submodule-inputgenerators"></span><h2>submodule <tt class="xref py py-mod docutils literal"><span class="pre">inputgenerators</span></tt><a class="headerlink" href="#module-LFPy.inputgenerators" title="Permalink to this headline">¶</a></h2>
-<p>Copyright (C) 2011 Computational Neuroscience Group, UMB.
+<p>Copyright (C) 2012 Computational Neuroscience Group, UMB.
 All rights reserved.</p>
 <dl class="function">
 <dt id="LFPy.inputgenerators.get_normal_input_times">
 <tt class="descclassname">LFPy.inputgenerators.</tt><tt class="descname">get_normal_input_times</tt><big>(</big><em>n</em>, <em>mu</em>, <em>sigma</em>, <em>tstart</em>, <em>tstop</em><big>)</big><a class="reference internal" href="_modules/LFPy/inputgenerators.html#get_normal_input_times"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LFPy.inputgenerators.get_normal_input_times" title="Permalink to this definition">¶</a></dt>
-<dd><p>generates n normal-distributed prosesses with mean mu and 
+<dd><p>Generates n normal-distributed prosesses with mean mu and 
 deviation sigma</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="LFPy.inputgenerators.get_normal_spike_times">
 <tt class="descclassname">LFPy.inputgenerators.</tt><tt class="descname">get_normal_spike_times</tt><big>(</big><em>nsyn</em>, <em>mu</em>, <em>sigma</em>, <em>tstart</em>, <em>tstop</em><big>)</big><a class="reference internal" href="_modules/LFPy/inputgenerators.html#get_normal_spike_times"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LFPy.inputgenerators.get_normal_spike_times" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generates nsyn normal-distributed processes with mean mu and 
+<dd><p>Generate nsyn normal-distributed processes with mean mu and 
 deviation sigma</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="LFPy.inputgenerators.get_rand_spike_times">
 <tt class="descclassname">LFPy.inputgenerators.</tt><tt class="descname">get_rand_spike_times</tt><big>(</big><em>synpos</em>, <em>nspikes</em>, <em>tstart</em>, <em>tstop</em><big>)</big><a class="reference internal" href="_modules/LFPy/inputgenerators.html#get_rand_spike_times"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LFPy.inputgenerators.get_rand_spike_times" title="Permalink to this definition">¶</a></dt>
-<dd><p>return synpos times nspikes random spike times on the 
+<dd><p>Return synpos times nspikes random spike times on the 
 interval [tstart, tstop]</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="LFPy.inputgenerators.stationary_gamma">
 <tt class="descclassname">LFPy.inputgenerators.</tt><tt class="descname">stationary_gamma</tt><big>(</big><em>tstart</em>, <em>tstop</em>, <em>k=2</em>, <em>theta=10</em>, <em>tmin=-1000.0</em>, <em>tmax=100000.0</em><big>)</big><a class="reference internal" href="_modules/LFPy/inputgenerators.html#stationary_gamma"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LFPy.inputgenerators.stationary_gamma" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generates spiketimes with interspike interval statistics according
-to gamma-distribution with &#8216;shape&#8217; k amd &#8216;scale&#8217; theta between tstart and
+<dd><p>Generate spiketimes with interspike interval statistics according
+to gamma-distribution with &#8216;shape&#8217; k and &#8216;scale&#8217; theta between tstart and
 tstop. Spiketimes from tmin up to tmax is calculated,
 times between 0 and tstop are returned</p>
 </dd></dl>
@@ -661,14 +664,14 @@ times between 0 and tstop are returned</p>
 <dl class="function">
 <dt id="LFPy.inputgenerators.stationary_poisson">
 <tt class="descclassname">LFPy.inputgenerators.</tt><tt class="descname">stationary_poisson</tt><big>(</big><em>nsyn</em>, <em>lambd</em>, <em>tstart</em>, <em>tstop</em><big>)</big><a class="reference internal" href="_modules/LFPy/inputgenerators.html#stationary_poisson"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LFPy.inputgenerators.stationary_poisson" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generates nsyn stationary possion processes with rate lambda 
+<dd><p>Generate nsyn stationary possion processes with rate lambda 
 between tstart and tstop</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="LFPy.inputgenerators.test_spiketimes">
 <tt class="descclassname">LFPy.inputgenerators.</tt><tt class="descname">test_spiketimes</tt><big>(</big><em>spiketime</em><big>)</big><a class="reference internal" href="_modules/LFPy/inputgenerators.html#test_spiketimes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LFPy.inputgenerators.test_spiketimes" title="Permalink to this definition">¶</a></dt>
-<dd><p>Test and sort spiketimes</p>
+<dd><p>Test and sort spike times</p>
 </dd></dl>
 
 </div>
