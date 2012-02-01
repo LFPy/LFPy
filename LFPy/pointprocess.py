@@ -6,7 +6,7 @@ import neuron
 
 class PointProcess:
     '''
-    Superclass on top of Synapse, StimIntraElectrode, 
+    Superclass on top of Synapse, StimIntElectrode, 
     just to import and set some shared variables.
     
     Arguments:
@@ -111,7 +111,7 @@ class Synapse(PointProcess):
         self.v = numpy.array(cell.synvreclist.o(self.hocidx))
 
         
-class StimIntraElectrode(PointProcess):
+class StimIntElectrode(PointProcess):
     '''
     Class for NEURON point processes, ie VClamp, SEClamp and ICLamp,
     SinIClamp, ChirpIClamp with arguments.
@@ -182,7 +182,7 @@ class StimIntraElectrode(PointProcess):
         
         for pointprocess in pointprocesses:
             cell = LFPy.Cell(morphology='morphologies/L5_Mainen96_LFPy.hoc')
-            stimulus = LFPy.StimIntraElectrode(cell, **pointprocess)
+            stimulus = LFPy.StimIntElectrode(cell, **pointprocess)
             cell.simulate(rec_istim=True)
             
             pl.subplot(211)
