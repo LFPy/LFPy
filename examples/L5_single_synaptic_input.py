@@ -30,15 +30,15 @@ cell = LFPy.Cell(**cell_params)
 # Define synapse parameters
 
 synapse_params = {
-    'idx' : cell.get_closest_idx(x=0, y=0, z=800),
-    'e' : 0,                                # reversal potential
+    'idx' : cell.get_closest_idx(x=0., y=0., z=800.),
+    'e' : 0.,                                # reversal potential
     'syntype' : 'ExpSyn',                   # synapse type
-    'tau' : 2,                              # syn. time constant
+    'tau' : 2.,                              # syn. time constant
     'weight' : 1.,                       # syn. weight
     'record_current' : True                 # syn. current record
 }
 
 synapse = LFPy.Synapse(cell,**synapse_params)
-synapse.set_spike_times(cell, np. )
+synapse.set_spike_times(cell, np.array([50.]))
 
 cell.simulate(rec_imem=True)
