@@ -27,7 +27,6 @@ from pointprocess import Synapse, PointProcess, StimIntraElectrode
 from recextelectrode import RecExtElectrode, RecExtElectrodeSetup
 from cell import Cell
 from electrodethreaded import ElectrodeThreaded
-from cellwithelectrode import CellWithElectrode
 
 import lfpcalc
 import tools
