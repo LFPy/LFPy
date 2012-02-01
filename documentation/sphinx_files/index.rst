@@ -6,7 +6,7 @@
 Welcome to LFPy's documentation!
 ================================
 
-.. image:: ../doc_graphics/logo_liten.png
+.. image:: ../sphinx_graphics/logo_liten.png
 
 This is the documentation for LFPy
 
