@@ -6,7 +6,7 @@
 Welcome to LFPy's documentation!
 ================================
 
-.. image:: doc_graphics/logo_liten.png
+.. image:: ../doc_graphics/logo_liten.png
 
 This is the documentation for LFPy
 
@@ -15,8 +15,8 @@ Contents:
 .. toctree::
     :maxdepth: 2
    
-    doc_rst_files/information
-    doc_rst_files/classes
+    information
+    classes
 
 Indices and tables
 ==================
