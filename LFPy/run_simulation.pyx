@@ -39,8 +39,10 @@ def _run_simulation(cell):
     
     cell.loadspikes()
     
+    
     #print sim.time at intervals
-    counter = 0.
+    cdef double counter = 0.
+    cdef double interval
     if cell.tstopms > 1000:
         interval = 1 / cell.timeres_NEURON * 100
     else:
