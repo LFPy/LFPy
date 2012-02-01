@@ -38,8 +38,7 @@ def _run_simulation(cell):
         neuron.h.t = cell.tstartms
     
     cell.loadspikes()
-    
-    
+        
     #print sim.time at intervals
     cdef double counter = 0.
     cdef double interval
@@ -61,9 +60,6 @@ def _run_simulation_with_electrode(cell, electrode):
     matrix, and calculate the LFP on every time step.
     '''
     
-    # Use electrode object(s) to calculate coefficient matrices for LFP
-    # calculations. If electrode is a list, then
-    
     #c-declare some variables
     cdef int i, j
     cdef int totnsegs = cell.totnsegs
@@ -78,7 +74,9 @@ def _run_simulation_with_electrode(cell, electrode):
     cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] area = \
         cell.area
     
-    #calculate coefficient matrices by using eye-matrix as imem
+    # Use electrode object(s) to calculate coefficient matrices for LFP
+    # calculations. If electrode is a list, then
+    # calculate coefficient matrices by using eye-matrix as imem
     cell.imem = np.eye(totnsegs)
     tvec = cell.tvec            
     cell.tvec = np.arange(totnsegs) * timeres_python
