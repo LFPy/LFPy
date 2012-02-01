@@ -23,7 +23,7 @@ synapseParameters = {
     'e' : 0,                                # reversal potential
     'syntype' : 'ExpSyn',                   # synapse type
     'tau' : 2,                              # syn. time constant
-    'weight' : 0.01,                       # syn. weight
+    'weight' : 0.01,                        # syn. weight
     'record_current' : True                 # syn. current record
 }
 
