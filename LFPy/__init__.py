@@ -16,6 +16,7 @@ All rights reserved.
   * Synapse - Convenience class for inserting synapses onto Cell objects
   * StimIntraElectrode - Convenience class for inserting electrodes onto Cell objects
   * RecExtElectrode - Class for performing simulations of extracellular potentials
+  * RecExtElectrdoeThreaded - same as above using multiprocessing to distribute contact points across cores
 
 :Modules:
   * lfpcalc - functions used by RecExtElectrode class
@@ -26,7 +27,7 @@ All rights reserved.
 from pointprocess import Synapse, PointProcess, StimIntraElectrode
 from recextelectrode import RecExtElectrode, RecExtElectrodeSetup
 from cell import Cell
-from electrodethreaded import ElectrodeThreaded
+from recextelectrodethreaded import RecExtElectrodeThreaded
 
 import lfpcalc
 import tools

@@ -10,12 +10,9 @@ DTYPE = np.float64
 ctypedef np.float64_t DTYPE_t
 
 
-class ElectrodeThreaded(RecExtElectrode):
+class RecExtElectrodeThreaded(RecExtElectrode):
     '''Inherit class RecExtElectrode, but using multiprocessing to distribute
     calculations of LFP for each electrode contact
-    
-    Will only work for case when averaging over electrode geometry area
-    currently
     '''
     def __init__(self, cell, sigma=0.3, x=100, y=0, z=0,
                  N=None, r=None, n=0, r_z=None, colors=None,
