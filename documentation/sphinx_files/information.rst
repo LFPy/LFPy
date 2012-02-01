@@ -14,13 +14,34 @@ The basic requirements for the release branch of LFPy is as follows
    
 5.  Cython (C-extensions for python, cython.org) to speed up simulations of extracellular fields
 
+Linux
+-----
+
 In Ubuntu 10.4LTS you may use Synaptic to install subversion, python2.6-dev, numpy, scipy and matplotlib. Note that the cython version in Ubuntu repositories (0.11) will not work, please install the current version from cython.org (tested with 0.15.1). The easiest way to install NEURON as a Python module is to download a .deb package from Eilif Muller's webpage (http://neuralensemble.org/people/eilifmuller/software.html). (The command to compile NEURON
 mechanisms is then /opt/nrn/i686/bin/nrnivmodl)
 
 Installation
-============
+============  
 
-1.  In a terminal, ``'cd'`` to a directory where you want your LFPy files to be, as an example this could be '/home/yourname/work'.
+New installation instructions:
+
+1.  Download the LFPy source distribution (LFPy-1.0.tar.gz) and unpack.
+
+2.  In LFPy-1.0 run
+    ::
+        sudo python setup.py install
+    or
+    ::
+        sudo python setup.py install --user
+    in case you want to install in your home directory (e.g. if you do not have root access).
+    
+3.  Now you should be able to 
+    ::
+        import LFPy
+     
+
+1.  In a terminal, ``'cd'`` to a directory where you want your LFPy files to be, as an example this could be '/home/yourname/work'. 
+
 2.  Download LFPy using SVN by typing:
     ::
         svn checkout https://bebiservice.umb.no/svn-private/LFPy-release
