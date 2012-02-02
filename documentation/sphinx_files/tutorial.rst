@@ -46,7 +46,7 @@ and create a Synapse object connected to our cell
 Let us assume we want the synapse to be activated by a single spike at t = 50ms. We have to pass the spike time to the synapse using
 ::
 
-    synapse.set_spike_times(cell, np.array([50.]))
+    synapse.set_spike_times(np.array([50.]))
     
 We now have a cell with a synapse, and we can run the simulation
 ::
