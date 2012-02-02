@@ -18,7 +18,10 @@ To install LFPy you will need the following:
 Linux
 -----
 
-In Ubuntu 10.4LTS you may use Synaptic to install python2.6-dev, numpy, scipy and matplotlib. Note that the cython version in Ubuntu repositories (0.11) will not work, please install the current version from http://cython.org (tested with 0.15.1). The easiest way to install NEURON as a Python module is to download a .deb package from Eilif Muller's webpage (http://neuralensemble.org/people/eilifmuller/software.html). (The command to compile NEURON
+In Ubuntu 10.4LTS you may use Synaptic to install python2.6-dev, numpy, scipy and matplotlib. Note that the cython version in Ubuntu repositories (0.11) will not work, please install the current version from http://cython.org (tested with 0.15.1). The easiest way to install NEURON as a Python module is to download a .deb package from 
+Eilif Muller's webpage: http://neuralensemble.org/people/eilifmuller/software.html. 
+
+(The command to compile NEURON
 mechanisms is then /opt/nrn/i686/bin/nrnivmodl)
 
 Mac OS X
@@ -62,6 +65,13 @@ Installation
         ipython
         >>>run script.py
 
+	We suggest you start with ``example1.py``.
+	
+5.  HTML documentation is available at::
+
+		LFPy-1.0/html/index.html
+
+
 Units
 =====
 
@@ -85,10 +95,23 @@ The units in LFPy for given quantities are:
 Note: resistance, conductance and capacitance are usually specific values, i.e per membrane area (lowercase r_m, g, c_m)
 Depending on the mechanism files, some may use different units altogether, but this should be taken care of internally by NEURON.
 
-Documumentation
-===============
+Contributors
+============
 
-To rebuild this documentation from the LFPy-release root folder, issue in terminal
-::
-    export LC_ALL=en_US.UTF-8
-    sphinx-build-2.* -b html documentation/sphinx_files/. html
+LFPy was developed by:
+
+*	Henrik Lindén
+
+*	Espen Hagen
+
+*	Eivind Norheim
+
+*	Szymon Łęski http://www.neuroinf.pl/Members/szleski
+
+.. Documentation
+.. ===============
+.. 
+.. To rebuild this documentation from the LFPy-release root folder, issue in terminal
+.. ::
+..     export LC_ALL=en_US.UTF-8
+..     sphinx-build-2.* -b html documentation/sphinx_files/. html

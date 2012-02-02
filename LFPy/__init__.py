@@ -1,9 +1,6 @@
 #!/usr/bin/env python
 '''Initialization of LFPy, a module for simulating extracellular potentials.
 
-Developed by: 
-Henrik Linden, Espen Hagen, Eivind Norheim, Szymon Leski
-
 Group of Computational Neuroscience (compneuro.umb.no),
 Department of Mathematical Sciences and Technology,
 Norwegian University of Life Sciences.

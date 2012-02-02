@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Requirements &mdash; LFPy 0.1 documentation</title>
+    <title>Requirements &mdash; LFPy 1.0 documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -16,7 +16,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '0.1',
+        VERSION:     '1.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,7 +25,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="LFPy 0.1 documentation" href="index.html" />
+    <link rel="top" title="LFPy 1.0 documentation" href="index.html" />
     <link rel="next" title="module LFPy" href="classes.html" />
     <link rel="prev" title="Welcome to LFPy’s documentation!" href="index.html" /> 
   </head>
@@ -45,7 +45,7 @@
         <li class="right" >
           <a href="index.html" title="Welcome to LFPy’s documentation!"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">LFPy 0.1 documentation</a> &raquo;</li> 
+        <li><a href="index.html">LFPy 1.0 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -73,7 +73,9 @@
 </ol>
 <div class="section" id="linux">
 <h2>Linux<a class="headerlink" href="#linux" title="Permalink to this headline">¶</a></h2>
-<p>In Ubuntu 10.4LTS you may use Synaptic to install python2.6-dev, numpy, scipy and matplotlib. Note that the cython version in Ubuntu repositories (0.11) will not work, please install the current version from <a class="reference external" href="http://cython.org">http://cython.org</a> (tested with 0.15.1). The easiest way to install NEURON as a Python module is to download a .deb package from Eilif Muller&#8217;s webpage (<a class="reference external" href="http://neuralensemble.org/people/eilifmuller/software.html">http://neuralensemble.org/people/eilifmuller/software.html</a>). (The command to compile NEURON
+<p>In Ubuntu 10.4LTS you may use Synaptic to install python2.6-dev, numpy, scipy and matplotlib. Note that the cython version in Ubuntu repositories (0.11) will not work, please install the current version from <a class="reference external" href="http://cython.org">http://cython.org</a> (tested with 0.15.1). The easiest way to install NEURON as a Python module is to download a .deb package from
+Eilif Muller&#8217;s webpage: <a class="reference external" href="http://neuralensemble.org/people/eilifmuller/software.html">http://neuralensemble.org/people/eilifmuller/software.html</a>.</p>
+<p>(The command to compile NEURON
 mechanisms is then /opt/nrn/i686/bin/nrnivmodl)</p>
 </div>
 <div class="section" id="mac-os-x">
@@ -107,7 +109,14 @@ mechanisms is then /opt/nrn/i686/bin/nrnivmodl)</p>
 python script.py
 #or
 ipython
-&gt;&gt;&gt;run script.py</pre>
+&gt;&gt;&gt;run script.py
+
+We suggest you start with ``example1.py``.</pre>
+</div>
+</li>
+<li><p class="first">HTML documentation is available at:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">LFPy</span><span class="o">-</span><span class="mf">1.0</span><span class="o">/</span><span class="n">html</span><span class="o">/</span><span class="n">index</span><span class="o">.</span><span class="n">html</span>
+</pre></div>
 </div>
 </li>
 </ol>
@@ -147,12 +156,15 @@ The units in LFPy for given quantities are:</p>
 <p>Note: resistance, conductance and capacitance are usually specific values, i.e per membrane area (lowercase r_m, g, c_m)
 Depending on the mechanism files, some may use different units altogether, but this should be taken care of internally by NEURON.</p>
 </div>
-<div class="section" id="documumentation">
-<h1>Documumentation<a class="headerlink" href="#documumentation" title="Permalink to this headline">¶</a></h1>
-<p>To rebuild this documentation from the LFPy-release root folder, issue in terminal</p>
-<div class="highlight-python"><pre>export LC_ALL=en_US.UTF-8
-sphinx-build-2.* -b html documentation/sphinx_files/. html</pre>
-</div>
+<div class="section" id="contributors">
+<h1>Contributors<a class="headerlink" href="#contributors" title="Permalink to this headline">¶</a></h1>
+<p>LFPy was developed by:</p>
+<ul class="simple">
+<li>Henrik Lindén</li>
+<li>Espen Hagen</li>
+<li>Eivind Norheim</li>
+<li>Szymon Łęski <a class="reference external" href="http://www.neuroinf.pl/Members/szleski">http://www.neuroinf.pl/Members/szleski</a></li>
+</ul>
 </div>
 
 
@@ -170,7 +182,7 @@ sphinx-build-2.* -b html documentation/sphinx_files/. html</pre>
 </li>
 <li><a class="reference internal" href="#installation">Installation</a></li>
 <li><a class="reference internal" href="#units">Units</a></li>
-<li><a class="reference internal" href="#documumentation">Documumentation</a></li>
+<li><a class="reference internal" href="#contributors">Contributors</a></li>
 </ul>
 
   <h4>Previous topic</h4>
@@ -216,11 +228,11 @@ sphinx-build-2.* -b html documentation/sphinx_files/. html</pre>
         <li class="right" >
           <a href="index.html" title="Welcome to LFPy’s documentation!"
              >previous</a> |</li>
-        <li><a href="index.html">LFPy 0.1 documentation</a> &raquo;</li> 
+        <li><a href="index.html">LFPy 1.0 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
-        &copy; Copyright 2011, Espen Hagen.
+        &copy; Copyright 2012, Computational Neuroscience Group, UMB.
       Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
     </div>
   </body>
