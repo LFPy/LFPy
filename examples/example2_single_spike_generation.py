@@ -2,7 +2,8 @@
 
 import pylab as pl
 import LFPy
-#pl.rcParams.update({'font.size' : 10, 'figure.figsize' : [16,9],'wspace' : 0.5 ,'hspace' : 0.5})
+pl.rcParams.update({'font.size' : 12, 'figure.figsize' : [10, 10],
+    'left': 0.1, 'wspace' : 0.5 ,'hspace' : 0.5})
 
 #plot pops up by itself
 pl.interactive(1)
@@ -30,6 +31,9 @@ def plotstuff(cell, electrode):
     for i in xrange(len(cell.synapses)):
         pl.plot([cell.synapses[i].x],[cell.synapses[i].z],\
             color=cell.synapses[i].color,marker=cell.synapses[i].marker)
+    pl.plot(electrode.x, electrode.z, 'o')
+    
+    
     pl.axis('equal')
     pl.title('Morphology (XZ)')
     pl.xlabel(r'x [$\mu$m]')
@@ -65,15 +69,15 @@ synapseParameters = {
     'idx' : 0,               #insert synapse on idx 0, the soma
     'e' : 0.,                #reversal potential
     'syntype' : 'Exp2Syn',   #conductance based exponential synapse
-    'tau1' : 0.1,            #Time constant, rise
+    'tau1' : 1.0,            #Time constant, rise
     'tau2' : 1.0,            #Time constant, decay
     'weight' : 0.03,         #Synaptic weight
     'record_current' : True, #Will enable synapse current recording
 }
 
 
-x = pl.arange(-50, 50, 21)
-z = pl.arange(-50, 50, 21)
+x = pl.linspace(-50, 50, 11)
+z = pl.linspace(-50, 50, 11)
 X, Z = pl.meshgrid(x, z)
 y = pl.zeros(X.size)
 electrodeParameters = {             #parameters for RecExtElectrode class
@@ -98,7 +102,7 @@ cell = LFPy.Cell(**cellParameters)
 
 #attach synapse and set spike time
 synapse = LFPy.Synapse(cell, **synapseParameters)
-synapse.set_spike_times(pl.array([-5]))
+synapse.set_spike_times(pl.array([1]))
 
 #perform NEURON simulation, results saved as attributes in the cell instance
 cell.simulate(electrode = electrode, rec_isyn=True)
@@ -107,5 +111,23 @@ cell.simulate(electrode = electrode, rec_isyn=True)
 
 ################################################################################
 
-plotstuff(cell, electrode)
+#plotstuff(cell, electrode)
+
+
+
+for i in xrange(cell.xend.size):
+    pl.plot([cell.xstart[i], cell.xend[i]], [cell.zstart[i], cell.zend[i]], color='k', lw=cell.diam[i])
+for i in xrange(len(cell.synapses)):
+    pl.plot([cell.synapses[i].x],[cell.synapses[i].z],\
+        color=cell.synapses[i].color,marker=cell.synapses[i].marker)
+pl.plot(electrode.x, electrode.z, 'o')
+
+
+
+
+
+pl.axis([-55, 55, -55, 55])
+#pl.title('Morphology (XZ)')
+pl.xlabel(r'x [$\mu$m]')
+pl.ylabel(r'z [$\mu$m]')
 

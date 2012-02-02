@@ -54,9 +54,11 @@ def f_to_integrate(Z):
     
 Vex = complex_quadrature(f_to_integrate, 0, L, epsabs=1.49e-20) + I0/(4*pi*sigma*sqrt(lat_dist**2 + (z-L)**2))
 
-Vcomplex = np.empty(time.size)
+Vcomplex = []
 for i in xrange(time.size):
-    Vcomplex[i] = Vex * exp(1j*2*pi*frequency*time[i])
+    Vcomplex.append(Vex * exp(1j*2*pi*frequency*time[i]))
+
+Vcomplex = array(Vcomplex)
 
 Vreal = Vcomplex.real
 
