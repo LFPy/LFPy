@@ -92,7 +92,10 @@ class RecExtElectrodeSetup(object):
                 raise ValueError, 'cell either string or list of strings'
 
         if cell is not None:
-            self._import_c(cell)
+            try:
+                self._import_c(cell)
+            except:
+                raise ValueError, "You have to run cell.simulate(rec_imem=True) before creating the electrode or set the cell argument to LFPy.RecExtElectorde to 'None' and then pass the electrode as argument to cell.simulate()"
         
 
     class cell():

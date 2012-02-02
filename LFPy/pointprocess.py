@@ -102,15 +102,16 @@ class Synapse(PointProcess):
                               **kwargs)
             
         self.syntype = syntype
+        self.cell = cell
         self.hocidx = int(cell.set_synapse(idx, syntype,
                                            record_current, **kwargs))
         cell.synapses.append(self)
         cell.synidx.append(idx)
 
-    def set_spike_times(self, cell , sptimes=numpy.zeros(0)):
+    def set_spike_times(self, sptimes=numpy.zeros(0)):
         '''Set the spike times'''
         self.sptimes = sptimes
-        cell.sptimeslist.append(sptimes)
+        self.cell.sptimeslist.append(sptimes)
         
     def collect_current(self, cell):
         '''Collect synapse current'''
