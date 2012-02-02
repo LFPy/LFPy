@@ -5,12 +5,11 @@ To install LFPy you will need the following:
 
 1.  Python, seems to work fine with recent python since 2.6.x (2.6.6 or newer recommended), 2.7.x works fine.
 2.  Python modules numpy, scipy, matplotlib
-3.  NEURON (from http://www.neuron.yale.edu) compiled as a Python module, so the following should execute without error in the terminal:
+3.  NEURON (from http://www.neuron.yale.edu) compiled as a Python module, so the following should execute without error in Python console:
     ::
     
-        ipython
-        >>> import neuron
-        >>> neuron.test()
+        import neuron
+        neuron.test()
 
 	
    
@@ -49,7 +48,7 @@ Installation
         import LFPy
     
 
-7.  There are some basic usage examples provided in 
+4.  There are some basic usage examples provided in 
     ::
     
         LFPy-1.0/examples/
@@ -66,11 +65,11 @@ Installation
 Units
 =====
 
-As of now, units follow the NEURON conventions.
+Units follow the NEURON conventions.
 The units in LFPy for given quantities are:
 
 +-------------+-----------+
-| What        | unit      |
+| What        | Unit      |
 +=============+===========+
 | Potentials  | [mV]      |
 +-------------+-----------+
@@ -84,7 +83,7 @@ The units in LFPy for given quantities are:
 +-------------+-----------+
 
 Note: resistance, conductance and capacitance are usually specific values, i.e per membrane area (lowercase r_m, g, c_m)
-Depending on the mechanism files, some may use different units altogether, but this should be taken care of internally by NEURON, right?.
+Depending on the mechanism files, some may use different units altogether, but this should be taken care of internally by NEURON.
 
 Documumentation
 ===============
