@@ -1,43 +1,67 @@
-===========
-Towel Stuff
-===========
+====
+LFPy
+====
 
-Towel Stuff provides such and such and so and so. You might find
-it most useful for tasks involving <x> and also <y>. Typical usage
-often looks like this::
+Requirements
+============
 
-    #!/usr/bin/env python
+To install LFPy you will need the following:
 
-    from towelstuff import location
-    from towelstuff import utils
+1.  Python, seems to work fine with recent python since 2.6.x (2.6.6 or newer recommended), 2.7.x works fine.
+2.  Python modules numpy, scipy, matplotlib
+3.  NEURON (from http://www.neuron.yale.edu) compiled as a Python module, so the following should execute without error in Python console:
+    ::
+    
+        import neuron
+        neuron.test()
 
-    if utils.has_towel():
-        print "Your towel is located:", location.where_is_my_towel()
+	
+   
+4.  Cython (C-extensions for python, cython.org) to speed up simulations of extracellular fields
 
-(Note the double-colon and 4-space indent formatting above.)
+Linux
+-----
 
-Paragraphs are separated by blank lines. *Italics*, **bold**,
-and ``monospace`` look like this.
+In Ubuntu 10.4LTS you may use Synaptic to install python2.6-dev, numpy, scipy and matplotlib. Note that the cython version in Ubuntu repositories (0.11) will not work, please install the current version from http://cython.org (tested with 0.15.1). The easiest way to install NEURON as a Python module is to download a .deb package from Eilif Muller's webpage (http://neuralensemble.org/people/eilifmuller/software.html). (The command to compile NEURON
+mechanisms is then /opt/nrn/i686/bin/nrnivmodl)
 
+Mac OS X
+--------
 
-A Section
-=========
+The easiest way to install Neuron as a Python module is again to use Eilif Muller's unofficial installer (http://neuralensemble.org/people/eilifmuller/software.html) which works with the Enthought Python Distribution (EPD). EPD provides numpy, scipy and matplotlib, so you only need to install cython from http://cython.org. 
 
-Lists look like this:
+Installation
+============  
 
-* First
+1.  Download the LFPy source distribution (LFPy-1.0.tar.gz) and unpack.
 
-* Second. Can be multiple lines
-  but must be indented properly.
+2.  In LFPy-1.0 run
+    ::
+    
+        sudo python setup.py install
+    
+    or ::
+    
+        python setup.py install --user
+    
+    in case you want to install in your home directory (e.g. if you do not have root access).
+    
+3.  Now you should be able to 
+    ::  
+    
+        import LFPy
+    
 
-A Sub-Section
--------------
+4.  There are some basic usage examples provided in 
+    ::
+    
+        LFPy-1.0/examples/
 
-Numbered lists look like you'd expect:
-
-1. hi there
-
-2. must be going
-
-Urls are http://like.this and links can be
-written `like this <http://www.example.com/foo/bar>`_.
+    To execute:
+    :: 
+    
+        cd examples
+        python script.py
+        #or
+        ipython
+        >>>run script.py
