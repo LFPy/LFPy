@@ -51,13 +51,13 @@
             
   <h1>Source code for LFPy.inputgenerators</h1><div class="highlight"><pre>
 <span class="c">#!/usr/bin/env python</span>
-<span class="sd">&#39;&#39;&#39;Copyright (C) 2011 Computational Neuroscience Group, UMB.</span>
+<span class="sd">&#39;&#39;&#39;Copyright (C) 2012 Computational Neuroscience Group, UMB.</span>
 <span class="sd">All rights reserved.&#39;&#39;&#39;</span>
 <span class="kn">import</span> <span class="nn">numpy</span>
 <span class="kn">import</span> <span class="nn">pylab</span> <span class="kn">as</span> <span class="nn">pl</span>
 
 <div class="viewcode-block" id="get_rand_spike_times"><a class="viewcode-back" href="../../classes.html#LFPy.inputgenerators.get_rand_spike_times">[docs]</a><span class="k">def</span> <span class="nf">get_rand_spike_times</span><span class="p">(</span><span class="n">synpos</span><span class="p">,</span> <span class="n">nspikes</span><span class="p">,</span> <span class="n">tstart</span><span class="p">,</span> <span class="n">tstop</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;return synpos times nspikes random spike times on the </span>
+    <span class="sd">&#39;&#39;&#39;Return synpos times nspikes random spike times on the </span>
 <span class="sd">    interval [tstart, tstop]&#39;&#39;&#39;</span>
     <span class="n">spiketimes</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">pl</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">synpos</span><span class="p">),</span> <span class="n">nspikes</span><span class="p">])</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">synpos</span><span class="p">)):</span>
@@ -65,7 +65,7 @@
     <span class="k">return</span> <span class="n">spiketimes</span>
 </div>
 <div class="viewcode-block" id="stationary_poisson"><a class="viewcode-back" href="../../classes.html#LFPy.inputgenerators.stationary_poisson">[docs]</a><span class="k">def</span> <span class="nf">stationary_poisson</span><span class="p">(</span><span class="n">nsyn</span><span class="p">,</span> <span class="n">lambd</span><span class="p">,</span> <span class="n">tstart</span><span class="p">,</span> <span class="n">tstop</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39; Generates nsyn stationary possion processes with rate lambda </span>
+    <span class="sd">&#39;&#39;&#39;Generate nsyn stationary possion processes with rate lambda </span>
 <span class="sd">    between tstart and tstop&#39;&#39;&#39;</span>
     <span class="n">interval_s</span> <span class="o">=</span> <span class="p">(</span><span class="n">tstop</span><span class="o">-</span><span class="n">tstart</span><span class="p">)</span><span class="o">*.</span><span class="mo">001</span>
     <span class="n">spiketimes</span> <span class="o">=</span> <span class="p">[]</span>
@@ -81,8 +81,8 @@
     <span class="k">return</span> <span class="n">spiketimes</span>
 </div>
 <div class="viewcode-block" id="stationary_gamma"><a class="viewcode-back" href="../../classes.html#LFPy.inputgenerators.stationary_gamma">[docs]</a><span class="k">def</span> <span class="nf">stationary_gamma</span><span class="p">(</span><span class="n">tstart</span><span class="p">,</span> <span class="n">tstop</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">theta</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">tmin</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1E3</span><span class="p">,</span> <span class="n">tmax</span><span class="o">=</span><span class="mf">1E5</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39; Generates spiketimes with interspike interval statistics according</span>
-<span class="sd">    to gamma-distribution with &#39;shape&#39; k amd &#39;scale&#39; theta between tstart and</span>
+    <span class="sd">&#39;&#39;&#39;Generate spiketimes with interspike interval statistics according</span>
+<span class="sd">    to gamma-distribution with &#39;shape&#39; k and &#39;scale&#39; theta between tstart and</span>
 <span class="sd">    tstop. Spiketimes from tmin up to tmax is calculated,</span>
 <span class="sd">    times between 0 and tstop are returned&#39;&#39;&#39;</span>
     
@@ -101,7 +101,7 @@
 
 </div>
 <div class="viewcode-block" id="test_spiketimes"><a class="viewcode-back" href="../../classes.html#LFPy.inputgenerators.test_spiketimes">[docs]</a><span class="k">def</span> <span class="nf">test_spiketimes</span><span class="p">(</span><span class="n">spiketime</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;Test and sort spiketimes&#39;&#39;&#39;</span>
+    <span class="sd">&#39;&#39;&#39;Test and sort spike times&#39;&#39;&#39;</span>
     <span class="n">spiketimes</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">spikecount</span> <span class="o">=</span> <span class="mi">1</span>
     <span class="n">spikevec</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">spikecount</span><span class="p">)</span>
@@ -110,7 +110,7 @@
     <span class="k">return</span> <span class="n">spiketimes</span>
 </div>
 <div class="viewcode-block" id="get_normal_spike_times"><a class="viewcode-back" href="../../classes.html#LFPy.inputgenerators.get_normal_spike_times">[docs]</a><span class="k">def</span> <span class="nf">get_normal_spike_times</span><span class="p">(</span><span class="n">nsyn</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">tstart</span><span class="p">,</span> <span class="n">tstop</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39; Generates nsyn normal-distributed processes with mean mu and </span>
+    <span class="sd">&#39;&#39;&#39;Generate nsyn normal-distributed processes with mean mu and </span>
 <span class="sd">    deviation sigma&#39;&#39;&#39;</span>
     <span class="n">spiketimes</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">spikecount</span> <span class="o">=</span> <span class="n">nsyn</span>
@@ -124,7 +124,7 @@
     <span class="k">return</span> <span class="n">spiketimes</span>
 </div>
 <div class="viewcode-block" id="get_normal_input_times"><a class="viewcode-back" href="../../classes.html#LFPy.inputgenerators.get_normal_input_times">[docs]</a><span class="k">def</span> <span class="nf">get_normal_input_times</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">tstart</span><span class="p">,</span> <span class="n">tstop</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39; generates n normal-distributed prosesses with mean mu and </span>
+    <span class="sd">&#39;&#39;&#39;Generates n normal-distributed prosesses with mean mu and </span>
 <span class="sd">    deviation sigma&#39;&#39;&#39;</span>
     <span class="n">times</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>

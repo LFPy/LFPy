@@ -59,30 +59,31 @@
 <span class="sd">Department of Mathematical Sciences and Technology,</span>
 <span class="sd">Norwegian University of Life Sciences.</span>
 
-<span class="sd">Copyright (C) 2011 Computational Neuroscience Group, UMB.</span>
+<span class="sd">Copyright (C) 2012 Computational Neuroscience Group, UMB.</span>
 <span class="sd">All rights reserved.</span>
 
 <span class="sd">:Classes:</span>
 <span class="sd">  * Cell - The pythonic neuron object itself laying on top of NEURON</span>
-<span class="sd">  * CellWithElectrode - Subclass of Cell that calculate LFP at every fadvance</span>
-<span class="sd">  * PointProcessSynapse - Convenience class for inserting synapses onto Cell objects</span>
-<span class="sd">  * PointProcessElectrode - Convenience class for inserting electrodes onto Cell objects</span>
-<span class="sd">  * Electrode - Class for performing simulations of extracellular potentials</span>
+<span class="sd">  * Synapse - Convenience class for inserting synapses onto Cell objects</span>
+<span class="sd">  * StimIntraElectrode - Convenience class for inserting electrodes onto Cell objects</span>
+<span class="sd">  * RecExtElectrode - Class for performing simulations of extracellular potentials</span>
+<span class="sd">  * RecExtElectrdoeThreaded - same as above using multiprocessing to distribute contact points across cores</span>
 
 <span class="sd">:Modules:</span>
-<span class="sd">  * lfpcalc - functions used by Electrode class</span>
+<span class="sd">  * lfpcalc - functions used by RecExtElectrode class</span>
 <span class="sd">  * tools - some convenient functions</span>
 <span class="sd">  * inputgenerators - functions for synaptic input time generation</span>
 <span class="sd">&#39;&#39;&#39;</span>
 
+<span class="kn">from</span> <span class="nn">pointprocess</span> <span class="kn">import</span> <span class="n">Synapse</span><span class="p">,</span> <span class="n">PointProcess</span><span class="p">,</span> <span class="n">StimIntElectrode</span>
+<span class="kn">from</span> <span class="nn">recextelectrode</span> <span class="kn">import</span> <span class="n">RecExtElectrode</span><span class="p">,</span> <span class="n">RecExtElectrodeSetup</span>
 <span class="kn">from</span> <span class="nn">cell</span> <span class="kn">import</span> <span class="n">Cell</span>
-<span class="kn">from</span> <span class="nn">pointprocess</span> <span class="kn">import</span> <span class="n">Synapse</span><span class="p">,</span> <span class="n">PointProcess</span><span class="p">,</span> \
-    <span class="n">PointProcessSynapse</span><span class="p">,</span> <span class="n">PointProcessElectrode</span>
-<span class="kn">from</span> <span class="nn">electrode</span> <span class="kn">import</span> <span class="n">Electrode</span><span class="p">,</span> <span class="n">ElectrodeThreaded</span><span class="p">,</span> <span class="n">ElectrodeSetup</span>
-<span class="kn">from</span> <span class="nn">cellwithelectrode</span> <span class="kn">import</span> <span class="n">CellWithElectrode</span>
+<span class="kn">from</span> <span class="nn">recextelectrodethreaded</span> <span class="kn">import</span> <span class="n">RecExtElectrodeThreaded</span>
 
+<span class="kn">import</span> <span class="nn">lfpcalc</span>
 <span class="kn">import</span> <span class="nn">tools</span>
 <span class="kn">import</span> <span class="nn">inputgenerators</span>
+<span class="kn">import</span> <span class="nn">run_simulation</span>
 </pre></div>
 
           </div>

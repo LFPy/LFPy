@@ -373,8 +373,106 @@ currents that will be part of the membrane currents.</p>
 </dd></dl>
 
 </div>
-<div class="section" id="class-stimintraelectrode">
-<h2>class <tt class="xref py py-class docutils literal"><span class="pre">StimIntraElectrode</span></tt><a class="headerlink" href="#class-stimintraelectrode" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="class-stimintelectrode">
+<h2>class <a class="reference internal" href="#LFPy.StimIntElectrode" title="LFPy.StimIntElectrode"><tt class="xref py py-class docutils literal"><span class="pre">StimIntElectrode</span></tt></a><a class="headerlink" href="#class-stimintelectrode" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="LFPy.StimIntElectrode">
+<em class="property">class </em><tt class="descclassname">LFPy.</tt><tt class="descname">StimIntElectrode</tt><big>(</big><em>cell</em>, <em>idx</em>, <em>pptype='SEClamp'</em>, <em>color='p'</em>, <em>marker='*'</em>, <em>record_current=False</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#LFPy.StimIntElectrode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">LFPy.pointprocess.PointProcess</span></tt></p>
+<p>Class for NEURON point processes, ie VClamp, SEClamp and ICLamp,
+SinIClamp, ChirpIClamp with arguments.
+Electrode currents go here.
+Membrane currents will no longer sum to zero if these mechanisms are used.</p>
+<p>Refer to NEURON documentation &#64; neuron.yale.edu for kwargs</p>
+<p>Usage:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">LFPy</span>
+<span class="kn">import</span> <span class="nn">pylab</span> <span class="kn">as</span> <span class="nn">pl</span>
+
+<span class="n">pl</span><span class="o">.</span><span class="n">interactive</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="n">pointprocesses</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">{</span>
+        <span class="s">&#39;idx&#39;</span> <span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="s">&#39;record_current&#39;</span> <span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+        <span class="s">&#39;pptype&#39;</span> <span class="p">:</span> <span class="s">&#39;IClamp&#39;</span><span class="p">,</span>
+        <span class="s">&#39;amp&#39;</span> <span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="s">&#39;dur&#39;</span> <span class="p">:</span> <span class="mi">20</span><span class="p">,</span>
+        <span class="s">&#39;delay&#39;</span> <span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s">&#39;idx&#39;</span> <span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="s">&#39;record_current&#39;</span> <span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+        <span class="s">&#39;pptype&#39;</span> <span class="p">:</span> <span class="s">&#39;VClamp&#39;</span><span class="p">,</span>
+        <span class="s">&#39;amp[0]&#39;</span> <span class="p">:</span> <span class="o">-</span><span class="mi">65</span><span class="p">,</span>
+        <span class="s">&#39;dur[0]&#39;</span> <span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+        <span class="s">&#39;amp[1]&#39;</span> <span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="s">&#39;dur[1]&#39;</span> <span class="p">:</span> <span class="mi">20</span><span class="p">,</span>
+        <span class="s">&#39;amp[2]&#39;</span> <span class="p">:</span> <span class="o">-</span><span class="mi">65</span><span class="p">,</span>
+        <span class="s">&#39;dur[2]&#39;</span> <span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s">&#39;idx&#39;</span> <span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="s">&#39;record_current&#39;</span> <span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+        <span class="s">&#39;pptype&#39;</span> <span class="p">:</span> <span class="s">&#39;SEClamp&#39;</span><span class="p">,</span>
+        <span class="s">&#39;dur1&#39;</span> <span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+        <span class="s">&#39;amp1&#39;</span> <span class="p">:</span> <span class="o">-</span><span class="mi">65</span><span class="p">,</span>
+        <span class="s">&#39;dur2&#39;</span> <span class="p">:</span> <span class="mi">20</span><span class="p">,</span>
+        <span class="s">&#39;amp2&#39;</span> <span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="s">&#39;dur3&#39;</span> <span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+        <span class="s">&#39;amp3&#39;</span> <span class="p">:</span> <span class="o">-</span><span class="mi">65</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s">&#39;idx&#39;</span> <span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="s">&#39;record_current&#39;</span> <span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+        <span class="s">&#39;pptype&#39;</span> <span class="p">:</span> <span class="s">&#39;SinIClamp&#39;</span><span class="p">,</span>
+        <span class="s">&#39;delay&#39;</span> <span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+        <span class="s">&#39;dur&#39;</span> <span class="p">:</span> <span class="mi">200</span><span class="p">,</span>
+        <span class="s">&#39;pkamp&#39;</span> <span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="s">&#39;freq&#39;</span> <span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s">&#39;idx&#39;</span> <span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="s">&#39;record_current&#39;</span> <span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+        <span class="s">&#39;pptype&#39;</span> <span class="p">:</span> <span class="s">&#39;ChirpIClamp&#39;</span><span class="p">,</span>
+        <span class="s">&#39;delay&#39;</span> <span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+        <span class="s">&#39;dur&#39;</span> <span class="p">:</span> <span class="mi">200</span><span class="p">,</span>
+        <span class="s">&#39;pkamp&#39;</span> <span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="s">&#39;freq&#39;</span> <span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="s">&#39;chirp_rate&#39;</span> <span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="p">}</span>
+
+<span class="p">]</span>
+
+<span class="k">for</span> <span class="n">pointprocess</span> <span class="ow">in</span> <span class="n">pointprocesses</span><span class="p">:</span>
+    <span class="n">cell</span> <span class="o">=</span> <span class="n">LFPy</span><span class="o">.</span><span class="n">Cell</span><span class="p">(</span><span class="n">morphology</span><span class="o">=</span><span class="s">&#39;morphologies/L5_Mainen96_LFPy.hoc&#39;</span><span class="p">)</span>
+    <span class="n">stimulus</span> <span class="o">=</span> <span class="n">LFPy</span><span class="o">.</span><span class="n">StimIntElectrode</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="o">**</span><span class="n">pointprocess</span><span class="p">)</span>
+    <span class="n">cell</span><span class="o">.</span><span class="n">simulate</span><span class="p">(</span><span class="n">rec_istim</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    
+    <span class="n">pl</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">211</span><span class="p">)</span>
+    <span class="n">pl</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">cell</span><span class="o">.</span><span class="n">tvec</span><span class="p">,</span> <span class="n">stimulus</span><span class="o">.</span><span class="n">i</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">pointprocess</span><span class="p">[</span><span class="s">&#39;pptype&#39;</span><span class="p">])</span>
+    <span class="n">pl</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s">&#39;best&#39;</span><span class="p">)</span>
+    <span class="n">pl</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s">&#39;Stimulus currents (nA)&#39;</span><span class="p">)</span>
+    
+    <span class="n">pl</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">212</span><span class="p">)</span>
+    <span class="n">pl</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">cell</span><span class="o">.</span><span class="n">tvec</span><span class="p">,</span> <span class="n">cell</span><span class="o">.</span><span class="n">somav</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">pointprocess</span><span class="p">[</span><span class="s">&#39;pptype&#39;</span><span class="p">])</span>
+    <span class="n">pl</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s">&#39;best&#39;</span><span class="p">)</span>
+    <span class="n">pl</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s">&#39;Somatic potential (mV)&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="LFPy.StimIntElectrode.collect_current">
+<tt class="descname">collect_current</tt><big>(</big><em>cell</em><big>)</big><a class="headerlink" href="#LFPy.StimIntElectrode.collect_current" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fetch electrode current from recorder list</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="LFPy.StimIntElectrode.collect_potential">
+<tt class="descname">collect_potential</tt><big>(</big><em>cell</em><big>)</big><a class="headerlink" href="#LFPy.StimIntElectrode.collect_potential" title="Permalink to this definition">¶</a></dt>
+<dd><p>Collect membrane potential of segment with PointProcess</p>
+</dd></dl>
+
+</dd></dl>
+
 </div>
 <div class="section" id="class-recextelectrodesetup">
 <h2>class <a class="reference internal" href="#LFPy.RecExtElectrodeSetup" title="LFPy.RecExtElectrodeSetup"><tt class="xref py py-class docutils literal"><span class="pre">RecExtElectrodeSetup</span></tt></a><a class="headerlink" href="#class-recextelectrodesetup" title="Permalink to this headline">¶</a></h2>
@@ -591,7 +689,7 @@ between tstart and tstop</p>
 <li><a class="reference internal" href="#class-cell">class <tt class="docutils literal"><span class="pre">Cell</span></tt></a></li>
 <li><a class="reference internal" href="#class-pointprocess">class <tt class="docutils literal"><span class="pre">PointProcess</span></tt></a></li>
 <li><a class="reference internal" href="#class-synapse">class <tt class="docutils literal"><span class="pre">Synapse</span></tt></a></li>
-<li><a class="reference internal" href="#class-stimintraelectrode">class <tt class="docutils literal"><span class="pre">StimIntraElectrode</span></tt></a></li>
+<li><a class="reference internal" href="#class-stimintelectrode">class <tt class="docutils literal"><span class="pre">StimIntElectrode</span></tt></a></li>
 <li><a class="reference internal" href="#class-recextelectrodesetup">class <tt class="docutils literal"><span class="pre">RecExtElectrodeSetup</span></tt></a></li>
 <li><a class="reference internal" href="#class-recextelectrode">class <tt class="docutils literal"><span class="pre">RecExtElectrode</span></tt></a></li>
 <li><a class="reference internal" href="#module-LFPy.lfpcalc">submodule <tt class="docutils literal"><span class="pre">lfpcalc</span></tt></a></li>
