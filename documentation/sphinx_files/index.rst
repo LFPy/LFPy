@@ -18,7 +18,7 @@ Contents:
     :maxdepth: 2
    
     information
-	tutorial
+    tutorial
     classes
 
 Indices and tables
