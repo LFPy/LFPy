@@ -1,3 +1,7 @@
+===============
+Getting started
+===============
+
 Requirements
 ============
 
@@ -71,42 +75,6 @@ Installation
 
 		LFPy-1.0/html/index.html
 
-
-Units
-=====
-
-Units follow the NEURON conventions.
-The units in LFPy for given quantities are:
-
-+-------------+-----------+
-| What        | Unit      |
-+=============+===========+
-| Potentials  | [mV]      |
-+-------------+-----------+
-| Currents    | [nA]      |
-+-------------+-----------+
-| conductance | [S/cm2]   |
-+-------------+-----------+
-| capacitance | [muF/cm2] |
-+-------------+-----------+
-| Coordinates | [mum]     |
-+-------------+-----------+
-
-Note: resistance, conductance and capacitance are usually specific values, i.e per membrane area (lowercase r_m, g, c_m)
-Depending on the mechanism files, some may use different units altogether, but this should be taken care of internally by NEURON.
-
-Contributors
-============
-
-LFPy was developed by:
-
-*	Henrik Lindén
-
-*	Espen Hagen
-
-*	Eivind Norheim
-
-*	Szymon Łęski http://www.neuroinf.pl/Members/szleski
 
 .. Documentation
 .. ===============

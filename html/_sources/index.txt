@@ -3,8 +3,8 @@
     You can adapt this file completely to your liking, but it should at least
     contain the root `toctree` directive.
 
-Welcome to LFPy's documentation!
-================================
+LFPy documentation
+==================
 
 .. image:: ../sphinx_graphics/logo_liten.png
 
@@ -19,7 +19,9 @@ Contents:
    
     information
     tutorial
+    using
     classes
+    contributors
 
 Indices and tables
 ==================

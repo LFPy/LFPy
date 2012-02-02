@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -8,9 +7,9 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Requirements &mdash; LFPy 1.0 documentation</title>
+    <title>Getting started &mdash; LFPy 1.0 documentation</title>
     
-    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     
     <script type="text/javascript">
@@ -26,8 +25,8 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="top" title="LFPy 1.0 documentation" href="index.html" />
-    <link rel="next" title="module LFPy" href="classes.html" />
-    <link rel="prev" title="Welcome to LFPy’s documentation!" href="index.html" /> 
+    <link rel="next" title="LFPy Tutorial" href="tutorial.html" />
+    <link rel="prev" title="LFPy documentation" href="index.html" /> 
   </head>
   <body>
     <div class="related">
@@ -40,10 +39,10 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="classes.html" title="module LFPy"
+          <a href="tutorial.html" title="LFPy Tutorial"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="index.html" title="Welcome to LFPy’s documentation!"
+          <a href="index.html" title="LFPy documentation"
              accesskey="P">previous</a> |</li>
         <li><a href="index.html">LFPy 1.0 documentation</a> &raquo;</li> 
       </ul>
@@ -54,8 +53,10 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <div class="section" id="requirements">
-<h1>Requirements<a class="headerlink" href="#requirements" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="getting-started">
+<h1>Getting started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="requirements">
+<h2>Requirements<a class="headerlink" href="#requirements" title="Permalink to this headline">¶</a></h2>
 <p>To install LFPy you will need the following:</p>
 <ol class="arabic">
 <li><p class="first">Python, seems to work fine with recent python since 2.6.x (2.6.6 or newer recommended), 2.7.x works fine.</p>
@@ -72,19 +73,19 @@
 </li>
 </ol>
 <div class="section" id="linux">
-<h2>Linux<a class="headerlink" href="#linux" title="Permalink to this headline">¶</a></h2>
+<h3>Linux<a class="headerlink" href="#linux" title="Permalink to this headline">¶</a></h3>
 <p>In Ubuntu 10.4LTS you may use Synaptic to install python2.6-dev, numpy, scipy and matplotlib. Note that the cython version in Ubuntu repositories (0.11) will not work, please install the current version from <a class="reference external" href="http://cython.org">http://cython.org</a> (tested with 0.15.1). The easiest way to install NEURON as a Python module is to download a .deb package from
 Eilif Muller&#8217;s webpage: <a class="reference external" href="http://neuralensemble.org/people/eilifmuller/software.html">http://neuralensemble.org/people/eilifmuller/software.html</a>.</p>
 <p>(The command to compile NEURON
 mechanisms is then /opt/nrn/i686/bin/nrnivmodl)</p>
 </div>
 <div class="section" id="mac-os-x">
-<h2>Mac OS X<a class="headerlink" href="#mac-os-x" title="Permalink to this headline">¶</a></h2>
+<h3>Mac OS X<a class="headerlink" href="#mac-os-x" title="Permalink to this headline">¶</a></h3>
 <p>The easiest way to install Neuron as a Python module is again to use Eilif Muller&#8217;s unofficial installer (<a class="reference external" href="http://neuralensemble.org/people/eilifmuller/software.html">http://neuralensemble.org/people/eilifmuller/software.html</a>) which works with the Enthought Python Distribution (EPD). EPD provides numpy, scipy and matplotlib, so you only need to install cython from <a class="reference external" href="http://cython.org">http://cython.org</a>.</p>
 </div>
 </div>
 <div class="section" id="installation">
-<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
 <ol class="arabic">
 <li><p class="first">Download the LFPy source distribution (LFPy-1.0.tar.gz) and unpack.</p>
 </li>
@@ -121,50 +122,6 @@ We suggest you start with ``example1.py``.</pre>
 </li>
 </ol>
 </div>
-<div class="section" id="units">
-<h1>Units<a class="headerlink" href="#units" title="Permalink to this headline">¶</a></h1>
-<p>Units follow the NEURON conventions.
-The units in LFPy for given quantities are:</p>
-<table border="1" class="docutils">
-<colgroup>
-<col width="54%" />
-<col width="46%" />
-</colgroup>
-<thead valign="bottom">
-<tr class="row-odd"><th class="head">What</th>
-<th class="head">Unit</th>
-</tr>
-</thead>
-<tbody valign="top">
-<tr class="row-even"><td>Potentials</td>
-<td>[mV]</td>
-</tr>
-<tr class="row-odd"><td>Currents</td>
-<td>[nA]</td>
-</tr>
-<tr class="row-even"><td>conductance</td>
-<td>[S/cm2]</td>
-</tr>
-<tr class="row-odd"><td>capacitance</td>
-<td>[muF/cm2]</td>
-</tr>
-<tr class="row-even"><td>Coordinates</td>
-<td>[mum]</td>
-</tr>
-</tbody>
-</table>
-<p>Note: resistance, conductance and capacitance are usually specific values, i.e per membrane area (lowercase r_m, g, c_m)
-Depending on the mechanism files, some may use different units altogether, but this should be taken care of internally by NEURON.</p>
-</div>
-<div class="section" id="contributors">
-<h1>Contributors<a class="headerlink" href="#contributors" title="Permalink to this headline">¶</a></h1>
-<p>LFPy was developed by:</p>
-<ul class="simple">
-<li>Henrik Lindén</li>
-<li>Espen Hagen</li>
-<li>Eivind Norheim</li>
-<li>Szymon Łęski <a class="reference external" href="http://www.neuroinf.pl/Members/szleski">http://www.neuroinf.pl/Members/szleski</a></li>
-</ul>
 </div>
 
 
@@ -175,22 +132,23 @@ Depending on the mechanism files, some may use different units altogether, but t
         <div class="sphinxsidebarwrapper">
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
-<li><a class="reference internal" href="#">Requirements</a><ul>
+<li><a class="reference internal" href="#">Getting started</a><ul>
+<li><a class="reference internal" href="#requirements">Requirements</a><ul>
 <li><a class="reference internal" href="#linux">Linux</a></li>
 <li><a class="reference internal" href="#mac-os-x">Mac OS X</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#installation">Installation</a></li>
-<li><a class="reference internal" href="#units">Units</a></li>
-<li><a class="reference internal" href="#contributors">Contributors</a></li>
+</ul>
+</li>
 </ul>
 
   <h4>Previous topic</h4>
   <p class="topless"><a href="index.html"
-                        title="previous chapter">Welcome to LFPy&#8217;s documentation!</a></p>
+                        title="previous chapter">LFPy documentation</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="classes.html"
-                        title="next chapter">module <tt class="docutils literal"><span class="pre">LFPy</span></tt></a></p>
+  <p class="topless"><a href="tutorial.html"
+                        title="next chapter">LFPy Tutorial</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/information.txt"
@@ -223,10 +181,10 @@ Depending on the mechanism files, some may use different units altogether, but t
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="classes.html" title="module LFPy"
+          <a href="tutorial.html" title="LFPy Tutorial"
              >next</a> |</li>
         <li class="right" >
-          <a href="index.html" title="Welcome to LFPy’s documentation!"
+          <a href="index.html" title="LFPy documentation"
              >previous</a> |</li>
         <li><a href="index.html">LFPy 1.0 documentation</a> &raquo;</li> 
       </ul>
