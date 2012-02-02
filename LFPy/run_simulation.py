@@ -69,22 +69,58 @@ def _run_simulation_with_electrode(cell, electrode):
     
     # Use electrode object(s) to calculate coefficient matrices for LFP
     # calculations. If electrode is a list, then
-    cell.imem = np.eye(cell.totnsegs)
-    tvec = cell.tvec            
-    cell.tvec = np.arange(cell.totnsegs) * cell.timeres_python
+    
+    #put electrode argument in list if needed
     if type(electrode) == type([]):
-        for el in electrode:
-            el.calc_lfp(cell=cell)
-            el.electrodecoeffs = el.LFP
-            el.LFP = []
+        electrodes = electrode
     else:
-        electrode.calc_lfp(cell=cell)
-        electrode.electrodecoeffs = electrode.LFP
-        electrode.LFP = []
-    cell.tvec = tvec
+        electrodes = [electrode]
+    
+    #calculate list of electrodecoeffs, will try temp storage of imem, tvec, LFP
+    cellTvec = cell.tvec
+    try:
+        cellImem = cell.imem.copy()
+    except:
+        pass
+    
+    cell.imem = np.eye(cell.totnsegs)
+    cell.tvec = np.arange(cell.totnsegs) * cell.timeres_python
+    electrodecoeffs = []
+    electrodeLFP = []   #list of electrode.LFP objects if they exist
+    restoreLFP = False
+    restoreCellLFP = False
+    for el in electrodes:
+        if hasattr(el, 'LFP'):
+            LFPcopy = el.LFP
+            del el.LFP
+            restoreLFP = True
+        if hasattr(el, 'CellLFP'):
+            CellLFP = el.CellLFP
+            restoreCellLFP = True
+        el.calc_lfp(cell=cell)
+        electrodecoeffs.append(el.LFP.copy())
+        if restoreLFP:
+            del el.LFP
+            el.LFP = LFPcopy
+        else:
+            del el.LFP
+        if restoreCellLFP:
+            el.CellLFP = CellLFP
+        else:
+            if hasattr(el, 'CellLFP'):
+                del el.CellLFP
         
+    #putting back variables
+    cell.tvec = cellTvec        
+    try:
+        cell.imem = cellImem
+    except:
+        del cell.imem
+    
+    # Initialize NEURON simulations of cell object    
     neuron.h.dt = cell.timeres_NEURON
     
+    #integrator
     cvode = neuron.h.CVode()
     
     #don't know if this is the way to do, but needed for variable dt method
@@ -108,6 +144,7 @@ def _run_simulation_with_electrode(cell, electrode):
     if cell.tstartms != None:
         neuron.h.t = cell.tstartms
     
+    #load spike times from NetCon
     cell.loadspikes()
     
     #print sim.time at intervals
@@ -119,56 +156,53 @@ def _run_simulation_with_electrode(cell, electrode):
     
     #temp vector to store membrane currents at each timestep
     imem = np.empty(cell.totnsegs)
+    #LFPs for each electrode will be put here during simulation
+    electrodesLFP = []
+    for coeffs in electrodecoeffs:
+        electrodesLFP.append([])
     
-    if type(electrode) == type([]):
-        while neuron.h.t < cell.tstopms:
-            if neuron.h.t >= 0:
-                i = 0
-                for sec in cell.allseclist:
-                    for seg in sec:
-                        imem[i] = seg.i_membrane * cell.area[i] * 1E-2
-                        i += 1
-                for el in electrode:
-                    el.LFP.append(np.dot(el.electrodecoeffs, imem))
-            
-            neuron.h.fadvance()
-            counter += 1.
-            if np.mod(counter, interval) == 0:
-                print 't = %.0f' % neuron.h.t
-        
-        #calculate LFP after final fadvance()
-        i = 0
-        for sec in cell.allseclist:
-            for seg in sec:
-                imem[i] = seg.i_membrane * cell.area[i] * 1E-2
-                i += 1
-        
-        for el in electrode:
-            
-            el.LFP.append(np.dot(el.electrodecoeffs, imem))
-            el.LFP = np.array(el.LFP).T
-    else:
-        while neuron.h.t < cell.tstopms:
-            if neuron.h.t >= 0:
-                i = 0
-                for sec in cell.allseclist:
-                    for seg in sec:
-                        imem[i] = seg.i_membrane * cell.area[i] * 1E-2
-                        i += 1
-                electrode.LFP.append(np.dot(electrode.electrodecoeffs, imem))
-            
-            neuron.h.fadvance()
-            counter += 1.
-            if np.mod(counter, interval) == 0:
-                print 't = %.0f' % neuron.h.t
-        
-        #calculate LFP after final fadvance()
-        i = 0
-        for sec in cell.allseclist:
-            for seg in sec:
-                imem[i] = seg.i_membrane * cell.area[i] * 1E-2
-                i += 1
-        
-        electrode.LFP.append(np.dot(electrode.electrodecoeffs, imem))
-        
-        electrode.LFP = np.array(electrode.LFP).T
+    #run fadvance until time limit, and calculate LFPs for each timestep
+    area = cell.area
+    while neuron.h.t < cell.tstopms:
+        if neuron.h.t >= 0:
+            i = 0
+            for sec in cell.allseclist:
+                for seg in sec:
+                    imem[i] = seg.i_membrane * area[i] * 1E-2
+                    i += 1
+            j = 0
+            for coeffs in electrodecoeffs:
+                electrodesLFP[j].append(np.dot(coeffs, imem))
+                j += 1
+        neuron.h.fadvance()
+        counter += 1.
+        if np.mod(counter, interval) == 0:
+            print 't = %.0f' % neuron.h.t
+    
+    #calculate LFP after final fadvance()
+    i = 0
+    for sec in cell.allseclist:
+        for seg in sec:
+            imem[i] = seg.i_membrane * area[i] * 1E-2
+            i += 1
+    j = 0
+    for coeffs in electrodecoeffs:
+        electrodesLFP[j].append(np.dot(coeffs, imem))
+        j += 1
+    
+    # Final step, put LFPs in the electrode object, superimpose if necessary
+    # If electrode.perCellLFP, store individual LFPs
+    j = 0
+    for el in electrodes:
+        if hasattr(el, 'LFP'):
+            el.LFP += np.array(electrodesLFP[j]).T
+        else:
+            el.LFP = np.array(electrodesLFP[j]).T
+        #will save each cell contribution separately
+        if el.perCellLFP:
+            if not hasattr(el, 'CellLFP'):
+                el.CellLFP = []
+            el.CellLFP.append(np.array(electrodesLFP[j]).T)
+        el.electrodecoeff = electrodecoeffs[j]
+        j += 1
+  

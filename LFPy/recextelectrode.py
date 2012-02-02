@@ -48,9 +48,18 @@ class RecExtElectrodeSetup(object):
                  seedvalue=None):
         '''Initialize class RecExtElectrodeSetup'''
         self.sigma = sigma
-        self.x = x
-        self.y = y
-        self.z = z
+        if type(x) == float or type(x) == int:
+            self.x = pl.array([x])
+        else:
+            self.x = x
+        if type(y) == float or type(y) == int:
+            self.y = pl.array([y])
+        else:
+            self.y = y
+        if type(z) == float or type(z) == int:
+            self.z = pl.array([z])
+        else:
+            self.z = z
         self.color = color
         self.marker = marker
         if N != None:
@@ -291,7 +300,9 @@ class RecExtElectrode(RecExtElectrodeSetup):
                 if self.verbose:
                     print 'Calculated potential contribution, cell %i.' % k
         if self.perCellLFP:
-            self.CellLFP = LFP_temp
+            self.CellLFP = []
+            for LFPtrace in LFP_temp:
+                self.CellLFP.append(LFPtrace)
         
         self.LFP = LFP_temp.sum(axis=0)
 
