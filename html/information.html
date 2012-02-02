@@ -63,25 +63,27 @@
 </li>
 <li><p class="first">Python modules numpy, scipy, matplotlib</p>
 </li>
-<li><p class="first">NEURON (from <a class="reference external" href="http://www.neuron.yale.edu">http://www.neuron.yale.edu</a>) compiled as a Python module, so the following should execute without error in Python console:</p>
+<li><p class="first"><a class="reference external" href="http://www.neuron.yale.edu">NEURON</a> compiled as a Python module, so the following should execute without error in Python console:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">neuron</span>
 <span class="n">neuron</span><span class="o">.</span><span class="n">test</span><span class="p">()</span>
 </pre></div>
 </div>
 </li>
-<li><p class="first">Cython (C-extensions for python, cython.org) to speed up simulations of extracellular fields</p>
+<li><p class="first"><a class="reference external" href="http://cython.org">Cython</a> (C-extensions for python) to speed up simulations of extracellular fields</p>
 </li>
 </ol>
 <div class="section" id="linux">
 <h3>Linux<a class="headerlink" href="#linux" title="Permalink to this headline">¶</a></h3>
 <p>In Ubuntu 10.4LTS you may use Synaptic to install python2.6-dev, numpy, scipy and matplotlib. Note that the cython version in Ubuntu repositories (0.11) will not work, please install the current version from <a class="reference external" href="http://cython.org">http://cython.org</a> (tested with 0.15.1). The easiest way to install NEURON as a Python module is to download a .deb package from
-Eilif Muller&#8217;s webpage: <a class="reference external" href="http://neuralensemble.org/people/eilifmuller/software.html">http://neuralensemble.org/people/eilifmuller/software.html</a>.</p>
+<a class="reference external" href="http://neuralensemble.org/people/eilifmuller/software.html">Eilif Muller&#8217;s webpage</a>.</p>
 <p>(The command to compile NEURON
 mechanisms is then /opt/nrn/i686/bin/nrnivmodl)</p>
 </div>
 <div class="section" id="mac-os-x">
 <h3>Mac OS X<a class="headerlink" href="#mac-os-x" title="Permalink to this headline">¶</a></h3>
-<p>The easiest way to install Neuron as a Python module is again to use Eilif Muller&#8217;s unofficial installer (<a class="reference external" href="http://neuralensemble.org/people/eilifmuller/software.html">http://neuralensemble.org/people/eilifmuller/software.html</a>) which works with the Enthought Python Distribution (EPD). EPD provides numpy, scipy and matplotlib, so you only need to install cython from <a class="reference external" href="http://cython.org">http://cython.org</a>.</p>
+<p>The easiest way to install Neuron as a Python module is again to use Eilif Muller&#8217;s
+<a class="reference external" href="http://neuralensemble.org/people/eilifmuller/software.html">unofficial installer</a>
+which works with the Enthought Python Distribution (<a class="reference external" href="http://www.enthought.com">EPD</a>). EPD provides numpy, scipy and matplotlib, so you only need to install cython from <a class="reference external" href="http://cython.org">http://cython.org</a>.</p>
 </div>
 </div>
 <div class="section" id="installation">

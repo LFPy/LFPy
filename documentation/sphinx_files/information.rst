@@ -9,7 +9,7 @@ To install LFPy you will need the following:
 
 1.  Python, seems to work fine with recent python since 2.6.x (2.6.6 or newer recommended), 2.7.x works fine.
 2.  Python modules numpy, scipy, matplotlib
-3.  NEURON (from http://www.neuron.yale.edu) compiled as a Python module, so the following should execute without error in Python console:
+3.  `NEURON <http://www.neuron.yale.edu>`_ compiled as a Python module, so the following should execute without error in Python console:
     ::
     
         import neuron
@@ -17,13 +17,13 @@ To install LFPy you will need the following:
 
 	
    
-4.  Cython (C-extensions for python, cython.org) to speed up simulations of extracellular fields
+4.  `Cython <http://cython.org>`_ (C-extensions for python) to speed up simulations of extracellular fields
 
 Linux
 -----
 
 In Ubuntu 10.4LTS you may use Synaptic to install python2.6-dev, numpy, scipy and matplotlib. Note that the cython version in Ubuntu repositories (0.11) will not work, please install the current version from http://cython.org (tested with 0.15.1). The easiest way to install NEURON as a Python module is to download a .deb package from 
-Eilif Muller's webpage: http://neuralensemble.org/people/eilifmuller/software.html. 
+`Eilif Muller's webpage <http://neuralensemble.org/people/eilifmuller/software.html>`_.  
 
 (The command to compile NEURON
 mechanisms is then /opt/nrn/i686/bin/nrnivmodl)
@@ -31,7 +31,9 @@ mechanisms is then /opt/nrn/i686/bin/nrnivmodl)
 Mac OS X
 --------
 
-The easiest way to install Neuron as a Python module is again to use Eilif Muller's unofficial installer (http://neuralensemble.org/people/eilifmuller/software.html) which works with the Enthought Python Distribution (EPD). EPD provides numpy, scipy and matplotlib, so you only need to install cython from http://cython.org. 
+The easiest way to install Neuron as a Python module is again to use Eilif Muller's 
+`unofficial installer <http://neuralensemble.org/people/eilifmuller/software.html>`_ 
+which works with the Enthought Python Distribution (`EPD <http://www.enthought.com>`_). EPD provides numpy, scipy and matplotlib, so you only need to install cython from http://cython.org. 
 
 Installation
 ============  

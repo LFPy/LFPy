@@ -10,7 +10,9 @@ LFPy documentation
 
 LFPy is a Python package for simulation of extracellular electric field around neurons. It relies on the NEURON simulator and the Python interface to NEURON.
 
-LFPy was developed at the Computational Neuroscience Group at the Norwegian University of Life Sciences (http://compneuro.umb.no).
+LFPy was developed at the `Computational Neuroscience Group <http://compneuro.umb.no>`_ at the `Norwegian University of Life Sciences <www.umb.no>`_, in collaboration with the 
+`Laboratory of Neuroinformatics <http://www.nencki.gov.pl/en/laboratory-of-neuroinformatics>`_, 
+`Nencki Institute of Experimental Biology <http://www.nencki.gov.pl>`_. The effort was supported by International Neuroinformatics Coordinating Facility (`INCF <http://incf.org>`_) and `The Research Council of Norway <http://www.forskningsradet.no/english/>`_.
 
 Contents:
 
