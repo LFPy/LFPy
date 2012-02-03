@@ -6,12 +6,12 @@
 # http://senselab.med.yale.edu/modeldb/ShowModel.asp?model=2488
 #
 # This scripts is set up to use the model, where the active conductances are set
-# in the file "active_declarations.hoc", and uses the mechanisms from the .mod-
-# files provided here. For this example to work, run "nrnivmodl" in this folder
-# to compile these mechanisms (i.e. /$PATHTONEURON/nrn/x86_64/bin/nrnivmodl).
+# in the file "active_declarations_example2.hoc", and uses the mechanisms from
+# the .mod-files provided here. For this example to work, run "nrnivmodl" in
+# this folder to compile these mechanisms
+# (i.e. /$PATHTONEURON/nrn/x86_64/bin/nrnivmodl).
 #
 ################################################################################
-
 #import some plotting stuff and the LFPy-module
 import matplotlib.pylab as pl
 import LFPy
@@ -180,6 +180,6 @@ cell.simulate(electrode = electrode, rec_isyn=True)
 
 # Plotting of simulation results:
 plotstuff(cell, electrode)
-
+#pl.savefig('example2.pdf')
 
 
