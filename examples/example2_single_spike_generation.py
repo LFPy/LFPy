@@ -17,7 +17,7 @@ import matplotlib.pylab as pl
 import LFPy
 
 #set some plotting parameters
-pl.rcParams.update({'font.size' : 12, 'figure.figsize' : [10, 10],
+pl.rcParams.update({'font.size' : 15,
     'figure.facecolor' : '1',
     'left': 0.1, 'wspace' : 0.5 ,'hspace' : 0.5})
 
@@ -37,8 +37,8 @@ def plotstuff(cell, electrode):
             zcoords = pl.array([cell.zmid[i]])
             diams = pl.array([cell.diam[i]])    
         else:
-            if cell.zmid[i] < 90 and cell.zmid[i] > -90 and \
-                    cell.xmid[i] < 90 and cell.xmid[i] > -90:
+            if cell.zmid[i] < 100 and cell.zmid[i] > -100 and \
+                    cell.xmid[i] < 100 and cell.xmid[i] > -100:
                 xcoords = pl.r_[xcoords, pl.linspace(cell.xstart[i],
                                             cell.xend[i], cell.length[i]*3)]   
                 ycoords = pl.r_[ycoords, pl.linspace(cell.ystart[i],
@@ -46,14 +46,14 @@ def plotstuff(cell, electrode):
                 zcoords = pl.r_[zcoords, pl.linspace(cell.zstart[i],
                                             cell.zend[i], cell.length[i]*3)]   
                 diams = pl.r_[diams, pl.linspace(cell.diam[i], cell.diam[i],
-                                            cell.length[i]*3)]   
+                                            cell.length[i]*3)]
     
     #sort along depth-axis
     argsort = pl.argsort(ycoords)
     
     #plotting
-    fig = pl.figure()
-    ax = fig.add_subplot(111, frame_on=False)
+    fig = pl.figure(figsize=[15, 10])
+    ax = fig.add_axes([0.1, 0.1, 0.533334, 0.8], frameon=False)
     ax.scatter(xcoords[argsort], zcoords[argsort], s=diams[argsort]**2*20,
                c=ycoords[argsort], edgecolors='none', cmap='gray')
     ax.plot(electrode.x, electrode.z, '.', marker='o', markersize=5, color='k')
@@ -91,7 +91,20 @@ def plotstuff(cell, electrode):
     ax.set_yticks([])
     
     ax.axis([-61, 61, -61, 61])
+    
+    ax.set_title('Location-dependent extracellular spike shapes')
+    
+        
+    ax = fig.add_axes([0.75, 0.55, 0.2, 0.35])
+    ax.plot(cell.tvec, cell.somav)
+    ax.set_title('Somatic action-potential')
+    ax.set_ylabel(r'$V_\mathrm{membrane}$ (mV)')
 
+    ax = fig.add_axes([0.75, 0.1, 0.2, 0.35])
+    ax.plot(cell.tvec, cell.synapses[0].i)
+    ax.set_title('Synaptic current')
+    ax.set_ylabel(r'$i_\mathrm{synapse}$ (nA)')
+    ax.set_xlabel(r'time (ms)')
 
 ################################################################################
 # Define parameters, using dictionaries
@@ -109,7 +122,7 @@ cellParameters = {
     'e_pas' : -65,              # reversal potential passive mechs
     'passive' : True,           # switch on passive mechs
     'nsegs_method' : 'lambda_f',# method for setting number of segments,
-    'lambda_f' : 200,           # segments are isopotential at this frequency
+    'lambda_f' : 500,           # segments are isopotential at this frequency
     'timeres_NEURON' : 2**-5,   # dt of LFP and NEURON simulation.
     'timeres_python' : 2**-5,
     'tstartms' : -10,           #start time, recorders start at t=0
@@ -165,7 +178,7 @@ synapse.set_spike_times(pl.array([1]))
 #perform NEURON simulation, results saved as attributes in the cell instance
 cell.simulate(electrode = electrode, rec_isyn=True)
 
-# Plotting:
+# Plotting of simulation results:
 plotstuff(cell, electrode)
 
 
