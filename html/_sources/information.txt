@@ -1,9 +1,8 @@
-===============
 Getting started
 ===============
 
 Requirements
-============
+------------
 
 To install LFPy you will need the following:
 
@@ -21,7 +20,7 @@ To install LFPy you will need the following:
 4.  `Cython <http://cython.org>`_ (C-extensions for python) to speed up simulations of extracellular fields
 
 Ubuntu 10.4LTS
---------------
+^^^^^^^^^^^^^^
 
 The instructions below show how to meet all the requirements starting from a clean Ubuntu 10.4 installation. 
 
@@ -68,16 +67,16 @@ Install NEURON as a Python module
     cd src/nrnpython/
     sudo python setup.py install
     
-(or `python setup.py install --user` if you want to install the Python package in your home folder). 
+(or ``python setup.py install --user`` if you want to install the Python package in your home folder). 
     
-Now you should be able to `import neuron` from Python console
+Now you should be able to ``import neuron`` from Python console
 ::
 
     cd $HOME
     ipython
     import neuron
     
-You might want to add the folder with NEURON executables to your PATH, so that you can easily compile NEURON mechanisms using `nrnivmodl`
+You might want to add the folder with NEURON executables to your PATH, so that you can easily compile NEURON mechanisms using ``nrnivmodl``
 ::
     
     export PATH=$PATH:$HOME/neuron/nrn/i686/bin
@@ -91,7 +90,7 @@ You are now ready to download and install LFPy.
 
 
 Installation
-============  
+------------
 
 1.  Download the LFPy source distribution (LFPy-1.0.tar.gz) and unpack.
 
@@ -122,14 +121,13 @@ Installation
     
         cd examples
         python example1.py
+
+    or ::
     
-    or 
-    ::
-        
         cd examples
         ipython
         execfile("example1.py")
-	
+
 5.  HTML documentation is available at::
 
 		LFPy-1.0/html/index.html

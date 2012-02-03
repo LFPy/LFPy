@@ -109,13 +109,13 @@ make install</pre>
 <div class="highlight-python"><pre>cd src/nrnpython/
 sudo python setup.py install</pre>
 </div>
-<p>(or <cite>python setup.py install &#8211;user</cite> if you want to install the Python package in your home folder).</p>
-<p>Now you should be able to <cite>import neuron</cite> from Python console</p>
+<p>(or <tt class="docutils literal"><span class="pre">python</span> <span class="pre">setup.py</span> <span class="pre">install</span> <span class="pre">--user</span></tt> if you want to install the Python package in your home folder).</p>
+<p>Now you should be able to <tt class="docutils literal"><span class="pre">import</span> <span class="pre">neuron</span></tt> from Python console</p>
 <div class="highlight-python"><pre>cd $HOME
 ipython
 import neuron</pre>
 </div>
-<p>You might want to add the folder with NEURON executables to your PATH, so that you can easily compile NEURON mechanisms using <cite>nrnivmodl</cite></p>
+<p>You might want to add the folder with NEURON executables to your PATH, so that you can easily compile NEURON mechanisms using <tt class="docutils literal"><span class="pre">nrnivmodl</span></tt></p>
 <div class="highlight-python"><pre>export PATH=$PATH:$HOME/neuron/nrn/i686/bin</pre>
 </div>
 <p>Now download Cython (Cython-0.15.1.tar.gz, or newer) from <a class="reference external" href="http://www.cython.org">http://www.cython.org</a>, unpack and install</p>
@@ -149,11 +149,11 @@ import neuron</pre>
 <div class="highlight-python"><pre>cd examples
 python example1.py</pre>
 </div>
-<blockquote>
-<div><p>cd examples
+<p>or</p>
+<div class="highlight-python"><pre>cd examples
 ipython
-execfile(&#8220;example1.py&#8221;)</p>
-</div></blockquote>
+execfile("example1.py")</pre>
+</div>
 </li>
 <li><p class="first">HTML documentation is available at:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">LFPy</span><span class="o">-</span><span class="mf">1.0</span><span class="o">/</span><span class="n">html</span><span class="o">/</span><span class="n">index</span><span class="o">.</span><span class="n">html</span>
