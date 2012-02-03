@@ -16,24 +16,79 @@ To install LFPy you will need the following:
     
         import neuron
         neuron.test()
+    LFPy was tested with NEURON 7.2 and 7.3. 
 
 4.  `Cython <http://cython.org>`_ (C-extensions for python) to speed up simulations of extracellular fields
 
-Linux
------
+Ubuntu 10.4LTS
+--------------
 
-In Ubuntu 10.4LTS you may use Synaptic to install python2.6-dev, numpy, scipy and matplotlib. Note that the cython version in Ubuntu repositories (0.11) will not work, please install the current version from http://cython.org (tested with 0.15.1). The easiest way to install NEURON as a Python module is to download a .deb package from 
-`Eilif Muller's webpage <http://neuralensemble.org/people/eilifmuller/software.html>`_.  
+The instructions below show how to meet all the requirements starting from a clean Ubuntu 10.4 installation. 
 
-(The command to compile NEURON
-mechanisms is then /opt/nrn/i686/bin/nrnivmodl)
+Start by installing the required packages
+::
 
-Mac OS X
---------
+    sudo apt-get install mercurial autoconf libtool
+    sudo apt-get install libxext-dev libncurses-dev
+    sudo apt-get install bison flex
+    sudo apt-get install python-dev python-numpy python-scipy python-matplotlib
+    sudo apt-get install ipython
 
-The easiest way to install Neuron as a Python module is again to use Eilif Muller's 
-`unofficial installer <http://neuralensemble.org/people/eilifmuller/software.html>`_ 
-which works with the Enthought Python Distribution (`EPD <http://www.enthought.com>`_). EPD provides numpy, scipy and matplotlib, so you only need to install cython from http://cython.org. 
+Now get the source code of NEURON
+::
+
+    cd $HOME
+    mkdir neuron
+    cd neuron
+
+    hg clone http://www.neuron.yale.edu/hg/neuron/iv
+    hg clone http://www.neuron.yale.edu/hg/neuron/nrn
+
+Compile and install InterViews
+::
+    
+    cd iv
+    sh build.sh 
+    ./configure --prefix=`pwd`
+    make
+    make install
+    
+Compile and install NEURON
+::
+
+    cd ../nrn
+    sh build.sh 
+    ./configure --prefix=`pwd` --with-iv=$HOME/neuron/iv --with-nrnpython=/usr/bin/python
+    make
+    make install
+
+Install NEURON as a Python module
+::
+
+    cd src/nrnpython/
+    sudo python setup.py install
+    
+(or `python setup.py install --user` if you want to install the Python package in your home folder). 
+    
+Now you should be able to `import neuron` from Python console
+::
+
+    cd $HOME
+    ipython
+    import neuron
+    
+You might want to add the folder with NEURON executables to your PATH, so that you can easily compile NEURON mechanisms using `nrnivmodl`
+::
+    
+    export PATH=$PATH:$HOME/neuron/nrn/i686/bin
+
+Now download Cython (Cython-0.15.1.tar.gz, or newer) from http://www.cython.org, unpack and install 
+::
+
+    sudo python setup.py install
+    
+You are now ready to download and install LFPy.
+
 
 Installation
 ============  
@@ -62,16 +117,18 @@ Installation
     
         LFPy-1.0/examples/
 
-    To execute:
+    We suggest you start with ``example1.py``
     :: 
     
         cd examples
-        python script.py
-        #or
+        python example1.py
+    
+    or 
+    ::
+        
+        cd examples
         ipython
-        >>>run script.py
-
-	We suggest you start with ``example1.py``.
+        execfile("example1.py")
 	
 5.  HTML documentation is available at::
 
