@@ -111,23 +111,36 @@ cell.simulate(electrode = electrode, rec_isyn=True)
 
 ################################################################################
 
-#plotstuff(cell, electrode)
-
-
-
 for i in xrange(cell.xend.size):
-    pl.plot([cell.xstart[i], cell.xend[i]], [cell.zstart[i], cell.zend[i]], color='k', lw=cell.diam[i])
-for i in xrange(len(cell.synapses)):
-    pl.plot([cell.synapses[i].x],[cell.synapses[i].z],\
-        color=cell.synapses[i].color,marker=cell.synapses[i].marker)
-pl.plot(electrode.x, electrode.z, 'o')
+    if i == 0:
+        xcoords = pl.array([cell.xmid[i]])
+        ycoords = pl.array([cell.ymid[i]])
+        zcoords = pl.array([cell.zmid[i]])
+        diams = pl.array([cell.diam[i]])    
+    else:
+        if cell.zmid[i] < 70 and cell.zmid[i] > -70 and cell.xmid[i] < 70 and cell.xmid[i] > -70:
+            xcoords = pl.r_[xcoords, pl.linspace(cell.xstart[i], cell.xend[i], cell.length[i]*3)]   
+            ycoords = pl.r_[ycoords, pl.linspace(cell.ystart[i], cell.yend[i], cell.length[i]*3)]   
+            zcoords = pl.r_[zcoords, pl.linspace(cell.zstart[i], cell.zend[i], cell.length[i]*3)]   
+            diams = pl.r_[diams, pl.linspace(cell.diam[i], cell.diam[i], cell.length[i]*3)]   
 
+argsort = pl.argsort(ycoords)
+pl.scatter(xcoords[argsort], zcoords[argsort], s=diams[argsort]**2*25, c=ycoords[argsort], edgecolors='none', cmap='gray')
+#for i in xrange(len(cell.synapses)):
+#    pl.plot([cell.synapses[i].x], [cell.synapses[i].z], \
+#        color='r', marker=cell.synapses[i].marker)
+pl.plot(electrode.x, electrode.z, '.', marker='o', markersize=10)
 
-
-
+i = 0
+limLFP = abs(electrode.LFP).max()
+for LFP in electrode.LFP:
+    tvec = cell.tvec + electrode.x[i]
+    trace = LFP + electrode.z[i]
+    color = 'k'
+    pl.plot(tvec, trace, color=color, lw = 2)
+    i += 1
 
 pl.axis([-55, 55, -55, 55])
-#pl.title('Morphology (XZ)')
-pl.xlabel(r'x [$\mu$m]')
-pl.ylabel(r'z [$\mu$m]')
+pl.xlabel(r'x ($\mu$m)')
+pl.ylabel(r'z ($\mu$m)')
 
