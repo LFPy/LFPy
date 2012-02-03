@@ -1,6 +1,6 @@
 import LFPy
 import numpy as np
-import matplotlib.pylab as plt
+import matplotlib.pyplot as plt
 
 # Example plot for LFPy: Single-synapse contribution to the LFP
 
