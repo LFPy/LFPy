@@ -1,0 +1,45 @@
+=============================
+Installing NEURON with Python
+=============================
+
+Ubuntu 10.4LTS
+==============
+::
+
+    sudo apt-get install mercurial
+    sudo apt-get install libtool
+    sudo apt-get install aclocal
+    sudo apt-get install autoconf
+    sudo apt-get install libxext-dev
+    sudo apt-get install bison
+    sudo apt-get install flex
+    sudo apt-get install automake
+    sudo apt-get install libncurses-dev
+
+    cd $HOME
+    mkdir neuron
+    cd neuron
+
+    hg clone http://www.neuron.yale.edu/hg/neuron/iv
+    hg clone http://www.neuron.yale.edu/hg/neuron/nrn
+    cd iv
+    hg up
+    cd ../nrn/
+    hg up
+    cd ../iv
+
+    sh build.sh 
+    ./configure --prefix=`pwd`
+    make
+    make install
+
+    cd ../nrn
+    ls
+    sh build.sh 
+    ./configure --prefix=`pwd` --with-iv=$HOME/neuron/iv --with-nrnpython=/usr/bin/python
+    make
+    make install
+
+    cd src/nrnpython/
+    sudo python setup.py install
+
