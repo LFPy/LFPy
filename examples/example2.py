@@ -127,7 +127,7 @@ cellParameters = {
     'timeres_python' : 2**-5,
     'tstartms' : -10,           #start time, recorders start at t=0
     'tstopms' : 10,             #stop time of simulation
-    'custom_code'  : ['active_declarations.hoc'],    # will execute this file
+    'custom_code'  : ['active_declarations_example2.hoc'],    # will execute this file
 }
 
 #Synaptic parameters, corresponding to a NetCon synapse built into NEURON
