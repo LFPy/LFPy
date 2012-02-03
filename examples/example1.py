@@ -4,7 +4,7 @@ import matplotlib.pylab as plt
 
 # Example plot for LFPy: Single-synapse contribution to the LFP
 
-# Define parameters
+# Define cell parameters
 
 cell_parameters = {          #various cell parameters,
     'morphology' : 'morphologies/L5_Mainen96_LFPy.hoc', #Mainen&Sejnowski, Nature, 1996
@@ -38,7 +38,7 @@ synapse_parameters = {
     'record_current':True,
 }
 
-# Create synapse and input spike time
+# Create synapse and set time of synaptic input
 
 synapse = LFPy.Synapse(cell,**synapse_parameters)
 synapse.set_spike_times(np.array([50.]))
@@ -47,17 +47,14 @@ synapse.set_spike_times(np.array([50.]))
 
 # But first create a grid of measurement locations
 
-# x = np.arange(-375, 376, 50)
-# z = np.arange(-275, 1201, 50)
-x = np.arange(-500, 501, 50)
+x = np.arange(-500, 501, 50) #last parameter sets grid spacing
 z = np.arange(-400, 1201, 50)
-
 X, Z = np.meshgrid(x, z)
 Y = np.zeros(np.shape(X))
 
 electrode_parameters = {
     'sigma' : 0.3,   # extracellular conductivity
-    'x' : X.flatten(),
+    'x' : X.flatten(), # electrode requires 1d vector of positions
     'y' : Y.flatten(),
     'z' : Z.flatten()
 }
