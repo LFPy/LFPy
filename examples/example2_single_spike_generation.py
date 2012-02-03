@@ -1,43 +1,96 @@
 #!/usr/bin/env python
+################################################################################
+#
+# This is an example scripts using LFPy with an active cell model adapted from
+# Mainen and Sejnowski, Nature 1996, for the original files, see
+# http://senselab.med.yale.edu/modeldb/ShowModel.asp?model=2488
+#
+# This scripts is set up to use the model, where the active conductances are set
+# in the file "active_declarations.hoc", and uses the mechanisms from the .mod-
+# files provided here. For this example to work, run "nrnivmodl" in this folder
+# to compile these mechanisms (i.e. /$PATHTONEURON/nrn/x86_64/bin/nrnivmodl).
+#
+################################################################################
 
-import pylab as pl
+#import some plotting stuff and the LFPy-module
+import matplotlib.pylab as pl
 import LFPy
+
+#set some plotting parameters
 pl.rcParams.update({'font.size' : 12, 'figure.figsize' : [10, 10],
+    'figure.facecolor' : '1',
     'left': 0.1, 'wspace' : 0.5 ,'hspace' : 0.5})
 
 #plot pops up by itself
 pl.interactive(1)
 
 ################################################################################
-# A couple of function declarations
+# Function declarations
 ################################################################################
 
 def plotstuff(cell, electrode):
-    fig = pl.figure()
-    pl.subplot(221)
-    pl.plot(cell.tvec,cell.somav)
-    pl.xlabel('Time [ms]')
-    pl.ylabel('Soma pot. [mV]')
-
-    pl.subplot(223)
-    for i in xrange(len(cell.synapses)):
-        pl.plot(cell.tvec,cell.synapses[i].i,color=cell.synapses[i].color)
-    pl.xlabel('Time [ms]')
-    pl.ylabel('Syn. i [nA]')
-
-    pl.subplot(122)
+    #creating array of points and corresponding diameters along structure
     for i in xrange(cell.xend.size):
-        pl.plot([cell.xstart[i],cell.xend[i]],[cell.zstart[i],cell.zend[i]],color='k')
-    for i in xrange(len(cell.synapses)):
-        pl.plot([cell.synapses[i].x],[cell.synapses[i].z],\
-            color=cell.synapses[i].color,marker=cell.synapses[i].marker)
-    pl.plot(electrode.x, electrode.z, 'o')
+        if i == 0:
+            xcoords = pl.array([cell.xmid[i]])
+            ycoords = pl.array([cell.ymid[i]])
+            zcoords = pl.array([cell.zmid[i]])
+            diams = pl.array([cell.diam[i]])    
+        else:
+            if cell.zmid[i] < 90 and cell.zmid[i] > -90 and \
+                    cell.xmid[i] < 90 and cell.xmid[i] > -90:
+                xcoords = pl.r_[xcoords, pl.linspace(cell.xstart[i],
+                                            cell.xend[i], cell.length[i]*3)]   
+                ycoords = pl.r_[ycoords, pl.linspace(cell.ystart[i],
+                                            cell.yend[i], cell.length[i]*3)]   
+                zcoords = pl.r_[zcoords, pl.linspace(cell.zstart[i],
+                                            cell.zend[i], cell.length[i]*3)]   
+                diams = pl.r_[diams, pl.linspace(cell.diam[i], cell.diam[i],
+                                            cell.length[i]*3)]   
     
+    #sort along depth-axis
+    argsort = pl.argsort(ycoords)
     
-    pl.axis('equal')
-    pl.title('Morphology (XZ)')
-    pl.xlabel(r'x [$\mu$m]')
-    pl.ylabel(r'z [$\mu$m]')
+    #plotting
+    fig = pl.figure()
+    ax = fig.add_subplot(111, frame_on=False)
+    ax.scatter(xcoords[argsort], zcoords[argsort], s=diams[argsort]**2*20,
+               c=ycoords[argsort], edgecolors='none', cmap='gray')
+    ax.plot(electrode.x, electrode.z, '.', marker='o', markersize=5, color='k')
+    
+    i = 0
+    limLFP = abs(electrode.LFP).max()
+    for LFP in electrode.LFP:
+        tvec = cell.tvec*0.6 + electrode.x[i] + 2
+        if abs(LFP).max() >= 1:
+            factor = 2
+            color='r'
+        elif abs(LFP).max() < 0.25:
+            factor = 50
+            color='b'
+        else:
+            factor = 10
+            color='g'
+        trace = LFP*factor + electrode.z[i]
+        ax.plot(tvec, trace, color=color, lw = 2)
+        i += 1
+    
+    ax.plot([22, 28], [-60, -60], color='k', lw = 2)
+    ax.text(22, -65, '10 ms')
+    
+    ax.plot([60, 60], [20, 30], color='r', lw=2)
+    ax.text(62, 20, '5 mV')
+    
+    ax.plot([60, 60], [0, 10], color='g', lw=2)
+    ax.text(62, 0, '1 mV')
+    
+    ax.plot([60, 60], [-20, -10], color='b', lw=2)
+    ax.text(62, -20, '0.1 mV')
+    
+    ax.set_xticks([])
+    ax.set_yticks([])
+    
+    ax.axis([-61, 61, -61, 61])
 
 
 ################################################################################
@@ -46,101 +99,74 @@ def plotstuff(cell, electrode):
 # we chose to show only the most important ones here.
 ################################################################################
 
-cellParameters = {          #various cell parameters,
-    'morphology' : 'morphologies/L5_Mainen96_wAxon_LFPy.hoc', #Mainen&Sejnowski, Nature, 1996
-    'rm' : 30000,       #membrane resistance
-    'cm' : 1.0,         #membrane capacitance
-    'Ra' : 150,         #axial resistance
-    'v_init' : -65,     #initial crossmembrane potential
-    'e_pas' : -65,      #reversal potential passive mechs
-    'passive' : True,   #switch on passive mechs
-    'nsegs_method' : 'lambda_f',    #method for setting number of segments
-    'lambda_f' : 100,               #frequency for segment
-    'timeres_NEURON' : 2**-4,   #[ms] dt's should be in powers of 2 for both,
-    'timeres_python' : 2**-4,   #need binary representation
-    'tstartms' : -10,  #start time of simulation, recorders start at t=0
-    'tstopms' : 20,   #stop simulation at 1000 ms. these can be overridden
-                        #by setting these arguments in cell.simulation()
-    'custom_code'  : ['active_declarations.hoc'],    #Custom .hoc/.py-scripts
+#define cell parameters used as input to cell-class
+cellParameters = {
+    'morphology' : 'morphologies/L5_Mainen96_wAxon_LFPy.hoc',
+    'rm' : 30000,               # membrane resistance
+    'cm' : 1.0,                 # membrane capacitance
+    'Ra' : 150,                 # axial resistance
+    'v_init' : -65,             # initial crossmembrane potential
+    'e_pas' : -65,              # reversal potential passive mechs
+    'passive' : True,           # switch on passive mechs
+    'nsegs_method' : 'lambda_f',# method for setting number of segments,
+    'lambda_f' : 200,           # segments are isopotential at this frequency
+    'timeres_NEURON' : 2**-5,   # dt of LFP and NEURON simulation.
+    'timeres_python' : 2**-5,
+    'tstartms' : -10,           #start time, recorders start at t=0
+    'tstopms' : 10,             #stop time of simulation
+    'custom_code'  : ['active_declarations.hoc'],    # will execute this file
 }
 
-#Synaptic parameters
+#Synaptic parameters, corresponding to a NetCon synapse built into NEURON
 synapseParameters = {
-    'idx' : 0,               #insert synapse on idx 0, the soma
-    'e' : 0.,                #reversal potential
-    'syntype' : 'Exp2Syn',   #conductance based exponential synapse
-    'tau1' : 1.0,            #Time constant, rise
-    'tau2' : 1.0,            #Time constant, decay
-    'weight' : 0.03,         #Synaptic weight
-    'record_current' : True, #Will enable synapse current recording
+    'idx' : 0,               # insert synapse on index "0", the soma
+    'e' : 0.,                # reversal potential of synapse
+    'syntype' : 'Exp2Syn',   # conductance based double-exponential synapse
+    'tau1' : 1.0,            # Time constant, rise
+    'tau2' : 1.0,            # Time constant, decay
+    'weight' : 0.03,         # Synaptic weight
+    'record_current' : True, # Will enable synapse current recording
 }
 
-
+#Generate the grid in xz-plane over which we calculate local field potentials
 x = pl.linspace(-50, 50, 11)
 z = pl.linspace(-50, 50, 11)
 X, Z = pl.meshgrid(x, z)
 y = pl.zeros(X.size)
-electrodeParameters = {             #parameters for RecExtElectrode class
-    'sigma' : 0.3,              #Extracellular potential
-    'x' : X.reshape(-1),
+
+#define parameters for extracellular recording electrode, using optional method
+electrodeParameters = {
+    'sigma' : 0.3,              # extracellular conductivity
+    'x' : X.reshape(-1),        # x,y,z-coordinates of contact points
     'y' : y,
-    'z' : Z.reshape(-1)
+    'z' : Z.reshape(-1),
+    'method' : 'som_as_point',  #treat soma segment as sphere source
 }
 
-
 ################################################################################
-# Main simulation procedure
+# Main simulation procedure, setting up extracellular electrode, cell, synapse
 ################################################################################
 
-pl.close('all')   #close open figures
+#close open figures
+pl.close('all')
 
 #create extracellular electrode object
 electrode = LFPy.RecExtElectrode(**electrodeParameters)
 
 #Initialize cell instance, using the LFPy.Cell class
 cell = LFPy.Cell(**cellParameters)
+#set the position of midpoint in soma to Origo (not needed, this is the default)
+cell.set_pos(xpos = 0, ypos = 0, zpos = 0)
 
-#attach synapse and set spike time
+#attach synapse with parameters and set spike time
 synapse = LFPy.Synapse(cell, **synapseParameters)
 synapse.set_spike_times(pl.array([1]))
 
 #perform NEURON simulation, results saved as attributes in the cell instance
 cell.simulate(electrode = electrode, rec_isyn=True)
 
+# Plotting:
+plotstuff(cell, electrode)
 
 
-################################################################################
-
-for i in xrange(cell.xend.size):
-    if i == 0:
-        xcoords = pl.array([cell.xmid[i]])
-        ycoords = pl.array([cell.ymid[i]])
-        zcoords = pl.array([cell.zmid[i]])
-        diams = pl.array([cell.diam[i]])    
-    else:
-        if cell.zmid[i] < 70 and cell.zmid[i] > -70 and cell.xmid[i] < 70 and cell.xmid[i] > -70:
-            xcoords = pl.r_[xcoords, pl.linspace(cell.xstart[i], cell.xend[i], cell.length[i]*3)]   
-            ycoords = pl.r_[ycoords, pl.linspace(cell.ystart[i], cell.yend[i], cell.length[i]*3)]   
-            zcoords = pl.r_[zcoords, pl.linspace(cell.zstart[i], cell.zend[i], cell.length[i]*3)]   
-            diams = pl.r_[diams, pl.linspace(cell.diam[i], cell.diam[i], cell.length[i]*3)]   
-
-argsort = pl.argsort(ycoords)
-pl.scatter(xcoords[argsort], zcoords[argsort], s=diams[argsort]**2*25, c=ycoords[argsort], edgecolors='none', cmap='gray')
-#for i in xrange(len(cell.synapses)):
-#    pl.plot([cell.synapses[i].x], [cell.synapses[i].z], \
-#        color='r', marker=cell.synapses[i].marker)
-pl.plot(electrode.x, electrode.z, '.', marker='o', markersize=10)
-
-i = 0
-limLFP = abs(electrode.LFP).max()
-for LFP in electrode.LFP:
-    tvec = cell.tvec + electrode.x[i]
-    trace = LFP + electrode.z[i]
-    color = 'k'
-    pl.plot(tvec, trace, color=color, lw = 2)
-    i += 1
-
-pl.axis([-55, 55, -55, 55])
-pl.xlabel(r'x ($\mu$m)')
-pl.ylabel(r'z ($\mu$m)')
 
