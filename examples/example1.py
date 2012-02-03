@@ -31,11 +31,11 @@ cell = LFPy.Cell(**cell_parameters)
 # Define synapse parameters
 
 synapse_parameters = {
-    'idx' : cell.get_closest_idx(x=-50., y=0., z=900.),
+    'idx' : cell.get_closest_idx(x=0., y=0., z=200.),
     'e' : 0.,                                # reversal potential
     'syntype' : 'ExpSyn',                   # synapse type
-    'tau' : 2.,                              # syn. time constant
-    'weight' : .1,                       # syn. weight
+    'tau' : 10.,                              # syn. time constant
+    'weight' : .001,                       # syn. weight
     'record_current':True,
 }
 
@@ -48,20 +48,21 @@ synapse.set_spike_times(np.array([50.]))
 
 # But first create a grid of measurement locations
 
-x_elec = np.tile(np.arange(-400,401,40),10)
-y_elec = np.zeros(len(x_elec))
-z_elec = np.repeat(np.arange(-400,1201,1600./20),10)
+x = np.arange(-375, 376, 50)
+z = np.arange(-275, 1201, 50)
+X, Z = np.meshgrid(x, z)
+Y = np.zeros(np.shape(X))
 
 electrode_parameters = {
     'sigma' : 0.3,   # extracellular conductivity
-    'x' : x_elec,
-    'y' : y_elec,
-    'z' : z_elec
+    'x' : X.flatten(),
+    'y' : Y.flatten(),
+    'z' : Z.flatten()
 }
 
 # Run simulation
 
-cell.simulate(rec_imem=True, rec_isyn=True)
+cell.simulate(rec_imem=True, rec_isyn=True, rec_vmem=True)
 
 # Set up electrode and calculate extracellular potential
 
@@ -91,12 +92,19 @@ def plot_morphology():
 plt.figure()
 
 plot_morphology()
-n_contours = 20
-X = np.reshape(x_elec,(10,21))
-Y = np.reshape(z_elec,(10,21))
-Z = np.reshape(sign_max_abs_LFP*max_abs_LFP,(10,21))
-plt.contourf(X,Y,Z,n_contours)
+n_contours = 100
 
+LFP = np.reshape(sign_max_abs_LFP*max_abs_LFP,(len(z),len(x)))
+plt.contourf(X,Z,LFP,n_contours)
+
+# LFP = np.reshape(np.log(max_abs_LFP),(len(z),len(x)))
+# plt.contourf(X,Z,LFP,n_contours)
+
+plt.figure()
+plt.plot(cell.tvec,cell.somav)
+
+plt.figure()
+plt.plot(cell.tvec,cell.synapses[0].i)
 
 # Figure formatting
 plt.axis('equal')
