@@ -93,22 +93,22 @@ def insert_synapses(synparams, section, n, spTimesFun, args):
 # we chose to show only the most important ones here.
 ################################################################################
 
-cellParameters = {          #various cell parameters,
-    'morphology' : 'morphologies/L5_Mainen96_wAxon_LFPy.hoc', #Mainen&Sejnowski, Nature, 1996
-    'rm' : 30000,       #membrane resistance
-    'cm' : 1.0,        #membrane capacitance
-    'Ra' : 150,         #axial resistance
-    'v_init' : -65,     #initial crossmembrane potential
-    'e_pas' : -65,      #reversal potential passive mechs
-    'passive' : True,   #switch on passive mechs
-    'nsegs_method' : 'lambda_f',
-    'lambda_f' : 100,
-    'timeres_NEURON' : 2**-4,   #[ms] dt's should be in powers of 2 for both,
-    'timeres_python' : 2**-4,   #need binary representation
-    'tstartms' : -100,  #start time of simulation, recorders start at t=0
-    'tstopms' : 1000,   #stop simulation at 1000 ms. these can be overridden
-                        #by setting these arguments in cell.simulation()
-    'custom_code'  : ['active_declarations_example3.hoc'],    #Custom .hoc/.py-scripts
+#define cell parameters used as input to cell-class
+cellParameters = {
+    'morphology' : 'morphologies/L5_Mainen96_wAxon_LFPy.hoc',
+    'rm' : 30000,               # membrane resistance
+    'cm' : 1.0,                 # membrane capacitance
+    'Ra' : 150,                 # axial resistance
+    'v_init' : -65,             # initial crossmembrane potential
+    'e_pas' : -65,              # reversal potential passive mechs
+    'passive' : True,           # switch on passive mechs
+    'nsegs_method' : 'lambda_f',# method for setting number of segments,
+    'lambda_f' : 100,           # segments are isopotential at this frequency
+    'timeres_NEURON' : 2**-4,   # dt of LFP and NEURON simulation.
+    'timeres_python' : 2**-4,
+    'tstartms' : -100,           #start time, recorders start at t=0
+    'tstopms' : 1000,             #stop time of simulation
+    'custom_code'  : ['active_declarations_example3.hoc'], # will run this file
 }
 
 # Synaptic parameters taken from Hendrickson et al 2011
