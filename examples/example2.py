@@ -11,6 +11,10 @@
 # this folder to compile these mechanisms
 # (i.e. /$PATHTONEURON/nrn/x86_64/bin/nrnivmodl).
 #
+# A single excitatory synapse drive the neuron into producing a single action-
+# potential, and the local field potential are calculated on a dense 2D-grid
+# on around the soma.
+#
 ################################################################################
 #import some plotting stuff and the LFPy-module
 import matplotlib.pylab as pl
@@ -94,12 +98,13 @@ def plotstuff(cell, electrode):
     
     ax.set_title('Location-dependent extracellular spike shapes')
     
-        
+    #plotting the soma trace    
     ax = fig.add_axes([0.75, 0.55, 0.2, 0.35])
     ax.plot(cell.tvec, cell.somav)
     ax.set_title('Somatic action-potential')
     ax.set_ylabel(r'$V_\mathrm{membrane}$ (mV)')
-
+    
+    #plotting the synaptic current
     ax = fig.add_axes([0.75, 0.1, 0.2, 0.35])
     ax.plot(cell.tvec, cell.synapses[0].i)
     ax.set_title('Synaptic current')

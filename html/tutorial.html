@@ -90,7 +90,7 @@ passive parameters of the cell or adding custom NEURON mechanisms), but for now 
 </pre></div>
 </div>
 <p>Let us assume we want the synapse to be activated by a single spike at t = 50ms. We have to pass the spike time to the synapse using</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">synapse</span><span class="o">.</span><span class="n">set_spike_times</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">50.</span><span class="p">]))</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">synapse</span><span class="o">.</span><span class="n">set_spike_times</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">50.</span><span class="p">]))</span>
 </pre></div>
 </div>
 <p>We now have a cell with a synapse, and we can run the simulation</p>

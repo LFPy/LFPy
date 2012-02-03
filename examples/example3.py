@@ -11,13 +11,18 @@
 # this folder to compile these mechanisms
 # (i.e. /$PATHTONEURON/nrn/x86_64/bin/nrnivmodl).
 #
+# Here, excitatory and inhibitory neurons are distributed on different parts of
+# the morphology, with stochastic spike times produced by the
+# LFPy.inputgenerators.stationary_gamma() function.
+#
 ################################################################################
 
 # importing some modules, setting some matplotlib values for pl.plot.
-import pylab as pl
+import matplotlib.pylab as pl
 import LFPy
-pl.rcParams.update({'font.size' : 10, 'figure.figsize' : [16,9], 'wspace' : 0.5,
-    'hspace' : 0.5})
+pl.rcParams.update({'font.size' : 12,
+    'figure.facecolor' : '1',
+    'wspace' : 0.5, 'hspace' : 0.5})
 
 #seed for random generation
 pl.seed(9876543210)
@@ -30,52 +35,42 @@ pl.interactive(1)
 ################################################################################
 
 def plotstuff():
-    fig = pl.figure()
-    pl.subplot(321)
-    pl.plot(cell.tvec,cell.somav)
-    pl.xlabel('Time [ms]')
-    pl.ylabel('Soma pot. [mV]')
-
-    pl.subplot(323)
+    fig = pl.figure(figsize=[12, 8])
+    
+    ax = fig.add_axes([0.1, 0.7, 0.5, 0.2])
+    ax.plot(cell.tvec,cell.somav)
+    ax.set_xlabel('Time [ms]')
+    ax.set_ylabel('Soma pot. [mV]')
+    
+    ax = fig.add_axes([0.1, 0.4, 0.5, 0.2])
     for i in xrange(len(cell.synapses)):
-        pl.plot(cell.tvec,cell.synapses[i].i,color=cell.synapses[i].color)
-    pl.xlabel('Time [ms]')
-    pl.ylabel('Syn. i [nA]')
-
-    pl.subplot(325)
+        ax.plot(cell.tvec,cell.synapses[i].i,color=cell.synapses[i].color)
+    ax.set_xlabel('Time [ms]')
+    ax.set_ylabel('Syn. i [nA]')
+    
+    ax = fig.add_axes([0.1, 0.1, 0.5, 0.2])
     absmaxLFP = abs(pl.array([electrode.LFP.max(),electrode.LFP.min()])).max()
     pl.imshow(electrode.LFP,vmax=absmaxLFP/5,vmin=-absmaxLFP/5,origin='lower',
            extent=(cell.tvec[0],cell.tvec[-1],electrode.z[0],electrode.z[-1]),cmap='jet_r',
            interpolation='nearest')
-    pl.colorbar()
+    cbar = pl.colorbar(ax=ax)
+    cbar.set_label('LFP (mV)')
     pl.axis('tight')
-    pl.xlabel('Time [ms]')
-    pl.ylabel('z [$\mu$m]')
-
-    pl.subplot(143)
+    ax.set_xlabel('Time [ms]')
+    ax.set_ylabel('z [$\mu$m]')
+    
+    ax = fig.add_axes([0.65, 0.1, 0.25, 0.8], frameon=False)
     for i in xrange(cell.xend.size):
-        pl.plot([cell.xstart[i],cell.xend[i]],[cell.zstart[i],cell.zend[i]],color='k')
+        ax.plot([cell.xstart[i],cell.xend[i]],[cell.zstart[i],cell.zend[i]],color='k')
     for i in xrange(len(cell.synapses)):
-        pl.plot([cell.synapses[i].x],[cell.synapses[i].z],\
+        ax.plot([cell.synapses[i].x],[cell.synapses[i].z],\
             color=cell.synapses[i].color,marker=cell.synapses[i].marker)
     for i in xrange(electrode.x.size):
-        pl.plot(electrode.x[i],electrode.z[i],color='g',marker='o')
+        ax.plot(electrode.x[i],electrode.z[i],color='g',marker='o')
     pl.axis('equal')
-    pl.title('Morphology (XZ)')
-    pl.xlabel(r'x [$\mu$m]')
-    pl.ylabel(r'z [$\mu$m]')
-
-    pl.subplot(144)
-    for i in xrange(cell.yend.size):
-        pl.plot([cell.ystart[i],cell.yend[i]],[cell.zstart[i],cell.zend[i]],color='k')
-    for i in xrange(len(cell.synapses)):
-        pl.plot([cell.synapses[i].y],[cell.synapses[i].z],\
-            color=cell.synapses[i].color,marker=cell.synapses[i].marker)
-    for i in xrange(electrode.y.size):
-        pl.plot(electrode.y[i],electrode.z[i],color='g',marker='o')
-    pl.axis('equal')
-    pl.title('Morphology (YZ)')
-    pl.xlabel(r'y [$\mu$m]')
+    pl.axis(pl.array(pl.axis())*0.8)
+    ax.set_xticks([])
+    ax.set_yticks([])
 
 def insert_synapses(synparams, section, n, spTimesFun, args):
     #find n compartments to insert synapses onto
@@ -108,8 +103,8 @@ cellParameters = {          #various cell parameters,
     'passive' : True,   #switch on passive mechs
     'nsegs_method' : 'lambda_f',
     'lambda_f' : 100,
-    'timeres_NEURON' : 2**-3,   #[ms] dt's should be in powers of 2 for both,
-    'timeres_python' : 2**-3,   #need binary representation
+    'timeres_NEURON' : 2**-4,   #[ms] dt's should be in powers of 2 for both,
+    'timeres_python' : 2**-4,   #need binary representation
     'tstartms' : -100,  #start time of simulation, recorders start at t=0
     'tstopms' : 1000,   #stop simulation at 1000 ms. these can be overridden
                         #by setting these arguments in cell.simulation()
