@@ -79,8 +79,11 @@ def plotstuff(cell, electrode):
         ax.plot(tvec, trace, color=color, lw = 2)
         i += 1
     
-    ax.plot([22, 28], [-60, -60], color='k', lw = 2)
+    ax.plot([22, 28], [-60, -60], color='k', lw = 3)
     ax.text(22, -65, '10 ms')
+    
+    ax.plot([40, 50], [-60, -60], color='k', lw = 3)
+    ax.text(42, -65, '10 $\mu$m')
     
     ax.plot([60, 60], [20, 30], color='r', lw=2)
     ax.text(62, 20, '5 mV')
@@ -90,6 +93,8 @@ def plotstuff(cell, electrode):
     
     ax.plot([60, 60], [-20, -10], color='b', lw=2)
     ax.text(62, -20, '0.1 mV')
+    
+    
     
     ax.set_xticks([])
     ax.set_yticks([])
@@ -175,6 +180,8 @@ electrode = LFPy.RecExtElectrode(**electrodeParameters)
 cell = LFPy.Cell(**cellParameters)
 #set the position of midpoint in soma to Origo (not needed, this is the default)
 cell.set_pos(xpos = 0, ypos = 0, zpos = 0)
+#rotate the morphology 90 degrees around z-axis
+cell.set_rotation(z = pl.pi/2)
 
 #attach synapse with parameters and set spike time
 synapse = LFPy.Synapse(cell, **synapseParameters)
