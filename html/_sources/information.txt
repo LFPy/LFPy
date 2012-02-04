@@ -21,17 +21,18 @@ To install LFPy you will need the following:
 4.  `Cython <http://cython.org>`_ (C-extensions for python) to speed up simulations of extracellular fields. Tested with version > 1.4.
 
 Installing NEURON with Python
-=============================
+-----------------------------
 
 Some users have difficulties install NEURON as a Python module,
-depending on their platform. We will provide some explanations here, and otherwise direct to the NEURON download pages;
+depending on their platform. 
+We will provide some explanations here, and otherwise direct to the NEURON download pages;
 http://www.neuron.yale.edu/neuron/download and http://www.neuron.yale.edu/neuron/download/getstd. The NEURON forums are
 also a useful resource for installation problems.
 
-Dependencies Ubuntu 10.4LTS and other Debian based Linux versions
------------------------------------------------------------------
+Dependencies: Ubuntu 10.4LTS and other Debian-based Linux versions
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The instructions below show how to meet all the requirements starting from a clean Ubuntu 10.4 installation of NEURON from the development branch. 
+The instructions below show how to meet all the requirements starting from a clean Ubuntu 10.4 for the installation of NEURON from the development branch. 
 
 Start by installing the required packages
 ::
@@ -49,7 +50,7 @@ Download Cython (Cython-0.15.1.tar.gz, or newer) from `Cython.org <http://www.cy
     sudo python setup.py install
 
 Linux/Unix installation
------------------------
+^^^^^^^^^^^^^^^^^^^^^^^
 
 Now get the source code of NEURON using mercurial
 ::
@@ -101,11 +102,11 @@ You might want to add the folder with NEURON executables to your PATH, so that y
     export PATH=$PATH:$HOME/neuron/nrn/x86_64/bin
 
 
-Dependencies and installation on Mac OSX
-----------------------------------------
+Dependencies and installation on Mac OS X
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Most of the development work and testing of LFPy has been done on Max OSX 10.6.* Snow Leopard and 10.7.* Lion. Our preferred way of building Python
-and NEURON have been through MacPorts; www.macports.org. 
+Most of the development work and testing of LFPy has been done on Max OS X 10.6.* Snow Leopard and 10.7.* Lion. Our preferred way of building Python
+and NEURON have been through MacPorts; http://www.macports.org. 
 
 To start using MacPorts, follow the instructions on http://www.macports.org/install.php.
 
@@ -116,6 +117,7 @@ Building a python 2.7 environment using MacPorts issue in Terminal:
 
 Make the installed Python and IPython default:
 ::
+
     sudo port select --set python python27
     sudo port select --set ipython ipython27
     
@@ -174,10 +176,10 @@ Install NEURON from the bleeding edge source code:
     cd src/nrnpython
     sudo python setup.py install
 
-If you rather use Enthough Python distribution, see this forum post: https://www.neuron.yale.edu/phpBB/viewtopic.php?f=2&t=2191 
+If you prefer to use Enthough Python distribution, see this forum post: https://www.neuron.yale.edu/phpBB/viewtopic.php?f=2&t=2191 
 
-Installation of LFPy
-====================
+Installing LFPy
+---------------
 
 1.  Download the LFPy source distribution (LFPy-1.0.tar.gz) and unpack.
 

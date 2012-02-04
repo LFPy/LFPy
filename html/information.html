@@ -75,16 +75,16 @@ Not tested with Python 3.x.</p>
 </li>
 </ol>
 </div>
-</div>
 <div class="section" id="installing-neuron-with-python">
-<h1>Installing NEURON with Python<a class="headerlink" href="#installing-neuron-with-python" title="Permalink to this headline">¶</a></h1>
+<h2>Installing NEURON with Python<a class="headerlink" href="#installing-neuron-with-python" title="Permalink to this headline">¶</a></h2>
 <p>Some users have difficulties install NEURON as a Python module,
-depending on their platform. We will provide some explanations here, and otherwise direct to the NEURON download pages;
+depending on their platform.
+We will provide some explanations here, and otherwise direct to the NEURON download pages;
 <a class="reference external" href="http://www.neuron.yale.edu/neuron/download">http://www.neuron.yale.edu/neuron/download</a> and <a class="reference external" href="http://www.neuron.yale.edu/neuron/download/getstd">http://www.neuron.yale.edu/neuron/download/getstd</a>. The NEURON forums are
 also a useful resource for installation problems.</p>
 <div class="section" id="dependencies-ubuntu-10-4lts-and-other-debian-based-linux-versions">
-<h2>Dependencies Ubuntu 10.4LTS and other Debian based Linux versions<a class="headerlink" href="#dependencies-ubuntu-10-4lts-and-other-debian-based-linux-versions" title="Permalink to this headline">¶</a></h2>
-<p>The instructions below show how to meet all the requirements starting from a clean Ubuntu 10.4 installation of NEURON from the development branch.</p>
+<h3>Dependencies: Ubuntu 10.4LTS and other Debian-based Linux versions<a class="headerlink" href="#dependencies-ubuntu-10-4lts-and-other-debian-based-linux-versions" title="Permalink to this headline">¶</a></h3>
+<p>The instructions below show how to meet all the requirements starting from a clean Ubuntu 10.4 for the installation of NEURON from the development branch.</p>
 <p>Start by installing the required packages</p>
 <div class="highlight-python"><pre>sudo apt-get install mercurial autoconf libtool
 sudo apt-get install libxext-dev libncurses-dev
@@ -98,7 +98,7 @@ Download Cython (Cython-0.15.1.tar.gz, or newer) from <a class="reference extern
 </div>
 </div>
 <div class="section" id="linux-unix-installation">
-<h2>Linux/Unix installation<a class="headerlink" href="#linux-unix-installation" title="Permalink to this headline">¶</a></h2>
+<h3>Linux/Unix installation<a class="headerlink" href="#linux-unix-installation" title="Permalink to this headline">¶</a></h3>
 <p>Now get the source code of NEURON using mercurial</p>
 <div class="highlight-python"><pre>cd $HOME
 mkdir neuron
@@ -136,10 +136,10 @@ neuron.test()</pre>
 <div class="highlight-python"><pre>export PATH=$PATH:$HOME/neuron/nrn/x86_64/bin</pre>
 </div>
 </div>
-<div class="section" id="dependencies-and-installation-on-mac-osx">
-<h2>Dependencies and installation on Mac OSX<a class="headerlink" href="#dependencies-and-installation-on-mac-osx" title="Permalink to this headline">¶</a></h2>
-<p>Most of the development work and testing of LFPy has been done on Max OSX 10.6.* Snow Leopard and 10.7.* Lion. Our preferred way of building Python
-and NEURON have been through MacPorts; www.macports.org.</p>
+<div class="section" id="dependencies-and-installation-on-mac-os-x">
+<h3>Dependencies and installation on Mac OS X<a class="headerlink" href="#dependencies-and-installation-on-mac-os-x" title="Permalink to this headline">¶</a></h3>
+<p>Most of the development work and testing of LFPy has been done on Max OS X 10.6.* Snow Leopard and 10.7.* Lion. Our preferred way of building Python
+and NEURON have been through MacPorts; <a class="reference external" href="http://www.macports.org">http://www.macports.org</a>.</p>
 <p>To start using MacPorts, follow the instructions on <a class="reference external" href="http://www.macports.org/install.php">http://www.macports.org/install.php</a>.</p>
 <p>Building a python 2.7 environment using MacPorts issue in Terminal:</p>
 <div class="highlight-python"><pre>sudo port install python27 py27-ipython py27-numpy py27-matplotlib py27-scipy py27-cython</pre>
@@ -199,11 +199,11 @@ sudo make after_install
 cd src/nrnpython
 sudo python setup.py install</pre>
 </div>
-<p>If you rather use Enthough Python distribution, see this forum post: <a class="reference external" href="https://www.neuron.yale.edu/phpBB/viewtopic.php?f=2&amp;t=2191">https://www.neuron.yale.edu/phpBB/viewtopic.php?f=2&amp;t=2191</a></p>
+<p>If you prefer to use Enthough Python distribution, see this forum post: <a class="reference external" href="https://www.neuron.yale.edu/phpBB/viewtopic.php?f=2&amp;t=2191">https://www.neuron.yale.edu/phpBB/viewtopic.php?f=2&amp;t=2191</a></p>
 </div>
 </div>
-<div class="section" id="installation-of-lfpy">
-<h1>Installation of LFPy<a class="headerlink" href="#installation-of-lfpy" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="installing-lfpy">
+<h2>Installing LFPy<a class="headerlink" href="#installing-lfpy" title="Permalink to this headline">¶</a></h2>
 <ol class="arabic">
 <li><p class="first">Download the LFPy source distribution (LFPy-1.0.tar.gz) and unpack.</p>
 </li>
@@ -240,6 +240,7 @@ execfile("example1.py")</pre>
 </li>
 </ol>
 </div>
+</div>
 
 
           </div>
@@ -251,15 +252,15 @@ execfile("example1.py")</pre>
   <ul>
 <li><a class="reference internal" href="#">Getting started</a><ul>
 <li><a class="reference internal" href="#requirements">Requirements</a></li>
-</ul>
-</li>
 <li><a class="reference internal" href="#installing-neuron-with-python">Installing NEURON with Python</a><ul>
-<li><a class="reference internal" href="#dependencies-ubuntu-10-4lts-and-other-debian-based-linux-versions">Dependencies Ubuntu 10.4LTS and other Debian based Linux versions</a></li>
+<li><a class="reference internal" href="#dependencies-ubuntu-10-4lts-and-other-debian-based-linux-versions">Dependencies: Ubuntu 10.4LTS and other Debian-based Linux versions</a></li>
 <li><a class="reference internal" href="#linux-unix-installation">Linux/Unix installation</a></li>
-<li><a class="reference internal" href="#dependencies-and-installation-on-mac-osx">Dependencies and installation on Mac OSX</a></li>
+<li><a class="reference internal" href="#dependencies-and-installation-on-mac-os-x">Dependencies and installation on Mac OS X</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#installation-of-lfpy">Installation of LFPy</a></li>
+<li><a class="reference internal" href="#installing-lfpy">Installing LFPy</a></li>
+</ul>
+</li>
 </ul>
 
   <h4>Previous topic</h4>
