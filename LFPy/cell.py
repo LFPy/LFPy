@@ -199,7 +199,15 @@ class Cell(object):
         if custom_code != None:
             for code in custom_code:
                 if code.split('.')[-1] == 'hoc':
-                    neuron.h.xopen(code)
+                    try:
+                        neuron.h.xopen(code)
+                    except RuntimeError:
+                        ERRMSG = '\n'.join(['', 
+                            'Could not load custom model code (%s)' %code, 
+                            'while creating a Cell object.',
+                            'One possible cause is the NEURON mechanisms have not been compiled, ',
+                            'try running nrnivmodl. ',])
+                        raise Exception, ERRMSG
                 elif code.split('.')[-1] == 'py':
                     exec(code)
                 else:
