@@ -12,7 +12,7 @@ import LFPy
 import os
 
 #plot will pop up by itself
-pl.interactive(1)
+# pl.interactive(1)
 
 '''
 Define some functions for plotting
@@ -35,8 +35,12 @@ def plot_morpho_indices(cell, new_fig = True):
     else:
         apic = cell.get_idx(section='dend')
     for i in xrange(apic.size):
-        ax.text(cell.xmid[apic[i]],cell.ymid[apic[i]],cell.zmid[apic[i]], \
+        try:
+            ax.text(cell.xmid[apic[i]],cell.ymid[apic[i]],cell.zmid[apic[i]], 
                 str(apic[i]), fontsize=8)
+        except TypeError:
+            ax.text(cell.xmid[apic[i]],cell.ymid[apic[i]],cell.zmid[apic[i]], 
+                str(apic[i]))
     
     apic = cell.get_idx(section='apic')
     soma = cell.get_idx(section='soma')
@@ -150,8 +154,8 @@ else:
 
         plot_morpho_indices(cell)
 
-        print('Idendtify TWO indices to be aligned with the z-axis in the plot')
-
+        print('Identify TWO indices to be aligned with the z-axis in the plot')
+        
         [a, b] = input('Type them in here (sep. by comma): ')
 
         r_a = pl.sqrt(cell.xmid[a]**2 + cell.ymid[a]**2 + cell.zmid[a]**2)
