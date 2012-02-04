@@ -615,7 +615,7 @@ class Cell(object):
         if rec_icap:
             self._set_icap_recorders()
         
-        #run fadvance until t >= tstopms
+        #run fadvance until t >= tstopms, and calculate LFP if asked for
         if electrode == None:
             if not rec_imem:
                 print "rec_imem = %s, membrane currents will not be recorded!" \
@@ -652,7 +652,9 @@ class Cell(object):
             self._collect_istim()
 
     def _collect_tvec(self):
-        '''Set the tvec to be a monotonically increasing numpy array'''
+        '''
+        Set the tvec to be a monotonically increasing numpy array after sim.
+        '''
         #fixing tvec, need to be monotonically increasing, from 0-tstopms
         self.tvec = np.array(self.tvec)
         if self.tstartms == 0:
@@ -669,7 +671,8 @@ class Cell(object):
         
 
     def _calc_imem(self):
-        '''Fetch the vectors from the memireclist and calculate self.imem
+        '''
+        Fetch the vectors from the memireclist and calculate self.imem
         containing all the membrane currents.
         '''
         self.imem = np.array(self.memireclist)
@@ -679,7 +682,9 @@ class Cell(object):
         del self.memireclist
     
     def _calc_ipas(self):
-        '''Get the passive currents'''
+        '''
+        Get the passive currents
+        '''
         self.ipas = np.array(self.memipasreclist)
         for i in xrange(self.ipas.shape[0]):
             self.ipas[i, ] *= self.area[i] * 1E-2
@@ -687,7 +692,9 @@ class Cell(object):
         del self.memipasreclist
     
     def _calc_icap(self):
-        '''Get the capacitive currents'''
+        '''
+        Get the capacitive currents
+        '''
         self.icap = np.array(self.memicapreclist)
         for i in xrange(self.icap.shape[0]):
             self.icap[i, ] *= self.area[i] * 1E-2
@@ -695,13 +702,17 @@ class Cell(object):
         del self.memicapreclist
     
     def _collect_vmem(self):
-        '''Get the membrane currents'''
+        '''
+        Get the membrane currents
+        '''
         self.vmem = np.array(self.memvreclist)
         self.memvreclist = None
         del self.memvreclist
     
     def _collect_isyn(self):
-        '''Get the synaptic currents'''
+        '''
+        Get the synaptic currents
+        '''
         for syn in self.synapses:
             if syn.record_current:
                 syn.collect_current(self)
@@ -711,14 +722,18 @@ class Cell(object):
         del self.synireclist
     
     def _collect_vsyn(self):
-        '''Collect the membrane voltage of segments with synapses'''
+        '''
+        Collect the membrane voltage of segments with synapses
+        '''
         for i in xrange(len(self.synapses)):
             self.synapses[i].collect_potential(self)
         self.synvreclist = None
         del self.synvreclist
     
     def _collect_istim(self):
-        '''Get the pointprocess currents'''
+        '''
+        Get the pointprocess currents
+        '''
         for i in xrange(len(self.pointprocesses)):
             if self.pointprocesses[i].record_current:
                 self.pointprocesses[i].collect_current(self)
@@ -728,21 +743,25 @@ class Cell(object):
         del self.stimireclist
        
     def loadspikes(self):
-        '''Initialize spiketimes from netcon if they exist'''
+        '''
+        Initialize spiketimes from netcon if they exist
+        '''
         if hasattr(self, 'synlist'):
             for i in xrange(int(self.synlist.count())):
                 for ii in xrange(int(self.sptimeslist.o(i).size)):
                     self.netconlist.o(i).event(float(self.sptimeslist.o(i)[ii]))
-                    #self.netconlist.o(i).event(self.sptimeslist.o(i)[ii])
-    
+
     def _set_time_recorder(self):
-        '''Initialize time-vector recorder in NEURON'''
-        #self.tvec = neuron.h.Vector(int(self.tstopms/self.timeres_python+1))
-        self.tvec = neuron.h.Vector() #Later NEURON versions dont double
+        '''
+        Initialize time-vector recorder in NEURON
+        '''
+        self.tvec = neuron.h.Vector()
         self.tvec.record(neuron.h._ref_t, self.timeres_python)
     
     def _set_soma_volt_recorder(self):
-        '''Record somatic membrane potential'''
+        '''
+        Record somatic membrane potential
+        '''
         self.somav = neuron.h.Vector(int(self.tstopms / 
                                          self.timeres_python+1))
         if self.nsomasec == 0:
@@ -756,7 +775,9 @@ class Cell(object):
                               self.timeres_python)
     
     def _set_imem_recorders(self):
-        '''Record membrane currents for all segments'''
+        '''
+        Record membrane currents for all segments
+        '''
         self.memireclist = neuron.h.List()
         for sec in self.allseclist:
             for seg in sec:
@@ -766,7 +787,9 @@ class Cell(object):
                 self.memireclist.append(memirec)
     
     def _set_ipas_recorders(self):
-        '''Record passive membrane currents for all segments'''
+        '''
+        Record passive membrane currents for all segments
+        '''
         self.memipasreclist = neuron.h.List()
         for sec in self.allseclist:
             for seg in sec:
@@ -776,7 +799,9 @@ class Cell(object):
                 self.memipasreclist.append(memipasrec)
     
     def _set_icap_recorders(self):
-        '''Record capacitive membrane currents for all segments'''
+        '''
+        Record capacitive membrane currents for all segments
+        '''
         self.memicapreclist = neuron.h.List()
         for sec in self.allseclist:
             for seg in sec:
@@ -786,7 +811,9 @@ class Cell(object):
                 self.memicapreclist.append(memicaprec)
     
     def _set_voltage_recorders(self):
-        '''Record membrane potentials for all segments'''
+        '''
+        Record membrane potentials for all segments
+        '''
         self.memvreclist = neuron.h.List()
         for sec in self.allseclist:
             for seg in sec:
@@ -796,8 +823,10 @@ class Cell(object):
                 self.memvreclist.append(memvrec)
     
     def set_pos(self, xpos=0, ypos=0, zpos=0):
-        '''Move the geometry so that midpoint of soma section is
-        in (xpos, ypos, zpos)'''
+        '''
+        Move the cell geometry so that midpoint of soma section is
+        in (xpos, ypos, zpos)
+        '''
         self.orig_pos = False
         
         diffx = self.somapos[0]-xpos
@@ -820,24 +849,43 @@ class Cell(object):
         self._update_synapse_positions()
     
     def strip_hoc_objects(self):
-        '''Destroy any NEURON hoc objects in cell instance'''
+        '''
+        Destroy any NEURON hoc objects in the cell object
+        '''
         for varname in dir(self):
             if type(getattr(self, varname)) == type(neuron.h.List()):
                 setattr(self, varname, None)
                 if self.verbose:
                     print 'None-typed %s in cell instance' % varname
         
-    
     def cellpickler(self, filename):
         '''Save data in cell to filename, using cPickle. It will however destroy
-        any neuron.h objects upon saving, as they cannot be pickled'''
+        any neuron.h objects upon saving, as they cannot be pickled
+        
+        Usage:
+        ::
+            cell.cellpickler('cell.cpickle')
+        
+        To load this cell again in another session:
+        ::
+            import cPickle
+            f = file('cell.cpickle', 'rb')
+            cell = cPickle.load(f)
+            f.close()
+        or
+        ::
+            import LFPy
+            cell = LFPy.tools.load('cell.cpickle')
+        '''
         self.strip_hoc_objects()
         filen = open(filename, 'wb')
         cPickle.dump(self, filen, protocol=2)
         filen.close()
     
     def _update_synapse_positions(self):
-        '''Update synapse positions after rotation of morphology'''
+        '''
+        Update synapse positions after rotation of morphology
+        '''
         for i in xrange(len(self.synapses)):
             self.synapses[i].update_pos(self)
     
@@ -847,14 +895,14 @@ class Cell(object):
         Input should be angles in radians.
         
         using rotation matrices, takes dict with rot. angles,
-        where {'x' : ... } etc. are the rotation angles around respective axes.
+        where x, y, z are the rotation angles around respective axes.
         All rotation angles are optional.
         
         Usage:
         ::
             cell = LFPy.Cell(**kwargs)
-            rotation = {'x' : 1.233, 'y : 0.236, 'z' : np.pi}
-            cell.set_rotation(rotation)
+            rotation = {'x' : 1.233, 'y' : 0.236, 'z' : np.pi}
+            cell.set_rotation(**rotation)
         '''
         if x != None:
             theta = -x
@@ -911,7 +959,9 @@ class Cell(object):
                 print 'Geometry not rotated around z-axis'
     
     def _squeeze_me_macaroni(self):
-        '''Reducing the dimensions of the morphology matrices'''
+        '''
+        Reducing the dimensions of the morphology matrices from 3D->2D
+        '''
         self.xstart = np.squeeze(np.array(self.xstart))
         self.xend = np.squeeze(np.array(self.xend))
         
@@ -922,17 +972,21 @@ class Cell(object):
         self.zend = np.squeeze(np.array(self.zend))
     
     def _rel_positions(self):
-        '''Morphology relative to soma position'''
-        rel_start = np.transpose(np.array([self.xstart-self.somapos[0], \
-                                                self.ystart-self.somapos[1], \
+        '''
+        Morphology relative to soma position
+        '''
+        rel_start = np.transpose(np.array([self.xstart-self.somapos[0],
+                                                self.ystart-self.somapos[1],
                                                 self.zstart-self.somapos[2]]))
-        rel_end = np.transpose(np.array([self.xend-self.somapos[0], \
-                                                self.yend-self.somapos[1], \
+        rel_end = np.transpose(np.array([self.xend-self.somapos[0],
+                                                self.yend-self.somapos[1],
                                                 self.zend-self.somapos[2]]))
         return rel_start, rel_end
     
     def _real_positions(self, rel_start, rel_end):
-        '''Morphology coordinates relative to Origo'''
+        '''
+        Morphology coordinates relative to Origo
+        '''
         self.xstart = rel_start[:, 0] + self.somapos[0]
         self.ystart = rel_start[:, 1] + self.somapos[1]
         self.zstart = rel_start[:, 2] + self.somapos[2]
@@ -947,27 +1001,31 @@ class Cell(object):
     
     def get_rand_prob_area_norm(self, section='allsec', 
                                 z_min=-10000, z_max=10000):
-        '''Return the probability (0-1) for synaptic coupling on segments
+        '''
+        Return the probability (0-1) for synaptic coupling on segments
         in section sum(prob)=1 over all segments in section.
-        Prob. determined by area.'''
+        Prob. determined by area.
+        '''
         idx = self.get_idx(section=section, z_min=z_min, z_max = z_max)
         prob = self.area[idx] / sum(self.area[idx])
         return prob
 
     def get_rand_prob_area_norm_from_idx(self, idx=np.array([0]), 
                                 z_min=-10000, z_max=10000):
-        '''Return the probability (0-1) for synaptic coupling on segments
-        in idx-array.
-        Normalised probability determined by area of segments.'''
+        '''
+        Return the normalized probability (0-1) for synaptic coupling on
+        segments in idx-array.
+        Normalised probability determined by area of segments.
+        '''
         prob = self.area[idx] / sum(self.area[idx])
         return prob
-
-
     
     def get_intersegment_vector(self, idx0=0, idx1=0):
-        '''Return the distance between midpoints of two segments with index
+        '''
+        Return the distance between midpoints of two segments with index
         idx0 and idx1. The argument returned is a vector [x, y, z], where
-        x = self.xmid[idx1] - self.xmid[idx0] etc'''
+        x = self.xmid[idx1] - self.xmid[idx0] etc.
+        '''
         vector = []
         try:
             if idx1 < 0 or idx0 < 0:
@@ -981,8 +1039,10 @@ class Cell(object):
             raise ValueError, ERRMSG
         
     def get_intersegment_distance(self, idx0=0, idx1=0):
-        '''Return the Euclidean distance between midpoints of two segments 
-        with indices idx0 and idx1.'''
+        '''
+        Return the Euclidean distance between midpoints of two segments 
+        with indices idx0 and idx1. Will return a float in unit of micrometers.
+        '''
         try:
             vector = np.array(self.get_intersegment_vector(idx0, idx1))
             return np.sqrt((vector**2).sum())
@@ -1019,8 +1079,10 @@ class Cell(object):
 
     def get_idx_parent_children(self, parent="soma[0]"):
         '''
-        Get the idx of parent and children sections, i.e. compartments ids
-        of sections connected to parent-argument'''
+        Get all idx of segments of parent and children sections, i.e. segment
+        idx of sections connected to parent-argument, and also of the parent
+        segments
+        '''
         idxvec = np.zeros(self.totnsegs)
         secnamelist = []
         childseclist = [parent]
@@ -1044,8 +1106,22 @@ class Cell(object):
         return idx
     
     def get_idx_section(self, section="soma[0]"):
-        '''Get the idx of segments in any section-argument, uses hoc naming
-        instead of general terms as in self.get_idx()'''
+        '''
+        Get the idx of segments in any section-argument, uses hoc naming
+        instead of general terms as in self.get_idx().
+        
+        For example:
+        ::
+            cell.get_idx_section(section='soma[0]')
+        will output something like
+        ::
+            array([0])
+            
+        To list all sections in the cell object, type
+        ::
+            for sec in cell.allseclist:
+                print sec.name()
+        '''
         idxvec = np.zeros(self.totnsegs)
         secnamelist = []
         i = 0
