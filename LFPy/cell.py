@@ -20,27 +20,6 @@ import cPickle
 from LFPy import RecExtElectrode
 from LFPy.run_simulation import _run_simulation, _run_simulation_with_electrode
 
-# INSTALLPATH = os.getenv('LFPYPATH')
-# 
-# KNOWN_ARCHITECTURES = ['i386', 'i686', 'x86_64', 'umac', 'ppc']
-# ARCHITECTURE = None
-# for arch in KNOWN_ARCHITECTURES:
-#     if os.path.isdir(os.path.join(INSTALLPATH, 'neuron', arch)):
-#         ARCHITECTURE = arch
-#         break
-# 
-# if ARCHITECTURE is None:
-#     ERRMSG = '\n'.join(['LFPy cannot find compiled neuron mechanisms!',
-#     'Try running nrnivmodl in %s' %os.path.join(INSTALLPATH, 'neuron'),
-#     'LFPy knows about the following architectures:',
-#     str(KNOWN_ARCHITECTURES)])
-#     raise Exception, ERRMSG
-# 
-# #loading the default LFPy mechanisms
-# DLL_FILENAME = os.path.join(INSTALLPATH,
-#                             'neuron', ARCHITECTURE, '.libs', 'libnrnmech.so')
-# neuron.h.nrn_load_dll(DLL_FILENAME) 
-
 class Cell(object):
     '''
     The main cell class used in LFPy.
