@@ -225,19 +225,6 @@ Normalised probability determined by area of segments.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="LFPy.Cell.rotate_xyz">
-<tt class="descname">rotate_xyz</tt><big>(</big><em>rotation</em><big>)</big><a class="headerlink" href="#LFPy.Cell.rotate_xyz" title="Permalink to this definition">¶</a></dt>
-<dd><p>Rotate geometry using rotation matrices, takes dict with rot. angles,
-where {&#8216;x&#8217; : ... } etc. are the rotation angles around respective axes.
-All rotation angles are optional.</p>
-<p>Usage:</p>
-<div class="highlight-python"><pre>cell = LFPy.Cell(**kwargs)
-rotation = {'x' : 1.233, 'y : 0.236, 'z' : np.pi}
-cell.rotate_xyz(rotation)</pre>
-</div>
-</dd></dl>
-
-<dl class="method">
 <dt id="LFPy.Cell.set_point_process">
 <tt class="descname">set_point_process</tt><big>(</big><em>idx</em>, <em>pptype</em>, <em>record_current=False</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#LFPy.Cell.set_point_process" title="Permalink to this definition">¶</a></dt>
 <dd><p>Insert pptype-electrode type pointprocess on segment numbered
@@ -251,6 +238,21 @@ idx, pptype, <a href="#id1"><span class="problematic" id="id2">**</span></a>kwar
 <tt class="descname">set_pos</tt><big>(</big><em>xpos=0</em>, <em>ypos=0</em>, <em>zpos=0</em><big>)</big><a class="headerlink" href="#LFPy.Cell.set_pos" title="Permalink to this definition">¶</a></dt>
 <dd><p>Move the geometry so that midpoint of soma section is
 in (xpos, ypos, zpos)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="LFPy.Cell.set_rotation">
+<tt class="descname">set_rotation</tt><big>(</big><em>x=None</em>, <em>y=None</em>, <em>z=None</em><big>)</big><a class="headerlink" href="#LFPy.Cell.set_rotation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rotate geometry of cell object around the x-, y-, z-axis in that order.
+Input should be angles in radians.</p>
+<p>using rotation matrices, takes dict with rot. angles,
+where {&#8216;x&#8217; : ... } etc. are the rotation angles around respective axes.
+All rotation angles are optional.</p>
+<p>Usage:</p>
+<div class="highlight-python"><pre>cell = LFPy.Cell(**kwargs)
+rotation = {'x' : 1.233, 'y : 0.236, 'z' : np.pi}
+cell.set_rotation(rotation)</pre>
+</div>
 </dd></dl>
 
 <dl class="method">

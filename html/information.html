@@ -151,7 +151,8 @@ sudo port select --set ipython ipython27</pre>
 <p>Install the necessary packages for cloning into repository and compiling NEURON:</p>
 <div class="highlight-python"><pre>sudo port install automake autoconf libtool libxext xorg-libXext ncurses mercurial bison flex</pre>
 </div>
-<p>Install NEURON from the bleeding edge source code:</p>
+<p>Install NEURON from the bleeding edge source code. The following recipe assumes a 64 bit build of NEURON and Python on OSX 10.7 Lion, so change
+&#8220;x86_64-apple-darwin10.7.0&#8221; throughout to facilitate your system accordingly;</p>
 <div class="highlight-python"><pre>#create a directory in home directory
 cd $HOME
 mkdir nrn64

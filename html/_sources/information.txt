@@ -126,7 +126,8 @@ Install the necessary packages for cloning into repository and compiling NEURON:
 
     sudo port install automake autoconf libtool libxext xorg-libXext ncurses mercurial bison flex
 
-Install NEURON from the bleeding edge source code:
+Install NEURON from the bleeding edge source code. The following recipe assumes a 64 bit build of NEURON and Python on OSX 10.7 Lion, so change
+"x86_64-apple-darwin10.7.0" throughout to facilitate your system accordingly;
 ::
 
     #create a directory in home directory                                                                                                                                                               
