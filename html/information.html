@@ -59,7 +59,8 @@
 <h2>Requirements<a class="headerlink" href="#requirements" title="Permalink to this headline">¶</a></h2>
 <p>To install LFPy you will need the following:</p>
 <ol class="arabic">
-<li><p class="first">Python, seems to work fine with recent python since 2.6.x (2.6.6 or newer recommended), 2.7.x works fine.</p>
+<li><p class="first">Python, seems to work fine with recent python since 2.6.x (2.6.6 or newer recommended), 2.7.x works fine.
+Not tested with Python 3.x.</p>
 </li>
 <li><p class="first">Python modules numpy, scipy, matplotlib</p>
 </li>
@@ -68,14 +69,22 @@
 <span class="n">neuron</span><span class="o">.</span><span class="n">test</span><span class="p">()</span>
 </pre></div>
 </div>
-<p>LFPy was tested with NEURON 7.2 and 7.3.</p>
+<p>LFPy was tested to work with NEURON 7.2 and 7.3, we had issues with NEURON 7.1.</p>
 </li>
-<li><p class="first"><a class="reference external" href="http://cython.org">Cython</a> (C-extensions for python) to speed up simulations of extracellular fields</p>
+<li><p class="first"><a class="reference external" href="http://cython.org">Cython</a> (C-extensions for python) to speed up simulations of extracellular fields. Tested with version &gt; 1.4.</p>
 </li>
 </ol>
-<div class="section" id="ubuntu-10-4lts">
-<h3>Ubuntu 10.4LTS<a class="headerlink" href="#ubuntu-10-4lts" title="Permalink to this headline">¶</a></h3>
-<p>The instructions below show how to meet all the requirements starting from a clean Ubuntu 10.4 installation.</p>
+</div>
+</div>
+<div class="section" id="installing-neuron-with-python">
+<h1>Installing NEURON with Python<a class="headerlink" href="#installing-neuron-with-python" title="Permalink to this headline">¶</a></h1>
+<p>Some users have difficulties install NEURON as a Python module,
+depending on their platform. We will provide some explanations here, and otherwise direct to the NEURON download pages;
+<a class="reference external" href="http://www.neuron.yale.edu/neuron/download">http://www.neuron.yale.edu/neuron/download</a> and <a class="reference external" href="http://www.neuron.yale.edu/neuron/download/getstd">http://www.neuron.yale.edu/neuron/download/getstd</a>. The NEURON forums are
+also a useful resource for installation problems.</p>
+<div class="section" id="dependencies-ubuntu-10-4lts-and-other-debian-based-linux-versions">
+<h2>Dependencies Ubuntu 10.4LTS and other Debian based Linux versions<a class="headerlink" href="#dependencies-ubuntu-10-4lts-and-other-debian-based-linux-versions" title="Permalink to this headline">¶</a></h2>
+<p>The instructions below show how to meet all the requirements starting from a clean Ubuntu 10.4 installation of NEURON from the development branch.</p>
 <p>Start by installing the required packages</p>
 <div class="highlight-python"><pre>sudo apt-get install mercurial autoconf libtool
 sudo apt-get install libxext-dev libncurses-dev
@@ -83,7 +92,14 @@ sudo apt-get install bison flex
 sudo apt-get install python-dev python-numpy python-scipy python-matplotlib
 sudo apt-get install ipython</pre>
 </div>
-<p>Now get the source code of NEURON</p>
+<p>The cython version provided in Ubuntu 10.4LTS is out of date, compile a more recent version yourself.
+Download Cython (Cython-0.15.1.tar.gz, or newer) from <a class="reference external" href="http://www.cython.org">Cython.org</a>, unpack and install;</p>
+<div class="highlight-python"><pre>sudo python setup.py install</pre>
+</div>
+</div>
+<div class="section" id="linux-unix-installation">
+<h2>Linux/Unix installation<a class="headerlink" href="#linux-unix-installation" title="Permalink to this headline">¶</a></h2>
+<p>Now get the source code of NEURON using mercurial</p>
 <div class="highlight-python"><pre>cd $HOME
 mkdir neuron
 cd neuron
@@ -110,22 +126,84 @@ make install</pre>
 sudo python setup.py install</pre>
 </div>
 <p>(or <tt class="docutils literal"><span class="pre">python</span> <span class="pre">setup.py</span> <span class="pre">install</span> <span class="pre">--user</span></tt> if you want to install the Python package in your home folder).</p>
-<p>Now you should be able to <tt class="docutils literal"><span class="pre">import</span> <span class="pre">neuron</span></tt> from Python console</p>
+<p>Now you should be able to <tt class="docutils literal"><span class="pre">import</span> <span class="pre">neuron</span></tt> from Python console and run a small test with success;</p>
 <div class="highlight-python"><pre>cd $HOME
 ipython
-import neuron</pre>
+import neuron
+neuron.test()</pre>
 </div>
 <p>You might want to add the folder with NEURON executables to your PATH, so that you can easily compile NEURON mechanisms using <tt class="docutils literal"><span class="pre">nrnivmodl</span></tt></p>
-<div class="highlight-python"><pre>export PATH=$PATH:$HOME/neuron/nrn/i686/bin</pre>
-</div>
-<p>Now download Cython (Cython-0.15.1.tar.gz, or newer) from <a class="reference external" href="http://www.cython.org">http://www.cython.org</a>, unpack and install</p>
-<div class="highlight-python"><pre>sudo python setup.py install</pre>
-</div>
-<p>You are now ready to download and install LFPy.</p>
+<div class="highlight-python"><pre>export PATH=$PATH:$HOME/neuron/nrn/x86_64/bin</pre>
 </div>
 </div>
-<div class="section" id="installation">
-<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="dependencies-and-installation-on-mac-osx">
+<h2>Dependencies and installation on Mac OSX<a class="headerlink" href="#dependencies-and-installation-on-mac-osx" title="Permalink to this headline">¶</a></h2>
+<p>Most of the development work and testing of LFPy has been done on Max OSX 10.6.* Snow Leopard and 10.7.* Lion. Our preferred way of building Python
+and NEURON have been through MacPorts; www.macports.org.</p>
+<p>To start using MacPorts, follow the instructions on <a class="reference external" href="http://www.macports.org/install.php">http://www.macports.org/install.php</a>.</p>
+<p>Building a python 2.7 environment using MacPorts issue in Terminal:</p>
+<div class="highlight-python"><pre>sudo port install python27 py27-ipython py27-numpy py27-matplotlib py27-scipy py27-cython</pre>
+</div>
+<p>Make the installed Python and IPython default:</p>
+<div class="highlight-python"><pre>sudo port select --set python python27
+sudo port select --set ipython ipython27</pre>
+</div>
+<p>Install the necessary packages for cloning into repository and compiling NEURON:</p>
+<div class="highlight-python"><pre>sudo port install automake autoconf libtool libxext xorg-libXext ncurses mercurial bison flex</pre>
+</div>
+<p>Install NEURON from the bleeding edge source code:</p>
+<div class="highlight-python"><pre>#create a directory in home directory
+cd $HOME
+mkdir nrn64
+cd nrn64
+
+#creating directories
+sudo mkdir /Applications/NEURON-7.2
+sudo mkdir /Applications/NEURON-7.2/iv
+sudo mkdir /Applications/NEURON-7.2/nrn
+
+#Downloading bleeding edge source code
+hg clone http://www.neuron.yale.edu/hg/neuron/iv
+hg clone http://www.neuron.yale.edu/hg/neuron/nrn
+cd iv
+hg up
+cd ../nrn
+hg up
+cd ..
+
+#compiling and installing IV under folder /Applications/nrn7.2
+cd iv
+sh build.sh
+./configure --prefix=/Applications/NEURON-7.2/iv \
+    --build=x86_64-apple-darwin10.7.0 --host=x86_64-apple-darwin10.7.0
+
+make
+sudo make install
+
+#Building NEURON with InterViews, you may have to alter the path --with-nrnpython=/python-path
+cd $HOME/nrn64/nrn
+sh build.sh
+./configure --prefix=/Applications/NEURON-7.2/nrn --with-iv=/Applications/NEURON-7.2/iv \
+    --with-x --x-includes=/usr/X11/include/ --x-libraries=/usr/X11/lib/ \
+    --with-nrnpython=/opt/local/Library/Frameworks/Python.framework/Versions/2.7/Resources/Python.app/Contents/MacOS/Python \
+    --host=x86_64-apple-darwin10.7.0 --build=x86_64-apple-darwin10.7.0
+
+make
+sudo make install
+sudo make after_install
+
+#You should now have a working NEURON application under Applications. Small test;
+#sudo /Applications/NEURON-7.2/nrn/x86_64/bin/neurondemo
+
+#Final step is to install neuron as a python module
+cd src/nrnpython
+sudo python setup.py install</pre>
+</div>
+<p>If you rather use Enthough Python distribution, see this forum post: <a class="reference external" href="https://www.neuron.yale.edu/phpBB/viewtopic.php?f=2&amp;t=2191">https://www.neuron.yale.edu/phpBB/viewtopic.php?f=2&amp;t=2191</a></p>
+</div>
+</div>
+<div class="section" id="installation-of-lfpy">
+<h1>Installation of LFPy<a class="headerlink" href="#installation-of-lfpy" title="Permalink to this headline">¶</a></h1>
 <ol class="arabic">
 <li><p class="first">Download the LFPy source distribution (LFPy-1.0.tar.gz) and unpack.</p>
 </li>
@@ -162,7 +240,6 @@ execfile("example1.py")</pre>
 </li>
 </ol>
 </div>
-</div>
 
 
           </div>
@@ -173,13 +250,16 @@ execfile("example1.py")</pre>
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Getting started</a><ul>
-<li><a class="reference internal" href="#requirements">Requirements</a><ul>
-<li><a class="reference internal" href="#ubuntu-10-4lts">Ubuntu 10.4LTS</a></li>
+<li><a class="reference internal" href="#requirements">Requirements</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#installation">Installation</a></li>
+<li><a class="reference internal" href="#installing-neuron-with-python">Installing NEURON with Python</a><ul>
+<li><a class="reference internal" href="#dependencies-ubuntu-10-4lts-and-other-debian-based-linux-versions">Dependencies Ubuntu 10.4LTS and other Debian based Linux versions</a></li>
+<li><a class="reference internal" href="#linux-unix-installation">Linux/Unix installation</a></li>
+<li><a class="reference internal" href="#dependencies-and-installation-on-mac-osx">Dependencies and installation on Mac OSX</a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#installation-of-lfpy">Installation of LFPy</a></li>
 </ul>
 
   <h4>Previous topic</h4>
