@@ -25,7 +25,7 @@ pl.rcParams.update({'font.size' : 12,
     'wspace' : 0.5, 'hspace' : 0.5})
 
 #seed for random generation
-pl.seed(9876543210)
+pl.seed(999)
 
 #plot pops up by itself
 pl.interactive(1)
