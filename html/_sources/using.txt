@@ -15,6 +15,10 @@ Cell morphology can be specified manually in a ``hoc`` file. For a simple exampl
 -  use ``soma`` as the name for the soma compartment,
 -  use a name starting with ``dend`` for the dendrites.
 
+Also the morphologies exported from the NEURON simulator 
+(for example using Cell Builder -> Export) should
+work with LFPy. 
+
 ::
 
     /* ----------------------------------------------------
@@ -81,15 +85,15 @@ The units in LFPy for given quantities are:
 +-------------+-----------+
 | What        | Unit      |
 +=============+===========+
-| Potentials  | [mV]      |
+| Potential   | [mV]      |
 +-------------+-----------+
-| Currents    | [nA]      |
+| Current     | [nA]      |
 +-------------+-----------+
-| conductance | [S/cm2]   |
+| Conductance | [S/cm2]   |
 +-------------+-----------+
-| capacitance | [muF/cm2] |
+| Capacitance | [μF/cm2]  |
 +-------------+-----------+
-| Coordinates | [mum]     |
+| Dimension   | [μm]      |
 +-------------+-----------+
 
 Note: resistance, conductance and capacitance are usually specific values, i.e per membrane area (lowercase r_m, g, c_m)

@@ -66,6 +66,9 @@
 <li>use <tt class="docutils literal"><span class="pre">soma</span></tt> as the name for the soma compartment,</li>
 <li>use a name starting with <tt class="docutils literal"><span class="pre">dend</span></tt> for the dendrites.</li>
 </ul>
+<p>Also the morphologies exported from the NEURON simulator
+(for example using Cell Builder -&gt; Export) should
+work with LFPy.</p>
 <div class="highlight-python"><pre>/* ----------------------------------------------------
 example_morphology.hoc
 
@@ -136,20 +139,20 @@ The units in LFPy for given quantities are:</p>
 </tr>
 </thead>
 <tbody valign="top">
-<tr class="row-even"><td>Potentials</td>
+<tr class="row-even"><td>Potential</td>
 <td>[mV]</td>
 </tr>
-<tr class="row-odd"><td>Currents</td>
+<tr class="row-odd"><td>Current</td>
 <td>[nA]</td>
 </tr>
-<tr class="row-even"><td>conductance</td>
+<tr class="row-even"><td>Conductance</td>
 <td>[S/cm2]</td>
 </tr>
-<tr class="row-odd"><td>capacitance</td>
-<td>[muF/cm2]</td>
+<tr class="row-odd"><td>Capacitance</td>
+<td>[μF/cm2]</td>
 </tr>
-<tr class="row-even"><td>Coordinates</td>
-<td>[mum]</td>
+<tr class="row-even"><td>Dimension</td>
+<td>[μm]</td>
 </tr>
 </tbody>
 </table>

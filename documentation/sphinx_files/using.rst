@@ -15,6 +15,10 @@ Cell morphology can be specified manually in a ``hoc`` file. For a simple exampl
 -  use ``soma`` as the name for the soma compartment,
 -  use a name starting with ``dend`` for the dendrites.
 
+Also the morphologies exported from the NEURON simulator 
+(for example using Cell Builder -> Export) should
+work with LFPy. 
+
 ::
 
     /* ----------------------------------------------------
