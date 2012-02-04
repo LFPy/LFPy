@@ -171,7 +171,7 @@ class Cell(object):
         #Gather geometry, set position and rotation of morphology
         self._collect_geometry()
         self.set_pos()
-        self.rotate_xyz(self.default_rotation)
+        self.set_rotation(**self.default_rotation)
         
     def _load_geometry(self):
         '''Load the morphology .hoc file in NEURON''' 
@@ -247,9 +247,7 @@ class Cell(object):
                 rotation[var] = val
         else:
             rotation = {
-                'x' : 0,
-                'y' : 0,
-            }
+                }
         return rotation
 
     def _create_sectionlists(self):
@@ -864,9 +862,12 @@ class Cell(object):
         for i in xrange(len(self.synapses)):
             self.synapses[i].update_pos(self)
     
-    def rotate_xyz(self, rotation):
+    def set_rotation(self, x=None, y=None, z=None):
         '''
-        Rotate geometry using rotation matrices, takes dict with rot. angles,
+        Rotate geometry of cell object around the x-, y-, z-axis in that order.
+        Input should be angles in radians.
+        
+        using rotation matrices, takes dict with rot. angles,
         where {'x' : ... } etc. are the rotation angles around respective axes.
         All rotation angles are optional.
         
@@ -874,11 +875,10 @@ class Cell(object):
         ::
             cell = LFPy.Cell(**kwargs)
             rotation = {'x' : 1.233, 'y : 0.236, 'z' : np.pi}
-            cell.rotate_xyz(rotation)
+            cell.set_rotation(rotation)
         '''
-        if np.isscalar(rotation.get('x'))==True:
-            rot_x = rotation.get('x')
-            theta = -rot_x
+        if x != None:
+            theta = -x
             rotation_x = np.matrix([[1, 0, 0],
                 [0, np.cos(theta), -np.sin(theta)],
                 [0, np.sin(theta), np.cos(theta)]])
@@ -895,9 +895,8 @@ class Cell(object):
             if self.verbose:
                 print 'Geometry not rotated around x-axis'
         
-        if np.isscalar(rotation.get('y'))==True:
-            rot_y = rotation.get('y')
-            phi = -rot_y
+        if y != None:
+            phi = -y
             rotation_y = np.matrix([[np.cos(phi), 0, np.sin(phi)],
                 [0, 1, 0],
                 [-np.sin(phi), 0, np.cos(phi)]])
@@ -914,9 +913,8 @@ class Cell(object):
             if self.verbose:
                 print 'Geometry not rotated around y-axis'
         
-        if np.isscalar(rotation.get('z'))==True:
-            rot_z = rotation.get('z')
-            gamma = -rot_z
+        if z != None:
+            gamma = -z
             rotation_z = np.matrix([[np.cos(gamma), -np.sin(gamma), 0],
                     [np.sin(gamma), np.cos(gamma), 0],
                     [0, 0, 1]])
