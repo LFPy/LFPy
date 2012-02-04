@@ -82,7 +82,7 @@ def plot_morphology(plot_synapses=False, color='k'):
         plt.plot([cell.xstart[i], cell.xend[i]],
             [cell.zstart[i], cell.zend[i]], color=col)
     if plot_synapses:
-        for i in xranAge(len(cell.synapses)):
+        for i in xrange(len(cell.synapses)):
             plt.plot([cell.synapses[i].x], [cell.synapses[i].z],
                 color=cell.synapses[i].color, marker=cell.synapses[i].marker, 
                 markersize=10)

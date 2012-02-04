@@ -18,7 +18,7 @@ LFPy was developed at the `Computational Neuroscience Group <http://compneuro.um
 Contents:
 
 .. toctree::
-    :maxdepth: 2
+    :maxdepth: 3
    
     information
     tutorial
