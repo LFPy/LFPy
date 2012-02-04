@@ -117,7 +117,7 @@ class Cell(object):
             self.morphology = morphology
             self._load_geometry()
         else:
-            raise Exception, "%s does not exist!" % morphology
+            raise Exception, "File %s does not exist!" % morphology
         
         #Some parameters and lists initialised
         if timeres_python not in 2.**np.arange(-16, -1) or timeres_NEURON \
