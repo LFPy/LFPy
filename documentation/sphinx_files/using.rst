@@ -81,15 +81,15 @@ The units in LFPy for given quantities are:
 +-------------+-----------+
 | What        | Unit      |
 +=============+===========+
-| Potentials  | [mV]      |
+| Potential   | [mV]      |
 +-------------+-----------+
-| Currents    | [nA]      |
+| Current     | [nA]      |
 +-------------+-----------+
-| conductance | [S/cm2]   |
+| Conductance | [S/cm2]   |
 +-------------+-----------+
-| capacitance | [muF/cm2] |
+| Capacitance | [μF/cm2]  |
 +-------------+-----------+
-| Coordinates | [mum]     |
+| Dimension   | [μm]      |
 +-------------+-----------+
 
 Note: resistance, conductance and capacitance are usually specific values, i.e per membrane area (lowercase r_m, g, c_m)
