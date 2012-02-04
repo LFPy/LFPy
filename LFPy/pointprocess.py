@@ -78,11 +78,11 @@ class Synapse(PointProcess):
             'e' : 0,                                # reversal potential
             'syntype' : 'ExpSyn',                   # synapse type
             'tau' : 2,                              # syn. time constant
-            'weight' : 0.01,                       # syn. weight
+            'weight' : 0.01,                        # syn. weight
             'record_current' : True                 # syn. current record
         }
         synapse = LFPy.Synapse(cell, **synapseParameters)
-        synapse.set_spike_times(cell, pl.array([10, 15, 20, 25]))
+        synapse.set_spike_times(pl.array([10, 15, 20, 25]))
         cell.simulate(rec_isyn=True)
         
         pl.subplot(211)
@@ -131,13 +131,16 @@ class StimIntElectrode(PointProcess):
     
     Refer to NEURON documentation @ neuron.yale.edu for kwargs
             
-    Usage:
+    Usage example:
     ::
+        #/usr/bin/python
+        
         import LFPy
         import pylab as pl
 
         pl.interactive(1)
         
+        #define a list of different electrode implementations from NEURON
         pointprocesses = [
             {
                 'idx' : 0,
@@ -169,28 +172,9 @@ class StimIntElectrode(PointProcess):
                 'dur3' : 10,
                 'amp3' : -65,
             },
-            {
-                'idx' : 0,
-                'record_current' : True,
-                'pptype' : 'SinIClamp',
-                'delay' : 5,
-                'dur' : 200,
-                'pkamp' : 1,
-                'freq' : 100,
-            },
-            {
-                'idx' : 0,
-                'record_current' : True,
-                'pptype' : 'ChirpIClamp',
-                'delay' : 5,
-                'dur' : 200,
-                'pkamp' : 1,
-                'freq' : 0,
-                'chirp_rate' : 1,
-            }
-        
         ]
         
+        #create a cell instance for each electrode
         for pointprocess in pointprocesses:
             cell = LFPy.Cell(morphology='morphologies/L5_Mainen96_LFPy.hoc')
             stimulus = LFPy.StimIntElectrode(cell, **pointprocess)
@@ -205,8 +189,6 @@ class StimIntElectrode(PointProcess):
             pl.plot(cell.tvec, cell.somav, label=pointprocess['pptype'])
             pl.legend(loc='best')
             pl.title('Somatic potential (mV)')
-            
-        
     '''    
     def __init__(self, cell, idx, pptype='SEClamp',
                  color='p', marker='*', record_current=False, **kwargs):
