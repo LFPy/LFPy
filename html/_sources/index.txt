@@ -15,8 +15,8 @@ LFPy was developed at the `Computational Neuroscience Group <http://compneuro.um
 `Nencki Institute of Experimental Biology <http://www.nencki.gov.pl>`_, Warsaw, Poland. The effort was supported by 
 `International Neuroinformatics Coordinating Facility <http://incf.org>`_ (`INCF <http://incf.org>`_) and the e-science program of `The Research Council of Norway <http://www.forskningsradet.no/english/>`_.
 
-Contents:
-
+Contents
+--------
 .. toctree::
     :maxdepth: 3
    
