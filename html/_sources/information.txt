@@ -16,7 +16,10 @@ To install LFPy you will need the following:
     
         import neuron
         neuron.test()
-    LFPy was tested to work with NEURON 7.2 and 7.3, we had issues with NEURON 7.1.
+    
+    If this step fails, see the next section.
+    
+    LFPy was tested to work with NEURON 7.2 and 7.3, we had some issues with NEURON 7.1.
 
 4.  `Cython <http://cython.org>`_ (C-extensions for python) to speed up simulations of extracellular fields. Tested with version > 1.4.
 
@@ -195,6 +198,11 @@ Installing LFPy
     
     in case you want to install in your home directory (e.g. if you do not have root access).
     
+    If you only want to have LFPy in one place, you can add this folder to your $PYTHONPATH, and just compile the Cython extensions;
+    ::
+    
+        python setup.py build_ext -i
+    
 3.  Now you should be able to 
     ::  
     
@@ -216,7 +224,7 @@ Installing LFPy
     
         cd examples
         ipython
-        execfile("example1.py")
+        run "example1.py"
 
 5.  HTML documentation is available at::
 

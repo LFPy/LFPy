@@ -69,7 +69,8 @@ Not tested with Python 3.x.</p>
 <span class="n">neuron</span><span class="o">.</span><span class="n">test</span><span class="p">()</span>
 </pre></div>
 </div>
-<p>LFPy was tested to work with NEURON 7.2 and 7.3, we had issues with NEURON 7.1.</p>
+<p>If this step fails, see the next section.</p>
+<p>LFPy was tested to work with NEURON 7.2 and 7.3, we had some issues with NEURON 7.1.</p>
 </li>
 <li><p class="first"><a class="reference external" href="http://cython.org">Cython</a> (C-extensions for python) to speed up simulations of extracellular fields. Tested with version &gt; 1.4.</p>
 </li>
@@ -215,6 +216,9 @@ sudo python setup.py install</pre>
 <div class="highlight-python"><pre>python setup.py install --user</pre>
 </div>
 <p>in case you want to install in your home directory (e.g. if you do not have root access).</p>
+<p>If you only want to have LFPy in one place, you can add this folder to your $PYTHONPATH, and just compile the Cython extensions;</p>
+<div class="highlight-python"><pre>python setup.py build_ext -i</pre>
+</div>
 </li>
 <li><p class="first">Now you should be able to</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">LFPy</span>
@@ -231,7 +235,7 @@ python example1.py</pre>
 <p>or</p>
 <div class="highlight-python"><pre>cd examples
 ipython
-execfile("example1.py")</pre>
+run "example1.py"</pre>
 </div>
 </li>
 <li><p class="first">HTML documentation is available at:</p>

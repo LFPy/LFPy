@@ -225,19 +225,6 @@ Normalised probability determined by area of segments.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="LFPy.Cell.rotate_xyz">
-<tt class="descname">rotate_xyz</tt><big>(</big><em>rotation</em><big>)</big><a class="headerlink" href="#LFPy.Cell.rotate_xyz" title="Permalink to this definition">¶</a></dt>
-<dd><p>Rotate geometry using rotation matrices, takes dict with rot. angles,
-where {&#8216;x&#8217; : ... } etc. are the rotation angles around respective axes.
-All rotation angles are optional.</p>
-<p>Usage:</p>
-<div class="highlight-python"><pre>cell = LFPy.Cell(**kwargs)
-rotation = {'x' : 1.233, 'y : 0.236, 'z' : np.pi}
-cell.rotate_xyz(rotation)</pre>
-</div>
-</dd></dl>
-
-<dl class="method">
 <dt id="LFPy.Cell.set_point_process">
 <tt class="descname">set_point_process</tt><big>(</big><em>idx</em>, <em>pptype</em>, <em>record_current=False</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#LFPy.Cell.set_point_process" title="Permalink to this definition">¶</a></dt>
 <dd><p>Insert pptype-electrode type pointprocess on segment numbered
@@ -251,6 +238,21 @@ idx, pptype, <a href="#id1"><span class="problematic" id="id2">**</span></a>kwar
 <tt class="descname">set_pos</tt><big>(</big><em>xpos=0</em>, <em>ypos=0</em>, <em>zpos=0</em><big>)</big><a class="headerlink" href="#LFPy.Cell.set_pos" title="Permalink to this definition">¶</a></dt>
 <dd><p>Move the geometry so that midpoint of soma section is
 in (xpos, ypos, zpos)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="LFPy.Cell.set_rotation">
+<tt class="descname">set_rotation</tt><big>(</big><em>x=None</em>, <em>y=None</em>, <em>z=None</em><big>)</big><a class="headerlink" href="#LFPy.Cell.set_rotation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rotate geometry of cell object around the x-, y-, z-axis in that order.
+Input should be angles in radians.</p>
+<p>using rotation matrices, takes dict with rot. angles,
+where {&#8216;x&#8217; : ... } etc. are the rotation angles around respective axes.
+All rotation angles are optional.</p>
+<p>Usage:</p>
+<div class="highlight-python"><pre>cell = LFPy.Cell(**kwargs)
+rotation = {'x' : 1.233, 'y : 0.236, 'z' : np.pi}
+cell.set_rotation(rotation)</pre>
+</div>
 </dd></dl>
 
 <dl class="method">
@@ -345,11 +347,11 @@ currents that will be part of the membrane currents.</p>
     <span class="s">&#39;e&#39;</span> <span class="p">:</span> <span class="mi">0</span><span class="p">,</span>                                <span class="c"># reversal potential</span>
     <span class="s">&#39;syntype&#39;</span> <span class="p">:</span> <span class="s">&#39;ExpSyn&#39;</span><span class="p">,</span>                   <span class="c"># synapse type</span>
     <span class="s">&#39;tau&#39;</span> <span class="p">:</span> <span class="mi">2</span><span class="p">,</span>                              <span class="c"># syn. time constant</span>
-    <span class="s">&#39;weight&#39;</span> <span class="p">:</span> <span class="mf">0.01</span><span class="p">,</span>                       <span class="c"># syn. weight</span>
+    <span class="s">&#39;weight&#39;</span> <span class="p">:</span> <span class="mf">0.01</span><span class="p">,</span>                        <span class="c"># syn. weight</span>
     <span class="s">&#39;record_current&#39;</span> <span class="p">:</span> <span class="bp">True</span>                 <span class="c"># syn. current record</span>
 <span class="p">}</span>
 <span class="n">synapse</span> <span class="o">=</span> <span class="n">LFPy</span><span class="o">.</span><span class="n">Synapse</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="o">**</span><span class="n">synapseParameters</span><span class="p">)</span>
-<span class="n">synapse</span><span class="o">.</span><span class="n">set_spike_times</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="n">pl</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">10</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">25</span><span class="p">]))</span>
+<span class="n">synapse</span><span class="o">.</span><span class="n">set_spike_times</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">10</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">25</span><span class="p">]))</span>
 <span class="n">cell</span><span class="o">.</span><span class="n">simulate</span><span class="p">(</span><span class="n">rec_isyn</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
 
 <span class="n">pl</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">211</span><span class="p">)</span>
@@ -392,12 +394,15 @@ SinIClamp, ChirpIClamp with arguments.
 Electrode currents go here.
 Membrane currents will no longer sum to zero if these mechanisms are used.</p>
 <p>Refer to NEURON documentation &#64; neuron.yale.edu for kwargs</p>
-<p>Usage:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">LFPy</span>
+<p>Usage example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c">#/usr/bin/python</span>
+
+<span class="kn">import</span> <span class="nn">LFPy</span>
 <span class="kn">import</span> <span class="nn">pylab</span> <span class="kn">as</span> <span class="nn">pl</span>
 
 <span class="n">pl</span><span class="o">.</span><span class="n">interactive</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
+<span class="c">#define a list of different electrode implementations from NEURON</span>
 <span class="n">pointprocesses</span> <span class="o">=</span> <span class="p">[</span>
     <span class="p">{</span>
         <span class="s">&#39;idx&#39;</span> <span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
@@ -429,28 +434,9 @@ Membrane currents will no longer sum to zero if these mechanisms are used.</p>
         <span class="s">&#39;dur3&#39;</span> <span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
         <span class="s">&#39;amp3&#39;</span> <span class="p">:</span> <span class="o">-</span><span class="mi">65</span><span class="p">,</span>
     <span class="p">},</span>
-    <span class="p">{</span>
-        <span class="s">&#39;idx&#39;</span> <span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
-        <span class="s">&#39;record_current&#39;</span> <span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
-        <span class="s">&#39;pptype&#39;</span> <span class="p">:</span> <span class="s">&#39;SinIClamp&#39;</span><span class="p">,</span>
-        <span class="s">&#39;delay&#39;</span> <span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
-        <span class="s">&#39;dur&#39;</span> <span class="p">:</span> <span class="mi">200</span><span class="p">,</span>
-        <span class="s">&#39;pkamp&#39;</span> <span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-        <span class="s">&#39;freq&#39;</span> <span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
-    <span class="p">},</span>
-    <span class="p">{</span>
-        <span class="s">&#39;idx&#39;</span> <span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
-        <span class="s">&#39;record_current&#39;</span> <span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
-        <span class="s">&#39;pptype&#39;</span> <span class="p">:</span> <span class="s">&#39;ChirpIClamp&#39;</span><span class="p">,</span>
-        <span class="s">&#39;delay&#39;</span> <span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
-        <span class="s">&#39;dur&#39;</span> <span class="p">:</span> <span class="mi">200</span><span class="p">,</span>
-        <span class="s">&#39;pkamp&#39;</span> <span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-        <span class="s">&#39;freq&#39;</span> <span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
-        <span class="s">&#39;chirp_rate&#39;</span> <span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-    <span class="p">}</span>
-
 <span class="p">]</span>
 
+<span class="c">#create a cell instance for each electrode</span>
 <span class="k">for</span> <span class="n">pointprocess</span> <span class="ow">in</span> <span class="n">pointprocesses</span><span class="p">:</span>
     <span class="n">cell</span> <span class="o">=</span> <span class="n">LFPy</span><span class="o">.</span><span class="n">Cell</span><span class="p">(</span><span class="n">morphology</span><span class="o">=</span><span class="s">&#39;morphologies/L5_Mainen96_LFPy.hoc&#39;</span><span class="p">)</span>
     <span class="n">stimulus</span> <span class="o">=</span> <span class="n">LFPy</span><span class="o">.</span><span class="n">StimIntElectrode</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="o">**</span><span class="n">pointprocess</span><span class="p">)</span>
