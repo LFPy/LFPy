@@ -55,6 +55,72 @@
             
   <div class="section" id="notes-on-lfpy">
 <h1>Notes on LFPy<a class="headerlink" href="#notes-on-lfpy" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="using-your-own-models">
+<h2>Using your own models<a class="headerlink" href="#using-your-own-models" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="importing-morphology">
+<h3>Importing morphology<a class="headerlink" href="#importing-morphology" title="Permalink to this headline">¶</a></h3>
+<p>Cell morphology can be specified manually in a <tt class="docutils literal"><span class="pre">hoc</span></tt> file. For a simple example, see
+<tt class="docutils literal"><span class="pre">examples/morphologies/example_morphology</span></tt>. Note the following conventions:</p>
+<ul class="simple">
+<li>soma needs to be a list (use <tt class="docutils literal"><span class="pre">soma[0]</span></tt>, not <tt class="docutils literal"><span class="pre">soma</span></tt>),</li>
+<li>use <tt class="docutils literal"><span class="pre">soma</span></tt> as the name for the soma compartment,</li>
+<li>use a name starting with <tt class="docutils literal"><span class="pre">dend</span></tt> for the dendrites.</li>
+</ul>
+<div class="highlight-python"><pre>/* ----------------------------------------------------
+example_morphology.hoc
+
+This hoc file creates a neuron of the following shape:
+
+            \
+             \
+              \   /
+               \ /
+                V
+                |
+                |
+                |
+                O
+
+Note the conventions:
+ - soma needs to be a list (soma[0], not soma),
+ - use soma for the soma compartment,
+ - use a name starting with dend for the dendrites.
+-----------------------------------------------------*/
+
+
+create soma[1]
+create dend[3]
+
+soma[0] {
+    pt3dadd(0, 0, 0, 25)
+    pt3dadd(0, 0, 35, 25)
+}
+
+dend[0] {
+    pt3dadd(0, 0, 35, 5)
+    pt3dadd(0, 0, 150, 5)
+}
+
+dend[1] {
+    pt3dadd(0, 0, 150, 2)
+    pt3dadd(-50, 20, 200, 1)
+}
+
+dend[2] {
+    pt3dadd(0, 0, 150, 2)
+    pt3dadd(30, 0, 160, 2)
+}
+
+connect dend[0](0), soma[0](1)
+connect dend[1](0), dend[0](1)
+connect dend[2](0), dend[0](1)</pre>
+</div>
+</div>
+<div class="section" id="using-neuron-mechanisms">
+<h3>Using NEURON mechanisms<a class="headerlink" href="#using-neuron-mechanisms" title="Permalink to this headline">¶</a></h3>
+<p>Custom NEURON mechanisms can be loaded from external <tt class="docutils literal"><span class="pre">hoc</span></tt> files - see <tt class="docutils literal"><span class="pre">example2.py</span></tt> and <tt class="docutils literal"><span class="pre">example3.py</span></tt>. Remeber to compile any <tt class="docutils literal"><span class="pre">mod</span></tt> files (if needed) using <tt class="docutils literal"><span class="pre">nrnivmodl</span></tt> (or <tt class="docutils literal"><span class="pre">mknrdll</span></tt> on Mac OS).</p>
+</div>
+</div>
 <div class="section" id="units">
 <h2>Units<a class="headerlink" href="#units" title="Permalink to this headline">¶</a></h2>
 <p>Units follow the NEURON conventions.
@@ -101,6 +167,11 @@ Depending on the mechanism files, some may use different units altogether, but t
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Notes on LFPy</a><ul>
+<li><a class="reference internal" href="#using-your-own-models">Using your own models</a><ul>
+<li><a class="reference internal" href="#importing-morphology">Importing morphology</a></li>
+<li><a class="reference internal" href="#using-neuron-mechanisms">Using NEURON mechanisms</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#units">Units</a></li>
 </ul>
 </li>
@@ -111,7 +182,7 @@ Depending on the mechanism files, some may use different units altogether, but t
                         title="previous chapter">LFPy Tutorial</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="classes.html"
-                        title="next chapter">module <tt class="docutils literal docutils literal docutils literal"><span class="pre">LFPy</span></tt></a></p>
+                        title="next chapter">module <tt class="docutils literal"><span class="pre">LFPy</span></tt></a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/using.txt"
