@@ -143,6 +143,20 @@ verbose: switching verbose output on/off</pre>
 <tt class="descname">cellpickler</tt><big>(</big><em>filename</em><big>)</big><a class="headerlink" href="#LFPy.Cell.cellpickler" title="Permalink to this definition">¶</a></dt>
 <dd><p>Save data in cell to filename, using cPickle. It will however destroy
 any neuron.h objects upon saving, as they cannot be pickled</p>
+<p>Usage:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">cell</span><span class="o">.</span><span class="n">cellpickler</span><span class="p">(</span><span class="s">&#39;cell.cpickle&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>To load this cell again in another session:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">cPickle</span>
+<span class="n">f</span> <span class="o">=</span> <span class="nb">file</span><span class="p">(</span><span class="s">&#39;cell.cpickle&#39;</span><span class="p">,</span> <span class="s">&#39;rb&#39;</span><span class="p">)</span>
+<span class="n">cell</span> <span class="o">=</span> <span class="n">cPickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+<span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</pre></div>
+</div>
+<blockquote>
+<div>import LFPy
+cell = LFPy.tools.load(&#8216;cell.cpickle&#8217;)</div></blockquote>
 </dd></dl>
 
 <dl class="method">
@@ -168,22 +182,36 @@ of sections connected to parent-argument</p>
 <dl class="method">
 <dt id="LFPy.Cell.get_idx_parent_children">
 <tt class="descname">get_idx_parent_children</tt><big>(</big><em>parent='soma[0]'</em><big>)</big><a class="headerlink" href="#LFPy.Cell.get_idx_parent_children" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get the idx of parent and children sections, i.e. compartments ids
-of sections connected to parent-argument</p>
+<dd><p>Get all idx of segments of parent and children sections, i.e. segment
+idx of sections connected to parent-argument, and also of the parent
+segments</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="LFPy.Cell.get_idx_section">
 <tt class="descname">get_idx_section</tt><big>(</big><em>section='soma[0]'</em><big>)</big><a class="headerlink" href="#LFPy.Cell.get_idx_section" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the idx of segments in any section-argument, uses hoc naming
-instead of general terms as in self.get_idx()</p>
+instead of general terms as in self.get_idx().</p>
+<p>For example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">cell</span><span class="o">.</span><span class="n">get_idx_section</span><span class="p">(</span><span class="n">section</span><span class="o">=</span><span class="s">&#39;soma[0]&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>will output something like</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>To list all sections in the cell object, type</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">for</span> <span class="n">sec</span> <span class="ow">in</span> <span class="n">cell</span><span class="o">.</span><span class="n">allseclist</span><span class="p">:</span>
+    <span class="k">print</span> <span class="n">sec</span><span class="o">.</span><span class="n">name</span><span class="p">()</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="method">
 <dt id="LFPy.Cell.get_intersegment_distance">
 <tt class="descname">get_intersegment_distance</tt><big>(</big><em>idx0=0</em>, <em>idx1=0</em><big>)</big><a class="headerlink" href="#LFPy.Cell.get_intersegment_distance" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the Euclidean distance between midpoints of two segments 
-with indices idx0 and idx1.</p>
+with indices idx0 and idx1. Will return a float in unit of micrometers.</p>
 </dd></dl>
 
 <dl class="method">
@@ -191,7 +219,7 @@ with indices idx0 and idx1.</p>
 <tt class="descname">get_intersegment_vector</tt><big>(</big><em>idx0=0</em>, <em>idx1=0</em><big>)</big><a class="headerlink" href="#LFPy.Cell.get_intersegment_vector" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the distance between midpoints of two segments with index
 idx0 and idx1. The argument returned is a vector [x, y, z], where
-x = self.xmid[idx1] - self.xmid[idx0] etc</p>
+x = self.xmid[idx1] - self.xmid[idx0] etc.</p>
 </dd></dl>
 
 <dl class="method">
@@ -213,8 +241,8 @@ Prob. determined by area.</p>
 <dl class="method">
 <dt id="LFPy.Cell.get_rand_prob_area_norm_from_idx">
 <tt class="descname">get_rand_prob_area_norm_from_idx</tt><big>(</big><em>idx=array([0])</em>, <em>z_min=-10000</em>, <em>z_max=10000</em><big>)</big><a class="headerlink" href="#LFPy.Cell.get_rand_prob_area_norm_from_idx" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return the probability (0-1) for synaptic coupling on segments
-in idx-array.
+<dd><p>Return the normalized probability (0-1) for synaptic coupling on
+segments in idx-array.
 Normalised probability determined by area of segments.</p>
 </dd></dl>
 
@@ -236,7 +264,7 @@ idx, pptype, <a href="#id1"><span class="problematic" id="id2">**</span></a>kwar
 <dl class="method">
 <dt id="LFPy.Cell.set_pos">
 <tt class="descname">set_pos</tt><big>(</big><em>xpos=0</em>, <em>ypos=0</em>, <em>zpos=0</em><big>)</big><a class="headerlink" href="#LFPy.Cell.set_pos" title="Permalink to this definition">¶</a></dt>
-<dd><p>Move the geometry so that midpoint of soma section is
+<dd><p>Move the cell geometry so that midpoint of soma section is
 in (xpos, ypos, zpos)</p>
 </dd></dl>
 
@@ -246,12 +274,13 @@ in (xpos, ypos, zpos)</p>
 <dd><p>Rotate geometry of cell object around the x-, y-, z-axis in that order.
 Input should be angles in radians.</p>
 <p>using rotation matrices, takes dict with rot. angles,
-where {&#8216;x&#8217; : ... } etc. are the rotation angles around respective axes.
+where x, y, z are the rotation angles around respective axes.
 All rotation angles are optional.</p>
 <p>Usage:</p>
-<div class="highlight-python"><pre>cell = LFPy.Cell(**kwargs)
-rotation = {'x' : 1.233, 'y : 0.236, 'z' : np.pi}
-cell.set_rotation(rotation)</pre>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">cell</span> <span class="o">=</span> <span class="n">LFPy</span><span class="o">.</span><span class="n">Cell</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+<span class="n">rotation</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;x&#39;</span> <span class="p">:</span> <span class="mf">1.233</span><span class="p">,</span> <span class="s">&#39;y&#39;</span> <span class="p">:</span> <span class="mf">0.236</span><span class="p">,</span> <span class="s">&#39;z&#39;</span> <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">}</span>
+<span class="n">cell</span><span class="o">.</span><span class="n">set_rotation</span><span class="p">(</span><span class="o">**</span><span class="n">rotation</span><span class="p">)</span>
+</pre></div>
 </div>
 </dd></dl>
 
@@ -287,7 +316,7 @@ rec_istim:  record currents of StimIntraElectrode</pre>
 <dl class="method">
 <dt id="LFPy.Cell.strip_hoc_objects">
 <tt class="descname">strip_hoc_objects</tt><big>(</big><big>)</big><a class="headerlink" href="#LFPy.Cell.strip_hoc_objects" title="Permalink to this definition">¶</a></dt>
-<dd><p>Destroy any NEURON hoc objects in cell instance</p>
+<dd><p>Destroy any NEURON hoc objects in the cell object</p>
 </dd></dl>
 
 </dd></dl>
