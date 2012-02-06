@@ -6,15 +6,15 @@ LFPy was developed by:
 
 *	Henrik Lindén http://www.csc.kth.se/~helinden/
 
-*	Espen Hagen
+*	Espen Hagen http://compneuro.umb.no/wiki/Person/Espen%20Hagen
 
 *	Szymon Łęski http://www.neuroinf.pl/Members/szleski
 
-*	Eivind Norheim
+*	Eivind Norheim 
 
-*   Klas H. Pettersen
+*       Klas H. Pettersen
 
-*   Gaute T. Einevoll
+*       Gaute T. Einevoll
 
 
 
