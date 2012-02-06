@@ -9,7 +9,8 @@ Or, download the development version of LFPy using `subversion <http://subversio
 ::
     
     svn checkout http://bebiservice.umb.no/svn-public/LFPy-release
-    
+
+The development code is then found under "trunk/", and different code releases under "tags/"
 
 
 
@@ -34,17 +35,18 @@ To install LFPy you will need the following:
     
     If this step fails, see the next section.
     
-    LFPy was tested to work with NEURON 7.2 and the 7.3 development branch, we had some issues with NEURON 7.1.
+    LFPy was tested to work with NEURON 7.2 and the 7.3 development branch, we had some issues with a precompiled version of NEURON 7.1.
 
-4.  `Cython <http://cython.org>`_ (C-extensions for python) to speed up simulations of extracellular fields. Tested with version > 1.4.
+4.  `Cython <http://cython.org>`_ (C-extensions for python) to speed up simulations of extracellular fields. Tested with version > 1.4.,
+    and known to fail with version 1.1.
 
 
 Installing LFPy
 ---------------
 
-1.  Download the LFPy source distribution (LFPy-0.9.tar.gz) and unpack.
+1.  Download the LFPy source distribution (LFPy-x.x.tar.gz) and unpack.
 
-2.  In LFPy-0.9 run
+2.  In "LFPy-x.x/" run
     ::
     
         sudo python setup.py install
@@ -55,7 +57,7 @@ Installing LFPy
     
     in case you want to install in your home directory (e.g. if you do not have root access).
     
-    If you only want to have LFPy in one place, you can add this folder to your $PYTHONPATH, and just compile the Cython extensions;
+    If you only want to have LFPy in one place, you can add this working folder to your $PYTHONPATH, and just compile the Cython extensions;
     ::
     
         python setup.py build_ext -i
@@ -64,12 +66,11 @@ Installing LFPy
     ::  
     
         import LFPy
-    
 
 4.  There are some basic usage examples provided in 
     ::
     
-        LFPy-0.9/examples/
+        LFPy-x.x/examples/
 
     We suggest you start with ``example1.py``
     :: 
@@ -82,16 +83,12 @@ Installing LFPy
         cd examples
         ipython
         >>> run "example1.py"
-
+    
+    For the example2.py and example3.py, the NEURON mechanisms (.mod-files) must be compiled using "nrnivmodl" from your NEURON installation first.
+    
 5.  HTML documentation is available at::
 
-		LFPy-0.9/html/index.html
-
-
-
-
-
-
+		LFPy-x.x/html/index.html
 
 
 
@@ -105,7 +102,7 @@ http://www.neuron.yale.edu/neuron/download and http://www.neuron.yale.edu/neuron
 also a useful resource for installation problems.
 
 Dependencies: Ubuntu 10.4LTS and other Debian-based Linux versions
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The instructions below show how to meet all the requirements starting from a clean Ubuntu 10.4 for the installation of NEURON from the development branch. 
 

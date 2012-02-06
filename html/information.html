@@ -60,6 +60,7 @@
 <p>Or, download the development version of LFPy using <a class="reference external" href="http://subversion.apache.org/">subversion</a> into a local folder:</p>
 <div class="highlight-python"><pre>svn checkout http://bebiservice.umb.no/svn-public/LFPy-release</pre>
 </div>
+<p>The development code is then found under &#8220;trunk/&#8221;, and different code releases under &#8220;tags/&#8221;</p>
 </div>
 <div class="section" id="getting-started">
 <h1>Getting started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h1>
@@ -78,25 +79,26 @@ Not tested with Python 3.x.</p>
 </pre></div>
 </div>
 <p>If this step fails, see the next section.</p>
-<p>LFPy was tested to work with NEURON 7.2 and the 7.3 development branch, we had some issues with NEURON 7.1.</p>
+<p>LFPy was tested to work with NEURON 7.2 and the 7.3 development branch, we had some issues with a precompiled version of NEURON 7.1.</p>
 </li>
-<li><p class="first"><a class="reference external" href="http://cython.org">Cython</a> (C-extensions for python) to speed up simulations of extracellular fields. Tested with version &gt; 1.4.</p>
+<li><p class="first"><a class="reference external" href="http://cython.org">Cython</a> (C-extensions for python) to speed up simulations of extracellular fields. Tested with version &gt; 1.4.,
+and known to fail with version 1.1.</p>
 </li>
 </ol>
 </div>
 <div class="section" id="installing-lfpy">
 <h2>Installing LFPy<a class="headerlink" href="#installing-lfpy" title="Permalink to this headline">¶</a></h2>
 <ol class="arabic">
-<li><p class="first">Download the LFPy source distribution (LFPy-0.9.tar.gz) and unpack.</p>
+<li><p class="first">Download the LFPy source distribution (LFPy-x.x.tar.gz) and unpack.</p>
 </li>
-<li><p class="first">In LFPy-0.9 run</p>
+<li><p class="first">In &#8220;LFPy-x.x/&#8221; run</p>
 <div class="highlight-python"><pre>sudo python setup.py install</pre>
 </div>
 <p>or</p>
 <div class="highlight-python"><pre>python setup.py install --user</pre>
 </div>
 <p>in case you want to install in your home directory (e.g. if you do not have root access).</p>
-<p>If you only want to have LFPy in one place, you can add this folder to your $PYTHONPATH, and just compile the Cython extensions;</p>
+<p>If you only want to have LFPy in one place, you can add this working folder to your $PYTHONPATH, and just compile the Cython extensions;</p>
 <div class="highlight-python"><pre>python setup.py build_ext -i</pre>
 </div>
 </li>
@@ -106,7 +108,7 @@ Not tested with Python 3.x.</p>
 </div>
 </li>
 <li><p class="first">There are some basic usage examples provided in</p>
-<div class="highlight-python"><pre>LFPy-0.9/examples/</pre>
+<div class="highlight-python"><pre>LFPy-x.x/examples/</pre>
 </div>
 <p>We suggest you start with <tt class="docutils literal"><span class="pre">example1.py</span></tt></p>
 <div class="highlight-python"><pre>cd examples
@@ -117,9 +119,10 @@ python example1.py</pre>
 ipython
 &gt;&gt;&gt; run "example1.py"</pre>
 </div>
+<p>For the example2.py and example3.py, the NEURON mechanisms (.mod-files) must be compiled using &#8220;nrnivmodl&#8221; from your NEURON installation first.</p>
 </li>
 <li><p class="first">HTML documentation is available at:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">LFPy</span><span class="o">-</span><span class="mf">0.9</span><span class="o">/</span><span class="n">html</span><span class="o">/</span><span class="n">index</span><span class="o">.</span><span class="n">html</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">LFPy</span><span class="o">-</span><span class="n">x</span><span class="o">.</span><span class="n">x</span><span class="o">/</span><span class="n">html</span><span class="o">/</span><span class="n">index</span><span class="o">.</span><span class="n">html</span>
 </pre></div>
 </div>
 </li>

@@ -1,4 +1,5 @@
-module :mod:`LFPy`
+==================
+Module :mod:`LFPy`
 ==================
 .. automodule:: LFPy
     :members:
