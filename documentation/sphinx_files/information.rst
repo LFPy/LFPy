@@ -1,7 +1,22 @@
+Getting LFPy
+============
+
+Downlad stable versions of LFPy here:
+
+`LFPy-0.9.tar.gz <bebiservice.umb.no/LFPy/downloads/LFPy-0.9.tar.gz>`_
+
+Or, download the development version of LFPy using `subversion <http://subversion.apache.org/>`_ into a local folder:
+::
+    
+    svn checkout https://bebiservice.umb.no/svn-private/LFPy-release
+    
+
+
+
 Getting started
 ===============
 
-Requirements
+Dependencies
 ------------
 
 To install LFPy you will need the following:
@@ -19,9 +34,66 @@ To install LFPy you will need the following:
     
     If this step fails, see the next section.
     
-    LFPy was tested to work with NEURON 7.2 and 7.3, we had some issues with NEURON 7.1.
+    LFPy was tested to work with NEURON 7.2 and the 7.3 development branch, we had some issues with NEURON 7.1.
 
 4.  `Cython <http://cython.org>`_ (C-extensions for python) to speed up simulations of extracellular fields. Tested with version > 1.4.
+
+
+Installing LFPy
+---------------
+
+1.  Download the LFPy source distribution (LFPy-1.0.tar.gz) and unpack.
+
+2.  In LFPy-1.0 run
+    ::
+    
+        sudo python setup.py install
+    
+    or ::
+    
+        python setup.py install --user
+    
+    in case you want to install in your home directory (e.g. if you do not have root access).
+    
+    If you only want to have LFPy in one place, you can add this folder to your $PYTHONPATH, and just compile the Cython extensions;
+    ::
+    
+        python setup.py build_ext -i
+    
+3.  In a fresh python-session you should now be able to 
+    ::  
+    
+        import LFPy
+    
+
+4.  There are some basic usage examples provided in 
+    ::
+    
+        LFPy-1.0/examples/
+
+    We suggest you start with ``example1.py``
+    :: 
+    
+        cd examples
+        python example1.py
+
+    or ::
+    
+        cd examples
+        ipython
+        >>> run "example1.py"
+
+5.  HTML documentation is available at::
+
+		LFPy-1.0/html/index.html
+
+
+
+
+
+
+
+
 
 Installing NEURON with Python
 -----------------------------
@@ -108,8 +180,8 @@ You might want to add the folder with NEURON executables to your PATH, so that y
 Dependencies and installation on Mac OS X
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Most of the development work and testing of LFPy has been done on Max OS X 10.6.* Snow Leopard and 10.7.* Lion. Our preferred way of building Python
-and NEURON have been through MacPorts; http://www.macports.org. 
+Most of the development work and testing of LFPy has been done on Max OS X 10.6.* Snow Leopard and 10.7.* Lion. Our preferred way of building Python 
+has been through MacPorts; http://www.macports.org. Here is an step-by-step explanation on how to compile NEURON agains that installation of Python.
 
 To start using MacPorts, follow the instructions on http://www.macports.org/install.php.
 
@@ -182,59 +254,8 @@ Install NEURON from the bleeding edge source code. The following recipe assumes 
 
 If you prefer to use Enthough Python distribution, see this forum post: https://www.neuron.yale.edu/phpBB/viewtopic.php?f=2&t=2191 
 
-Installing LFPy
----------------
+Windows
+^^^^^^^
 
-1.  Download the LFPy source distribution (LFPy-1.0.tar.gz) and unpack.
-
-2.  In LFPy-1.0 run
-    ::
-    
-        sudo python setup.py install
-    
-    or ::
-    
-        python setup.py install --user
-    
-    in case you want to install in your home directory (e.g. if you do not have root access).
-    
-    If you only want to have LFPy in one place, you can add this folder to your $PYTHONPATH, and just compile the Cython extensions;
-    ::
-    
-        python setup.py build_ext -i
-    
-3.  Now you should be able to 
-    ::  
-    
-        import LFPy
-    
-
-4.  There are some basic usage examples provided in 
-    ::
-    
-        LFPy-1.0/examples/
-
-    We suggest you start with ``example1.py``
-    :: 
-    
-        cd examples
-        python example1.py
-
-    or ::
-    
-        cd examples
-        ipython
-        run "example1.py"
-
-5.  HTML documentation is available at::
-
-		LFPy-1.0/html/index.html
-
-
-.. Documentation
-.. ===============
-.. 
-.. To rebuild this documentation from the LFPy-release root folder, issue in terminal
-.. ::
-..     export LC_ALL=en_US.UTF-8
-..     sphinx-build-2.* -b html documentation/sphinx_files/. html
+We have not tested this, but there is probably some way or another to compile NEURON as a Python module on the Windows platform.
+If so, LFPy should work as well. 
