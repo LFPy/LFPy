@@ -3,7 +3,7 @@ Getting LFPy
 
 Downlad stable versions of LFPy here:
 
-`LFPy-0.9.tar.gz <compneuro.umb.no/LFPy/downloads/LFPy-0.9.tar.gz>`_
+`LFPy-0.9.tar.gz <http://compneuro.umb.no/LFPy/downloads/LFPy-0.9.tar.gz>`_
 
 Or, download the development version of LFPy using `subversion <http://subversion.apache.org/>`_ into a local folder:
 ::
