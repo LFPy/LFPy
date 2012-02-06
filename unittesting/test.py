@@ -2,6 +2,9 @@
 import LFPy
 import matplotlib.pylab as pl
 
+pl.interactive(1)
+pl.close('all')
+
 stickParams = {
     'morphology' : 'stick.hoc',
     'rm' : 30000,
@@ -12,20 +15,21 @@ stickParams = {
     'timeres_python' : 2**-4,
     'timeres_NEURON' : 2**-4,
     'nsegs_method' : 'lambda_f',
-    'lambda_f' : 200,
+    'lambda_f' : 100,
     
 }
 
 electrodeParams = {
     'sigma' : 0.3,
-    'x' : pl.ones(101) + 10.,
+    'x' : pl.ones(101) + 100.,
     'y' : pl.zeros(101),
-    'z' : pl.linspace(1000, 0, 1001),
+    'z' : pl.linspace(1000, 0, 101),
+    'method' : 'pointsource'
 }
 
 stimParams = {
     'pptype' : 'SinSyn',
-    'delay' : 0.,
+    'delay' : -100.,
     'dur' : 1000.,
     'pkamp' : 1.,
     'freq' : 100.,
@@ -43,12 +47,24 @@ synapse = LFPy.StimIntElectrode(stick, stick.get_closest_idx(0, 0, 1000),
                        **stimParams)
 stick.simulate(electrode, rec_imem=True, rec_istim=True, rec_vmem=True)
 
-pl.subplot(211)
+pl.subplot(221)
 pl.plot(stick.tvec, stick.pointprocesses[0].i)
+pl.xlabel('time (ms)')
+pl.ylabel('$i_\mathrm{electrode}$ (nA)')
+
+pl.subplot(222)
+for i in xrange(stick.totnsegs):
+    pl.plot([stick.xstart[i], stick.xend[i]],
+            [stick.zstart[i], stick.zend[i]],
+             'k', lw=stick.diam[i])
+pl.plot(synapse.x, synapse.z, '.', color='r', marker='o')
+pl.plot(electrode.x, electrode.z, '.', color='b', marker='o')
+pl.axis('equal')
+pl.xlabel('x ($\mu$m)')
+pl.ylabel('z ($\mu$m)')
 
 pl.subplot(212)
-pl.imshow(electrode.LFP, cmap='jet_r')
+pl.imshow(electrode.LFP, cmap='jet_r', interpolation='nearest')
 pl.axis('tight')
-pl.colorbar()
-
-pl.show()
+cbar = pl.colorbar()
+cbar.set_label('LFP (mV)')
