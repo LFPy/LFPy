@@ -1,20 +1,15 @@
 #!/usr/bin/env python
 ################################################################################
 #
-# This is an example scripts using LFPy with an active cell model adapted from
+# This is an example scripts using LFPy with a passive cell model adapted from
 # Mainen and Sejnowski, Nature 1996, for the original files, see
 # http://senselab.med.yale.edu/modeldb/ShowModel.asp?model=2488
-#
-# This scripts is set up to use the model, where the active conductances are set
-# in the file "active_declarations_example3.hoc", and uses the mechanisms from
-# the .mod-files provided here. For this example to work, run "nrnivmodl" in
-# this folder to compile these mechanisms
-# (i.e. /$PATHTONEURON/nrn/x86_64/bin/nrnivmodl).
 #
 # Here, excitatory and inhibitory neurons are distributed on different parts of
 # the morphology, with stochastic spike times produced by the
 # LFPy.inputgenerators.stationary_gamma() function.
 #
+# Same as "example3.py", just without the active conductances
 ################################################################################
 
 # importing some modules, setting some matplotlib values for pl.plot.
@@ -95,7 +90,7 @@ def insert_synapses(synparams, section, n, spTimesFun, args):
 
 #define cell parameters used as input to cell-class
 cellParameters = {
-    'morphology' : 'morphologies/L5_Mainen96_wAxon_LFPy.hoc',
+    'morphology' : 'morphologies/L5_Mainen96_LFPy.hoc',
     'rm' : 30000,               # membrane resistance
     'cm' : 1.0,                 # membrane capacitance
     'Ra' : 150,                 # axial resistance
@@ -106,9 +101,9 @@ cellParameters = {
     'lambda_f' : 100,           # segments are isopotential at this frequency
     'timeres_NEURON' : 2**-4,   # dt of LFP and NEURON simulation.
     'timeres_python' : 2**-4,
-    'tstartms' : -100,           #start time, recorders start at t=0
-    'tstopms' : 1000,             #stop time of simulation
-    'custom_code'  : ['active_declarations_example3.hoc'], # will run this file
+    'tstartms' : -100,          #start time, recorders start at t=0
+    'tstopms' : 1000,           #stop time of simulation
+    'custom_code'  : [],        # will if given list of files run this file
 }
 
 # Synaptic parameters taken from Hendrickson et al 2011
@@ -213,4 +208,4 @@ electrode.calc_lfp()
 
 #plotting some variables and geometry, saving output to .pdf.
 plotstuff()
-#pl.savefig('example3.pdf')
+#pl.savefig('example4.pdf')
