@@ -149,7 +149,11 @@ class Cell(object):
         
         #Gather geometry, set position and rotation of morphology
         self._collect_geometry()
-        self.set_pos()
+        if hasattr(self, 'somapos'):
+            self.set_pos()
+        else:
+            if self.verbose:
+                print 'will not set position, no soma section.'
         self.set_rotation(**self.default_rotation)
         
     def _load_geometry(self):
@@ -446,7 +450,8 @@ class Cell(object):
                 
         if self.somaidx.size == 0:
             pass
-            #print 'There is no soma!'
+            if self.verbose:
+                print 'There is no soma!'
         elif self.somaidx.size == 1:
             self.somapos = np.zeros(3)
             self.somapos[0] = self.xmid[self.somaidx]
@@ -825,7 +830,7 @@ class Cell(object):
     def set_pos(self, xpos=0, ypos=0, zpos=0):
         '''
         Move the cell geometry so that midpoint of soma section is
-        in (xpos, ypos, zpos)
+        in (xpos, ypos, zpos). If no soma pos, use the first segment
         '''
         self.orig_pos = False
         

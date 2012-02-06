@@ -8,7 +8,7 @@ Downlad stable versions of LFPy here:
 Or, download the development version of LFPy using `subversion <http://subversion.apache.org/>`_ into a local folder:
 ::
     
-    svn checkout https://bebiservice.umb.no/svn-private/LFPy-release
+    svn checkout http://bebiservice.umb.no/svn-public/LFPy-release
     
 
 
@@ -42,9 +42,9 @@ To install LFPy you will need the following:
 Installing LFPy
 ---------------
 
-1.  Download the LFPy source distribution (LFPy-1.0.tar.gz) and unpack.
+1.  Download the LFPy source distribution (LFPy-0.9.tar.gz) and unpack.
 
-2.  In LFPy-1.0 run
+2.  In LFPy-0.9 run
     ::
     
         sudo python setup.py install
@@ -69,7 +69,7 @@ Installing LFPy
 4.  There are some basic usage examples provided in 
     ::
     
-        LFPy-1.0/examples/
+        LFPy-0.9/examples/
 
     We suggest you start with ``example1.py``
     :: 
@@ -85,7 +85,7 @@ Installing LFPy
 
 5.  HTML documentation is available at::
 
-		LFPy-1.0/html/index.html
+		LFPy-0.9/html/index.html
 
 
 

@@ -7,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Getting started &mdash; LFPy 1.0 documentation</title>
+    <title>Getting LFPy &mdash; LFPy 0.9 documentation</title>
     
     <link rel="stylesheet" href="_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -15,7 +15,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '1.0',
+        VERSION:     '0.9',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="LFPy 1.0 documentation" href="index.html" />
+    <link rel="top" title="LFPy 0.9 documentation" href="index.html" />
     <link rel="next" title="LFPy Tutorial" href="tutorial.html" />
     <link rel="prev" title="LFPy documentation" href="index.html" /> 
   </head>
@@ -44,7 +44,7 @@
         <li class="right" >
           <a href="index.html" title="LFPy documentation"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">LFPy 1.0 documentation</a> &raquo;</li> 
+        <li><a href="index.html">LFPy 0.9 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -53,10 +53,18 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <div class="section" id="getting-started">
+  <div class="section" id="getting-lfpy">
+<h1>Getting LFPy<a class="headerlink" href="#getting-lfpy" title="Permalink to this headline">¶</a></h1>
+<p>Downlad stable versions of LFPy here:</p>
+<p><a class="reference external" href="bebiservice.umb.no/LFPy/downloads/LFPy-0.9.tar.gz">LFPy-0.9.tar.gz</a></p>
+<p>Or, download the development version of LFPy using <a class="reference external" href="http://subversion.apache.org/">subversion</a> into a local folder:</p>
+<div class="highlight-python"><pre>svn checkout http://bebiservice.umb.no/svn-public/LFPy-release</pre>
+</div>
+</div>
+<div class="section" id="getting-started">
 <h1>Getting started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="requirements">
-<h2>Requirements<a class="headerlink" href="#requirements" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="dependencies">
+<h2>Dependencies<a class="headerlink" href="#dependencies" title="Permalink to this headline">¶</a></h2>
 <p>To install LFPy you will need the following:</p>
 <ol class="arabic">
 <li><p class="first">Python, seems to work fine with recent python since 2.6.x (2.6.6 or newer recommended), 2.7.x works fine.
@@ -70,9 +78,50 @@ Not tested with Python 3.x.</p>
 </pre></div>
 </div>
 <p>If this step fails, see the next section.</p>
-<p>LFPy was tested to work with NEURON 7.2 and 7.3, we had some issues with NEURON 7.1.</p>
+<p>LFPy was tested to work with NEURON 7.2 and the 7.3 development branch, we had some issues with NEURON 7.1.</p>
 </li>
 <li><p class="first"><a class="reference external" href="http://cython.org">Cython</a> (C-extensions for python) to speed up simulations of extracellular fields. Tested with version &gt; 1.4.</p>
+</li>
+</ol>
+</div>
+<div class="section" id="installing-lfpy">
+<h2>Installing LFPy<a class="headerlink" href="#installing-lfpy" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic">
+<li><p class="first">Download the LFPy source distribution (LFPy-0.9.tar.gz) and unpack.</p>
+</li>
+<li><p class="first">In LFPy-0.9 run</p>
+<div class="highlight-python"><pre>sudo python setup.py install</pre>
+</div>
+<p>or</p>
+<div class="highlight-python"><pre>python setup.py install --user</pre>
+</div>
+<p>in case you want to install in your home directory (e.g. if you do not have root access).</p>
+<p>If you only want to have LFPy in one place, you can add this folder to your $PYTHONPATH, and just compile the Cython extensions;</p>
+<div class="highlight-python"><pre>python setup.py build_ext -i</pre>
+</div>
+</li>
+<li><p class="first">In a fresh python-session you should now be able to</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">LFPy</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">There are some basic usage examples provided in</p>
+<div class="highlight-python"><pre>LFPy-0.9/examples/</pre>
+</div>
+<p>We suggest you start with <tt class="docutils literal"><span class="pre">example1.py</span></tt></p>
+<div class="highlight-python"><pre>cd examples
+python example1.py</pre>
+</div>
+<p>or</p>
+<div class="highlight-python"><pre>cd examples
+ipython
+&gt;&gt;&gt; run "example1.py"</pre>
+</div>
+</li>
+<li><p class="first">HTML documentation is available at:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">LFPy</span><span class="o">-</span><span class="mf">0.9</span><span class="o">/</span><span class="n">html</span><span class="o">/</span><span class="n">index</span><span class="o">.</span><span class="n">html</span>
+</pre></div>
+</div>
 </li>
 </ol>
 </div>
@@ -140,7 +189,7 @@ neuron.test()</pre>
 <div class="section" id="dependencies-and-installation-on-mac-os-x">
 <h3>Dependencies and installation on Mac OS X<a class="headerlink" href="#dependencies-and-installation-on-mac-os-x" title="Permalink to this headline">¶</a></h3>
 <p>Most of the development work and testing of LFPy has been done on Max OS X 10.6.* Snow Leopard and 10.7.* Lion. Our preferred way of building Python
-and NEURON have been through MacPorts; <a class="reference external" href="http://www.macports.org">http://www.macports.org</a>.</p>
+has been through MacPorts; <a class="reference external" href="http://www.macports.org">http://www.macports.org</a>. Here is an step-by-step explanation on how to compile NEURON agains that installation of Python.</p>
 <p>To start using MacPorts, follow the instructions on <a class="reference external" href="http://www.macports.org/install.php">http://www.macports.org/install.php</a>.</p>
 <p>Building a python 2.7 environment using MacPorts issue in Terminal:</p>
 <div class="highlight-python"><pre>sudo port install python27 py27-ipython py27-numpy py27-matplotlib py27-scipy py27-cython</pre>
@@ -203,47 +252,11 @@ sudo python setup.py install</pre>
 </div>
 <p>If you prefer to use Enthough Python distribution, see this forum post: <a class="reference external" href="https://www.neuron.yale.edu/phpBB/viewtopic.php?f=2&amp;t=2191">https://www.neuron.yale.edu/phpBB/viewtopic.php?f=2&amp;t=2191</a></p>
 </div>
+<div class="section" id="windows">
+<h3>Windows<a class="headerlink" href="#windows" title="Permalink to this headline">¶</a></h3>
+<p>We have not tested this, but there is probably some way or another to compile NEURON as a Python module on the Windows platform.
+If so, LFPy should work as well.</p>
 </div>
-<div class="section" id="installing-lfpy">
-<h2>Installing LFPy<a class="headerlink" href="#installing-lfpy" title="Permalink to this headline">¶</a></h2>
-<ol class="arabic">
-<li><p class="first">Download the LFPy source distribution (LFPy-1.0.tar.gz) and unpack.</p>
-</li>
-<li><p class="first">In LFPy-1.0 run</p>
-<div class="highlight-python"><pre>sudo python setup.py install</pre>
-</div>
-<p>or</p>
-<div class="highlight-python"><pre>python setup.py install --user</pre>
-</div>
-<p>in case you want to install in your home directory (e.g. if you do not have root access).</p>
-<p>If you only want to have LFPy in one place, you can add this folder to your $PYTHONPATH, and just compile the Cython extensions;</p>
-<div class="highlight-python"><pre>python setup.py build_ext -i</pre>
-</div>
-</li>
-<li><p class="first">Now you should be able to</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">LFPy</span>
-</pre></div>
-</div>
-</li>
-<li><p class="first">There are some basic usage examples provided in</p>
-<div class="highlight-python"><pre>LFPy-1.0/examples/</pre>
-</div>
-<p>We suggest you start with <tt class="docutils literal"><span class="pre">example1.py</span></tt></p>
-<div class="highlight-python"><pre>cd examples
-python example1.py</pre>
-</div>
-<p>or</p>
-<div class="highlight-python"><pre>cd examples
-ipython
-run "example1.py"</pre>
-</div>
-</li>
-<li><p class="first">HTML documentation is available at:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">LFPy</span><span class="o">-</span><span class="mf">1.0</span><span class="o">/</span><span class="n">html</span><span class="o">/</span><span class="n">index</span><span class="o">.</span><span class="n">html</span>
-</pre></div>
-</div>
-</li>
-</ol>
 </div>
 </div>
 
@@ -255,15 +268,17 @@ run "example1.py"</pre>
         <div class="sphinxsidebarwrapper">
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
-<li><a class="reference internal" href="#">Getting started</a><ul>
-<li><a class="reference internal" href="#requirements">Requirements</a></li>
+<li><a class="reference internal" href="#">Getting LFPy</a></li>
+<li><a class="reference internal" href="#getting-started">Getting started</a><ul>
+<li><a class="reference internal" href="#dependencies">Dependencies</a></li>
+<li><a class="reference internal" href="#installing-lfpy">Installing LFPy</a></li>
 <li><a class="reference internal" href="#installing-neuron-with-python">Installing NEURON with Python</a><ul>
 <li><a class="reference internal" href="#dependencies-ubuntu-10-4lts-and-other-debian-based-linux-versions">Dependencies: Ubuntu 10.4LTS and other Debian-based Linux versions</a></li>
 <li><a class="reference internal" href="#linux-unix-installation">Linux/Unix installation</a></li>
 <li><a class="reference internal" href="#dependencies-and-installation-on-mac-os-x">Dependencies and installation on Mac OS X</a></li>
+<li><a class="reference internal" href="#windows">Windows</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#installing-lfpy">Installing LFPy</a></li>
 </ul>
 </li>
 </ul>
@@ -311,7 +326,7 @@ run "example1.py"</pre>
         <li class="right" >
           <a href="index.html" title="LFPy documentation"
              >previous</a> |</li>
-        <li><a href="index.html">LFPy 1.0 documentation</a> &raquo;</li> 
+        <li><a href="index.html">LFPy 0.9 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
