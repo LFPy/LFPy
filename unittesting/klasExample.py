@@ -1,8 +1,8 @@
 #!/usr/bin/env python
-from numpy import pi, cos, tanh, cosh, sqrt, exp, arange, array, linspace, empty
+from numpy import pi, cos, tanh, cosh, sqrt, exp, arange, array, linspace, empty, zeros
 from scipy.integrate import quad
 from scipy import real, imag
-from matplotlib.pyplot import plot, subplot, imshow, axis, show, xlabel, ylabel, title
+from matplotlib.pyplot import plot, subplot, imshow, axis, show, xlabel, ylabel, title, close, colorbar
 
 def complex_quadrature(func, a, b, **kwargs):
     def real_func(x):
@@ -17,9 +17,10 @@ def complex_quadrature(func, a, b, **kwargs):
 
 time = arange(0, 0.1, 0.0001) #time vector (s)
 
-input_z_location = 1000E-6     # z-coordinate of electrode (m)
-electrode_x = 1000E-6 #linspace(0, 1000E-6, 1001) #1000E-6      # x-coordinate of electrode (m)
+input_z_location = 1000E-6     # input, end of stick (z = L)
+electrode_x = 100E-6    # x-coordinate of electrode (m)
 sigma = 0.3             # extracellular conductivity (ohm/m)
+electrode_z = linspace(1000E-6, 0, 101)
 
 
 #current input
@@ -41,42 +42,55 @@ ri = 4. * Ri / (pi * diam**2) # intracellular resistance
 Lambda = 1. / sqrt(gm * ri) # Electrotonic length constant of stick
 Ginf = 1. / (ri * Lambda)   # input conductance?
 tau_m = Rm * Cm         # membrane time constant
-Omega = 2 * pi * frequency * tau_m
-Z = input_z_location / Lambda    # position of input current, end of stick
-L = len_stick / Lambda      # Unitless length of stick
-R = electrode_x / Lambda    # extracellular, location along x-axis
+Omega = 2 * pi * frequency * tau_m  #impedance
+#Z = input_z_location / Lambda    # z-position of extracellular point, in units of Lambda
+L = len_stick / Lambda      # Length of stick in units of Lambda
+R = electrode_x / Lambda    # extracellular, location along x-axis, or radius, in units of Lambda
 q = sqrt(1+1j*Omega)	    # Note: j is sqrt(-1)
-
 Yin = q*Ginf*tanh(q*L)	    # Zin is input position
 
 
-#V_extracellular = empty((electrode_x.size, time.size))
-#j = 0
-#for R in electrode_x / Lambda:
-def i_mem(Z):
-    return gm*q**2*cosh(q*L-q*Z)/cosh(q*L)*I0/Yin
+V_extracellular = empty((electrode_z.size, time.size))
+j = 0
+for Z in electrode_z / Lambda:
+    print 'calculate Vex for Z=%.3f' % Z
+    def i_mem(Z):
+        return gm * q**2*cosh(q * L - q * Z)/cosh(q * L) * I0 / Yin / 1000.
+        
+        
+    def f_to_integrate(Z):
+        return Lambda / (4 * pi * sigma) * i_mem(Z) / sqrt(R**2 + Z**2)
+    
+    #calculate contrib from membrane currents
+    Vex_imem = complex_quadrature(f_to_integrate, 0, L, epsabs=1E-20)
+    
+    #adding contrib from input current to Vex
+    Vex_input = I0 / (4 * pi * sigma * sqrt(R**2 + (Z-L)**2))
+    
+    Vex = Vex_imem + Vex_input
+    Vcomplex = []
+    for i in xrange(time.size):
+        Vcomplex.append(Vex * exp(1j*2*pi*frequency*time[i]))
+    
+    Vcomplex = array(Vcomplex)
 
-def f_to_integrate(Z):
-    return Lambda / (4 * pi * sigma) * i_mem(Z) / sqrt(R**2 + Z**2)
+    V_extracellular[j, ] = Vcomplex.real
+    j += 1
 
+close('all')
 
-Vex = complex_quadrature(f_to_integrate, 0, L, epsabs=1.49e-20) + \
-    I0 / (4 * pi * sigma * sqrt(electrode_x**2 + (input_z_location - L)**2))
-
-Vcomplex = []
-for i in xrange(time.size):
-    Vcomplex.append(Vex * exp(1j*2*pi*frequency*time[i]))
-
-Vcomplex = array(Vcomplex)
-
-V_extracellular = Vcomplex.real
-#j += 1
-
-subplot(211)
+subplot(221)
 plot(time, I0 * cos(2 * pi *frequency * time))
 
+subplot(222)
+plot([0, 0], [0, 1E-3], 'k', lw=2)
+plot(0, 1E-3, '.', marker='o', color='r')
+plot(zeros(101) + electrode_x, electrode_z, '.', color='b', marker='o')
+axis('equal')
+
 subplot(212)
-plot(time, V_extracellular)
+imshow(V_extracellular, cmap='jet_r', interpolation='nearest')
 axis('tight')
+colorbar()
 
 show()
