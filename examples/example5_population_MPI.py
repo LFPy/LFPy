@@ -9,20 +9,15 @@ import LFPy
 
 '''
 This is an example using LFPy and MPI to run several cell models similar to
-ex_L5pyr_active.py in parallel, with cells positioned different in space.
+example3.py in parallel, with cells positioned different in space.
 
 To execute this scripts in parallel issue in the terminal::
 $ mpirun -n 8 python ex_MPI_L5pyr_active.py
 
-On Stallo the job may be submitted using the corresponding .sh script::
-$ qsub ex_MPI_L5pyr_active.sh
-
-or using an interactive session:
-$ export LD_PRELOAD=libmkl_intel_lp64.so:libmkl_intel_thread.so:libmkl_core.so:libguide.so
-$ mpirun -n 8 -x LD_PRELOAD python ex_MPI_L5pyr_active.py
-
 Note that -n 2 don't get speedups, because one core is used to send and receive
 and not for actual simulations.
+
+Can also be run in serial mode.
 '''
 
 ################################################################################
@@ -89,13 +84,16 @@ def insert_synapses(cell, synparams, section, n, spTimesFun, args):
         spiketimes = spTimesFun(args[0], args[1], args[2], args[3])
 
         # Create synapse(s) and setting times using the Synapse class in LFPy
-        s = LFPy.PointProcessSynapse(cell,**synparams)
-        s.set_spike_times(cell, spiketimes)
+        s = LFPy.Synapse(cell,**synparams)
+        s.set_spike_times(spiketimes)
 
 def cellsim(cellposition={'xpos' : 0, 'ypos' : 0, 'zpos' : 0}):
-
+    
+    #Initialte extracellular electrode object
+    electrode = LFPy.RecExtElectrode(**electrodeParameters)
+    
     #Initialize cell instance, using the LFPy.Cell class
-    cell = LFPy.CellWithElectrode(**cellParameters)
+    cell = LFPy.Cell(**cellParameters)
     cell.set_pos(**cellposition)
     #Insert synapses
     insert_synapses(cell, synparams_AMPA, **insert_synapses_AMPA_args)
@@ -103,12 +101,11 @@ def cellsim(cellposition={'xpos' : 0, 'ypos' : 0, 'zpos' : 0}):
     insert_synapses(cell, synparams_GABA_A, **insert_synapses_GABA_A_args)
     
     #perform NEURON simulation, results saved as attributes in the cell instance
-    simulateParameters.update(electrodeParameters)
-    cell.simulate(**simulateParameters)
+    cell.simulate(electrode, **simulateParameters)
     
     #for some reason, returning the cell-object is problematic, so some arrays
     #are returned
-    return [cell.tvec, cell.somav, cell.LFP]
+    return [cell.tvec, cell.somav, electrode]
 
 ################################################################################
 # Define parameters, using dictionaries
@@ -132,7 +129,7 @@ cellParameters = {          #various cell parameters,
     'tstartms' : -100,  #start time of simulation, recorders start at t=0
     'tstopms' : 200,   #stop simulation at 1000 ms. these can be overridden
                         #by setting these arguments in cell.simulation()
-    'custom_code'  : ['my_active_declarations.hoc'],    #Custom .hoc/.py-scripts
+    'custom_code'  : ['active_declarations_example3.hoc'],    #Custom .hoc/.py-scripts
 }
 #Synaptic parameters taken from Hendrickson et al 2011
 synparams_AMPA = {         #Excitatory synapse parameters
@@ -285,7 +282,7 @@ if master_mode:
     
     LFPsum = pl.zeros(outputs[0][2].shape)
     for output in outputs:
-        LFPsum += output[2]
+        LFPsum += output[2].LFP
     pl.figure()
     pl.imshow(LFPsum, origin='bottom', cmap='jet_r',
               vmin=-abs(LFPsum).max(), vmax=abs(LFPsum).max(),
@@ -293,7 +290,8 @@ if master_mode:
     pl.axis('tight')
     pl.colorbar()
     pl.title('Extracellular Field Potentials')
-    pl.savefig('ex_MPI_LFPs.pdf')
+    #save figure to pdf
+    #pl.savefig('ex_MPI_LFPs.pdf')
     
         
     
