@@ -1,0 +1,3 @@
+To create a new version tag, issue in terminal:
+
+svn copy https://bebiservice.umb.no/svn-public/LFPy-release/trunk/ https://bebiservice.umb.no/svn-public/LFPy-release/tags/VERSION.VERSION -m "release VERSION.VERSION"
