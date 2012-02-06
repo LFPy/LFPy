@@ -21,10 +21,10 @@ stickParams = {
 
 electrodeParams = {
     'sigma' : 0.3,
-    'x' : pl.ones(101) + 100.,
+    'x' : pl.ones(101) * 100.,
     'y' : pl.zeros(101),
     'z' : pl.linspace(1000, 0, 101),
-    'method' : 'pointsource'
+    'method' : 'linesource'
 }
 
 stimParams = {
