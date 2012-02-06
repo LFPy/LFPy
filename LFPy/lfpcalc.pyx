@@ -36,6 +36,7 @@ cpdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] calc_lfp_choose(c,
                                     r_limit=r_limit,
                                     timestep=timestep, t_indices=t_indices)
 
+
 cpdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] calc_lfp_linesource(c,
                         double x=0,
                         double y=0,
@@ -43,6 +44,7 @@ cpdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] calc_lfp_linesource(c,
                         double sigma=0.3,
                         r_limit=None,
                         timestep=None, t_indices=None):
+    
     """Calculate electric field potential using the line-source method, all
     compartments treated as line sources, even soma."""
     # Handling the r_limits. If a r_limit is a single value, an array r_limit
@@ -55,8 +57,8 @@ cpdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] calc_lfp_linesource(c,
 
     cdef np.ndarray[DTYPE_t, ndim=2, negative_indices=False] currmem
     cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] xstart, xend, \
-        ystart, yend, zstart, zend, r_lims, deltaS, h, r2, l, \
-        Ememi, Ememii, Ememiii, Emem
+        ystart, yend, zstart, zend, deltaS, h, r2, l, \
+        Ememi, Ememii, Ememiii, Emem, r_lims
     cdef np.ndarray[long, ndim=1, negative_indices=False] i, ii, iii
 
     if timestep != None:
@@ -76,32 +78,44 @@ cpdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] calc_lfp_linesource(c,
     zend = c.zend
 
 
-    deltaS = deltaS_calc(xstart, xend, ystart, yend, zstart, zend)
-    h = h_calc(xstart, xend, ystart, yend, zstart, zend, deltaS, x, y, z)
-    r2 = r2_calc(xend, yend, zend, x, y, z, h)
-    if np.any(r2 < 0):
-        raise Exception
+    deltaS = _deltaS_calc(xstart, xend, ystart, yend, zstart, zend)
+    h = _h_calc(xstart, xend, ystart, yend, zstart, zend, deltaS, x, y, z)
+    r2 = _r2_calc(xend, yend, zend, x, y, z, h)
 
 
     r_lims = r_limit
-    r2 = check_rlimit(r2, r_lims, h, deltaS)
+    r2 = _check_rlimit(r2, r_limit, h, deltaS)
 
     l = h + deltaS
 
+
+    hnegi = h < 0
+    hposi = h >= 0
+    lnegi = l < 0
+    lposi = l >= 0
+
     #case i, h < 0, l < 0
-    [i] = np.where((h < 0) & (l < 1))
+    [i] = np.where(hnegi & lnegi)
     #case ii, h < 0, l > 0
-    [ii] = np.where((h < 0) & (l >= 0))
+    [ii] = np.where(hnegi & lposi)
     #case iii, h > 0, l > 0
-    [iii] = np.where((h >= 0) & (l >= 1))
+    [iii] = np.where(hposi & lposi)
+    
+    ##case i, h < 0, l < 0
+    #[i] = np.where((h < 0) & (l < 1))
+    ##case ii, h < 0, l >= 0
+    #[ii] = np.where((h < 0) & (l >= 0))
+    ##case iii, h >= 0, l >= 0
+    #[iii] = np.where((h >= 0) & (l >= 1))
+    #
 
-    Ememi = Ememi_calc(i, currmem, sigma, deltaS, l, r2, h)
-    Ememii = Ememii_calc(ii, currmem, sigma, deltaS, l, r2, h)
-    Ememiii = Ememiii_calc(iii, currmem, sigma, deltaS, l, r2, h)
+    Ememi = _Ememi_calc(i, currmem, sigma, deltaS, l, r2, h)
+    Ememii = _Ememii_calc(ii, currmem, sigma, deltaS, l, r2, h)
+    Ememiii = _Ememiii_calc(iii, currmem, sigma, deltaS, l, r2, h)
 
-    Emem = Ememi.transpose() + Ememiii.transpose() + Ememii.transpose()
+    Emem = Ememi + Ememii + Ememiii
 
-    return Emem
+    return Emem.transpose()
 
 
 cpdef np.ndarray[DTYPE_t, ndim=1] calc_lfp_som_as_point(c,
@@ -155,17 +169,17 @@ cpdef np.ndarray[DTYPE_t, ndim=1] calc_lfp_som_as_point(c,
     zend = c.zend
 
 
-    deltaS = deltaS_calc(xstart, xend, ystart, yend, zstart, zend)
-    h = h_calc(xstart, xend, ystart, yend, zstart, zend, deltaS, x, y, z)
-    r2 = r2_calc(xend, yend, zend, x, y, z, h)
-    r_soma = r_soma_calc(xmid, ymid, zmid, x, y, z)
+    deltaS = _deltaS_calc(xstart, xend, ystart, yend, zstart, zend)
+    h = _h_calc(xstart, xend, ystart, yend, zstart, zend, deltaS, x, y, z)
+    r2 = _r2_calc(xend, yend, zend, x, y, z, h)
+    r_soma = _r_soma_calc(xmid, ymid, zmid, x, y, z)
     if r_soma < s_limit:
         print 'Adjusting r-distance to soma segment from %g to %g' \
                 % (r_soma, s_limit)
         r_soma = s_limit
 
     # Check that no segment is close the electrode than r_limit
-    if np.sum(np.nonzero( r2 < r_limit*r_limit )) > 0:
+    if np.sum(np.nonzero( r2 < r_limit * r_limit )) > 0:
         for idx in np.nonzero( r2[1:] < r_limit[1:] * r_limit[1:] )[0]+1:
             if (h[idx] < r_limit[idx]) and \
             ((deltaS[idx] + h[idx]) > -r_limit[idx]):
@@ -191,21 +205,21 @@ cpdef np.ndarray[DTYPE_t, ndim=1] calc_lfp_som_as_point(c,
     #case iii,  h > 0,  l > 0
     [iii] = np.where(hposi & lposi)
 
-    Ememi = Ememi_calc(i, currmem, sigma, deltaS, l, r2, h)
-    Ememii = Ememii_calc(ii, currmem, sigma, deltaS, l, r2, h)
-    Ememiii = Ememiii_calc(iii, currmem, sigma, deltaS, l, r2, h)
+    Ememi = _Ememi_calc(i, currmem, sigma, deltaS, l, r2, h)
+    Ememii = _Ememii_calc(ii, currmem, sigma, deltaS, l, r2, h)
+    Ememiii = _Ememiii_calc(iii, currmem, sigma, deltaS, l, r2, h)
 
     #Potential contribution from soma
     Emem0 = currmem[0] / (4 * np.pi * sigma * r_soma)
 
     #Summarizing all potential contributions
     Emem = Emem0 + Ememi + Ememiii + Ememii
-
+    
     return Emem.transpose()
 
 
-cdef double r_soma_calc(double xmid, double ymid, double zmid,
-                        double x, double y, double z) except? -2:
+cdef double _r_soma_calc(double xmid, double ymid, double zmid,
+                        double x, double y, double z):
     '''Calculate the distance to the soma midpoint'''
     r_soma = np.sqrt((x - xmid)*(x - xmid) + (y - ymid)*(y - ymid) + \
         (z - zmid)*(z - zmid))
@@ -213,7 +227,7 @@ cdef double r_soma_calc(double xmid, double ymid, double zmid,
     return r_soma
 
 
-cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] check_rlimit(
+cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] _check_rlimit(
                  np.ndarray[DTYPE_t, ndim=1, negative_indices=False] r2,
                  np.ndarray[DTYPE_t, ndim=1, negative_indices=False] r_limit,
                  np.ndarray[DTYPE_t, ndim=1, negative_indices=False] h,
@@ -229,7 +243,7 @@ cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] check_rlimit(
     return r2
 
 
-cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] Ememi_calc(
+cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] _Ememi_calc(
                np.ndarray[long, ndim=1, negative_indices=False] i,
                np.ndarray[DTYPE_t, ndim=2, negative_indices=False] currmem,
                double sigma,
@@ -262,7 +276,7 @@ cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] Ememi_calc(
     return Emem_i
 
 
-cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] Ememii_calc(
+cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] _Ememii_calc(
                 np.ndarray[long, ndim=1, negative_indices=False] ii,
                 np.ndarray[DTYPE_t, ndim=2, negative_indices=False] currmem,
                 double sigma,
@@ -293,7 +307,7 @@ cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] Ememii_calc(
     return Emem_ii
 
 
-cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] Ememiii_calc(
+cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] _Ememiii_calc(
                  np.ndarray[long, ndim=1, negative_indices=False] iii,
                  np.ndarray[DTYPE_t, ndim=2, negative_indices=False] currmem,
                  double sigma,
@@ -324,7 +338,7 @@ cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] Ememiii_calc(
     return Emem_iii
 
 
-cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] deltaS_calc(
+cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] _deltaS_calc(
                 np.ndarray[DTYPE_t, ndim=1, negative_indices=False] xstart,
                 np.ndarray[DTYPE_t, ndim=1, negative_indices=False] xend,
                 np.ndarray[DTYPE_t, ndim=1, negative_indices=False] ystart,
@@ -339,7 +353,7 @@ cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] deltaS_calc(
     return deltaS
 
 
-cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] h_calc(
+cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] _h_calc(
                 np.ndarray[DTYPE_t, ndim=1, negative_indices=False] xstart,
                 np.ndarray[DTYPE_t, ndim=1, negative_indices=False] xend,
                 np.ndarray[DTYPE_t, ndim=1, negative_indices=False] ystart,
@@ -359,7 +373,7 @@ cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] h_calc(
     hh[0] = 0
     return hh
 
-cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] r2_calc(
+cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] _r2_calc(
             np.ndarray[DTYPE_t, ndim=1] xend,
             np.ndarray[DTYPE_t, ndim=1, negative_indices=False] yend,
             np.ndarray[DTYPE_t, ndim=1, negative_indices=False] zend,
