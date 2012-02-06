@@ -2,7 +2,9 @@
 from numpy import pi, cos, tanh, cosh, sqrt, exp, arange, array, linspace, empty, zeros
 from scipy.integrate import quad
 from scipy import real, imag
-from matplotlib.pyplot import plot, subplot, imshow, axis, show, xlabel, ylabel, title, close, colorbar
+from matplotlib.pyplot import plot, subplot, imshow, axis, show, xlabel, ylabel, title, close, colorbar, interactive
+
+interactive(1)
 
 def complex_quadrature(func, a, b, **kwargs):
     def real_func(x):
@@ -55,7 +57,7 @@ j = 0
 for Z in electrode_z / Lambda:
     print 'calculate Vex for Z=%.3f' % Z
     def i_mem(Z):
-        return gm * q**2*cosh(q * L - q * Z)/cosh(q * L) * I0 / Yin / 1000.
+        return gm * q**2 * cosh(q * L - q * Z) / cosh(q * L) * I0 / Yin
         
         
     def f_to_integrate(Z):
@@ -77,6 +79,7 @@ for Z in electrode_z / Lambda:
     V_extracellular[j, ] = Vcomplex.real
     j += 1
 
+
 close('all')
 
 subplot(221)
@@ -93,4 +96,4 @@ imshow(V_extracellular, cmap='jet_r', interpolation='nearest')
 axis('tight')
 colorbar()
 
-show()
+
