@@ -8,7 +8,7 @@ ENDCOMMENT
 NEURON {
         POINT_PROCESS SinSyn
         RANGE del, dur, pkamp, freq, phase, bias
-        NONSPECIFIC_CURRENT i
+        ELECTRODE_CURRENT i
 }
 
 UNITS {
