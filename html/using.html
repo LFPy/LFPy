@@ -1,0 +1,234 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Notes on LFPy &mdash; LFPy 0.9 documentation</title>
+    
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.9',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="LFPy 0.9 documentation" href="index.html" />
+    <link rel="next" title="module LFPy" href="classes.html" />
+    <link rel="prev" title="LFPy Tutorial" href="tutorial.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="classes.html" title="module LFPy"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="tutorial.html" title="LFPy Tutorial"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">LFPy 0.9 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="notes-on-lfpy">
+<h1>Notes on LFPy<a class="headerlink" href="#notes-on-lfpy" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="using-your-own-models">
+<h2>Using your own models<a class="headerlink" href="#using-your-own-models" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="importing-morphology">
+<h3>Importing morphology<a class="headerlink" href="#importing-morphology" title="Permalink to this headline">¶</a></h3>
+<p>Cell morphology can be specified manually in a <tt class="docutils literal"><span class="pre">hoc</span></tt> file. For a simple example, see
+<tt class="docutils literal"><span class="pre">examples/morphologies/example_morphology</span></tt>. Note the following conventions:</p>
+<ul class="simple">
+<li>soma needs to be a list (use <tt class="docutils literal"><span class="pre">soma[0]</span></tt>, not <tt class="docutils literal"><span class="pre">soma</span></tt>),</li>
+<li>use <tt class="docutils literal"><span class="pre">soma</span></tt> as the name for the soma compartment,</li>
+<li>use a name starting with <tt class="docutils literal"><span class="pre">dend</span></tt> for the dendrites.</li>
+</ul>
+<p>Also the morphologies exported from the NEURON simulator
+(for example using Cell Builder -&gt; Export) should
+work with LFPy.</p>
+<div class="highlight-python"><pre>/* ----------------------------------------------------
+example_morphology.hoc
+
+This hoc file creates a neuron of the following shape:
+
+            \
+             \
+              \   /
+               \ /
+                V
+                |
+                |
+                |
+                O
+
+Note the conventions:
+ - soma needs to be a list (soma[0], not soma),
+ - use soma for the soma compartment,
+ - use a name starting with dend for the dendrites.
+-----------------------------------------------------*/
+
+
+create soma[1]
+create dend[3]
+
+soma[0] {
+    pt3dadd(0, 0, 0, 25)
+    pt3dadd(0, 0, 35, 25)
+}
+
+dend[0] {
+    pt3dadd(0, 0, 35, 5)
+    pt3dadd(0, 0, 150, 5)
+}
+
+dend[1] {
+    pt3dadd(0, 0, 150, 2)
+    pt3dadd(-50, 20, 200, 1)
+}
+
+dend[2] {
+    pt3dadd(0, 0, 150, 2)
+    pt3dadd(30, 0, 160, 2)
+}
+
+connect dend[0](0), soma[0](1)
+connect dend[1](0), dend[0](1)
+connect dend[2](0), dend[0](1)</pre>
+</div>
+</div>
+<div class="section" id="using-neuron-mechanisms">
+<h3>Using NEURON mechanisms<a class="headerlink" href="#using-neuron-mechanisms" title="Permalink to this headline">¶</a></h3>
+<p>Custom NEURON mechanisms can be loaded from external <tt class="docutils literal"><span class="pre">hoc</span></tt> files - see <tt class="docutils literal"><span class="pre">example2.py</span></tt> and <tt class="docutils literal"><span class="pre">example3.py</span></tt>. Remeber to compile any <tt class="docutils literal"><span class="pre">mod</span></tt> files (if needed) using <tt class="docutils literal"><span class="pre">nrnivmodl</span></tt> (or <tt class="docutils literal"><span class="pre">mknrdll</span></tt> on Mac OS).</p>
+</div>
+</div>
+<div class="section" id="units">
+<h2>Units<a class="headerlink" href="#units" title="Permalink to this headline">¶</a></h2>
+<p>Units follow the NEURON conventions.
+The units in LFPy for given quantities are:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="54%" />
+<col width="46%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">What</th>
+<th class="head">Unit</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>Potential</td>
+<td>[mV]</td>
+</tr>
+<tr class="row-odd"><td>Current</td>
+<td>[nA]</td>
+</tr>
+<tr class="row-even"><td>Conductance</td>
+<td>[S/cm2]</td>
+</tr>
+<tr class="row-odd"><td>Capacitance</td>
+<td>[μF/cm2]</td>
+</tr>
+<tr class="row-even"><td>Dimension</td>
+<td>[μm]</td>
+</tr>
+</tbody>
+</table>
+<p>Note: resistance, conductance and capacitance are usually specific values, i.e per membrane area (lowercase r_m, g, c_m)
+Depending on the mechanism files, some may use different units altogether, but this should be taken care of internally by NEURON.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Notes on LFPy</a><ul>
+<li><a class="reference internal" href="#using-your-own-models">Using your own models</a><ul>
+<li><a class="reference internal" href="#importing-morphology">Importing morphology</a></li>
+<li><a class="reference internal" href="#using-neuron-mechanisms">Using NEURON mechanisms</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#units">Units</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="tutorial.html"
+                        title="previous chapter">LFPy Tutorial</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="classes.html"
+                        title="next chapter">module <tt class="docutils literal docutils literal docutils literal"><span class="pre">LFPy</span></tt></a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/using.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="classes.html" title="module LFPy"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="tutorial.html" title="LFPy Tutorial"
+             >previous</a> |</li>
+        <li><a href="index.html">LFPy 0.9 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012, Computational Neuroscience Group, UMB.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+  </body>
+</html>

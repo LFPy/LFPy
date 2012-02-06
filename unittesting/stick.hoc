@@ -1,0 +1,33 @@
+proc celldef() {
+  topol()
+  subsets()
+  geom()
+  biophys()
+  geom_nseg()
+}
+
+create dend
+
+proc topol() { local i
+  basic_shape()
+}
+proc basic_shape() {
+  dend {pt3dclear() pt3dadd(0, 0, 0, 2) pt3dadd(0, 0, 1000, 2)}
+}
+
+objref all
+proc subsets() { local i
+  objref all
+  all = new SectionList()
+    dend all.append()
+
+}
+proc geom() {
+}
+proc geom_nseg() {
+}
+proc biophys() {
+}
+access dend
+
+celldef()
