@@ -15,7 +15,7 @@ stickParams = {
     'timeres_python' : 2**-4,
     'timeres_NEURON' : 2**-4,
     'nsegs_method' : 'lambda_f',
-    'lambda_f' : 100,
+    'lambda_f' : 1000,
     
 }
 
