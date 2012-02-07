@@ -47,12 +47,23 @@ synapse = LFPy.StimIntElectrode(stick, stick.get_closest_idx(0, 0, 1000),
                        **stimParams)
 stick.simulate(electrode, rec_imem=True, rec_istim=True, rec_vmem=True)
 
-pl.subplot(221)
+#separate LFP contribs from synapse current as point source:
+synapse.LFP = pl.zeros(electrode.LFP.shape)
+
+for i in xrange(electrode.x.size):
+    r = pl.sqrt(electrode.x[i]**2 + (1000-electrode.z[i])**2)
+    synapse.LFP[i, ] = stick.pointprocesses[0].i / \
+            (4 * pl.pi * electrode.sigma * r)
+    i += 1
+
+pl.figure(figsize=(10, 10))
+pl.subplot(421)
 pl.plot(stick.tvec, stick.pointprocesses[0].i)
 pl.xlabel('time (ms)')
 pl.ylabel('$i_\mathrm{electrode}$ (nA)')
+pl.title('Synapse current')
 
-pl.subplot(222)
+pl.subplot(422)
 for i in xrange(stick.totnsegs):
     pl.plot([stick.xstart[i], stick.xend[i]],
             [stick.zstart[i], stick.zend[i]],
@@ -62,9 +73,26 @@ pl.plot(electrode.x, electrode.z, '.', color='b', marker='o')
 pl.axis('equal')
 pl.xlabel('x ($\mu$m)')
 pl.ylabel('z ($\mu$m)')
+pl.title('geometry')
 
-pl.subplot(212)
+pl.subplot(412)
 pl.imshow(electrode.LFP, cmap='jet_r', interpolation='nearest')
 pl.axis('tight')
 cbar = pl.colorbar()
 cbar.set_label('LFP (mV)')
+pl.title('total LFP')
+
+
+pl.subplot(413)
+pl.imshow(synapse.LFP, cmap='jet_r', interpolation='nearest')
+pl.axis('tight')
+cbar = pl.colorbar()
+cbar.set_label('Stimulus LFP (mV)')
+pl.title('Stimulus LFP')
+
+pl.subplot(414)
+pl.imshow(electrode.LFP - synapse.LFP, cmap='jet_r', interpolation='nearest')
+pl.axis('tight')
+cbar = pl.colorbar()
+cbar.set_label('residual LFP (mV)')
+pl.title('Residual LFP')
