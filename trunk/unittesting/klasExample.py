@@ -61,14 +61,14 @@ def analytical_LFP(time=np.linspace(0, 100, 1001),
         return gm * q**2 * np.cosh(q * z) / np.cosh(q * L) * stimAmplitude / Yin
         
     def f_to_integrate(z):
-        return 1 / (4 * np.pi * sigma) * i_mem(z) \
-            / np.sqrt(Rel**2 + (z - Zel)**2) / Lambda
+        return 1E-3 / (4 * np.pi * sigma) * i_mem(z) \
+            / np.sqrt(Rel**2 + (z - Zel)**2)
     
     #calculate contrib from membrane currents
-    Vex_imem = complex_quadrature(f_to_integrate, 0, L) #, epsabs=1E-20)
+    Vex_imem = -complex_quadrature(f_to_integrate, 0, L) #, epsabs=1E-20)
     
     #adding contrib from input current to Vex
-    Vex_input = -stimAmplitude / (4 * np.pi * sigma * Lambda * np.sqrt(Rel**2 + (Zin-Zel)**2))
+    Vex_input = stimAmplitude / (4 * np.pi * sigma * Lambda * np.sqrt(Rel**2 + (Zin-Zel)**2))
     
     PhiExImemComplex = Vex_imem * np.exp(1j * 2 * np.pi * stimFrequency *
                                               time / 1000)
@@ -125,14 +125,15 @@ pl.close('all')
 
 pl.figure(figsize=(10, 10))
 pl.subplot(421)
-pl.plot(time, stimAmplitude * np.cos(2 * np.pi * stimFrequency * time / 1000))
+pl.plot(time, modelspec['stimAmplitude'] * np.exp(1j * 2 * np.pi * modelspec['stimFrequency'] *
+                                              time / 1000).real)
 pl.xlabel('time (ms)')
 pl.ylabel('$i_\mathrm{electrode}$ (nA)')
 pl.title('Synapse current')
 
 pl.subplot(422)
 pl.plot([0, 0], [0, 1000], 'k', lw=2)
-pl.plot(0, stickLength, '.', marker='o', color='r')
+pl.plot(0, modelspec['stickLength'], '.', marker='o', color='r')
 pl.plot(R, Z, '.', color='b', marker='o')
 pl.axis('equal')
 pl.xlabel('x ($\mu$m)')

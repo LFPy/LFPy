@@ -7,11 +7,11 @@ pl.close('all')
 
 stickParams = {
     'morphology' : 'stick.hoc',
-    'rm' : 30000,
-    'cm' : 1,
-    'Ra' : 150,
-    'tstartms' : -100,
-    'tstopms' : 100,
+    'rm' : 30000.,
+    'cm' : 1.,
+    'Ra' : 150.,
+    'tstartms' : -100.,
+    'tstopms' : 100.,
     'timeres_python' : 2**-4,
     'timeres_NEURON' : 2**-4,
     'nsegs_method' : 'lambda_f',
