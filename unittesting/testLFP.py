@@ -6,12 +6,74 @@ from scipy.integrate import quad
 from scipy import real, imag
 import LFPy
 
-class testLFPy(unittest.TestCase):
-    def test(self):
-        self.failUnless(True)
+class testLFPy(unittest.TestCase):    
+    def test_method_linesource(self):
+        #create LFPs using LFPy-model
+        LFP_LFPy = self.stickSimulation(method='linesource')
+        
+        #create LFPs using the analytical approac
+        time = np.linspace(0, 100, 10001)
+        R = np.ones(101)*100
+        Z = np.linspace(1000, 0, 101)
+        
+        LFP_analytic = np.empty((R.size, time.size))
+        for i in xrange(R.size):
+            LFP_analytic[i, ] = self.analytical_LFP(time, electrodeR=R[i],
+                                                    electrodeZ=Z[i])
+        LFP_LFPy.flatten()
+        LFP_analytic.flatten()
+        j = 0
+        for i in LFP_LFPy:    
+            self.failUnlessAlmostEqual(i, LFP_analytic[j])
+            j += 1
+        
+    def stickSimulation(self, method):
+        stickParams = {
+            'morphology' : 'stick.hoc',
+            'rm' : 30000,
+            'cm' : 1,
+            'Ra' : 150,
+            'tstartms' : -100,
+            'tstopms' : 100,
+            'timeres_python' : 0.01,
+            'timeres_NEURON' : 0.01,
+            'nsegs_method' : 'lambda_f',
+            'lambda_f' : 100,
+            
+        }
+        
+        electrodeParams = {
+            'sigma' : 0.3,
+            'x' : np.ones(101) * 100.,
+            'y' : np.zeros(101),
+            'z' : np.linspace(1000, 0, 101),
+            'method' : method
+        }
+        
+        stimParams = {
+            'pptype' : 'SinSyn',
+            'delay' : -100.,
+            'dur' : 1000.,
+            'pkamp' : 1.,
+            'freq' : 100.,
+            'phase' : -np.pi/2,
+            'bias' : 0.,
+            'record_current' : True
+        }
+        
+        
+        electrode = LFPy.RecExtElectrode(**electrodeParams)
+        
+        stick = LFPy.Cell(**stickParams)
+        
+        synapse = LFPy.StimIntElectrode(stick, stick.get_closest_idx(0, 0, 1000),
+                               **stimParams)
+        stick.simulate(electrode, rec_imem=True, rec_istim=True, rec_vmem=True)
+        
+        return electrode.LFP
 
     
-    def analytical_LFP(time=np.linspace(0, 100, 1001),
+    def analytical_LFP(self, time=np.linspace(0, 100, 1001),
                        stickLength=1000.,
                        stickDiam=2.,
                        Rm=30000.,
@@ -65,14 +127,14 @@ class testLFPy(unittest.TestCase):
             return gm * q**2 * np.cosh(q * z) / np.cosh(q * L) * stimAmplitude / Yin
             
         def f_to_integrate(z):
-            return 1 / (4 * np.pi * sigma) * i_mem(z) \
-                / np.sqrt(Rel**2 + (z - Zel)**2) / Lambda
+            return 1E-3 / (4 * np.pi * sigma) * i_mem(z) \
+                / np.sqrt(Rel**2 + (z - Zel)**2)
         
         #calculate contrib from membrane currents
-        Vex_imem = complex_quadrature(f_to_integrate, 0, L) #, epsabs=1E-20)
+        Vex_imem = -self.complex_quadrature(f_to_integrate, 0, L) #, epsabs=1E-20)
         
         #adding contrib from input current to Vex
-        Vex_input = -stimAmplitude / (4 * np.pi * sigma * Lambda * np.sqrt(Rel**2 + (Zin-Zel)**2))
+        Vex_input = stimAmplitude / (4 * np.pi * sigma * Lambda * np.sqrt(Rel**2 + (Zin-Zel)**2))
         
         PhiExImemComplex = Vex_imem * np.exp(1j * 2 * np.pi * stimFrequency *
                                                   time / 1000)
@@ -84,10 +146,9 @@ class testLFPy(unittest.TestCase):
         PhiExInput = PhiExInputComplex.real
         
         PhiEx = PhiExImem + PhiExInput
-        
-        return PhiEx, PhiExImem, PhiExInput
+        return PhiEx
     
-    def complex_quadrature(func, a, b, **kwargs):
+    def complex_quadrature(self, func, a, b, **kwargs):
         '''
         Will return the complex integral value.
         '''
