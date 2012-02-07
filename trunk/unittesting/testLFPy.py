@@ -4,17 +4,26 @@ import numpy as np
 from scipy.integrate import quad
 from scipy import real, imag
 import LFPy
-import pylab as pl
 
 class testLFPy(unittest.TestCase):
+    '''
+    A set of test functions for each method of calculating the LFP, where the
+    model outcome from LFPy is compared with analytically obtained results for
+    a stick neuron with sinusoid synaptic current input at the end, and LFP
+    calculated alongside the neuron.
+    
+    The tests should pass with 3 significant numbers in the LFP, as effects
+    of compartmentalising the stick is prominent.
+    '''
+    
     def test_method_pointsource(self):
         #create LFPs using LFPy-model
         LFP_LFPy = self.stickSimulation(method='pointsource')
         
         #create LFPs using the analytical approac
         time = np.linspace(0, 100, 10001)
-        R = np.ones(101)*100
-        Z = np.linspace(1000, 0, 101)
+        R = np.ones(11)*100
+        Z = np.linspace(1000, 0, 11)
         
         LFP_analytic = np.empty((R.size, time.size))
         for i in xrange(R.size):
@@ -32,8 +41,8 @@ class testLFPy(unittest.TestCase):
         
         #create LFPs using the analytical approac
         time = np.linspace(0, 100, 10001)
-        R = np.ones(101)*100
-        Z = np.linspace(1000, 0, 101)
+        R = np.ones(11)*100
+        Z = np.linspace(1000, 0, 11)
         
         LFP_analytic = np.empty((R.size, time.size))
         for i in xrange(R.size):
@@ -44,6 +53,26 @@ class testLFPy(unittest.TestCase):
             for j in xrange(b):
                 self.failUnlessAlmostEqual(LFP_LFPy[i, j], LFP_analytic[i, j],
                                            places=3)
+    
+    def test_method_som_as_point(self):
+        #create LFPs using LFPy-model
+        LFP_LFPy = self.stickSimulation(method='som_as_point')
+        
+        #create LFPs using the analytical approac
+        time = np.linspace(0, 100, 10001)
+        R = np.ones(11)*100
+        Z = np.linspace(1000, 0, 11)
+        
+        LFP_analytic = np.empty((R.size, time.size))
+        for i in xrange(R.size):
+            LFP_analytic[i, ] = self.analytical_LFP(time, electrodeR=R[i],
+                                                    electrodeZ=Z[i])
+        (a, b) = LFP_LFPy.shape
+        for i in xrange(a):
+            for j in xrange(b):
+                self.failUnlessAlmostEqual(LFP_LFPy[i, j], LFP_analytic[i, j],
+                                           places=3)
+
             
     def stickSimulation(self, method):
         stickParams = {
@@ -62,9 +91,9 @@ class testLFPy(unittest.TestCase):
         
         electrodeParams = {
             'sigma' : 0.3,
-            'x' : np.ones(101) * 100.,
-            'y' : np.zeros(101),
-            'z' : np.linspace(1000, 0, 101),
+            'x' : np.ones(11) * 100.,
+            'y' : np.zeros(11),
+            'z' : np.linspace(1000, 0, 11),
             'method' : method
         }
         
@@ -179,5 +208,8 @@ class testLFPy(unittest.TestCase):
         return real_integral[0] + 1j*imag_integral[0]
 
 
-if __name__ == '__main__':
-    unittest.main()
+suite = unittest.TestLoader().loadTestsFromTestCase(testLFPy)
+unittest.TextTestRunner(verbosity=2).run(suite)
+
+#if __name__ == '__main__':
+#    unittest.main()
