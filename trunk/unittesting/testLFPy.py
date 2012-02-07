@@ -1,12 +1,31 @@
 #!/usr/bin/env python
-
 import unittest
 import numpy as np
 from scipy.integrate import quad
 from scipy import real, imag
 import LFPy
+import pylab as pl
 
-class testLFPy(unittest.TestCase):    
+class testLFPy(unittest.TestCase):
+    def test_method_pointsource(self):
+        #create LFPs using LFPy-model
+        LFP_LFPy = self.stickSimulation(method='pointsource')
+        
+        #create LFPs using the analytical approac
+        time = np.linspace(0, 100, 10001)
+        R = np.ones(101)*100
+        Z = np.linspace(1000, 0, 101)
+        
+        LFP_analytic = np.empty((R.size, time.size))
+        for i in xrange(R.size):
+            LFP_analytic[i, ] = self.analytical_LFP(time, electrodeR=R[i],
+                                                    electrodeZ=Z[i])
+        (a, b) = LFP_LFPy.shape
+        for i in xrange(a):
+            for j in xrange(b):
+                self.failUnlessAlmostEqual(LFP_LFPy[i, j], LFP_analytic[i, j],
+                                           places=3)
+
     def test_method_linesource(self):
         #create LFPs using LFPy-model
         LFP_LFPy = self.stickSimulation(method='linesource')
@@ -20,13 +39,12 @@ class testLFPy(unittest.TestCase):
         for i in xrange(R.size):
             LFP_analytic[i, ] = self.analytical_LFP(time, electrodeR=R[i],
                                                     electrodeZ=Z[i])
-        LFP_LFPy.flatten()
-        LFP_analytic.flatten()
-        j = 0
-        for i in LFP_LFPy:    
-            self.failUnlessAlmostEqual(i, LFP_analytic[j])
-            j += 1
-        
+        (a, b) = LFP_LFPy.shape
+        for i in xrange(a):
+            for j in xrange(b):
+                self.failUnlessAlmostEqual(LFP_LFPy[i, j], LFP_analytic[i, j],
+                                           places=3)
+            
     def stickSimulation(self, method):
         stickParams = {
             'morphology' : 'stick.hoc',
@@ -38,7 +56,7 @@ class testLFPy(unittest.TestCase):
             'timeres_python' : 0.01,
             'timeres_NEURON' : 0.01,
             'nsegs_method' : 'lambda_f',
-            'lambda_f' : 100,
+            'lambda_f' : 1000,
             
         }
         
@@ -131,7 +149,7 @@ class testLFPy(unittest.TestCase):
                 / np.sqrt(Rel**2 + (z - Zel)**2)
         
         #calculate contrib from membrane currents
-        Vex_imem = -self.complex_quadrature(f_to_integrate, 0, L) #, epsabs=1E-20)
+        Vex_imem = -self.complex_quadrature(f_to_integrate, 0, L, epsabs=1E-20)
         
         #adding contrib from input current to Vex
         Vex_input = stimAmplitude / (4 * np.pi * sigma * Lambda * np.sqrt(Rel**2 + (Zin-Zel)**2))
