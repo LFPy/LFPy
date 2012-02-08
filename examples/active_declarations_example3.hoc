@@ -130,7 +130,7 @@ proc set_active() {
 
 
 // Insert spines
-//add_spines("dend")
+add_spines("dend")
 
 
 // Insert active channels

@@ -5,11 +5,13 @@
 # Mainen and Sejnowski, Nature 1996, for the original files, see
 # http://senselab.med.yale.edu/modeldb/ShowModel.asp?model=2488
 #
-# This scripts is set up to use the model, where the active conductances are set
-# in the file "active_declarations_example3.hoc", and uses the mechanisms from
-# the .mod-files provided here. For this example to work, run "nrnivmodl" in
-# this folder to compile these mechanisms
-# (i.e. /$PATHTONEURON/nrn/x86_64/bin/nrnivmodl).
+# This scripts is set up to use the model, where the active conductances and
+# spine corrections are set in the function "active_declarations()", and uses
+# the mechanisms from the .mod-files provided here.
+# For this example to work, run "nrnivmodl" in this folder to compile these
+# mechanisms (i.e. /$PATHTONEURON/nrn/x86_64/bin/nrnivmodl).
+#
+# The active parameters are similar to the file active_declarations_example3.py
 #
 # Here, excitatory and inhibitory neurons are distributed on different parts of
 # the morphology, with stochastic spike times produced by the
@@ -20,16 +22,145 @@
 # importing some modules, setting some matplotlib values for pl.plot.
 import matplotlib.pylab as pl
 import LFPy
+import neuron
 pl.rcParams.update({'font.size' : 12,
     'figure.facecolor' : '1',
     'wspace' : 0.5, 'hspace' : 0.5})
 
 #seed for random generation
-pl.seed(123)
+pl.seed(1234)
 
 ################################################################################
 # A couple of function declarations
 ################################################################################
+
+def active_declarations():
+    #set active conductances and correct for spines,
+    #see file active_declarations_example3.hoc
+    spine_dens = 1
+    spine_area = 0.83 # // um^2  -- K Harris
+        
+    cm_myelin = 0.04
+    g_pas_node = 0.02
+    
+    celsius   = 37.
+    
+    Ek = -85.
+    Ena = 60.
+    
+    gna_dend = 20.
+    gna_node = 30000.
+    gna_soma = gna_dend
+    
+    gkv_axon = 2000.
+    gkv_soma = 200.
+    
+    gca = .3
+    gkm = .1
+    gkca = 3
+    
+    gca_soma = gca
+    gkm_soma = gkm
+    gkca_soma = gkca
+    
+    dendritic = neuron.h.SectionList()
+    for sec in neuron.h.allsec():
+        if sec.name()[:4] == 'soma':
+            dendritic.append(sec)
+        if sec.name()[:4] == 'dend':
+            dendritic.append(sec)
+        if sec.name()[:4] == 'apic':
+            dendritic.append(sec)
+    
+    def add_spines(section):
+        is_spiny = 1
+        if section == "dend":
+            print "adding spines"
+            for sec in dendritic:
+                a = 0
+                for seg in sec:
+                    a = a + neuron.h.area(seg.x)
+                
+                F = (sec.L*spine_area*spine_dens + a)/a
+                sec.L = sec.L * F**(2./3.)
+                for seg in sec:
+                    seg.diam = seg.diam * F**(1./3.)
+                
+        neuron.h.define_shape()
+
+    # Insert active channels
+    def set_active():
+        print "active ion-channels inserted."
+        
+        # exceptions along the axon
+        for sec in neuron.h.myelin:
+            sec.cm = cm_myelin
+        for sec in neuron.h.node:
+            sec.g_pas = g_pas_node
+        
+        # na+ channels
+        for sec in neuron.h.allsec():
+            sec.insert('na')
+        for sec in dendritic:
+            sec.gbar_na = gna_dend
+        for sec in neuron.h.myelin:
+            sec.gbar_na = gna_dend
+        for sec in neuron.h.hill:
+            sec.gbar_na = gna_node
+        for sec in neuron.h.iseg:
+            sec.gbar_na = gna_node
+        for sec in neuron.h.node:
+            sec.gbar_na = gna_node
+        
+        # kv delayed rectifier channels
+        neuron.h.iseg.insert('kv')
+        neuron.h.iseg.gbar_kv = gkv_axon
+        
+        neuron.h.hill.insert('kv')
+        neuron.h.hill.gbar_kv = gkv_axon
+        for sec in neuron.h.soma:
+            sec.insert('kv')
+            sec.gbar_kv = gkv_soma
+        
+        # dendritic channels
+        for sec in dendritic:
+            sec.insert('km')
+            sec.gbar_km  = gkm
+            sec.insert('kca')
+            sec.gbar_kca = gkca
+            sec.insert('ca')
+            sec.gbar_ca = gca
+            sec.insert('cad')
+        
+        # somatic channels
+        for sec in neuron.h.soma:
+            sec.gbar_na = gna_soma
+            sec.gbar_km = gkm_soma
+            sec.gbar_kca = gkca_soma
+            sec.gbar_ca = gca_soma
+        
+        
+        for sec in neuron.h.allsec():
+            if neuron.h.ismembrane('k_ion'):
+                sec.ek = Ek
+        
+        for sec in neuron.h.allsec():
+            if neuron.h.ismembrane('na_ion'):
+                sec.ena = Ena
+                neuron.vshift_na = -5
+
+        for sec in neuron.h.allsec():
+            if neuron.h.ismembrane('ca_ion'):
+                sec.eca = 140
+                neuron.h.ion_style("ca_ion",0,1,0,0,0)
+                neuron.h.vshift_ca = 0
+    
+    #// Insert spines
+    add_spines("dend")
+    
+    #// Insert active channels
+    set_active()
+
 
 def plotstuff():
     fig = pl.figure(figsize=[12, 8])
@@ -103,9 +234,10 @@ cellParameters = {
     'lambda_f' : 100,           # segments are isopotential at this frequency
     'timeres_NEURON' : 2**-4,   # dt of LFP and NEURON simulation.
     'timeres_python' : 2**-4,
-    'tstartms' : -100,           #start time, recorders start at t=0
-    'tstopms' : 1000,             #stop time of simulation
-    'custom_code'  : ['active_declarations_example3.hoc'], # will run this file
+    'tstartms' : -100,          #start time, recorders start at t=0
+    'tstopms' : 1000,           #stop time of simulation
+    'custom_fun'  : [active_declarations], # will execute this function
+    'custom_fun_args' : [{}]
 }
 
 # Synaptic parameters taken from Hendrickson et al 2011
@@ -145,19 +277,19 @@ synapseParameters_GABA_A = {
 # where to insert, how many, and which input statistics
 insert_synapses_AMPA_args = {
     'section' : 'apic',
-    'n' : 100,
+    'n' : 125,
     'spTimesFun' : LFPy.inputgenerators.stationary_gamma,
     'args' : [cellParameters['tstartms'], cellParameters['tstopms'], 2, 10]
 }
 insert_synapses_NMDA_args = {
     'section' : 'alldend',
-    'n' : 10,
+    'n' : 15,
     'spTimesFun' : LFPy.inputgenerators.stationary_gamma,
     'args' : [cellParameters['tstartms'], cellParameters['tstopms'], 5, 20]
 }
 insert_synapses_GABA_A_args = {
     'section' : 'dend',
-    'n' : 100,
+    'n' : 125,
     'spTimesFun' : LFPy.inputgenerators.stationary_gamma,
     'args' : [cellParameters['tstartms'], cellParameters['tstopms'], 2, 10]
 }
@@ -189,7 +321,7 @@ simulationParameters = {
 ################################################################################
 
 #close open figures
-pl.close('all')   
+#pl.close('all')   
 
 #Initialize cell instance, using the LFPy.Cell class
 cell = LFPy.Cell(**cellParameters)
