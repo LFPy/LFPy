@@ -53,12 +53,13 @@ def _run_simulation(cell):
     #print sim.time at intervals
     cdef double counter = 0.
     cdef double interval
-    if cell.tstopms > 1000:
+    cdef double tstopms = cell.tstopms
+    if tstopms > 1000:
         interval = 1 / cell.timeres_NEURON * 100
     else:
         interval = 1 / cell.timeres_NEURON * 10
     
-    while neuron.h.t < cell.tstopms:
+    while neuron.h.t < tstopms:
         neuron.h.fadvance()
         counter += 1.
         if np.mod(counter, interval) == 0:
@@ -136,7 +137,7 @@ def _run_simulation_with_electrode(cell, electrode):
         del cell.imem
     
     # Initialize NEURON simulations of cell object    
-    neuron.h.dt = cell.timeres_NEURON
+    neuron.h.dt = timeres_NEURON
     
     #integrator
     cvode = neuron.h.CVode()
@@ -167,10 +168,10 @@ def _run_simulation_with_electrode(cell, electrode):
     
     #print sim.time at intervals
     counter = 0.
-    if cell.tstopms > 1000:
-        interval = 1 / cell.timeres_NEURON * 100
+    if tstopms > 1000:
+        interval = 1 / timeres_NEURON * 100
     else:
-        interval = 1 / cell.timeres_NEURON * 10
+        interval = 1 / timeres_NEURON * 10
     
     #temp vector to store membrane currents at each timestep
     imem = np.empty(cell.totnsegs)
@@ -180,7 +181,7 @@ def _run_simulation_with_electrode(cell, electrode):
         electrodesLFP.append([])
     
     #run fadvance until time limit, and calculate LFPs for each timestep
-    while neuron.h.t < cell.tstopms:
+    while neuron.h.t < tstopms:
         if neuron.h.t >= 0:
             i = 0
             for sec in cell.allseclist:
