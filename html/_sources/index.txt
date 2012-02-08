@@ -12,7 +12,7 @@ LFPy is a Python package for simulation of extracellular electric field around n
 `NEURON simulator <http://www.neuron.yale.edu/neuron/>`_ and the 
 `Python interface to NEURON <http://www.frontiersin.org/neuroinformatics/10.3389/neuro.11.001.2009/abstract>`_.
 
-LFPy was developed at the `Computational Neuroscience Group <http://compneuro.umb.no>`_ at the `Norwegian University of Life Sciences <www.umb.no>`_, in collaboration with the 
+LFPy was developed in the `Computational Neuroscience Group <http://compneuro.umb.no>`_ at the `Norwegian University of Life Sciences <http://www.umb.no>`_, in collaboration with the 
 `Laboratory of Neuroinformatics <http://www.nencki.gov.pl/en/laboratory-of-neuroinformatics>`_, 
 `Nencki Institute of Experimental Biology <http://www.nencki.gov.pl>`_, Warsaw, Poland. The effort was supported by 
 `International Neuroinformatics Coordinating Facility <http://incf.org>`_ (`INCF <http://incf.org>`_) and the e-science program of `The Research Council of Norway <http://www.forskningsradet.no/english/>`_.
@@ -27,7 +27,7 @@ Contents
     using
     classes
     contributors
-    citations
+..    citations
 
 Indices and tables
 ==================

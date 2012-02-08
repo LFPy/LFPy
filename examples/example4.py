@@ -20,10 +20,7 @@ pl.rcParams.update({'font.size' : 12,
     'wspace' : 0.5, 'hspace' : 0.5})
 
 #seed for random generation
-pl.seed(999)
-
-#plot pops up by itself
-pl.interactive(1)
+pl.seed(123)
 
 ################################################################################
 # A couple of function declarations
@@ -209,3 +206,5 @@ electrode.calc_lfp()
 #plotting some variables and geometry, saving output to .pdf.
 plotstuff()
 #pl.savefig('example4.pdf')
+
+pl.show()
