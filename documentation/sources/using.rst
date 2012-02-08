@@ -73,7 +73,9 @@ work with LFPy.
 Using NEURON mechanisms
 -----------------------
 
-Custom NEURON mechanisms can be loaded from external ``hoc`` files - see ``example2.py`` and ``example3.py``. Remeber to compile any ``mod`` files (if needed) using ``nrnivmodl`` (or ``mknrdll`` on Mac OS).  
+Custom NEURON mechanisms can be loaded from external ``.hoc``- or``.py``-files - see ``example2.py`` and ``example3.py``.
+Python function definitions with arguments can also be given as input to the ``Cell``-class, specifying model specific conductances etc.
+Remeber to compile any ``mod`` files (if needed) using ``nrnivmodl`` (or ``mknrdll`` on Mac OS).  
 
 
 Units
