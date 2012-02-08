@@ -20,7 +20,7 @@ pl.rcParams.update({'font.size' : 12,
     'wspace' : 0.5, 'hspace' : 0.5})
 
 #seed for random generation
-pl.seed(123)
+pl.seed(1234)
 
 ################################################################################
 # A couple of function declarations
@@ -140,19 +140,19 @@ synapseParameters_GABA_A = {
 # where to insert, how many, and which input statistics
 insert_synapses_AMPA_args = {
     'section' : 'apic',
-    'n' : 100,
+    'n' : 125,
     'spTimesFun' : LFPy.inputgenerators.stationary_gamma,
     'args' : [cellParameters['tstartms'], cellParameters['tstopms'], 2, 10]
 }
 insert_synapses_NMDA_args = {
     'section' : 'alldend',
-    'n' : 10,
+    'n' : 15,
     'spTimesFun' : LFPy.inputgenerators.stationary_gamma,
     'args' : [cellParameters['tstartms'], cellParameters['tstopms'], 5, 20]
 }
 insert_synapses_GABA_A_args = {
     'section' : 'dend',
-    'n' : 100,
+    'n' : 125,
     'spTimesFun' : LFPy.inputgenerators.stationary_gamma,
     'args' : [cellParameters['tstartms'], cellParameters['tstopms'], 2, 10]
 }
