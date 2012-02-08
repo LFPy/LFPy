@@ -1,3 +1,28 @@
+What is LFPy?
+=============
+
+LFPy is a `Python <http://www.python.org>`_-module for calculating extracellular potentials from multicompartment neuron models.
+It relies on calculating compartmental membrane currents using the `NEURON <www.neuron.yale.edu>`_-simulator, a under the hood, and
+provides a set of easy-to-use Python-classes for setting up your model in Python, and run your simulations and have simultaneous
+model predicitions of the extracellular potentials arising from activity of your model neuron. If you have a model working in `NEURON <www.neuron.yale.edu>`_
+already, it is likely that it can be adapted to work with LFPy.
+
+The extracellular potentials are calculated using the following assumptions:
+ * The extracellular potential is zero for every compartment when calculating membrane currents
+ * The transmembrane current of each compartment are treates as either point- or line-sources in the extracellular space
+ * Extracellular potential can not be calculated inside the model cell's volume, LFPy adjust the distance to each compartment to it's radius
+ if the extracellular distance is less than this radius
+ * Infinite and homogenous extracellular conductivity of the extracellular conductivity
+ * Linear and frequency independent extracellular medium
+ * Linear superposition of the extracellular contribution from all current-sources.
+
+
+LFPy was developed at the `Computational Neuroscience Group <http://compneuro.umb.no>`_ at the `Norwegian University of Life Sciences <www.umb.no>`_, in collaboration with the 
+`Laboratory of Neuroinformatics <http://www.nencki.gov.pl/en/laboratory-of-neuroinformatics>`_, 
+`Nencki Institute of Experimental Biology <http://www.nencki.gov.pl>`_, Warsaw, Poland. The effort was supported by 
+`International Neuroinformatics Coordinating Facility <http://incf.org>`_ (`INCF <http://incf.org>`_) and the e-science program of `The Research Council of Norway <http://www.forskningsradet.no/english/>`_.
+
+
 Getting LFPy
 ============
 
@@ -10,7 +35,9 @@ Or, download the development version of LFPy using `subversion <http://subversio
     
     svn checkout http://bebiservice.umb.no/svn-public/LFPy-release
 
-The development code is then found under "trunk/", and different code releases under "tags/"
+The development code is then found under "trunk/", and different numbered releases under "tags/".
+
+To browse the source codes online, see http://bebiservice.umb.no/projects-public/LFPy-release/browser.
 
 
 
@@ -240,7 +267,7 @@ Install NEURON from the bleeding edge source code. The following recipe assumes 
     
     make
     sudo make install
-    sudo make after_install
+    sudo make install after_install
     
     #You should now have a working NEURON application under Applications. Small test;                                                                                                                   
     #sudo /Applications/NEURON-7.2/nrn/x86_64/bin/neurondemo                                                                                                                                            
