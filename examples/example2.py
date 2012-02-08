@@ -25,8 +25,6 @@ pl.rcParams.update({'font.size' : 15,
     'figure.facecolor' : '1',
     'left': 0.1, 'wspace' : 0.5 ,'hspace' : 0.5})
 
-#plot pops up by itself
-pl.interactive(1)
 
 ################################################################################
 # Function declarations
@@ -193,5 +191,7 @@ cell.simulate(electrode = electrode, rec_isyn=True)
 # Plotting of simulation results:
 plotstuff(cell, electrode)
 #pl.savefig('example2.pdf')
+
+pl.show()
 
 
