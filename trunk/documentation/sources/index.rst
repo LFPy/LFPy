@@ -27,6 +27,7 @@ Contents
     using
     classes
     contributors
+    citations
 
 Indices and tables
 ==================
