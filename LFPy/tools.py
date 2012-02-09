@@ -36,9 +36,10 @@ def noise_brown(timevector, nrows=1, weight=1, highpassfilter=False):
         signal = pl.normal(size=timevector.size+10000).cumsum()
         if highpassfilter:
             signal = ss.lfilter(coeff_b, coeff_a, signal)
-        signal /= pl.rms_flat(signal)
-        signal *= weight
+        #signal /= pl.rms_flat(signal)
+        #signal *= weight
         noise[i, :] = signal[10000:]
-    
+        noise[i, :] /= pl.rms_flat(noise[i, :])
+        noise[i, :] *= weight
     return noise
     
