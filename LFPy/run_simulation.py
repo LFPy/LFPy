@@ -149,6 +149,7 @@ def _run_simulation_with_electrode(cell, electrode):
     
     #print sim.time at intervals
     counter = 0.
+    tstep = 0
     if cell.tstopms > 1000:
         interval = 1 / cell.timeres_NEURON * 100
     else:
@@ -159,7 +160,8 @@ def _run_simulation_with_electrode(cell, electrode):
     #LFPs for each electrode will be put here during simulation
     electrodesLFP = []
     for coeffs in electrodecoeffs:
-        electrodesLFP.append([])
+        electrodesLFP.append(np.empty((coeffs.shape[0],
+                                       cell.tstopms / cell.timeres_NEURON + 1)))
     
     #run fadvance until time limit, and calculate LFPs for each timestep
     area = cell.area
@@ -172,8 +174,9 @@ def _run_simulation_with_electrode(cell, electrode):
                     i += 1
             j = 0
             for coeffs in electrodecoeffs:
-                electrodesLFP[j].append(np.dot(coeffs, imem))
+                electrodesLFP[j][:, tstep] = np.dot(coeffs, imem)
                 j += 1
+            tstep += 1
         neuron.h.fadvance()
         counter += 1.
         if np.mod(counter, interval) == 0:
@@ -187,7 +190,7 @@ def _run_simulation_with_electrode(cell, electrode):
             i += 1
     j = 0
     for coeffs in electrodecoeffs:
-        electrodesLFP[j].append(np.dot(coeffs, imem))
+        electrodesLFP[j][:, tstep] = np.dot(coeffs, imem)
         j += 1
     
     # Final step, put LFPs in the electrode object, superimpose if necessary
@@ -195,14 +198,14 @@ def _run_simulation_with_electrode(cell, electrode):
     j = 0
     for el in electrodes:
         if hasattr(el, 'LFP'):
-            el.LFP += np.array(electrodesLFP[j]).T
+            el.LFP += electrodesLFP[j]
         else:
-            el.LFP = np.array(electrodesLFP[j]).T
+            el.LFP = electrodesLFP[j]
         #will save each cell contribution separately
         if el.perCellLFP:
             if not hasattr(el, 'CellLFP'):
                 el.CellLFP = []
-            el.CellLFP.append(np.array(electrodesLFP[j]).T)
+            el.CellLFP.append(electrodesLFP[j])
         el.electrodecoeff = electrodecoeffs[j]
         j += 1
   
