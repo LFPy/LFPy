@@ -85,7 +85,7 @@ class testLFPy(unittest.TestCase):
             'timeres_python' : 0.01,
             'timeres_NEURON' : 0.01,
             'nsegs_method' : 'lambda_f',
-            'lambda_f' : 1000,
+            'lambda_f' : 100,
             
         }
         
@@ -210,6 +210,3 @@ class testLFPy(unittest.TestCase):
 
 suite = unittest.TestLoader().loadTestsFromTestCase(testLFPy)
 unittest.TextTestRunner(verbosity=2).run(suite)
-
-#if __name__ == '__main__':
-#    unittest.main()
