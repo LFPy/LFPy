@@ -182,16 +182,19 @@ def _run_simulation_with_electrode(cell, electrode):
         if np.mod(counter, interval) == 0:
             print 't = %.0f' % neuron.h.t
     
-    #calculate LFP after final fadvance()
-    i = 0
-    for sec in cell.allseclist:
-        for seg in sec:
-            imem[i] = seg.i_membrane * area[i] * 1E-2
-            i += 1
-    j = 0
-    for coeffs in electrodecoeffs:
-        electrodesLFP[j][:, tstep] = np.dot(coeffs, imem)
-        j += 1
+    try:
+        #calculate LFP after final fadvance()
+        i = 0
+        for sec in cell.allseclist:
+            for seg in sec:
+                imem[i] = seg.i_membrane * area[i] * 1E-2
+                i += 1
+        j = 0
+        for coeffs in electrodecoeffs:
+            electrodesLFP[j][:, tstep] = np.dot(coeffs, imem)
+            j += 1
+    except:
+        pass
     
     # Final step, put LFPs in the electrode object, superimpose if necessary
     # If electrode.perCellLFP, store individual LFPs
