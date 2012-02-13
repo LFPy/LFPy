@@ -108,4 +108,4 @@ Depending on the mechanism files, some may use different units altogether, but t
 .. To rebuild this documentation from the LFPy-release root folder, issue in terminal
 .. ::
 ..     export LC_ALL=en_US.UTF-8
-..     sphinx-build-2.* -b html documentation/sphinx_files/. html
+..     sphinx-build-2.* -b html documentation/sources/. html
