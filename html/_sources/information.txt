@@ -24,7 +24,7 @@ in collaboration with the `Laboratory of Neuroinformatics <http://www.nencki.gov
 `International Neuroinformatics Coordinating Facility <http://incf.org>`_ (`INCF <http://incf.org>`_) and the e-science program of `The Research Council of Norway <http://www.forskningsradet.no/english/>`_.
 
 
-Getting LFPy
+Downloading LFPy
 ============
 
 Downlad stable versions of LFPy here:
