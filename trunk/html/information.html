@@ -7,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>What is LFPy? &mdash; LFPy 0.9 documentation</title>
+    <title>Downloading LFPy &mdash; LFPy 0.9 documentation</title>
     
     <link rel="stylesheet" href="_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -43,6 +43,9 @@
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
           <a href="tutorial.html" title="LFPy Tutorial"
              accesskey="N">next</a> |</li>
         <li class="right" >
@@ -57,33 +60,7 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <div class="section" id="what-is-lfpy">
-<h1>What is LFPy?<a class="headerlink" href="#what-is-lfpy" title="Permalink to this headline">¶</a></h1>
-<p>LFPy is a <a class="reference external" href="http://www.python.org">Python</a>-module for calculating extracellular potentials from multicompartment neuron models.
-It relies on calculating compartmental membrane currents using the <a class="reference external" href="www.neuron.yale.edu">NEURON</a>-simulator, a under the hood, and
-provides a set of easy-to-use Python-classes for setting up your model in Python, and run your simulations and have simultaneous
-model predicitions of the extracellular potentials arising from activity of your model neuron. If you have a model working in <a class="reference external" href="www.neuron.yale.edu">NEURON</a>
-already, it is likely that it can be adapted to work with LFPy.</p>
-<dl class="docutils">
-<dt>The extracellular potentials are calculated using the following assumptions:</dt>
-<dd><ul class="first simple">
-<li>The extracellular potential is zero for every compartment when calculating membrane currents</li>
-<li>The transmembrane current of each compartment are treates as either point- or line-sources in the extracellular space</li>
-<li>Extracellular potential can not be calculated inside the model cell&#8217;s volume, LFPy adjust the distance to each compartment to it&#8217;s radius</li>
-</ul>
-<p class="last">if the extracellular distance is less than this radius
-* Infinite and homogenous extracellular conductivity of the extracellular conductivity
-* Linear and frequency independent extracellular medium
-* Linear superposition of the extracellular contribution from all current-sources.</p>
-</dd>
-</dl>
-<p>LFPy was developed in the <a class="reference external" href="http://compneuro.umb.no">Computational Neuroscience Group</a>, <a class="reference external" href="http://www.umb.no/imt">Department of Mathemathical Sciences and Technology</a>,
-at the <a class="reference external" href="http://www.umb.no">Norwegian University of Life Sciences</a> ,
-in collaboration with the <a class="reference external" href="http://www.nencki.gov.pl/en/laboratory-of-neuroinformatics">Laboratory of Neuroinformatics</a>,
-<a class="reference external" href="http://www.nencki.gov.pl">Nencki Institute of Experimental Biology</a>, Warsaw, Poland. The effort was supported by
-<a class="reference external" href="http://incf.org">International Neuroinformatics Coordinating Facility</a> (<a class="reference external" href="http://incf.org">INCF</a>) and the e-science program of <a class="reference external" href="http://www.forskningsradet.no/english/">The Research Council of Norway</a>.</p>
-</div>
-<div class="section" id="downloading-lfpy">
+  <div class="section" id="downloading-lfpy">
 <h1>Downloading LFPy<a class="headerlink" href="#downloading-lfpy" title="Permalink to this headline">¶</a></h1>
 <p>Downlad stable versions of LFPy here:</p>
 <p><a class="reference external" href="http://compneuro.umb.no/LFPy/downloads/LFPy-0.9.tar.gz">LFPy-0.9.tar.gz</a></p>
@@ -302,8 +279,7 @@ If so, LFPy should work as well.</p>
         <div class="sphinxsidebarwrapper">
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
-<li><a class="reference internal" href="#">What is LFPy?</a></li>
-<li><a class="reference internal" href="#downloading-lfpy">Downloading LFPy</a></li>
+<li><a class="reference internal" href="#">Downloading LFPy</a></li>
 <li><a class="reference internal" href="#getting-started">Getting started</a><ul>
 <li><a class="reference internal" href="#dependencies">Dependencies</a></li>
 <li><a class="reference internal" href="#installing-lfpy">Installing LFPy</a></li>
@@ -353,6 +329,9 @@ If so, LFPy should work as well.</p>
           <a href="genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
           <a href="tutorial.html" title="LFPy Tutorial"
              >next</a> |</li>
         <li class="right" >
@@ -366,9 +345,9 @@ If so, LFPy should work as well.</p>
         &copy; Copyright 2012, Computational Neuroscience Group, UMB.
       Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
     </div>
-<div class="footer">This page uses <a href="http://analytics.google.com/">
+<!--<div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking
-the JavaScript coming from www.google-analytics.com.
+the JavaScript coming from www.google-analytics.com.-->
 <script type="text/javascript">
   (function() {
     var ga = document.createElement('script');
