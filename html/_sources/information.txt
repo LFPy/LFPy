@@ -211,23 +211,18 @@ Install NEURON from the bleeding edge source code. The following recipe assumes 
     cd nrn64
     
     #creating directories                                                                                                                                                                               
-    sudo mkdir /Applications/NEURON-7.2
-    sudo mkdir /Applications/NEURON-7.2/iv
-    sudo mkdir /Applications/NEURON-7.2/nrn
+    sudo mkdir /Applications/NEURON-7.3
+    sudo mkdir /Applications/NEURON-7.3/iv
+    sudo mkdir /Applications/NEURON-7.3/nrn
     
     #Downloading bleeding edge source code                                                                                                                                                              
     hg clone http://www.neuron.yale.edu/hg/neuron/iv
     hg clone http://www.neuron.yale.edu/hg/neuron/nrn
     cd iv
-    hg up
-    cd ../nrn
-    hg up
-    cd ..
         
-    #compiling and installing IV under folder /Applications/nrn7.2                                                                                                                                             
-    cd iv
+    #compiling and installing IV under folder /Applications/nrn7.3                                                                                                                                             
     sh build.sh
-    ./configure --prefix=/Applications/NEURON-7.2/iv \
+    ./configure --prefix=/Applications/NEURON-7.3/iv \
         --build=x86_64-apple-darwin10.7.0 --host=x86_64-apple-darwin10.7.0
     
     make
@@ -236,7 +231,7 @@ Install NEURON from the bleeding edge source code. The following recipe assumes 
     #Building NEURON with InterViews, you may have to alter the path --with-nrnpython=/python-path                                                                                                      
     cd $HOME/nrn64/nrn
     sh build.sh
-    ./configure --prefix=/Applications/NEURON-7.2/nrn --with-iv=/Applications/NEURON-7.2/iv \
+    ./configure --prefix=/Applications/NEURON-7.3/nrn --with-iv=/Applications/NEURON-7.3/iv \
         --with-x --x-includes=/usr/X11/include/ --x-libraries=/usr/X11/lib/ \
         --with-nrnpython=/opt/local/Library/Frameworks/Python.framework/Versions/2.7/Resources/Python.app/Contents/MacOS/Python \
         --host=x86_64-apple-darwin10.7.0 --build=x86_64-apple-darwin10.7.0
@@ -246,7 +241,7 @@ Install NEURON from the bleeding edge source code. The following recipe assumes 
     sudo make install after_install
     
     #You should now have a working NEURON application under Applications. Small test;                                                                                                                   
-    #sudo /Applications/NEURON-7.2/nrn/x86_64/bin/neurondemo                                                                                                                                            
+    #sudo /Applications/NEURON-7.3/nrn/x86_64/bin/neurondemo                                                                                                                                            
     
     #Final step is to install neuron as a python module                                                                                                                                                 
     cd src/nrnpython
