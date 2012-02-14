@@ -54,7 +54,7 @@ class Cell(object):
     ::
         import LFPy
         cellParameters = {                          
-            'morphology' : 'path/to/morphology.hoc',
+            'morphology' : 'path/to/morphology',
             'rm' : 30000,
             'cm' : 1.0,
             'Ra' : 150,
@@ -157,7 +157,7 @@ class Cell(object):
         self.set_rotation(**self.default_rotation)
         
     def _load_geometry(self):
-        '''Load the morphology .hoc file in NEURON''' 
+        '''Load the morphology-file in NEURON''' 
         try: 
             neuron.h.sec_counted = 0
         except LookupError:
@@ -172,7 +172,19 @@ class Cell(object):
         neuron.h.apicdendlist = None
         neuron.h('forall delete_section()')
         
-        neuron.h.load_file(1, self.morphology)
+        if self.morphology.split('.')[-1] == 'hoc':
+            neuron.h.load_file(1, self.morphology)
+        elif self.morphology.split('.')[-1] == 'asc':
+            neuron.h.load_file('import3d.hoc')
+            neuron.h('objref this')
+            neurolucida = neuron.h.Import3d_Neurolucida3()
+            neurolucida.quiet = 1
+            neurolucida.input(self.morphology)
+            imprt = neuron.h.Import3d_GUI(neurolucida, 0)
+            imprt.instantiate(neuron.h.this)
+        else:
+            raise ValueError, '%s is not a recognised morphology file format!' % self.morphology
+            
         neuron.h.define_shape()
         self._create_sectionlists()
         
