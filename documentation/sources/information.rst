@@ -252,5 +252,10 @@ If you prefer to use Enthough Python distribution, see this forum post: https://
 Windows
 ^^^^^^^
 
-We have not tested this, but there is probably some way or another to compile NEURON as a Python module on the Windows platform.
-If so, LFPy should work as well. 
+There is a package PyNEURON on the Python package index, PiPy: http://pypi.python.org/pypi/PyNEURON/
+and a corresponding forum thread on the NEURON homepage here; http://www.neuron.yale.edu/phpBB/viewtopic.php?f=2&t=2501
+
+If you have pip installed, try:
+::
+
+    pip install PyNEURON
