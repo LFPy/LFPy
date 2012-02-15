@@ -172,18 +172,32 @@ class Cell(object):
         neuron.h.apicdendlist = None
         neuron.h('forall delete_section()')
         
-        if self.morphology.split('.')[-1] == 'hoc':
+        #import the morphology, try and determine format
+        fileEnding = self.morphology.split('.')[-1]
+        if fileEnding == 'hoc' or fileEnding == 'HOC':
             neuron.h.load_file(1, self.morphology)
-        elif self.morphology.split('.')[-1] == 'asc':
+        else:
             neuron.h.load_file('import3d.hoc')
             neuron.h('objref this')
-            neurolucida = neuron.h.Import3d_Neurolucida3()
-            neurolucida.quiet = 1
-            neurolucida.input(self.morphology)
-            imprt = neuron.h.Import3d_GUI(neurolucida, 0)
+            if fileEnding == 'asc' or fileEnding == 'ASC':
+                Import = neuron.h.Import3d_Neurolucida3()
+                if not self.verbose:
+                    Import.quiet = 1
+            elif fileEnding == 'swc' or fileEnding ==  'SWC':
+                Import = neuron.h.Import3d_SWC_read()
+            elif fileEnding == 'xml' or fileEnding ==  'XML':
+                ne
+                Import = neuron.h.Import3d_MorphML()
+            else:
+                raise ValueError, \
+                    '%s is not a recognised morphology file format! ',\
+                    'Should be either .hoc, .asc, .swc, .xml!' \
+                     % self.morphology
+            
+            #assuming now that morphologies file is the correct format
+            Import.input(self.morphology)
+            imprt = neuron.h.Import3d_GUI(Import, 0)
             imprt.instantiate(neuron.h.this)
-        else:
-            raise ValueError, '%s is not a recognised morphology file format!' % self.morphology
             
         neuron.h.define_shape()
         self._create_sectionlists()
