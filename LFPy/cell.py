@@ -186,7 +186,6 @@ class Cell(object):
             elif fileEnding == 'swc' or fileEnding ==  'SWC':
                 Import = neuron.h.Import3d_SWC_read()
             elif fileEnding == 'xml' or fileEnding ==  'XML':
-                ne
                 Import = neuron.h.Import3d_MorphML()
             else:
                 raise ValueError, \
@@ -195,8 +194,19 @@ class Cell(object):
                      % self.morphology
             
             #assuming now that morphologies file is the correct format
-            Import.input(self.morphology)
-            imprt = neuron.h.Import3d_GUI(Import, 0)
+            try:
+                Import.input(self.morphology)
+            except:
+                if not hasattr(neuron, 'neuroml'):
+                    raise Exception, 'Can not import, try and copy the ' + \
+                    'nrn/share/lib/python/neuron/neuroml ' + \
+                    'folder into %s' % neuron.__path__[0]
+                else:
+                    raise Exception, 'something wrong with file, see output'
+            try:
+                imprt = neuron.h.Import3d_GUI(Import, 0)
+            except:
+                raise Exception, 'See output, try to correct the file'
             imprt.instantiate(neuron.h.this)
             
         neuron.h.define_shape()
@@ -475,9 +485,14 @@ class Cell(object):
         self.somaidx = self.get_idx(section='soma')
                 
         if self.somaidx.size == 0:
-            pass
             if self.verbose:
                 print 'There is no soma!'
+                print 'using first segment as root point'
+            self.somaidx = np.array([0])
+            self.somapos = np.zeros(3)
+            self.somapos[0] = self.xmid[self.somaidx]
+            self.somapos[1] = self.ymid[self.somaidx]
+            self.somapos[2] = self.zmid[self.somaidx]
         elif self.somaidx.size == 1:
             self.somapos = np.zeros(3)
             self.somapos[0] = self.xmid[self.somaidx]
