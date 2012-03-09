@@ -23,9 +23,9 @@ already, it is likely that it can be adapted to work with LFPy.
 
 The extracellular potentials are calculated using the following assumptions:
  * The extracellular potential is zero for every compartment when calculating membrane currents
- * The transmembrane current of each compartment are treates as either point- or line-sources in the extracellular space
- * Extracellular potential can not be calculated inside the model cell's volume, LFPy adjust the distance to each compartment to it's radius if the extracellular distance is less than this radius
- * Infinite and homogenous extracellular conductivity of the extracellular conductivity
+ * The transmembrane current of each compartment are treated as either point- or line-sources in the extracellular space
+ * Extracellular potentials can not be calculated inside the model cell's volume, LFPy adjust the distance to each compartment to it's radius if the extracellular distance is less than this radius
+ * Infinite and homogenous extracellular conductivity of the extracellular medium
  * Linear and frequency independent extracellular medium
  * Linear superposition of the extracellular potential contribution from all current-sources.
 

@@ -873,8 +873,6 @@ class Cell(object):
         Move the cell geometry so that midpoint of soma section is
         in (xpos, ypos, zpos). If no soma pos, use the first segment
         '''
-        self.orig_pos = False
-        
         diffx = self.somapos[0]-xpos
         diffy = self.somapos[1]-ypos
         diffz = self.somapos[2]-zpos

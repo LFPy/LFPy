@@ -13,7 +13,7 @@ GNU General Public License for more details.'''
 
 import numpy as np
 import neuron
-
+from time import time
 
 def _run_simulation(cell):
     '''
@@ -47,8 +47,10 @@ def _run_simulation(cell):
     
     cell.loadspikes()
     
-    #print sim.time at intervals
+    #print sim.time and realtime factor at intervals
     counter = 0.
+    t0 = time()
+    ti = neuron.h.t
     if cell.tstopms > 1000:
         interval = 1 / cell.timeres_NEURON * 100
     else:
@@ -58,7 +60,10 @@ def _run_simulation(cell):
         neuron.h.fadvance()
         counter += 1.
         if np.mod(counter, interval) == 0:
-            print 't = %.0f' % neuron.h.t
+            rtfactor = (neuron.h.t - ti)  * 1E-3 / (time() - t0)
+            print 't = %.0f, realtime factor: %.3f' % (neuron.h.t, rtfactor)
+            t0 = time()
+            ti = neuron.h.t
 
 def _run_simulation_with_electrode(cell, electrode):
     '''
@@ -150,6 +155,8 @@ def _run_simulation_with_electrode(cell, electrode):
     #print sim.time at intervals
     counter = 0.
     tstep = 0
+    t0 = time()
+    ti = neuron.h.t
     if cell.tstopms > 1000:
         interval = 1 / cell.timeres_NEURON * 100
     else:
@@ -180,7 +187,10 @@ def _run_simulation_with_electrode(cell, electrode):
         neuron.h.fadvance()
         counter += 1.
         if np.mod(counter, interval) == 0:
-            print 't = %.0f' % neuron.h.t
+            rtfactor = (neuron.h.t - ti) * 1E-3 / (time() - t0)
+            print 't = %.0f, realtime factor: %.3f' % (neuron.h.t, rtfactor)
+            t0 = time()
+            ti = neuron.h.t
     
     try:
         #calculate LFP after final fadvance()
