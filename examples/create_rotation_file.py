@@ -12,7 +12,7 @@ import LFPy
 import os
 
 #plot will pop up by itself
-# pl.interactive(1)
+pl.interactive(1)
 
 '''
 Define some functions for plotting
