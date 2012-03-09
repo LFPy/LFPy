@@ -41,9 +41,8 @@ def _run_simulation(cell):
         neuron.h.fcurrent()
     neuron.h.frecord_init()
     
-    #Starting simulation at t != 0
-    if cell.tstartms != None:
-        neuron.h.t = cell.tstartms
+    ##Starting simulation at tstart
+    neuron.h.t = cell.tstartms
     
     cell.loadspikes()
     
@@ -145,9 +144,8 @@ def _run_simulation_with_electrode(cell, electrode):
         neuron.h.fcurrent()
     neuron.h.frecord_init()
     
-    #Starting simulation at t != 0
-    if cell.tstartms != None:
-        neuron.h.t = cell.tstartms
+    #Starting simulation at tstartms
+    neuron.h.t = cell.tstartms
     
     #load spike times from NetCon
     cell.loadspikes()
