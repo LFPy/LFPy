@@ -14,6 +14,7 @@ GNU General Public License for more details.'''
 import numpy as np
 cimport numpy as np
 import neuron
+from time import time
 
 DTYPE = np.float64
 ctypedef np.float64_t DTYPE_t
@@ -54,6 +55,9 @@ def _run_simulation(cell):
     cdef double counter = 0.
     cdef double interval
     cdef double tstopms = cell.tstopms
+    cdef double t0 = time()
+    cdef double ti = neuron.h.t
+    cdef double rtfactor
     if tstopms > 1000:
         interval = 1 / cell.timeres_NEURON * 100
     else:
@@ -63,7 +67,10 @@ def _run_simulation(cell):
         neuron.h.fadvance()
         counter += 1.
         if np.mod(counter, interval) == 0:
-            print 't = %.0f' % neuron.h.t
+            rtfactor = (neuron.h.t - ti)  * 1E-3 / (time() - t0)
+            print 't = %.0f, realtime factor: %.3f' % (neuron.h.t, rtfactor)
+            t0 = time()
+            ti = neuron.h.t
 
 def _run_simulation_with_electrode(cell, electrode):
     '''
@@ -77,6 +84,9 @@ def _run_simulation_with_electrode(cell, electrode):
     cdef int totnsegs = cell.totnsegs
     cdef double tstopms = cell.tstopms
     cdef double counter, interval
+    cdef double t0
+    cdef double ti
+    cdef double rtfactor
     cdef double timeres_NEURON = cell.timeres_NEURON
     cdef double timeres_python = cell.timeres_python
     cdef np.ndarray[DTYPE_t, ndim=2, negative_indices=False] coeffs
@@ -169,6 +179,8 @@ def _run_simulation_with_electrode(cell, electrode):
     #print sim.time at intervals
     counter = 0.
     tstep = 0
+    t0 = time()
+    ti = neuron.h.t
     if tstopms > 1000:
         interval = 1 / timeres_NEURON * 100
     else:
@@ -198,7 +210,11 @@ def _run_simulation_with_electrode(cell, electrode):
         neuron.h.fadvance()
         counter += 1.
         if np.mod(counter, interval) == 0:
-            print 't = %.0f' % neuron.h.t
+            rtfactor = (neuron.h.t - ti)  * 1E-3 / (time() - t0)
+            print 't = %.0f, realtime factor: %.3f' % (neuron.h.t, rtfactor)
+            t0 = time()
+            ti = neuron.h.t
+
     
     
     try:
