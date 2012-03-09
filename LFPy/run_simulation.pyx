@@ -46,8 +46,7 @@ def _run_simulation(cell):
     neuron.h.frecord_init()
     
     #Starting simulation at t != 0
-    if cell.tstartms != None:
-        neuron.h.t = cell.tstartms
+    neuron.h.t = cell.tstartms
     
     cell.loadspikes()
         
@@ -170,8 +169,7 @@ def _run_simulation_with_electrode(cell, electrode):
     neuron.h.frecord_init()
     
     #Starting simulation at t != 0
-    if cell.tstartms != None:
-        neuron.h.t = cell.tstartms
+    neuron.h.t = cell.tstartms
     
     #load spike times from NetCon
     cell.loadspikes()
@@ -214,8 +212,6 @@ def _run_simulation_with_electrode(cell, electrode):
             print 't = %.0f, realtime factor: %.3f' % (neuron.h.t, rtfactor)
             t0 = time()
             ti = neuron.h.t
-
-    
     
     try:
         #calculate LFP after final fadvance()

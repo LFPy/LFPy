@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+'''A few tests for LFPy, most importantly the calculations of
+extracellular field potentials'''
+
 import unittest
 import numpy as np
 from scipy.integrate import quad
@@ -14,6 +17,8 @@ class testLFPy(unittest.TestCase):
     
     The tests should pass with 3 significant numbers in the LFP, as effects
     of compartmentalising the stick is prominent.
+    
+    Some tests of cell.tvec is also executed
     '''
     
     def test_method_pointsource(self):
@@ -34,7 +39,7 @@ class testLFPy(unittest.TestCase):
             for j in xrange(b):
                 self.failUnlessAlmostEqual(LFP_LFPy[i, j], LFP_analytic[i, j],
                                            places=3)
-
+    
     def test_method_linesource(self):
         #create LFPs using LFPy-model
         LFP_LFPy = self.stickSimulation(method='linesource')
@@ -73,7 +78,314 @@ class testLFPy(unittest.TestCase):
                 self.failUnlessAlmostEqual(LFP_LFPy[i, j], LFP_analytic[i, j],
                                            places=3)
 
-            
+
+    def test_method_pointsource_contact_average_r10n100(self):
+        #create LFPs using LFPy-model
+        LFP_LFPy = self.stickSimulationAveragingElectrode(
+            contactRadius=10, contactNPoints=100, method='som_as_point')
+        
+        #create LFPs using the analytical approac
+        time = np.linspace(0, 100, 10001)
+        R = np.ones(11)*100
+        Z = np.linspace(1000, 0, 11)
+        
+        LFP_analytic = np.empty((R.size, time.size))
+        for i in xrange(R.size):
+            LFP_analytic[i, ] = self.analytical_LFP(time, electrodeR=R[i],
+                                                    electrodeZ=Z[i])
+        (a, b) = LFP_LFPy.shape
+        for i in xrange(a):
+            for j in xrange(b):
+                self.failUnlessAlmostEqual(LFP_LFPy[i, j], LFP_analytic[i, j],
+                                           places=3)
+    
+    def test_method_linesource_contact_average_r10n100(self):
+        #create LFPs using LFPy-model
+        LFP_LFPy = self.stickSimulationAveragingElectrode(
+            contactRadius=10, contactNPoints=100, method='linesource')
+        
+        #create LFPs using the analytical approac
+        time = np.linspace(0, 100, 10001)
+        R = np.ones(11)*100
+        Z = np.linspace(1000, 0, 11)
+        
+        LFP_analytic = np.empty((R.size, time.size))
+        for i in xrange(R.size):
+            LFP_analytic[i, ] = self.analytical_LFP(time, electrodeR=R[i],
+                                                    electrodeZ=Z[i])
+        (a, b) = LFP_LFPy.shape
+        for i in xrange(a):
+            for j in xrange(b):
+                self.failUnlessAlmostEqual(LFP_LFPy[i, j], LFP_analytic[i, j],
+                                           places=3)
+
+    def test_method_som_as_point_contact_average_r10n100(self):
+        #create LFPs using LFPy-model
+        LFP_LFPy = self.stickSimulationAveragingElectrode(
+            contactRadius=10, contactNPoints=100, method='som_as_point')
+        
+        #create LFPs using the analytical approac
+        time = np.linspace(0, 100, 10001)
+        R = np.ones(11)*100
+        Z = np.linspace(1000, 0, 11)
+        
+        LFP_analytic = np.empty((R.size, time.size))
+        for i in xrange(R.size):
+            LFP_analytic[i, ] = self.analytical_LFP(time, electrodeR=R[i],
+                                                    electrodeZ=Z[i])
+        (a, b) = LFP_LFPy.shape
+        for i in xrange(a):
+            for j in xrange(b):
+                self.failUnlessAlmostEqual(LFP_LFPy[i, j], LFP_analytic[i, j],
+                                           places=3)
+
+    
+    def test_tvec_00(self):
+        stickParams = {
+            'timeres_python' : 2**-3,
+            'timeres_NEURON' : 2**-3,
+            'tstartms' : 0.,
+            'tstopms' : 100.,
+        }
+        
+        tvec = self.stickSimulationTesttvec(**stickParams)
+        tvec_numpy = np.linspace(0, stickParams['tstopms'],
+                    stickParams['tstopms']/stickParams['timeres_python'] + 1)
+        
+        self.assertEqual(tvec.size, tvec_numpy.size)
+        
+    def test_tvec_01(self):
+        stickParams = {
+            'timeres_python' : 2**-3,
+            'timeres_NEURON' : 2**-3,
+            'tstartms' : 0.,
+            'tstopms' : 100.,
+        }
+        
+        tvec = self.stickSimulationTesttvec(**stickParams)
+        tvec_numpy = np.linspace(0, stickParams['tstopms'],
+                    stickParams['tstopms']/stickParams['timeres_python'] + 1)
+        
+        for i in xrange(tvec.size):
+            self.assertEqual(tvec[i], tvec_numpy[i])
+
+    def test_tvec_02(self):
+        stickParams = {
+            'timeres_python' : 2**-3,
+            'timeres_NEURON' : 2**-4,
+            'tstartms' : 0.,
+            'tstopms' : 100.,
+        }
+        
+        tvec = self.stickSimulationTesttvec(**stickParams)
+        tvec_numpy = np.linspace(0, stickParams['tstopms'],
+                    stickParams['tstopms']/stickParams['timeres_python'] + 1)
+        
+        self.assertEqual(tvec.size, tvec_numpy.size)
+
+    def test_tvec_03(self):
+        stickParams = {
+            'timeres_python' : 2**-3,
+            'timeres_NEURON' : 2**-4,
+            'tstartms' : 0.,
+            'tstopms' : 100.,
+        }
+        
+        tvec = self.stickSimulationTesttvec(**stickParams)
+        tvec_numpy = np.linspace(0, stickParams['tstopms'],
+                    stickParams['tstopms']/stickParams['timeres_python'] + 1)
+        
+        
+        for i in xrange(tvec.size):
+            self.assertEqual(tvec[i], tvec_numpy[i])
+
+
+    def test_tvec_04(self):
+        stickParams = {
+            'timeres_python' : 0.1,
+            'timeres_NEURON' : 0.1,
+            'tstartms' : 0,
+            'tstopms' : 100,
+        }
+        
+        tvec = self.stickSimulationTesttvec(**stickParams)
+        tvec_numpy = np.linspace(0, stickParams['tstopms'],
+                    stickParams['tstopms']/stickParams['timeres_python'] + 1)
+        
+        self.assertEqual(tvec.size, tvec_numpy.size)
+    
+    @unittest.expectedFailure    
+    def test_tvec_05(self):
+        stickParams = {
+            'timeres_python' : 0.1,
+            'timeres_NEURON' : 0.1,
+            'tstartms' : 0.,
+            'tstopms' : 100.,
+        }
+        
+        tvec = self.stickSimulationTesttvec(**stickParams)
+        tvec_numpy = np.linspace(0, stickParams['tstopms'],
+                    stickParams['tstopms']/stickParams['timeres_python'] + 1)
+        
+        for i in xrange(tvec.size):
+            self.assertAlmostEqual(tvec[i], tvec_numpy[i])
+
+    def test_tvec_06(self):
+        stickParams = {
+            'timeres_python' : 0.10,
+            'timeres_NEURON' : 0.05,
+            'tstartms' : 0,
+            'tstopms' : 100,
+        }
+        
+        tvec = self.stickSimulationTesttvec(**stickParams)
+        tvec_numpy = np.linspace(0, stickParams['tstopms'],
+                    stickParams['tstopms']/stickParams['timeres_python'] + 1)
+        
+        self.assertEqual(tvec.size, tvec_numpy.size)
+    
+    @unittest.expectedFailure
+    def test_tvec_07(self):
+        stickParams = {
+            'timeres_python' : 0.10,
+            'timeres_NEURON' : 0.05,
+            'tstartms' : 0.,
+            'tstopms' : 100.,
+        }
+        
+        tvec = self.stickSimulationTesttvec(**stickParams)
+        tvec_numpy = np.linspace(0, stickParams['tstopms'],
+                    stickParams['tstopms']/stickParams['timeres_python'] + 1)
+        
+        for i in xrange(tvec.size):
+            self.assertEqual(tvec[i], tvec_numpy[i])
+
+    def test_tvec_08(self):
+        stickParams = {
+            'timeres_python' : 2**-3,
+            'timeres_NEURON' : 2**-3,
+            'tstartms' : -100,
+            'tstopms' : 100,
+        }
+        
+        tvec = self.stickSimulationTesttvec(**stickParams)
+        tvec_numpy = np.linspace(0, stickParams['tstopms'],
+                    stickParams['tstopms']/stickParams['timeres_python'] + 1)
+        
+        self.assertEqual(tvec.size, tvec_numpy.size)
+
+        
+    def test_tvec_09(self):
+        stickParams = {
+            'timeres_python' : 2**-3,
+            'timeres_NEURON' : 2**-3,
+            'tstartms' : -100,
+            'tstopms' : 100,
+        }
+        
+        tvec = self.stickSimulationTesttvec(**stickParams)
+        tvec_numpy = np.linspace(0, stickParams['tstopms'],
+                    stickParams['tstopms']/stickParams['timeres_python'] + 1)
+        
+        for i in xrange(tvec.size):
+            self.assertEqual(tvec[i], tvec_numpy[i])
+
+    def test_tvec_10(self):
+        stickParams = {
+            'timeres_python' : 2**-3,
+            'timeres_NEURON' : 2**-4,
+            'tstartms' : -100,
+            'tstopms' : 100,
+        }
+        
+        tvec = self.stickSimulationTesttvec(**stickParams)
+        tvec_numpy = np.linspace(0, stickParams['tstopms'],
+                    stickParams['tstopms']/stickParams['timeres_python'] + 1)
+        
+        self.assertEqual(tvec.size, tvec_numpy.size)
+
+        
+    def test_tvec_11(self):
+        stickParams = {
+            'timeres_python' : 2**-3,
+            'timeres_NEURON' : 2**-4,
+            'tstartms' : -100,
+            'tstopms' : 100,
+        }
+        
+        tvec = self.stickSimulationTesttvec(**stickParams)
+        tvec_numpy = np.linspace(0, stickParams['tstopms'],
+                    stickParams['tstopms']/stickParams['timeres_python'] + 1)
+        
+        for i in xrange(tvec.size):
+            self.assertEqual(tvec[i], tvec_numpy[i])
+
+    def test_tvec_12(self):
+        stickParams = {
+            'timeres_python' : 0.10,
+            'timeres_NEURON' : 0.10,
+            'tstartms' : -100,
+            'tstopms' : 100,
+        }
+        
+        tvec = self.stickSimulationTesttvec(**stickParams)
+        tvec_numpy = np.linspace(0, stickParams['tstopms'],
+                    stickParams['tstopms']/stickParams['timeres_python'] + 1)
+        
+        self.assertEqual(tvec.size, tvec_numpy.size)
+
+    @unittest.expectedFailure    
+    def test_tvec_13(self):
+        stickParams = {
+            'timeres_python' : 0.10,
+            'timeres_NEURON' : 0.10,
+            'tstartms' : -100,
+            'tstopms' : 100,
+        }
+        
+        tvec = self.stickSimulationTesttvec(**stickParams)
+        tvec_numpy = np.linspace(0, stickParams['tstopms'],
+                    stickParams['tstopms']/stickParams['timeres_python'] + 1)
+        
+        for i in xrange(tvec.size):
+            self.assertAlmostEqual(tvec[i], tvec_numpy[i])
+
+    def test_tvec_14(self):
+        stickParams = {
+            'timeres_python' : 0.10,
+            'timeres_NEURON' : 0.05,
+            'tstartms' : -100,
+            'tstopms' : 100,
+        }
+        
+        tvec = self.stickSimulationTesttvec(**stickParams)
+        tvec_numpy = np.linspace(0, stickParams['tstopms'],
+                    stickParams['tstopms']/stickParams['timeres_python'] + 1)
+        
+        self.assertEqual(tvec.size, tvec_numpy.size)
+
+    @unittest.expectedFailure    
+    def test_tvec_15(self):
+        stickParams = {
+            'timeres_python' : 0.10,
+            'timeres_NEURON' : 0.05,
+            'tstartms' : -100,
+            'tstopms' : 100,
+        }
+        
+        tvec = self.stickSimulationTesttvec(**stickParams)
+        tvec_numpy = np.linspace(0, stickParams['tstopms'],
+                    stickParams['tstopms']/stickParams['timeres_python'] + 1)
+        
+        for i in xrange(tvec.size):
+            self.assertAlmostEqual(tvec[i], tvec_numpy[i])    
+    
+    ######## Functions used by tests: ##########################################
+    def stickSimulationTesttvec(self, **kwargs):
+        stick = LFPy.Cell(morphology = 'stick.hoc', verbose=True, **kwargs)
+        stick.simulate(rec_imem=False)    
+        return stick.tvec
+    
     def stickSimulation(self, method):
         stickParams = {
             'morphology' : 'stick.hoc',
@@ -94,6 +406,57 @@ class testLFPy(unittest.TestCase):
             'x' : np.ones(11) * 100.,
             'y' : np.zeros(11),
             'z' : np.linspace(1000, 0, 11),
+            'method' : method
+        }
+        
+        stimParams = {
+            'pptype' : 'SinSyn',
+            'delay' : -100.,
+            'dur' : 1000.,
+            'pkamp' : 1.,
+            'freq' : 100.,
+            'phase' : -np.pi/2,
+            'bias' : 0.,
+            'record_current' : True
+        }
+        
+        
+        electrode = LFPy.RecExtElectrode(**electrodeParams)
+        
+        stick = LFPy.Cell(**stickParams)
+        
+        synapse = LFPy.StimIntElectrode(stick, stick.get_closest_idx(0, 0, 1000),
+                               **stimParams)
+        stick.simulate(electrode, rec_imem=True, rec_istim=True, rec_vmem=True)
+        
+        return electrode.LFP
+
+    def stickSimulationAveragingElectrode(self,
+                        contactRadius, contactNPoints, method):
+        stickParams = {
+            'morphology' : 'stick.hoc',
+            'rm' : 30000,
+            'cm' : 1,
+            'Ra' : 150,
+            'tstartms' : -100,
+            'tstopms' : 100,
+            'timeres_python' : 0.01,
+            'timeres_NEURON' : 0.01,
+            'nsegs_method' : 'lambda_f',
+            'lambda_f' : 100,
+            
+        }
+        
+        N = np.empty((11, 3))
+        for i in xrange(N.shape[0]): N[i,] = [1, 0, 0] #normal unit vec. to contacts
+        electrodeParams = {
+            'sigma' : 0.3,
+            'x' : np.ones(11) * 100.,
+            'y' : np.zeros(11),
+            'z' : np.linspace(1000, 0, 11),
+            'r' : contactRadius,
+            'n' : 10,
+            'N' : N,
             'method' : method
         }
         
