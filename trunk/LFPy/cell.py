@@ -102,8 +102,9 @@ class Cell(object):
         if timeres_python not in 2.**np.arange(-16, -1) or timeres_NEURON \
                 not in 2.**np.arange(-16, -1):
             if self.verbose:
-                print 'timeres_python and timeres_NEURON not a power of 2, less \
-                numerical accuracy may occur. Initialization will continue.'
+                print 'timeres_python and or timeres_NEURON not a power of 2,',
+                print 'cell.tvec errors may occur.',
+                print 'Initialization will continue.'
             else:
                 pass
         if timeres_python < timeres_NEURON:
@@ -705,13 +706,17 @@ class Cell(object):
         self.tvec = np.array(self.tvec)
         if self.tstartms == 0:
             self.tvec[1:] = self.tvec[1:] + self.timeres_NEURON
-        elif self.tstartms != None:
-            if self.tvec[0] > -self.timeres_NEURON and self.tvec[0] < \
-                    self.timeres_NEURON:
-                pass
+        elif self.tstartms < 0:
+            if self.tvec[0] > -self.timeres_python and \
+                    self.tvec[0] < self.timeres_python:
+                if self.tvec[0] <= -self.timeres_NEURON+self.timeres_NEURON/10.:
+                    self.tvec += self.timeres_NEURON
+                else:
+                    pass
             else:
                 self.tvec += self.timeres_NEURON
         else:
+            #if self.verbose:
             print 'adding %.3f to tvec' % self.timeres_NEURON
             self.tvec[1:] = self.tvec[1:] + self.timeres_NEURON
         
