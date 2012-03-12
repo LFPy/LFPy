@@ -136,8 +136,9 @@ class Cell(object):
             if self.verbose:
                 print 'No passive properties added'
         
-        #run user specified code and functions
-        self._run_custom_codes(custom_code, custom_fun, custom_fun_args)
+        #run user specified code and functions if argument given
+        if custom_code != None or custom_fun != None:
+            self._run_custom_codes(custom_code, custom_fun, custom_fun_args)
         
         #Insert extracellular mech on all segments
         self._set_extracellular()
@@ -239,6 +240,10 @@ class Cell(object):
             for fun in custom_fun:
                 fun(**custom_fun_args[i])
                 i +=  1
+        
+        #recreate sectionlists in case something changed
+        neuron.h.define_shape()
+        self._create_sectionlists()
     
     def _set_nsegs(self, nsegs_method, lambda_f, max_nsegs_length):
         '''Set number of segments per section according to the lambda-rule,

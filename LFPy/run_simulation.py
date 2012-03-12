@@ -80,7 +80,7 @@ def _run_simulation_with_electrode(cell, electrode):
     else:
         electrodes = [electrode]
     
-    #calculate list of electrodecoeffs, will try temp storage of imem, tvec, LFP
+    #calculate list of electrodecoeffs, will try temp store of imem, tvec, LFP
     cellTvec = cell.tvec
     try:
         cellImem = cell.imem.copy()

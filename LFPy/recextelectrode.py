@@ -242,7 +242,7 @@ class RecExtElectrode(RecExtElectrodeSetup):
                  perCellLFP=False, method='linesource', 
                  color='g', marker='o',
                  from_file=False, cellfile=None, verbose=False,
-                 seedvalue=12345):
+                 seedvalue=None):
         '''This is the regular implementation of the RecExtElectrode class
         that calculates the LFP serially using a single core'''
         RecExtElectrodeSetup.__init__(self, cell, sigma, x, y, z,
@@ -359,7 +359,8 @@ class RecExtElectrode(RecExtElectrodeSetup):
                 crcl = pl.zeros((m, 3))
                 
                 #assert the same random numbers are drawn every time
-                pl.seed(self.seedvalue)
+                if self.seedvalue != None:
+                    pl.seed(self.seedvalue)
                 for j in xrange(n):
                     A = [(pl.rand()-0.5)*radius*2, (pl.rand()-0.5)*radius*2,
                             (pl.rand()-0.5)*radius*2]
