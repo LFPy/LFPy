@@ -30,7 +30,7 @@ class RecExtElectrodeThreaded(RecExtElectrode):
                  color='g', marker='o',
                  from_file=False, cellfile=None,
                  NUMBER_OF_PROCESSES=None, verbose=False,
-                 seedvalue=12345):
+                 seedvalue=None):
         '''Initialization of class ElectrodeThreaded, with electrode setup
         inherited from class RecExtElectrodeSetup'''
         RecExtElectrode.__init__(self, cell, sigma, x, y, z,
@@ -200,7 +200,8 @@ class RecExtElectrodeThreaded(RecExtElectrode):
                 crcl = np.zeros((m, 3))
                 
                 #assert the same random numbers are drawn every time
-                np.random.seed(self.seedvalue)
+                if self.seedvalue != None:
+                    np.random.seed(self.seedvalue)
                 
                 for j in xrange(n):
                     A = np.array([(np.random.rand()-0.5)*radius*2,
