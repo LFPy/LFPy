@@ -42,9 +42,9 @@ Contents
     information
     tutorial
     using
-    classes
     contributors
-..    citations
+    contact
+    classes
 
 Indices and tables
 ==================
