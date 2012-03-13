@@ -17,7 +17,7 @@ LFPy was developed by:
 *       Gaute T. Einevoll http://arken.umb.no/~gautei/index_english.html
 
 
-Want to contribute on LFPy?
+Want to contribute to LFPy?
 ---------------------------
 
 We are interested in having more people contributing on the LFPy-project.
