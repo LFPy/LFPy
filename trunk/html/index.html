@@ -62,28 +62,21 @@
 </div>
 <div class="section" id="what-is-lfpy">
 <h1>What is LFPy?<a class="headerlink" href="#what-is-lfpy" title="Permalink to this headline">¶</a></h1>
-<p>LFPy is a <a class="reference external" href="http://www.python.org">Python</a>-package for calculation of extracellular potentials from multicompartment neuron models.
+<p>LFPy is a <a class="reference external" href="http://www.python.org">Python</a> package for calculation of extracellular potentials from multicompartment neuron models.
 It relies on the <a class="reference external" href="http://www.neuron.yale.edu/neuron/">NEURON simulator</a> and uses the
 <a class="reference external" href="http://www.frontiersin.org/neuroinformatics/10.3389/neuro.11.001.2009/abstract">Python interface</a> it provides.</p>
 <p>LFPy provides a set of easy-to-use Python classes for setting up your model, running your simulations and calculating the extracellular potentials arising from activity in your model neuron. If you have a model working in <a class="reference external" href="www.neuron.yale.edu">NEURON</a>
 already, it is likely that it can be adapted to work with LFPy.</p>
-<dl class="docutils">
-<dt>The extracellular potentials are calculated using the following assumptions:</dt>
-<dd><ul class="first last simple">
-<li>The extracellular potential is zero for every compartment when calculating membrane currents</li>
-<li>The transmembrane current of each compartment are treated as either point- or line-sources in the extracellular space</li>
-<li>Extracellular potentials can not be calculated inside the model cell&#8217;s volume, LFPy adjust the distance to each compartment to it&#8217;s radius if the extracellular distance is less than this radius</li>
-<li>Infinite and homogenous extracellular conductivity of the extracellular medium</li>
-<li>Linear and frequency independent extracellular medium</li>
-<li>Linear superposition of the extracellular potential contribution from all current-sources.</li>
+<p>The extracellular potentials are calculated transmembrane currents in multi-compartment neuron models using the line-source method (Holt &amp; Koch, J Comp Neurosci 1999), but a simpler point-source method is also available. The calculations assume that the neuron are surrounded by an infinite extracellular medium with homogeneous and frequency independent conductivity, and compartments are assumed to be at least at a minimal distance from the electrode (which can be specified by the user). For more information on the biophysics underlying the numerical framework used see this coming book chapter:</p>
+<ul class="simple">
+<li>K.H. Pettersen, H. Linden, A.M. Dale and G.T. Einevoll: Extracellular spikes and current-source density, in <em>Handbook of Neural Activity Measurement</em>, edited by R. Brette and A. Destexhe, Cambridge, to appear <a class="reference external" href="http://arken.umb.no/~gautei/forskning/PettersenLindenDaleEinevoll-BookChapter-revised.pdf">[preprint PDF, 5.7MB]</a></li>
 </ul>
-</dd>
-</dl>
+<p>In the present version LFPy is mainly designed for simulation of single neurons.</p>
 <p>LFPy was developed in the <a class="reference external" href="http://compneuro.umb.no">Computational Neuroscience Group</a>, <a class="reference external" href="http://www.umb.no/imt">Department of Mathemathical Sciences and Technology</a>,
 at the <a class="reference external" href="http://www.umb.no">Norwegian University of Life Sciences</a> ,
 in collaboration with the <a class="reference external" href="http://www.nencki.gov.pl/en/laboratory-of-neuroinformatics">Laboratory of Neuroinformatics</a>,
 <a class="reference external" href="http://www.nencki.gov.pl">Nencki Institute of Experimental Biology</a>, Warsaw, Poland. The effort was supported by
-<a class="reference external" href="http://incf.org">International Neuroinformatics Coordinating Facility</a> (<a class="reference external" href="http://incf.org">INCF</a>) and the e-science program of <a class="reference external" href="http://www.forskningsradet.no/english/">The Research Council of Norway</a>.</p>
+<a class="reference external" href="http://incf.org">International Neuroinformatics Coordinating Facility</a> (<a class="reference external" href="http://incf.org">INCF</a>) and the <a class="reference external" href="http://www.forskningsradet.no/english/">The Research Council of Norway</a> (eScience, NevroNor).</p>
 </div>
 <div class="section" id="contents">
 <h1>Contents<a class="headerlink" href="#contents" title="Permalink to this headline">¶</a></h1>
