@@ -32,7 +32,7 @@ in collaboration with the `Laboratory of Neuroinformatics <http://www.nencki.gov
 `Nencki Institute of Experimental Biology <http://www.nencki.gov.pl>`_, Warsaw, Poland. The effort was supported by 
 `International Neuroinformatics Coordinating Facility <http://incf.org>`_ (`INCF <http://incf.org>`_) and the `The Research Council of Norway <http://www.forskningsradet.no/english/>`_ (eScience, NevroNor).
 
-
+This scientific software is released under the GNU Public License `GPLv3 <http://www.gnu.org/copyleft/gpl.html>`_.
 
 Contents
 ========
