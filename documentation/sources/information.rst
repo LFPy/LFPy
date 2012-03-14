@@ -1,6 +1,6 @@
 
-Downloading LFPy
-============
+Download LFPy
+=============
 
 Downlad stable versions of LFPy here:
 

@@ -15,9 +15,9 @@ import numpy
 
 setup(
     name = "LFPy",
-    version = "1.0", 
+    version = "0.9.1", 
     maintainer = "Espen Hagen",
-	maintainer_email = 'ehagen@umb.no',
+        maintainer_email = 'ehagen@umb.no',
     packages = ['LFPy'], 
     cmdclass = { 'build_ext' : build_ext}, 
     ext_modules = [
@@ -31,12 +31,25 @@ setup(
         ['LFPy/recextelectrodethreaded.pyx'],
         include_dirs=[numpy.get_include()])
         ],
-    url='http://pypi.python.org/pypi/LFPy/',
+    url='http://compneuro.umb.no/LFPy/',
     license='LICENSE.txt',
-    description='A simulation environment for LFP built on NEURON',
+    description='A module for modeling Local Field Potentials built on NEURON',
     long_description=open('README.txt').read(),
-	classifiers=[
-	          'License :: OSI Approved :: GNU General Public License (GPL)',
-	          'Programming Language :: Python',
-	          ],
+    classifiers=[
+        'License :: OSI Approved :: GNU General Public License (GPL)',
+        'Programming Language :: Python',
+        'Programming Language :: Python :: 2.6',
+        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Cython',
+        'Operating System :: OS Independent',
+        'Topic :: Scientific/Engineering',
+        'Topic :: Scientific/Engineering :: Physics',
+        'Intended Audience :: Developers',
+        'Intended Audience :: Science/Research',
+        'Development Status :: 4 - Beta',
+        ],
+    requires = [
+        'numpy', 'scipy', 'matplotlib', 'neuron', 'Cython'
+        ],
+    provides = ['LFPy'],
     )
