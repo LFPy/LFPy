@@ -13,6 +13,9 @@ from distutils.extension import Extension
 from Cython.Distutils import build_ext
 import numpy
 
+with open('README.txt') as file:
+    long_description = file.read()
+
 setup(
     name = "LFPy",
     version = "0.9.1", 
@@ -34,7 +37,7 @@ setup(
     url='http://compneuro.umb.no/LFPy/',
     license='LICENSE.txt',
     description='A module for modeling Local Field Potentials built on NEURON',
-    long_description=open('README.txt').read(),
+    long_description=long_description,
     classifiers=[
         'License :: OSI Approved :: GNU General Public License (GPL)',
         'Programming Language :: Python',

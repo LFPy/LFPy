@@ -1,7 +1,7 @@
-
 ====
 LFPy
 ====
+
 
 LFPy is a Python-module for calculation of extracellular potentials from multicompartment neuron models.
 It relies on the NEURON simulator (http://www.neuron.yale.edu/neuron) and uses the 
@@ -23,22 +23,60 @@ in collaboration with the Laboratory of Neuroinformatics (http://www.nencki.gov.
 Nencki Institute of Experimental Biology (http://www.nencki.gov.pl), Warsaw, Poland. The effort was supported by 
 International Neuroinformatics Coordinating Facility (http://incf.org) and the the Research Council of Norway (http://www.forskningsradet.no/english) (eScience, NevroNor).
 
+For updated information on LFPy and online documentation, see the LFPy homepage (http://compneuro.umb.no/LFPy).
+
 This scientific software is released under the GNU Public License GPLv3.
+
 
 Requirements
 ============
 
+
 To install LFPy you will need the following:
 
-1.  Python, seems to work fine with recent python since 2.6.x (2.6.6 or newer recommended), 2.7.x works fine.
-2.  Python modules numpy, scipy, matplotlib
-3.  NEURON (from http://www.neuron.yale.edu) compiled as a Python module, so the following should execute without error in Python console:
+* Python modules numpy, scipy and matplotlib
+* NEURON (from http://www.neuron.yale.edu) compiled as a Python module, so the following should execute without error in Python console::
+    
+    import neuron
+    neuron.test()
+
+* Cython (C-extensions for python, http://cython.org) to speed up simulations of extracellular fields
+
+
+
+Installation
+============
+
+
+There are different way to install LFPy:
+
+1.  From the Python Package Index with only local access using pip
+    ::
+        
+        pip install --user LFPy
+
+
+    as sudoer:
     ::
     
-        import neuron
-        neuron.test()
+        sudo pip install LFPy
 
-	
-   
-4.  Cython (C-extensions for python, cython.org) to speed up simulations of extracellular fields
 
+
+2.  From the Python Package Index with only local access using easy_install
+    ::
+    
+        easy_install --user LFPy
+
+
+    as sudoer:
+    ::
+    
+        sudo easy_install LFPy
+
+3.  From source:
+    ::
+    
+        tar -xzf LFPy-x.x.tar.gz
+        cd LFPy-x.x
+        (sudo) python setup.py install (--user)
