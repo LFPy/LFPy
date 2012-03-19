@@ -4,7 +4,8 @@ Download LFPy
 
 Downlad stable versions of LFPy here:
 
-`LFPy-0.9.tar.gz <http://compneuro.umb.no/LFPy/downloads/LFPy-0.9.tar.gz>`_
+- `LFPy-0.9.1.tar.gz <http://compneuro.umb.no/LFPy/downloads/LFPy-0.9.1.tar.gz>`_
+- `LFPy-0.9.tar.gz <http://compneuro.umb.no/LFPy/downloads/LFPy-0.9.tar.gz>`_
 
 Or, download the development version of LFPy using `subversion <http://subversion.apache.org/>`_ into a local folder:
 ::
@@ -47,51 +48,55 @@ To install LFPy you will need the following:
 Installing LFPy
 ---------------
 
-1.  Download the LFPy source distribution (LFPy-x.x.tar.gz) and unpack.
+There are few options to install LFPy:
 
-2.  In "LFPy-x.x/" run
+1.  From the Python Package Index with only local access using pip
+    ::
+        
+        pip install --user LFPy
+
+
+    as sudoer:
     ::
     
-        sudo python setup.py install
+        sudo pip install LFPy
+
+
+
+2.  From the Python Package Index with only local access using easy_install
+    ::
     
-    or ::
+        easy_install --user LFPy
+
+
+    as sudoer:
+    ::
     
-        python setup.py install --user
+        sudo easy_install LFPy
+
+3.  From source:
+    ::
     
-    in case you want to install in your home directory (e.g. if you do not have root access).
+        tar -xzf LFPy-x.x.tar.gz
+        cd LFPy-x.x
+        (sudo) python setup.py install (--user)
+
+4.  Development version from subversion repository:
+    ::
     
-    If you only want to have LFPy in one place, you can add this working folder to your $PYTHONPATH, and just compile the Cython extensions;
+        svn checkout http://bebiservice.umb.no/svn-public/LFPy-release/
+        cd LFPy-release/trunk
+        (sudo) python setup.py install (--user)
+    
+5.  If you only want to have LFPy in one place, you can add this working folder to your $PYTHONPATH, and just compile the Cython extensions;
     ::
     
         python setup.py build_ext -i
     
-3.  In a fresh python-session you should now be able to 
-    ::  
-    
-        import LFPy
+In a fresh python-session you should now be able to: 
+::  
 
-4.  There are some basic usage examples provided in 
-    ::
-    
-        LFPy-x.x/examples/
-
-    We suggest you start with ``example1.py``
-    :: 
-    
-        cd examples
-        python example1.py
-
-    or ::
-    
-        cd examples
-        ipython
-        >>> run "example1.py"
-    
-    For the example2.py and example3.py, the NEURON mechanisms (.mod-files) must be compiled using "nrnivmodl" from your NEURON installation first.
-    
-5.  HTML documentation is available at::
-
-		LFPy-x.x/html/index.html
+    import LFPy
 
 
 
