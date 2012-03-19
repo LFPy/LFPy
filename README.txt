@@ -1,7 +1,6 @@
-====
+
 LFPy
 ====
-
 
 LFPy is a Python-module for calculation of extracellular potentials from multicompartment neuron models.
 It relies on the NEURON simulator (http://www.neuron.yale.edu/neuron) and uses the 
@@ -27,28 +26,24 @@ For updated information on LFPy and online documentation, see the LFPy homepage 
 
 This scientific software is released under the GNU Public License GPLv3.
 
-
 Requirements
 ============
 
-
 To install LFPy you will need the following:
 
-* Python modules numpy, scipy and matplotlib
-* NEURON (from http://www.neuron.yale.edu) compiled as a Python module, so the following should execute without error in Python console::
+- Python modules numpy, scipy and matplotlib
+- NEURON (from http://www.neuron.yale.edu) compiled as a Python module, so the following should execute without error in Python console::
     
     import neuron
     neuron.test()
 
-* Cython (C-extensions for python, http://cython.org) to speed up simulations of extracellular fields
-
+- Cython (C-extensions for python, http://cython.org) to speed up simulations of extracellular fields
 
 
 Installation
 ============
 
-
-There are different way to install LFPy:
+There are few options to install LFPy:
 
 1.  From the Python Package Index with only local access using pip
     ::
@@ -62,12 +57,10 @@ There are different way to install LFPy:
         sudo pip install LFPy
 
 
-
 2.  From the Python Package Index with only local access using easy_install
     ::
     
         easy_install --user LFPy
-
 
     as sudoer:
     ::
@@ -79,4 +72,11 @@ There are different way to install LFPy:
     
         tar -xzf LFPy-x.x.tar.gz
         cd LFPy-x.x
+        (sudo) python setup.py install (--user)
+
+4.  Development version from subversion repository:
+    ::
+    
+        svn checkout http://bebiservice.umb.no/svn-public/LFPy-release/
+        cd LFPy-release/trunk
         (sudo) python setup.py install (--user)
