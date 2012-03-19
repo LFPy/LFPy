@@ -2,7 +2,7 @@
 LFPy Tutorial
 =============
 
-This tutorial will guide you through the first steps with LFPy. It is based on ``example1.py``.
+This tutorial will guide you through the first steps with LFPy. It is based on ``example1.py`` in the examples folder.
 
 Let us start by importing LFPy, as well as numpy
 ::
@@ -78,3 +78,4 @@ Finally, we calculate the extracellular potential at the specified electrode loc
     electrode.calc_lfp()
     
 The resulting LFP is stored in ``electrode.LFP``.
+

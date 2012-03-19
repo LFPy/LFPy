@@ -3,19 +3,14 @@
     You can adapt this file completely to your liking, but it should at least
     contain the root `toctree` directive.
 
-
-LFPy documentation
-==================
-
 .. image:: logo_liten.png
 
-What is LFPy?
+LFPy Homepage
 =============
 
 LFPy is a `Python <http://www.python.org>`_ package for calculation of extracellular potentials from multicompartment neuron models.
 It relies on the `NEURON simulator <http://www.neuron.yale.edu/neuron/>`_ and uses the 
 `Python interface <http://www.frontiersin.org/neuroinformatics/10.3389/neuro.11.001.2009/abstract>`_ it provides.
-
 
 LFPy provides a set of easy-to-use Python classes for setting up your model, running your simulations and calculating the extracellular potentials arising from activity in your model neuron. If you have a model working in `NEURON <www.neuron.yale.edu>`_
 already, it is likely that it can be adapted to work with LFPy.
