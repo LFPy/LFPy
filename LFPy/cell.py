@@ -420,7 +420,10 @@ class Cell(object):
                     command = cmd1 + syntype + cmd2  
                     exec(command)
                     for param in kwargs.keys():
-                        exec('syn.' + param + '=' + str(kwargs[param]))
+                        try:
+                            exec('syn.' + param + '=' + str(kwargs[param]))
+                        except:
+                            pass
                     self.synlist.append(syn)  
 
                     #create NetCon
@@ -773,7 +776,7 @@ class Cell(object):
             if syn.record_current:
                 syn.collect_current(self)
             else:
-                raise Exception, 'must set record_current=True for synapse'
+                raise Exception, 'must set record_current=True in Synapse class'
         self.synireclist = None
         del self.synireclist
     

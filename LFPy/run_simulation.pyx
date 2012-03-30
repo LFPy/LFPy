@@ -65,7 +65,7 @@ def _run_simulation(cell):
     while neuron.h.t < tstopms:
         neuron.h.fadvance()
         counter += 1.
-        if np.mod(counter, interval) == 0:
+        if divmod(counter, interval)[0] == 0:
             rtfactor = (neuron.h.t - ti)  * 1E-3 / (time() - t0)
             print 't = %.0f, realtime factor: %.3f' % (neuron.h.t, rtfactor)
             t0 = time()
@@ -79,7 +79,7 @@ def _run_simulation_with_electrode(cell, electrode):
     '''
     
     #c-declare some variables
-    cdef int i, j, tstep
+    cdef int i, j, tstep, ncoeffs
     cdef int totnsegs = cell.totnsegs
     cdef double tstopms = cell.tstopms
     cdef double counter, interval
@@ -117,6 +117,7 @@ def _run_simulation_with_electrode(cell, electrode):
     electrodeLFP = []   #list of electrode.LFP objects if they exist
     restoreLFP = False
     restoreCellLFP = False
+    ncoeffs = 0
     for el in electrodes:
         if hasattr(el, 'LFP'):
             LFPcopy = el.LFP
@@ -137,7 +138,8 @@ def _run_simulation_with_electrode(cell, electrode):
         else:
             if hasattr(el, 'CellLFP'):
                 del el.CellLFP
-        
+        ncoeffs += 1
+    
     #putting back variables
     cell.tvec = cellTvec        
     try:
@@ -200,14 +202,12 @@ def _run_simulation_with_electrode(cell, electrode):
                 for seg in sec:
                     imem[i] = seg.i_membrane * area[i] * 1E-2
                     i += 1
-            j = 0
-            for coeffs in electrodecoeffs:
-                electrodesLFP[j][:, tstep] = np.dot(coeffs, imem)
-                j += 1
+            for j in xrange(ncoeffs):
+                electrodesLFP[j][:, tstep] = np.dot(electrodecoeffs[j], imem)
                 tstep += 1
         neuron.h.fadvance()
         counter += 1.
-        if np.mod(counter, interval) == 0:
+        if divmod(counter, interval)[1] == 0:
             rtfactor = (neuron.h.t - ti)  * 1E-3 / (time() - t0)
             print 't = %.0f, realtime factor: %.3f' % (neuron.h.t, rtfactor)
             t0 = time()
