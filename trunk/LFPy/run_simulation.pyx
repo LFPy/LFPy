@@ -65,7 +65,7 @@ def _run_simulation(cell):
     while neuron.h.t < tstopms:
         neuron.h.fadvance()
         counter += 1.
-        if divmod(counter, interval)[0] == 0:
+        if divmod(counter, interval)[1] == 0:
             rtfactor = (neuron.h.t - ti)  * 1E-3 / (time() - t0)
             print 't = %.0f, realtime factor: %.3f' % (neuron.h.t, rtfactor)
             t0 = time()
@@ -204,7 +204,7 @@ def _run_simulation_with_electrode(cell, electrode):
                     i += 1
             for j in xrange(ncoeffs):
                 electrodesLFP[j][:, tstep] = np.dot(electrodecoeffs[j], imem)
-                tstep += 1
+            tstep += 1
         neuron.h.fadvance()
         counter += 1.
         if divmod(counter, interval)[1] == 0:
