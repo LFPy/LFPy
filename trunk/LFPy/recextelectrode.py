@@ -173,7 +173,7 @@ class RecExtElectrodeSetup(object):
                 pass
             else:
                 if abs(sum_imem).max() >= tolerance:
-                    print 'Membrane currents do not sum towards zero! They should!'
+                    print 'Membrane currents do not sum to zero! They should!'
                     [inds] = pl.where((abs(sum_imem) >= tolerance))
                     for i in inds:
                         print 'membrane current sum cell %i, timestep %i: %.3e' \
