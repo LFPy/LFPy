@@ -261,8 +261,9 @@ class Cell(object):
     def _get_rotation(self):
         '''Check if there exists a corresponding file
         with rotation angles'''
-        if os.path.isfile(self.morphology[0:-4]+'.rot'):
-            rotation_file = self.morphology[0:-4]+'.rot'
+        base = os.path.splitext(self.morphology)[0]
+        if os.path.isfile(base+'.rot'):
+            rotation_file = base+'.rot'
             rotation_data = open(rotation_file)
             rotation = {}
             for line in rotation_data:
@@ -637,7 +638,8 @@ class Cell(object):
     
     def simulate(self, electrode=None, rec_imem=False, rec_vmem=False,
                  rec_ipas=False, rec_icap=False,
-                 rec_isyn=False, rec_vmemsyn=False, rec_istim=False):
+                 rec_isyn=False, rec_vmemsyn=False, rec_istim=False,
+                 rec_cai=False):
         '''
         This is the main function running the simulation of the NEURON model.
         Start NEURON simulation and record variables specified by arguments.
@@ -657,6 +659,7 @@ class Cell(object):
             rec_isyn:   record synaptic currents of from Synapse class instances
             rec_vmemsyn:    record membrane voltage of segments with Synapse
             rec_istim:  record currents of StimIntraElectrode
+            rec_cai:    record intracellular [Ca2+]
         '''
         self._set_soma_volt_recorder()
         self._set_time_recorder()
@@ -669,6 +672,8 @@ class Cell(object):
             self._set_ipas_recorders()
         if rec_icap:
             self._set_icap_recorders()
+        if rec_cai:
+            self._set_cai_recorders()
         
         #run fadvance until t >= tstopms, and calculate LFP if asked for
         if electrode == None:
@@ -686,25 +691,22 @@ class Cell(object):
         self.somav = np.array(self.somav)
         
         if rec_imem:
-            self._calc_imem()
-        
+            self._calc_imem()        
         if rec_ipas:
-            self._calc_ipas()
-        
+            self._calc_ipas()        
         if rec_icap:
-            self._calc_icap()
-        
+            self._calc_icap()        
         if rec_vmem:
-            self._collect_vmem()
-        
+            self._collect_vmem()        
         if rec_isyn:
-            self._collect_isyn()
-        
+            self._collect_isyn()        
         if rec_vmemsyn:
-            self._collect_vsyn()
-        
+            self._collect_vsyn()        
         if rec_istim:
             self._collect_istim()
+        if rec_cai:
+            self._collect_cai()
+        
 
     def _collect_tvec(self):
         '''
@@ -800,6 +802,14 @@ class Cell(object):
                 raise Exception, 'must set record_current=True for pointp.'
         self.stimireclist = None
         del self.stimireclist
+        
+    def _collect_cai(self):
+        '''
+        Get intracellular calcium
+        '''
+        self.cai = np.array(self.memcaireclist)
+        self.memcaireclist = None
+        del self.memcaireclist
        
     def loadspikes(self):
         '''
@@ -880,6 +890,19 @@ class Cell(object):
                                               self.timeres_python+1))
                 memvrec.record(seg._ref_v, self.timeres_python)
                 self.memvreclist.append(memvrec)
+
+    def _set_cai_recorders(self):
+        '''
+        Record intracellular [Ca2+] for all segments
+        '''
+        self.memcaireclist = neuron.h.List()
+        for sec in self.allseclist:
+            for seg in sec:
+                memcairec = neuron.h.Vector(int(self.tstopms / 
+                                              self.timeres_python+1))
+                if hasattr(seg, 'cai'):                    
+                    memcairec.record(seg._ref_cai, self.timeres_python)
+                self.memcaireclist.append(memcairec)
     
     def set_pos(self, xpos=0, ypos=0, zpos=0):
         '''
