@@ -639,7 +639,7 @@ class Cell(object):
     def simulate(self, electrode=None, rec_imem=False, rec_vmem=False,
                  rec_ipas=False, rec_icap=False,
                  rec_isyn=False, rec_vmemsyn=False, rec_istim=False,
-                 rec_cai=False):
+                 rec_cai=False, rec_variables=[]):
         '''
         This is the main function running the simulation of the NEURON model.
         Start NEURON simulation and record variables specified by arguments.
@@ -660,9 +660,11 @@ class Cell(object):
             rec_vmemsyn:    record membrane voltage of segments with Synapse
             rec_istim:  record currents of StimIntraElectrode
             rec_cai:    record intracellular [Ca2+]
+            rec_variables: list of variables to record, i.e arg=['cai', ]
         '''
         self._set_soma_volt_recorder()
-        self._set_time_recorder()
+        #self._set_time_recorder()
+        self._collect_tvec()
         
         if rec_imem:
             self._set_imem_recorders()
@@ -674,6 +676,8 @@ class Cell(object):
             self._set_icap_recorders()
         if rec_cai:
             self._set_cai_recorders()
+        if len(rec_variables) > 0:
+            self._set_variable_recorders(rec_variables)
         
         #run fadvance until t >= tstopms, and calculate LFP if asked for
         if electrode == None:
@@ -686,7 +690,7 @@ class Cell(object):
                 raise ValueError, 'timeres_NEURON != timeres_python'
             _run_simulation_with_electrode(self, electrode)
         
-        self._collect_tvec()
+        #self._collect_tvec()
         
         self.somav = np.array(self.somav)
         
@@ -706,29 +710,32 @@ class Cell(object):
             self._collect_istim()
         if rec_cai:
             self._collect_cai()
-        
+        if len(rec_variables) > 0:
+            self._collect_rec_variables(rec_variables)
 
     def _collect_tvec(self):
         '''
         Set the tvec to be a monotonically increasing numpy array after sim.
         '''
-        #fixing tvec, need to be monotonically increasing, from 0-tstopms
-        self.tvec = np.array(self.tvec)
-        if self.tstartms == 0:
-            self.tvec[1:] = self.tvec[1:] + self.timeres_NEURON
-        elif self.tstartms < 0:
-            if self.tvec[0] > -self.timeres_python and \
-                    self.tvec[0] < self.timeres_python:
-                if self.tvec[0] <= -self.timeres_NEURON+self.timeres_NEURON/10.:
-                    self.tvec += self.timeres_NEURON
-                else:
-                    pass
-            else:
-                self.tvec += self.timeres_NEURON
-        else:
-            #if self.verbose:
-            print 'adding %.3f to tvec' % self.timeres_NEURON
-            self.tvec[1:] = self.tvec[1:] + self.timeres_NEURON
+        self.tvec = np.arange(self.tstopms / self.timeres_python + 1) \
+                            * self.timeres_python
+        ##fixing tvec, need to be monotonically increasing, from 0-tstopms
+        #self.tvec = np.array(self.tvec)
+        #if self.tstartms == 0:
+        #    self.tvec[1:] = self.tvec[1:] + self.timeres_NEURON
+        #elif self.tstartms < 0:
+        #    if self.tvec[0] > -self.timeres_python and \
+        #            self.tvec[0] < self.timeres_python:
+        #        if self.tvec[0] <= -self.timeres_NEURON+self.timeres_NEURON/10.:
+        #            self.tvec += self.timeres_NEURON
+        #        else:
+        #            pass
+        #    else:
+        #        self.tvec += self.timeres_NEURON
+        #else:
+        #    #if self.verbose:
+        #    print 'adding %.3f to tvec' % self.timeres_NEURON
+        #    self.tvec[1:] = self.tvec[1:] + self.timeres_NEURON
         
 
     def _calc_imem(self):
@@ -810,7 +817,20 @@ class Cell(object):
         self.cai = np.array(self.memcaireclist)
         self.memcaireclist = None
         del self.memcaireclist
-       
+    
+    def _collect_rec_variables(self, rec_variables):
+        '''
+        Create dict of np.arrays from recorded variables
+        '''
+        self.rec_variables = {}
+        i = 0
+        for values in self.recvariablesreclist:
+            self.rec_variables.update({rec_variables[i] : np.array(values)})
+            if self.verbose:
+                print 'collected recorded variable %s' % rec_variables[i] 
+            i += 1
+        del self.recvariablesreclist
+    
     def loadspikes(self):
         '''
         Initialize spiketimes from netcon if they exist
@@ -820,12 +840,12 @@ class Cell(object):
                 for ii in xrange(int(self.sptimeslist.o(i).size)):
                     self.netconlist.o(i).event(float(self.sptimeslist.o(i)[ii]))
 
-    def _set_time_recorder(self):
-        '''
-        Initialize time-vector recorder in NEURON
-        '''
-        self.tvec = neuron.h.Vector()
-        self.tvec.record(neuron.h._ref_t, self.timeres_python)
+    #def _set_time_recorder(self):
+    #    '''
+    #    Initialize time-vector recorder in NEURON
+    #    '''
+    #    self.tvec = neuron.h.Vector()
+    #    self.tvec.record(neuron.h._ref_t, self.timeres_python)
     
     def _set_soma_volt_recorder(self):
         '''
@@ -903,6 +923,30 @@ class Cell(object):
                 if hasattr(seg, 'cai'):                    
                     memcairec.record(seg._ref_cai, self.timeres_python)
                 self.memcaireclist.append(memcairec)
+    
+    def _set_variable_recorders(self, rec_variables):
+        '''
+        Create a recorder for each variable name in list
+        rec_variables
+        
+        Variables is stored in nested list self.recvariablesreclist
+        '''
+        self.recvariablesreclist = neuron.h.List()        
+        for variable in rec_variables:
+            variablereclist = neuron.h.List()
+            self.recvariablesreclist.append(variablereclist)
+            for sec in self.allseclist:
+                for seg in sec:
+                    recvector = neuron.h.Vector(int(self.tstopms /
+                                                    self.timeres_python + 1))
+                    if hasattr(seg, variable):
+                        recvector.record(getattr(seg, '_ref_%s' % variable),
+                                         self.timeres_python)
+                    else:
+                        print 'non-existing variable %s, section %s.%f' % \
+                                (variable, sec.name(), seg.x)
+                    variablereclist.append(recvector)
+        
     
     def set_pos(self, xpos=0, ypos=0, zpos=0):
         '''

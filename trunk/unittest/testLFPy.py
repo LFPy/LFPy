@@ -214,7 +214,6 @@ class testLFPy(unittest.TestCase):
         
         self.assertEqual(tvec.size, tvec_numpy.size)
     
-    @unittest.expectedFailure    
     def test_tvec_05(self):
         stickParams = {
             'timeres_python' : 0.1,
@@ -244,7 +243,6 @@ class testLFPy(unittest.TestCase):
         
         self.assertEqual(tvec.size, tvec_numpy.size)
     
-    @unittest.expectedFailure
     def test_tvec_07(self):
         stickParams = {
             'timeres_python' : 0.10,
@@ -334,7 +332,6 @@ class testLFPy(unittest.TestCase):
         
         self.assertEqual(tvec.size, tvec_numpy.size)
 
-    @unittest.expectedFailure    
     def test_tvec_13(self):
         stickParams = {
             'timeres_python' : 0.10,
@@ -364,7 +361,6 @@ class testLFPy(unittest.TestCase):
         
         self.assertEqual(tvec.size, tvec_numpy.size)
 
-    @unittest.expectedFailure    
     def test_tvec_15(self):
         stickParams = {
             'timeres_python' : 0.10,
