@@ -1082,6 +1082,32 @@ class Cell(object):
             if self.verbose:
                 print 'Geometry not rotated around z-axis'
     
+    
+    def chiral_morphology(self, axis='x'):
+        '''
+        Mirror the morphology around given axis, (default x-axis),
+        useful to introduce more heterogeneouties in morphology shapes
+        '''
+        #morphology relative to soma-position
+        rel_start, rel_end = self._rel_positions()
+        if axis == 'x':
+            rel_start[:, 0] = -rel_start[:, 0]
+            rel_end[:, 0] = -rel_end[:, 0]
+        elif axis == 'y':
+            rel_start[:, 1] = -rel_start[:, 1]
+            rel_end[:, 1] = -rel_end[:, 1]
+        elif axis == 'z':
+            rel_start[:, 2] = -rel_start[:, 2]
+            rel_end[:, 2] = -rel_end[:, 2]
+        else:
+            raise Exception, "axis must be either 'x', 'y' or 'z'"
+        
+        if self.verbose:
+            print 'morphology mirrored across %s-axis' % axis
+        
+        #set the proper 3D positions
+        self._real_positions(rel_start, rel_end)
+        
     def _squeeze_me_macaroni(self):
         '''
         Reducing the dimensions of the morphology matrices from 3D->2D
