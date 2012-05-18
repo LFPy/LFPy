@@ -78,7 +78,7 @@ NEURON convention for creating morphology files in ``hoc``:
 Other file formats
 ------------------
 
-In the developer branch of LFPy, we've added support for SWC, NeuroLucida3 and NeuroML file formats, but consider this
+Support for SWC, NeuroLucida3 and NeuroML file formats is added, but consider this
 experimental and is poorly tested. If there is something wrong with the files, strange behaviour may occur or LFPy may even fail
 to load the desired morphology at all.
 
