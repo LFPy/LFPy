@@ -7,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Module LFPy &mdash; LFPy 0.9.1 documentation</title>
+    <title>Module LFPy &mdash; LFPy 0.9.2 documentation</title>
     
     <link rel="stylesheet" href="_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -15,7 +15,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '0.9.1',
+        VERSION:     '0.9.2',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="LFPy 0.9.1 documentation" href="index.html" />
+    <link rel="top" title="LFPy 0.9.2 documentation" href="index.html" />
     <link rel="prev" title="Contact" href="contact.html" />
  
 <script type="text/javascript">
@@ -47,7 +47,7 @@
         <li class="right" >
           <a href="contact.html" title="Contact"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">LFPy 0.9.1 documentation</a> &raquo;</li> 
+        <li><a href="index.html">LFPy 0.9.2 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -160,6 +160,13 @@ any neuron.h objects upon saving, as they cannot be pickled</p>
 <blockquote>
 <div>import LFPy
 cell = LFPy.tools.load(&#8216;cell.cpickle&#8217;)</div></blockquote>
+</dd></dl>
+
+<dl class="method">
+<dt id="LFPy.Cell.chiral_morphology">
+<tt class="descname">chiral_morphology</tt><big>(</big><em>axis='x'</em><big>)</big><a class="headerlink" href="#LFPy.Cell.chiral_morphology" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mirror the morphology around given axis, (default x-axis),
+useful to introduce more heterogeneouties in morphology shapes</p>
 </dd></dl>
 
 <dl class="method">
@@ -296,7 +303,7 @@ All rotation angles are optional.</p>
 
 <dl class="method">
 <dt id="LFPy.Cell.simulate">
-<tt class="descname">simulate</tt><big>(</big><em>electrode=None</em>, <em>rec_imem=False</em>, <em>rec_vmem=False</em>, <em>rec_ipas=False</em>, <em>rec_icap=False</em>, <em>rec_isyn=False</em>, <em>rec_vmemsyn=False</em>, <em>rec_istim=False</em><big>)</big><a class="headerlink" href="#LFPy.Cell.simulate" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">simulate</tt><big>(</big><em>electrode=None</em>, <em>rec_imem=False</em>, <em>rec_vmem=False</em>, <em>rec_ipas=False</em>, <em>rec_icap=False</em>, <em>rec_isyn=False</em>, <em>rec_vmemsyn=False</em>, <em>rec_istim=False</em>, <em>rec_variables=</em><span class="optional">[</span><span class="optional">]</span><big>)</big><a class="headerlink" href="#LFPy.Cell.simulate" title="Permalink to this definition">¶</a></dt>
 <dd><p>This is the main function running the simulation of the NEURON model.
 Start NEURON simulation and record variables specified by arguments.</p>
 <p>Arguments:</p>
@@ -312,7 +319,8 @@ rec_ipas:   record passive segment membrane currents
 rec_icap:   record capacitive segment membrane currents
 rec_isyn:   record synaptic currents of from Synapse class instances
 rec_vmemsyn:    record membrane voltage of segments with Synapse
-rec_istim:  record currents of StimIntraElectrode</pre>
+rec_istim:  record currents of StimIntraElectrode
+rec_variables: list of variables to record, i.e arg=['cai', ]</pre>
 </div>
 </dd></dl>
 
@@ -800,13 +808,13 @@ GNU General Public License for more details.</p>
         <li class="right" >
           <a href="contact.html" title="Contact"
              >previous</a> |</li>
-        <li><a href="index.html">LFPy 0.9.1 documentation</a> &raquo;</li> 
+        <li><a href="index.html">LFPy 0.9.2 documentation</a> &raquo;</li> 
       </ul>
     </div>
 
     <div class="footer">
         &copy; Copyright 2012, Computational Neuroscience Group, UMB.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
     </div>
 <!--<div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking
