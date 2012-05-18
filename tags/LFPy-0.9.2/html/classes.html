@@ -1,0 +1,834 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Module LFPy &mdash; LFPy 0.9.2 documentation</title>
+    
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.9.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="LFPy 0.9.2 documentation" href="index.html" />
+    <link rel="prev" title="Contact" href="contact.html" />
+ 
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-29024998-1']);
+  _gaq.push(['_trackPageview']);
+</script>
+
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="contact.html" title="Contact"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">LFPy 0.9.2 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-LFPy">
+<span id="module-lfpy"></span><h1>Module <a class="reference internal" href="#module-LFPy" title="LFPy"><tt class="xref py py-mod docutils literal"><span class="pre">LFPy</span></tt></a><a class="headerlink" href="#module-LFPy" title="Permalink to this headline">¶</a></h1>
+<p>Initialization of LFPy, a module for simulating extracellular potentials.</p>
+<p>Group of Computational Neuroscience (compneuro.umb.no),
+Department of Mathematical Sciences and Technology,
+Norwegian University of Life Sciences.</p>
+<p>Copyright (C) 2012 Computational Neuroscience Group, UMB.</p>
+<p>This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.</p>
+<p>This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Classes:</th><td class="field-body"><ul class="first simple">
+<li>Cell - The pythonic neuron object itself laying on top of NEURON</li>
+<li>Synapse - Convenience class for inserting synapses onto Cell objects</li>
+<li>StimIntraElectrode - Convenience class for inserting electrodes onto Cell objects</li>
+<li>RecExtElectrode - Class for performing simulations of extracellular potentials</li>
+<li>RecExtElectrdoeThreaded - same as above using multiprocessing to distribute contact points across cores</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Modules:</th><td class="field-body"><ul class="first last simple">
+<li>lfpcalc - functions used by RecExtElectrode class</li>
+<li>tools - some convenient functions</li>
+<li>inputgenerators - functions for synaptic input time generation</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="section" id="class-cell">
+<h2>class <a class="reference internal" href="#LFPy.Cell" title="LFPy.Cell"><tt class="xref py py-class docutils literal"><span class="pre">Cell</span></tt></a><a class="headerlink" href="#class-cell" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="LFPy.Cell">
+<em class="property">class </em><tt class="descclassname">LFPy.</tt><tt class="descname">Cell</tt><big>(</big><em>morphology</em>, <em>v_init=-65.0</em>, <em>Ra=150</em>, <em>rm=30000</em>, <em>cm=1.0</em>, <em>e_pas=-65.0</em>, <em>passive=True</em>, <em>timeres_NEURON=0.125</em>, <em>timeres_python=0.125</em>, <em>tstartms=0</em>, <em>tstopms=100</em>, <em>nsegs_method='lambda100'</em>, <em>max_nsegs_length=30</em>, <em>lambda_f=100</em>, <em>custom_code=None</em>, <em>custom_fun=None</em>, <em>custom_fun_args=None</em>, <em>verbose=False</em><big>)</big><a class="headerlink" href="#LFPy.Cell" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>The main cell class used in LFPy.</p>
+<p>Arguments:</p>
+<div class="highlight-python"><pre>morphology : path to morphology file;
+
+v_init: initial potential;
+passive: passive mechs are initialized if True;
+Ra: axial resistance;
+rm: membrane resistivity;
+cm: membrane capacitance;
+e_pas: passive mechanism reversal potential;
+
+timeres_NEURON: internal dt for NEURON simulation;
+timeres_python: overall dt for python simulation;
+
+tstartms: initialization time for simulation &lt;= 0 ms
+tstopms: stop time for simulation &gt; 0 ms
+
+nsegs_method: method for setting the number of segments;
+max_nsegs_length: max segment length for method 'fixed_length';
+lambda_f: AC frequency for method 'lambda_f';
+
+custom_code: list of model-specific code files ([.py/.hoc]);
+custom_fun: list of model-specific functions to be called with args:
+custom_fun_args: list of arguments passed to custom_fun functions
+verbose: switching verbose output on/off</pre>
+</div>
+<p>Usage of cell class:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">LFPy</span>
+<span class="n">cellParameters</span> <span class="o">=</span> <span class="p">{</span>                          
+    <span class="s">&#39;morphology&#39;</span> <span class="p">:</span> <span class="s">&#39;path/to/morphology&#39;</span><span class="p">,</span>
+    <span class="s">&#39;rm&#39;</span> <span class="p">:</span> <span class="mi">30000</span><span class="p">,</span>
+    <span class="s">&#39;cm&#39;</span> <span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="s">&#39;Ra&#39;</span> <span class="p">:</span> <span class="mi">150</span><span class="p">,</span>
+    <span class="s">&#39;timeres_NEURON&#39;</span> <span class="p">:</span> <span class="mf">0.1</span><span class="p">,</span>
+    <span class="s">&#39;timeres_python&#39;</span> <span class="p">:</span> <span class="mf">0.1</span><span class="p">,</span>
+    <span class="s">&#39;tstartms&#39;</span> <span class="p">:</span> <span class="o">-</span><span class="mi">50</span><span class="p">,</span>
+    <span class="s">&#39;tstopms&#39;</span> <span class="p">:</span> <span class="mi">50</span><span class="p">,</span>
+<span class="p">}</span>
+<span class="n">cell</span> <span class="o">=</span> <span class="n">LFPy</span><span class="o">.</span><span class="n">Cell</span><span class="p">(</span><span class="o">**</span><span class="n">cellParameters</span><span class="p">)</span>
+<span class="n">cell</span><span class="o">.</span><span class="n">simulate</span><span class="p">()</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="LFPy.Cell.cellpickler">
+<tt class="descname">cellpickler</tt><big>(</big><em>filename</em><big>)</big><a class="headerlink" href="#LFPy.Cell.cellpickler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save data in cell to filename, using cPickle. It will however destroy
+any neuron.h objects upon saving, as they cannot be pickled</p>
+<p>Usage:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">cell</span><span class="o">.</span><span class="n">cellpickler</span><span class="p">(</span><span class="s">&#39;cell.cpickle&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>To load this cell again in another session:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">cPickle</span>
+<span class="n">f</span> <span class="o">=</span> <span class="nb">file</span><span class="p">(</span><span class="s">&#39;cell.cpickle&#39;</span><span class="p">,</span> <span class="s">&#39;rb&#39;</span><span class="p">)</span>
+<span class="n">cell</span> <span class="o">=</span> <span class="n">cPickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+<span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</pre></div>
+</div>
+<blockquote>
+<div>import LFPy
+cell = LFPy.tools.load(&#8216;cell.cpickle&#8217;)</div></blockquote>
+</dd></dl>
+
+<dl class="method">
+<dt id="LFPy.Cell.chiral_morphology">
+<tt class="descname">chiral_morphology</tt><big>(</big><em>axis='x'</em><big>)</big><a class="headerlink" href="#LFPy.Cell.chiral_morphology" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mirror the morphology around given axis, (default x-axis),
+useful to introduce more heterogeneouties in morphology shapes</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="LFPy.Cell.get_closest_idx">
+<tt class="descname">get_closest_idx</tt><big>(</big><em>x=0</em>, <em>y=0</em>, <em>z=0</em>, <em>section='allsec'</em><big>)</big><a class="headerlink" href="#LFPy.Cell.get_closest_idx" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the index number of a segment in specified section which 
+midpoint is closest to the coordinates defined by the user</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="LFPy.Cell.get_idx">
+<tt class="descname">get_idx</tt><big>(</big><em>section='allsec'</em>, <em>z_min=-10000</em>, <em>z_max=10000</em><big>)</big><a class="headerlink" href="#LFPy.Cell.get_idx" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns neuron idx of segments on interval [z_min, z_max]</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="LFPy.Cell.get_idx_children">
+<tt class="descname">get_idx_children</tt><big>(</big><em>parent='soma[0]'</em><big>)</big><a class="headerlink" href="#LFPy.Cell.get_idx_children" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the idx of parent&#8217;s children sections, i.e. compartments ids
+of sections connected to parent-argument</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="LFPy.Cell.get_idx_parent_children">
+<tt class="descname">get_idx_parent_children</tt><big>(</big><em>parent='soma[0]'</em><big>)</big><a class="headerlink" href="#LFPy.Cell.get_idx_parent_children" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get all idx of segments of parent and children sections, i.e. segment
+idx of sections connected to parent-argument, and also of the parent
+segments</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="LFPy.Cell.get_idx_section">
+<tt class="descname">get_idx_section</tt><big>(</big><em>section='soma[0]'</em><big>)</big><a class="headerlink" href="#LFPy.Cell.get_idx_section" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the idx of segments in any section-argument, uses hoc naming
+instead of general terms as in self.get_idx().</p>
+<p>For example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">cell</span><span class="o">.</span><span class="n">get_idx_section</span><span class="p">(</span><span class="n">section</span><span class="o">=</span><span class="s">&#39;soma[0]&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>will output something like</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>To list all sections in the cell object, type</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">for</span> <span class="n">sec</span> <span class="ow">in</span> <span class="n">cell</span><span class="o">.</span><span class="n">allseclist</span><span class="p">:</span>
+    <span class="k">print</span> <span class="n">sec</span><span class="o">.</span><span class="n">name</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="LFPy.Cell.get_intersegment_distance">
+<tt class="descname">get_intersegment_distance</tt><big>(</big><em>idx0=0</em>, <em>idx1=0</em><big>)</big><a class="headerlink" href="#LFPy.Cell.get_intersegment_distance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the Euclidean distance between midpoints of two segments 
+with indices idx0 and idx1. Will return a float in unit of micrometers.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="LFPy.Cell.get_intersegment_vector">
+<tt class="descname">get_intersegment_vector</tt><big>(</big><em>idx0=0</em>, <em>idx1=0</em><big>)</big><a class="headerlink" href="#LFPy.Cell.get_intersegment_vector" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the distance between midpoints of two segments with index
+idx0 and idx1. The argument returned is a vector [x, y, z], where
+x = self.xmid[idx1] - self.xmid[idx0] etc.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="LFPy.Cell.get_rand_idx_area_norm">
+<tt class="descname">get_rand_idx_area_norm</tt><big>(</big><em>section='allsec'</em>, <em>nidx=1</em>, <em>z_min=-10000</em>, <em>z_max=10000</em><big>)</big><a class="headerlink" href="#LFPy.Cell.get_rand_idx_area_norm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return nidx segment indices in section with random probability
+normalized to the membrane area of segment on 
+interval [z_min, z_max]</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="LFPy.Cell.get_rand_prob_area_norm">
+<tt class="descname">get_rand_prob_area_norm</tt><big>(</big><em>section='allsec'</em>, <em>z_min=-10000</em>, <em>z_max=10000</em><big>)</big><a class="headerlink" href="#LFPy.Cell.get_rand_prob_area_norm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the probability (0-1) for synaptic coupling on segments
+in section sum(prob)=1 over all segments in section.
+Prob. determined by area.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="LFPy.Cell.get_rand_prob_area_norm_from_idx">
+<tt class="descname">get_rand_prob_area_norm_from_idx</tt><big>(</big><em>idx=array([0])</em>, <em>z_min=-10000</em>, <em>z_max=10000</em><big>)</big><a class="headerlink" href="#LFPy.Cell.get_rand_prob_area_norm_from_idx" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the normalized probability (0-1) for synaptic coupling on
+segments in idx-array.
+Normalised probability determined by area of segments.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="LFPy.Cell.loadspikes">
+<tt class="descname">loadspikes</tt><big>(</big><big>)</big><a class="headerlink" href="#LFPy.Cell.loadspikes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize spiketimes from netcon if they exist</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="LFPy.Cell.set_point_process">
+<tt class="descname">set_point_process</tt><big>(</big><em>idx</em>, <em>pptype</em>, <em>record_current=False</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#LFPy.Cell.set_point_process" title="Permalink to this definition">¶</a></dt>
+<dd><p>Insert pptype-electrode type pointprocess on segment numbered
+idx on cell object, with keyword arguments according to types:
+SEClamp, VClamp, IClamp, SinIClamp, ChirpIClamp.
+idx, pptype, <a href="#id1"><span class="problematic" id="id2">**</span></a>kwargs is passed on from PointProcessElectrode class.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="LFPy.Cell.set_pos">
+<tt class="descname">set_pos</tt><big>(</big><em>xpos=0</em>, <em>ypos=0</em>, <em>zpos=0</em><big>)</big><a class="headerlink" href="#LFPy.Cell.set_pos" title="Permalink to this definition">¶</a></dt>
+<dd><p>Move the cell geometry so that midpoint of soma section is
+in (xpos, ypos, zpos). If no soma pos, use the first segment</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="LFPy.Cell.set_rotation">
+<tt class="descname">set_rotation</tt><big>(</big><em>x=None</em>, <em>y=None</em>, <em>z=None</em><big>)</big><a class="headerlink" href="#LFPy.Cell.set_rotation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rotate geometry of cell object around the x-, y-, z-axis in that order.
+Input should be angles in radians.</p>
+<p>using rotation matrices, takes dict with rot. angles,
+where x, y, z are the rotation angles around respective axes.
+All rotation angles are optional.</p>
+<p>Usage:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">cell</span> <span class="o">=</span> <span class="n">LFPy</span><span class="o">.</span><span class="n">Cell</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+<span class="n">rotation</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;x&#39;</span> <span class="p">:</span> <span class="mf">1.233</span><span class="p">,</span> <span class="s">&#39;y&#39;</span> <span class="p">:</span> <span class="mf">0.236</span><span class="p">,</span> <span class="s">&#39;z&#39;</span> <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">}</span>
+<span class="n">cell</span><span class="o">.</span><span class="n">set_rotation</span><span class="p">(</span><span class="o">**</span><span class="n">rotation</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="LFPy.Cell.set_synapse">
+<tt class="descname">set_synapse</tt><big>(</big><em>idx</em>, <em>syntype</em>, <em>record_current=False</em>, <em>record_potential=False</em>, <em>weight=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#LFPy.Cell.set_synapse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Insert syntype (e.g. ExpSyn) synapse on segment with index idx, 
+<a href="#id3"><span class="problematic" id="id4">**</span></a>kwargs passed on from class PointProcessSynapse.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="LFPy.Cell.simulate">
+<tt class="descname">simulate</tt><big>(</big><em>electrode=None</em>, <em>rec_imem=False</em>, <em>rec_vmem=False</em>, <em>rec_ipas=False</em>, <em>rec_icap=False</em>, <em>rec_isyn=False</em>, <em>rec_vmemsyn=False</em>, <em>rec_istim=False</em>, <em>rec_variables=</em><span class="optional">[</span><span class="optional">]</span><big>)</big><a class="headerlink" href="#LFPy.Cell.simulate" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the main function running the simulation of the NEURON model.
+Start NEURON simulation and record variables specified by arguments.</p>
+<p>Arguments:</p>
+<div class="highlight-python"><pre>electrode:  Either an LFPy.RecExtElectrode object or a list of such.
+            If supplied, LFPs will be calculated at every time step
+            and accessible as electrode.LFP. If a list of objects
+            is given, accessible as electrode[0].LFP etc.
+rec_imem:   If true, segment membrane currents will be recorded
+            If no electrode argument is given, it is necessary to
+            set rec_imem=True in order to calculate LFP later on.
+rec_vmem:   record segment membrane voltages
+rec_ipas:   record passive segment membrane currents
+rec_icap:   record capacitive segment membrane currents
+rec_isyn:   record synaptic currents of from Synapse class instances
+rec_vmemsyn:    record membrane voltage of segments with Synapse
+rec_istim:  record currents of StimIntraElectrode
+rec_variables: list of variables to record, i.e arg=['cai', ]</pre>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="LFPy.Cell.strip_hoc_objects">
+<tt class="descname">strip_hoc_objects</tt><big>(</big><big>)</big><a class="headerlink" href="#LFPy.Cell.strip_hoc_objects" title="Permalink to this definition">¶</a></dt>
+<dd><p>Destroy any NEURON hoc objects in the cell object</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="class-pointprocess">
+<h2>class <a class="reference internal" href="#LFPy.PointProcess" title="LFPy.PointProcess"><tt class="xref py py-class docutils literal"><span class="pre">PointProcess</span></tt></a><a class="headerlink" href="#class-pointprocess" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="LFPy.PointProcess">
+<em class="property">class </em><tt class="descclassname">LFPy.</tt><tt class="descname">PointProcess</tt><big>(</big><em>cell</em>, <em>idx</em>, <em>color='k'</em>, <em>marker='o'</em>, <em>record_current=False</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#LFPy.PointProcess" title="Permalink to this definition">¶</a></dt>
+<dd><p>Superclass on top of Synapse, StimIntElectrode, 
+just to import and set some shared variables.</p>
+<p>Arguments:</p>
+<div class="highlight-python"><pre>cell    : LFPy.Cell object
+idx     : index of segment
+color   : color in plot (optional) 
+marker  : marker in plot (optional) 
+record_current : Must be set True for recording of pointprocess currents
+kwargs  : pointprocess specific variables passed on to cell/neuron</pre>
+</div>
+<dl class="method">
+<dt id="LFPy.PointProcess.update_pos">
+<tt class="descname">update_pos</tt><big>(</big><em>cell</em><big>)</big><a class="headerlink" href="#LFPy.PointProcess.update_pos" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extract coordinates of point-process</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="class-synapse">
+<h2>class <a class="reference internal" href="#LFPy.Synapse" title="LFPy.Synapse"><tt class="xref py py-class docutils literal"><span class="pre">Synapse</span></tt></a><a class="headerlink" href="#class-synapse" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="LFPy.Synapse">
+<em class="property">class </em><tt class="descclassname">LFPy.</tt><tt class="descname">Synapse</tt><big>(</big><em>cell</em>, <em>idx</em>, <em>syntype</em>, <em>color='r'</em>, <em>marker='o'</em>, <em>record_current=False</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#LFPy.Synapse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">LFPy.pointprocess.PointProcess</span></tt></p>
+<p>The synapse class, pointprocesses that spawn membrane currents.
+See <a class="reference external" href="http://www.neuron.yale.edu/neuron/static/docs/help/neuron/neuron/mech.html#pointprocesses">http://www.neuron.yale.edu/neuron/static/docs/help/neuron/neuron/mech.html#pointprocesses</a>
+for details, or corresponding mod-files.</p>
+<p>This class is meant to be used with synaptic mechanisms, giving rise to
+currents that will be part of the membrane currents.</p>
+<p>Usage:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c">#!/usr/bin/env python</span>
+
+<span class="kn">import</span> <span class="nn">LFPy</span>
+<span class="kn">import</span> <span class="nn">pylab</span> <span class="kn">as</span> <span class="nn">pl</span>
+
+<span class="n">pl</span><span class="o">.</span><span class="n">interactive</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="n">cellParameters</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s">&#39;morphology&#39;</span> <span class="p">:</span>  <span class="s">&#39;morphologies/L5_Mainen96_LFPy.hoc&#39;</span><span class="p">,</span>
+    <span class="s">&#39;tstopms&#39;</span> <span class="p">:</span>     <span class="mi">50</span><span class="p">,</span> 
+<span class="p">}</span>
+<span class="n">cell</span> <span class="o">=</span> <span class="n">LFPy</span><span class="o">.</span><span class="n">Cell</span><span class="p">(</span><span class="o">**</span><span class="n">cellParameters</span><span class="p">)</span>
+
+<span class="n">synapseParameters</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s">&#39;idx&#39;</span> <span class="p">:</span> <span class="n">cell</span><span class="o">.</span><span class="n">get_closest_idx</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="mi">800</span><span class="p">),</span>
+    <span class="s">&#39;e&#39;</span> <span class="p">:</span> <span class="mi">0</span><span class="p">,</span>                                <span class="c"># reversal potential</span>
+    <span class="s">&#39;syntype&#39;</span> <span class="p">:</span> <span class="s">&#39;ExpSyn&#39;</span><span class="p">,</span>                   <span class="c"># synapse type</span>
+    <span class="s">&#39;tau&#39;</span> <span class="p">:</span> <span class="mi">2</span><span class="p">,</span>                              <span class="c"># syn. time constant</span>
+    <span class="s">&#39;weight&#39;</span> <span class="p">:</span> <span class="mf">0.01</span><span class="p">,</span>                        <span class="c"># syn. weight</span>
+    <span class="s">&#39;record_current&#39;</span> <span class="p">:</span> <span class="bp">True</span>                 <span class="c"># syn. current record</span>
+<span class="p">}</span>
+<span class="n">synapse</span> <span class="o">=</span> <span class="n">LFPy</span><span class="o">.</span><span class="n">Synapse</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="o">**</span><span class="n">synapseParameters</span><span class="p">)</span>
+<span class="n">synapse</span><span class="o">.</span><span class="n">set_spike_times</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">10</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">25</span><span class="p">]))</span>
+<span class="n">cell</span><span class="o">.</span><span class="n">simulate</span><span class="p">(</span><span class="n">rec_isyn</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+<span class="n">pl</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">211</span><span class="p">)</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">cell</span><span class="o">.</span><span class="n">tvec</span><span class="p">,</span> <span class="n">synapse</span><span class="o">.</span><span class="n">i</span><span class="p">)</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s">&#39;Synapse current (nA)&#39;</span><span class="p">)</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">212</span><span class="p">)</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">cell</span><span class="o">.</span><span class="n">tvec</span><span class="p">,</span> <span class="n">cell</span><span class="o">.</span><span class="n">somav</span><span class="p">)</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s">&#39;Somatic potential (mV)&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="LFPy.Synapse.collect_current">
+<tt class="descname">collect_current</tt><big>(</big><em>cell</em><big>)</big><a class="headerlink" href="#LFPy.Synapse.collect_current" title="Permalink to this definition">¶</a></dt>
+<dd><p>Collect synapse current</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="LFPy.Synapse.collect_potential">
+<tt class="descname">collect_potential</tt><big>(</big><em>cell</em><big>)</big><a class="headerlink" href="#LFPy.Synapse.collect_potential" title="Permalink to this definition">¶</a></dt>
+<dd><p>Collect membrane potential of segment with synapse</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="LFPy.Synapse.set_spike_times">
+<tt class="descname">set_spike_times</tt><big>(</big><em>sptimes=array(</em><span class="optional">[</span><span class="optional">]</span>, <em>dtype=float64)</em><big>)</big><a class="headerlink" href="#LFPy.Synapse.set_spike_times" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the spike times</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="class-stimintelectrode">
+<h2>class <a class="reference internal" href="#LFPy.StimIntElectrode" title="LFPy.StimIntElectrode"><tt class="xref py py-class docutils literal"><span class="pre">StimIntElectrode</span></tt></a><a class="headerlink" href="#class-stimintelectrode" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="LFPy.StimIntElectrode">
+<em class="property">class </em><tt class="descclassname">LFPy.</tt><tt class="descname">StimIntElectrode</tt><big>(</big><em>cell</em>, <em>idx</em>, <em>pptype='SEClamp'</em>, <em>color='p'</em>, <em>marker='*'</em>, <em>record_current=False</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#LFPy.StimIntElectrode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">LFPy.pointprocess.PointProcess</span></tt></p>
+<p>Class for NEURON point processes, ie VClamp, SEClamp and ICLamp,
+SinIClamp, ChirpIClamp with arguments.
+Electrode currents go here.
+Membrane currents will no longer sum to zero if these mechanisms are used.</p>
+<p>Refer to NEURON documentation &#64; neuron.yale.edu for kwargs</p>
+<p>Usage example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c">#/usr/bin/python</span>
+
+<span class="kn">import</span> <span class="nn">LFPy</span>
+<span class="kn">import</span> <span class="nn">pylab</span> <span class="kn">as</span> <span class="nn">pl</span>
+
+<span class="n">pl</span><span class="o">.</span><span class="n">interactive</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="c">#define a list of different electrode implementations from NEURON</span>
+<span class="n">pointprocesses</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">{</span>
+        <span class="s">&#39;idx&#39;</span> <span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="s">&#39;record_current&#39;</span> <span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+        <span class="s">&#39;pptype&#39;</span> <span class="p">:</span> <span class="s">&#39;IClamp&#39;</span><span class="p">,</span>
+        <span class="s">&#39;amp&#39;</span> <span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="s">&#39;dur&#39;</span> <span class="p">:</span> <span class="mi">20</span><span class="p">,</span>
+        <span class="s">&#39;delay&#39;</span> <span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s">&#39;idx&#39;</span> <span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="s">&#39;record_current&#39;</span> <span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+        <span class="s">&#39;pptype&#39;</span> <span class="p">:</span> <span class="s">&#39;VClamp&#39;</span><span class="p">,</span>
+        <span class="s">&#39;amp[0]&#39;</span> <span class="p">:</span> <span class="o">-</span><span class="mi">65</span><span class="p">,</span>
+        <span class="s">&#39;dur[0]&#39;</span> <span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+        <span class="s">&#39;amp[1]&#39;</span> <span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="s">&#39;dur[1]&#39;</span> <span class="p">:</span> <span class="mi">20</span><span class="p">,</span>
+        <span class="s">&#39;amp[2]&#39;</span> <span class="p">:</span> <span class="o">-</span><span class="mi">65</span><span class="p">,</span>
+        <span class="s">&#39;dur[2]&#39;</span> <span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s">&#39;idx&#39;</span> <span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="s">&#39;record_current&#39;</span> <span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+        <span class="s">&#39;pptype&#39;</span> <span class="p">:</span> <span class="s">&#39;SEClamp&#39;</span><span class="p">,</span>
+        <span class="s">&#39;dur1&#39;</span> <span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+        <span class="s">&#39;amp1&#39;</span> <span class="p">:</span> <span class="o">-</span><span class="mi">65</span><span class="p">,</span>
+        <span class="s">&#39;dur2&#39;</span> <span class="p">:</span> <span class="mi">20</span><span class="p">,</span>
+        <span class="s">&#39;amp2&#39;</span> <span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="s">&#39;dur3&#39;</span> <span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+        <span class="s">&#39;amp3&#39;</span> <span class="p">:</span> <span class="o">-</span><span class="mi">65</span><span class="p">,</span>
+    <span class="p">},</span>
+<span class="p">]</span>
+
+<span class="c">#create a cell instance for each electrode</span>
+<span class="k">for</span> <span class="n">pointprocess</span> <span class="ow">in</span> <span class="n">pointprocesses</span><span class="p">:</span>
+    <span class="n">cell</span> <span class="o">=</span> <span class="n">LFPy</span><span class="o">.</span><span class="n">Cell</span><span class="p">(</span><span class="n">morphology</span><span class="o">=</span><span class="s">&#39;morphologies/L5_Mainen96_LFPy.hoc&#39;</span><span class="p">)</span>
+    <span class="n">stimulus</span> <span class="o">=</span> <span class="n">LFPy</span><span class="o">.</span><span class="n">StimIntElectrode</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="o">**</span><span class="n">pointprocess</span><span class="p">)</span>
+    <span class="n">cell</span><span class="o">.</span><span class="n">simulate</span><span class="p">(</span><span class="n">rec_istim</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    
+    <span class="n">pl</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">211</span><span class="p">)</span>
+    <span class="n">pl</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">cell</span><span class="o">.</span><span class="n">tvec</span><span class="p">,</span> <span class="n">stimulus</span><span class="o">.</span><span class="n">i</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">pointprocess</span><span class="p">[</span><span class="s">&#39;pptype&#39;</span><span class="p">])</span>
+    <span class="n">pl</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s">&#39;best&#39;</span><span class="p">)</span>
+    <span class="n">pl</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s">&#39;Stimulus currents (nA)&#39;</span><span class="p">)</span>
+    
+    <span class="n">pl</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">212</span><span class="p">)</span>
+    <span class="n">pl</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">cell</span><span class="o">.</span><span class="n">tvec</span><span class="p">,</span> <span class="n">cell</span><span class="o">.</span><span class="n">somav</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">pointprocess</span><span class="p">[</span><span class="s">&#39;pptype&#39;</span><span class="p">])</span>
+    <span class="n">pl</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s">&#39;best&#39;</span><span class="p">)</span>
+    <span class="n">pl</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s">&#39;Somatic potential (mV)&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="LFPy.StimIntElectrode.collect_current">
+<tt class="descname">collect_current</tt><big>(</big><em>cell</em><big>)</big><a class="headerlink" href="#LFPy.StimIntElectrode.collect_current" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fetch electrode current from recorder list</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="LFPy.StimIntElectrode.collect_potential">
+<tt class="descname">collect_potential</tt><big>(</big><em>cell</em><big>)</big><a class="headerlink" href="#LFPy.StimIntElectrode.collect_potential" title="Permalink to this definition">¶</a></dt>
+<dd><p>Collect membrane potential of segment with PointProcess</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="class-recextelectrodesetup">
+<h2>class <a class="reference internal" href="#LFPy.RecExtElectrodeSetup" title="LFPy.RecExtElectrodeSetup"><tt class="xref py py-class docutils literal"><span class="pre">RecExtElectrodeSetup</span></tt></a><a class="headerlink" href="#class-recextelectrodesetup" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="LFPy.RecExtElectrodeSetup">
+<em class="property">class </em><tt class="descclassname">LFPy.</tt><tt class="descname">RecExtElectrodeSetup</tt><big>(</big><em>cell=None</em>, <em>sigma=0.3</em>, <em>x=100</em>, <em>y=0</em>, <em>z=0</em>, <em>N=None</em>, <em>r=None</em>, <em>n=None</em>, <em>r_z=None</em>, <em>perCellLFP=False</em>, <em>method='linesource'</em>, <em>color='g'</em>, <em>marker='o'</em>, <em>from_file=False</em>, <em>cellfile=None</em>, <em>verbose=False</em>, <em>seedvalue=None</em><big>)</big><a class="headerlink" href="#LFPy.RecExtElectrodeSetup" title="Permalink to this definition">¶</a></dt>
+<dd><p>RecExtElectrode superclass. 
+If (optional) cell argument is given then the it is imported,
+otherwise the cell argument has to be passed later on to calc_lfp.
+The argument cell can be an LFPy.cell.Cell object 
+or either a list or a dictionary containing such Cell objects. 
+Keyword arguments determine properties of later LFP-calculations</p>
+<p>Arguments:</p>
+<div class="highlight-python"><pre>sigma   : extracellular conductivity
+x, y, z : coordinates or arrays of coordinates. Must be same length
+N       : Normal vector [x, y, z] of contact surface, default None
+r       : radius of contact surface, default None
+n       : if N != None and r &gt; 0, the number of points to use for each
+          contact point in order to calculate average
+color   : color of electrode contact points in plots
+marker  : marker of electrode contact points in plots
+from_file   : if True, load cell object from file
+cellfile    : path to cell pickle
+verbose : Flag for verbose output
+seedvalue : fixed seed when finding random position on contact with r &gt;0</pre>
+</div>
+<dl class="class">
+<dt id="LFPy.RecExtElectrodeSetup.cell">
+<em class="property">class </em><tt class="descname">cell</tt><a class="headerlink" href="#LFPy.RecExtElectrodeSetup.cell" title="Permalink to this definition">¶</a></dt>
+<dd><p>Empty object that cell-specific variables are stored in</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="class-recextelectrode">
+<h2>class <a class="reference internal" href="#LFPy.RecExtElectrode" title="LFPy.RecExtElectrode"><tt class="xref py py-class docutils literal"><span class="pre">RecExtElectrode</span></tt></a><a class="headerlink" href="#class-recextelectrode" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="LFPy.RecExtElectrode">
+<em class="property">class </em><tt class="descclassname">LFPy.</tt><tt class="descname">RecExtElectrode</tt><big>(</big><em>cell=None</em>, <em>sigma=0.3</em>, <em>x=100</em>, <em>y=0</em>, <em>z=0</em>, <em>N=None</em>, <em>r=None</em>, <em>n=0</em>, <em>r_z=None</em>, <em>perCellLFP=False</em>, <em>method='linesource'</em>, <em>color='g'</em>, <em>marker='o'</em>, <em>from_file=False</em>, <em>cellfile=None</em>, <em>verbose=False</em>, <em>seedvalue=None</em><big>)</big><a class="headerlink" href="#LFPy.RecExtElectrode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">LFPy.recextelectrode.RecExtElectrodeSetup</span></tt></p>
+<p>RecExtElectrode class with inheritance from LFPy.RecExtElectrodeSetup 
+able to actually calculate local field potentials from LFPy.Cell objects. 
+<a href="#id5"><span class="problematic" id="id6">**</span></a>kwargs are passed on to LFPy.RecExtElectrodeSetup</p>
+<p>Usage:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">LFPy</span>
+<span class="kn">import</span> <span class="nn">pylab</span> <span class="kn">as</span> <span class="nn">pl</span>
+
+<span class="n">N</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="mi">16</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">N</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span> <span class="n">N</span><span class="p">[</span><span class="n">i</span><span class="p">,]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="c">#normal unit vec. to contacts</span>
+<span class="n">electrodeParameters</span> <span class="o">=</span> <span class="p">{</span>             <span class="c">#parameters for RecExtElectrode class</span>
+    <span class="s">&#39;sigma&#39;</span> <span class="p">:</span> <span class="mf">0.3</span><span class="p">,</span>              <span class="c">#Extracellular potential</span>
+    <span class="s">&#39;x&#39;</span> <span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">16</span><span class="p">)</span><span class="o">+</span><span class="mi">25</span><span class="p">,</span>      <span class="c">#Coordinates of electrode contacts</span>
+    <span class="s">&#39;y&#39;</span> <span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">16</span><span class="p">),</span>
+    <span class="s">&#39;z&#39;</span> <span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">500</span><span class="p">,</span><span class="mi">1000</span><span class="p">,</span><span class="mi">16</span><span class="p">),</span>
+    <span class="s">&#39;n&#39;</span> <span class="p">:</span> <span class="mi">20</span><span class="p">,</span>
+    <span class="s">&#39;r&#39;</span> <span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+    <span class="s">&#39;N&#39;</span> <span class="p">:</span> <span class="n">N</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="n">cellParameters</span> <span class="o">=</span> <span class="p">{</span>                          
+    <span class="s">&#39;morphology&#39;</span> <span class="p">:</span> <span class="s">&#39;L5_Mainen96_LFPy.hoc&#39;</span><span class="p">,</span>  <span class="c"># morphology file</span>
+    <span class="s">&#39;rm&#39;</span> <span class="p">:</span> <span class="mi">30000</span><span class="p">,</span>                           <span class="c"># membrane resistivity</span>
+    <span class="s">&#39;cm&#39;</span> <span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>                             <span class="c"># membrane capacitance</span>
+    <span class="s">&#39;Ra&#39;</span> <span class="p">:</span> <span class="mi">150</span><span class="p">,</span>                             <span class="c"># axial resistivity</span>
+    <span class="s">&#39;timeres_NEURON&#39;</span> <span class="p">:</span> <span class="mi">2</span><span class="o">**-</span><span class="mi">4</span><span class="p">,</span>                <span class="c"># dt for NEURON sim.</span>
+    <span class="s">&#39;timeres_python&#39;</span> <span class="p">:</span> <span class="mi">2</span><span class="o">**-</span><span class="mi">4</span><span class="p">,</span>                 <span class="c"># dt for python output</span>
+    <span class="s">&#39;tstartms&#39;</span> <span class="p">:</span> <span class="o">-</span><span class="mi">50</span><span class="p">,</span>                         <span class="c"># start t of simulation</span>
+    <span class="s">&#39;tstopms&#39;</span> <span class="p">:</span> <span class="mi">50</span><span class="p">,</span>                        <span class="c"># end t of simulation</span>
+<span class="p">}</span>
+
+<span class="n">cell</span> <span class="o">=</span> <span class="n">LFPy</span><span class="o">.</span><span class="n">Cell</span><span class="p">(</span><span class="o">**</span><span class="n">cellParameters</span><span class="p">)</span>
+
+<span class="n">synapseParameters</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s">&#39;idx&#39;</span> <span class="p">:</span> <span class="n">cell</span><span class="o">.</span><span class="n">get_closest_idx</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="mi">800</span><span class="p">),</span> <span class="c"># compartment</span>
+    <span class="s">&#39;e&#39;</span> <span class="p">:</span> <span class="mi">0</span><span class="p">,</span>                                <span class="c"># reversal potential</span>
+    <span class="s">&#39;syntype&#39;</span> <span class="p">:</span> <span class="s">&#39;ExpSyn&#39;</span><span class="p">,</span>                   <span class="c"># synapse type</span>
+    <span class="s">&#39;tau&#39;</span> <span class="p">:</span> <span class="mi">2</span><span class="p">,</span>                              <span class="c"># syn. time constant</span>
+    <span class="s">&#39;weight&#39;</span> <span class="p">:</span> <span class="mf">0.01</span><span class="p">,</span>                       <span class="c"># syn. weight</span>
+    <span class="s">&#39;record_current&#39;</span> <span class="p">:</span> <span class="bp">True</span>                 <span class="c"># syn. current record</span>
+<span class="p">}</span>
+
+<span class="n">synapse</span> <span class="o">=</span> <span class="n">LFPy</span><span class="o">.</span><span class="n">PointProcessSynapse</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="o">**</span><span class="n">synapseParameters</span><span class="p">)</span>
+<span class="n">synapse</span><span class="o">.</span><span class="n">set_spike_times</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="n">pl</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">10</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">25</span><span class="p">]))</span>
+
+<span class="n">cell</span><span class="o">.</span><span class="n">simulate</span><span class="p">()</span>
+
+<span class="n">electrode</span> <span class="o">=</span> <span class="n">LFPy</span><span class="o">.</span><span class="n">RecExtElectrode</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="o">**</span><span class="n">electrodeParameters</span><span class="p">)</span>
+<span class="n">electrode</span><span class="o">.</span><span class="n">calc_lfp</span><span class="p">()</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">matshow</span><span class="p">(</span><span class="n">electrode</span><span class="o">.</span><span class="n">LFP</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="LFPy.RecExtElectrode.calc_lfp">
+<tt class="descname">calc_lfp</tt><big>(</big><em>t_indices=None</em>, <em>cell=None</em><big>)</big><a class="headerlink" href="#LFPy.RecExtElectrode.calc_lfp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate LFP on electrode geometry from all cell instances.
+Will chose distributed calculated if electrode contain &#8216;n&#8217;, &#8216;N&#8217;, and &#8216;r&#8217;</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-LFPy.lfpcalc">
+<span id="submodule-lfpcalc"></span><h2>submodule <tt class="xref py py-mod docutils literal"><span class="pre">lfpcalc</span></tt><a class="headerlink" href="#module-LFPy.lfpcalc" title="Permalink to this headline">¶</a></h2>
+<p>Copyright (C) 2012 Computational Neuroscience Group, UMB.</p>
+<p>This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.</p>
+<p>This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.</p>
+<dl class="function">
+<dt id="LFPy.lfpcalc.calc_lfp_choose">
+<tt class="descclassname">LFPy.lfpcalc.</tt><tt class="descname">calc_lfp_choose</tt><big>(</big><big>)</big><a class="headerlink" href="#LFPy.lfpcalc.calc_lfp_choose" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determine which method to use, line-source for soma default</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="LFPy.lfpcalc.calc_lfp_linesource">
+<tt class="descclassname">LFPy.lfpcalc.</tt><tt class="descname">calc_lfp_linesource</tt><big>(</big><big>)</big><a class="headerlink" href="#LFPy.lfpcalc.calc_lfp_linesource" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate electric field potential using the line-source method, all
+compartments treated as line sources, even soma.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="LFPy.lfpcalc.calc_lfp_pointsource">
+<tt class="descclassname">LFPy.lfpcalc.</tt><tt class="descname">calc_lfp_pointsource</tt><big>(</big><big>)</big><a class="headerlink" href="#LFPy.lfpcalc.calc_lfp_pointsource" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate local field potentials using the point-source equation on all
+compartments</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="LFPy.lfpcalc.calc_lfp_som_as_point">
+<tt class="descclassname">LFPy.lfpcalc.</tt><tt class="descname">calc_lfp_som_as_point</tt><big>(</big><big>)</big><a class="headerlink" href="#LFPy.lfpcalc.calc_lfp_som_as_point" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate electric field potential using the line-source method,
+soma is treated as point/sphere source</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-LFPy.tools">
+<span id="submodule-tools"></span><h2>submodule <tt class="xref py py-mod docutils literal"><span class="pre">tools</span></tt><a class="headerlink" href="#module-LFPy.tools" title="Permalink to this headline">¶</a></h2>
+<p>Copyright (C) 2012 Computational Neuroscience Group, UMB.</p>
+<p>This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.</p>
+<p>This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.</p>
+<dl class="function">
+<dt id="LFPy.tools.load">
+<tt class="descclassname">LFPy.tools.</tt><tt class="descname">load</tt><big>(</big><em>filename</em><big>)</big><a class="reference internal" href="_modules/LFPy/tools.html#load"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LFPy.tools.load" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generic loading of cPickled objects from file</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="LFPy.tools.noise_brown">
+<tt class="descclassname">LFPy.tools.</tt><tt class="descname">noise_brown</tt><big>(</big><em>ncols</em>, <em>nrows=1</em>, <em>weight=1</em>, <em>filter=None</em>, <em>filterargs=None</em><big>)</big><a class="reference internal" href="_modules/LFPy/tools.html#noise_brown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LFPy.tools.noise_brown" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return 1/f^2 noise of shape(nrows, ncols obtained by taking 
+the cumulative sum of gaussian white noise, with rms weight.</p>
+<p>If filter != None, this function will apply the filter coefficients obtained
+by:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">b</span><span class="p">,</span> <span class="n">a</span> <span class="o">=</span> <span class="nb">filter</span><span class="p">(</span><span class="o">**</span><span class="n">filterargs</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">signal</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">signal</span><span class="o">.</span><span class="n">lfilter</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">signal</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="module-LFPy.inputgenerators">
+<span id="submodule-inputgenerators"></span><h2>submodule <tt class="xref py py-mod docutils literal"><span class="pre">inputgenerators</span></tt><a class="headerlink" href="#module-LFPy.inputgenerators" title="Permalink to this headline">¶</a></h2>
+<p>Copyright (C) 2012 Computational Neuroscience Group, UMB.</p>
+<p>This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.</p>
+<p>This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.</p>
+<dl class="function">
+<dt id="LFPy.inputgenerators.get_normal_input_times">
+<tt class="descclassname">LFPy.inputgenerators.</tt><tt class="descname">get_normal_input_times</tt><big>(</big><em>n</em>, <em>mu</em>, <em>sigma</em>, <em>tstart</em>, <em>tstop</em><big>)</big><a class="reference internal" href="_modules/LFPy/inputgenerators.html#get_normal_input_times"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LFPy.inputgenerators.get_normal_input_times" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates n normal-distributed prosesses with mean mu and 
+deviation sigma</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="LFPy.inputgenerators.get_normal_spike_times">
+<tt class="descclassname">LFPy.inputgenerators.</tt><tt class="descname">get_normal_spike_times</tt><big>(</big><em>nsyn</em>, <em>mu</em>, <em>sigma</em>, <em>tstart</em>, <em>tstop</em><big>)</big><a class="reference internal" href="_modules/LFPy/inputgenerators.html#get_normal_spike_times"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LFPy.inputgenerators.get_normal_spike_times" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate nsyn normal-distributed processes with mean mu and 
+deviation sigma</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="LFPy.inputgenerators.get_rand_spike_times">
+<tt class="descclassname">LFPy.inputgenerators.</tt><tt class="descname">get_rand_spike_times</tt><big>(</big><em>synpos</em>, <em>nspikes</em>, <em>tstart</em>, <em>tstop</em><big>)</big><a class="reference internal" href="_modules/LFPy/inputgenerators.html#get_rand_spike_times"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LFPy.inputgenerators.get_rand_spike_times" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return synpos times nspikes random spike times on the 
+interval [tstart, tstop]</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="LFPy.inputgenerators.stationary_gamma">
+<tt class="descclassname">LFPy.inputgenerators.</tt><tt class="descname">stationary_gamma</tt><big>(</big><em>tstart</em>, <em>tstop</em>, <em>k=2</em>, <em>theta=10</em>, <em>tmin=-1000.0</em>, <em>tmax=100000.0</em><big>)</big><a class="reference internal" href="_modules/LFPy/inputgenerators.html#stationary_gamma"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LFPy.inputgenerators.stationary_gamma" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate spiketimes with interspike interval statistics according
+to gamma-distribution with &#8216;shape&#8217; k and &#8216;scale&#8217; theta between tstart and
+tstop. Spiketimes from tmin up to tmax is calculated,
+times between 0 and tstop are returned</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="LFPy.inputgenerators.stationary_poisson">
+<tt class="descclassname">LFPy.inputgenerators.</tt><tt class="descname">stationary_poisson</tt><big>(</big><em>nsyn</em>, <em>lambd</em>, <em>tstart</em>, <em>tstop</em><big>)</big><a class="reference internal" href="_modules/LFPy/inputgenerators.html#stationary_poisson"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LFPy.inputgenerators.stationary_poisson" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate nsyn stationary possion processes with rate lambda 
+between tstart and tstop</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="LFPy.inputgenerators.test_spiketimes">
+<tt class="descclassname">LFPy.inputgenerators.</tt><tt class="descname">test_spiketimes</tt><big>(</big><em>spiketime</em><big>)</big><a class="reference internal" href="_modules/LFPy/inputgenerators.html#test_spiketimes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LFPy.inputgenerators.test_spiketimes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test and sort spike times</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-LFPy.run_simulation">
+<span id="submodule-run-simulation"></span><h2>submodule <tt class="xref py py-mod docutils literal"><span class="pre">run_simulation</span></tt><a class="headerlink" href="#module-LFPy.run_simulation" title="Permalink to this headline">¶</a></h2>
+<p>Copyright (C) 2012 Computational Neuroscience Group, UMB.</p>
+<p>This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.</p>
+<p>This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Module <tt class="docutils literal"><span class="pre">LFPy</span></tt></a><ul>
+<li><a class="reference internal" href="#class-cell">class <tt class="docutils literal"><span class="pre">Cell</span></tt></a></li>
+<li><a class="reference internal" href="#class-pointprocess">class <tt class="docutils literal"><span class="pre">PointProcess</span></tt></a></li>
+<li><a class="reference internal" href="#class-synapse">class <tt class="docutils literal"><span class="pre">Synapse</span></tt></a></li>
+<li><a class="reference internal" href="#class-stimintelectrode">class <tt class="docutils literal"><span class="pre">StimIntElectrode</span></tt></a></li>
+<li><a class="reference internal" href="#class-recextelectrodesetup">class <tt class="docutils literal"><span class="pre">RecExtElectrodeSetup</span></tt></a></li>
+<li><a class="reference internal" href="#class-recextelectrode">class <tt class="docutils literal"><span class="pre">RecExtElectrode</span></tt></a></li>
+<li><a class="reference internal" href="#module-LFPy.lfpcalc">submodule <tt class="docutils literal"><span class="pre">lfpcalc</span></tt></a></li>
+<li><a class="reference internal" href="#module-LFPy.tools">submodule <tt class="docutils literal"><span class="pre">tools</span></tt></a></li>
+<li><a class="reference internal" href="#module-LFPy.inputgenerators">submodule <tt class="docutils literal"><span class="pre">inputgenerators</span></tt></a></li>
+<li><a class="reference internal" href="#module-LFPy.run_simulation">submodule <tt class="docutils literal"><span class="pre">run_simulation</span></tt></a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="contact.html"
+                        title="previous chapter">Contact</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/classes.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="contact.html" title="Contact"
+             >previous</a> |</li>
+        <li><a href="index.html">LFPy 0.9.2 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2012, Computational Neuroscience Group, UMB.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+<!--<div class="footer">This page uses <a href="http://analytics.google.com/">
+Google Analytics</a> to collect statistics. You can disable it by blocking
+the JavaScript coming from www.google-analytics.com.-->
+<script type="text/javascript">
+  (function() {
+    var ga = document.createElement('script');
+    ga.src = ('https:' == document.location.protocol ?
+              'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    ga.setAttribute('async', 'true');
+    document.documentElement.firstChild.appendChild(ga);
+  })();
+</script>
+</div>
+
+  </body>
+</html>

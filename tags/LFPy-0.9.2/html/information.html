@@ -1,0 +1,363 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Download LFPy &mdash; LFPy 0.9.2 documentation</title>
+    
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.9.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="LFPy 0.9.2 documentation" href="index.html" />
+    <link rel="next" title="LFPy Tutorial" href="tutorial.html" />
+    <link rel="prev" title="LFPy Homepage" href="index.html" />
+ 
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-29024998-1']);
+  _gaq.push(['_trackPageview']);
+</script>
+
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="tutorial.html" title="LFPy Tutorial"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="LFPy Homepage"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">LFPy 0.9.2 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="download-lfpy">
+<h1>Download LFPy<a class="headerlink" href="#download-lfpy" title="Permalink to this headline">¶</a></h1>
+<p>Downlad stable versions of LFPy here:</p>
+<ul class="simple">
+<li><a class="reference external" href="http://compneuro.umb.no/LFPy/downloads/LFPy-0.9.2.tar.gz">LFPy-0.9.2.tar.gz</a></li>
+<li><a class="reference external" href="http://compneuro.umb.no/LFPy/downloads/LFPy-0.9.1.tar.gz">LFPy-0.9.1.tar.gz</a></li>
+<li><a class="reference external" href="http://compneuro.umb.no/LFPy/downloads/LFPy-0.9.tar.gz">LFPy-0.9.tar.gz</a></li>
+</ul>
+<p>Or, download the development version of LFPy using <a class="reference external" href="http://subversion.apache.org/">subversion</a> into a local folder:</p>
+<div class="highlight-python"><pre>svn checkout http://bebiservice.umb.no/svn-public/LFPy-release</pre>
+</div>
+<p>The development code is then found under &#8220;trunk/&#8221;, and different numbered releases under &#8220;tags/&#8221;.</p>
+<p>To browse the source codes online, see <a class="reference external" href="http://bebiservice.umb.no/projects-public/LFPy-release/browser">http://bebiservice.umb.no/projects-public/LFPy-release/browser</a>.</p>
+</div>
+<div class="section" id="getting-started">
+<h1>Getting started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="dependencies">
+<h2>Dependencies<a class="headerlink" href="#dependencies" title="Permalink to this headline">¶</a></h2>
+<p>To install LFPy you will need the following:</p>
+<ol class="arabic">
+<li><p class="first">Python, seems to work fine with recent python since 2.6.x (2.6.6 or newer recommended), 2.7.x works fine.
+Not tested with Python 3.x.</p>
+</li>
+<li><p class="first">Python modules numpy, scipy, matplotlib</p>
+</li>
+<li><p class="first"><a class="reference external" href="http://www.neuron.yale.edu">NEURON</a> compiled as a Python module, so the following should execute without error in Python console:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">neuron</span>
+<span class="n">neuron</span><span class="o">.</span><span class="n">test</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>If this step fails, see the next section.</p>
+<p>LFPy was tested to work with NEURON 7.2 and the 7.3 development branch, we had some issues with a precompiled version of NEURON 7.1.</p>
+</li>
+<li><p class="first"><a class="reference external" href="http://cython.org">Cython</a> (C-extensions for python) to speed up simulations of extracellular fields. Tested with version &gt; 1.4.,
+and known to fail with version 1.1.</p>
+</li>
+</ol>
+</div>
+<div class="section" id="installing-lfpy">
+<h2>Installing LFPy<a class="headerlink" href="#installing-lfpy" title="Permalink to this headline">¶</a></h2>
+<p>There are few options to install LFPy:</p>
+<ol class="arabic">
+<li><p class="first">From the Python Package Index with only local access using pip</p>
+<div class="highlight-python"><pre>pip install --user LFPy</pre>
+</div>
+<p>as sudoer:</p>
+<div class="highlight-python"><pre>sudo pip install LFPy</pre>
+</div>
+</li>
+<li><p class="first">From the Python Package Index with only local access using easy_install</p>
+<div class="highlight-python"><pre>easy_install --user LFPy</pre>
+</div>
+<p>as sudoer:</p>
+<div class="highlight-python"><pre>sudo easy_install LFPy</pre>
+</div>
+</li>
+<li><p class="first">From source:</p>
+<div class="highlight-python"><pre>tar -xzf LFPy-x.x.tar.gz
+cd LFPy-x.x
+(sudo) python setup.py install (--user)</pre>
+</div>
+</li>
+<li><p class="first">Development version from subversion repository:</p>
+<div class="highlight-python"><pre>svn checkout http://bebiservice.umb.no/svn-public/LFPy-release/
+cd LFPy-release/trunk
+(sudo) python setup.py install (--user)</pre>
+</div>
+</li>
+<li><p class="first">If you only want to have LFPy in one place, you can add this working folder to your $PYTHONPATH, and just compile the Cython extensions;</p>
+<div class="highlight-python"><pre>python setup.py build_ext -i</pre>
+</div>
+</li>
+</ol>
+<p>In a fresh python-session you should now be able to:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">LFPy</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="installing-neuron-with-python">
+<h2>Installing NEURON with Python<a class="headerlink" href="#installing-neuron-with-python" title="Permalink to this headline">¶</a></h2>
+<p>Some users have difficulties install NEURON as a Python module,
+depending on their platform.
+We will provide some explanations here, and otherwise direct to the NEURON download pages;
+<a class="reference external" href="http://www.neuron.yale.edu/neuron/download">http://www.neuron.yale.edu/neuron/download</a> and <a class="reference external" href="http://www.neuron.yale.edu/neuron/download/getstd">http://www.neuron.yale.edu/neuron/download/getstd</a>. The NEURON forums are
+also a useful resource for installation problems.</p>
+<div class="section" id="dependencies-ubuntu-10-4lts-and-other-debian-based-linux-versions">
+<h3>Dependencies: Ubuntu 10.4LTS and other Debian-based Linux versions<a class="headerlink" href="#dependencies-ubuntu-10-4lts-and-other-debian-based-linux-versions" title="Permalink to this headline">¶</a></h3>
+<p>The instructions below show how to meet all the requirements starting from a clean Ubuntu 10.4 for the installation of NEURON from the development branch.</p>
+<p>Start by installing the required packages</p>
+<div class="highlight-python"><pre>sudo apt-get install mercurial autoconf libtool
+sudo apt-get install libxext-dev libncurses-dev
+sudo apt-get install bison flex
+sudo apt-get install python-dev python-numpy python-scipy python-matplotlib
+sudo apt-get install ipython</pre>
+</div>
+<p>The cython version provided in Ubuntu 10.4LTS is out of date, compile a more recent version yourself.
+Download Cython (Cython-0.15.1.tar.gz, or newer) from <a class="reference external" href="http://www.cython.org">Cython.org</a>, unpack and install;</p>
+<div class="highlight-python"><pre>sudo python setup.py install</pre>
+</div>
+</div>
+<div class="section" id="linux-unix-installation">
+<h3>Linux/Unix installation<a class="headerlink" href="#linux-unix-installation" title="Permalink to this headline">¶</a></h3>
+<p>Now get the source code of NEURON using mercurial</p>
+<div class="highlight-python"><pre>cd $HOME
+mkdir neuron
+cd neuron
+
+hg clone http://www.neuron.yale.edu/hg/neuron/iv
+hg clone http://www.neuron.yale.edu/hg/neuron/nrn</pre>
+</div>
+<p>Compile and install InterViews</p>
+<div class="highlight-python"><pre>cd iv
+sh build.sh
+./configure --prefix=`pwd`
+make
+make install</pre>
+</div>
+<p>Compile and install NEURON</p>
+<div class="highlight-python"><pre>cd ../nrn
+sh build.sh
+./configure --prefix=`pwd` --with-iv=$HOME/neuron/iv --with-nrnpython=/usr/bin/python
+make
+make install</pre>
+</div>
+<p>Install NEURON as a Python module</p>
+<div class="highlight-python"><pre>cd src/nrnpython/
+sudo python setup.py install</pre>
+</div>
+<p>(or <tt class="docutils literal"><span class="pre">python</span> <span class="pre">setup.py</span> <span class="pre">install</span> <span class="pre">--user</span></tt> if you want to install the Python package in your home folder).</p>
+<p>Now you should be able to <tt class="docutils literal"><span class="pre">import</span> <span class="pre">neuron</span></tt> from Python console and run a small test with success;</p>
+<div class="highlight-python"><pre>cd $HOME
+ipython
+import neuron
+neuron.test()</pre>
+</div>
+<p>You might want to add the folder with NEURON executables to your PATH, so that you can easily compile NEURON mechanisms using <tt class="docutils literal"><span class="pre">nrnivmodl</span></tt></p>
+<div class="highlight-python"><pre>export PATH=$PATH:$HOME/neuron/nrn/x86_64/bin</pre>
+</div>
+</div>
+<div class="section" id="dependencies-and-installation-on-mac-os-x">
+<h3>Dependencies and installation on Mac OS X<a class="headerlink" href="#dependencies-and-installation-on-mac-os-x" title="Permalink to this headline">¶</a></h3>
+<p>Most of the development work and testing of LFPy has been done on Max OS X 10.6.* Snow Leopard and 10.7.* Lion. Our preferred way of building Python
+has been through MacPorts; <a class="reference external" href="http://www.macports.org">http://www.macports.org</a>. Here is an step-by-step explanation on how to compile NEURON agains that installation of Python.</p>
+<p>To start using MacPorts, follow the instructions on <a class="reference external" href="http://www.macports.org/install.php">http://www.macports.org/install.php</a>.</p>
+<p>Building a python 2.7 environment using MacPorts issue in Terminal:</p>
+<div class="highlight-python"><pre>sudo port install python27 py27-ipython py27-numpy py27-matplotlib py27-scipy py27-cython</pre>
+</div>
+<p>Make the installed Python and IPython default:</p>
+<div class="highlight-python"><pre>sudo port select --set python python27
+sudo port select --set ipython ipython27</pre>
+</div>
+<p>Install the necessary packages for cloning into repository and compiling NEURON:</p>
+<div class="highlight-python"><pre>sudo port install automake autoconf libtool libxext xorg-libXext ncurses mercurial bison flex</pre>
+</div>
+<p>Install NEURON from the bleeding edge source code. The following recipe assumes a 64 bit build of NEURON and Python on OSX 10.7 Lion, so change
+&#8220;x86_64-apple-darwin10.7.0&#8221; throughout to facilitate your system accordingly;</p>
+<div class="highlight-python"><pre>#create a directory in home directory
+cd $HOME
+mkdir nrn64
+cd nrn64
+
+#creating directories
+sudo mkdir /Applications/NEURON-7.3
+sudo mkdir /Applications/NEURON-7.3/iv
+sudo mkdir /Applications/NEURON-7.3/nrn
+
+#Downloading bleeding edge source code
+hg clone http://www.neuron.yale.edu/hg/neuron/iv
+hg clone http://www.neuron.yale.edu/hg/neuron/nrn
+cd iv
+
+#compiling and installing IV under folder /Applications/nrn7.3
+sh build.sh
+./configure --prefix=/Applications/NEURON-7.3/iv \
+    --build=x86_64-apple-darwin10.7.0 --host=x86_64-apple-darwin10.7.0
+
+make
+sudo make install
+
+#Building NEURON with InterViews, you may have to alter the path --with-nrnpython=/python-path
+cd $HOME/nrn64/nrn
+sh build.sh
+./configure --prefix=/Applications/NEURON-7.3/nrn --with-iv=/Applications/NEURON-7.3/iv \
+    --with-x --x-includes=/usr/X11/include/ --x-libraries=/usr/X11/lib/ \
+    --with-nrnpython=/opt/local/Library/Frameworks/Python.framework/Versions/2.7/Resources/Python.app/Contents/MacOS/Python \
+    --host=x86_64-apple-darwin10.7.0 --build=x86_64-apple-darwin10.7.0
+
+make
+sudo make install
+sudo make install after_install
+
+#You should now have a working NEURON application under Applications. Small test;
+#sudo /Applications/NEURON-7.3/nrn/x86_64/bin/neurondemo
+
+#Final step is to install neuron as a python module
+cd src/nrnpython
+sudo python setup.py install</pre>
+</div>
+<p>If you prefer to use Enthough Python distribution, see this forum post: <a class="reference external" href="https://www.neuron.yale.edu/phpBB/viewtopic.php?f=2&amp;t=2191">https://www.neuron.yale.edu/phpBB/viewtopic.php?f=2&amp;t=2191</a></p>
+</div>
+<div class="section" id="windows">
+<h3>Windows<a class="headerlink" href="#windows" title="Permalink to this headline">¶</a></h3>
+<p>There is a package PyNEURON on the Python package index, PiPy: <a class="reference external" href="http://pypi.python.org/pypi/PyNEURON/">http://pypi.python.org/pypi/PyNEURON/</a>
+and a corresponding forum thread on the NEURON homepage here; <a class="reference external" href="http://www.neuron.yale.edu/phpBB/viewtopic.php?f=2&amp;t=2501">http://www.neuron.yale.edu/phpBB/viewtopic.php?f=2&amp;t=2501</a></p>
+<p>If you have pip installed, try:</p>
+<div class="highlight-python"><pre>pip install PyNEURON</pre>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Download LFPy</a></li>
+<li><a class="reference internal" href="#getting-started">Getting started</a><ul>
+<li><a class="reference internal" href="#dependencies">Dependencies</a></li>
+<li><a class="reference internal" href="#installing-lfpy">Installing LFPy</a></li>
+<li><a class="reference internal" href="#installing-neuron-with-python">Installing NEURON with Python</a><ul>
+<li><a class="reference internal" href="#dependencies-ubuntu-10-4lts-and-other-debian-based-linux-versions">Dependencies: Ubuntu 10.4LTS and other Debian-based Linux versions</a></li>
+<li><a class="reference internal" href="#linux-unix-installation">Linux/Unix installation</a></li>
+<li><a class="reference internal" href="#dependencies-and-installation-on-mac-os-x">Dependencies and installation on Mac OS X</a></li>
+<li><a class="reference internal" href="#windows">Windows</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">LFPy Homepage</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="tutorial.html"
+                        title="next chapter">LFPy Tutorial</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/information.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="tutorial.html" title="LFPy Tutorial"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="LFPy Homepage"
+             >previous</a> |</li>
+        <li><a href="index.html">LFPy 0.9.2 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2012, Computational Neuroscience Group, UMB.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+<!--<div class="footer">This page uses <a href="http://analytics.google.com/">
+Google Analytics</a> to collect statistics. You can disable it by blocking
+the JavaScript coming from www.google-analytics.com.-->
+<script type="text/javascript">
+  (function() {
+    var ga = document.createElement('script');
+    ga.src = ('https:' == document.location.protocol ?
+              'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    ga.setAttribute('async', 'true');
+    document.documentElement.firstChild.appendChild(ga);
+  })();
+</script>
+</div>
+
+  </body>
+</html>

@@ -1,0 +1,211 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>LFPy Homepage &mdash; LFPy 0.9.2 documentation</title>
+    
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.9.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="LFPy 0.9.2 documentation" href="#" />
+    <link rel="next" title="Download LFPy" href="information.html" />
+ 
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-29024998-1']);
+  _gaq.push(['_trackPageview']);
+</script>
+
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="information.html" title="Download LFPy"
+             accesskey="N">next</a> |</li>
+        <li><a href="#">LFPy 0.9.2 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <img alt="_images/logo_liten.png" src="_images/logo_liten.png" />
+<div class="section" id="lfpy-homepage">
+<h1>LFPy Homepage<a class="headerlink" href="#lfpy-homepage" title="Permalink to this headline">¶</a></h1>
+<p>LFPy is a <a class="reference external" href="http://www.python.org">Python</a> package for calculation of extracellular potentials from multicompartment neuron models.
+It relies on the <a class="reference external" href="http://www.neuron.yale.edu/neuron/">NEURON simulator</a> and uses the
+<a class="reference external" href="http://www.frontiersin.org/neuroinformatics/10.3389/neuro.11.001.2009/abstract">Python interface</a> it provides.</p>
+<p>LFPy provides a set of easy-to-use Python classes for setting up your model, running your simulations and calculating the extracellular potentials arising from activity in your model neuron. If you have a model working in <a class="reference external" href="www.neuron.yale.edu">NEURON</a>
+already, it is likely that it can be adapted to work with LFPy.</p>
+<p>The extracellular potentials are calculated from transmembrane currents in multi-compartment neuron models using the line-source method (Holt &amp; Koch, J Comp Neurosci 1999), but a simpler point-source method is also available. The calculations assume that the neuron are surrounded by an infinite extracellular medium with homogeneous and frequency independent conductivity, and compartments are assumed to be at least at a minimal distance from the electrode (which can be specified by the user). For more information on the biophysics underlying the numerical framework used see this coming book chapter:</p>
+<ul class="simple">
+<li>K.H. Pettersen, H. Linden, A.M. Dale and G.T. Einevoll: Extracellular spikes and current-source density, in <em>Handbook of Neural Activity Measurement</em>, edited by R. Brette and A. Destexhe, Cambridge, to appear <a class="reference external" href="http://arken.umb.no/~gautei/forskning/PettersenLindenDaleEinevoll-BookChapter-revised.pdf">[preprint PDF, 5.7MB]</a></li>
+</ul>
+<p>In the present version LFPy is mainly designed for simulation of single neurons.</p>
+<p>LFPy was developed in the <a class="reference external" href="http://compneuro.umb.no">Computational Neuroscience Group</a>, <a class="reference external" href="http://www.umb.no/imt">Department of Mathemathical Sciences and Technology</a>,
+at the <a class="reference external" href="http://www.umb.no">Norwegian University of Life Sciences</a> ,
+in collaboration with the <a class="reference external" href="http://www.nencki.gov.pl/en/laboratory-of-neuroinformatics">Laboratory of Neuroinformatics</a>,
+<a class="reference external" href="http://www.nencki.gov.pl">Nencki Institute of Experimental Biology</a>, Warsaw, Poland. The effort was supported by
+<a class="reference external" href="http://incf.org">International Neuroinformatics Coordinating Facility</a> (<a class="reference external" href="http://incf.org">INCF</a>) and the <a class="reference external" href="http://www.forskningsradet.no/english/">The Research Council of Norway</a> (eScience, NevroNor).</p>
+<p>This scientific software is released under the GNU Public License <a class="reference external" href="http://www.gnu.org/copyleft/gpl.html">GPLv3</a>.</p>
+</div>
+<div class="section" id="contents">
+<h1>Contents<a class="headerlink" href="#contents" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="information.html">Download LFPy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="information.html#getting-started">Getting started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="information.html#dependencies">Dependencies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="information.html#installing-lfpy">Installing LFPy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="information.html#installing-neuron-with-python">Installing NEURON with Python</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="information.html#dependencies-ubuntu-10-4lts-and-other-debian-based-linux-versions">Dependencies: Ubuntu 10.4LTS and other Debian-based Linux versions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="information.html#linux-unix-installation">Linux/Unix installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="information.html#dependencies-and-installation-on-mac-os-x">Dependencies and installation on Mac OS X</a></li>
+<li class="toctree-l3"><a class="reference internal" href="information.html#windows">Windows</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">LFPy Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="using.html">Notes on LFPy</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="using.html#morphology-files">Morphology files</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="using.html#other-file-formats">Other file formats</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="using.html#using-neuron-mechanisms">Using NEURON mechanisms</a></li>
+<li class="toctree-l2"><a class="reference internal" href="using.html#units">Units</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="contributors.html">Contributors</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="contributors.html#want-to-contribute-to-lfpy">Want to contribute to LFPy?</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="contact.html">Contact</a></li>
+<li class="toctree-l1"><a class="reference internal" href="classes.html">Module <tt class="docutils literal"><span class="pre">LFPy</span></tt></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classes.html#class-cell">class <tt class="docutils literal"><span class="pre">Cell</span></tt></a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes.html#class-pointprocess">class <tt class="docutils literal"><span class="pre">PointProcess</span></tt></a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes.html#class-synapse">class <tt class="docutils literal"><span class="pre">Synapse</span></tt></a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes.html#class-stimintelectrode">class <tt class="docutils literal"><span class="pre">StimIntElectrode</span></tt></a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes.html#class-recextelectrodesetup">class <tt class="docutils literal"><span class="pre">RecExtElectrodeSetup</span></tt></a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes.html#class-recextelectrode">class <tt class="docutils literal"><span class="pre">RecExtElectrode</span></tt></a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes.html#module-LFPy.lfpcalc">submodule <tt class="docutils literal"><span class="pre">lfpcalc</span></tt></a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes.html#module-LFPy.tools">submodule <tt class="docutils literal"><span class="pre">tools</span></tt></a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes.html#module-LFPy.inputgenerators">submodule <tt class="docutils literal"><span class="pre">inputgenerators</span></tt></a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes.html#module-LFPy.run_simulation">submodule <tt class="docutils literal"><span class="pre">run_simulation</span></tt></a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><a class="reference internal" href="genindex.html"><em>Index</em></a></li>
+<li><a class="reference internal" href="py-modindex.html"><em>Module Index</em></a></li>
+<li><a class="reference internal" href="search.html"><em>Search Page</em></a></li>
+</ul>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="#">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">LFPy Homepage</a></li>
+<li><a class="reference internal" href="#contents">Contents</a><ul>
+</ul>
+</li>
+<li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
+</ul>
+
+  <h4>Next topic</h4>
+  <p class="topless"><a href="information.html"
+                        title="next chapter">Download LFPy</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/index.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="information.html" title="Download LFPy"
+             >next</a> |</li>
+        <li><a href="#">LFPy 0.9.2 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2012, Computational Neuroscience Group, UMB.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+<!--<div class="footer">This page uses <a href="http://analytics.google.com/">
+Google Analytics</a> to collect statistics. You can disable it by blocking
+the JavaScript coming from www.google-analytics.com.-->
+<script type="text/javascript">
+  (function() {
+    var ga = document.createElement('script');
+    ga.src = ('https:' == document.location.protocol ?
+              'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    ga.setAttribute('async', 'true');
+    document.documentElement.firstChild.appendChild(ga);
+  })();
+</script>
+</div>
+
+  </body>
+</html>
