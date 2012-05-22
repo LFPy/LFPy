@@ -285,6 +285,6 @@ def _run_simulation_with_electrode(cell, electrode,
                 el.CellLFP.append(electrodesLFP[j])
             el.electrodecoeff = electrodecoeffs[j]
             j += 1
-      
+    
     if to_file:
         el_LFP_file.close()

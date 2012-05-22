@@ -208,7 +208,7 @@ def _run_simulation_with_electrode(cell, electrode,
             if to_file:
                 j = 0
                 for coeffs in electrodecoeffs:
-                    el_LFP_file['electrode%.3i' % i][:, tstep] = lfp
+                    el_LFP_file['electrode%.3i' % j][:, tstep] = lfp
             
             tstep += 1
         neuron.h.fadvance()
@@ -235,7 +235,7 @@ def _run_simulation_with_electrode(cell, electrode,
         if to_file:
             j = 0
             for coeffs in electrodecoeffs:
-                el_LFP_file['electrode%.3i' % i][:, tstep] = lfp
+                el_LFP_file['electrode%.3i' % j][:, tstep] = lfp
 
     except:
         pass
