@@ -186,9 +186,8 @@ synapse = LFPy.Synapse(cell, **synapseParameters)
 synapse.set_spike_times(pl.array([1]))
 
 #perform NEURON simulation, results saved as attributes in the cell instance
-#cell.simulate(electrode = electrode, rec_isyn=True)
-cell.simulate(electrode = electrode, to_memory=False, to_file=True, file_name='test.h5')
-raise Exception
+cell.simulate(electrode = electrode, rec_isyn=True)
+
 # Plotting of simulation results:
 plotstuff(cell, electrode)
 #pl.savefig('example2.pdf')
