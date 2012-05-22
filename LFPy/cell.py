@@ -646,7 +646,8 @@ class Cell(object):
     def simulate(self, electrode=None, rec_imem=False, rec_vmem=False,
                  rec_ipas=False, rec_icap=False,
                  rec_isyn=False, rec_vmemsyn=False, rec_istim=False,
-                 rec_variables=[]):
+                 rec_variables=[],
+                 to_memory=True, to_file=False, file_name=None):
         '''
         This is the main function running the simulation of the NEURON model.
         Start NEURON simulation and record variables specified by arguments.
@@ -667,6 +668,9 @@ class Cell(object):
             rec_vmemsyn:    record membrane voltage of segments with Synapse
             rec_istim:  record currents of StimIntraElectrode
             rec_variables: list of variables to record, i.e arg=['cai', ]
+            to_memory:  only valid with electrode, store lfp in -> electrode.LFP
+            to_file:    only valid with electrode, save LFPs in hdf5 file format
+            file_name:  name of hdf5 file, '.h5' is appended if it doesnt exist
         '''
         self._set_soma_volt_recorder()
         self._collect_tvec()
@@ -691,7 +695,8 @@ class Cell(object):
         else:
             if self.timeres_NEURON != self.timeres_python:
                 raise ValueError, 'timeres_NEURON != timeres_python'
-            _run_simulation_with_electrode(self, electrode)
+            _run_simulation_with_electrode(self, electrode,
+                                           to_memory, to_file, file_name)
         
         #somatic trace
         self.somav = np.array(self.somav)
