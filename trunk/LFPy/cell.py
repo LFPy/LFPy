@@ -473,7 +473,14 @@ class Cell(object):
                     command = cmd1 + pptype + cmd2  
                     exec(command)
                     for param in kwargs.keys():
-                        exec('stim.' + param + '=' + str(kwargs[param]))
+                        try:
+                            exec('stim.' + param + '=' + str(kwargs[param]))
+                        except SyntaxError:
+                            ERRMSG = ''.join(['',
+                                     'Point process type "{0}" might not '.format(pptype),
+                                     'recognize attribute "{0}". '.format(param),
+                                     'Check for misspellings'])
+                            raise Exception, ERRMSG                            
                     self.stimlist.append(stim)
                     
                     #record current
