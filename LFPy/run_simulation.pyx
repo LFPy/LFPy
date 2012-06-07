@@ -71,7 +71,7 @@ def _run_simulation(cell, variable_dt=False, atol=0.001):
             t0 = time()
             ti = neuron.h.t
 
-def _run_simulation_with_electrode(cell, electrode, variable_dt=False):
+def _run_simulation_with_electrode(cell, electrode):
     '''
     Running the actual simulation in NEURON.
     electrode argument used to determine coefficient
@@ -164,7 +164,7 @@ def _run_simulation_with_electrode(cell, electrode, variable_dt=False):
     cvode = neuron.h.CVode()
     
     #don't know if this is the way to do, but needed for variable dt method
-    if variable_dt:
+    if timeres_NEURON <=1E-8:
         cvode.active(1)
         cvode.atol(0.001)
     else:
