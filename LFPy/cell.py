@@ -283,6 +283,29 @@ class Cell(object):
         self.dendlist = neuron.h.SectionList()
         self.apiclist = neuron.h.SectionList()
         
+        # Update the local lists
+        self._update_local_seclists()
+
+        #list with all sections
+        self.allseclist = neuron.h.SectionList()
+        for sec in self.somalist:
+            self.allseclist.append(sec)
+        for sec in self.dendlist:
+            self.allseclist.append(sec)
+        for sec in self.apiclist:
+            self.allseclist.append(sec)
+        for sec in self.axonlist:
+            self.allseclist.append(sec)
+        
+        #list with all dendritic sections
+        self.alldendlist = neuron.h.SectionList()
+        for sec in self.dendlist:
+            self.alldendlist.append(sec)
+        for sec in self.apiclist:
+            self.alldendlist.append(sec)
+            
+    def _update_local_seclists(self):
+        '''Update "local" section lists'''
         if neuron.h.sec_counted == 0:
             self.nsomasec = 0
             #Place sections in lists
@@ -311,24 +334,6 @@ class Cell(object):
                     self.axonlist.append(sec)
             except:
                 pass
-        
-        #list with all sections
-        self.allseclist = neuron.h.SectionList()
-        for sec in self.somalist:
-            self.allseclist.append(sec)
-        for sec in self.dendlist:
-            self.allseclist.append(sec)
-        for sec in self.apiclist:
-            self.allseclist.append(sec)
-        for sec in self.axonlist:
-            self.allseclist.append(sec)
-        
-        #list with all dendritic sections
-        self.alldendlist = neuron.h.SectionList()
-        for sec in self.dendlist:
-            self.alldendlist.append(sec)
-        for sec in self.apiclist:
-            self.alldendlist.append(sec)
     
     def _get_idx(self, seclist):
         '''Return boolean vector which indexes where segments in seclist 
@@ -646,8 +651,7 @@ class Cell(object):
     def simulate(self, electrode=None, rec_imem=False, rec_vmem=False,
                  rec_ipas=False, rec_icap=False,
                  rec_isyn=False, rec_vmemsyn=False, rec_istim=False,
-                 rec_variables=[],
-                 to_memory=True, to_file=False, file_name=None):
+                 rec_variables=[]):
         '''
         This is the main function running the simulation of the NEURON model.
         Start NEURON simulation and record variables specified by arguments.
@@ -668,9 +672,7 @@ class Cell(object):
             rec_vmemsyn:    record membrane voltage of segments with Synapse
             rec_istim:  record currents of StimIntraElectrode
             rec_variables: list of variables to record, i.e arg=['cai', ]
-            to_memory:  only valid with electrode, store lfp in -> electrode.LFP
-            to_file:    only valid with electrode, save LFPs in hdf5 file format
-            file_name:  name of hdf5 file, '.h5' is appended if it doesnt exist
+            variable_dt: boolean, using variable timestep in NEURON
         '''
         self._set_soma_volt_recorder()
         self._collect_tvec()
@@ -695,8 +697,7 @@ class Cell(object):
         else:
             if self.timeres_NEURON != self.timeres_python:
                 raise ValueError, 'timeres_NEURON != timeres_python'
-            _run_simulation_with_electrode(self, electrode,
-                                           to_memory, to_file, file_name)
+            _run_simulation_with_electrode(self)
         
         #somatic trace
         self.somav = np.array(self.somav)

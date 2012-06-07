@@ -19,7 +19,7 @@ from time import time
 DTYPE = np.float64
 ctypedef np.float64_t DTYPE_t
 
-def _run_simulation(cell):
+def _run_simulation(cell, variable_dt=False, atol=0.001):
     '''
     Running the actual simulation in NEURON, simulations in NEURON
     is now interruptable.
@@ -29,9 +29,9 @@ def _run_simulation(cell):
     cvode = neuron.h.CVode()
     
     #don't know if this is the way to do, but needed for variable dt method
-    if neuron.h.dt <= 1E-8:
+    if variable_dt:
         cvode.active(1)
-        cvode.atol(0.001)
+        cvode.atol(atol)
     else:
         cvode.active(0)
     
@@ -71,9 +71,7 @@ def _run_simulation(cell):
             t0 = time()
             ti = neuron.h.t
 
-def _run_simulation_with_electrode(cell, electrode,
-                            to_memory=True, to_file=False,
-                            file_name=None):
+def _run_simulation_with_electrode(cell, electrode, variable_dt=False):
     '''
     Running the actual simulation in NEURON.
     electrode argument used to determine coefficient
@@ -166,7 +164,7 @@ def _run_simulation_with_electrode(cell, electrode,
     cvode = neuron.h.CVode()
     
     #don't know if this is the way to do, but needed for variable dt method
-    if neuron.h.dt <= 1E-8:
+    if variable_dt:
         cvode.active(1)
         cvode.atol(0.001)
     else:
