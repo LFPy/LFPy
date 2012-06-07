@@ -651,7 +651,7 @@ class Cell(object):
     def simulate(self, electrode=None, rec_imem=False, rec_vmem=False,
                  rec_ipas=False, rec_icap=False,
                  rec_isyn=False, rec_vmemsyn=False, rec_istim=False,
-                 rec_variables=[]):
+                 rec_variables=[], variable_dt=False, atol=None):
         '''
         This is the main function running the simulation of the NEURON model.
         Start NEURON simulation and record variables specified by arguments.
@@ -693,7 +693,7 @@ class Cell(object):
             if not rec_imem:
                 print "rec_imem = %s, membrane currents will not be recorded!" \
                                   % str(rec_imem)
-            _run_simulation(self)
+            _run_simulation(self, variable_dt, atol)
         else:
             if self.timeres_NEURON != self.timeres_python:
                 raise ValueError, 'timeres_NEURON != timeres_python'
