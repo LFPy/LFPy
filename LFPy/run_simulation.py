@@ -180,7 +180,7 @@ def _run_simulation_with_electrode(cell, electrode, variable_dt=False, atol=0.00
         #ensure right ending:
         if file_name.split('.')[-1] != 'h5':
             file_name += '.h5'
-        el_LFP_file = h5py.File(file_name, 'w', driver='stdio')
+        el_LFP_file = h5py.File(file_name, 'w')
         i = 0
         for coeffs in electrodecoeffs:
             el_LFP_file['electrode%.3i' % i] = np.empty((coeffs.shape[0],
