@@ -641,10 +641,11 @@ class Cell(object):
         '''
         poss_idx = self.get_idx(section=section, z_min=z_min, z_max = z_max)
         idx = np.empty(nidx, dtype=int)
+        norm_area_cumsum = np.cumsum(self.area[poss_idx] / 
+                                     sum(self.area[poss_idx]))
         
         for i in xrange(nidx):
-            idx[i] = np.min(np.nonzero(np.random.rand() < \
-                np.cumsum(self.area[poss_idx]/sum(self.area[poss_idx])))[0])
+            idx[i] = np.nonzero(np.random.rand() < norm_area_cumsum)[0].min()
         
         return poss_idx[idx]
     
