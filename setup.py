@@ -30,9 +30,6 @@ setup(
         Extension('LFPy.run_simulation', 
         ['LFPy/run_simulation.pyx'],
         include_dirs=[numpy.get_include()]),
-        Extension('LFPy.recextelectrodethreaded', 
-        ['LFPy/recextelectrodethreaded.pyx'],
-        include_dirs=[numpy.get_include()])
         ],
     url='http://compneuro.umb.no/LFPy/',
     license='LICENSE.txt',
