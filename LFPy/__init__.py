@@ -33,7 +33,6 @@ GNU General Public License for more details.
 from pointprocess import Synapse, PointProcess, StimIntElectrode
 from recextelectrode import RecExtElectrode, RecExtElectrodeSetup
 from cell import Cell
-from recextelectrodethreaded import RecExtElectrodeThreaded
 
 import lfpcalc
 import tools
