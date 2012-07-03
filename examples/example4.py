@@ -73,7 +73,7 @@ def insert_synapses(synparams, section, n, spTimesFun, args):
         synparams.update({'idx' : int(i)})
 
         # Some input spike train using the function call
-        spiketimes = spTimesFun(args[0], args[1], args[2], args[3])
+        spiketimes = spTimesFun(args[0], args[1], args[2], args[3], args[4])
 
         # Create synapse(s) and setting times using the Synapse class in LFPy
         s = LFPy.Synapse(cell,**synparams)
@@ -142,19 +142,22 @@ insert_synapses_AMPA_args = {
     'section' : 'apic',
     'n' : 125,
     'spTimesFun' : LFPy.inputgenerators.stationary_gamma,
-    'args' : [cellParameters['tstartms'], cellParameters['tstopms'], 2, 10]
+    'args' : [cellParameters['tstartms'], cellParameters['tstopms'], 2, 10,
+              cellParameters['tstartms']]
 }
 insert_synapses_NMDA_args = {
     'section' : 'alldend',
     'n' : 15,
     'spTimesFun' : LFPy.inputgenerators.stationary_gamma,
-    'args' : [cellParameters['tstartms'], cellParameters['tstopms'], 5, 20]
+    'args' : [cellParameters['tstartms'], cellParameters['tstopms'], 5, 20,
+              cellParameters['tstartms']]
 }
 insert_synapses_GABA_A_args = {
     'section' : 'dend',
     'n' : 125,
     'spTimesFun' : LFPy.inputgenerators.stationary_gamma,
-    'args' : [cellParameters['tstartms'], cellParameters['tstopms'], 2, 10]
+    'args' : [cellParameters['tstartms'], cellParameters['tstopms'], 2, 10,
+              cellParameters['tstartms']]
 }
 
 # Define electrode geometry corresponding to a laminar electrode, where contact
