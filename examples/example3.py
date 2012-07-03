@@ -236,9 +236,9 @@ cellParameters = {
     'timeres_python' : 2**-4,
     'tstartms' : -100,          #start time, recorders start at t=0
     'tstopms' : 1000,           #stop time of simulation
-    'custom_fun'  : [active_declarations], # will execute this function
-    'custom_fun_args' : [{}],
-    #'custom_code' : ['active_declarations_example3.hoc'],
+    #'custom_fun'  : [active_declarations], # will execute this function
+    #'custom_fun_args' : [{}],
+    'custom_code' : ['active_declarations_example3.hoc'],
 }
 
 # Synaptic parameters taken from Hendrickson et al 2011
