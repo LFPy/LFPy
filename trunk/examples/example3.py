@@ -71,15 +71,16 @@ def active_declarations():
             dendritic.append(sec)
         if sec.name()[:4] == 'apic':
             dendritic.append(sec)
+
     
     def add_spines(section):
         is_spiny = 1
         if section == "dend":
             print "adding spines"
-            for sec in dendritic:
+            for sec in neuron.h.dendlist:
                 a = 0
                 for seg in sec:
-                    a = a + neuron.h.area(seg.x)
+                    a += neuron.h.area(seg.x)
                 
                 F = (sec.L*spine_area*spine_dens + a)/a
                 sec.L = sec.L * F**(2./3.)
@@ -95,9 +96,9 @@ def active_declarations():
         # exceptions along the axon
         for sec in neuron.h.myelin:
             sec.cm = cm_myelin
-        for sec in neuron.h.node:
+        for sec in neuron.h.node: 
             sec.g_pas = g_pas_node
-        
+            
         # na+ channels
         for sec in neuron.h.allsec():
             sec.insert('na')
@@ -115,7 +116,6 @@ def active_declarations():
         # kv delayed rectifier channels
         neuron.h.iseg.insert('kv')
         neuron.h.iseg.gbar_kv = gkv_axon
-        
         neuron.h.hill.insert('kv')
         neuron.h.hill.gbar_kv = gkv_axon
         for sec in neuron.h.soma:
@@ -147,8 +147,8 @@ def active_declarations():
         for sec in neuron.h.allsec():
             if neuron.h.ismembrane('na_ion'):
                 sec.ena = Ena
-                neuron.vshift_na = -5
-
+                neuron.shift_na = -5
+        
         for sec in neuron.h.allsec():
             if neuron.h.ismembrane('ca_ion'):
                 sec.eca = 140
@@ -209,8 +209,8 @@ def insert_synapses(synparams, section, n, spTimesFun, args):
         synparams.update({'idx' : int(i)})
 
         # Some input spike train using the function call
-        spiketimes = spTimesFun(args[0], args[1], args[2], args[3])
-
+        spiketimes = spTimesFun(args[0], args[1], args[2], args[3], args[4])
+        
         # Create synapse(s) and setting times using the Synapse class in LFPy
         s = LFPy.Synapse(cell,**synparams)
         s.set_spike_times(spiketimes)
@@ -237,7 +237,8 @@ cellParameters = {
     'tstartms' : -100,          #start time, recorders start at t=0
     'tstopms' : 1000,           #stop time of simulation
     'custom_fun'  : [active_declarations], # will execute this function
-    'custom_fun_args' : [{}]
+    'custom_fun_args' : [{}],
+    #'custom_code' : ['active_declarations_example3.hoc'],
 }
 
 # Synaptic parameters taken from Hendrickson et al 2011
@@ -279,19 +280,22 @@ insert_synapses_AMPA_args = {
     'section' : 'apic',
     'n' : 125,
     'spTimesFun' : LFPy.inputgenerators.stationary_gamma,
-    'args' : [cellParameters['tstartms'], cellParameters['tstopms'], 2, 10]
+    'args' : [cellParameters['tstartms'], cellParameters['tstopms'], 2, 10,
+              cellParameters['tstartms']]
 }
 insert_synapses_NMDA_args = {
     'section' : 'alldend',
     'n' : 15,
     'spTimesFun' : LFPy.inputgenerators.stationary_gamma,
-    'args' : [cellParameters['tstartms'], cellParameters['tstopms'], 5, 20]
+    'args' : [cellParameters['tstartms'], cellParameters['tstopms'], 5, 20,
+              cellParameters['tstartms']]
 }
 insert_synapses_GABA_A_args = {
     'section' : 'dend',
     'n' : 125,
     'spTimesFun' : LFPy.inputgenerators.stationary_gamma,
-    'args' : [cellParameters['tstartms'], cellParameters['tstopms'], 2, 10]
+    'args' : [cellParameters['tstartms'], cellParameters['tstopms'], 2, 10,
+              cellParameters['tstartms']]
 }
 
 # Define electrode geometry corresponding to a laminar electrode, where contact
@@ -325,7 +329,7 @@ simulationParameters = {
 
 #Initialize cell instance, using the LFPy.Cell class
 cell = LFPy.Cell(**cellParameters)
-
+#
 #Insert synapses using the function defined earlier
 insert_synapses(synapseParameters_AMPA, **insert_synapses_AMPA_args)
 insert_synapses(synapseParameters_NMDA, **insert_synapses_NMDA_args)
@@ -339,6 +343,7 @@ cell.simulate(**simulationParameters)
 # and created after the NEURON simulations are finished
 electrode = LFPy.RecExtElectrode(cell,**electrodeParameters)
 electrode.calc_lfp()
+
 
 #plotting some variables and geometry, saving output to .pdf.
 plotstuff()
