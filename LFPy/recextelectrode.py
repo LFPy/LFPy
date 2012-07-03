@@ -137,23 +137,40 @@ class RecExtElectrodeSetup(object):
             cell = celldict
         
         self.c = {}
-        if str(type(cell))[:12] == "<class 'LFPy.cell.Cell'>"[:12] or \
-                    str(type(cell))[:12] == "<class 'cell.Cell'>"[:12]:
-            self.c[0] = self.cell()
-            for v in variables:
-                setattr(self.c[0], v, getattr(cell, v))
-        elif type(cell) == dict:
+        if type(cell) == dict:
             for k in cell:
-                if str(type(cell[k]))[:12] != "<class 'LFPy.cell.Cell'>"[:12]:
-                    raise Exception,  "Error! <type(cell[%s])> something else \
-                    than <LFPy.cell.Cell object>" % str(k)
                 self.c[k] = self.cell()
                 for v in variables:
-                    setattr(self.c[k], v, getattr(cell[k], v))
+                    try:
+                        setattr(self.c[k], v, getattr(cell[k], v))
+                    except:
+                        raise ValueError, 'cell[%s].%s missing' % (str(k), v)
         else:
-            raise Exception, \
-            "Error! <type(cell)> something else than <LFPy.cell.Cell object> \
-            or <dict>"
+            self.c[0] = self.cell()
+            for v in variables:
+                try:
+                    setattr(self.c[0], v, getattr(cell, v))
+                except:
+                    raise ValueError, 'cell.%s missing' % v
+            
+        
+        #if str(type(cell))[:12] == "<class 'LFPy.cell.Cell'>"[:12] or \
+        #            str(type(cell))[:12] == "<class 'cell.Cell'>"[:12]:
+        #    self.c[0] = self.cell()
+        #    for v in variables:
+        #        setattr(self.c[0], v, getattr(cell, v))
+        #elif type(cell) == dict:
+        #    for k in cell:
+        #        if str(type(cell[k]))[:12] != "<class 'LFPy.cell.Cell'>"[:12]:
+        #            raise Exception,  "Error! <type(cell[%s])> something else \
+        #            than <LFPy.cell.Cell object>" % str(k)
+        #        self.c[k] = self.cell()
+        #        for v in variables:
+        #            setattr(self.c[k], v, getattr(cell[k], v))
+        #else:
+        #    raise Exception, \
+        #    "Error! <type(cell)> something else than <LFPy.cell.Cell object> \
+        #    or <dict>"
 
         setattr(self, 'tvec', self.c[self.c.keys()[0]].tvec)
         setattr(self, 'dt', self.c[self.c.keys()[0]].timeres_python)
