@@ -92,11 +92,11 @@ class RecExtElectrodeSetup(object):
                 raise ValueError, 'cell either string or list of strings'
 
         if cell is not None:
-            try:
+            #try:
                 self._import_c(cell)
-            except:
-                raise ValueError, "You have to run cell.simulate(rec_imem=True) before creating the electrode or set the cell argument to LFPy.RecExtElectorde to 'None' and then pass the electrode as argument to cell.simulate()"
-        
+            #except:
+            #    raise ValueError, "You have to run cell.simulate(rec_imem=True) before creating the electrode or set the cell argument to LFPy.RecExtElectorde to 'None' and then pass the electrode as argument to cell.simulate()"
+            #
 
     class cell():
         '''Empty object that cell-specific variables are stored in'''
@@ -110,8 +110,9 @@ class RecExtElectrodeSetup(object):
         variables = [
             'somav',
             'somaidx',
-            'tvec',
             'timeres_python',
+            'tstopms',
+            'tvec',
             'imem',
             'diam',
             'xstart',
@@ -172,6 +173,7 @@ class RecExtElectrodeSetup(object):
         #    "Error! <type(cell)> something else than <LFPy.cell.Cell object> \
         #    or <dict>"
 
+        
         setattr(self, 'tvec', self.c[self.c.keys()[0]].tvec)
         setattr(self, 'dt', self.c[self.c.keys()[0]].timeres_python)
         

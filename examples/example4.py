@@ -26,24 +26,26 @@ pl.seed(1234)
 # A couple of function declarations
 ################################################################################
 
-def plotstuff():
+
+def plotstuff(cell, electrode):
     fig = pl.figure(figsize=[12, 8])
     
     ax = fig.add_axes([0.1, 0.7, 0.5, 0.2])
-    ax.plot(cell.tvec,cell.somav)
+    ax.plot(cell.tvec, cell.somav)
     ax.set_xlabel('Time [ms]')
     ax.set_ylabel('Soma pot. [mV]')
     
     ax = fig.add_axes([0.1, 0.4, 0.5, 0.2])
     for i in xrange(len(cell.synapses)):
-        ax.plot(cell.tvec,cell.synapses[i].i,color=cell.synapses[i].color)
+        ax.plot(cell.tvec, cell.synapses[i].i, color=cell.synapses[i].color)
     ax.set_xlabel('Time [ms]')
     ax.set_ylabel('Syn. i [nA]')
     
     ax = fig.add_axes([0.1, 0.1, 0.5, 0.2])
-    absmaxLFP = abs(pl.array([electrode.LFP.max(),electrode.LFP.min()])).max()
-    pl.imshow(electrode.LFP,vmax=absmaxLFP,vmin=-absmaxLFP,origin='lower',
-           extent=(cell.tvec[0],cell.tvec[-1],electrode.z[0],electrode.z[-1]),cmap='jet_r',
+    absmaxLFP = abs(pl.array([electrode.LFP.max(), electrode.LFP.min()])).max()
+    pl.imshow(electrode.LFP, vmax=absmaxLFP, vmin=-absmaxLFP, origin='lower',
+           extent=(cell.tvec[0], cell.tvec[-1], electrode.z[0], electrode.z[-1]),
+           cmap='jet_r',
            interpolation='nearest')
     cbar = pl.colorbar(ax=ax)
     cbar.set_label('LFP (mV)')
@@ -52,8 +54,11 @@ def plotstuff():
     ax.set_ylabel('z [$\mu$m]')
     
     ax = fig.add_axes([0.65, 0.1, 0.25, 0.8], frameon=False)
-    for i in xrange(cell.xend.size):
-        ax.plot([cell.xstart[i],cell.xend[i]],[cell.zstart[i],cell.zend[i]],color='k')
+    for sec in LFPy.cell.neuron.h.allsec():
+        idx = cell.get_idx_section(sec.name())
+        ax.plot(pl.r_[cell.xstart[idx], cell.xend[idx][-1]],
+                pl.r_[cell.zstart[idx], cell.zend[idx][-1]],
+                color='k')
     for i in xrange(len(cell.synapses)):
         ax.plot([cell.synapses[i].x],[cell.synapses[i].z],\
             color=cell.synapses[i].color,marker=cell.synapses[i].marker)
@@ -74,7 +79,7 @@ def insert_synapses(synparams, section, n, spTimesFun, args):
 
         # Some input spike train using the function call
         spiketimes = spTimesFun(args[0], args[1], args[2], args[3], args[4])
-
+        
         # Create synapse(s) and setting times using the Synapse class in LFPy
         s = LFPy.Synapse(cell,**synparams)
         s.set_spike_times(spiketimes)
@@ -87,7 +92,7 @@ def insert_synapses(synparams, section, n, spTimesFun, args):
 
 #define cell parameters used as input to cell-class
 cellParameters = {
-    'morphology' : 'morphologies/L5_Mainen96_LFPy.hoc',
+    'morphology' : 'morphologies/L5_Mainen96_wAxon_LFPy.hoc',
     'rm' : 30000,               # membrane resistance
     'cm' : 1.0,                 # membrane capacitance
     'Ra' : 150,                 # axial resistance
@@ -100,7 +105,6 @@ cellParameters = {
     'timeres_python' : 2**-4,
     'tstartms' : -100,          #start time, recorders start at t=0
     'tstopms' : 1000,           #stop time of simulation
-    'custom_code'  : [],        # will if given list of files run this file
 }
 
 # Synaptic parameters taken from Hendrickson et al 2011
@@ -140,23 +144,23 @@ synapseParameters_GABA_A = {
 # where to insert, how many, and which input statistics
 insert_synapses_AMPA_args = {
     'section' : 'apic',
-    'n' : 125,
+    'n' : 100,
     'spTimesFun' : LFPy.inputgenerators.stationary_gamma,
-    'args' : [cellParameters['tstartms'], cellParameters['tstopms'], 2, 10,
+    'args' : [cellParameters['tstartms'], cellParameters['tstopms'], 0.5, 40,
               cellParameters['tstartms']]
 }
 insert_synapses_NMDA_args = {
     'section' : 'alldend',
     'n' : 15,
     'spTimesFun' : LFPy.inputgenerators.stationary_gamma,
-    'args' : [cellParameters['tstartms'], cellParameters['tstopms'], 5, 20,
+    'args' : [cellParameters['tstartms'], cellParameters['tstopms'], 2, 50,
               cellParameters['tstartms']]
 }
 insert_synapses_GABA_A_args = {
     'section' : 'dend',
-    'n' : 125,
+    'n' : 100,
     'spTimesFun' : LFPy.inputgenerators.stationary_gamma,
-    'args' : [cellParameters['tstartms'], cellParameters['tstopms'], 2, 10,
+    'args' : [cellParameters['tstartms'], cellParameters['tstopms'], 0.5, 40,
               cellParameters['tstartms']]
 }
 
@@ -187,7 +191,7 @@ simulationParameters = {
 ################################################################################
 
 #close open figures
-pl.close('all')   
+#pl.close('all')   
 
 #Initialize cell instance, using the LFPy.Cell class
 cell = LFPy.Cell(**cellParameters)
@@ -207,7 +211,6 @@ electrode = LFPy.RecExtElectrode(cell,**electrodeParameters)
 electrode.calc_lfp()
 
 #plotting some variables and geometry, saving output to .pdf.
-plotstuff()
-#pl.savefig('example4.pdf')
-
+plotstuff(cell, electrode)
+#pl.savefig('example3.pdf')
 pl.show()

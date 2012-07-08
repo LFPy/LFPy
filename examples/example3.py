@@ -35,6 +35,7 @@ pl.seed(1234)
 ################################################################################
 
 def active_declarations():
+    '''THIS ONE DO NOT WORK!!!'''
     #set active conductances and correct for spines,
     #see file active_declarations_example3.hoc
     spine_dens = 1
@@ -50,7 +51,7 @@ def active_declarations():
     
     gna_dend = 20.
     gna_node = 30000.
-    gna_soma = gna_dend
+    gna_soma = gna_dend * 10
     
     gkv_axon = 2000.
     gkv_soma = 200.
@@ -71,7 +72,6 @@ def active_declarations():
             dendritic.append(sec)
         if sec.name()[:4] == 'apic':
             dendritic.append(sec)
-
     
     def add_spines(section):
         is_spiny = 1
@@ -103,7 +103,7 @@ def active_declarations():
         for sec in neuron.h.allsec():
             sec.insert('na')
         for sec in dendritic:
-            sec.gbar_na = gna_dend
+            sec.gbar_na = gna_dend            
         for sec in neuron.h.myelin:
             sec.gbar_na = gna_dend
         for sec in neuron.h.hill:
@@ -112,7 +112,7 @@ def active_declarations():
             sec.gbar_na = gna_node
         for sec in neuron.h.node:
             sec.gbar_na = gna_node
-        
+                    
         # kv delayed rectifier channels
         neuron.h.iseg.insert('kv')
         neuron.h.iseg.gbar_kv = gkv_axon
@@ -139,7 +139,6 @@ def active_declarations():
             sec.gbar_kca = gkca_soma
             sec.gbar_ca = gca_soma
         
-        
         for sec in neuron.h.allsec():
             if neuron.h.ismembrane('k_ion'):
                 sec.ek = Ek
@@ -147,8 +146,8 @@ def active_declarations():
         for sec in neuron.h.allsec():
             if neuron.h.ismembrane('na_ion'):
                 sec.ena = Ena
-                neuron.shift_na = -5
-        
+                neuron.h.vshift_na = -5
+                
         for sec in neuron.h.allsec():
             if neuron.h.ismembrane('ca_ion'):
                 sec.eca = 140
@@ -156,30 +155,31 @@ def active_declarations():
                 neuron.h.vshift_ca = 0
     
     #// Insert spines
-    add_spines("dend")
+    add_spines('dend')
     
     #// Insert active channels
     set_active()
+    
 
-
-def plotstuff():
+def plotstuff(cell, electrode):
     fig = pl.figure(figsize=[12, 8])
     
     ax = fig.add_axes([0.1, 0.7, 0.5, 0.2])
-    ax.plot(cell.tvec,cell.somav)
+    ax.plot(cell.tvec, cell.somav)
     ax.set_xlabel('Time [ms]')
     ax.set_ylabel('Soma pot. [mV]')
     
     ax = fig.add_axes([0.1, 0.4, 0.5, 0.2])
     for i in xrange(len(cell.synapses)):
-        ax.plot(cell.tvec,cell.synapses[i].i,color=cell.synapses[i].color)
+        ax.plot(cell.tvec, cell.synapses[i].i, color=cell.synapses[i].color)
     ax.set_xlabel('Time [ms]')
     ax.set_ylabel('Syn. i [nA]')
     
     ax = fig.add_axes([0.1, 0.1, 0.5, 0.2])
-    absmaxLFP = abs(pl.array([electrode.LFP.max(),electrode.LFP.min()])).max()
-    pl.imshow(electrode.LFP,vmax=absmaxLFP,vmin=-absmaxLFP,origin='lower',
-           extent=(cell.tvec[0],cell.tvec[-1],electrode.z[0],electrode.z[-1]),cmap='jet_r',
+    absmaxLFP = abs(pl.array([electrode.LFP.max(), electrode.LFP.min()])).max()
+    pl.imshow(electrode.LFP, vmax=absmaxLFP, vmin=-absmaxLFP, origin='lower',
+           extent=(cell.tvec[0], cell.tvec[-1], electrode.z[0], electrode.z[-1]),
+           cmap='jet_r',
            interpolation='nearest')
     cbar = pl.colorbar(ax=ax)
     cbar.set_label('LFP (mV)')
@@ -188,8 +188,11 @@ def plotstuff():
     ax.set_ylabel('z [$\mu$m]')
     
     ax = fig.add_axes([0.65, 0.1, 0.25, 0.8], frameon=False)
-    for i in xrange(cell.xend.size):
-        ax.plot([cell.xstart[i],cell.xend[i]],[cell.zstart[i],cell.zend[i]],color='k')
+    for sec in LFPy.cell.neuron.h.allsec():
+        idx = cell.get_idx_section(sec.name())
+        ax.plot(pl.r_[cell.xstart[idx], cell.xend[idx][-1]],
+                pl.r_[cell.zstart[idx], cell.zend[idx][-1]],
+                color='k')
     for i in xrange(len(cell.synapses)):
         ax.plot([cell.synapses[i].x],[cell.synapses[i].z],\
             color=cell.synapses[i].color,marker=cell.synapses[i].marker)
@@ -278,23 +281,23 @@ synapseParameters_GABA_A = {
 # where to insert, how many, and which input statistics
 insert_synapses_AMPA_args = {
     'section' : 'apic',
-    'n' : 125,
+    'n' : 100,
     'spTimesFun' : LFPy.inputgenerators.stationary_gamma,
-    'args' : [cellParameters['tstartms'], cellParameters['tstopms'], 2, 10,
+    'args' : [cellParameters['tstartms'], cellParameters['tstopms'], 0.5, 40,
               cellParameters['tstartms']]
 }
 insert_synapses_NMDA_args = {
     'section' : 'alldend',
     'n' : 15,
     'spTimesFun' : LFPy.inputgenerators.stationary_gamma,
-    'args' : [cellParameters['tstartms'], cellParameters['tstopms'], 5, 20,
+    'args' : [cellParameters['tstartms'], cellParameters['tstopms'], 2, 50,
               cellParameters['tstartms']]
 }
 insert_synapses_GABA_A_args = {
     'section' : 'dend',
-    'n' : 125,
+    'n' : 100,
     'spTimesFun' : LFPy.inputgenerators.stationary_gamma,
-    'args' : [cellParameters['tstartms'], cellParameters['tstopms'], 2, 10,
+    'args' : [cellParameters['tstartms'], cellParameters['tstopms'], 0.5, 40,
               cellParameters['tstartms']]
 }
 
@@ -329,7 +332,7 @@ simulationParameters = {
 
 #Initialize cell instance, using the LFPy.Cell class
 cell = LFPy.Cell(**cellParameters)
-#
+
 #Insert synapses using the function defined earlier
 insert_synapses(synapseParameters_AMPA, **insert_synapses_AMPA_args)
 insert_synapses(synapseParameters_NMDA, **insert_synapses_NMDA_args)
@@ -344,9 +347,7 @@ cell.simulate(**simulationParameters)
 electrode = LFPy.RecExtElectrode(cell,**electrodeParameters)
 electrode.calc_lfp()
 
-
 #plotting some variables and geometry, saving output to .pdf.
-plotstuff()
+plotstuff(cell, electrode)
 #pl.savefig('example3.pdf')
-
 pl.show()

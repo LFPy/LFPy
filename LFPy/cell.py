@@ -167,7 +167,8 @@ class Cell(object):
         
         #Not sure if all of these are needed, just precautions
         neuron.h('objref axonlist, dendlist, apicdendlist')
-        neuron.h('objref somalist, allseclist, alldendlist')
+        neuron.h('objref somalist, alldendlist')
+        #neuron.h('objref allseclist')
         neuron.h.somalist = None
         neuron.h.dendlist = None
         neuron.h.axonlist = None
@@ -244,6 +245,7 @@ class Cell(object):
         #recreate sectionlists in case something changed
         neuron.h.define_shape()
         self._create_sectionlists()
+
     
     def _set_nsegs(self, nsegs_method, lambda_f, max_nsegs_length):
         '''Set number of segments per section according to the lambda-rule,
