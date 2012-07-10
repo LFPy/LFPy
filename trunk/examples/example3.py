@@ -35,7 +35,6 @@ pl.seed(1234)
 ################################################################################
 
 def active_declarations():
-    '''THIS ONE DO NOT WORK!!!'''
     #set active conductances and correct for spines,
     #see file active_declarations_example3.hoc
     spine_dens = 1
@@ -91,8 +90,6 @@ def active_declarations():
 
     # Insert active channels
     def set_active():
-        print "active ion-channels inserted."
-        
         # exceptions along the axon
         for sec in neuron.h.myelin:
             sec.cm = cm_myelin
@@ -153,7 +150,12 @@ def active_declarations():
                 sec.eca = 140
                 neuron.h.ion_style("ca_ion",0,1,0,0,0)
                 neuron.h.vshift_ca = 0
-    
+        
+        neuron.h.celsius = celsius
+        
+        print "active ion-channels inserted."
+        
+        
     #// Insert spines
     add_spines('dend')
     
@@ -235,13 +237,12 @@ cellParameters = {
     'passive' : True,           # switch on passive mechs
     'nsegs_method' : 'lambda_f',# method for setting number of segments,
     'lambda_f' : 100,           # segments are isopotential at this frequency
-    'timeres_NEURON' : 2**-4,   # dt of LFP and NEURON simulation.
-    'timeres_python' : 2**-4,
+    'timeres_NEURON' : 2**-3,   # dt of LFP and NEURON simulation.
+    'timeres_python' : 2**-3,
     'tstartms' : -100,          #start time, recorders start at t=0
     'tstopms' : 1000,           #stop time of simulation
-    #'custom_fun'  : [active_declarations], # will execute this function
-    #'custom_fun_args' : [{}],
-    'custom_code' : ['active_declarations_example3.hoc'],
+    'custom_fun'  : [active_declarations], # will execute this function
+    'custom_fun_args' : [{}],
 }
 
 # Synaptic parameters taken from Hendrickson et al 2011
@@ -345,7 +346,9 @@ cell.simulate(**simulationParameters)
 # LFPy.RecExtElectrode class. Note that now cell is given as input to electrode
 # and created after the NEURON simulations are finished
 electrode = LFPy.RecExtElectrode(cell,**electrodeParameters)
+print 'simulating LFPs....'
 electrode.calc_lfp()
+print 'done'
 
 #plotting some variables and geometry, saving output to .pdf.
 plotstuff(cell, electrode)
