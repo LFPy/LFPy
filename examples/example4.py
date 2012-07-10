@@ -101,8 +101,8 @@ cellParameters = {
     'passive' : True,           # switch on passive mechs
     'nsegs_method' : 'lambda_f',# method for setting number of segments,
     'lambda_f' : 100,           # segments are isopotential at this frequency
-    'timeres_NEURON' : 2**-4,   # dt of LFP and NEURON simulation.
-    'timeres_python' : 2**-4,
+    'timeres_NEURON' : 2**-3,   # dt of LFP and NEURON simulation.
+    'timeres_python' : 2**-3,
     'tstartms' : -100,          #start time, recorders start at t=0
     'tstopms' : 1000,           #stop time of simulation
 }
@@ -208,9 +208,11 @@ cell.simulate(**simulationParameters)
 # LFPy.RecExtElectrode class. Note that now cell is given as input to electrode
 # and created after the NEURON simulations are finished
 electrode = LFPy.RecExtElectrode(cell,**electrodeParameters)
+print 'simulating LFPs....'
 electrode.calc_lfp()
+print 'done'
 
 #plotting some variables and geometry, saving output to .pdf.
 plotstuff(cell, electrode)
-#pl.savefig('example3.pdf')
+#pl.savefig('example4.pdf')
 pl.show()
