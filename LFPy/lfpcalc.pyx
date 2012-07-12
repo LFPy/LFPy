@@ -16,6 +16,7 @@ cimport numpy as np
 
 DTYPE = np.float64
 ctypedef np.float64_t DTYPE_t
+ctypedef np.int64_t   LTYPE_t
 
 
 cpdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] calc_lfp_choose(c,
@@ -59,7 +60,7 @@ cpdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] calc_lfp_linesource(c,
     cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] xstart, xend, \
         ystart, yend, zstart, zend, deltaS, h, r2, l, \
         Ememi, Ememii, Ememiii, Emem, r_lims
-    cdef np.ndarray[long, ndim=1, negative_indices=False] i, ii, iii
+    cdef np.ndarray[LTYPE_t, ndim=1, negative_indices=False] i, ii, iii
 
     if timestep != None:
         currmem = c.imem[:, timestep]
@@ -146,7 +147,7 @@ cpdef np.ndarray[DTYPE_t, ndim=1] calc_lfp_som_as_point(c,
     cdef np.ndarray[DTYPE_t, ndim=1] xstart, xend, \
         ystart, yend, zstart, zend, deltaS, h, r2, l, \
         Ememi, Ememii, Ememiii, Emem
-    cdef np.ndarray[long, ndim=1] i, ii, iii
+    cdef np.ndarray[LTYPE_t, ndim=1] i, ii, iii
     cdef double xmid, ymid, zmid
 
 
@@ -244,7 +245,7 @@ cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] _check_rlimit(
 
 
 cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] _Ememi_calc(
-               np.ndarray[long, ndim=1, negative_indices=False] i,
+               np.ndarray[LTYPE_t, ndim=1, negative_indices=False] i,
                np.ndarray[DTYPE_t, ndim=2, negative_indices=False] currmem,
                double sigma,
                np.ndarray[DTYPE_t, ndim=1, negative_indices=False] deltaS,
@@ -277,7 +278,7 @@ cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] _Ememi_calc(
 
 
 cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] _Ememii_calc(
-                np.ndarray[long, ndim=1, negative_indices=False] ii,
+                np.ndarray[LTYPE_t, ndim=1, negative_indices=False] ii,
                 np.ndarray[DTYPE_t, ndim=2, negative_indices=False] currmem,
                 double sigma,
                 np.ndarray[DTYPE_t, ndim=1, negative_indices=False] deltaS,
@@ -308,7 +309,7 @@ cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] _Ememii_calc(
 
 
 cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] _Ememiii_calc(
-                 np.ndarray[long, ndim=1, negative_indices=False] iii,
+                 np.ndarray[LTYPE_t, ndim=1, negative_indices=False] iii,
                  np.ndarray[DTYPE_t, ndim=2, negative_indices=False] currmem,
                  double sigma,
                  np.ndarray[DTYPE_t, ndim=1, negative_indices=False] deltaS,
