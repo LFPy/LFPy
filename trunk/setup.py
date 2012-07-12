@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+'''LFPy setup.py file'''
 
 # patch distutils if it can't cope with the "classifiers" or
 # "download_url" keywords
