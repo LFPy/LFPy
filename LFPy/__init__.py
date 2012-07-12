@@ -22,7 +22,6 @@ GNU General Public License for more details.
   * Synapse - Convenience class for inserting synapses onto Cell objects
   * StimIntraElectrode - Convenience class for inserting electrodes onto Cell objects
   * RecExtElectrode - Class for performing simulations of extracellular potentials
-  * RecExtElectrdoeThreaded - same as above using multiprocessing to distribute contact points across cores
 
 :Modules:
   * lfpcalc - functions used by RecExtElectrode class

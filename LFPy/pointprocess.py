@@ -115,12 +115,17 @@ class Synapse(PointProcess):
         
     def collect_current(self, cell):
         '''Collect synapse current'''
-        self.i = numpy.array(cell.synireclist.o(self.hocidx))
+        try:
+            self.i = numpy.array(cell.synireclist.o(self.hocidx))
+        except:
+            raise Exception, 'cell.synireclist deleted from consequtive runs'
     
     def collect_potential(self, cell):
         '''Collect membrane potential of segment with synapse'''
-        self.v = numpy.array(cell.synvreclist.o(self.hocidx))
-
+        try:
+            self.v = numpy.array(cell.synvreclist.o(self.hocidx))
+        except:
+            raise Exeption, 'cell.synvreclist deleted from consequtive runs'
         
 class StimIntElectrode(PointProcess):
     '''

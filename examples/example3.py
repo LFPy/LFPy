@@ -151,6 +151,7 @@ def active_declarations():
                 neuron.h.ion_style("ca_ion",0,1,0,0,0)
                 neuron.h.vshift_ca = 0
         
+        #set the temperature for the neuron dynamics
         neuron.h.celsius = celsius
         
         print "active ion-channels inserted."
