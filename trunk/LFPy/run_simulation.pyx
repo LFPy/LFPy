@@ -48,7 +48,7 @@ def _run_simulation(cell, variable_dt=False, atol=0.001):
     #Starting simulation at t != 0
     neuron.h.t = cell.tstartms
     
-    cell.loadspikes()
+    cell._loadspikes()
         
     #print sim.time at intervals
     cdef double counter = 0.
@@ -185,7 +185,7 @@ def _run_simulation_with_electrode(cell, electrode, variable_dt=False, atol=0.00
     neuron.h.t = cell.tstartms
     
     #load spike times from NetCon
-    cell.loadspikes()
+    cell._loadspikes()
     
     #print sim.time at intervals
     counter = 0.
