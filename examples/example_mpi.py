@@ -54,7 +54,7 @@ class Population:
         self.cellRotations = self.drawRandCellRotations()
         
     def run(self):
-        '''run the proper simulation and collect results'''
+        '''execute the proper simulation and collect simulation results'''
         #produce simulation results on each RANK
         self.results = self.distribute_cellsims()
         
