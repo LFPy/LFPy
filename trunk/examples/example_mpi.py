@@ -1,16 +1,19 @@
 #!/usr/bin/env python
-'''An LFPy example file showing how cells can be run in parallel using MPI.
-To run using MPI with 4 cpu cores, issue in terminal
-openmpirun -np 4 python example_mpi.py
-
-The example uses mpi4py with openmpi, and do not rely on NEURON's MPI.
+'''
+################################################################################
+# An LFPy example file showing how cells can be run in parallel using MPI.
+# To run using MPI with 4 cpu cores, issue in terminal
+# openmpirun -np 4 python example_mpi.py
+#
+# The example uses mpi4py with openmpi, and do not rely on NEURON's MPI.
+################################################################################
 '''
 import numpy as np
 import matplotlib.pyplot as plt
 import LFPy
 from mpi4py import MPI
 
-#set one global seed, ensure all randomizations are on RANK 0 in script!
+#set one global seed, ensure all randomizations are set on RANK 0 in script!
 np.random.seed(12345)
 
 #MPI stuff we're using
@@ -30,7 +33,7 @@ class Population:
         '''
         class initialization
         
-        POPULATION_SIZE :       int, numper of cells
+        POPULATION_SIZE :       int, number of cells
         cellParameters :        dict
         populationParameters :  dict
         electrodeParameters :   dict
@@ -55,7 +58,7 @@ class Population:
         #produce simulation results on each RANK
         self.results = self.distribute_cellsims()
         
-        #superimpose LFPs on every RANK, then summarize using MPI to RANK 0
+        #superimpose local LFPs on every RANK, then sum using MPI to RANK 0
         self.LFP = []
         for key, value in self.results.iteritems():
             self.LFP.append(value['LFP'])
@@ -127,10 +130,8 @@ class Population:
             cellRotations = None
         return COMM.bcast(cellRotations, root=0)
         
-    def cellsim(self, cellindex, seed = 0):
+    def cellsim(self, cellindex):
         '''main cell- and LFP simulation procedure'''
-        np.random.seed( cellindex)
-        
         #create extracellular electrode object
         electrode = LFPy.RecExtElectrode(**self.electrodeParameters)
         
@@ -156,7 +157,7 @@ class Population:
     def plotstuff(self):
         '''plot LFPs and somatraces'''
         if RANK == 0:
-            fig = plt.figure(figsize=(10,10))
+            fig = plt.figure(figsize=(10, 10))
             ax = fig.add_subplot(211)
             for key, value in self.results.iteritems():
                 tvec = np.arange(value['somav'].size) * \
@@ -169,12 +170,10 @@ class Population:
             ax.set_title('somatic potentials')
             
             ax = fig.add_subplot(212)
-            im = ax.imshow(self.LFP,
-                           interpolation='nearest', cmap='jet_r',
-                           origin='lower',
-                           extent = [0, tvec[-1],
-                                     self.electrodeParameters['z'].min(),
-                                     self.electrodeParameters['z'].max()])
+            im = ax.pcolormesh(tvec, self.electrodeParameters['z'], self.LFP,
+                           cmap='spectral_r',
+                           vmin = -abs(self.LFP).max(),
+                           vmax = abs(self.LFP).max())
             ax.axis(ax.axis('tight'))
             cbar = plt.colorbar(im)
             cbar.set_label('LFP (mV)')
@@ -198,7 +197,7 @@ if __name__ == '__main__':
         'lambda_f' : 100,           # segments are isopotential at frequency
         'timeres_NEURON' : 2**-3,   # dt of LFP and NEURON simulation.
         'timeres_python' : 2**-3,
-        'tstartms' : -200,          #start time, recorders start at t=0
+        'tstartms' : -100,          #start time, recorders start at t=0
         'tstopms' : 200,            #stop time of simulation
         'custom_code'  : ['active_declarations_example3.hoc'], #active decl.
     }
@@ -246,7 +245,7 @@ if __name__ == '__main__':
         'zmax' : 200,
     }
     
-    ########## INITIALIZE POPULATION ###############################################
+    ########## INITIALIZE POPULATION ###########################################
     population = Population(POPULATION_SIZE,
                      cellParameters,
                      populationParameters,
