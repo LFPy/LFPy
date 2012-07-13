@@ -821,7 +821,7 @@ class Cell(object):
             i += 1
         del self.recvariablesreclist
     
-    def loadspikes(self):
+    def _loadspikes(self):
         '''
         Initialize spiketimes from netcon if they exist
         '''
