@@ -11,8 +11,24 @@ if version < '2.2.3':
 
 from distutils.core import setup 
 from distutils.extension import Extension
-from Cython.Distutils import build_ext
 import numpy
+try:
+    from Cython.Distutils import build_ext
+    cmdclass = { 'build_ext' : build_ext}
+    ext_modules = [
+        Extension('LFPy.lfpcalc', 
+        ['LFPy/lfpcalc.pyx'],
+        include_dirs=[numpy.get_include()]),
+        Extension('LFPy.run_simulation', 
+        ['LFPy/run_simulation.pyx'],
+        include_dirs=[numpy.get_include()]),
+        ]
+except:
+    print "'from Cython.Distutils import build_ext' failed!!!!"
+    print "Cython extensions will not be compiled, and"
+    print "Simulations in LFPy will run slower"
+    cmdclass = {}
+    ext_modules = []
 
 with open('README.txt') as file:
     long_description = file.read()
@@ -23,15 +39,8 @@ setup(
     maintainer = "Espen Hagen",
         maintainer_email = 'ehagen@umb.no',
     packages = ['LFPy'], 
-    cmdclass = { 'build_ext' : build_ext}, 
-    ext_modules = [
-        Extension('LFPy.lfpcalc', 
-        ['LFPy/lfpcalc.pyx'],
-        include_dirs=[numpy.get_include()]),
-        Extension('LFPy.run_simulation', 
-        ['LFPy/run_simulation.pyx'],
-        include_dirs=[numpy.get_include()]),
-        ],
+    cmdclass = cmdclass, 
+    ext_modules = ext_modules,
     url='http://compneuro.umb.no/LFPy/',
     license='LICENSE.txt',
     description='A module for modeling Local Field Potentials built on NEURON',
