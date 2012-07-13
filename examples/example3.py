@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+'''
 ################################################################################
 #
 # This is an example scripts using LFPy with an active cell model adapted from
@@ -18,25 +19,26 @@
 # LFPy.inputgenerators.stationary_gamma() function.
 #
 ################################################################################
-
-# importing some modules, setting some matplotlib values for pl.plot.
-import matplotlib.pylab as pl
+'''
+# importing some modules, including LFPy
 import LFPy
+import numpy as np
 import neuron
-pl.rcParams.update({'font.size' : 12,
+import matplotlib.pyplot as plt
+plt.rcParams.update({'font.size' : 12,
     'figure.facecolor' : '1',
     'wspace' : 0.5, 'hspace' : 0.5})
 
 #seed for random generation
-pl.seed(1234)
+np.random.seed(1234)
 
 ################################################################################
 # A couple of function declarations
 ################################################################################
 
 def active_declarations():
-    #set active conductances and correct for spines,
-    #see file active_declarations_example3.hoc
+    '''set active conductances and correct for spines,
+    see file active_declarations_example3.hoc'''
     spine_dens = 1
     spine_area = 0.83 # // um^2  -- K Harris
         
@@ -73,6 +75,7 @@ def active_declarations():
             dendritic.append(sec)
     
     def add_spines(section):
+        '''add spines as a modification of the compartment area'''
         is_spiny = 1
         if section == "dend":
             print "adding spines"
@@ -90,6 +93,7 @@ def active_declarations():
 
     # Insert active channels
     def set_active():
+        '''set the channel densities'''
         # exceptions along the axon
         for sec in neuron.h.myelin:
             sec.cm = cm_myelin
@@ -148,7 +152,7 @@ def active_declarations():
         for sec in neuron.h.allsec():
             if neuron.h.ismembrane('ca_ion'):
                 sec.eca = 140
-                neuron.h.ion_style("ca_ion",0,1,0,0,0)
+                neuron.h.ion_style("ca_ion", 0, 1, 0, 0, 0)
                 neuron.h.vshift_ca = 0
         
         #set the temperature for the neuron dynamics
@@ -164,50 +168,8 @@ def active_declarations():
     set_active()
     
 
-def plotstuff(cell, electrode):
-    fig = pl.figure(figsize=[12, 8])
-    
-    ax = fig.add_axes([0.1, 0.7, 0.5, 0.2])
-    ax.plot(cell.tvec, cell.somav)
-    ax.set_xlabel('Time [ms]')
-    ax.set_ylabel('Soma pot. [mV]')
-    
-    ax = fig.add_axes([0.1, 0.4, 0.5, 0.2])
-    for i in xrange(len(cell.synapses)):
-        ax.plot(cell.tvec, cell.synapses[i].i, color=cell.synapses[i].color)
-    ax.set_xlabel('Time [ms]')
-    ax.set_ylabel('Syn. i [nA]')
-    
-    ax = fig.add_axes([0.1, 0.1, 0.5, 0.2])
-    absmaxLFP = abs(pl.array([electrode.LFP.max(), electrode.LFP.min()])).max()
-    pl.imshow(electrode.LFP, vmax=absmaxLFP, vmin=-absmaxLFP, origin='lower',
-           extent=(cell.tvec[0], cell.tvec[-1], electrode.z[0], electrode.z[-1]),
-           cmap='jet_r',
-           interpolation='nearest')
-    cbar = pl.colorbar(ax=ax)
-    cbar.set_label('LFP (mV)')
-    pl.axis('tight')
-    ax.set_xlabel('Time [ms]')
-    ax.set_ylabel('z [$\mu$m]')
-    
-    ax = fig.add_axes([0.65, 0.1, 0.25, 0.8], frameon=False)
-    for sec in LFPy.cell.neuron.h.allsec():
-        idx = cell.get_idx_section(sec.name())
-        ax.plot(pl.r_[cell.xstart[idx], cell.xend[idx][-1]],
-                pl.r_[cell.zstart[idx], cell.zend[idx][-1]],
-                color='k')
-    for i in xrange(len(cell.synapses)):
-        ax.plot([cell.synapses[i].x],[cell.synapses[i].z],\
-            color=cell.synapses[i].color,marker=cell.synapses[i].marker)
-    for i in xrange(electrode.x.size):
-        ax.plot(electrode.x[i],electrode.z[i],color='g',marker='o')
-    pl.axis('equal')
-    pl.axis(pl.array(pl.axis())*0.8)
-    ax.set_xticks([])
-    ax.set_yticks([])
-
 def insert_synapses(synparams, section, n, spTimesFun, args):
-    #find n compartments to insert synapses onto
+    '''find n compartments to insert synapses onto'''
     idx = cell.get_rand_idx_area_norm(section=section, nidx=n)
 
     #Insert synapses in an iterative fashion
@@ -218,7 +180,7 @@ def insert_synapses(synparams, section, n, spTimesFun, args):
         spiketimes = spTimesFun(args[0], args[1], args[2], args[3], args[4])
         
         # Create synapse(s) and setting times using the Synapse class in LFPy
-        s = LFPy.Synapse(cell,**synparams)
+        s = LFPy.Synapse(cell, **synparams)
         s.set_spike_times(spiketimes)
 
 ################################################################################
@@ -238,10 +200,10 @@ cellParameters = {
     'passive' : True,           # switch on passive mechs
     'nsegs_method' : 'lambda_f',# method for setting number of segments,
     'lambda_f' : 100,           # segments are isopotential at this frequency
-    'timeres_NEURON' : 2**-3,   # dt of LFP and NEURON simulation.
-    'timeres_python' : 2**-3,
+    'timeres_NEURON' : 2**-4,   # dt of LFP and NEURON simulation.
+    'timeres_python' : 2**-4,
     'tstartms' : -100,          #start time, recorders start at t=0
-    'tstopms' : 1000,           #stop time of simulation
+    'tstopms' : 200,           #stop time of simulation
     'custom_fun'  : [active_declarations], # will execute this function
     'custom_fun_args' : [{}],
 }
@@ -254,8 +216,8 @@ synapseParameters_AMPA = {
     'tau1' : 1.,                #Time constant, rise
     'tau2' : 3.,                #Time constant, decay
     'weight' : 0.005,           #Synaptic weight
-    'color' : 'r',              #for pl.plot
-    'marker' : '.',             #for pl.plot
+    'color' : 'r',              #for plt.plot
+    'marker' : '.',             #for plt.plot
     'record_current' : True,    #record synaptic currents
 }
 # Excitatory synapse parameters
@@ -306,14 +268,14 @@ insert_synapses_GABA_A_args = {
 # Define electrode geometry corresponding to a laminar electrode, where contact
 # points have a radius r, surface normal vectors N, and LFP calculated as the
 # average LFP in n random points on each contact:
-N = pl.empty((16, 3))
+N = np.empty((16, 3))
 for i in xrange(N.shape[0]): N[i,] = [1, 0, 0] #normal unit vec. to contacts
 # put parameters in dictionary
 electrodeParameters = {
     'sigma' : 0.3,              # Extracellular potential
-    'x' : pl.zeros(16)+25,      # x,y,z-coordinates of electrode contacts
-    'y' : pl.zeros(16),
-    'z' : pl.linspace(-500,1000,16),
+    'x' : np.zeros(16) + 25,      # x,y,z-coordinates of electrode contacts
+    'y' : np.zeros(16),
+    'z' : np.linspace(-500, 1000, 16),
     'n' : 20,
     'r' : 10,
     'N' : N,
@@ -329,9 +291,6 @@ simulationParameters = {
 # Main simulation procedure
 ################################################################################
 
-#close open figures
-#pl.close('all')   
-
 #Initialize cell instance, using the LFPy.Cell class
 cell = LFPy.Cell(**cellParameters)
 
@@ -346,12 +305,13 @@ cell.simulate(**simulationParameters)
 # Initialize electrode geometry, then calculate the LFP, using the
 # LFPy.RecExtElectrode class. Note that now cell is given as input to electrode
 # and created after the NEURON simulations are finished
-electrode = LFPy.RecExtElectrode(cell,**electrodeParameters)
+electrode = LFPy.RecExtElectrode(cell, **electrodeParameters)
 print 'simulating LFPs....'
 electrode.calc_lfp()
 print 'done'
 
 #plotting some variables and geometry, saving output to .pdf.
-plotstuff(cell, electrode)
-#pl.savefig('example3.pdf')
-pl.show()
+from example_suppl import plot_ex3
+fig = plot_ex3(cell, electrode)
+#fig.savefig('example3.pdf')
+plt.show()
