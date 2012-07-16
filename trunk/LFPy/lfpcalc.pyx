@@ -16,7 +16,7 @@ cimport numpy as np
 
 DTYPE = np.float64
 ctypedef np.float64_t DTYPE_t
-ctypedef np.int64_t   LTYPE_t
+ctypedef np.int_t   LTYPE_t
 
 
 cpdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] calc_lfp_choose(c,
