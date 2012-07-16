@@ -7,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Module LFPy &mdash; LFPy 0.9.2 documentation</title>
+    <title>Module LFPy &mdash; LFPy 0.9.3 documentation</title>
     
     <link rel="stylesheet" href="_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -15,7 +15,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '0.9.2',
+        VERSION:     '0.9.3',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="LFPy 0.9.2 documentation" href="index.html" />
+    <link rel="top" title="LFPy 0.9.3 documentation" href="index.html" />
     <link rel="prev" title="Contact" href="contact.html" />
  
 <script type="text/javascript">
@@ -47,7 +47,7 @@
         <li class="right" >
           <a href="contact.html" title="Contact"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">LFPy 0.9.2 documentation</a> &raquo;</li> 
+        <li><a href="index.html">LFPy 0.9.3 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -80,7 +80,6 @@ GNU General Public License for more details.</p>
 <li>Synapse - Convenience class for inserting synapses onto Cell objects</li>
 <li>StimIntraElectrode - Convenience class for inserting electrodes onto Cell objects</li>
 <li>RecExtElectrode - Class for performing simulations of extracellular potentials</li>
-<li>RecExtElectrdoeThreaded - same as above using multiprocessing to distribute contact points across cores</li>
 </ul>
 </td>
 </tr>
@@ -257,12 +256,6 @@ Normalised probability determined by area of segments.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="LFPy.Cell.loadspikes">
-<tt class="descname">loadspikes</tt><big>(</big><big>)</big><a class="headerlink" href="#LFPy.Cell.loadspikes" title="Permalink to this definition">¶</a></dt>
-<dd><p>Initialize spiketimes from netcon if they exist</p>
-</dd></dl>
-
-<dl class="method">
 <dt id="LFPy.Cell.set_point_process">
 <tt class="descname">set_point_process</tt><big>(</big><em>idx</em>, <em>pptype</em>, <em>record_current=False</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#LFPy.Cell.set_point_process" title="Permalink to this definition">¶</a></dt>
 <dd><p>Insert pptype-electrode type pointprocess on segment numbered
@@ -303,7 +296,7 @@ All rotation angles are optional.</p>
 
 <dl class="method">
 <dt id="LFPy.Cell.simulate">
-<tt class="descname">simulate</tt><big>(</big><em>electrode=None</em>, <em>rec_imem=False</em>, <em>rec_vmem=False</em>, <em>rec_ipas=False</em>, <em>rec_icap=False</em>, <em>rec_isyn=False</em>, <em>rec_vmemsyn=False</em>, <em>rec_istim=False</em>, <em>rec_variables=</em><span class="optional">[</span><span class="optional">]</span><big>)</big><a class="headerlink" href="#LFPy.Cell.simulate" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">simulate</tt><big>(</big><em>electrode=None</em>, <em>rec_imem=False</em>, <em>rec_vmem=False</em>, <em>rec_ipas=False</em>, <em>rec_icap=False</em>, <em>rec_isyn=False</em>, <em>rec_vmemsyn=False</em>, <em>rec_istim=False</em>, <em>rec_variables=</em><span class="optional">[</span><span class="optional">]</span>, <em>variable_dt=False</em>, <em>atol=0.001</em>, <em>to_memory=True</em>, <em>to_file=False</em>, <em>file_name=None</em><big>)</big><a class="headerlink" href="#LFPy.Cell.simulate" title="Permalink to this definition">¶</a></dt>
 <dd><p>This is the main function running the simulation of the NEURON model.
 Start NEURON simulation and record variables specified by arguments.</p>
 <p>Arguments:</p>
@@ -320,7 +313,12 @@ rec_icap:   record capacitive segment membrane currents
 rec_isyn:   record synaptic currents of from Synapse class instances
 rec_vmemsyn:    record membrane voltage of segments with Synapse
 rec_istim:  record currents of StimIntraElectrode
-rec_variables: list of variables to record, i.e arg=['cai', ]</pre>
+rec_variables: list of variables to record, i.e arg=['cai', ]
+variable_dt: boolean, using variable timestep in NEURON
+atol:       absolute tolerance used with the variable timestep in NEURON
+to_memory:  only valid with electrode, store lfp in -&gt; electrode.LFP 
+to_file:    only valid with electrode, save LFPs in hdf5 file format 
+file_name:  name of hdf5 file, '.h5' is appended if it doesnt exist </pre>
 </div>
 </dd></dl>
 
@@ -808,7 +806,7 @@ GNU General Public License for more details.</p>
         <li class="right" >
           <a href="contact.html" title="Contact"
              >previous</a> |</li>
-        <li><a href="index.html">LFPy 0.9.2 documentation</a> &raquo;</li> 
+        <li><a href="index.html">LFPy 0.9.3 documentation</a> &raquo;</li> 
       </ul>
     </div>
 

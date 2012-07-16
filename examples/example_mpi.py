@@ -156,9 +156,27 @@ class Population:
 
     def plotstuff(self):
         '''plot LFPs and somatraces'''
+                
         if RANK == 0:
-            fig = plt.figure(figsize=(10, 10))
-            ax = fig.add_subplot(211)
+            fig = plt.figure(figsize=(12, 8))
+            
+            ax = fig.add_subplot(121, aspect='equal', frameon=False,
+                        xticks=[], xticklabels=[], yticks=[], yticklabels=[])
+            for cellindex in xrange(self.POPULATION_SIZE):
+                cell = LFPy.Cell(**self.cellParameters)
+                cell.set_pos(xpos = self.cellPositions[cellindex, 0],
+                     ypos = self.cellPositions[cellindex, 1],
+                     zpos = self.cellPositions[cellindex, 2])
+                cell.set_rotation(z = self.cellRotations[cellindex])
+                for sec in LFPy.cell.neuron.h.allsec():
+                    idx = cell.get_idx_section(sec.name())
+                    ax.plot(np.r_[cell.xstart[idx], cell.xend[idx][-1]],
+                            np.r_[cell.zstart[idx], cell.zend[idx][-1]],
+                            color='bgrcmykbgrcmykbgrcmyk'[cellindex])
+            ax.plot(self.electrodeParameters['x'],
+                    self.electrodeParameters['z'], '.', marker='o', color='g')
+            
+            ax = fig.add_subplot(222)
             for key, value in self.results.iteritems():
                 tvec = np.arange(value['somav'].size) * \
                                         self.cellParameters['timeres_python']
@@ -169,7 +187,7 @@ class Population:
             ax.set_ylabel('$V_{soma}$ (mV)')
             ax.set_title('somatic potentials')
             
-            ax = fig.add_subplot(212)
+            ax = fig.add_subplot(224)
             im = ax.pcolormesh(tvec, self.electrodeParameters['z'], self.LFP,
                            cmap='spectral_r',
                            vmin = -abs(self.LFP).max(),
@@ -180,6 +198,8 @@ class Population:
             ax.set_title('superimposed LFP')
             ax.set_xlabel('time (ms)')
             ax.set_ylabel('$z$ ($\mu$m)')
+            
+            fig.savefig('example_mpi.pdf')
         
 
 if __name__ == '__main__':
@@ -222,14 +242,15 @@ if __name__ == '__main__':
     # Define electrode geometry corresponding to a laminar electrode, where
     # contact points have a radius r, surface normal vectors N, and LFP
     # calculated as the average LFP in n random points on each contact:
-    N = np.zeros((21, 3))
+    X, Y, Z = np.mgrid[0:1, 0:1, -500:1001:50]
+    N = np.zeros((X.size, 3))
     for i in xrange(N.shape[0]): N[i,] = [1, 0, 0] #normal unit vec. to contacts
     # put parameters in dictionary
     electrodeParameters = {
         'sigma' : 0.3,              # Extracellular potential
-        'x' : np.zeros(21),      # x,y,z-coordinates of electrode contacts
-        'y' : np.zeros(21),
-        'z' : np.arange(-10, 11) * 25,
+        'x' : X.flatten(),      # x,y,z-coordinates of electrode contacts
+        'y' : Y.flatten(),
+        'z' : Z.flatten(),
         'n' : 50,
         'r' : 5,
         'N' : N,
