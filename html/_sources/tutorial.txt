@@ -79,3 +79,18 @@ Finally, we calculate the extracellular potential at the specified electrode loc
     
 The resulting LFP is stored in ``electrode.LFP``.
 
+
+More examples
+=============
+
+More examples of LFPy usage are provided in the "trunk/examples" folder in the
+source code release, displaying different usage scenarios;
+
+- `example1.py <http://bebiservice.umb.no/projects-public/LFPy-release/browser/trunk/examples/example1.py>`_
+- `example2.py <http://bebiservice.umb.no/projects-public/LFPy-release/browser/trunk/examples/example2.py>`_
+- `example3.py <http://bebiservice.umb.no/projects-public/LFPy-release/browser/trunk/examples/example3.py>`_
+- `example4.py <http://bebiservice.umb.no/projects-public/LFPy-release/browser/trunk/examples/example4.py>`_
+- `example_mpi.py <http://bebiservice.umb.no/projects-public/LFPy-release/browser/trunk/examples/example_mpi.py>`_
+
+The examples rely on files present inside the `examples folder <http://bebiservice.umb.no/projects-public/LFPy-release/browser/trunk/examples>`_,
+such as morphology files and .mod files.
