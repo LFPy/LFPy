@@ -101,6 +101,7 @@ cell.simulate(electrode = electrode, rec_isyn=True)
 # Plotting of simulation results:
 from example_suppl import plot_ex2
 fig = plot_ex2(cell, electrode)
+#Optional: saving the figure
 #fig.savefig('example2.pdf')
 
 plt.show()
