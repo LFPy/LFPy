@@ -14,7 +14,7 @@ Or, download the development version of LFPy using `subversion <http://subversio
     
     svn checkout http://bebiservice.umb.no/svn-public/LFPy-release
 
-The development code is then found under "trunk/", and different numbered releases under "tags/".
+The development code is then found under "LFPy-release/trunk/", and different numbered releases under "LFPy-release/tags/".
 
 To browse the source codes online, see http://bebiservice.umb.no/projects-public/LFPy-release/browser.
 
@@ -43,8 +43,8 @@ To install LFPy you will need the following:
     
     LFPy was tested to work with NEURON 7.2 and the 7.3 development branch, we had some issues with a precompiled version of NEURON 7.1.
 
-4.  `Cython <http://cython.org>`_ (C-extensions for python) to speed up simulations of extracellular fields. Tested with version > 1.4.,
-    and known to fail with version 1.1.
+4.  `Cython <http://cython.org>`_ (C-extensions for python) to speed up simulations of extracellular fields. Tested with version > 0.14,
+    and known to fail with version 0.11. LFPy works without Cython, but simulations will run slow and is therefore recommended.
 
 
 Installing LFPy

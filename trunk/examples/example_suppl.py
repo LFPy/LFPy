@@ -29,7 +29,7 @@ def plot_ex1(cell, electrode, X, Y, Z):
     
     #plot_morphology(plot_synapses=True)
     for sec in neuron.h.allsec():
-        idx = cell.get_idx_section(sec.name())
+        idx = cell.get_idx(sec.name())
         ax1.plot(np.r_[cell.xstart[idx], cell.xend[idx][-1]],
                 np.r_[cell.zstart[idx], cell.zend[idx][-1]],
                 color='k')
@@ -192,7 +192,7 @@ def plot_ex3(cell, electrode):
     #plot the morphology, electrode contacts and synapses
     ax = fig.add_axes([0.65, 0.1, 0.25, 0.8], frameon=False)
     for sec in neuron.h.allsec():
-        idx = cell.get_idx_section(sec.name())
+        idx = cell.get_idx(sec.name())
         ax.plot(np.r_[cell.xstart[idx], cell.xend[idx][-1]],
                 np.r_[cell.zstart[idx], cell.zend[idx][-1]],
                 color='k')

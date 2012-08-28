@@ -19,6 +19,7 @@ import numpy as np
 import cPickle
 from LFPy import RecExtElectrode
 from LFPy.run_simulation import _run_simulation, _run_simulation_with_electrode
+import sys
 
 class Cell(object):
     '''
@@ -157,7 +158,8 @@ class Cell(object):
             if self.verbose:
                 print 'will not set position, no soma section.'
         self.set_rotation(**self.default_rotation)
-        
+
+
     def _load_geometry(self):
         '''Load the morphology-file in NEURON''' 
         try: 
@@ -214,6 +216,7 @@ class Cell(object):
             
         neuron.h.define_shape()
         self._create_sectionlists()
+
         
     def _run_custom_codes(self, custom_code, custom_fun, custom_fun_args):
         '''Execute custom model code and functions with arguments'''
@@ -280,63 +283,21 @@ class Cell(object):
 
     def _create_sectionlists(self):
         '''Create section lists for different kinds of sections'''
-        self.somalist = neuron.h.SectionList()
-        self.axonlist = neuron.h.SectionList()
-        self.dendlist = neuron.h.SectionList()
-        self.apiclist = neuron.h.SectionList()
-        
-        # Update the local lists
-        self._update_local_seclists()
-
         #list with all sections
         self.allseclist = neuron.h.SectionList()
-        for sec in self.somalist:
+        self.allsecnames = []
+        for sec in neuron.h.allsec():
             self.allseclist.append(sec)
-        for sec in self.dendlist:
-            self.allseclist.append(sec)
-        for sec in self.apiclist:
-            self.allseclist.append(sec)
-        for sec in self.axonlist:
-            self.allseclist.append(sec)
+            self.allsecnames.append(sec.name())
         
-        #list with all dendritic sections
-        self.alldendlist = neuron.h.SectionList()
-        for sec in self.dendlist:
-            self.alldendlist.append(sec)
-        for sec in self.apiclist:
-            self.alldendlist.append(sec)
-            
-    def _update_local_seclists(self):
-        '''Update "local" section lists'''
-        if neuron.h.sec_counted == 0:
-            self.nsomasec = 0
-            #Place sections in lists
-            for sec in neuron.h.allsec():
-                if sec.name()[:4] == 'soma':
-                    self.nsomasec += 1
-                    self.somalist.append(sec)
-                elif sec.name()[:4] == 'axon':
-                    self.axonlist.append(sec)
-                elif sec.name()[:4] == 'dend':
-                    self.dendlist.append(sec)
-                elif sec.name()[:4] == 'apic':
-                    self.apiclist.append(sec)
-        elif neuron.h.sec_counted == 1:
-            self.nsomasec = neuron.h.nsomasec
-            #Place sections in lists
-            for sec in neuron.h.soma:
+        #list of soma sections, assuming it is named on the format "soma*"
+        self.nsomasec = 0
+        self.somalist = neuron.h.SectionList()
+        for sec in neuron.h.allsec():
+            if sec.name().find('soma') >= 0:
                 self.somalist.append(sec)
-            for sec in neuron.h.dendlist:
-                self.dendlist.append(sec)
-            for sec in neuron.h.allsec():
-                if sec.name()[:4] == 'apic':
-                    self.apiclist.append(sec)
-            try:
-                for sec in neuron.h.axonlist:
-                    self.axonlist.append(sec)
-            except:
-                pass
-    
+                self.nsomasec += 1
+            
     def _get_idx(self, seclist):
         '''Return boolean vector which indexes where segments in seclist 
         matches segments in self.allseclist, rewritten from 
@@ -407,7 +368,6 @@ class Cell(object):
         Insert syntype (e.g. ExpSyn) synapse on segment with index idx, 
         **kwargs passed on from class PointProcessSynapse.
         '''
-
         if not hasattr(self, 'synlist'):
             self.synlist = neuron.h.List()
         if not hasattr(self, 'synireclist'):
@@ -598,25 +558,37 @@ class Cell(object):
         self.zmid = .5*(self.zstart+self.zend)
 
     def get_idx(self, section='allsec', z_min=-10000, z_max=10000):
-        '''Returns neuron idx of segments on interval [z_min, z_max]
+        '''
+        Returns neuron idx of segments from sections with names that match
+        the pattern defined in input section on interval [z_min, z_max].
+        
+        Can be any entry in cell.allsecnames, or 'allsec'.
+        
+        Usage:
+        ::
+            idx = cell.get_idx(section='allsec')
+            print idx
+            idx = cell.get_idx(section=['soma', 'dend', 'apic'])
+            print idx
+            
         '''
         if section == 'allsec': 
             seclist = self.allseclist
-        elif section == 'soma': 
-            seclist = self.somalist
-        elif section == 'dend': 
-            seclist = self.dendlist
-        elif section == 'apic': 
-            seclist = self.apiclist
-        elif section == 'alldend': 
-            seclist = self.alldendlist
-        elif section == 'axon': 
-            seclist = self.axonlist
         else:
-            sections = ['allsec', 'soma', 'alldend', 'dend', 'apic', 'axon']
-            raise Exception, "section %s is not any of %s" % (section, 
-                                                              str(sections))
-        
+            seclist = neuron.h.SectionList()
+            if type(section) == str:
+                for sec in self.allseclist:
+                    if sec.name().find(section) >= 0:
+                        seclist.append(sec)
+            elif type(section) == list:
+                for secname in section:
+                    for sec in self.allseclist:
+                        if sec.name().find(secname) >= 0:
+                            seclist.append(sec)
+            else:
+                if self.verbose:
+                    print '%s did not match any section name' % str(section)
+                
         idx = np.where(self._get_idx(seclist))[0]
         
         sel_z_idx = np.where(np.logical_and(self.zmid[idx] > z_min,
@@ -1227,30 +1199,3 @@ class Cell(object):
         [idx] = np.where(idxvec)
         return idx
     
-    def get_idx_section(self, section="soma[0]"):
-        '''
-        Get the idx of segments in any section-argument, uses hoc naming
-        instead of general terms as in self.get_idx().
-        
-        For example:
-        ::
-            cell.get_idx_section(section='soma[0]')
-        will output something like
-        ::
-            array([0])
-            
-        To list all sections in the cell object, type
-        ::
-            for sec in cell.allseclist:
-                print sec.name()
-        '''
-        idxvec = np.zeros(self.totnsegs)
-        secnamelist = []
-        i = 0
-        for sec in self.allseclist:
-            for seg in sec:
-                if sec.name() == section:
-                    idxvec[i] += 1
-                i += 1
-        [idx] = np.where(idxvec)
-        return idx
