@@ -178,7 +178,16 @@ midpoint is closest to the coordinates defined by the user</p>
 <dl class="method">
 <dt id="LFPy.Cell.get_idx">
 <tt class="descname">get_idx</tt><big>(</big><em>section='allsec'</em>, <em>z_min=-10000</em>, <em>z_max=10000</em><big>)</big><a class="headerlink" href="#LFPy.Cell.get_idx" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns neuron idx of segments on interval [z_min, z_max]</p>
+<dd><p>Returns neuron idx of segments from sections with names that match
+the pattern defined in input section on interval [z_min, z_max].</p>
+<p>Can be any entry in cell.allsecnames, or &#8216;allsec&#8217;.</p>
+<p>Usage:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">idx</span> <span class="o">=</span> <span class="n">cell</span><span class="o">.</span><span class="n">get_idx</span><span class="p">(</span><span class="n">section</span><span class="o">=</span><span class="s">&#39;allsec&#39;</span><span class="p">)</span>
+<span class="k">print</span> <span class="n">idx</span>
+<span class="n">idx</span> <span class="o">=</span> <span class="n">cell</span><span class="o">.</span><span class="n">get_idx</span><span class="p">(</span><span class="n">section</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;soma&#39;</span><span class="p">,</span> <span class="s">&#39;dend&#39;</span><span class="p">,</span> <span class="s">&#39;apic&#39;</span><span class="p">])</span>
+<span class="k">print</span> <span class="n">idx</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="method">
@@ -194,26 +203,6 @@ of sections connected to parent-argument</p>
 <dd><p>Get all idx of segments of parent and children sections, i.e. segment
 idx of sections connected to parent-argument, and also of the parent
 segments</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="LFPy.Cell.get_idx_section">
-<tt class="descname">get_idx_section</tt><big>(</big><em>section='soma[0]'</em><big>)</big><a class="headerlink" href="#LFPy.Cell.get_idx_section" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get the idx of segments in any section-argument, uses hoc naming
-instead of general terms as in self.get_idx().</p>
-<p>For example:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">cell</span><span class="o">.</span><span class="n">get_idx_section</span><span class="p">(</span><span class="n">section</span><span class="o">=</span><span class="s">&#39;soma[0]&#39;</span><span class="p">)</span>
-</pre></div>
-</div>
-<p>will output something like</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">])</span>
-</pre></div>
-</div>
-<p>To list all sections in the cell object, type</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="k">for</span> <span class="n">sec</span> <span class="ow">in</span> <span class="n">cell</span><span class="o">.</span><span class="n">allseclist</span><span class="p">:</span>
-    <span class="k">print</span> <span class="n">sec</span><span class="o">.</span><span class="n">name</span><span class="p">()</span>
-</pre></div>
-</div>
 </dd></dl>
 
 <dl class="method">

@@ -169,7 +169,7 @@ class Population:
                      zpos = self.cellPositions[cellindex, 2])
                 cell.set_rotation(z = self.cellRotations[cellindex])
                 for sec in LFPy.cell.neuron.h.allsec():
-                    idx = cell.get_idx_section(sec.name())
+                    idx = cell.get_idx(sec.name())
                     ax.plot(np.r_[cell.xstart[idx], cell.xend[idx][-1]],
                             np.r_[cell.zstart[idx], cell.zend[idx][-1]],
                             color='bgrcmykbgrcmykbgrcmyk'[cellindex])
@@ -214,7 +214,7 @@ if __name__ == '__main__':
         'e_pas' : -65,              # reversal potential passive mechs
         'passive' : True,           # switch on passive mechs
         'nsegs_method' : 'lambda_f',# method for setting number of segments,
-        'lambda_f' : 100,           # segments are isopotential at frequency
+        'lambda_f' : 1,           # segments are isopotential at frequency
         'timeres_NEURON' : 2**-3,   # dt of LFP and NEURON simulation.
         'timeres_python' : 2**-3,
         'tstartms' : -100,          #start time, recorders start at t=0

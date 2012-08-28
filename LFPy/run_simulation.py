@@ -80,7 +80,9 @@ def _run_simulation_with_electrode(cell, electrode, variable_dt=False, atol=0.00
 
     # Use electrode object(s) to calculate coefficient matrices for LFP
     # calculations. If electrode is a list, then
-    
+    if cell.verbose:
+        print 'precalculating geometry - LFP mapping'
+        
     #put electrode argument in list if needed
     if type(electrode) == type([]):
         electrodes = electrode

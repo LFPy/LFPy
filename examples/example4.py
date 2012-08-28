@@ -111,7 +111,7 @@ insert_synapses_AMPA_args = {
               cellParameters['tstartms']]
 }
 insert_synapses_NMDA_args = {
-    'section' : 'alldend',
+    'section' : ['dend', 'apic'],
     'n' : 15,
     'spTimesFun' : LFPy.inputgenerators.stationary_gamma,
     'args' : [cellParameters['tstartms'], cellParameters['tstopms'], 2, 50,

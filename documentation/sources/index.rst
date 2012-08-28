@@ -29,6 +29,13 @@ in collaboration with the `Laboratory of Neuroinformatics <http://www.nencki.gov
 
 This scientific software is released under the GNU Public License `GPLv3 <http://www.gnu.org/copyleft/gpl.html>`_.
 
+CNS2012 slides on LFPy
+----------------------
+
+As part of the CNS 2012 meeting workshop `Modeling and interpretation of extracellular potentials <http://www.cnsorg.org/cns-2012-tutorials#EinevollLeskiHagen>`_, there was a talk on LFPy.
+The slides can be found here: `LFPy_tutorial_OCNS2012.pdf  <http://compneuro.umb.no/LFPy/downloads/LFPy_tutorial_OCNS2012.pdf>`_.
+
+
 Contents
 ========
 .. toctree::
