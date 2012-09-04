@@ -61,10 +61,6 @@ synapseParameters = {
 }
 
 #Generate the grid in xz-plane over which we calculate local field potentials
-#x = np.linspace(-50, 50, 11)
-#z = np.linspace(-50, 50, 11)
-#X, Z = np.meshgrid(x, z)
-#y = np.zeros(X.size)
 X, Z = np.mgrid[-5:6, -5:6] * 10
 Y = np.zeros(X.shape)
 
