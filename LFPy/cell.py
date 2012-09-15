@@ -230,7 +230,8 @@ class Cell(object):
                         ERRMSG = '\n'.join(['', 
                             'Could not load custom model code (%s)' %code, 
                             'while creating a Cell object.',
-                            'One possible cause is the NEURON mechanisms have not been compiled, ',
+                            'One possible cause is the NEURON mechanisms have',
+                            'not been compiled, ',
                             'try running nrnivmodl. ',])
                         raise Exception, ERRMSG
                 elif code.split('.')[-1] == 'py':
@@ -562,7 +563,7 @@ class Cell(object):
         Returns neuron idx of segments from sections with names that match
         the pattern defined in input section on interval [z_min, z_max].
         
-        Can be any entry in cell.allsecnames, or 'allsec'.
+        Section can be any entry in cell.allsecnames, or 'allsec'.
         
         Usage:
         ::
@@ -649,7 +650,7 @@ class Cell(object):
             rec_istim:  record currents of StimIntraElectrode
             rec_variables: list of variables to record, i.e arg=['cai', ]
             variable_dt: boolean, using variable timestep in NEURON
-            atol:       absolute tolerance used with the variable timestep in NEURON
+            atol:       absolute tolerance used with NEURON variable timestep 
             to_memory:  only valid with electrode, store lfp in -> electrode.LFP 
             to_file:    only valid with electrode, save LFPs in hdf5 file format 
             file_name:  name of hdf5 file, '.h5' is appended if it doesnt exist 
