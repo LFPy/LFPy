@@ -1,4 +1,4 @@
-
+====
 LFPy
 ====
 
@@ -16,7 +16,7 @@ The extracellular potentials are calculated from transmembrane currents in multi
 
 In the present version LFPy is mainly designed for simulation of single neurons.
 
-LFPy was developed in the Computational Neuroscience Group (http://compneuro.umb.no), Department of Mathemathical Sciences and Technology <http://www.umb.no/imt>`_,
+LFPy was developed in the Computational Neuroscience Group (http://compneuro.umb.no), Department of Mathemathical Sciences and Technology (http://www.umb.no/imt),
 at the Norwegian University of Life Sciences (http://www.umb.no) ,
 in collaboration with the Laboratory of Neuroinformatics (http://www.nencki.gov.pl/en/laboratory-of-neuroinformatics), 
 Nencki Institute of Experimental Biology (http://www.nencki.gov.pl), Warsaw, Poland. The effort was supported by 
@@ -26,6 +26,7 @@ For updated information on LFPy and online documentation, see the LFPy homepage 
 
 This scientific software is released under the GNU Public License GPLv3.
 
+============
 Requirements
 ============
 
@@ -40,6 +41,7 @@ To install LFPy you will need the following:
 - Cython (C-extensions for python, http://cython.org) to speed up simulations of extracellular fields
 
 
+============
 Installation
 ============
 
