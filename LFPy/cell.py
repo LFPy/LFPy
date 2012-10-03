@@ -91,10 +91,11 @@ class Cell(object):
         self.verbose = verbose
         
         neuron.h.load_file('stdlib.hoc')    #NEURON std. library
+        neuron.h.load_file('import3d.hoc')  #import 3D morphology lib
         
         #load morphology
-        if os.path.isfile(morphology):
-            self.morphology = morphology
+        self.morphology = morphology
+        if os.path.isfile(self.morphology):
             self._load_geometry()
         else:
             raise Exception, "File %s does not exist!" % morphology
@@ -167,22 +168,21 @@ class Cell(object):
         except LookupError:
             neuron.h('sec_counted = 0')
         
-        #Not sure if all of these are needed, just precautions
-        neuron.h('objref axonlist, dendlist, apicdendlist')
-        neuron.h('objref somalist, alldendlist')
+        ##Not sure if all of these are needed, just precautions
+        #neuron.h('objref axonlist, dendlist, apicdendlist')
+        #neuron.h('objref somalist, alldendlist')
         #neuron.h('objref allseclist')
-        neuron.h.somalist = None
-        neuron.h.dendlist = None
-        neuron.h.axonlist = None
-        neuron.h.apicdendlist = None
-        neuron.h('forall delete_section()') #don't think this is necessary
+        #neuron.h.somalist = None
+        #neuron.h.dendlist = None
+        #neuron.h.axonlist = None
+        #neuron.h.apicdendlist = None
+        #neuron.h('forall delete_section()') #don't think this is necessary
         
         #import the morphology, try and determine format
         fileEnding = self.morphology.split('.')[-1]
         if fileEnding == 'hoc' or fileEnding == 'HOC':
             neuron.h.load_file(1, self.morphology)
         else:
-            neuron.h.load_file('import3d.hoc')
             neuron.h('objref this')
             if fileEnding == 'asc' or fileEnding == 'ASC':
                 Import = neuron.h.Import3d_Neurolucida3()
