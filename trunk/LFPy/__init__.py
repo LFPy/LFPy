@@ -32,6 +32,7 @@ GNU General Public License for more details.
 from pointprocess import Synapse, PointProcess, StimIntElectrode
 from recextelectrode import RecExtElectrode, RecExtElectrodeSetup
 from cell import Cell
+from templatecell import TemplateCell
 
 import lfpcalc
 import tools
