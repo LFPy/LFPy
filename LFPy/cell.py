@@ -175,7 +175,7 @@ class Cell(object):
         neuron.h.dendlist = None
         neuron.h.axonlist = None
         neuron.h.apicdendlist = None
-        neuron.h('forall delete_section()')
+        neuron.h('forall delete_section()') #don't think this is necessary
         
         #import the morphology, try and determine format
         fileEnding = self.morphology.split('.')[-1]
@@ -285,25 +285,25 @@ class Cell(object):
     def _create_sectionlists(self):
         '''Create section lists for different kinds of sections'''
         #list with all sections
-        self.allseclist = neuron.h.SectionList()
         self.allsecnames = []
+        self.allseclist = neuron.h.SectionList()
         for sec in neuron.h.allsec():
-            self.allseclist.append(sec)
             self.allsecnames.append(sec.name())
+            self.allseclist.append(sec=sec)
         
         #list of soma sections, assuming it is named on the format "soma*"
         self.nsomasec = 0
         self.somalist = neuron.h.SectionList()
         for sec in neuron.h.allsec():
             if sec.name().find('soma') >= 0:
-                self.somalist.append(sec)
+                self.somalist.append(sec=sec)
                 self.nsomasec += 1
             
     def _get_idx(self, seclist):
         '''Return boolean vector which indexes where segments in seclist 
-        matches segments in self.allseclist, rewritten from 
+        matches segments in neuron.h.allsec(), rewritten from 
         LFPy.hoc function get_idx()'''
-        if self.allseclist == seclist:
+        if neuron.h.allsec() == seclist:
             return np.ones(self.totnsegs)
         else:
             idxvec = np.zeros(self.totnsegs)
@@ -574,18 +574,18 @@ class Cell(object):
             
         '''
         if section == 'allsec': 
-            seclist = self.allseclist
+            seclist = neuron.h.allsec()
         else:
             seclist = neuron.h.SectionList()
             if type(section) == str:
                 for sec in self.allseclist:
                     if sec.name().find(section) >= 0:
-                        seclist.append(sec)
+                        seclist.append(sec=sec)
             elif type(section) == list:
                 for secname in section:
                     for sec in self.allseclist:
                         if sec.name().find(secname) >= 0:
-                            seclist.append(sec)
+                            seclist.append(sec=sec)
             else:
                 if self.verbose:
                     print '%s did not match any section name' % str(section)
@@ -813,12 +813,24 @@ class Cell(object):
         if self.nsomasec == 0:
             pass
         elif self.nsomasec == 1:
-            self.somav.record(neuron.h.soma[0](0.5)._ref_v, 
+            for sec in self.somalist:
+                self.somav.record(sec(0.5)._ref_v, 
                               self.timeres_python)
         elif self.nsomasec > 1:
-            i, j = divmod(self.nsomasec, 2)
-            self.somav.record(neuron.h.soma[int(i)](j/2)._ref_v, 
-                              self.timeres_python)
+            nseg = self.get_idx('soma').size
+            i, j = divmod(nseg, 2)
+            k = 1
+            for sec in self.somalist:
+                for seg in sec:
+                    if nseg==2 and k == 1:
+                        #if 2 segments, record from the first one: 
+                        self.somav.record(seg._ref_v, self.timeres_python)
+                    else:
+                        if k == i*2:
+                            #record from one of the middle segments:
+                            self.somav.record(seg._ref_v,
+                                              self.timeres_python)
+                    k += 1
     
     def _set_imem_recorders(self):
         '''
