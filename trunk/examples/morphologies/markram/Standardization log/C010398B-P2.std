@@ -1,0 +1,167 @@
+# Standardization file for C010398B-P2.asc.swc created with SwcStd version 1.211 by Duncan Donohue on 8/4/05.
+# Edited SWC file saved as C010398B-P2.asc.swc.CNG.swc.  See SwcStd1.21.doc for more information.
+#
+# code   irregularity_description. (action taken)
+#     irregularity_type     coordinates
+#
+4.3  Radius of line 116 at 0.665 >= 5.0 stdevs above the mean.  (no action taken)
+     B1      X, Y, Z:  32.02  9.79  9.4
+4.3  Radius of line 1061 at 1.0 >= 5.0 stdevs above the mean.  (no action taken)
+     B1      X, Y, Z:  26.9  48.29  3.3
+4.3  Radius of line 214 at 0.665 >= 5.0 stdevs above the mean.  (no action taken)
+     B1      X, Y, Z:  24.96  16.23  2.6
+4.3  Radius of line 215 at 0.665 >= 5.0 stdevs above the mean.  (no action taken)
+     B1      X, Y, Z:  22.41  12.58  1.6
+4.5  Radius of terminal line 300 at 0.165 >= 5.0 stdevs above the mean.  (no action taken)
+     B1      X, Y, Z:  30.91  -282.9  2.7
+4.5  Radius of terminal line 305 at 0.165 >= 5.0 stdevs above the mean.  (no action taken)
+     B1      X, Y, Z:  21.2  -270.5  3.8
+4.5  Radius of terminal line 404 at 0.165 >= 5.0 stdevs above the mean.  (no action taken)
+     B1      X, Y, Z:  -509.31  -124.83  -1.5
+4.5  Radius of terminal line 436 at 0.165 >= 5.0 stdevs above the mean.  (no action taken)
+     B1      X, Y, Z:  -131.48  -125.43  -95.28
+4.5  Radius of terminal line 444 at 0.165 >= 5.0 stdevs above the mean.  (no action taken)
+     B1      X, Y, Z:  -148.14  -104.1  -100.67
+4.5  Radius of terminal line 463 at 0.165 >= 5.0 stdevs above the mean.  (no action taken)
+     B1      X, Y, Z:  55.52  -105.84  -121.17
+4.5  Radius of terminal line 470 at 0.165 >= 5.0 stdevs above the mean.  (no action taken)
+     B1      X, Y, Z:  38.33  -65.63  -18.4
+4.5  Radius of terminal line 544 at 0.165 >= 5.0 stdevs above the mean.  (no action taken)
+     B1      X, Y, Z:  -214.25  110.13  10.5
+4.5  Radius of terminal line 599 at 0.165 >= 5.0 stdevs above the mean.  (no action taken)
+     B1      X, Y, Z:  -232.08  389.58  -67.28
+4.5  Radius of terminal line 668 at 0.165 >= 5.0 stdevs above the mean.  (no action taken)
+     B1      X, Y, Z:  26.31  411.04  -99.28
+4.5  Radius of terminal line 696 at 0.165 >= 5.0 stdevs above the mean.  (no action taken)
+     B1      X, Y, Z:  -187.78  310.08  -15.5
+4.5  Radius of terminal line 708 at 0.165 >= 5.0 stdevs above the mean.  (no action taken)
+     B1      X, Y, Z:  -110.91  256.43  -99.78
+4.5  Radius of terminal line 892 at 0.165 >= 5.0 stdevs above the mean.  (no action taken)
+     B1      X, Y, Z:  -969.3  -104.04  -32.79
+4.5  Radius of terminal line 896 at 0.165 >= 5.0 stdevs above the mean.  (no action taken)
+     B1      X, Y, Z:  -863.01  -168.28  -70.68
+4.5  Radius of terminal line 898 at 0.165 >= 5.0 stdevs above the mean.  (no action taken)
+     B1      X, Y, Z:  -811.63  -187.58  -91.68
+4.5  Radius of terminal line 986 at 0.165 >= 5.0 stdevs above the mean.  (no action taken)
+     B1      X, Y, Z:  -860.69  162.38  -187.15
+4.5  Radius of terminal line 1009 at 0.165 >= 5.0 stdevs above the mean.  (no action taken)
+     B1      X, Y, Z:  -849.64  -50.85  -222.94
+4.5  Radius of terminal line 1018 at 0.165 >= 5.0 stdevs above the mean.  (no action taken)
+     B1      X, Y, Z:  -687.7  1.19  -235.14
+4.5  Radius of terminal line 1042 at 0.165 >= 5.0 stdevs above the mean.  (no action taken)
+     B1      X, Y, Z:  -647.36  -211.96  -155.26
+4.5  Radius of terminal line 1043 at 0.165 >= 5.0 stdevs above the mean.  (no action taken)
+     B1      X, Y, Z:  -71.06  -76.87  -4.3
+4.5  Radius of terminal line 1046 at 0.165 >= 5.0 stdevs above the mean.  (no action taken)
+     B1      X, Y, Z:  -65.63  -71.9  -4.4
+4.5  Radius of terminal line 1052 at 0.165 >= 5.0 stdevs above the mean.  (no action taken)
+     B1      X, Y, Z:  -58.99  -53.61  13.7
+4.4  Line 4 of rad 0.335 links to 3 of rad 0.165.  (no action taken)
+     B1      X, Y, Z:  31.88  30.14  0.7
+4.4  Line 6 of rad 0.335 links to 5 of rad 0.165.  (no action taken)
+     B1      X, Y, Z:  32.61  33.36  0.7
+4.4  Line 8 of rad 0.335 links to 7 of rad 0.165.  (no action taken)
+     B1      X, Y, Z:  33.93  40.06  0.7
+4.4  Line 12 of rad 0.335 links to 11 of rad 0.165.  (no action taken)
+     B1      X, Y, Z:  39.43  51.37  -3.4
+4.4  Line 20 of rad 0.335 links to 19 of rad 0.165.  (no action taken)
+     B1      X, Y, Z:  48.41  73.49  -6.0
+4.4  Line 22 of rad 0.335 links to 21 of rad 0.165.  (no action taken)
+     B1      X, Y, Z:  47.62  76.89  -10.4
+4.4  Line 24 of rad 0.335 links to 23 of rad 0.165.  (no action taken)
+     B1      X, Y, Z:  47.8  79.75  -10.4
+4.4  Line 29 of rad 0.335 links to 28 of rad 0.165.  (no action taken)
+     B1      X, Y, Z:  48.08  89.36  -16.3
+4.4  Line 41 of rad 0.335 links to 40 of rad 0.165.  (no action taken)
+     B1      X, Y, Z:  53.46  108.44  -35.89
+4.4  Line 63 of rad 0.335 links to 62 of rad 0.165.  (no action taken)
+     B1      X, Y, Z:  86.88  27.91  -35.29
+4.4  Line 81 of rad 0.335 links to 80 of rad 0.165.  (no action taken)
+     B1      X, Y, Z:  58.37  -10.5  8.7
+4.4  Line 97 of rad 0.335 links to 96 of rad 0.165.  (no action taken)
+     B1      X, Y, Z:  72.88  17.79  9.3
+4.4  Line 101 of rad 0.335 links to 100 of rad 0.165.  (no action taken)
+     B1      X, Y, Z:  82.64  22.31  8.6
+4.4  Line 126 of rad 0.335 links to 125 of rad 0.165.  (no action taken)
+     B1      X, Y, Z:  39.53  -39.37  1.3
+4.4  Line 128 of rad 0.335 links to 127 of rad 0.165.  (no action taken)
+     B1      X, Y, Z:  38.72  -41.84  0.5
+4.4  Line 131 of rad 0.335 links to 130 of rad 0.165.  (no action taken)
+     B1      X, Y, Z:  38.72  -48.13  -10.8
+4.4  Line 138 of rad 0.335 links to 137 of rad 0.165.  (no action taken)
+     B1      X, Y, Z:  4.88  17.98  10.5
+4.4  Line 140 of rad 0.335 links to 139 of rad 0.165.  (no action taken)
+     B1      X, Y, Z:  -5.05  20.04  9.5
+4.4  Line 142 of rad 0.335 links to 141 of rad 0.165.  (no action taken)
+     B1      X, Y, Z:  -8.62  18.19  11.0
+4.4  Line 144 of rad 0.335 links to 143 of rad 0.165.  (no action taken)
+     B1      X, Y, Z:  -11.97  17.28  10.1
+4.4  Line 146 of rad 0.335 links to 145 of rad 0.165.  (no action taken)
+     B1      X, Y, Z:  -16.61  14.0  12.1
+4.4  Line 151 of rad 0.335 links to 150 of rad 0.165.  (no action taken)
+     B1      X, Y, Z:  -32.54  6.79  11.8
+4.4  Line 163 of rad 0.335 links to 162 of rad 0.165.  (no action taken)
+     B1      X, Y, Z:  -10.44  29.36  10.8
+4.4  Line 167 of rad 0.335 links to 166 of rad 0.165.  (no action taken)
+     B1      X, Y, Z:  -0.84  38.51  7.6
+4.4  Line 192 of rad 0.335 links to 191 of rad 0.165.  (no action taken)
+     B1      X, Y, Z:  -80.59  142.37  -17.5
+4.4  Line 208 of rad 0.335 links to 207 of rad 0.165.  (no action taken)
+     B1      X, Y, Z:  32.79  -31.2  -14.5
+4.4  Line 1172 of rad 0.335 links to 1171 of rad 0.165.  (no action taken)
+     B1      X, Y, Z:  12.02  440.15  -5.2
+4.4  Line 1192 of rad 0.335 links to 1191 of rad 0.165.  (no action taken)
+     B1      X, Y, Z:  42.31  146.05  7.8
+4.4  Line 1214 of rad 0.335 links to 1213 of rad 0.165.  (no action taken)
+     B1      X, Y, Z:  34.76  100.88  -51.59
+4.4  Line 1217 of rad 0.335 links to 1216 of rad 0.165.  (no action taken)
+     B1      X, Y, Z:  35.11  103.46  -53.19
+4.4  Line 1226 of rad 0.335 links to 1225 of rad 0.165.  (no action taken)
+     B1      X, Y, Z:  48.19  117.14  -70.38
+4.4  Line 1228 of rad 0.335 links to 1227 of rad 0.165.  (no action taken)
+     B1      X, Y, Z:  50.73  118.72  -72.08
+4.4  Line 1231 of rad 0.335 links to 1230 of rad 0.165.  (no action taken)
+     B1      X, Y, Z:  27.03  54.55  -1.6
+4.4  Line 1236 of rad 0.335 links to 1235 of rad 0.165.  (no action taken)
+     B1      X, Y, Z:  24.56  61.65  -4.2
+4.4  Line 1244 of rad 0.335 links to 1243 of rad 0.165.  (no action taken)
+     B1      X, Y, Z:  22.16  80.59  -17.7
+4.4  Line 1248 of rad 0.335 links to 1247 of rad 0.165.  (no action taken)
+     B1      X, Y, Z:  24.92  89.39  -15.1
+4.4  Line 1252 of rad 0.335 links to 1251 of rad 0.165.  (no action taken)
+     B1      X, Y, Z:  29.76  96.73  -17.7
+4.4  Line 1266 of rad 0.335 links to 1265 of rad 0.165.  (no action taken)
+     B1      X, Y, Z:  5.15  66.3  3.1
+4.4  Line 1275 of rad 0.335 links to 1274 of rad 0.165.  (no action taken)
+     B1      X, Y, Z:  -30.34  95.3  8.2
+4.4  Line 1278 of rad 0.335 links to 1277 of rad 0.165.  (no action taken)
+     B1      X, Y, Z:  -35.15  95.44  9.2
+4.4  Line 1281 of rad 0.335 links to 1280 of rad 0.165.  (no action taken)
+     B1      X, Y, Z:  -6.74  67.59  0.4
+4.4  Line 1288 of rad 0.335 links to 1287 of rad 0.165.  (no action taken)
+     B1      X, Y, Z:  -26.15  68.44  -6.2
+4.4  Line 1304 of rad 0.335 links to 1303 of rad 0.165.  (no action taken)
+     B1      X, Y, Z:  -65.89  69.15  -33.79
+4.4  Line 1307 of rad 0.335 links to 1306 of rad 0.165.  (no action taken)
+     B1      X, Y, Z:  25.93  48.4  3.7
+4.4  Line 1310 of rad 0.335 links to 1309 of rad 0.165.  (no action taken)
+     B1      X, Y, Z:  23.35  51.9  3.7
+4.4  Line 1312 of rad 0.335 links to 1311 of rad 0.165.  (no action taken)
+     B1      X, Y, Z:  21.55  53.51  3.7
+4.4  Line 1315 of rad 0.335 links to 1314 of rad 0.165.  (no action taken)
+     B1      X, Y, Z:  18.86  56.55  6.7
+4.4  Line 1318 of rad 0.335 links to 1317 of rad 0.165.  (no action taken)
+     B1      X, Y, Z:  18.02  62.32  8.5
+4.4  Line 1320 of rad 0.335 links to 1319 of rad 0.165.  (no action taken)
+     B1      X, Y, Z:  19.04  65.71  10.8
+4.4  Line 1336 of rad 0.335 links to 1335 of rad 0.165.  (no action taken)
+     B1      X, Y, Z:  68.5  80.9  8.2
+2.1  Line 1 has 9 daughters.  Type is 1.  (no action taken)
+     B1      X, Y, Z:  27.484  22.0873  2.37333
+ 
+
+
+Number of type A irregularities = 0
+Number of type B1 irregularities = 77
+Number of type B2 irregularities = 0
+Number of type C irregularities = 0
