@@ -28,6 +28,10 @@ class TemplateCell(Cell):
     Arguments:
     ::
         morphology : path to morphology file;
+        
+        templatefile :  Cell template definition(s)
+        templatename :  Cell template-name used for this cell object
+        templateargs :  Arguments provided to template-definition
     
         v_init: initial potential;
         passive: passive mechs are initialized if True;
@@ -51,11 +55,15 @@ class TemplateCell(Cell):
         custom_fun_args: list of arguments passed to custom_fun functions
         verbose: switching verbose output on/off
     
-    Usage of cell class:
+    Usage of TemplateCell class:
     ::
         import LFPy
-        cellParameters = {                          
+        cellParameters = {                      
             'morphology' : 'path/to/morphology',
+            'templatefile' :  'path/to/template-file (.hoc)
+            'templatename' :  'templatename'
+            'templateargs' :  None
+
             'rm' : 30000,
             'cm' : 1.0,
             'Ra' : 150,
@@ -64,7 +72,7 @@ class TemplateCell(Cell):
             'tstartms' : -50,
             'tstopms' : 50,
         }
-        cell = LFPy.Cell(**cellParameters)
+        cell = LFPy.TemplateCell(**cellParameters)
         cell.simulate()
     '''
     def __init__(self,
@@ -107,7 +115,6 @@ class TemplateCell(Cell):
         except LookupError:
             neuron.h('sec_counted = 0')
         
-            
         #the python cell object we are loading the morphology into:
         celltemplate = getattr(neuron.h, self.templatename)
         self.cell = celltemplate(self.templateargs)
