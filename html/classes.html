@@ -7,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Module LFPy &mdash; LFPy 0.9.3 documentation</title>
+    <title>Module LFPy &mdash; LFPy 0.9.4 documentation</title>
     
     <link rel="stylesheet" href="_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -15,7 +15,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '0.9.3',
+        VERSION:     '0.9.4',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="LFPy 0.9.3 documentation" href="index.html" />
+    <link rel="top" title="LFPy 0.9.4 documentation" href="index.html" />
     <link rel="prev" title="Contact" href="contact.html" />
  
 <script type="text/javascript">
@@ -47,7 +47,7 @@
         <li class="right" >
           <a href="contact.html" title="Contact"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">LFPy 0.9.3 documentation</a> &raquo;</li> 
+        <li><a href="index.html">LFPy 0.9.4 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -180,7 +180,7 @@ midpoint is closest to the coordinates defined by the user</p>
 <tt class="descname">get_idx</tt><big>(</big><em>section='allsec'</em>, <em>z_min=-10000</em>, <em>z_max=10000</em><big>)</big><a class="headerlink" href="#LFPy.Cell.get_idx" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns neuron idx of segments from sections with names that match
 the pattern defined in input section on interval [z_min, z_max].</p>
-<p>Can be any entry in cell.allsecnames, or &#8216;allsec&#8217;.</p>
+<p>Section can be any entry in cell.allsecnames, or &#8216;allsec&#8217;.</p>
 <p>Usage:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">idx</span> <span class="o">=</span> <span class="n">cell</span><span class="o">.</span><span class="n">get_idx</span><span class="p">(</span><span class="n">section</span><span class="o">=</span><span class="s">&#39;allsec&#39;</span><span class="p">)</span>
 <span class="k">print</span> <span class="n">idx</span>
@@ -304,7 +304,7 @@ rec_vmemsyn:    record membrane voltage of segments with Synapse
 rec_istim:  record currents of StimIntraElectrode
 rec_variables: list of variables to record, i.e arg=['cai', ]
 variable_dt: boolean, using variable timestep in NEURON
-atol:       absolute tolerance used with the variable timestep in NEURON
+atol:       absolute tolerance used with NEURON variable timestep 
 to_memory:  only valid with electrode, store lfp in -&gt; electrode.LFP 
 to_file:    only valid with electrode, save LFPs in hdf5 file format 
 file_name:  name of hdf5 file, '.h5' is appended if it doesnt exist </pre>
@@ -317,6 +317,64 @@ file_name:  name of hdf5 file, '.h5' is appended if it doesnt exist </pre>
 <dd><p>Destroy any NEURON hoc objects in the cell object</p>
 </dd></dl>
 
+</dd></dl>
+
+</div>
+<div class="section" id="class-templatecell">
+<h2>class <a class="reference internal" href="#LFPy.TemplateCell" title="LFPy.TemplateCell"><tt class="xref py py-class docutils literal"><span class="pre">TemplateCell</span></tt></a><a class="headerlink" href="#class-templatecell" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="LFPy.TemplateCell">
+<em class="property">class </em><tt class="descclassname">LFPy.</tt><tt class="descname">TemplateCell</tt><big>(</big><em>templatefile='LFPyCellTemplate.hoc'</em>, <em>templatename='LFPyCellTemplate'</em>, <em>templateargs=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#LFPy.TemplateCell" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">LFPy.cell.Cell</span></tt></p>
+<p>This class allow using cell templates with some limitations</p>
+<p>Arguments:</p>
+<div class="highlight-python"><pre>morphology : path to morphology file;
+
+templatefile :  Cell template definition(s)
+templatename :  Cell template-name used for this cell object
+templateargs :  Arguments provided to template-definition
+
+v_init: initial potential;
+passive: passive mechs are initialized if True;
+Ra: axial resistance;
+rm: membrane resistivity;
+cm: membrane capacitance;
+e_pas: passive mechanism reversal potential;
+
+timeres_NEURON: internal dt for NEURON simulation;
+timeres_python: overall dt for python simulation;
+
+tstartms: initialization time for simulation &lt;= 0 ms
+tstopms: stop time for simulation &gt; 0 ms
+
+nsegs_method: method for setting the number of segments;
+max_nsegs_length: max segment length for method 'fixed_length';
+lambda_f: AC frequency for method 'lambda_f';
+
+custom_code: list of model-specific code files ([.py/.hoc]);
+custom_fun: list of model-specific functions to be called with args:
+custom_fun_args: list of arguments passed to custom_fun functions
+verbose: switching verbose output on/off</pre>
+</div>
+<p>Usage of TemplateCell class:</p>
+<div class="highlight-python"><pre>import LFPy
+cellParameters = {                      
+    'morphology' : 'path/to/morphology',
+    'templatefile' :  'path/to/template-file (.hoc)
+    'templatename' :  'templatename'
+    'templateargs' :  None
+
+    'rm' : 30000,
+    'cm' : 1.0,
+    'Ra' : 150,
+    'timeres_NEURON' : 0.1,
+    'timeres_python' : 0.1,
+    'tstartms' : -50,
+    'tstopms' : 50,
+}
+cell = LFPy.TemplateCell(**cellParameters)
+cell.simulate()</pre>
+</div>
 </dd></dl>
 
 </div>
@@ -745,6 +803,7 @@ GNU General Public License for more details.</p>
   <ul>
 <li><a class="reference internal" href="#">Module <tt class="docutils literal"><span class="pre">LFPy</span></tt></a><ul>
 <li><a class="reference internal" href="#class-cell">class <tt class="docutils literal"><span class="pre">Cell</span></tt></a></li>
+<li><a class="reference internal" href="#class-templatecell">class <tt class="docutils literal"><span class="pre">TemplateCell</span></tt></a></li>
 <li><a class="reference internal" href="#class-pointprocess">class <tt class="docutils literal"><span class="pre">PointProcess</span></tt></a></li>
 <li><a class="reference internal" href="#class-synapse">class <tt class="docutils literal"><span class="pre">Synapse</span></tt></a></li>
 <li><a class="reference internal" href="#class-stimintelectrode">class <tt class="docutils literal"><span class="pre">StimIntElectrode</span></tt></a></li>
@@ -795,7 +854,7 @@ GNU General Public License for more details.</p>
         <li class="right" >
           <a href="contact.html" title="Contact"
              >previous</a> |</li>
-        <li><a href="index.html">LFPy 0.9.3 documentation</a> &raquo;</li> 
+        <li><a href="index.html">LFPy 0.9.4 documentation</a> &raquo;</li> 
       </ul>
     </div>
 

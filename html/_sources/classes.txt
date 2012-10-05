@@ -13,6 +13,13 @@ Module :mod:`LFPy`
         :show-inheritance:
         :undoc-members:
 
+    class :class:`TemplateCell`
+    ===========================
+    .. autoclass:: TemplateCell
+        :members:
+        :show-inheritance:
+        :undoc-members:
+    
     class :class:`PointProcess`
     ===========================
     .. autoclass:: PointProcess
