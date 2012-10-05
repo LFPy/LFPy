@@ -95,10 +95,19 @@ class Cell(object):
         
         #load morphology
         self.morphology = morphology
-        if os.path.isfile(self.morphology):
-            self._load_geometry()
+        if self.morphology != None:
+            if os.path.isfile(self.morphology):
+                self._load_geometry()
+            else:
+                raise Exception, 'non-existen file %s' % self.morphology
         else:
-            raise Exception, "File %s does not exist!" % morphology
+            try:
+                #will try to import top level cell and create sectionlist,
+                #in case there were no morphology file loaded
+                neuron.h.define_shape()
+                self._create_sectionlists()
+            except:
+                raise Exception, "File %s does not exist!" % morphology
         
         #Some parameters and lists initialised
         if timeres_python not in 2.**np.arange(-16, -1) or timeres_NEURON \
@@ -267,19 +276,21 @@ class Cell(object):
     def _get_rotation(self):
         '''Check if there exists a corresponding file
         with rotation angles'''
-        base = os.path.splitext(self.morphology)[0]
-        if os.path.isfile(base+'.rot'):
-            rotation_file = base+'.rot'
-            rotation_data = open(rotation_file)
-            rotation = {}
-            for line in rotation_data:
-                var, val = line.split('=')
-                val = val.strip()
-                val = float(str(val))
-                rotation[var] = val
+        if self.morphology != None:
+            base = os.path.splitext(self.morphology)[0]        
+            if os.path.isfile(base+'.rot'):
+                rotation_file = base+'.rot'
+                rotation_data = open(rotation_file)
+                rotation = {}
+                for line in rotation_data:
+                    var, val = line.split('=')
+                    val = val.strip()
+                    val = float(str(val))
+                    rotation[var] = val
+            else:
+                rotation = {}
         else:
-            rotation = {
-                }
+            rotation = {}
         return rotation
 
     def _create_sectionlists(self):
