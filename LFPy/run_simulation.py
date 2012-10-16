@@ -64,8 +64,10 @@ def _run_simulation(cell, variable_dt=False, atol=0.001):
             t0 = time()
             ti = neuron.h.t
 
-def _run_simulation_with_electrode(cell, electrode, variable_dt=False, atol=0.001,
-                                   to_memory=True, to_file=False, file_name=None):
+def _run_simulation_with_electrode(cell, electrode=None,
+                                   variable_dt=False, atol=0.001,
+                                   to_memory=True, to_file=False,
+                                   file_name=None, electrodecoeffs=None):
     '''
     Running the actual simulation in NEURON.
     electrode argument used to determine coefficient
@@ -83,52 +85,63 @@ def _run_simulation_with_electrode(cell, electrode, variable_dt=False, atol=0.00
     if cell.verbose:
         print 'precalculating geometry - LFP mapping'
         
-    #put electrode argument in list if needed
-    if type(electrode) == type([]):
-        electrodes = electrode
+    
+    #assume now that if electrodecoeff != None, we're not using
+    #the electrode object:
+    if electrode != None and electrodecoeffs != None:
+        ERR = "electrode and electrodecoeffs can't both be != None"
+        raise AssertionError, ERR
+    #put electrodecoeff in a list, if it isn't already
+    if electrodecoeffs != None:
+        if type(electrodecoeffs) != type(list):
+            electrodecoeffs = [electrodecoeffs]
     else:
-        electrodes = [electrode]
-    
-    #calculate list of electrodecoeffs, will try temp store of imem, tvec, LFP
-    cellTvec = cell.tvec
-    try:
-        cellImem = cell.imem.copy()
-    except:
-        pass
-    
-    cell.imem = np.eye(cell.totnsegs)
-    cell.tvec = np.arange(cell.totnsegs) * cell.timeres_python
-    electrodecoeffs = []
-    electrodeLFP = []   #list of electrode.LFP objects if they exist
-    restoreLFP = False
-    restoreCellLFP = False
-    for el in electrodes:
-        if hasattr(el, 'LFP'):
-            LFPcopy = el.LFP
-            del el.LFP
-            restoreLFP = True
-        if hasattr(el, 'CellLFP'):
-            CellLFP = el.CellLFP
-            restoreCellLFP = True
-        el.calc_lfp(cell=cell)
-        electrodecoeffs.append(el.LFP.copy())
-        if restoreLFP:
-            del el.LFP
-            el.LFP = LFPcopy
+        #put electrode argument in list if needed
+        if type(electrode) == type([]):
+            electrodes = electrode
         else:
-            del el.LFP
-        if restoreCellLFP:
-            el.CellLFP = CellLFP
-        else:
-            if hasattr(el, 'CellLFP'):
-                del el.CellLFP
+            electrodes = [electrode]
         
-    #putting back variables
-    cell.tvec = cellTvec        
-    try:
-        cell.imem = cellImem
-    except:
-        del cell.imem
+        #calculate list of electrodecoeffs, will try temp store of imem, tvec, LFP
+        cellTvec = cell.tvec
+        try:
+            cellImem = cell.imem.copy()
+        except:
+            pass
+        
+        cell.imem = np.eye(cell.totnsegs)
+        cell.tvec = np.arange(cell.totnsegs) * cell.timeres_python
+        electrodecoeffs = []
+        electrodeLFP = []   #list of electrode.LFP objects if they exist
+        restoreLFP = False
+        restoreCellLFP = False
+        for el in electrodes:
+            if hasattr(el, 'LFP'):
+                LFPcopy = el.LFP
+                del el.LFP
+                restoreLFP = True
+            if hasattr(el, 'CellLFP'):
+                CellLFP = el.CellLFP
+                restoreCellLFP = True
+            el.calc_lfp(cell=cell)
+            electrodecoeffs.append(el.LFP.copy())
+            if restoreLFP:
+                del el.LFP
+                el.LFP = LFPcopy
+            else:
+                del el.LFP
+            if restoreCellLFP:
+                el.CellLFP = CellLFP
+            else:
+                if hasattr(el, 'CellLFP'):
+                    del el.CellLFP
+            
+        #putting back variables
+        cell.tvec = cellTvec        
+        try:
+            cell.imem = cellImem
+        except:
+            del cell.imem
     
     # Initialize NEURON simulations of cell object    
     neuron.h.dt = cell.timeres_NEURON
