@@ -74,13 +74,14 @@ class Cell(object):
                     cm=1.0,
                     e_pas=-65.,
                     passive = True,
+                    extracellular = True,
                     timeres_NEURON=2**-3,
                     timeres_python=2**-3,
                     tstartms=0,
                     tstopms=100,
                     nsegs_method='lambda100',
-                    max_nsegs_length=30,
                     lambda_f = 100,
+                    max_nsegs_length=None,
                     custom_code=None,
                     custom_fun=None,
                     custom_fun_args=None,
@@ -99,7 +100,7 @@ class Cell(object):
             if os.path.isfile(self.morphology):
                 self._load_geometry()
             else:
-                raise Exception, 'non-existen file %s' % self.morphology
+                raise Exception, 'non-existent file %s' % self.morphology
         else:
             try:
                 #will try to import top level cell and create sectionlist,
@@ -107,7 +108,7 @@ class Cell(object):
                 neuron.h.define_shape()
                 self._create_sectionlists()
             except:
-                raise Exception, "File %s does not exist!" % morphology
+                raise Exception, "Could not load existent top-level cell"
         
         #Some parameters and lists initialised
         if timeres_python not in 2.**np.arange(-16, -1) or timeres_NEURON \
@@ -152,7 +153,12 @@ class Cell(object):
             self._run_custom_codes(custom_code, custom_fun, custom_fun_args)
         
         #Insert extracellular mech on all segments
-        self._set_extracellular()
+        self.extracellular = extracellular
+        if self.extracellular:
+            self._set_extracellular()
+        else:
+            if self.verbose:
+                print "no extracellular mechanism inserted, can't access imem!"
         
         #set number of segments accd to rule, and calculate the number
         self._set_nsegs(nsegs_method, lambda_f, max_nsegs_length)
@@ -653,12 +659,13 @@ class Cell(object):
             rec_imem:   If true, segment membrane currents will be recorded
                         If no electrode argument is given, it is necessary to
                         set rec_imem=True in order to calculate LFP later on.
-            rec_vmem:   record segment membrane voltages
-            rec_ipas:   record passive segment membrane currents
-            rec_icap:   record capacitive segment membrane currents
-            rec_isyn:   record synaptic currents of from Synapse class instances
-            rec_vmemsyn:    record membrane voltage of segments with Synapse
-            rec_istim:  record currents of StimIntraElectrode
+                        Units of (nA).
+            rec_vmem:   record segment membrane voltages (mV)
+            rec_ipas:   record passive segment membrane currents (nA)
+            rec_icap:   record capacitive segment membrane currents (nA)
+            rec_isyn:   record synaptic currents of from Synapse class (nA)
+            rec_vmemsyn:    record membrane voltage of segments with Synapse(mV)
+            rec_istim:  record currents of StimIntraElectrode (nA)
             rec_variables: list of variables to record, i.e arg=['cai', ]
             variable_dt: boolean, using variable timestep in NEURON
             atol:       absolute tolerance used with NEURON variable timestep 
