@@ -43,6 +43,7 @@ cellParams = {
     'timeres_NEURON' : 2**-3,
     'timeres_python' : 2**-3,
     'verbose' : True,
+    'extracellular' : False,
 }
 
 #Use the TemplateCell-class to create the cell
