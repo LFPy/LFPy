@@ -114,6 +114,9 @@ class TemplateCell(Cell):
             neuron.h.sec_counted = 0
         except LookupError:
             neuron.h('sec_counted = 0')
+            
+        ##considering uncommenting this:
+        #neuron.h("forall delete_section()")
         
         #the python cell object we are loading the morphology into:
         celltemplate = getattr(neuron.h, self.templatename)
