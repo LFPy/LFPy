@@ -166,6 +166,7 @@ class Cell(object):
         if self.verbose:
             print "Total number of segments = ", self.totnsegs
         
+
         #Gather geometry, set position and rotation of morphology
         self._collect_geometry()
         if hasattr(self, 'somapos'):
@@ -174,6 +175,17 @@ class Cell(object):
             if self.verbose:
                 print 'will not set position, no soma section.'
         self.set_rotation(**self.default_rotation)
+
+    
+        #extract pt3d info from NEURON, and set these with the same rotation
+        #and position in space as in our simulations, assuming RH rule, which
+        #NEURON do NOT use in shape plot
+        self.x3d, self.y3d, self.z3d, self.diam3d = self._collect_pt3d()
+        self._update_pt3d()
+        #set position and rotation of pt3d geometry
+        self._set_pt3d_pos()
+        self._set_pt3d_rotation(**self.default_rotation)
+
 
 
     def _load_geometry(self):
@@ -958,6 +970,11 @@ class Cell(object):
         
         self._calc_midpoints()
         self._update_synapse_positions()
+        
+        #also update the pt3d_pos:
+        if hasattr(self, 'x3d'):
+            self._set_pt3d_pos()
+
     
     def strip_hoc_objects(self):
         '''
@@ -1068,7 +1085,11 @@ class Cell(object):
         else:
             if self.verbose:
                 print 'Geometry not rotated around z-axis'
-    
+
+        #rotate the pt3d geometry accordingly
+        if hasattr(self, 'x3d'):
+            self._set_pt3d_rotation(x, y, z)
+
     
     def chiral_morphology(self, axis='x'):
         '''
@@ -1241,4 +1262,217 @@ class Cell(object):
             
         [idx] = np.where(idxvec)
         return idx
+
     
+    def _collect_pt3d(self):
+        '''collect the pt3d info, for each section'''
+        x = []
+        y = []
+        z = []
+        d = []
+        for sec in self.allseclist:
+            x_i, y_i, z_i, d_i = [], [], [], []
+            for i in xrange(int(neuron.h.n3d())):
+                x_i.append(neuron.h.x3d(i))
+                y_i.append(neuron.h.y3d(i))
+                z_i.append(neuron.h.z3d(i))
+                d_i.append(neuron.h.diam3d(i))
+            
+            x.append(np.array(x_i))
+            y.append(np.array(y_i))
+            z.append(np.array(z_i))
+            d.append(np.array(d_i))
+        
+        #remove offsets which may be present if soma is centred in Origo
+        if len(x) > 1:
+            xoff = x[0].mean()
+            yoff = y[0].mean()
+            zoff = z[0].mean()
+            for i in xrange(len(x)):
+                x[i] -= xoff
+                y[i] -= yoff
+                z[i] -= zoff
+
+        return x, y, z, d
+
+            
+    def _update_pt3d(self):           
+        '''
+        update the locations in neuron.hoc.space using neuron.h.pt3dchange()
+        '''
+        i = 0
+        for sec in self.allseclist:
+            n3d = int(neuron.h.n3d())
+            for n in xrange(n3d):
+                neuron.h.pt3dchange(n,
+                                    self.x3d[i][n],
+                                    self.y3d[i][n],
+                                    self.z3d[i][n],
+                                    self.diam3d[i][n])
+            i += 1
+        
+        #let NEURON know about the changes we just did:
+        neuron.h.define_shape() 
+        #must recollect the geometry, otherwise we get roundoff errors!
+        self._collect_geometry()
+
+
+    def _set_pt3d_pos(self):
+        '''
+        Offset pt3d geometry with cell.somapos
+        '''
+        for i in xrange(len(self.x3d)):
+            self.x3d[i] += self.somapos[0]
+            self.y3d[i] += self.somapos[1]
+            self.z3d[i] += self.somapos[2]
+        self._update_pt3d()
+
+
+    def _set_pt3d_rotation(self, x=None, y=None, z=None):
+        '''
+        Rotate pt3d geometry of cell object around the x-, y-, z-axis
+        in that order.
+        Input should be angles in radians.
+        
+        using rotation matrices, takes dict with rot. angles,
+        where x, y, z are the rotation angles around respective axes.
+        All rotation angles are optional.
+        
+        Usage:
+        ::
+            cell = LFPy.Cell(**kwargs)
+            rotation = {'x' : 1.233, 'y' : 0.236, 'z' : np.pi}
+            cell.set_pt3d_rotation(**rotation)
+        '''
+        if x != None:
+            theta = -x
+            rotation_x = np.matrix([[1, 0, 0],
+                [0, np.cos(theta), -np.sin(theta)],
+                [0, np.sin(theta), np.cos(theta)]])
+            for i in xrange(len(self.x3d)):
+                rel_pos = self._rel_pt3d_positions(self.x3d[i],
+                                                   self.y3d[i], self.z3d[i])
+                
+                rel_pos = rel_pos * rotation_x
+                
+                self.x3d[i], self.y3d[i], self.z3d[i] = \
+                                            self._real_pt3d_positions(rel_pos)
+            if self.verbose:
+                print 'Rotated geometry %g radians around x-axis' % (-theta)
+        else:
+            if self.verbose:
+                print 'Geometry not rotated around x-axis'
+        
+        if y != None:
+            phi = -y
+            rotation_y = np.matrix([[np.cos(phi), 0, np.sin(phi)],
+                [0, 1, 0],
+                [-np.sin(phi), 0, np.cos(phi)]])
+            for i in xrange(len(self.x3d)):
+                rel_pos = self._rel_pt3d_positions(self.x3d[i],
+                                                   self.y3d[i], self.z3d[i])
+                
+                rel_pos = rel_pos * rotation_y
+                
+                self.x3d[i], self.y3d[i], self.z3d[i] = \
+                                            self._real_pt3d_positions(rel_pos)
+            if self.verbose:
+                print 'Rotated geometry %g radians around y-axis' % (-phi)
+        else:
+            if self.verbose:
+                print 'Geometry not rotated around y-axis'
+        
+        if z != None:
+            gamma = -z
+            rotation_z = np.matrix([[np.cos(gamma), -np.sin(gamma), 0],
+                    [np.sin(gamma), np.cos(gamma), 0],
+                    [0, 0, 1]])
+            for i in xrange(len(self.x3d)):
+                rel_pos = self._rel_pt3d_positions(self.x3d[i],
+                                                   self.y3d[i], self.z3d[i])
+                
+                rel_pos = rel_pos * rotation_z
+                
+                self.x3d[i], self.y3d[i], self.z3d[i] = \
+                                            self._real_pt3d_positions(rel_pos)
+            if self.verbose:
+                print 'Rotated geometry %g radians around z-axis' % (-gamma)
+        else:
+            if self.verbose:
+                print 'Geometry not rotated around z-axis'
+        
+        self._update_pt3d()
+
+    def _rel_pt3d_positions(self, x, y, z):
+        '''
+        Morphology relative to soma position
+        '''
+        rel_pos = np.transpose(np.array([x - self.somapos[0],
+                                         y - self.somapos[1],
+                                         z - self.somapos[2]]))
+
+        return rel_pos
+    
+    def _real_pt3d_positions(self, rel_pos):
+        '''
+        Morphology coordinates relative to Origo
+        '''
+        x = rel_pos[:, 0] + self.somapos[0]
+        y = rel_pos[:, 1] + self.somapos[1]
+        z = rel_pos[:, 2] + self.somapos[2]
+        
+        x = np.array(x).flatten()
+        y = np.array(y).flatten()
+        z = np.array(z).flatten()
+        
+        return x, y, z
+    
+    def _create_polygon(self, i):
+        '''create a polygon to fill for each section'''
+        
+        
+        x = self.x3d[i]
+        z = self.z3d[i]
+        d = self.diam3d[i]
+        
+        inds = (x != 0) + (z != 0)
+        
+        if x.size > 2:
+            x = x[inds]
+            z = z[inds]
+            d = d[inds]
+        
+        dx = np.diff(x)
+        dz = np.diff(z)
+        theta = np.arctan2(dz, dx)
+        
+        x = np.r_[x, x[::-1]]
+        z = np.r_[z, z[::-1]]
+        
+        theta = np.r_[theta, theta[::-1]]
+        d = np.r_[d, d[::-1]]
+        
+        
+        #one side
+        x[:dx.size+1] -= 0.5 * d[:dx.size+1] * np.sin(theta)[:dx.size+1]
+        z[:dz.size+1] += 0.5 * d[:dx.size+1] * np.cos(theta)[:dx.size+1]
+        
+        #other side
+        x[::-1][:dx.size+1] += 0.5 * d[::-1][:dx.size+1] * np.sin(theta)[::-1][:dx.size+1]
+        z[::-1][:dz.size+1] -= 0.5 * d[::-1][:dx.size+1] * np.cos(theta)[::-1][:dx.size+1]
+        
+        return x, z
+    
+    def get_pt3d_polygons(self):
+        '''for each section create a polygon in the (x,z)-plane, that can be
+        visualized using plt.fill()
+        
+        Returned argument is a list of (x, z) tuples giving the trajectory
+        of each section
+        '''
+        polygons = []
+        for i in xrange(len(self.x3d)):
+            polygons.append(self._create_polygon(i))
+        
+        return polygons
+
