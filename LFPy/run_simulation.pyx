@@ -18,6 +18,8 @@ from time import time
 
 DTYPE = np.float64
 ctypedef np.float64_t DTYPE_t
+ctypedef Py_ssize_t   LTYPE_t
+
 
 def _run_simulation(cell, variable_dt=False, atol=0.001):
     '''
@@ -301,3 +303,73 @@ def _run_simulation_with_electrode(cell, electrode=None,
     
     if to_file:
         el_LFP_file.close()
+
+
+cpdef _collect_geometry_neuron(cell):
+    '''Loop over allseclist to determine area, diam, xyz-start- and
+    endpoints, embed geometry to cell object'''
+    
+    
+    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] areavec = np.zeros(cell.totnsegs)
+    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] diamvec = np.zeros(cell.totnsegs)
+    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] lengthvec = np.zeros(cell.totnsegs)
+    
+    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] xstartvec = np.zeros(cell.totnsegs)
+    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] xendvec = np.zeros(cell.totnsegs)
+    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] ystartvec = np.zeros(cell.totnsegs)
+    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] yendvec = np.zeros(cell.totnsegs)
+    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] zstartvec = np.zeros(cell.totnsegs)
+    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] zendvec = np.zeros(cell.totnsegs)
+    
+    cdef DTYPE_t xlength, ylength, zlength, n3d, x3d, y3d, z3d, segx, gsen2, secL
+    cdef LTYPE_t counter, nseg 
+    
+    counter = 0
+    
+    #loop over all segments
+    for sec in cell.allseclist:
+        n3d = neuron.h.n3d()
+        if n3d > 0:
+            #length of sections
+            x3d = neuron.h.x3d(0)
+            y3d = neuron.h.y3d(0)
+            z3d = neuron.h.z3d(0)
+            xlength = neuron.h.x3d(n3d - 1) - x3d
+            ylength = neuron.h.y3d(n3d - 1) - y3d
+            zlength = neuron.h.z3d(n3d - 1) - z3d
+            
+            secL = sec.L
+            nseg = sec.nseg
+            gsen2 = 1. / 2. / nseg
+            
+            for seg in sec:
+                segx = seg.x
+                
+                areavec[counter] = neuron.h.area(segx)
+                diamvec[counter] = seg.diam
+                lengthvec[counter] = secL / nseg
+                
+                xstartvec[counter] = x3d + xlength * (segx - gsen2)
+                xendvec[counter] = x3d + xlength * (segx + gsen2)
+                
+                ystartvec[counter] = y3d + ylength * (segx - gsen2)
+                yendvec[counter] = y3d + ylength * (segx + gsen2)
+                
+                zstartvec[counter] = z3d + zlength * (segx - gsen2)
+                zendvec[counter] = z3d + zlength * (segx + gsen2)
+                
+                counter += 1
+    
+    
+    cell.xstart = xstartvec
+    cell.ystart = ystartvec
+    cell.zstart = zstartvec
+    
+    cell.xend = xendvec
+    cell.yend = yendvec
+    cell.zend = zendvec
+    
+    cell.area = areavec
+    cell.diam = diamvec
+    cell.length = lengthvec
+
