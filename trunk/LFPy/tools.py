@@ -11,12 +11,13 @@ but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.'''
 
-import cPickle
-import pylab as pl
+import numpy as np
 import scipy.signal as ss
 
 def load(filename):
     '''Generic loading of cPickled objects from file'''
+    import cPickle
+    
     filen = open(filename,'rb')
     obj = cPickle.load(filen)
     filen.close()
@@ -33,16 +34,18 @@ def noise_brown(ncols, nrows=1, weight=1, filter=None, filterargs=None):
         >>> b, a = filter(**filterargs)
         >>> signal = scipy.signal.lfilter(b, a, signal)
     '''
+    from matplotlib.mlab import rms_flat
+
     if filter != None:
         coeff_b, coeff_a = filter(**filterargs)
     
-    noise = pl.empty((nrows, ncols))    
+    noise = np.empty((nrows, ncols))    
     for i in xrange(nrows):
-        signal = pl.normal(size=ncols+10000).cumsum()
+        signal = np.random.normal(size=ncols+10000).cumsum()
         if filter != None:
             signal = ss.lfilter(coeff_b, coeff_a, signal)
         noise[i, :] = signal[10000:]
-        noise[i, :] /= pl.rms_flat(noise[i, :])
+        noise[i, :] /= rms_flat(noise[i, :])
         noise[i, :] *= weight
     return noise
     
