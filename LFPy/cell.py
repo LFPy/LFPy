@@ -18,7 +18,7 @@ import neuron
 import numpy as np
 import cPickle
 from LFPy import RecExtElectrode
-from LFPy.run_simulation import _run_simulation, _run_simulation_with_electrode
+from LFPy.run_simulation import _run_simulation, _run_simulation_with_electrode, _collect_geometry_neuron
 import sys
 
 class Cell(object):
@@ -49,6 +49,7 @@ class Cell(object):
         custom_code: list of model-specific code files ([.py/.hoc]);
         custom_fun: list of model-specific functions to be called with args:
         custom_fun_args: list of arguments passed to custom_fun functions
+        pt3d: Use and update pt3d-info of the cell geometries, can be slow!
         verbose: switching verbose output on/off
     
     Usage of cell class:
@@ -85,11 +86,13 @@ class Cell(object):
                     custom_code=None,
                     custom_fun=None,
                     custom_fun_args=None,
+                    pt3d=False,
                     verbose=False):
         '''
         Initialization of the Cell object.
         '''
         self.verbose = verbose
+        self.pt3d = pt3d
         
         neuron.h.load_file('stdlib.hoc')    #NEURON std. library
         neuron.h.load_file('import3d.hoc')  #import 3D morphology lib
@@ -180,11 +183,12 @@ class Cell(object):
         #extract pt3d info from NEURON, and set these with the same rotation
         #and position in space as in our simulations, assuming RH rule, which
         #NEURON do NOT use in shape plot
-        self.x3d, self.y3d, self.z3d, self.diam3d = self._collect_pt3d()
-        self._update_pt3d()
-        #set position and rotation of pt3d geometry
-        self._set_pt3d_pos()
-        self._set_pt3d_rotation(**self.default_rotation)
+        if self.pt3d:
+            self.x3d, self.y3d, self.z3d, self.diam3d = self._collect_pt3d()
+            self._update_pt3d()
+            #set position and rotation of pt3d geometry
+            self._set_pt3d_pos()
+            self._set_pt3d_rotation(**self.default_rotation)
 
 
 
@@ -336,13 +340,29 @@ class Cell(object):
             return np.ones(self.totnsegs)
         else:
             idxvec = np.zeros(self.totnsegs)
+            #get sectionnames from seclist
+            seclistnames = []
+            for sec in seclist:
+                seclistnames.append(sec.name())
+            seclistnames = np.array(seclistnames, dtype='|S128')
+            segnames = np.empty(self.totnsegs, dtype='|S128')
             i = 0
             for sec in self.allseclist:
+                secname = sec.name()
                 for seg in sec:
-                    for secl in seclist:
-                        if sec.name() == secl.name():
-                            idxvec[i] = 1
+                    segnames[i] = secname
                     i += 1
+            for name in seclistnames:
+                idxvec[segnames == name] = 1
+            
+            
+            #i = 0
+            #for sec in self.allseclist:
+            #    for seg in sec:
+            #        for secl in seclist:
+            #            if sec.name() == secl.name():
+            #                idxvec[i] = 1
+            #        i += 1
             return idxvec
     
     def _set_nsegs_lambda_f(self, frequency):
@@ -493,7 +513,8 @@ class Cell(object):
     
     def _collect_geometry(self):
         '''Collects x, y, z-coordinates from NEURON'''
-        self._collect_geometry_neuron()
+        #self._collect_geometry_neuron()
+        _collect_geometry_neuron(self)
         self._calc_midpoints()
         
         self.somaidx = self.get_idx(section='soma')
@@ -522,70 +543,13 @@ class Cell(object):
             self.somapos[1] = ymids.mean()
             self.somapos[2] = zmids.mean()
     
-    def _collect_geometry_neuron(self):
-        '''Loop over allseclist to determine area, diam, xyz-start- and
-        endpoints, embed geometry to cell object'''
-        
-        areavec = neuron.h.Vector(self.totnsegs)
-        diamvec = neuron.h.Vector(self.totnsegs)
-        lengthvec = neuron.h.Vector(self.totnsegs)
-        
-        xstartvec = neuron.h.Vector(self.totnsegs)
-        xendvec = neuron.h.Vector(self.totnsegs)
-        ystartvec = neuron.h.Vector(self.totnsegs)
-        yendvec = neuron.h.Vector(self.totnsegs)
-        zstartvec = neuron.h.Vector(self.totnsegs)
-        zendvec = neuron.h.Vector(self.totnsegs)
-        
-        counter = 0
-        
-        #loop over all segments
-        for sec in self.allseclist:
-            if neuron.h.n3d() > 0:
-                #length of sections
-                xlength = neuron.h.x3d(neuron.h.n3d() - 1) - neuron.h.x3d(0)
-                ylength = neuron.h.y3d(neuron.h.n3d() - 1) - neuron.h.y3d(0)
-                zlength = neuron.h.z3d(neuron.h.n3d() - 1) - neuron.h.z3d(0)
-                
-                for seg in sec:
-                    areavec.x[counter] = neuron.h.area(seg.x)
-                    diamvec.x[counter] = seg.diam
-                    lengthvec.x[counter] = sec.L/sec.nseg
-                    
-                    xstartvec.x[counter] = neuron.h.x3d(0) + \
-                        xlength * (seg.x - 1./2./sec.nseg)
-                    xendvec.x[counter] = neuron.h.x3d(0) + \
-                        xlength * (seg.x + 1./2./sec.nseg)
-                    
-                    ystartvec.x[counter] = neuron.h.y3d(0) + \
-                        ylength * (seg.x - 1./2./sec.nseg)
-                    yendvec.x[counter] = neuron.h.y3d(0) + \
-                        ylength * (seg.x + 1./2./sec.nseg)
-                    
-                    zstartvec.x[counter] = neuron.h.z3d(0) + \
-                        zlength * (seg.x - 1./2./sec.nseg)
-                    zendvec.x[counter] = neuron.h.z3d(0) + \
-                        zlength * (seg.x + 1./2./sec.nseg)
-                    
-                    counter += 1
-        
-        self.xstart = np.array(xstartvec)
-        self.ystart = np.array(ystartvec)
-        self.zstart = np.array(zstartvec)
-        
-        self.xend = np.array(xendvec)
-        self.yend = np.array(yendvec)
-        self.zend = np.array(zendvec)
-        
-        self.area = np.array(areavec)
-        self.diam = np.array(diamvec)
-        self.length = np.array(lengthvec)
     
     def _calc_midpoints(self):
         '''Calculate midpoints of each segment'''
-        self.xmid = .5*(self.xstart+self.xend)
-        self.ymid = .5*(self.ystart+self.yend)
-        self.zmid = .5*(self.zstart+self.zend)
+        self.xmid = .5*(self.xstart+self.xend).flatten()
+        self.ymid = .5*(self.ystart+self.yend).flatten()
+        self.zmid = .5*(self.zstart+self.zend).flatten()
+
 
     def get_idx(self, section='allsec', z_min=-10000, z_max=10000):
         '''
@@ -618,12 +582,11 @@ class Cell(object):
             else:
                 if self.verbose:
                     print '%s did not match any section name' % str(section)
-                
+
         idx = np.where(self._get_idx(seclist))[0]
-        
-        sel_z_idx = np.where(np.logical_and(self.zmid[idx] > z_min,
-                                                self.zmid[idx] < z_max))
+        sel_z_idx = (self.zmid[idx] > z_min) & (self.zmid[idx] < z_max)
         return idx[sel_z_idx]
+                            
                 
     def get_closest_idx(self, x=0, y=0, z=0, section='allsec'):
         '''Get the index number of a segment in specified section which 
@@ -972,8 +935,8 @@ class Cell(object):
         self._update_synapse_positions()
         
         #also update the pt3d_pos:
-        if hasattr(self, 'x3d'):
-            self._set_pt3d_pos()
+        if self.pt3d and hasattr(self, 'x3d'):
+                self._set_pt3d_pos()
 
     
     def strip_hoc_objects(self):
@@ -1087,7 +1050,7 @@ class Cell(object):
                 print 'Geometry not rotated around z-axis'
 
         #rotate the pt3d geometry accordingly
-        if hasattr(self, 'x3d'):
+        if self.pt3d and hasattr(self, 'x3d'):
             self._set_pt3d_rotation(x, y, z)
 
     
@@ -1118,28 +1081,31 @@ class Cell(object):
         
     def _squeeze_me_macaroni(self):
         '''
-        Reducing the dimensions of the morphology matrices from 3D->2D
+        Reducing the dimensions of the morphology matrices from 3D->1D
         '''
-        self.xstart = np.squeeze(np.array(self.xstart))
-        self.xend = np.squeeze(np.array(self.xend))
+        self.xstart = np.array(self.xstart).flatten()
+        self.xend = np.array(self.xend).flatten()
         
-        self.ystart = np.squeeze(np.array(self.ystart))
-        self.yend = np.squeeze(np.array(self.yend))
+        self.ystart = np.array(self.ystart).flatten()
+        self.yend = np.array(self.yend).flatten()
         
-        self.zstart = np.squeeze(np.array(self.zstart))
-        self.zend = np.squeeze(np.array(self.zend))
+        self.zstart = np.array(self.zstart).flatten()
+        self.zend = np.array(self.zend).flatten()
+        
     
     def _rel_positions(self):
         '''
         Morphology relative to soma position
         '''
-        rel_start = np.transpose(np.array([self.xstart-self.somapos[0],
-                                                self.ystart-self.somapos[1],
-                                                self.zstart-self.somapos[2]]))
-        rel_end = np.transpose(np.array([self.xend-self.somapos[0],
-                                                self.yend-self.somapos[1],
-                                                self.zend-self.somapos[2]]))
+        rel_start = np.array([self.xstart-self.somapos[0],
+                              self.ystart-self.somapos[1],
+                              self.zstart-self.somapos[2]]).T    
+        rel_end = np.array([self.xend-self.somapos[0],
+                            self.yend-self.somapos[1],
+                            self.zend-self.somapos[2]]).T
+
         return rel_start, rel_end
+
     
     def _real_positions(self, rel_start, rel_end):
         '''
@@ -1156,6 +1122,7 @@ class Cell(object):
         self._squeeze_me_macaroni()
         self._calc_midpoints()
         self._update_synapse_positions()
+
     
     def get_rand_prob_area_norm(self, section='allsec', 
                                 z_min=-10000, z_max=10000):
@@ -1263,25 +1230,27 @@ class Cell(object):
         [idx] = np.where(idxvec)
         return idx
 
-    
     def _collect_pt3d(self):
         '''collect the pt3d info, for each section'''
         x = []
         y = []
         z = []
         d = []
+
         for sec in self.allseclist:
-            x_i, y_i, z_i, d_i = [], [], [], []
-            for i in xrange(int(neuron.h.n3d())):
-                x_i.append(neuron.h.x3d(i))
-                y_i.append(neuron.h.y3d(i))
-                z_i.append(neuron.h.z3d(i))
-                d_i.append(neuron.h.diam3d(i))
+            n3d = int(neuron.h.n3d())
+            x_i, y_i, z_i, d_i = np.zeros(n3d), np.zeros(n3d), np.zeros(n3d), np.zeros(n3d)
+            for i in xrange(n3d):
+                x_i[i] = neuron.h.x3d(i)
+                y_i[i] = neuron.h.y3d(i)
+                z_i[i] = neuron.h.z3d(i)
+                d_i[i] = neuron.h.diam3d(i)
+
             
-            x.append(np.array(x_i))
-            y.append(np.array(y_i))
-            z.append(np.array(z_i))
-            d.append(np.array(d_i))
+            x.append(x_i)
+            y.append(y_i)
+            z.append(z_i)
+            d.append(d_i)
         
         #remove offsets which may be present if soma is centred in Origo
         if len(x) > 1:
@@ -1428,9 +1397,7 @@ class Cell(object):
         return x, y, z
     
     def _create_polygon(self, i):
-        '''create a polygon to fill for each section'''
-        
-        
+        '''create a polygon to fill for each section'''        
         x = self.x3d[i]
         z = self.z3d[i]
         d = self.diam3d[i]

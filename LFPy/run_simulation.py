@@ -276,3 +276,66 @@ def _run_simulation_with_electrode(cell, electrode=None,
     if to_file:
         el_LFP_file.close()
 
+
+def _collect_geometry_neuron(cell):
+    '''Loop over allseclist to determine area, diam, xyz-start- and
+    endpoints, embed geometry to cell object'''
+    
+    
+    areavec = np.zeros(cell.totnsegs)
+    diamvec = np.zeros(cell.totnsegs)
+    lengthvec = np.zeros(cell.totnsegs)
+    
+    xstartvec = np.zeros(cell.totnsegs)
+    xendvec = np.zeros(cell.totnsegs)
+    ystartvec = np.zeros(cell.totnsegs)
+    yendvec = np.zeros(cell.totnsegs)
+    zstartvec = np.zeros(cell.totnsegs)
+    zendvec = np.zeros(cell.totnsegs)
+    
+    counter = 0
+    
+    #loop over all segments
+    for sec in cell.allseclist:
+        n3d = neuron.h.n3d()
+        if n3d > 0:
+            #length of sections
+            xlength = neuron.h.x3d(n3d - 1) - neuron.h.x3d(0)
+            ylength = neuron.h.y3d(n3d - 1) - neuron.h.y3d(0)
+            zlength = neuron.h.z3d(n3d - 1) - neuron.h.z3d(0)
+            
+            for seg in sec:
+                areavec[counter] = neuron.h.area(seg.x)
+                diamvec[counter] = seg.diam
+                lengthvec[counter] = sec.L/sec.nseg
+                
+                xstartvec[counter] = neuron.h.x3d(0) + \
+                    xlength * (seg.x - 1./2./sec.nseg)
+                xendvec[counter] = neuron.h.x3d(0) + \
+                    xlength * (seg.x + 1./2./sec.nseg)
+                
+                ystartvec[counter] = neuron.h.y3d(0) + \
+                    ylength * (seg.x - 1./2./sec.nseg)
+                yendvec[counter] = neuron.h.y3d(0) + \
+                    ylength * (seg.x + 1./2./sec.nseg)
+                
+                zstartvec[counter] = neuron.h.z3d(0) + \
+                    zlength * (seg.x - 1./2./sec.nseg)
+                zendvec[counter] = neuron.h.z3d(0) + \
+                    zlength * (seg.x + 1./2./sec.nseg)
+                
+                counter += 1
+    
+    
+    cell.xstart = np.array(xstartvec)
+    cell.ystart = np.array(ystartvec)
+    cell.zstart = np.array(zstartvec)
+    
+    cell.xend = np.array(xendvec)
+    cell.yend = np.array(yendvec)
+    cell.zend = np.array(zendvec)
+    
+    cell.area = np.array(areavec)
+    cell.diam = np.array(diamvec)
+    cell.length = np.array(lengthvec)
+
