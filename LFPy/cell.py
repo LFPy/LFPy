@@ -1443,3 +1443,50 @@ class Cell(object):
         
         return polygons
 
+
+    def insert_v_ext(self, v_ext, t_ext):        
+        '''
+        playback of some extracellular potential v_ext on each cell.totnseg
+        compartments. Assumes that the "extracellular"-mechanism is inserted
+        on each compartment.
+        
+        Can be used to study ephaptic effects and similar
+        
+        The inputs will be copied and attached to the cell object as
+        cell.v_ext, cell.t_ext, and converted
+        to (list of) neuron.h.Vector types, to allow playback into each
+        compartment e_extracellular reference.
+        
+        Can not be deleted 
+        
+        Args:
+        ::
+            v_ext : cell.totnsegs x t_ext.size np.array, unit mV
+            t_ext : np.array, time vector of v_ext
+            
+        '''
+        #test dimensions of input
+        try:
+            if v_ext.shape[0] != self.totnsegs:
+                raise ValueError, "v_ext.shape[0] != cell.totnsegs"
+            if v_ext.shape[1] != t_ext.size:
+                raise ValueError, 'v_ext.shape[1] != t_ext.size'
+        except:
+            raise ValueError, 'v_ext, t_ext must both be np.array types'
+        
+        if not self.extracellular:
+            raise Exception, 'LFPy.Cell arg extracellular != True'
+        
+        #create list of extracellular potentials on each segment, time vector
+        self.t_ext = neuron.h.Vector(t_ext)
+        self.v_ext = []
+        for v in v_ext:
+            self.v_ext.append(neuron.h.Vector(v))
+        #play v_ext into e_extracellular reference
+        i = 0
+        for sec in self.allseclist:
+            for seg in sec:
+                self.v_ext[i].play(seg._ref_e_extracellular, self.t_ext)
+                i += 1
+        
+        return 
