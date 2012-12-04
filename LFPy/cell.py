@@ -1457,7 +1457,7 @@ class Cell(object):
         to (list of) neuron.h.Vector types, to allow playback into each
         compartment e_extracellular reference.
         
-        Can not be deleted 
+        Can not be deleted prior to running cell.simulate() 
         
         Args:
         ::
