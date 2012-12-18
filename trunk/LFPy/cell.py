@@ -513,7 +513,17 @@ class Cell(object):
     
     def _collect_geometry(self):
         '''Collects x, y, z-coordinates from NEURON'''
-        #self._collect_geometry_neuron()
+        #None-type some attributes, so pylint doesn't complain
+        self.xstart = None
+        self.ystart = None
+        self.zstart = None
+        self.xend = None
+        self.yend = None
+        self.zend = None
+        self.area = None
+        self.diam = None
+        self.length = None
+        
         _collect_geometry_neuron(self)
         self._calc_midpoints()
         
@@ -607,14 +617,18 @@ class Cell(object):
         interval [z_min, z_max]
         '''
         poss_idx = self.get_idx(section=section, z_min=z_min, z_max = z_max)
-        idx = np.empty(nidx, dtype=int)
-        norm_area_cumsum = np.cumsum(self.area[poss_idx] / 
-                                     sum(self.area[poss_idx]))
-        
-        for i in xrange(nidx):
-            idx[i] = np.nonzero(np.random.rand() < norm_area_cumsum)[0].min()
-        
-        return poss_idx[idx]
+        if poss_idx.size == 0:
+            print 'No possible segment idx match enquire! returning empty array'
+            return np.array([])
+        else:
+            idx = np.empty(nidx, dtype=int)
+            norm_area_cumsum = np.cumsum(self.area[poss_idx] / 
+                                         sum(self.area[poss_idx]))
+            
+            for i in xrange(nidx):
+                idx[i] = np.nonzero(np.random.rand() < norm_area_cumsum)[0].min()
+            
+            return poss_idx[idx]
     
     def simulate(self, electrode=None, rec_imem=False, rec_vmem=False,
                  rec_ipas=False, rec_icap=False,
@@ -1463,7 +1477,44 @@ class Cell(object):
         ::
             v_ext : cell.totnsegs x t_ext.size np.array, unit mV
             t_ext : np.array, time vector of v_ext
+        
+        Simple usage:
+        ::
+            import LFPy
+            import numpy as np
+            import matplotlib.pyplot as plt
             
+            #create cell
+            cell = LFPy.Cell(morphology='morphologies/example_morphology.hoc')
+            
+            #time vector and extracellular field for every segment:
+            t_ext = np.arange(cell.tstopms / cell.timeres_python+ 1) * cell.timeres_python
+            v_ext = np.random.rand(cell.totnsegs, t_ext.size)-0.5
+        
+            #insert potentials and record response:
+            cell.insert_v_ext(v_ext, t_ext)
+            cell.simulate(rec_imem=True, rec_vmem=True)
+        
+            fig = plt.figure()
+            ax1 = fig.add_subplot(311)
+            ax2 = fig.add_subplot(312)
+            ax3 = fig.add_subplot(313)
+            eim = ax1.matshow(np.array(cell.v_ext), cmap='spectral')
+            cb1 = fig.colorbar(eim, ax=ax1)
+            cb1.set_label('v_ext')
+            ax1.axis(ax1.axis('tight'))
+            iim = ax2.matshow(cell.imem, cmap='spectral')
+            cb2 = fig.colorbar(iim, ax=ax2)
+            cb2.set_label('imem')
+            ax2.axis(ax2.axis('tight'))
+            vim = ax3.matshow(cell.vmem, cmap='spectral')
+            ax3.axis(ax3.axis('tight'))
+            cb3 = fig.colorbar(vim, ax=ax3)
+            cb3.set_label('vmem')
+            ax3.set_xlabel('tstep')
+            plt.show()
+        
+        
         '''
         #test dimensions of input
         try:
