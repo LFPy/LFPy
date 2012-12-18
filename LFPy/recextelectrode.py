@@ -14,7 +14,6 @@ GNU General Public License for more details.'''
 import pylab as pl
 import sys
 from LFPy import lfpcalc, tools
-from multiprocessing import Process, Queue, freeze_support, cpu_count
 
 class RecExtElectrodeSetup(object):
     '''
@@ -80,6 +79,8 @@ class RecExtElectrodeSetup(object):
         self.method = method
         self.verbose = verbose
         self.seedvalue = seedvalue
+        #None-type some attributes created by the Cell class
+        self.electrodecoeff = None
 
         if from_file:
             if type(cellfile) == type(str()):
@@ -92,11 +93,8 @@ class RecExtElectrodeSetup(object):
                 raise ValueError, 'cell either string or list of strings'
 
         if cell is not None:
-            #try:
                 self._import_c(cell)
-            #except:
-            #    raise ValueError, "You have to run cell.simulate(rec_imem=True) before creating the electrode or set the cell argument to LFPy.RecExtElectorde to 'None' and then pass the electrode as argument to cell.simulate()"
-            #
+
 
     class cell():
         '''Empty object that cell-specific variables are stored in'''
