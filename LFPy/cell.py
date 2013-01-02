@@ -169,6 +169,11 @@ class Cell(object):
         if self.verbose:
             print "Total number of segments = ", self.totnsegs
         
+        #extract pt3d info from NEURON, and set these with the same rotation
+        #and position in space as in our simulations, assuming RH rule, which
+        #NEURON do NOT use in shape plot
+        if self.pt3d:
+            self.x3d, self.y3d, self.z3d, self.diam3d = self._collect_pt3d()
 
         #Gather geometry, set position and rotation of morphology
         self._collect_geometry()
@@ -176,19 +181,10 @@ class Cell(object):
             self.set_pos()
         else:
             if self.verbose:
-                print 'will not set position, no soma section.'
+                print 'no soma, using the midpoint if initial segment.'
         self.set_rotation(**self.default_rotation)
 
     
-        #extract pt3d info from NEURON, and set these with the same rotation
-        #and position in space as in our simulations, assuming RH rule, which
-        #NEURON do NOT use in shape plot
-        if self.pt3d:
-            self.x3d, self.y3d, self.z3d, self.diam3d = self._collect_pt3d()
-            self._update_pt3d()
-            #set position and rotation of pt3d geometry
-            self._set_pt3d_pos()
-            self._set_pt3d_rotation(**self.default_rotation)
 
 
 
@@ -198,16 +194,6 @@ class Cell(object):
             neuron.h.sec_counted = 0
         except LookupError:
             neuron.h('sec_counted = 0')
-        
-        ##Not sure if all of these are needed, just precautions
-        #neuron.h('objref axonlist, dendlist, apicdendlist')
-        #neuron.h('objref somalist, alldendlist')
-        #neuron.h('objref allseclist')
-        #neuron.h.somalist = None
-        #neuron.h.dendlist = None
-        #neuron.h.axonlist = None
-        #neuron.h.apicdendlist = None
-        #neuron.h('forall delete_section()') #don't think this is necessary
         
         #import the morphology, try and determine format
         fileEnding = self.morphology.split('.')[-1]
@@ -354,15 +340,7 @@ class Cell(object):
                     i += 1
             for name in seclistnames:
                 idxvec[segnames == name] = 1
-            
-            
-            #i = 0
-            #for sec in self.allseclist:
-            #    for seg in sec:
-            #        for secl in seclist:
-            #            if sec.name() == secl.name():
-            #                idxvec[i] = 1
-            #        i += 1
+
             return idxvec
     
     def _set_nsegs_lambda_f(self, frequency):
@@ -513,23 +491,37 @@ class Cell(object):
     
     def _collect_geometry(self):
         '''Collects x, y, z-coordinates from NEURON'''
-        #None-type some attributes, so pylint doesn't complain
-        self.xstart = None
-        self.ystart = None
-        self.zstart = None
-        self.xend = None
-        self.yend = None
-        self.zend = None
-        self.area = None
-        self.diam = None
-        self.length = None
+        #None-type some attributes if they do not exis:
+        if not hasattr(self, 'xstart'):
+            self.xstart = None
+            self.ystart = None
+            self.zstart = None
+            self.xend = None
+            self.yend = None
+            self.zend = None
+            self.area = None
+            self.diam = None
+            self.length = None
         
         _collect_geometry_neuron(self)
         self._calc_midpoints()
         
         self.somaidx = self.get_idx(section='soma')
                 
-        if self.somaidx.size == 0:
+        if self.somaidx.size > 1:
+            xmids = self.xmid[self.somaidx]
+            ymids = self.ymid[self.somaidx]
+            zmids = self.zmid[self.somaidx]
+            self.somapos = np.zeros(3)
+            self.somapos[0] = xmids.mean()
+            self.somapos[1] = ymids.mean()
+            self.somapos[2] = zmids.mean()
+        elif self.somaidx.size == 1:
+            self.somapos = np.zeros(3)
+            self.somapos[0] = self.xmid[self.somaidx]
+            self.somapos[1] = self.ymid[self.somaidx]
+            self.somapos[2] = self.zmid[self.somaidx]
+        elif self.somaidx.size == 0:
             if self.verbose:
                 print 'There is no soma!'
                 print 'using first segment as root point'
@@ -538,21 +530,8 @@ class Cell(object):
             self.somapos[0] = self.xmid[self.somaidx]
             self.somapos[1] = self.ymid[self.somaidx]
             self.somapos[2] = self.zmid[self.somaidx]
-        elif self.somaidx.size == 1:
-            self.somapos = np.zeros(3)
-            self.somapos[0] = self.xmid[self.somaidx]
-            self.somapos[1] = self.ymid[self.somaidx]
-            self.somapos[2] = self.zmid[self.somaidx]
-        elif self.somaidx.size > 1:
-            xmids = self.xmid[self.somaidx]
-            ymids = self.ymid[self.somaidx]
-            zmids = self.zmid[self.somaidx]
-            
-            self.somapos = np.zeros(3)
-            self.somapos[0] = xmids.mean()
-            self.somapos[1] = ymids.mean()
-            self.somapos[2] = zmids.mean()
-    
+        else:
+            raise Exception, 'Huh?!'
     
     def _calc_midpoints(self):
         '''Calculate midpoints of each segment'''
@@ -933,24 +912,26 @@ class Cell(object):
         diffy = self.somapos[1]-ypos
         diffz = self.somapos[2]-zpos
         
+        
         self.somapos[0] = xpos
         self.somapos[1] = ypos
         self.somapos[2] = zpos
-        
-        self.xstart = self.xstart - diffx
-        self.ystart = self.ystart - diffy
-        self.zstart = self.zstart - diffz
-        
-        self.xend = self.xend - diffx
-        self.yend = self.yend - diffy
-        self.zend = self.zend - diffz
+
+        #also update the pt3d_pos:
+        if self.pt3d and hasattr(self, 'x3d'):
+                self._set_pt3d_pos()
+        else:
+            self.xstart -= diffx
+            self.ystart -= diffy
+            self.zstart -= diffz
+            
+            self.xend -= diffx
+            self.yend -= diffy
+            self.zend -= diffz
         
         self._calc_midpoints()
         self._update_synapse_positions()
         
-        #also update the pt3d_pos:
-        if self.pt3d and hasattr(self, 'x3d'):
-                self._set_pt3d_pos()
 
     
     def strip_hoc_objects(self):
@@ -1288,14 +1269,13 @@ class Cell(object):
             n3d = int(neuron.h.n3d())
             for n in xrange(n3d):
                 neuron.h.pt3dchange(n,
-                                    self.x3d[i][n],
-                                    self.y3d[i][n],
-                                    self.z3d[i][n],
-                                    self.diam3d[i][n])
+                                self.x3d[i][n],
+                                self.y3d[i][n],
+                                self.z3d[i][n],
+                                self.diam3d[i][n])
             i += 1
-        
-        #let NEURON know about the changes we just did:
-        neuron.h.define_shape() 
+        ##let NEURON know about the changes we just did:
+        #neuron.h.define_shape() 
         #must recollect the geometry, otherwise we get roundoff errors!
         self._collect_geometry()
 
@@ -1356,7 +1336,7 @@ class Cell(object):
                                                    self.y3d[i], self.z3d[i])
                 
                 rel_pos = rel_pos * rotation_y
-                
+                                
                 self.x3d[i], self.y3d[i], self.z3d[i] = \
                                             self._real_pt3d_positions(rel_pos)
             if self.verbose:
