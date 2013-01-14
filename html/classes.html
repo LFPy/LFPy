@@ -96,33 +96,35 @@ GNU General Public License for more details.</p>
 <h2>class <a class="reference internal" href="#LFPy.Cell" title="LFPy.Cell"><tt class="xref py py-class docutils literal"><span class="pre">Cell</span></tt></a><a class="headerlink" href="#class-cell" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="LFPy.Cell">
-<em class="property">class </em><tt class="descclassname">LFPy.</tt><tt class="descname">Cell</tt><big>(</big><em>morphology</em>, <em>v_init=-65.0</em>, <em>Ra=150</em>, <em>rm=30000</em>, <em>cm=1.0</em>, <em>e_pas=-65.0</em>, <em>passive=True</em>, <em>timeres_NEURON=0.125</em>, <em>timeres_python=0.125</em>, <em>tstartms=0</em>, <em>tstopms=100</em>, <em>nsegs_method='lambda100'</em>, <em>max_nsegs_length=30</em>, <em>lambda_f=100</em>, <em>custom_code=None</em>, <em>custom_fun=None</em>, <em>custom_fun_args=None</em>, <em>verbose=False</em><big>)</big><a class="headerlink" href="#LFPy.Cell" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">LFPy.</tt><tt class="descname">Cell</tt><big>(</big><em>morphology</em>, <em>v_init=-65.0</em>, <em>passive=True</em>, <em>Ra=150</em>, <em>rm=30000</em>, <em>cm=1.0</em>, <em>e_pas=-65.0</em>, <em>extracellular=True</em>, <em>timeres_NEURON=0.125</em>, <em>timeres_python=0.125</em>, <em>tstartms=0</em>, <em>tstopms=100</em>, <em>nsegs_method='lambda100'</em>, <em>lambda_f=100</em>, <em>max_nsegs_length=None</em>, <em>custom_code=None</em>, <em>custom_fun=None</em>, <em>custom_fun_args=None</em>, <em>pt3d=False</em>, <em>verbose=False</em><big>)</big><a class="headerlink" href="#LFPy.Cell" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
 <p>The main cell class used in LFPy.</p>
 <p>Arguments:</p>
-<div class="highlight-python"><pre>morphology : path to morphology file;
+<div class="highlight-python"><pre>morphology : path/to/morphology/file
 
-v_init: initial potential;
-passive: passive mechs are initialized if True;
-Ra: axial resistance;
-rm: membrane resistivity;
-cm: membrane capacitance;
-e_pas: passive mechanism reversal potential;
+v_init: [-65.]: initial potential
+passive: [True]/False: passive mechs are initialized if True
+Ra: [150.]: axial resistance
+rm: [30000]: membrane resistivity
+cm: [1.0]: membrane capacitance
+e_pas: [-65.]: passive mechanism reversal potential
+extracellular: [True]/False: switch for NEURON's extracellular mechanism
 
-timeres_NEURON: internal dt for NEURON simulation;
-timeres_python: overall dt for python simulation;
+timeres_NEURON: [0.1]: internal dt for NEURON simulation
+timeres_python: [0.1]: overall dt for python simulation
 
-tstartms: initialization time for simulation &lt;= 0 ms
-tstopms: stop time for simulation &gt; 0 ms
+tstartms: [0.]:  initialization time for simulation &lt;= 0 ms
+tstopms: [100.]: stop time for simulation &gt; 0 ms
 
-nsegs_method: method for setting the number of segments;
-max_nsegs_length: max segment length for method 'fixed_length';
-lambda_f: AC frequency for method 'lambda_f';
+nsegs_method: ['lambda100']/'lambda_f'/'fixed_length': nseg rule
+max_nsegs_length: [None]: max segment length for method 'fixed_length'
+lambda_f: [100]: AC frequency for method 'lambda_f'
 
-custom_code: list of model-specific code files ([.py/.hoc]);
-custom_fun: list of model-specific functions to be called with args:
-custom_fun_args: list of arguments passed to custom_fun functions
-verbose: switching verbose output on/off</pre>
+custom_code: [None]: list of model-specific code files ([.py/.hoc])
+custom_fun: [None]: list of model-specific functions with args
+custom_fun_args: [None]: list of args passed to custom_fun functions
+pt3d: True/[False]: Use pt3d-info of the cell geometries switch
+verbose: True/[False]: verbose output switch</pre>
 </div>
 <p>Usage of cell class:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">LFPy</span>
@@ -221,6 +223,15 @@ x = self.xmid[idx1] - self.xmid[idx0] etc.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="LFPy.Cell.get_pt3d_polygons">
+<tt class="descname">get_pt3d_polygons</tt><big>(</big><big>)</big><a class="headerlink" href="#LFPy.Cell.get_pt3d_polygons" title="Permalink to this definition">¶</a></dt>
+<dd><p>for each section create a polygon in the (x,z)-plane, that can be
+visualized using plt.fill()</p>
+<p>Returned argument is a list of (x, z) tuples giving the trajectory
+of each section</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="LFPy.Cell.get_rand_idx_area_norm">
 <tt class="descname">get_rand_idx_area_norm</tt><big>(</big><em>section='allsec'</em>, <em>nidx=1</em>, <em>z_min=-10000</em>, <em>z_max=10000</em><big>)</big><a class="headerlink" href="#LFPy.Cell.get_rand_idx_area_norm" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return nidx segment indices in section with random probability
@@ -242,6 +253,60 @@ Prob. determined by area.</p>
 <dd><p>Return the normalized probability (0-1) for synaptic coupling on
 segments in idx-array.
 Normalised probability determined by area of segments.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="LFPy.Cell.insert_v_ext">
+<tt class="descname">insert_v_ext</tt><big>(</big><em>v_ext</em>, <em>t_ext</em><big>)</big><a class="headerlink" href="#LFPy.Cell.insert_v_ext" title="Permalink to this definition">¶</a></dt>
+<dd><p>playback of some extracellular potential v_ext on each cell.totnseg
+compartments. Assumes that the &#8220;extracellular&#8221;-mechanism is inserted
+on each compartment.</p>
+<p>Can be used to study ephaptic effects and similar</p>
+<p>The inputs will be copied and attached to the cell object as
+cell.v_ext, cell.t_ext, and converted
+to (list of) neuron.h.Vector types, to allow playback into each
+compartment e_extracellular reference.</p>
+<p>Can not be deleted prior to running cell.simulate()</p>
+<p>Args:</p>
+<div class="highlight-python"><pre>v_ext : cell.totnsegs x t_ext.size np.array, unit mV
+t_ext : np.array, time vector of v_ext</pre>
+</div>
+<p>Simple usage:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">LFPy</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+
+<span class="c">#create cell</span>
+<span class="n">cell</span> <span class="o">=</span> <span class="n">LFPy</span><span class="o">.</span><span class="n">Cell</span><span class="p">(</span><span class="n">morphology</span><span class="o">=</span><span class="s">&#39;morphologies/example_morphology.hoc&#39;</span><span class="p">)</span>
+
+<span class="c">#time vector and extracellular field for every segment:</span>
+<span class="n">t_ext</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">cell</span><span class="o">.</span><span class="n">tstopms</span> <span class="o">/</span> <span class="n">cell</span><span class="o">.</span><span class="n">timeres_python</span><span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">cell</span><span class="o">.</span><span class="n">timeres_python</span>
+<span class="n">v_ext</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">cell</span><span class="o">.</span><span class="n">totnsegs</span><span class="p">,</span> <span class="n">t_ext</span><span class="o">.</span><span class="n">size</span><span class="p">)</span><span class="o">-</span><span class="mf">0.5</span>
+
+<span class="c">#insert potentials and record response:</span>
+<span class="n">cell</span><span class="o">.</span><span class="n">insert_v_ext</span><span class="p">(</span><span class="n">v_ext</span><span class="p">,</span> <span class="n">t_ext</span><span class="p">)</span>
+<span class="n">cell</span><span class="o">.</span><span class="n">simulate</span><span class="p">(</span><span class="n">rec_imem</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">rec_vmem</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+<span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">ax1</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">311</span><span class="p">)</span>
+<span class="n">ax2</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">312</span><span class="p">)</span>
+<span class="n">ax3</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">313</span><span class="p">)</span>
+<span class="n">eim</span> <span class="o">=</span> <span class="n">ax1</span><span class="o">.</span><span class="n">matshow</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">cell</span><span class="o">.</span><span class="n">v_ext</span><span class="p">),</span> <span class="n">cmap</span><span class="o">=</span><span class="s">&#39;spectral&#39;</span><span class="p">)</span>
+<span class="n">cb1</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">eim</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax1</span><span class="p">)</span>
+<span class="n">cb1</span><span class="o">.</span><span class="n">set_label</span><span class="p">(</span><span class="s">&#39;v_ext&#39;</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="n">ax1</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s">&#39;tight&#39;</span><span class="p">))</span>
+<span class="n">iim</span> <span class="o">=</span> <span class="n">ax2</span><span class="o">.</span><span class="n">matshow</span><span class="p">(</span><span class="n">cell</span><span class="o">.</span><span class="n">imem</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s">&#39;spectral&#39;</span><span class="p">)</span>
+<span class="n">cb2</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">iim</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax2</span><span class="p">)</span>
+<span class="n">cb2</span><span class="o">.</span><span class="n">set_label</span><span class="p">(</span><span class="s">&#39;imem&#39;</span><span class="p">)</span>
+<span class="n">ax2</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="n">ax2</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s">&#39;tight&#39;</span><span class="p">))</span>
+<span class="n">vim</span> <span class="o">=</span> <span class="n">ax3</span><span class="o">.</span><span class="n">matshow</span><span class="p">(</span><span class="n">cell</span><span class="o">.</span><span class="n">vmem</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s">&#39;spectral&#39;</span><span class="p">)</span>
+<span class="n">ax3</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="n">ax3</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s">&#39;tight&#39;</span><span class="p">))</span>
+<span class="n">cb3</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">vim</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax3</span><span class="p">)</span>
+<span class="n">cb3</span><span class="o">.</span><span class="n">set_label</span><span class="p">(</span><span class="s">&#39;vmem&#39;</span><span class="p">)</span>
+<span class="n">ax3</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s">&#39;tstep&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="method">
@@ -285,7 +350,7 @@ All rotation angles are optional.</p>
 
 <dl class="method">
 <dt id="LFPy.Cell.simulate">
-<tt class="descname">simulate</tt><big>(</big><em>electrode=None</em>, <em>rec_imem=False</em>, <em>rec_vmem=False</em>, <em>rec_ipas=False</em>, <em>rec_icap=False</em>, <em>rec_isyn=False</em>, <em>rec_vmemsyn=False</em>, <em>rec_istim=False</em>, <em>rec_variables=</em><span class="optional">[</span><span class="optional">]</span>, <em>variable_dt=False</em>, <em>atol=0.001</em>, <em>to_memory=True</em>, <em>to_file=False</em>, <em>file_name=None</em><big>)</big><a class="headerlink" href="#LFPy.Cell.simulate" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">simulate</tt><big>(</big><em>electrode=None</em>, <em>rec_imem=False</em>, <em>rec_vmem=False</em>, <em>rec_ipas=False</em>, <em>rec_icap=False</em>, <em>rec_isyn=False</em>, <em>rec_vmemsyn=False</em>, <em>rec_istim=False</em>, <em>rec_variables=</em><span class="optional">[</span><span class="optional">]</span>, <em>variable_dt=False</em>, <em>atol=0.001</em>, <em>to_memory=True</em>, <em>to_file=False</em>, <em>file_name=None</em>, <em>electrodecoeffs=None</em><big>)</big><a class="headerlink" href="#LFPy.Cell.simulate" title="Permalink to this definition">¶</a></dt>
 <dd><p>This is the main function running the simulation of the NEURON model.
 Start NEURON simulation and record variables specified by arguments.</p>
 <p>Arguments:</p>
@@ -296,18 +361,25 @@ Start NEURON simulation and record variables specified by arguments.</p>
 rec_imem:   If true, segment membrane currents will be recorded
             If no electrode argument is given, it is necessary to
             set rec_imem=True in order to calculate LFP later on.
-rec_vmem:   record segment membrane voltages
-rec_ipas:   record passive segment membrane currents
-rec_icap:   record capacitive segment membrane currents
-rec_isyn:   record synaptic currents of from Synapse class instances
-rec_vmemsyn:    record membrane voltage of segments with Synapse
-rec_istim:  record currents of StimIntraElectrode
+            Units of (nA).
+rec_vmem:   record segment membrane voltages (mV)
+rec_ipas:   record passive segment membrane currents (nA)
+rec_icap:   record capacitive segment membrane currents (nA)
+rec_isyn:   record synaptic currents of from Synapse class (nA)
+rec_vmemsyn:    record membrane voltage of segments with Synapse(mV)
+rec_istim:  record currents of StimIntraElectrode (nA)
 rec_variables: list of variables to record, i.e arg=['cai', ]
 variable_dt: boolean, using variable timestep in NEURON
 atol:       absolute tolerance used with NEURON variable timestep 
 to_memory:  only valid with electrode, store lfp in -&gt; electrode.LFP 
 to_file:    only valid with electrode, save LFPs in hdf5 file format 
-file_name:  name of hdf5 file, '.h5' is appended if it doesnt exist </pre>
+file_name:  name of hdf5 file, '.h5' is appended if it doesnt exist
+electrodecoeffs :   Nseg x Ncontacts matrix or list thereof,
+            that at each time step compute the extracellular
+            potential as the dot product
+            Phi(t) = np.dot(electrodecoeffs, Imem(t))
+            electrode argument must be None! Assumes units of
+            (mV/nA)</pre>
 </div>
 </dd></dl>
 

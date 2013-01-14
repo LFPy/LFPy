@@ -18,7 +18,8 @@ import neuron
 import numpy as np
 import cPickle
 from LFPy import RecExtElectrode
-from LFPy.run_simulation import _run_simulation, _run_simulation_with_electrode, _collect_geometry_neuron
+from LFPy.run_simulation import _run_simulation, _run_simulation_with_electrode
+from LFPy.run_simulation import _collect_geometry_neuron
 import sys
 
 class Cell(object):
@@ -27,30 +28,31 @@ class Cell(object):
     
     Arguments:
     ::
-        morphology : path to morphology file;
+        morphology : path/to/morphology/file
     
-        v_init: initial potential;
-        passive: passive mechs are initialized if True;
-        Ra: axial resistance;
-        rm: membrane resistivity;
-        cm: membrane capacitance;
-        e_pas: passive mechanism reversal potential;
+        v_init: [-65.]: initial potential
+        passive: [True]/False: passive mechs are initialized if True
+        Ra: [150.]: axial resistance
+        rm: [30000]: membrane resistivity
+        cm: [1.0]: membrane capacitance
+        e_pas: [-65.]: passive mechanism reversal potential
+        extracellular: [True]/False: switch for NEURON's extracellular mechanism
     
-        timeres_NEURON: internal dt for NEURON simulation;
-        timeres_python: overall dt for python simulation;
+        timeres_NEURON: [0.1]: internal dt for NEURON simulation
+        timeres_python: [0.1]: overall dt for python simulation
     
-        tstartms: initialization time for simulation <= 0 ms
-        tstopms: stop time for simulation > 0 ms
+        tstartms: [0.]:  initialization time for simulation <= 0 ms
+        tstopms: [100.]: stop time for simulation > 0 ms
     
-        nsegs_method: method for setting the number of segments;
-        max_nsegs_length: max segment length for method 'fixed_length';
-        lambda_f: AC frequency for method 'lambda_f';
+        nsegs_method: ['lambda100']/'lambda_f'/'fixed_length': nseg rule
+        max_nsegs_length: [None]: max segment length for method 'fixed_length'
+        lambda_f: [100]: AC frequency for method 'lambda_f'
     
-        custom_code: list of model-specific code files ([.py/.hoc]);
-        custom_fun: list of model-specific functions to be called with args:
-        custom_fun_args: list of arguments passed to custom_fun functions
-        pt3d: Use and update pt3d-info of the cell geometries, can be slow!
-        verbose: switching verbose output on/off
+        custom_code: [None]: list of model-specific code files ([.py/.hoc])
+        custom_fun: [None]: list of model-specific functions with args
+        custom_fun_args: [None]: list of args passed to custom_fun functions
+        pt3d: True/[False]: Use pt3d-info of the cell geometries switch
+        verbose: True/[False]: verbose output switch
     
     Usage of cell class:
     ::
@@ -70,11 +72,11 @@ class Cell(object):
     '''
     def __init__(self, morphology,
                     v_init=-65.,
+                    passive = True,
                     Ra=150,
                     rm=30000,
                     cm=1.0,
                     e_pas=-65.,
-                    passive = True,
                     extracellular = True,
                     timeres_NEURON=2**-3,
                     timeres_python=2**-3,
