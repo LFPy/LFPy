@@ -4,6 +4,7 @@ Download LFPy
 
 Downlad stable versions of LFPy here:
 
+- `LFPy-0.9.4.tar.gz <http://compneuro.umb.no/LFPy/downloads/LFPy-0.9.4.tar.gz>`_
 - `LFPy-0.9.3.tar.gz <http://compneuro.umb.no/LFPy/downloads/LFPy-0.9.3.tar.gz>`_
 - `LFPy-0.9.2.tar.gz <http://compneuro.umb.no/LFPy/downloads/LFPy-0.9.2.tar.gz>`_
 - `LFPy-0.9.1.tar.gz <http://compneuro.umb.no/LFPy/downloads/LFPy-0.9.1.tar.gz>`_
