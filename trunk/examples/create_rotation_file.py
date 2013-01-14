@@ -61,14 +61,17 @@ def plot_morpho_indices(cell, new_fig = True):
     ax.set_ylabel('y [$\mu$m]')
     ax.set_zlabel('z [$\mu$m]')
 
-    lim_3d = max([max(abs(cell.xmid[apic])), \
-                        max(abs(cell.ymid[apic])), \
-                        max(abs(cell.zmid[apic]))])
-    lim_3d = round(lim_3d/2,-2)
-
-    ax.set_xlim3d(-lim_3d,lim_3d)
-    ax.set_ylim3d(-lim_3d,lim_3d)
-    ax.set_zlim3d(-lim_3d,lim_3d)
+    #lim_3d = max([max(abs(cell.xmid[apic])), \
+    #                    max(abs(cell.ymid[apic])), \
+    #                    max(abs(cell.zmid[apic]))])
+    #lim_3d = round(lim_3d/2,-2)
+    #
+    #ax.set_xlim3d(-lim_3d,lim_3d)
+    #ax.set_ylim3d(-lim_3d,lim_3d)
+    #ax.set_zlim3d(-lim_3d,lim_3d)
+    
+    ax.axis(ax.axis('equal'))
+    
 
 def plot_morpho_3D_simple(cell, new_fig = True, color = 'k'):
     from mpl_toolkits.mplot3d import Axes3D
