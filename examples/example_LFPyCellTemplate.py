@@ -3,8 +3,6 @@
 A very generic case where the same morphology on different file formats
 is loaded in LFPy using a generic template specification, defined by
 file LFPyCellTemplate.hoc
-
-This script may give segfaults in NEURON by repeating script executions!
 '''
 import LFPy
 import neuron
@@ -20,8 +18,7 @@ def plotcell(cell, color='k'):
     print ' '
 
 #delete cell instances from previous script executions,
-for sec in neuron.h.allsec():
-    neuron.h.delete_section()
+neuron.h('forall delete_section()')
 
 #create some cell instances, set the positions, plot the morphologies
 cell1 = LFPy.TemplateCell(
