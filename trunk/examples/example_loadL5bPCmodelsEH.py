@@ -19,8 +19,7 @@ import neuron
 import matplotlib.pyplot as plt
 
 #remove cells from previous script executions
-for sec in neuron.h.allsec():
-    neuron.h.delete_section()
+neuron.h('forall delete_section()')
 
 #load the corresponding neuron mech's, but run nrnivmodl here first!
 neuron.load_mechanisms('L5bPCmodelsEH/mod/')
