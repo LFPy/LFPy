@@ -349,7 +349,8 @@ class Cell(object):
         '''Set the number of segments for section according to the 
         d_lambda-rule for a given input frequency'''
         for sec in self.allseclist:
-            sec.nseg = int((sec.L / (0.1 * neuron.h.lambda_f(frequency)) + .9)
+            sec.nseg = int((sec.L / (0.1*neuron.h.lambda_f(frequency,
+                                                           sec=sec)) + .9)
                 / 2 )*2 + 1
         if self.verbose:
             print "set nsegs using lambda-rule with frequency %i." % frequency
@@ -1277,7 +1278,8 @@ class Cell(object):
                                 self.diam3d[i][n])
             i += 1
         ##let NEURON know about the changes we just did:
-        #neuron.h.define_shape() 
+        #neuron.h.define_shape()
+        #raise Exception #there are some problems with the above statement....
         #must recollect the geometry, otherwise we get roundoff errors!
         self._collect_geometry()
 

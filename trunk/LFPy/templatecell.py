@@ -183,18 +183,43 @@ class TemplateCell(Cell):
     def _create_sectionlists(self):
         '''Create section lists for different kinds of sections'''
         #list with all sections
-        self.allsecnames = []
-        for sec in self.cell.all:
-            self.allsecnames.append(sec.name())
         
-        #hotpatching the allseclist!!!
-        self.allseclist = self.cell.all
-        
-        #list of soma sections, assuming it is named on the format "soma*"
-        self.nsomasec = 0
-        self.somalist = neuron.h.SectionList()
+        #test if list self.cell.all is not empty
+        numsec = 0
         for sec in self.cell.all:
-            if sec.name().find('soma') >= 0:
-                self.somalist.append(sec=sec)
-                self.nsomasec += 1
+            numsec += 1
+        
+        if numsec > 0:
+            self.allsecnames = []
+            for sec in self.cell.all:
+                self.allsecnames.append(sec.name())
+            
+            #hotpatching the allseclist!!!
+            self.allseclist = self.cell.all
+            
+            #list of soma sections, assuming it is named on the format "soma*"
+            self.nsomasec = 0
+            self.somalist = neuron.h.SectionList()
+            for sec in self.cell.all:
+                if sec.name().find('soma') >= 0:
+                    self.somalist.append(sec=sec)
+                    self.nsomasec += 1
+        else:
+            self.allsecnames = []
+            for sec in self.cell.allsec():
+                self.allsecnames.append(sec.name())
+            
+            self.allseclist = neuron.h.SectionList()
+            for sec in self.cell.allsec():
+                self.allseclist.append(sec=sec)
+            
+            
+            #list of soma sections, assuming it is named on the format "soma*"
+            self.nsomasec = 0
+            self.somalist = neuron.h.SectionList()
+            for sec in self.cell.allsec():
+                if sec.name().find('soma') >= 0:
+                    self.somalist.append(sec=sec)
+                    self.nsomasec += 1
+ 
 

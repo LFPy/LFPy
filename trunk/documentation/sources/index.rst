@@ -25,7 +25,7 @@ LFPy was developed in the `Computational Neuroscience Group <http://compneuro.um
 at the `Norwegian University of Life Sciences <http://www.umb.no>`_ ,
 in collaboration with the `Laboratory of Neuroinformatics <http://www.nencki.gov.pl/en/laboratory-of-neuroinformatics>`_, 
 `Nencki Institute of Experimental Biology <http://www.nencki.gov.pl>`_, Warsaw, Poland. The effort was supported by 
-`International Neuroinformatics Coordinating Facility <http://incf.org>`_ (`INCF <http://incf.org>`_), `The Research Council of Norway <http://www.forskningsradet.no/english/>`_ (eScience, NevroNor) and `EU-FP7 (BrainScales) <http://www.brainscales.org>`_.
+`International Neuroinformatics Coordinating Facility <http://incf.org>`_ (`INCF <http://incf.org>`_), `The Research Council of Norway <http://www.forskningsradet.no/english/>`_ (eScience, NevroNor) and `EU-FP7 (BrainScaleS) <http://www.brainscales.org>`_.
 
 This scientific software is released under the GNU Public License `GPLv3 <http://www.gnu.org/copyleft/gpl.html>`_.
 
