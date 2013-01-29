@@ -104,6 +104,7 @@ class TemplateCell(Cell):
             for template in self.templatefile:
                 neuron.h.load_file(template)
 
+
         #initialize the cell object
         Cell.__init__(self, **kwargs)
         

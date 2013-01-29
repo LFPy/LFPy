@@ -125,7 +125,7 @@ class Synapse(PointProcess):
         try:
             self.v = numpy.array(cell.synvreclist.o(self.hocidx))
         except:
-            raise Exeption, 'cell.synvreclist deleted from consequtive runs'
+            raise Exception, 'cell.synvreclist deleted from consequtive runs'
         
 class StimIntElectrode(PointProcess):
     '''
