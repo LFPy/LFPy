@@ -224,3 +224,21 @@ class TemplateCell(Cell):
                     self.nsomasec += 1
  
 
+    def _update_pt3d(self):           
+        '''
+        update the locations in neuron.hoc.space using neuron.h.pt3dchange()
+        '''
+        i = 0
+        for sec in self.allseclist:
+            n3d = int(neuron.h.n3d())
+            for n in xrange(n3d):
+                neuron.h.pt3dchange(n,
+                                self.x3d[i][n],
+                                self.y3d[i][n],
+                                self.z3d[i][n],
+                                self.diam3d[i][n])
+            i += 1
+        #let NEURON know about the changes we just did:
+        neuron.h.define_shape()
+        #must recollect the geometry, otherwise we get roundoff errors!
+        self._collect_geometry()

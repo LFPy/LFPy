@@ -1279,7 +1279,6 @@ class Cell(object):
             i += 1
         ##let NEURON know about the changes we just did:
         #neuron.h.define_shape()
-        #raise Exception #there are some problems with the above statement....
         #must recollect the geometry, otherwise we get roundoff errors!
         self._collect_geometry()
 
