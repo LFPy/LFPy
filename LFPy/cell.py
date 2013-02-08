@@ -598,8 +598,11 @@ class Cell(object):
         normalized to the membrane area of segment on 
         interval [z_min, z_max]
         '''
-        poss_idx = self.get_idx(section=section, z_min=z_min, z_max = z_max)
-        if poss_idx.size == 0:
+        poss_idx = self.get_idx(section=section, z_min=z_min, z_max=z_max)
+        if nidx < 1:
+            print 'nidx < 1, returning empty array'
+            return np.array([])
+        elif poss_idx.size == 0:
             print 'No possible segment idx match enquire! returning empty array'
             return np.array([])
         else:
