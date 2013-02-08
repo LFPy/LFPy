@@ -115,10 +115,7 @@ class TemplateCell(Cell):
             neuron.h.sec_counted = 0
         except LookupError:
             neuron.h('sec_counted = 0')
-            
-        ##considering uncommenting this:
-        #neuron.h("forall delete_section()")
-        
+                
         #the python cell object we are loading the morphology into:
         celltemplate = getattr(neuron.h, self.templatename)
         self.cell = celltemplate(self.templateargs)
@@ -228,8 +225,7 @@ class TemplateCell(Cell):
         '''
         update the locations in neuron.hoc.space using neuron.h.pt3dchange()
         '''
-        i = 0
-        for sec in self.allseclist:
+        for i, sec in enumerate(self.allseclist):
             n3d = int(neuron.h.n3d())
             for n in xrange(n3d):
                 neuron.h.pt3dchange(n,
@@ -237,8 +233,7 @@ class TemplateCell(Cell):
                                 self.y3d[i][n],
                                 self.z3d[i][n],
                                 self.diam3d[i][n])
-            i += 1
-        #let NEURON know about the changes we just did:
-        neuron.h.define_shape()
+            #let NEURON know about the changes we just did:
+            neuron.h.define_shape()
         #must recollect the geometry, otherwise we get roundoff errors!
         self._collect_geometry()
