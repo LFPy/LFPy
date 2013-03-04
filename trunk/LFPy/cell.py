@@ -1280,8 +1280,8 @@ class Cell(object):
                                 self.z3d[i][n],
                                 self.diam3d[i][n])
             i += 1
-        ##let NEURON know about the changes we just did:
-        #neuron.h.define_shape()
+            #let NEURON know about the changes we just did:
+            neuron.h.define_shape()
         #must recollect the geometry, otherwise we get roundoff errors!
         self._collect_geometry()
 
