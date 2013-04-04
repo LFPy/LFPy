@@ -240,7 +240,7 @@ def _h_calc(xstart, xend, ystart, yend, zstart, zend, deltaS, x, y, z):
     aa = np.array([x - xend, y - yend, z-zend])
     bb = np.array([xend - xstart, yend - ystart, zend - zstart])
     try:
-        cc = np.dot(aa.T, bb).diagonal()
+        cc = np.dot(aa.T, bb).diagonal().copy()
     except:
         raise ValueError
     hh = cc / deltaS
