@@ -276,7 +276,7 @@ class PointProcessPlayInSoma:
         somaTvecVec = neuron.h.Vector(somaTvec1)
         somaTraceVec = neuron.h.Vector(somaTrace1)
         
-        for sec in neuron.h.somalist:
+        for sec in neuron.h.somalist: #cell.somalist
             #ensure that soma is perfect capacitor
             sec.cm = 1E9
             #Why the fuck doesnt this work:

@@ -369,7 +369,7 @@ cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] _h_calc(
 
     aa = np.array([x - xend, y - yend, z-zend])
     bb = np.array([xend - xstart, yend - ystart, zend - zstart])
-    cc = np.dot(aa.T, bb).diagonal() 
+    cc = np.dot(aa.T, bb).diagonal().copy()
     hh = cc / deltaS
     hh[0] = 0
     return hh
