@@ -13,50 +13,50 @@ GNU General Public License for more details.'''
 
 import numpy as np
 
-def calc_lfp_choose(c, x=0, y=0, z=0, sigma=0.3,
+def calc_lfp_choose(cell, x=0, y=0, z=0, sigma=0.3,
                     r_limit=None,
                     timestep=None, t_indices=None, method='linesource'):
     '''Determine which method to use, line-source for soma default'''
     if method == 'som_as_point':
-        return calc_lfp_som_as_point(c, x=x, y=y, z=z, sigma=sigma,
+        return calc_lfp_som_as_point(cell, x=x, y=y, z=z, sigma=sigma,
                                      r_limit=r_limit,
                                      timestep=timestep, t_indices=t_indices)
     elif method == 'linesource':
-        return calc_lfp_linesource(c, x=x, y=y, z=z, sigma=sigma,
+        return calc_lfp_linesource(cell, x=x, y=y, z=z, sigma=sigma,
                                    r_limit=r_limit,
                                    timestep=timestep, t_indices=t_indices)
     elif method == 'pointsource':
-        return calc_lfp_pointsource(c, x=x, y=y, z=z, sigma=sigma,
+        return calc_lfp_pointsource(cell, x=x, y=y, z=z, sigma=sigma,
                                     r_limit=r_limit,
                                     timestep=timestep, t_indices=t_indices)
 
-def calc_lfp_linesource(c, x=0, y=0, z=0, sigma=0.3,
+def calc_lfp_linesource(cell, x=0, y=0, z=0, sigma=0.3,
                         r_limit=None,
                         timestep=None, t_indices=None):
     '''Calculate electric field potential using the line-source method, all
     compartments treated as line sources, even soma.'''
     # Handling the r_limits. If a r_limit is a single value, an array r_limit
-    # of shape c.diam is returned.
+    # of shape cell.diam is returned.
     if type(r_limit) == int or type(r_limit) == float:
-        r_limit = np.ones(np.shape(c.diam))*abs(r_limit)
-    elif np.shape(r_limit) != np.shape(c.diam):
+        r_limit = np.ones(np.shape(cell.diam))*abs(r_limit)
+    elif np.shape(r_limit) != np.shape(cell.diam):
         raise Exception, 'r_limit is neither a float- or int- value, nor is \
-            r_limit.shape() equal to c.diam.shape()'
+            r_limit.shape() equal to cell.diam.shape()'
     
     if timestep != None:
-        currmem = c.imem[:, timestep]
+        currmem = cell.imem[:, timestep]
     if t_indices != None:
-        currmem = c.imem[:, t_indices]
+        currmem = cell.imem[:, t_indices]
     else:
-        currmem = c.imem
+        currmem = cell.imem
 
     #some variables for h, r2, r_soma calculations
-    xstart = c.xstart
-    xend = c.xend
-    ystart = c.ystart
-    yend = c.yend
-    zstart = c.zstart
-    zend = c.zend
+    xstart = cell.xstart
+    xend = cell.xend
+    ystart = cell.ystart
+    yend = cell.yend
+    zstart = cell.zstart
+    zend = cell.zend
     
     deltaS = _deltaS_calc(xstart, xend, ystart, yend, zstart, zend)
     h = _h_calc(xstart, xend, ystart, yend, zstart, zend, deltaS, x, y, z)
@@ -87,46 +87,46 @@ def calc_lfp_linesource(c, x=0, y=0, z=0, sigma=0.3,
     
     return Emem.transpose()
 
-def calc_lfp_som_as_point(c, x=0, y=0, z=0, sigma=0.3,
+def calc_lfp_som_as_point(cell, x=0, y=0, z=0, sigma=0.3,
                           r_limit=None,
                           timestep=None, t_indices=None):
     '''Calculate electric field potential using the line-source method,
     soma is treated as point/sphere source'''
     #Handling the r_limits. If a r_limit is a single value,
-    #an array r_limit of shape c.diam is returned.
+    #an array r_limit of shape cell.diam is returned.
     if type(r_limit) != type(np.array([])):
         r_limit = np.array(r_limit)
     if r_limit.shape == ():
         s_limit = r_limit
-        r_limit = np.ones(c.diam.size) * abs(r_limit)
+        r_limit = np.ones(cell.diam.size) * abs(r_limit)
     elif r_limit.shape == (2, ):
         s_limit = abs(r_limit[0])
-        r_limit = np.ones(c.diam.size) * abs(r_limit[1])
-    elif r_limit.shape == c.diam.shape:
+        r_limit = np.ones(cell.diam.size) * abs(r_limit[1])
+    elif r_limit.shape == cell.diam.shape:
         s_limit = r_limit[0]
         r_limit = r_limit
     else:
         raise Exception,  'r_limit is neither a float- or int- value, \
             on the form r_limit=[s_limit, r_limit],  \
-            nor is shape(r_limit) equal to shape(c.diam)!'
+            nor is shape(r_limit) equal to shape(cell.diam)!'
 
     if timestep != None:
-        currmem = c.imem[:, timestep]
+        currmem = cell.imem[:, timestep]
     if t_indices != None:
-        currmem = c.imem[:, t_indices]
+        currmem = cell.imem[:, t_indices]
     else:
-        currmem = c.imem
+        currmem = cell.imem
 
     #some variables for h, r2, r_soma calculations
-    xstart = c.xstart
-    xmid = c.xmid[0]
-    xend = c.xend
-    ystart = c.ystart
-    ymid = c.ymid[0]
-    yend = c.yend
-    zstart = c.zstart
-    zmid = c.zmid[0]
-    zend = c.zend
+    xstart = cell.xstart
+    xmid = cell.xmid[0]
+    xend = cell.xend
+    ystart = cell.ystart
+    ymid = cell.ymid[0]
+    yend = cell.yend
+    zstart = cell.zstart
+    zmid = cell.zmid[0]
+    zend = cell.zend
 
 
     deltaS = _deltaS_calc(xstart, xend, ystart, yend, zstart, zend)
@@ -271,27 +271,27 @@ def _r_soma_calc(xmid, ymid, zmid, x, y, z):
 
     return r_soma
 
-def calc_lfp_pointsource(c, x=0, y=0, z=0, sigma=0.3,
+def calc_lfp_pointsource(cell, x=0, y=0, z=0, sigma=0.3,
                         r_limit=None, 
                         timestep=None, t_indices=None):
     '''Calculate local field potentials using the point-source equation on all
     compartments'''
     # Handling the r_limits. If a r_limit is a single value, an array r_limit
-    # of shape c.diam is returned.
+    # of shape cell.diam is returned.
     if type(r_limit) == int or type(r_limit) == float:
-        r_limit = np.ones(np.shape(c.diam))*abs(r_limit)
-    elif np.shape(r_limit) != np.shape(c.diam):
+        r_limit = np.ones(np.shape(cell.diam))*abs(r_limit)
+    elif np.shape(r_limit) != np.shape(cell.diam):
         raise Exception, 'r_limit is neither a float- or int- value, nor is \
-            r_limit.shape() equal to c.diam.shape()'
+            r_limit.shape() equal to cell.diam.shape()'
 
     if timestep != None:
-        currmem = c.imem[:, timestep]
+        currmem = cell.imem[:, timestep]
     if t_indices != None:
-        currmem = c.imem[:, t_indices]
+        currmem = cell.imem[:, t_indices]
     else:
-        currmem = c.imem
+        currmem = cell.imem
     
-    r2 = (c.xmid - x)**2 + (c.ymid - y)**2 + (c.zmid - z)**2
+    r2 = (cell.xmid - x)**2 + (cell.ymid - y)**2 + (cell.zmid - z)**2
     r2 = _check_rlimit_point(r2, r_limit)
     r = np.sqrt(r2)
     
