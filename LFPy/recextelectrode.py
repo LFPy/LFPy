@@ -11,8 +11,8 @@ but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.'''
 
-import pylab as pl
-import sys
+import numpy as np
+import warnings
 from LFPy import lfpcalc, tools
 
 class RecExtElectrodeSetup(object):
@@ -26,20 +26,32 @@ class RecExtElectrodeSetup(object):
     
     Arguments:
     ::
-        sigma   : extracellular conductivity
-        x, y, z : coordinates or arrays of coordinates. Must be same length
-        N       : Normal vector [x, y, z] of contact surface, default None
-        r       : radius of contact surface, default None
-        n       : if N != None and r > 0, the number of points to use for each
+        sigma : float,
+            extracellular conductivity
+        x, y, z : np.ndarray,
+            coordinates or arrays of coordinates. Must be same length
+        N : np.ndarray,
+            Normal vector [x, y, z] of contact surface, default None
+        r : float,
+            radius of contact surface, default None
+        n : int,
+            if N != None and r > 0, the number of points to use for each
                   contact point in order to calculate average
-        color   : color of electrode contact points in plots
-        marker  : marker of electrode contact points in plots
-        from_file   : if True, load cell object from file
-        cellfile    : path to cell pickle
-        verbose : Flag for verbose output
-        seedvalue : fixed seed when finding random position on contact with r >0
+        color : str,
+            color of electrode contact points in plots
+        marker : str,
+            marker of electrode contact points in plots
+        from_file : Bool,
+            if True, load cell object from file
+        cellfile : str,
+            path to cell pickle
+        verbose : Bool,
+            Flag for verbose output
+        seedvalue : int,
+            rand seed when finding random position on contact with r >0
     '''
-    def __init__(self, cell=None, sigma=0.3, x=100, y=0, z=0,
+    def __init__(self, cell=None, sigma=0.3,
+                 x=np.array([0]), y=np.array([0]), z=np.array([0]),
                  N=None, r=None, n=None, r_z=None,
                  perCellLFP=False, method='linesource', 
                  color='g', marker='o',
@@ -48,15 +60,15 @@ class RecExtElectrodeSetup(object):
         '''Initialize class RecExtElectrodeSetup'''
         self.sigma = sigma
         if type(x) == float or type(x) == int:
-            self.x = pl.array([x])
+            self.x = np.array([x])
         else:
             self.x = x
         if type(y) == float or type(y) == int:
-            self.y = pl.array([y])
+            self.y = np.array([y])
         else:
             self.y = y
         if type(z) == float or type(z) == int:
-            self.z = pl.array([z])
+            self.z = np.array([z])
         else:
             self.z = z
         self.color = color
@@ -79,8 +91,16 @@ class RecExtElectrodeSetup(object):
         self.method = method
         self.verbose = verbose
         self.seedvalue = seedvalue
+        
         #None-type some attributes created by the Cell class
         self.electrodecoeff = None
+        self.tvec = np.array([])
+        self.cells = {}
+        self.nCells = None
+        self.CellLFP = None
+        self.circle = None
+        #self.LFP = None
+        self.offsets = None
 
         if from_file:
             if type(cellfile) == type(str()):
@@ -93,7 +113,7 @@ class RecExtElectrodeSetup(object):
                 raise ValueError, 'cell either string or list of strings'
 
         if cell is not None:
-                self._import_c(cell)
+            self._import_cell(cell)
 
 
     class cell():
@@ -102,7 +122,7 @@ class RecExtElectrodeSetup(object):
             '''Just a container'''
             pass
 
-    def _import_c(self, cell):
+    def _import_cell(self, cell):
         '''Keeps the relevant variables for LFP-calculation from cell'''
         #keeping these variables:
         variables = [
@@ -128,73 +148,52 @@ class RecExtElectrodeSetup(object):
         
         #redefine list of cells as dict of cells
         if type(cell) == list:
-            k = 0
+            cellkey = 0
             celldict = {}
             for c in cell:
-                celldict[k] = c
-                k += 1
+                celldict[cellkey] = c
+                cellkey += 1
             cell = celldict
         
-        self.c = {}
+        
         if type(cell) == dict:
-            for k in cell:
-                self.c[k] = self.cell()
+            for cellkey in cell:
+                self.cells[cellkey] = self.cell()
                 for v in variables:
                     try:
-                        setattr(self.c[k], v, getattr(cell[k], v))
+                        setattr(self.cells[cellkey], v, getattr(cell[cellkey], v))
                     except:
-                        raise ValueError, 'cell[%s].%s missing' % (str(k), v)
+                        raise ValueError, 'cell[%s].%s missing' % (str(cellkey), v)
         else:
-            self.c[0] = self.cell()
+            self.cells[0] = self.cell()
             for v in variables:
                 try:
-                    setattr(self.c[0], v, getattr(cell, v))
+                    setattr(self.cells[0], v, getattr(cell, v))
                 except:
                     raise ValueError, 'cell.%s missing' % v
-            
-        
-        #if str(type(cell))[:12] == "<class 'LFPy.cell.Cell'>"[:12] or \
-        #            str(type(cell))[:12] == "<class 'cell.Cell'>"[:12]:
-        #    self.c[0] = self.cell()
-        #    for v in variables:
-        #        setattr(self.c[0], v, getattr(cell, v))
-        #elif type(cell) == dict:
-        #    for k in cell:
-        #        if str(type(cell[k]))[:12] != "<class 'LFPy.cell.Cell'>"[:12]:
-        #            raise Exception,  "Error! <type(cell[%s])> something else \
-        #            than <LFPy.cell.Cell object>" % str(k)
-        #        self.c[k] = self.cell()
-        #        for v in variables:
-        #            setattr(self.c[k], v, getattr(cell[k], v))
-        #else:
-        #    raise Exception, \
-        #    "Error! <type(cell)> something else than <LFPy.cell.Cell object> \
-        #    or <dict>"
 
+        setattr(self, 'tvec', self.cells[0].tvec)
+        #setattr(self, 'dt', self.cells[self.cells.keys()[0]].timeres_python)
         
-        setattr(self, 'tvec', self.c[self.c.keys()[0]].tvec)
-        setattr(self, 'dt', self.c[self.c.keys()[0]].timeres_python)
+        self.nCells = np.array(self.cells.keys()).size 
         
-        self.nCells = pl.array(self.c.keys()).size 
         #test that currents sum towards zero        
-        try:
-            self._test_imem_sum()
-        except:
-            pass
+        self._test_imem_sum()
+            
     
     def _test_imem_sum(self, tolerance=1E-12):
         '''Test that the membrane currents sum to zero'''
-        for k in self.c:
-            sum_imem = self.c[k].imem.sum(axis=0)
-            if pl.any(sum_imem == pl.ones(self.c[k].totnsegs)):
+        for cellkey in self.cells.iterkeys():
+            sum_imem = self.cells[cellkey].imem.sum(axis=0)
+            if np.any(sum_imem == np.ones(self.cells[cellkey].totnsegs)):
                 pass
             else:
                 if abs(sum_imem).max() >= tolerance:
-                    print 'Membrane currents do not sum to zero! They should!'
-                    [inds] = pl.where((abs(sum_imem) >= tolerance))
+                    warnings.warn('Membrane currents do not sum to zero')
+                    [inds] = np.where((abs(sum_imem) >= tolerance))
                     for i in inds:
-                        print 'membrane current sum cell %i, timestep %i: %.3e' \
-                            % (k, i, sum_imem[i])
+                        print 'membrane current sum cell %i, timestep %i: %.3e'\
+                            % (cellkey, i, sum_imem[i])
                 else:
                     pass
 
@@ -207,16 +206,17 @@ class RecExtElectrode(RecExtElectrodeSetup):
     
     Usage:
     ::
+        import numpy as np
+        import import matplotlib.pyplot as plt
         import LFPy
-        import pylab as pl
         
-        N = pl.empty((16, 3))
-        for i in xrange(N.shape[0]): N[i,] = [1, 0, 0] #normal unit vec. to contacts
-        electrodeParameters = {             #parameters for RecExtElectrode class
+        N = np.empty((16, 3))
+        for i in xrange(N.shape[0]): N[i,] = [1, 0, 0] #normal vec. of contacts
+        electrodeParameters = {         #parameters for RecExtElectrode class
             'sigma' : 0.3,              #Extracellular potential
-            'x' : pl.zeros(16)+25,      #Coordinates of electrode contacts
-            'y' : pl.zeros(16),
-            'z' : pl.linspace(-500,1000,16),
+            'x' : np.zeros(16)+25,      #Coordinates of electrode contacts
+            'y' : np.zeros(16),
+            'z' : np.linspace(-500,1000,16),
             'n' : 20,
             'r' : 10,
             'N' : N,
@@ -245,16 +245,17 @@ class RecExtElectrode(RecExtElectrodeSetup):
         }
         
         synapse = LFPy.PointProcessSynapse(cell, **synapseParameters)
-        synapse.set_spike_times(cell, pl.array([10, 15, 20, 25]))
+        synapse.set_spike_times(cell, np.array([10, 15, 20, 25]))
         
         cell.simulate()
         
         electrode = LFPy.RecExtElectrode(cell, **electrodeParameters)
         electrode.calc_lfp()
-        pl.matshow(electrode.LFP)
+        plt.matshow(electrode.LFP)
     '''
 
-    def __init__(self, cell=None, sigma=0.3, x=100, y=0, z=0,
+    def __init__(self, cell=None, sigma=0.3,
+                 x=np.array([0]), y=np.array([0]), z=np.array([0]),
                  N=None, r=None, n=0, r_z=None,
                  perCellLFP=False, method='linesource', 
                  color='g', marker='o',
@@ -272,18 +273,18 @@ class RecExtElectrode(RecExtElectrodeSetup):
         '''Calculate LFP on electrode geometry from all cell instances.
         Will chose distributed calculated if electrode contain 'n', 'N', and 'r'
         '''
-        if not hasattr(self, 'c'):
-            self._import_c(cell)
+        if not hasattr(self, 'cells') or len(self.cells.keys()) == 0:
+            self._import_cell(cell)
        
         if not hasattr(self,  'LFP'):
             if t_indices != None:
-                self.LFP = pl.zeros((self.x.size, t_indices.size))
+                self.LFP = np.zeros((self.x.size, t_indices.size))
             else:
-                self.LFP = pl.zeros((self.x.size, self.tvec.size))
+                self.LFP = np.zeros((self.x.size, self.tvec.size))
         if t_indices != None:
-            LFP_temp = pl.zeros((self.nCells, self.x.size, t_indices.size))
+            LFP_temp = np.zeros((self.nCells, self.x.size, t_indices.size))
         else:
-            LFP_temp = pl.zeros((self.nCells, self.x.size, self.tvec.size))
+            LFP_temp = np.zeros((self.nCells, self.x.size, self.tvec.size))
             
         variables = {
             'sigma' : self.sigma,
@@ -303,22 +304,22 @@ class RecExtElectrode(RecExtElectrodeSetup):
                     })
 
 
-            for k in self.c.iterkeys():                    
+            for cellkey in self.cells.iterkeys():                    
                 variables.update({
-                    'r_limit' : self.c[k].diam/2,
+                    'r_limit' : self.cells[cellkey].diam/2,
                     })
-                [self.circle, self.offsets, LFP_temp[k, :, :]] = \
-                    self._lfp_el_pos_calc_dist(k, **variables)
+                [self.circle, self.offsets, LFP_temp[cellkey, :, :]] = \
+                    self._lfp_el_pos_calc_dist(cellkey, **variables)
                 if self.verbose:
-                    print 'Calculated potential contribution, cell %i.' % k
+                    print 'Calculated potential contribution, cell %i.' % cellkey
         else:
-            for k in self.c.iterkeys():
+            for cellkey in self.cells.iterkeys():
                 variables.update({
-                    'r_limit' : self.c[k].diam/2
+                    'r_limit' : self.cells[cellkey].diam/2
                 })
-                LFP_temp[k, :, :] = self._loop_over_contacts(k, variables)
+                LFP_temp[cellkey, :, :] = self._loop_over_contacts(**variables)
                 if self.verbose:
-                    print 'Calculated potential contribution, cell %i.' % k
+                    print 'Calculated potential contribution, cell %i.' % cellkey
         if self.perCellLFP:
             self.CellLFP = []
             for LFPtrace in LFP_temp:
@@ -326,67 +327,59 @@ class RecExtElectrode(RecExtElectrodeSetup):
         
         self.LFP = LFP_temp.sum(axis=0)
 
-    def _loop_over_contacts(self, k, variables):
+    def _loop_over_contacts(self, cellkey=0, sigma=0.3,
+                    r_limit=None,
+                    timestep=None, t_indices=None, method='linesource'):
         '''Loop over electrode contacts, and will return LFP_temp filled'''
-        if variables['t_indices'] != None:
-            LFP_temp = pl.zeros((self.x.size, variables['t_indices'].size))
+        if t_indices != None:
+            LFP_temp = np.zeros((self.x.size, t_indices.size))
         else:
-            LFP_temp = pl.zeros((self.x.size, self.tvec.size))
+            LFP_temp = np.zeros((self.x.size, self.tvec.size))
             
         for i in xrange(self.x.size):
-            variables.update({
-                'x' : self.x[i],
-                'y' : self.y[i],
-                'z' : self.z[i],
-            })
-            if hasattr(self, 'r_drift'):
-                for j in xrange(self.LFP.shape[1]):
-                    variables.update({
-                        'x' : self.x[i] + self.r_drift['x'][i],
-                        'y' : self.y[i] + self.r_drift['y'][i],
-                        'z' : self.z[i] + self.r_drift['z'][i],
-                        'timestep' : j
-                    })
-                    LFP_temp[i, j] = LFP_temp[i, j] + \
-                        lfpcalc.calc_lfp_choose(self.c[k], **variables)
-            else:
-                LFP_temp[i, :] = LFP_temp[i, :] + \
-                        lfpcalc.calc_lfp_choose(self.c[k], **variables)
+            LFP_temp[i, :] = LFP_temp[i, :] + \
+                    lfpcalc.calc_lfp_choose(self.cells[cellkey], x = self.x[i],
+                                            y = self.y[i], z = self.z[i],
+                                            sigma=sigma, r_limit=r_limit,
+                                            timestep=timestep,
+                                            t_indices=t_indices, method=method)
             
         return LFP_temp
 
     
-    def _lfp_el_pos_calc_dist(self, k, r_limit, sigma=0.3, radius=10, n=10,
+    def _lfp_el_pos_calc_dist(self, cellkey=0, r_limit=None, sigma=0.3, radius=10, n=10,
                              m=50, N=None, t_indices=None, 
                              method='linesource'):
         '''
         Calc. of LFP over an n-point integral approximation over flat
         electrode surface with radius r. The locations of these n points on
         the electrode surface are random,  within the given radius. The '''
-        lfp_el_pos = pl.zeros(self.LFP.shape)
+        lfp_el_pos = np.zeros(self.LFP.shape)
         offsets = {}
         circle = {}
         for i in xrange(len(self.x)):
             if n > 1:
-                lfp_e = pl.zeros((n, self.LFP.shape[1]))
+                lfp_e = np.zeros((n, self.LFP.shape[1]))
 
-                offs = pl.zeros((n, 3))
-                r2 = pl.zeros(n)
+                offs = np.zeros((n, 3))
+                r2 = np.zeros(n)
 
-                crcl = pl.zeros((m, 3))
+                crcl = np.zeros((m, 3))
                 
                 #assert the same random numbers are drawn every time
                 if self.seedvalue != None:
-                    pl.seed(self.seedvalue)
+                    np.random.seed(self.seedvalue)
                 for j in xrange(n):
-                    A = [(pl.rand()-0.5)*radius*2, (pl.rand()-0.5)*radius*2,
-                            (pl.rand()-0.5)*radius*2]
-                    offs[j, ] = pl.cross(N[i, ], A)
+                    A = [(np.random.rand()-0.5)*radius*2,
+                        (np.random.rand()-0.5)*radius*2,
+                        (np.random.rand()-0.5)*radius*2]
+                    offs[j, ] = np.cross(N[i, ], A)
                     r2[j] = offs[j, 0]**2 + offs[j, 1]**2 + offs[j, 2]**2
                     while r2[j] > radius**2:
-                        A = [(pl.rand()-0.5)*radius*2, (pl.rand()-0.5)*radius*2,
-                            (pl.rand()-0.5)*radius*2]
-                        offs[j, ] = pl.cross(N[i, ], A)
+                        A = [(np.random.rand()-0.5)*radius*2,
+                            (np.random.rand()-0.5)*radius*2,
+                            (np.random.rand()-0.5)*radius*2]
+                        offs[j, ] = np.cross(N[i, ], A)
                         r2[j] = offs[j, 0]**2 + offs[j, 1]**2 + offs[j, 2]**2
 
                 x_n = offs[:, 0] + self.x[i]
@@ -394,9 +387,11 @@ class RecExtElectrode(RecExtElectrodeSetup):
                 z_n = offs[:, 2] + self.z[i]
 
                 for j in xrange(m):
-                    B = [(pl.rand()-0.5), (pl.rand()-0.5), (pl.rand()-0.5)]
-                    crcl[j, ] = pl.cross(N[i, ], B)
-                    crcl[j, ] = crcl[j, ]/pl.sqrt(crcl[j, 0]**2 +
+                    B = [(np.random.rand()-0.5),
+                        (np.random.rand()-0.5),
+                        (np.random.rand()-0.5)]
+                    crcl[j, ] = np.cross(N[i, ], B)
+                    crcl[j, ] = crcl[j, ]/np.sqrt(crcl[j, 0]**2 +
                                                crcl[j, 1]**2 + \
                                                crcl[j, 2]**2)*radius
 
@@ -405,21 +400,19 @@ class RecExtElectrode(RecExtElectrodeSetup):
                 crclz = crcl[:, 2] + self.z[i]
 
                 for j in xrange(n):
-                    variables = {
-                        'x' : x_n[j],
-                        'y' : y_n[j],
-                        'z' : z_n[j],
-                        'r_limit' : r_limit,
-                        'sigma' : sigma,
-                        't_indices' : t_indices,
-                        'method' : method,
-                    }
-                    lfp_e[j, ] = lfpcalc.calc_lfp_choose(self.c[k], **variables)
+                    lfp_e[j, ] = lfpcalc.calc_lfp_choose(self.cells[cellkey],
+                                                        x = x_n[j],
+                                                        y = y_n[j],
+                                                        z = z_n[j],
+                                                        r_limit = r_limit,
+                                                        sigma = sigma,
+                                                        t_indices = t_indices,
+                                                        method = method)
 
                 lfp_el_pos[i] = lfp_e.mean(axis=0)
 
             else:
-                lfp_el_pos[i] = lfpcalc.calc_lfp_choose(self.c[k], \
+                lfp_el_pos[i] = lfpcalc.calc_lfp_choose(self.cells[cellkey], \
                     x=self.x[i], y=self.y[i], z=self.z[i], r_limit = r_limit, \
                     sigma=sigma, t_indices=t_indices)
             offsets[i] = {
