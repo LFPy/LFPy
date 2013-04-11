@@ -12,7 +12,9 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.'''
 
 import numpy as np
+import scipy.interpolate as si
 import neuron
+
 from time import time
 
 def _run_simulation(cell, variable_dt=False, atol=0.001):
@@ -297,45 +299,64 @@ def _collect_geometry_neuron(cell):
     
     #loop over all segments
     for sec in cell.allseclist:
-        n3d = neuron.h.n3d()
+        n3d = int(neuron.h.n3d())
         if n3d > 0:
-            #length of sections
-            xlength = neuron.h.x3d(n3d - 1) - neuron.h.x3d(0)
-            ylength = neuron.h.y3d(n3d - 1) - neuron.h.y3d(0)
-            zlength = neuron.h.z3d(n3d - 1) - neuron.h.z3d(0)
+            #create interpolation objects for the xyz pt3d info:
+            L = np.zeros(n3d)
+            x = np.zeros(n3d)
+            y = np.zeros(n3d)
+            z = np.zeros(n3d)
+            for i in xrange(n3d):
+                L[i] = neuron.h.arc3d(i)
+                x[i] = neuron.h.x3d(i)
+                y[i] = neuron.h.y3d(i)
+                z[i] = neuron.h.z3d(i)
             
-            for seg in sec:
+            #normalize as seg.x [0, 1]
+            L /= sec.L
+                        
+            #interpolation objects
+            fx = si.interp1d(L, x, kind=1)
+            fy = si.interp1d(L, y, kind=1)
+            fz = si.interp1d(L, z, kind=1)
+            
+            #temporary store position of segment midpoints
+            segx = np.zeros(sec.nseg)
+            for i, seg in enumerate(sec):
+                segx[i] = seg.x
+            
+            #can't be >0 which may happen due to NEURON->Python float transfer:
+            segx0 = (segx - 1./2./sec.nseg).round(decimals=6)
+            segx1 = (segx + 1./2./sec.nseg).round(decimals=6)
+            
+            #fill vectors with interpolated coordinates of start and end points
+            xstartvec[counter:counter+sec.nseg] = fx(segx0)
+            xendvec[counter:counter+sec.nseg] = fx(segx1)
+
+            ystartvec[counter:counter+sec.nseg] = fy(segx0)
+            yendvec[counter:counter+sec.nseg] = fy(segx1)
+
+            zstartvec[counter:counter+sec.nseg] = fz(segx0)
+            zendvec[counter:counter+sec.nseg] = fz(segx1)
+
+            #fill in values area, diam, length
+            for i, seg in enumerate(sec):
                 areavec[counter] = neuron.h.area(seg.x)
                 diamvec[counter] = seg.diam
                 lengthvec[counter] = sec.L/sec.nseg
-                
-                xstartvec[counter] = neuron.h.x3d(0) + \
-                    xlength * (seg.x - 1./2./sec.nseg)
-                xendvec[counter] = neuron.h.x3d(0) + \
-                    xlength * (seg.x + 1./2./sec.nseg)
-                
-                ystartvec[counter] = neuron.h.y3d(0) + \
-                    ylength * (seg.x - 1./2./sec.nseg)
-                yendvec[counter] = neuron.h.y3d(0) + \
-                    ylength * (seg.x + 1./2./sec.nseg)
-                
-                zstartvec[counter] = neuron.h.z3d(0) + \
-                    zlength * (seg.x - 1./2./sec.nseg)
-                zendvec[counter] = neuron.h.z3d(0) + \
-                    zlength * (seg.x + 1./2./sec.nseg)
-                
+
                 counter += 1
     
     
-    cell.xstart = np.array(xstartvec)
-    cell.ystart = np.array(ystartvec)
-    cell.zstart = np.array(zstartvec)
+    cell.xstart = xstartvec
+    cell.ystart = ystartvec
+    cell.zstart = zstartvec
     
-    cell.xend = np.array(xendvec)
-    cell.yend = np.array(yendvec)
-    cell.zend = np.array(zendvec)
+    cell.xend = xendvec
+    cell.yend = yendvec
+    cell.zend = zendvec
     
-    cell.area = np.array(areavec)
-    cell.diam = np.array(diamvec)
-    cell.length = np.array(lengthvec)
+    cell.area = areavec
+    cell.diam = diamvec
+    cell.length = lengthvec
 
