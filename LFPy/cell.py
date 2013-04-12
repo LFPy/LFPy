@@ -1253,8 +1253,8 @@ class Cell(object):
 
         #ensure all idx are valid
         if np.any(idx >= self.totnsegs):
-            wrongidx = np.where(idx >= self.totnsegs)
-            raise Exception, 'idx % >= number of compartments' % wrongidx
+            wrongidx = idx[np.where(idx >= self.totnsegs)]
+            raise Exception, 'idx %s >= number of compartments' % str(wrongidx)
         
         #create list of seg names:
         allsegnames = []
@@ -1487,6 +1487,55 @@ class Cell(object):
             polygons.append(self._create_polygon(i))
         
         return polygons
+
+
+    def _create_segment_polygon(self, i):
+        '''create a polygon to fill for segment i'''        
+        x = [self.xstart[i], self.xend[i]]
+        z = [self.zstart[i], self.zend[i]]
+        d = self.diam[i]
+        
+        #calculate angles        
+        dx = np.diff(x)
+        dz = np.diff(z)
+        theta = np.arctan2(dz, dx)
+        
+        x = np.r_[x, x[::-1]]
+        z = np.r_[z, z[::-1]]
+                
+        #1st corner:
+        x[0] -= 0.5 * d * np.sin(theta)
+        z[0] += 0.5 * d * np.cos(theta)
+                
+        #end of section, first side
+        x[1] -= 0.5 * d * np.sin(theta)
+        z[1] += 0.5 * d * np.cos(theta)
+        
+        #other side
+        #end of section, second side
+        x[2] += 0.5 * d * np.sin(theta)
+        z[2] -= 0.5 * d * np.cos(theta)
+        
+        #last corner:
+        x[3] += 0.5 * d * np.sin(theta)
+        z[3] -= 0.5 * d * np.cos(theta)
+        
+        return x, z
+
+
+    def get_idx_polygons(self, idx=np.array([0])):
+        '''for each segment id create a polygon in the (x,z)-plane, that can be
+        visualized using plt.fill()
+        
+        Returned argument is a list of (x, z) tuples giving the trajectory
+        of each section
+        '''
+        polygons = []
+        for i in idx:
+            polygons.append(self._create_segment_polygon(i))
+        
+        return polygons
+
 
 
     def insert_v_ext(self, v_ext, t_ext):        
