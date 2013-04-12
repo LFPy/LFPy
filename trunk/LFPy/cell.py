@@ -1529,6 +1529,30 @@ class Cell(object):
         
         Returned argument is a list of (x, z) tuples giving the trajectory
         of each section
+        
+        The most efficient way of using this would be something like
+        ::
+            from matplotlib.collections import PolyCollection
+            import matplotlib.pyplot as plt
+            
+            cell = LFPy.Cell(morphology='morphologies/L5_Mainen96_LFPy.hoc)
+            polys = np.array(cell.get_idx_polygons(np.arange(cell.totnsegs)))
+            
+            zips = []
+            for i, xz in enumerate(polys):
+                zips.append(zip(xz[0], xz[1]))
+            
+            polycol = PolyCollection(zips,
+                                     edgecolors='none',
+                                     facecolors='gray')
+            
+            fig = plt.figure()
+            ax = fig.add_subplot(111)
+            
+            ax.add_collection(polycol)
+            ax.axis(ax.axis('equal'))
+            
+            plt.show()
         '''
         polygons = []
         for i in idx:
