@@ -1231,6 +1231,41 @@ class Cell(object):
         [idx] = np.where(idxvec)
         return idx
 
+    def get_idx_name(self, idx=np.array([0])):
+        '''
+        Return NEURON convention name of segments with index idx.
+        The returned argument is a list of tuples with corresponding
+        segment idx, section name, and position along the section, like;
+        [(0, 'neuron.h.soma[0]', 0.5),]
+        
+        args:
+        ::
+            idx : np.ndarray, dtype int
+                segment indices, must be between 0 and cell.totnsegs        
+        '''
+        #ensure idx is array-like, or convert
+        if type(idx) == int:
+            idx = np.array([idx])
+        elif len(idx) == 0:
+            return
+        else:
+            idx = np.array(idx).astype(int)
+
+        #ensure all idx are valid
+        if np.any(idx >= self.totnsegs):
+            wrongidx = np.where(idx >= self.totnsegs)
+            raise Exception, 'idx % >= number of compartments' % wrongidx
+        
+        #create list of seg names:
+        allsegnames = []
+        segidx = 0
+        for sec in self.allseclist:
+            for seg in sec:
+                allsegnames.append((segidx, '%s'  % sec.name(), seg.x))
+                segidx += 1
+        
+        return allsegnames[idx]
+
     def _collect_pt3d(self):
         '''collect the pt3d info, for each section'''
         x = []
