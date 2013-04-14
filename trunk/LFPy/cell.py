@@ -1453,8 +1453,8 @@ class Cell(object):
         z[0] += 0.5 * d[0] * np.cos(theta[0])
         
         ##pt3d points between start and end of section, first side
-        x[1:dx.size] -= 0.5 * d[1:dx.size] * (np.sin(theta[:dx.size-1]) + np.sin(theta[1:dx.size]))
-        z[1:dz.size] += 0.5 * d[1:dz.size] * (np.cos(theta[:dz.size-1]) + np.cos(theta[1:dx.size]))
+        x[1:dx.size] -= 0.25 * d[1:dx.size] * (np.sin(theta[:dx.size-1]) + np.sin(theta[1:dx.size]))
+        z[1:dz.size] += 0.25 * d[1:dz.size] * (np.cos(theta[:dz.size-1]) + np.cos(theta[1:dx.size]))
         
         #end of section, first side
         x[dx.size] -= 0.5 * d[dx.size] * np.sin(theta[dx.size])
@@ -1466,8 +1466,8 @@ class Cell(object):
         z[dz.size+1] -= 0.5 * d[dz.size+1] * np.cos(theta[dz.size])
         
         ##pt3d points between start and end of section, second side
-        x[::-1][1:dx.size] += 0.5 * d[::-1][1:dx.size] * (np.sin(theta[::-1][:dx.size-1]) + np.sin(theta[::-1][1:dx.size]))
-        z[::-1][1:dz.size] -= 0.5 * d[::-1][1:dz.size] * (np.cos(theta[::-1][:dz.size-1]) + np.cos(theta[::-1][1:dx.size]))
+        x[::-1][1:dx.size] += 0.25 * d[::-1][1:dx.size] * (np.sin(theta[::-1][:dx.size-1]) + np.sin(theta[::-1][1:dx.size]))
+        z[::-1][1:dz.size] -= 0.25 * d[::-1][1:dz.size] * (np.cos(theta[::-1][:dz.size-1]) + np.cos(theta[::-1][1:dx.size]))
 
         #last corner:
         x[-1] += 0.5 * d[-1] * np.sin(theta[-1])
@@ -1480,7 +1480,28 @@ class Cell(object):
         visualized using plt.fill()
         
         Returned argument is a list of (x, z) tuples giving the trajectory
-        of each section
+        of each section that can be plotted using PolyCollection
+        ::
+            from matplotlib.collections import PolyCollection
+            import matplotlib.pyplot as plt
+            
+            cell = LFPy.Cell(morphology='PATH/TO/MORPHOLOGY')
+            
+            zips = []
+            for x, z in cell.get_idx_polygons():
+                zips.append(zip(x, z))
+            
+            polycol = PolyCollection(zips,
+                                     edgecolors='none',
+                                     facecolors='gray')
+            
+            fig = plt.figure()
+            ax = fig.add_subplot(111)
+            
+            ax.add_collection(polycol)
+            ax.axis(ax.axis('equal'))
+            
+            plt.show()
         '''
         polygons = []
         for i in xrange(len(self.x3d)):
@@ -1523,24 +1544,24 @@ class Cell(object):
         return x, z
 
 
-    def get_idx_polygons(self, idx=np.array([0])):
-        '''for each segment id create a polygon in the (x,z)-plane, that can be
-        visualized using plt.fill()
+    def get_idx_polygons(self):
+        '''for each segment idx in celll create a polygon in the (x,z)-plane,
+        that can be visualized using plt.fill() or
+        mpl.collections.PolyCollection
         
-        Returned argument is a list of (x, z) tuples giving the trajectory
-        of each section
+        Returned argument is a list of (np.ndarray, np.ndarray) tuples
+        giving the trajectory of each section
         
         The most efficient way of using this would be something like
         ::
             from matplotlib.collections import PolyCollection
             import matplotlib.pyplot as plt
             
-            cell = LFPy.Cell(morphology='morphologies/L5_Mainen96_LFPy.hoc)
-            polys = np.array(cell.get_idx_polygons(np.arange(cell.totnsegs)))
+            cell = LFPy.Cell(morphology='PATH/TO/MORPHOLOGY')
             
             zips = []
-            for i, xz in enumerate(polys):
-                zips.append(zip(xz[0], xz[1]))
+            for x, z in cell.get_idx_polygons():
+                zips.append(zip(x, z))
             
             polycol = PolyCollection(zips,
                                      edgecolors='none',
@@ -1555,7 +1576,7 @@ class Cell(object):
             plt.show()
         '''
         polygons = []
-        for i in idx:
+        for i in np.arange(self.totnsegs):
             polygons.append(self._create_segment_polygon(i))
         
         return polygons
