@@ -475,9 +475,10 @@ class Cell(object):
                             exec('stim.' + param + '=' + str(kwargs[param]))
                         except SyntaxError:
                             ERRMSG = ''.join(['',
-                                     'Point process type "{0}" might not '.format(pptype),
-                                     'recognize attribute "{0}". '.format(param),
-                                     'Check for misspellings'])
+                                'Point process type "{0}" might not '.format(
+                                    pptype),
+                                'recognize attribute "{0}". '.format(param),
+                                'Check for misspellings'])
                             raise Exception, ERRMSG                            
                     self.stimlist.append(stim)
                     
@@ -1275,7 +1276,8 @@ class Cell(object):
 
         for sec in self.allseclist:
             n3d = int(neuron.h.n3d())
-            x_i, y_i, z_i, d_i = np.zeros(n3d), np.zeros(n3d), np.zeros(n3d), np.zeros(n3d)
+            x_i, y_i, z_i = np.zeros(n3d), np.zeros(n3d), np.zeros(n3d),
+            d_i = np.zeros(n3d)
             for i in xrange(n3d):
                 x_i[i] = neuron.h.x3d(i)
                 y_i[i] = neuron.h.y3d(i)
@@ -1453,8 +1455,10 @@ class Cell(object):
         z[0] += 0.5 * d[0] * np.cos(theta[0])
         
         ##pt3d points between start and end of section, first side
-        x[1:dx.size] -= 0.25 * d[1:dx.size] * (np.sin(theta[:dx.size-1]) + np.sin(theta[1:dx.size]))
-        z[1:dz.size] += 0.25 * d[1:dz.size] * (np.cos(theta[:dz.size-1]) + np.cos(theta[1:dx.size]))
+        x[1:dx.size] -= 0.25 * d[1:dx.size] * (
+            np.sin(theta[:dx.size-1]) + np.sin(theta[1:dx.size]))
+        z[1:dz.size] += 0.25 * d[1:dz.size] * (
+            np.cos(theta[:dz.size-1]) + np.cos(theta[1:dx.size]))
         
         #end of section, first side
         x[dx.size] -= 0.5 * d[dx.size] * np.sin(theta[dx.size])
@@ -1466,8 +1470,10 @@ class Cell(object):
         z[dz.size+1] -= 0.5 * d[dz.size+1] * np.cos(theta[dz.size])
         
         ##pt3d points between start and end of section, second side
-        x[::-1][1:dx.size] += 0.25 * d[::-1][1:dx.size] * (np.sin(theta[::-1][:dx.size-1]) + np.sin(theta[::-1][1:dx.size]))
-        z[::-1][1:dz.size] -= 0.25 * d[::-1][1:dz.size] * (np.cos(theta[::-1][:dz.size-1]) + np.cos(theta[::-1][1:dx.size]))
+        x[::-1][1:dx.size] += 0.25 * d[::-1][1:dx.size] * (
+            np.sin(theta[::-1][:dx.size-1]) + np.sin(theta[::-1][1:dx.size]))
+        z[::-1][1:dz.size] -= 0.25 * d[::-1][1:dz.size] * (
+            np.cos(theta[::-1][:dz.size-1]) + np.cos(theta[::-1][1:dx.size]))
 
         #last corner:
         x[-1] += 0.5 * d[-1] * np.sin(theta[-1])
@@ -1613,7 +1619,8 @@ class Cell(object):
             cell = LFPy.Cell(morphology='morphologies/example_morphology.hoc')
             
             #time vector and extracellular field for every segment:
-            t_ext = np.arange(cell.tstopms / cell.timeres_python+ 1) * cell.timeres_python
+            t_ext = np.arange(cell.tstopms / cell.timeres_python+ 1) * \
+                    cell.timeres_python
             v_ext = np.random.rand(cell.totnsegs, t_ext.size)-0.5
         
             #insert potentials and record response:
