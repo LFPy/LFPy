@@ -126,8 +126,7 @@ class RecExtElectrodeSetup(object):
         '''Keeps the relevant variables for LFP-calculation from cell'''
         #keeping these variables:
         variables = [
-            'somav',
-            'somaidx',
+            #'somaidx',
             'timeres_python',
             'tstopms',
             'tvec',
@@ -143,7 +142,7 @@ class RecExtElectrodeSetup(object):
             'zmid',
             'zend',
             'totnsegs',
-            'synapses',
+            #'synapses',
         ]
         
         #redefine list of cells as dict of cells
