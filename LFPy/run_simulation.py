@@ -94,11 +94,14 @@ def _run_simulation_with_electrode(cell, electrode=None,
         raise AssertionError, ERR
     #put electrodecoeff in a list, if it isn't already
     if electrodecoeffs != None:
-        if type(electrodecoeffs) != type(list):
+        if type(electrodecoeffs) != list:
             electrodecoeffs = [electrodecoeffs]
+        electrodes = None
     else:
         #put electrode argument in list if needed
-        if type(electrode) == type([]):
+        if electrode == None:
+            electrodes = None
+        elif type(electrode) == list:
             electrodes = electrode
         else:
             electrodes = [electrode]
@@ -212,19 +215,14 @@ def _run_simulation_with_electrode(cell, electrode=None,
                 for seg in sec:
                     imem[i] = seg.i_membrane * area[i] * 1E-2
                     i += 1
-            #this is the lfp at this timestep
-            lfp = np.dot(coeffs, imem)
             
             if to_memory:
-                j = 0
-                for coeffs in electrodecoeffs:
-                    electrodesLFP[j][:, tstep] = lfp
-                    j += 1
+                for j, coeffs in enumerate(electrodecoeffs):
+                    electrodesLFP[j][:, tstep] = np.dot(coeffs, imem)
                     
             if to_file:
-                j = 0
-                for coeffs in electrodecoeffs:
-                    el_LFP_file['electrode%.3i' % j][:, tstep] = lfp
+                for j, coeffs in enumerate(electrodecoeffs):
+                    el_LFP_file['electrode%.3i' % j][:, tstep] = np.dot(coeffs, imem)
             
             tstep += 1
         neuron.h.fadvance()
@@ -243,15 +241,12 @@ def _run_simulation_with_electrode(cell, electrode=None,
                 imem[i] = seg.i_membrane * area[i] * 1E-2
                 i += 1
         if to_memory:
-            j = 0
-            for coeffs in electrodecoeffs:
-                lfp = np.dot(coeffs, imem)
-                electrodesLFP[j][:, tstep] = lfp
-                j += 1
+            for j, coeffs in enumerate(electrodecoeffs):
+                electrodesLFP[j][:, tstep] = np.dot(coeffs, imem)
+                #j += 1
         if to_file:
-            j = 0
-            for coeffs in electrodecoeffs:
-                el_LFP_file['electrode%.3i' % j][:, tstep] = lfp
+            for j, coeffs in enumerate(electrodecoeffs):
+                el_LFP_file['electrode%.3i' % j][:, tstep] = np.dot(coeffs, imem)
 
     except:
         pass
@@ -259,19 +254,33 @@ def _run_simulation_with_electrode(cell, electrode=None,
     # Final step, put LFPs in the electrode object, superimpose if necessary
     # If electrode.perCellLFP, store individual LFPs
     if to_memory:
-        j = 0
-        for el in electrodes:
-            if hasattr(el, 'LFP'):
-                el.LFP += electrodesLFP[j]
-            else:
-                el.LFP = electrodesLFP[j]
-            #will save each cell contribution separately
-            if el.perCellLFP:
-                if not hasattr(el, 'CellLFP'):
-                    el.CellLFP = []
-                el.CellLFP.append(electrodesLFP[j])
-            el.electrodecoeff = electrodecoeffs[j]
-            j += 1
+        if electrodes == None:
+            cell.coeff_map_results = electrodesLFP
+        else:
+            for j, LFP in enumerate(electrodesLFP):
+                if hasattr(electrodes[j], 'LFP'):
+                    electrodes[j].LFP += LFP
+                else:
+                    electrodes[j].LFP = LFP
+                #will save each cell contribution separately
+                if electrodes[j].perCellLFP:
+                    if not hasattr(electrodes[j], 'CellLFP'):
+                        electrodes[j].CellLFP = []
+                    electrodes[j].CellLFP.append(LFP)
+                electrodes[j].electrodecoeff = electrodecoeffs[j]
+        #j = 0
+        #for el in electrodes:
+        #    if hasattr(el, 'LFP'):
+        #        el.LFP += electrodesLFP[j]
+        #    else:
+        #        el.LFP = electrodesLFP[j]
+        #    #will save each cell contribution separately
+        #    if el.perCellLFP:
+        #        if not hasattr(el, 'CellLFP'):
+        #            el.CellLFP = []
+        #        el.CellLFP.append(electrodesLFP[j])
+        #    el.electrodecoeff = electrodecoeffs[j]
+        #    j += 1
 
 
     if to_file:
