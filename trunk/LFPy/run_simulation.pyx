@@ -119,11 +119,14 @@ def _run_simulation_with_electrode(cell, electrode=None,
     if dotprodcoeffs != None:
         if type(dotprodcoeffs) != list:
             dotprodcoeffs = [dotprodcoeffs]
-        electrodes = None
+        electrodes = []
     else:
         #create empty list if no dotprodcoeffs are supplied
         dotprodcoeffs = []
-        
+    
+    #just for safekeeping
+    lendotrodcoeffs0 = len(dotprodcoeffs)
+     
     #access electrode object and append dotprodcoeffs        
     if electrode != None:
         #put electrode argument in list if needed
@@ -175,7 +178,10 @@ def _run_simulation_with_electrode(cell, electrode=None,
             cell.imem = cellImem
         except:
             del cell.imem
-    
+
+    #just for safekeeping
+    lendotrodcoeffs1 = len(dotprodcoeffs)
+
     # Initialize NEURON simulations of cell object    
     neuron.h.dt = timeres_NEURON
     
@@ -285,20 +291,20 @@ def _run_simulation_with_electrode(cell, electrode=None,
     # If electrode.perCellLFP, store individual LFPs
     if to_memory:
         #the first few belong to input dotprodcoeffs
-        cell.coeff_map_results = electrodesLFP[:len(electrodes)]
+        cell.dotprodresults = electrodesLFP[:lendotrodcoeffs0]
         #the remaining belong to input electrode arguments
         for j, LFP in enumerate(electrodesLFP):
-            if not j < len(electrodes):
-                if hasattr(electrodes[j-len(electrodes)], 'LFP'):
-                    electrodes[j-len(electrodes)].LFP += LFP
+            if not j < lendotrodcoeffs0:
+                if hasattr(electrodes[j-lendotrodcoeffs0], 'LFP'):
+                    electrodes[j-lendotrodcoeffs0].LFP += LFP
                 else:
-                    electrodes[j-len(electrodes)].LFP = LFP
+                    electrodes[j-lendotrodcoeffs0].LFP = LFP
                 #will save each cell contribution separately
-                if electrodes[j-len(electrodes)].perCellLFP:
+                if electrodes[j-lendotrodcoeffs0].perCellLFP:
                     if not hasattr(electrodes[j], 'CellLFP'):
-                        electrodes[j-len(electrodes)].CellLFP = []
-                    electrodes[j-len(electrodes)].CellLFP.append(LFP)
-                electrodes[j-len(electrodes)].electrodecoeff = dotprodcoeffs[j]
+                        electrodes[j-lendotrodcoeffs0].CellLFP = []
+                    electrodes[j-lendotrodcoeffs0].CellLFP.append(LFP)
+                electrodes[j-lendotrodcoeffs0].electrodecoeff = dotprodcoeffs[j]
     
     if to_file:
         el_LFP_file.close()
