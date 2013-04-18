@@ -31,12 +31,12 @@ class testLFPy(unittest.TestCase):
         Z = np.linspace(1000, 0, 11)
         
         LFP_analytic = np.empty((R.size, time.size))
-        for i in xrange(R.size):
+        for i in range(R.size):
             LFP_analytic[i, ] = self.analytical_LFP(time, electrodeR=R[i],
                                                     electrodeZ=Z[i])
         (a, b) = LFP_LFPy.shape
-        for i in xrange(a):
-            for j in xrange(b):
+        for i in range(a):
+            for j in range(b):
                 self.failUnlessAlmostEqual(LFP_LFPy[i, j], LFP_analytic[i, j],
                                            places=3)
     
@@ -50,12 +50,12 @@ class testLFPy(unittest.TestCase):
         Z = np.linspace(1000, 0, 11)
         
         LFP_analytic = np.empty((R.size, time.size))
-        for i in xrange(R.size):
+        for i in range(R.size):
             LFP_analytic[i, ] = self.analytical_LFP(time, electrodeR=R[i],
                                                     electrodeZ=Z[i])
         (a, b) = LFP_LFPy.shape
-        for i in xrange(a):
-            for j in xrange(b):
+        for i in range(a):
+            for j in range(b):
                 self.failUnlessAlmostEqual(LFP_LFPy[i, j], LFP_analytic[i, j],
                                            places=3)
     
@@ -69,12 +69,12 @@ class testLFPy(unittest.TestCase):
         Z = np.linspace(1000, 0, 11)
         
         LFP_analytic = np.empty((R.size, time.size))
-        for i in xrange(R.size):
+        for i in range(R.size):
             LFP_analytic[i, ] = self.analytical_LFP(time, electrodeR=R[i],
                                                     electrodeZ=Z[i])
         (a, b) = LFP_LFPy.shape
-        for i in xrange(a):
-            for j in xrange(b):
+        for i in range(a):
+            for j in range(b):
                 self.failUnlessAlmostEqual(LFP_LFPy[i, j], LFP_analytic[i, j],
                                            places=3)
 
@@ -90,12 +90,12 @@ class testLFPy(unittest.TestCase):
         Z = np.linspace(1000, 0, 11)
         
         LFP_analytic = np.empty((R.size, time.size))
-        for i in xrange(R.size):
+        for i in range(R.size):
             LFP_analytic[i, ] = self.analytical_LFP(time, electrodeR=R[i],
                                                     electrodeZ=Z[i])
         (a, b) = LFP_LFPy.shape
-        for i in xrange(a):
-            for j in xrange(b):
+        for i in range(a):
+            for j in range(b):
                 self.failUnlessAlmostEqual(LFP_LFPy[i, j], LFP_analytic[i, j],
                                            places=3)
     
@@ -110,12 +110,12 @@ class testLFPy(unittest.TestCase):
         Z = np.linspace(1000, 0, 11)
         
         LFP_analytic = np.empty((R.size, time.size))
-        for i in xrange(R.size):
+        for i in range(R.size):
             LFP_analytic[i, ] = self.analytical_LFP(time, electrodeR=R[i],
                                                     electrodeZ=Z[i])
         (a, b) = LFP_LFPy.shape
-        for i in xrange(a):
-            for j in xrange(b):
+        for i in range(a):
+            for j in range(b):
                 self.failUnlessAlmostEqual(LFP_LFPy[i, j], LFP_analytic[i, j],
                                            places=3)
 
@@ -130,12 +130,12 @@ class testLFPy(unittest.TestCase):
         Z = np.linspace(1000, 0, 11)
         
         LFP_analytic = np.empty((R.size, time.size))
-        for i in xrange(R.size):
+        for i in range(R.size):
             LFP_analytic[i, ] = self.analytical_LFP(time, electrodeR=R[i],
                                                     electrodeZ=Z[i])
         (a, b) = LFP_LFPy.shape
-        for i in xrange(a):
-            for j in xrange(b):
+        for i in range(a):
+            for j in range(b):
                 self.failUnlessAlmostEqual(LFP_LFPy[i, j], LFP_analytic[i, j],
                                            places=3)
 
@@ -166,7 +166,7 @@ class testLFPy(unittest.TestCase):
         tvec_numpy = np.linspace(0, stickParams['tstopms'],
                     stickParams['tstopms']/stickParams['timeres_python'] + 1)
         
-        for i in xrange(tvec.size):
+        for i in range(tvec.size):
             self.assertEqual(tvec[i], tvec_numpy[i])
 
     def test_tvec_02(self):
@@ -196,7 +196,7 @@ class testLFPy(unittest.TestCase):
                     stickParams['tstopms']/stickParams['timeres_python'] + 1)
         
         
-        for i in xrange(tvec.size):
+        for i in range(tvec.size):
             self.assertEqual(tvec[i], tvec_numpy[i])
 
 
@@ -226,7 +226,7 @@ class testLFPy(unittest.TestCase):
         tvec_numpy = np.linspace(0, stickParams['tstopms'],
                     stickParams['tstopms']/stickParams['timeres_python'] + 1)
         
-        for i in xrange(tvec.size):
+        for i in range(tvec.size):
             self.assertAlmostEqual(tvec[i], tvec_numpy[i])
 
     def test_tvec_06(self):
@@ -255,7 +255,7 @@ class testLFPy(unittest.TestCase):
         tvec_numpy = np.linspace(0, stickParams['tstopms'],
                     stickParams['tstopms']/stickParams['timeres_python'] + 1)
         
-        for i in xrange(tvec.size):
+        for i in range(tvec.size):
             self.assertEqual(tvec[i], tvec_numpy[i])
 
     def test_tvec_08(self):
@@ -285,7 +285,7 @@ class testLFPy(unittest.TestCase):
         tvec_numpy = np.linspace(0, stickParams['tstopms'],
                     stickParams['tstopms']/stickParams['timeres_python'] + 1)
         
-        for i in xrange(tvec.size):
+        for i in range(tvec.size):
             self.assertEqual(tvec[i], tvec_numpy[i])
 
     def test_tvec_10(self):
@@ -315,7 +315,7 @@ class testLFPy(unittest.TestCase):
         tvec_numpy = np.linspace(0, stickParams['tstopms'],
                     stickParams['tstopms']/stickParams['timeres_python'] + 1)
         
-        for i in xrange(tvec.size):
+        for i in range(tvec.size):
             self.assertEqual(tvec[i], tvec_numpy[i])
 
     def test_tvec_12(self):
@@ -344,7 +344,7 @@ class testLFPy(unittest.TestCase):
         tvec_numpy = np.linspace(0, stickParams['tstopms'],
                     stickParams['tstopms']/stickParams['timeres_python'] + 1)
         
-        for i in xrange(tvec.size):
+        for i in range(tvec.size):
             self.assertAlmostEqual(tvec[i], tvec_numpy[i])
 
     def test_tvec_14(self):
@@ -373,7 +373,7 @@ class testLFPy(unittest.TestCase):
         tvec_numpy = np.linspace(0, stickParams['tstopms'],
                     stickParams['tstopms']/stickParams['timeres_python'] + 1)
         
-        for i in xrange(tvec.size):
+        for i in range(tvec.size):
             self.assertAlmostEqual(tvec[i], tvec_numpy[i])    
     
     ######## Functions used by tests: ##########################################
@@ -444,7 +444,7 @@ class testLFPy(unittest.TestCase):
         }
         
         N = np.empty((11, 3))
-        for i in xrange(N.shape[0]): N[i,] = [1, 0, 0] #normal unit vec. to contacts
+        for i in range(N.shape[0]): N[i,] = [1, 0, 0] #normal unit vec. to contacts
         electrodeParams = {
             'sigma' : 0.3,
             'x' : np.ones(11) * 100.,

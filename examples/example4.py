@@ -129,7 +129,7 @@ insert_synapses_GABA_A_args = {
 # points have a radius r, surface normal vectors N, and LFP calculated as the
 # average LFP in n random points on each contact:
 N = np.empty((16, 3))
-for i in xrange(N.shape[0]): N[i,] = [1, 0, 0] #normal unit vec. to contacts
+for i in range(N.shape[0]): N[i,] = [1, 0, 0] #normal unit vec. to contacts
 # put parameters in dictionary
 electrodeParameters = {
     'sigma' : 0.3,              # Extracellular potential
@@ -166,9 +166,9 @@ cell.simulate(**simulationParameters)
 # LFPy.RecExtElectrode class. Note that now cell is given as input to electrode
 # and created after the NEURON simulations are finished
 electrode = LFPy.RecExtElectrode(cell, **electrodeParameters)
-print 'simulating LFPs....'
+print('simulating LFPs....')
 electrode.calc_lfp()
-print 'done'
+print('done')
 
 #plotting some variables and geometry, saving output to .pdf.
 from example_suppl import plot_ex3

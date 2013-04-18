@@ -69,7 +69,7 @@ def _run_simulation(cell, variable_dt=False, atol=0.001):
         counter += 1.
         if divmod(counter, interval)[1] == 0:
             rtfactor = (neuron.h.t - ti)  * 1E-3 / (time() - t0)
-            print 't = %.0f, realtime factor: %.3f' % (neuron.h.t, rtfactor)
+            print('t = %.0f, realtime factor: %.3f' % (neuron.h.t, rtfactor))
             t0 = time()
             ti = neuron.h.t
 
@@ -105,7 +105,7 @@ def _run_simulation_with_electrode(cell, electrode=None,
     try:
         import h5py
     except:
-        print 'h5py not found, LFP to file not possible'
+        print('h5py not found, LFP to file not possible')
         to_file = False
         file_name = None
 
@@ -113,7 +113,7 @@ def _run_simulation_with_electrode(cell, electrode=None,
     # Use electrode object(s) to calculate coefficient matrices for LFP
     # calculations. If electrode is a list, then
     if cell.verbose:
-        print 'precalculating geometry - LFP mapping'
+        print('precalculating geometry - LFP mapping')
     
     #put electrodecoeff in a list, if it isn't already
     if dotprodcoeffs != None:
@@ -265,7 +265,7 @@ def _run_simulation_with_electrode(cell, electrode=None,
         counter += 1.
         if np.mod(counter, interval) == 0:
             rtfactor = (neuron.h.t - ti) * 1E-3 / (time() - t0)
-            print 't = %.0f, realtime factor: %.3f' % (neuron.h.t, rtfactor)
+            print('t = %.0f, realtime factor: %.3f' % (neuron.h.t, rtfactor))
             t0 = time()
             ti = neuron.h.t
     
@@ -348,7 +348,7 @@ cpdef _collect_geometry_neuron(cell):
             x = np.zeros(n3d)
             y = np.zeros(n3d)
             z = np.zeros(n3d)
-            for i in xrange(n3d):
+            for i in range(n3d):
                 L[i] = neuron.h.arc3d(i)
                 x[i] = neuron.h.x3d(i)
                 y[i] = neuron.h.y3d(i)

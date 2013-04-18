@@ -17,7 +17,7 @@ def get_rand_spike_times(synpos, nspikes, tstart, tstop):
     '''Return synpos times nspikes random spike times on the 
     interval [tstart, tstop]'''
     spiketimes = np.zeros([np.size(synpos), nspikes])
-    for i in xrange(np.size(synpos)):
+    for i in range(np.size(synpos)):
         spiketimes[i, :] = np.random.random_integers(tstart, tstop, nspikes)
     return spiketimes
 
@@ -26,7 +26,7 @@ def stationary_poisson(nsyn, lambd, tstart, tstop):
     between tstart and tstop'''
     interval_s = (tstop-tstart)*.001
     spiketimes = []
-    for i in xrange(nsyn):
+    for i in range(nsyn):
         spikecount = np.random.poisson(interval_s*lambd)
         spikevec = np.empty(spikecount)
         if spikecount == 0:
@@ -84,7 +84,7 @@ def get_normal_input_times(n, mu, sigma, tstart, tstop):
     '''Generates n normal-distributed prosesses with mean mu and 
     deviation sigma'''
     times = np.random.normal(mu, sigma, n)
-    for i in xrange(n):
+    for i in range(n):
         while times[i] <= tstart or times[i] >= tstop:
             times[i] = np.random.normal(mu, sigma)
     return times

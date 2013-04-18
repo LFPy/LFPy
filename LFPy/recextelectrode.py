@@ -79,7 +79,7 @@ class RecExtElectrodeSetup(object):
             else:
                 self.N = N.T
                 if N.shape[-1] != 3:
-                    raise Exception, 'N.shape must be (n contacts, 1, 3)!'
+                    raise Exception('N.shape must be (n contacts, 1, 3)!')
         else:
             self.N = N
             
@@ -110,7 +110,7 @@ class RecExtElectrodeSetup(object):
                 for fil in cellfile:
                     cell.append(tools.load(fil))
             else:
-                raise ValueError, 'cell either string or list of strings'
+                raise ValueError('cell either string or list of strings')
 
         if cell is not None:
             self._import_cell(cell)
@@ -162,19 +162,19 @@ class RecExtElectrodeSetup(object):
                     try:
                         setattr(self.cells[cellkey], v, getattr(cell[cellkey], v))
                     except:
-                        raise ValueError, 'cell[%s].%s missing' % (str(cellkey), v)
+                        raise ValueError('cell[%s].%s missing' % (str(cellkey), v))
         else:
             self.cells[0] = self.cell()
             for v in variables:
                 try:
                     setattr(self.cells[0], v, getattr(cell, v))
                 except:
-                    raise ValueError, 'cell.%s missing' % v
+                    raise ValueError('cell.%s missing' % v)
 
         setattr(self, 'tvec', self.cells[0].tvec)
         #setattr(self, 'dt', self.cells[self.cells.keys()[0]].timeres_python)
         
-        self.nCells = np.array(self.cells.keys()).size 
+        self.nCells = np.array(list(self.cells.keys())).size 
         
         #test that currents sum towards zero        
         self._test_imem_sum()
@@ -182,7 +182,7 @@ class RecExtElectrodeSetup(object):
     
     def _test_imem_sum(self, tolerance=1E-12):
         '''Test that the membrane currents sum to zero'''
-        for cellkey in self.cells.iterkeys():
+        for cellkey in self.cells.keys():
             sum_imem = self.cells[cellkey].imem.sum(axis=0)
             if np.any(sum_imem == np.ones(self.cells[cellkey].totnsegs)):
                 pass
@@ -191,8 +191,8 @@ class RecExtElectrodeSetup(object):
                     warnings.warn('Membrane currents do not sum to zero')
                     [inds] = np.where((abs(sum_imem) >= tolerance))
                     for i in inds:
-                        print 'membrane current sum cell %i, timestep %i: %.3e'\
-                            % (cellkey, i, sum_imem[i])
+                        print('membrane current sum cell %i, timestep %i: %.3e'\
+                            % (cellkey, i, sum_imem[i]))
                 else:
                     pass
 
@@ -272,7 +272,7 @@ class RecExtElectrode(RecExtElectrodeSetup):
         '''Calculate LFP on electrode geometry from all cell instances.
         Will chose distributed calculated if electrode contain 'n', 'N', and 'r'
         '''
-        if not hasattr(self, 'cells') or len(self.cells.keys()) == 0:
+        if not hasattr(self, 'cells') or len(list(self.cells.keys())) == 0:
             self._import_cell(cell)
        
         if not hasattr(self,  'LFP'):
@@ -293,7 +293,7 @@ class RecExtElectrode(RecExtElectrodeSetup):
         
         if self.n != None and self.N != None and self.r != None:
             if self.n <= 1:
-                raise ValueError, "n = %i must be larger that 1" % self.n
+                raise ValueError("n = %i must be larger that 1" % self.n)
             else:
                 variables.update({
                     'radius' : self.r,
@@ -303,22 +303,22 @@ class RecExtElectrode(RecExtElectrodeSetup):
                     })
 
 
-            for cellkey in self.cells.iterkeys():                    
+            for cellkey in self.cells.keys():                    
                 variables.update({
                     'r_limit' : self.cells[cellkey].diam/2,
                     })
                 [self.circle, self.offsets, LFP_temp[cellkey, :, :]] = \
                     self._lfp_el_pos_calc_dist(cellkey, **variables)
                 if self.verbose:
-                    print 'Calculated potential contribution, cell %i.' % cellkey
+                    print('Calculated potential contribution, cell %i.' % cellkey)
         else:
-            for cellkey in self.cells.iterkeys():
+            for cellkey in self.cells.keys():
                 variables.update({
                     'r_limit' : self.cells[cellkey].diam/2
                 })
                 LFP_temp[cellkey, :, :] = self._loop_over_contacts(**variables)
                 if self.verbose:
-                    print 'Calculated potential contribution, cell %i.' % cellkey
+                    print('Calculated potential contribution, cell %i.' % cellkey)
         if self.perCellLFP:
             self.CellLFP = []
             for LFPtrace in LFP_temp:
@@ -335,7 +335,7 @@ class RecExtElectrode(RecExtElectrodeSetup):
         else:
             LFP_temp = np.zeros((self.x.size, self.tvec.size))
             
-        for i in xrange(self.x.size):
+        for i in range(self.x.size):
             LFP_temp[i, :] = LFP_temp[i, :] + \
                     lfpcalc.calc_lfp_choose(self.cells[cellkey], x = self.x[i],
                                             y = self.y[i], z = self.z[i],
@@ -356,7 +356,7 @@ class RecExtElectrode(RecExtElectrodeSetup):
         lfp_el_pos = np.zeros(self.LFP.shape)
         offsets = {}
         circle = {}
-        for i in xrange(len(self.x)):
+        for i in range(len(self.x)):
             if n > 1:
                 lfp_e = np.zeros((n, self.LFP.shape[1]))
 
@@ -368,7 +368,7 @@ class RecExtElectrode(RecExtElectrodeSetup):
                 #assert the same random numbers are drawn every time
                 if self.seedvalue != None:
                     np.random.seed(self.seedvalue)
-                for j in xrange(n):
+                for j in range(n):
                     A = [(np.random.rand()-0.5)*radius*2,
                         (np.random.rand()-0.5)*radius*2,
                         (np.random.rand()-0.5)*radius*2]
@@ -385,7 +385,7 @@ class RecExtElectrode(RecExtElectrodeSetup):
                 y_n = offs[:, 1] + self.y[i]
                 z_n = offs[:, 2] + self.z[i]
 
-                for j in xrange(m):
+                for j in range(m):
                     B = [(np.random.rand()-0.5),
                         (np.random.rand()-0.5),
                         (np.random.rand()-0.5)]
@@ -398,7 +398,7 @@ class RecExtElectrode(RecExtElectrodeSetup):
                 crcly = crcl[:, 1] + self.y[i]
                 crclz = crcl[:, 2] + self.z[i]
 
-                for j in xrange(n):
+                for j in range(n):
                     lfp_e[j, ] = lfpcalc.calc_lfp_choose(self.cells[cellkey],
                                                         x = x_n[j],
                                                         y = y_n[j],
