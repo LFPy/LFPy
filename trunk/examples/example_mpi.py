@@ -60,14 +60,14 @@ class Population:
         
         #superimpose local LFPs on every RANK, then sum using MPI to RANK 0
         self.LFP = []
-        for key, value in self.results.iteritems():
+        for key, value in self.results.items():
             self.LFP.append(value['LFP'])
         self.LFP = np.array(self.LFP).sum(axis=0)
         self.LFP = COMM.reduce(self.LFP)        #LFP is None on all but RANK 0
         
         #collect all simulation results on RANK 0, including single cell LFP
         if RANK == 0:
-            for i in xrange(1, SIZE):
+            for i in range(1, SIZE):
                 result = COMM.recv(source=MPI.ANY_SOURCE) #receive from ANY rank
                 self.results.update(result)     #collect
         else:
@@ -81,7 +81,7 @@ class Population:
         #start unique cell simulation on every RANK,
         #and store the electrode and cell objects in dicts indexed by cellindex
         results = {}
-        for cellindex in xrange(self.POPULATION_SIZE):
+        for cellindex in range(self.POPULATION_SIZE):
             if divmod(cellindex, SIZE)[1] == RANK:
                 results.update({cellindex : self.cellsim(cellindex)})
         return results
@@ -90,7 +90,7 @@ class Population:
         '''draw and distribute some spike times for each cell in population'''
         if RANK == 0:
             RandSpikeTimes = []
-            for cellindex in xrange(self.POPULATION_SIZE):
+            for cellindex in range(self.POPULATION_SIZE):
                 sptimes = LFPy.inputgenerators.stationary_gamma(
                     self.cellParameters['tstartms'],
                     self.cellParameters['tstopms'],
@@ -106,7 +106,7 @@ class Population:
         cylinder constraints'''
         if RANK == 0:
             cellPositions = []
-            for cellindex in xrange(self.POPULATION_SIZE):
+            for cellindex in range(self.POPULATION_SIZE):
                 r = np.sqrt(np.random.rand()) * \
                                     self.populationParameters['radius']
                 theta = np.random.rand() * 2 * np.pi
@@ -162,7 +162,7 @@ class Population:
             
             ax = fig.add_subplot(121, aspect='equal', frameon=False,
                         xticks=[], xticklabels=[], yticks=[], yticklabels=[])
-            for cellindex in xrange(self.POPULATION_SIZE):
+            for cellindex in range(self.POPULATION_SIZE):
                 cell = LFPy.Cell(**self.cellParameters)
                 cell.set_pos(xpos = self.cellPositions[cellindex, 0],
                      ypos = self.cellPositions[cellindex, 1],
@@ -177,7 +177,7 @@ class Population:
                     self.electrodeParameters['z'], '.', marker='o', color='g')
             
             ax = fig.add_subplot(222)
-            for key, value in self.results.iteritems():
+            for key, value in self.results.items():
                 tvec = np.arange(value['somav'].size) * \
                                         self.cellParameters['timeres_python']
                 ax.plot(tvec, value['somav'],
@@ -244,7 +244,7 @@ if __name__ == '__main__':
     # calculated as the average LFP in n random points on each contact:
     X, Y, Z = np.mgrid[0:1, 0:1, -500:1001:50]
     N = np.zeros((X.size, 3))
-    for i in xrange(N.shape[0]): N[i,] = [1, 0, 0] #normal unit vec. to contacts
+    for i in range(N.shape[0]): N[i,] = [1, 0, 0] #normal unit vec. to contacts
     # put parameters in dictionary
     electrodeParameters = {
         'sigma' : 0.3,              # Extracellular potential

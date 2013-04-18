@@ -118,14 +118,14 @@ class Synapse(PointProcess):
         try:
             self.i = numpy.array(cell.synireclist.o(self.hocidx))
         except:
-            raise Exception, 'cell.synireclist deleted from consequtive runs'
+            raise Exception('cell.synireclist deleted from consequtive runs')
     
     def collect_potential(self, cell):
         '''Collect membrane potential of segment with synapse'''
         try:
             self.v = numpy.array(cell.synvreclist.o(self.hocidx))
         except:
-            raise Exception, 'cell.synvreclist deleted from consequtive runs'
+            raise Exception('cell.synvreclist deleted from consequtive runs')
         
 class StimIntElectrode(PointProcess):
     '''
@@ -243,7 +243,7 @@ class PointProcessPlayInSoma:
         f = file(self.soma_trace)
         x = []
         for line in f.readlines():
-            x.append(map(float, line.split()))
+            x.append(list(map(float, line.split())))
         x = numpy.array(x)
         X = x.T
         f.close()
@@ -262,7 +262,7 @@ class PointProcessPlayInSoma:
         somaTvec = somaTvec0
         somaTrace = trace
         
-        for i in xrange(1, t_on.size):
+        for i in range(1, t_on.size):
             numpy.concatenate((somaTvec, somaTvec0 + t_on[i]))
             numpy.concatenate((somaTrace, trace))
         

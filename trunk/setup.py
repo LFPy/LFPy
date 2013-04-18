@@ -24,9 +24,9 @@ try:
         include_dirs=[numpy.get_include()]),
         ]
 except:
-    print "'from Cython.Distutils import build_ext' failed!!!!"
-    print "Cython extensions will not be compiled, and"
-    print "Simulations in LFPy will run slower"
+    print("'from Cython.Distutils import build_ext' failed!!!!")
+    print("Cython extensions will not be compiled, and")
+    print("Simulations in LFPy will run slower")
     cmdclass = {}
     ext_modules = []
 
@@ -50,6 +50,7 @@ setup(
         'Programming Language :: Python',
         'Programming Language :: Python :: 2.6',
         'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3.3',
         'Programming Language :: Cython',
         'Operating System :: OS Independent',
         'Topic :: Scientific/Engineering',

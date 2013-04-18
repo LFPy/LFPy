@@ -16,7 +16,7 @@ GNU General Public License for more details.
 import os
 import neuron
 import numpy as np
-import cPickle
+import pickle
 from LFPy import Cell, RecExtElectrode
 from LFPy.run_simulation import _run_simulation, _run_simulation_with_electrode
 import sys
@@ -139,25 +139,23 @@ class TemplateCell(Cell):
                 elif fileEnding == 'xml' or fileEnding ==  'XML':
                     Import = neuron.h.Import3d_MorphML()
                 else:
-                    raise ValueError, \
-                        '%s is not a recognised morphology file format! ',\
-                        'Should be either .hoc, .asc, .swc, .xml!' \
-                         % self.morphology
+                    raise ValueError('%s is not a recognised morphology file format! ').with_traceback('Should be either .hoc, .asc, .swc, .xml!' \
+                         % self.morphology)
                 
                 #assuming now that morphology file is the correct format
                 try:
                     Import.input(self.morphology)
                 except:
                     if not hasattr(neuron, 'neuroml'):
-                        raise Exception, 'Can not import, try and copy the ' + \
+                        raise Exception('Can not import, try and copy the ' + \
                         'nrn/share/lib/python/neuron/neuroml ' + \
-                        'folder into %s' % neuron.__path__[0]
+                        'folder into %s' % neuron.__path__[0])
                     else:
-                        raise Exception, 'something wrong with file, see output'
+                        raise Exception('something wrong with file, see output')
                 try:
                     imprt = neuron.h.Import3d_GUI(Import, 0)
                 except:
-                    raise Exception, 'See output, try to correct the file'
+                    raise Exception('See output, try to correct the file')
                 
                 #instantiate the cell object
                 if fileEnding == 'xml' or fileEnding ==  'XML':
@@ -165,7 +163,7 @@ class TemplateCell(Cell):
                     try:
                         imprt.instantiate(self.cell)
                     except:
-                        raise Exception, "this xml file is not supported"
+                        raise Exception("this xml file is not supported")
                 else:
                     imprt.instantiate(self.cell)
                 
@@ -227,7 +225,7 @@ class TemplateCell(Cell):
         '''
         for i, sec in enumerate(self.allseclist):
             n3d = int(neuron.h.n3d())
-            for n in xrange(n3d):
+            for n in range(n3d):
                 neuron.h.pt3dchange(n,
                                 self.x3d[i][n],
                                 self.y3d[i][n],

@@ -15,7 +15,7 @@ def plotcell(cell, color='k'):
         pl.plot(pl.r_[cell.xstart[idx], cell.xend[idx][-1]],
                 pl.r_[cell.zstart[idx], cell.zend[idx][-1]],
                 color=color)
-    print ' '
+    print(' ')
 
 #delete cell instances from previous script executions,
 neuron.h('forall delete_section()')

@@ -16,10 +16,10 @@ import scipy.signal as ss
 
 def load(filename):
     '''Generic loading of cPickled objects from file'''
-    import cPickle
+    import pickle
     
     filen = open(filename,'rb')
-    obj = cPickle.load(filen)
+    obj = pickle.load(filen)
     filen.close()
     return obj
 
@@ -37,10 +37,10 @@ def noise_brown(ncols, nrows=1, weight=1, filter=None, filterargs=None):
     from matplotlib.mlab import rms_flat
 
     if filter != None:
-        coeff_b, coeff_a = filter(**filterargs)
+        coeff_b, coeff_a = list(filter(**filterargs))
     
     noise = np.empty((nrows, ncols))    
-    for i in xrange(nrows):
+    for i in range(nrows):
         signal = np.random.normal(size=ncols+10000).cumsum()
         if filter != None:
             signal = ss.lfilter(coeff_b, coeff_a, signal)
