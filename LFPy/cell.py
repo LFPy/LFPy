@@ -16,7 +16,7 @@ GNU General Public License for more details.
 import os
 import neuron
 import numpy as np
-import cPickle
+import pickle
 from LFPy import RecExtElectrode
 from LFPy.run_simulation import _run_simulation, _run_simulation_with_electrode
 from LFPy.run_simulation import _collect_geometry_neuron
@@ -105,7 +105,7 @@ class Cell(object):
             if os.path.isfile(self.morphology):
                 self._load_geometry()
             else:
-                raise Exception, 'non-existent file %s' % self.morphology
+                raise Exception('non-existent file %s' % self.morphology)
         else:
             try:
                 #will try to import top level cell and create sectionlist,
@@ -113,20 +113,20 @@ class Cell(object):
                 neuron.h.define_shape()
                 self._create_sectionlists()
             except:
-                raise Exception, "Could not load existent top-level cell"
+                raise Exception("Could not load existent top-level cell")
         
         #Some parameters and lists initialised
         if timeres_python not in 2.**np.arange(-16, -1) or timeres_NEURON \
                 not in 2.**np.arange(-16, -1):
             if self.verbose:
-                print 'timeres_python and or timeres_NEURON not a power of 2,',
-                print 'cell.tvec errors may occur.',
-                print 'Initialization will continue.'
+                print('timeres_python and or timeres_NEURON not a power of 2,')
+                print('cell.tvec errors may occur.')
+                print('Initialization will continue.')
             else:
                 pass
         if timeres_python < timeres_NEURON:
-            raise ValueError, 'timeres_python = %.3e < timeres_NEURON = %.3e' \
-                                        % (timeres_python, timeres_NEURON)
+            raise ValueError('timeres_python = %.3e < timeres_NEURON = %.3e' \
+                                        % (timeres_python, timeres_NEURON))
         self.timeres_python = timeres_python
         self.timeres_NEURON = timeres_NEURON
         
@@ -151,7 +151,7 @@ class Cell(object):
             self._set_passive()
         else:
             if self.verbose:
-                print 'No passive properties added'
+                print('No passive properties added')
         
         #run user specified code and functions if argument given
         if custom_code != None or custom_fun != None:
@@ -163,13 +163,13 @@ class Cell(object):
             self._set_extracellular()
         else:
             if self.verbose:
-                print "no extracellular mechanism inserted, can't access imem!"
+                print("no extracellular mechanism inserted, can't access imem!")
         
         #set number of segments accd to rule, and calculate the number
         self._set_nsegs(nsegs_method, lambda_f, max_nsegs_length)
         self.totnsegs = self._calc_totnsegs()
         if self.verbose:
-            print "Total number of segments = ", self.totnsegs
+            print("Total number of segments: %i" % self.totnsegs)
         
         #extract pt3d info from NEURON, and set these with the same rotation
         #and position in space as in our simulations, assuming RH rule, which
@@ -183,7 +183,7 @@ class Cell(object):
             self.set_pos()
         else:
             if self.verbose:
-                print 'no soma, using the midpoint if initial segment.'
+                print('no soma, using the midpoint if initial segment.')
         self.set_rotation(**self.default_rotation)
 
     
@@ -212,25 +212,23 @@ class Cell(object):
             elif fileEnding == 'xml' or fileEnding ==  'XML':
                 Import = neuron.h.Import3d_MorphML()
             else:
-                raise ValueError, \
-                    '%s is not a recognised morphology file format! ',\
-                    'Should be either .hoc, .asc, .swc, .xml!' \
-                     % self.morphology
+                raise ValueError('%s is not a recognised morphology file format! ').with_traceback('Should be either .hoc, .asc, .swc, .xml!' \
+                     % self.morphology)
             
             #assuming now that morphologies file is the correct format
             try:
                 Import.input(self.morphology)
             except:
                 if not hasattr(neuron, 'neuroml'):
-                    raise Exception, 'Can not import, try and copy the ' + \
+                    raise Exception('Can not import, try and copy the ' + \
                     'nrn/share/lib/python/neuron/neuroml ' + \
-                    'folder into %s' % neuron.__path__[0]
+                    'folder into %s' % neuron.__path__[0])
                 else:
-                    raise Exception, 'something wrong with file, see output'
+                    raise Exception('something wrong with file, see output')
             try:
                 imprt = neuron.h.Import3d_GUI(Import, 0)
             except:
-                raise Exception, 'See output, try to correct the file'
+                raise Exception('See output, try to correct the file')
             imprt.instantiate(neuron.h.this)
             
         neuron.h.define_shape()
@@ -252,11 +250,11 @@ class Cell(object):
                             'One possible cause is the NEURON mechanisms have',
                             'not been compiled, ',
                             'try running nrnivmodl. ',])
-                        raise Exception, ERRMSG
+                        raise Exception(ERRMSG)
                 elif code.split('.')[-1] == 'py':
                     exec(code)
                 else:
-                    raise Exception, '%s not a .hoc- nor .py-file' % code
+                    raise Exception('%s not a .hoc- nor .py-file' % code)
         
         # run custom functions with arguments
         i = 0
@@ -281,7 +279,7 @@ class Cell(object):
             self._set_nsegs_fixed_length(max_nsegs_length)
         else:
             if self.verbose:
-                print 'No nsegs_method applied (%s)' % nsegs_method
+                print('No nsegs_method applied (%s)' % nsegs_method)
     
     def _get_rotation(self):
         '''Check if there exists a corresponding file
@@ -353,7 +351,7 @@ class Cell(object):
                                                            sec=sec)) + .9)
                 / 2 )*2 + 1
         if self.verbose:
-            print "set nsegs using lambda-rule with frequency %i." % frequency
+            print("set nsegs using lambda-rule with frequency %i." % frequency)
    
     def _set_nsegs_lambda100(self):
         '''Set the numbers of segments using d_lambda(100)'''
@@ -375,7 +373,7 @@ class Cell(object):
     def _check_currents(self):
         '''Check that the sum of all membrane and electrode currents over all
         segments is sufficiently close to zero'''
-        raise NotImplementedError, 'this function need to be written'
+        raise NotImplementedError('this function need to be written')
     
     def _set_passive(self):
         '''Insert passive mechanism on all segments'''
@@ -418,7 +416,7 @@ class Cell(object):
                 if i == idx:
                     command = cmd1 + syntype + cmd2  
                     exec(command)
-                    for param in kwargs.keys():
+                    for param in list(kwargs.keys()):
                         try:
                             exec('syn.' + param + '=' + str(kwargs[param]))
                         except:
@@ -470,7 +468,7 @@ class Cell(object):
                 if i == idx:
                     command = cmd1 + pptype + cmd2  
                     exec(command)
-                    for param in kwargs.keys():
+                    for param in list(kwargs.keys()):
                         try:
                             exec('stim.' + param + '=' + str(kwargs[param]))
                         except SyntaxError:
@@ -479,7 +477,7 @@ class Cell(object):
                                     pptype),
                                 'recognize attribute "{0}". '.format(param),
                                 'Check for misspellings'])
-                            raise Exception, ERRMSG                            
+                            raise Exception(ERRMSG)                            
                     self.stimlist.append(stim)
                     
                     #record current
@@ -527,15 +525,15 @@ class Cell(object):
             self.somapos[2] = self.zmid[self.somaidx]
         elif self.somaidx.size == 0:
             if self.verbose:
-                print 'There is no soma!'
-                print 'using first segment as root point'
+                print('There is no soma!')
+                print('using first segment as root point')
             self.somaidx = np.array([0])
             self.somapos = np.zeros(3)
             self.somapos[0] = self.xmid[self.somaidx]
             self.somapos[1] = self.ymid[self.somaidx]
             self.somapos[2] = self.zmid[self.somaidx]
         else:
-            raise Exception, 'Huh?!'
+            raise Exception('Huh?!')
     
     def _calc_midpoints(self):
         '''Calculate midpoints of each segment'''
@@ -574,7 +572,7 @@ class Cell(object):
                             seclist.append(sec=sec)
             else:
                 if self.verbose:
-                    print '%s did not match any section name' % str(section)
+                    print('%s did not match any section name' % str(section))
 
         idx = np.where(self._get_idx(seclist))[0]
         sel_z_idx = (self.zmid[idx] > z_min) & (self.zmid[idx] < z_max)
@@ -601,17 +599,17 @@ class Cell(object):
         '''
         poss_idx = self.get_idx(section=section, z_min=z_min, z_max=z_max)
         if nidx < 1:
-            print 'nidx < 1, returning empty array'
+            print('nidx < 1, returning empty array')
             return np.array([])
         elif poss_idx.size == 0:
-            print 'No possible segment idx match enquire! returning empty array'
+            print('No possible segment idx match enquire! returning empty array')
             return np.array([])
         else:
             idx = np.empty(nidx, dtype=int)
             norm_area_cumsum = np.cumsum(self.area[poss_idx] / 
                                          sum(self.area[poss_idx]))
             
-            for i in xrange(nidx):
+            for i in range(nidx):
                 idx[i] = np.nonzero(np.random.rand() < norm_area_cumsum)[0].min()
             
             return poss_idx[idx]
@@ -669,8 +667,8 @@ class Cell(object):
         #run fadvance until t >= tstopms, and calculate LFP if asked for
         if electrode == None and dotprodcoeffs == None:
             if not rec_imem:
-                print "rec_imem = %s, membrane currents will not be recorded!" \
-                                  % str(rec_imem)
+                print("rec_imem = %s, membrane currents will not be recorded!" \
+                                  % str(rec_imem))
             _run_simulation(self, variable_dt, atol)
         else:
             #allow using both electrode and additional coefficients:
@@ -710,7 +708,7 @@ class Cell(object):
         containing all the membrane currents.
         '''
         self.imem = np.array(self.memireclist)
-        for i in xrange(self.imem.shape[0]):
+        for i in range(self.imem.shape[0]):
             self.imem[i, ] *= self.area[i] * 1E-2
         self.memireclist = None
         del self.memireclist
@@ -720,7 +718,7 @@ class Cell(object):
         Get the passive currents
         '''
         self.ipas = np.array(self.memipasreclist)
-        for i in xrange(self.ipas.shape[0]):
+        for i in range(self.ipas.shape[0]):
             self.ipas[i, ] *= self.area[i] * 1E-2
         self.memipasreclist = None
         del self.memipasreclist
@@ -730,7 +728,7 @@ class Cell(object):
         Get the capacitive currents
         '''
         self.icap = np.array(self.memicapreclist)
-        for i in xrange(self.icap.shape[0]):
+        for i in range(self.icap.shape[0]):
             self.icap[i, ] *= self.area[i] * 1E-2
         self.memicapreclist = None
         del self.memicapreclist
@@ -751,7 +749,7 @@ class Cell(object):
             if syn.record_current:
                 syn.collect_current(self)
             else:
-                raise Exception, 'must set record_current=True in Synapse class'
+                raise Exception('must set record_current=True in Synapse class')
         self.synireclist = None
         del self.synireclist
     
@@ -759,7 +757,7 @@ class Cell(object):
         '''
         Collect the membrane voltage of segments with synapses
         '''
-        for i in xrange(len(self.synapses)):
+        for i in range(len(self.synapses)):
             self.synapses[i].collect_potential(self)
         self.synvreclist = None
         del self.synvreclist
@@ -768,11 +766,11 @@ class Cell(object):
         '''
         Get the pointprocess currents
         '''
-        for i in xrange(len(self.pointprocesses)):
+        for i in range(len(self.pointprocesses)):
             if self.pointprocesses[i].record_current:
                 self.pointprocesses[i].collect_current(self)
             else:
-                raise Exception, 'must set record_current=True for pointp.'
+                raise Exception('must set record_current=True for pointp.')
         self.stimireclist = None
         del self.stimireclist
         
@@ -786,7 +784,7 @@ class Cell(object):
         for values in self.recvariablesreclist:
             self.rec_variables.update({rec_variables[i] : np.array(values)})
             if self.verbose:
-                print 'collected recorded variable %s' % rec_variables[i] 
+                print('collected recorded variable %s' % rec_variables[i]) 
             i += 1
         del self.recvariablesreclist
     
@@ -795,8 +793,8 @@ class Cell(object):
         Initialize spiketimes from netcon if they exist
         '''
         if hasattr(self, 'synlist'):
-            for i in xrange(int(self.synlist.count())):
-                for ii in xrange(int(self.sptimeslist.o(i).size)):
+            for i in range(int(self.synlist.count())):
+                for ii in range(int(self.sptimeslist.o(i).size)):
                     self.netconlist.o(i).event(float(self.sptimeslist.o(i)[ii]))
 
     
@@ -896,8 +894,8 @@ class Cell(object):
                         recvector.record(getattr(seg, '_ref_%s' % variable),
                                          self.timeres_python)
                     else:
-                        print 'non-existing variable %s, section %s.%f' % \
-                                (variable, sec.name(), seg.x)
+                        print('non-existing variable %s, section %s.%f' % \
+                                (variable, sec.name(), seg.x))
                     variablereclist.append(recvector)
         
     
@@ -940,7 +938,7 @@ class Cell(object):
             if type(getattr(self, varname)) == type(neuron.h.List()):
                 setattr(self, varname, None)
                 if self.verbose:
-                    print 'None-typed %s in cell instance' % varname
+                    print('None-typed %s in cell instance' % varname)
         
     def cellpickler(self, filename):
         '''Save data in cell to filename, using cPickle. It will however destroy
@@ -963,14 +961,14 @@ class Cell(object):
         '''
         self.strip_hoc_objects()
         filen = open(filename, 'wb')
-        cPickle.dump(self, filen, protocol=2)
+        pickle.dump(self, filen, protocol=2)
         filen.close()
     
     def _update_synapse_positions(self):
         '''
         Update synapse positions after rotation of morphology
         '''
-        for i in xrange(len(self.synapses)):
+        for i in range(len(self.synapses)):
             self.synapses[i].update_pos(self)
     
     def set_rotation(self, x=None, y=None, z=None):
@@ -1001,10 +999,10 @@ class Cell(object):
             
             self._real_positions(rel_start, rel_end)
             if self.verbose:
-                print 'Rotated geometry %g radians around x-axis' % (-theta)
+                print('Rotated geometry %g radians around x-axis' % (-theta))
         else:
             if self.verbose:
-                print 'Geometry not rotated around x-axis'
+                print('Geometry not rotated around x-axis')
         
         if y != None:
             phi = -y
@@ -1019,10 +1017,10 @@ class Cell(object):
             
             self._real_positions(rel_start, rel_end)
             if self.verbose:
-                print 'Rotated geometry %g radians around y-axis' % (-phi)
+                print('Rotated geometry %g radians around y-axis' % (-phi))
         else:
             if self.verbose:
-                print 'Geometry not rotated around y-axis'
+                print('Geometry not rotated around y-axis')
         
         if z != None:
             gamma = -z
@@ -1037,10 +1035,10 @@ class Cell(object):
             
             self._real_positions(rel_start, rel_end)
             if self.verbose:
-                print 'Rotated geometry %g radians around z-axis' % (-gamma)
+                print('Rotated geometry %g radians around z-axis' % (-gamma))
         else:
             if self.verbose:
-                print 'Geometry not rotated around z-axis'
+                print('Geometry not rotated around z-axis')
 
         #rotate the pt3d geometry accordingly
         if self.pt3d and hasattr(self, 'x3d'):
@@ -1064,10 +1062,10 @@ class Cell(object):
             rel_start[:, 2] = -rel_start[:, 2]
             rel_end[:, 2] = -rel_end[:, 2]
         else:
-            raise Exception, "axis must be either 'x', 'y' or 'z'"
+            raise Exception("axis must be either 'x', 'y' or 'z'")
         
         if self.verbose:
-            print 'morphology mirrored across %s-axis' % axis
+            print('morphology mirrored across %s-axis' % axis)
         
         #set the proper 3D positions
         self._real_positions(rel_start, rel_end)
@@ -1154,7 +1152,7 @@ class Cell(object):
             return vector
         except:
             ERRMSG = 'idx0 and idx1 must be ints on [0, %i]' % self.totnsegs
-            raise ValueError, ERRMSG
+            raise ValueError(ERRMSG)
         
     def get_intersegment_distance(self, idx0=0, idx1=0):
         '''
@@ -1166,7 +1164,7 @@ class Cell(object):
             return np.sqrt((vector**2).sum())
         except:
             ERRMSG = 'idx0 and idx1 must be ints on [0, %i]' % self.totnsegs
-            raise ValueError, ERRMSG
+            raise ValueError(ERRMSG)
     
     
     def get_idx_children(self, parent="soma[0]"):
@@ -1246,7 +1244,7 @@ class Cell(object):
         #ensure all idx are valid
         if np.any(idx >= self.totnsegs):
             wrongidx = idx[np.where(idx >= self.totnsegs)]
-            raise Exception, 'idx %s >= number of compartments' % str(wrongidx)
+            raise Exception('idx %s >= number of compartments' % str(wrongidx))
         
         #create list of seg names:
         allsegnames = []
@@ -1269,7 +1267,7 @@ class Cell(object):
             n3d = int(neuron.h.n3d())
             x_i, y_i, z_i = np.zeros(n3d), np.zeros(n3d), np.zeros(n3d),
             d_i = np.zeros(n3d)
-            for i in xrange(n3d):
+            for i in range(n3d):
                 x_i[i] = neuron.h.x3d(i)
                 y_i[i] = neuron.h.y3d(i)
                 z_i[i] = neuron.h.z3d(i)
@@ -1286,7 +1284,7 @@ class Cell(object):
             xoff = x[0].mean()
             yoff = y[0].mean()
             zoff = z[0].mean()
-            for i in xrange(len(x)):
+            for i in range(len(x)):
                 x[i] -= xoff
                 y[i] -= yoff
                 z[i] -= zoff
@@ -1301,7 +1299,7 @@ class Cell(object):
         i = 0
         for sec in self.allseclist:
             n3d = int(neuron.h.n3d())
-            for n in xrange(n3d):
+            for n in range(n3d):
                 neuron.h.pt3dchange(n,
                                 self.x3d[i][n],
                                 self.y3d[i][n],
@@ -1318,7 +1316,7 @@ class Cell(object):
         '''
         Offset pt3d geometry with cell.somapos
         '''
-        for i in xrange(len(self.x3d)):
+        for i in range(len(self.x3d)):
             self.x3d[i] += self.somapos[0]
             self.y3d[i] += self.somapos[1]
             self.z3d[i] += self.somapos[2]
@@ -1346,7 +1344,7 @@ class Cell(object):
             rotation_x = np.matrix([[1, 0, 0],
                 [0, np.cos(theta), -np.sin(theta)],
                 [0, np.sin(theta), np.cos(theta)]])
-            for i in xrange(len(self.x3d)):
+            for i in range(len(self.x3d)):
                 rel_pos = self._rel_pt3d_positions(self.x3d[i],
                                                    self.y3d[i], self.z3d[i])
                 
@@ -1355,17 +1353,17 @@ class Cell(object):
                 self.x3d[i], self.y3d[i], self.z3d[i] = \
                                             self._real_pt3d_positions(rel_pos)
             if self.verbose:
-                print 'Rotated geometry %g radians around x-axis' % (-theta)
+                print('Rotated geometry %g radians around x-axis' % (-theta))
         else:
             if self.verbose:
-                print 'Geometry not rotated around x-axis'
+                print('Geometry not rotated around x-axis')
         
         if y != None:
             phi = -y
             rotation_y = np.matrix([[np.cos(phi), 0, np.sin(phi)],
                 [0, 1, 0],
                 [-np.sin(phi), 0, np.cos(phi)]])
-            for i in xrange(len(self.x3d)):
+            for i in range(len(self.x3d)):
                 rel_pos = self._rel_pt3d_positions(self.x3d[i],
                                                    self.y3d[i], self.z3d[i])
                 
@@ -1374,17 +1372,17 @@ class Cell(object):
                 self.x3d[i], self.y3d[i], self.z3d[i] = \
                                             self._real_pt3d_positions(rel_pos)
             if self.verbose:
-                print 'Rotated geometry %g radians around y-axis' % (-phi)
+                print('Rotated geometry %g radians around y-axis' % (-phi))
         else:
             if self.verbose:
-                print 'Geometry not rotated around y-axis'
+                print('Geometry not rotated around y-axis')
         
         if z != None:
             gamma = -z
             rotation_z = np.matrix([[np.cos(gamma), -np.sin(gamma), 0],
                     [np.sin(gamma), np.cos(gamma), 0],
                     [0, 0, 1]])
-            for i in xrange(len(self.x3d)):
+            for i in range(len(self.x3d)):
                 rel_pos = self._rel_pt3d_positions(self.x3d[i],
                                                    self.y3d[i], self.z3d[i])
                 
@@ -1393,10 +1391,10 @@ class Cell(object):
                 self.x3d[i], self.y3d[i], self.z3d[i] = \
                                             self._real_pt3d_positions(rel_pos)
             if self.verbose:
-                print 'Rotated geometry %g radians around z-axis' % (-gamma)
+                print('Rotated geometry %g radians around z-axis' % (-gamma))
         else:
             if self.verbose:
-                print 'Geometry not rotated around z-axis'
+                print('Geometry not rotated around z-axis')
         
         self._update_pt3d()
 
@@ -1501,7 +1499,7 @@ class Cell(object):
             plt.show()
         '''
         polygons = []
-        for i in xrange(len(self.x3d)):
+        for i in range(len(self.x3d)):
             polygons.append(self._create_polygon(i))
         
         return polygons
@@ -1642,14 +1640,14 @@ class Cell(object):
         #test dimensions of input
         try:
             if v_ext.shape[0] != self.totnsegs:
-                raise ValueError, "v_ext.shape[0] != cell.totnsegs"
+                raise ValueError("v_ext.shape[0] != cell.totnsegs")
             if v_ext.shape[1] != t_ext.size:
-                raise ValueError, 'v_ext.shape[1] != t_ext.size'
+                raise ValueError('v_ext.shape[1] != t_ext.size')
         except:
-            raise ValueError, 'v_ext, t_ext must both be np.array types'
+            raise ValueError('v_ext, t_ext must both be np.array types')
         
         if not self.extracellular:
-            raise Exception, 'LFPy.Cell arg extracellular != True'
+            raise Exception('LFPy.Cell arg extracellular != True')
         
         #create list of extracellular potentials on each segment, time vector
         self.t_ext = neuron.h.Vector(t_ext)

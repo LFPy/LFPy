@@ -54,8 +54,8 @@ cpdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] calc_lfp_linesource(
     if type(r_limit) == int or type(r_limit) == float:
         r_limit = np.ones(np.shape(cell.diam))*abs(r_limit)
     elif np.shape(r_limit) != np.shape(cell.diam):
-        raise Exception, 'r_limit is neither a float- or int- value, nor is \
-            r_limit.shape() equal to cell.diam.shape()'
+        raise Exception('r_limit is neither a float- or int- value, nor is \
+            r_limit.shape() equal to cell.diam.shape()')
 
     cdef np.ndarray[DTYPE_t, ndim=2, negative_indices=False] currmem
     cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] xstart, xend, \
@@ -140,9 +140,9 @@ cpdef np.ndarray[DTYPE_t, ndim=1] calc_lfp_som_as_point(cell,
         s_limit = r_limit[0]
         r_limit = r_limit
     else:
-        raise Exception,  'r_limit is neither a float- or int- value, \
+        raise Exception('r_limit is neither a float- or int- value, \
             on the form r_limit=[s_limit, r_limit],  \
-            nor is shape(r_limit) equal to shape(cell.diam)!'
+            nor is shape(r_limit) equal to shape(cell.diam)!')
 
     cdef np.ndarray[DTYPE_t, ndim=2] currmem
     cdef np.ndarray[DTYPE_t, ndim=1] xstart, xend, \
@@ -176,8 +176,8 @@ cpdef np.ndarray[DTYPE_t, ndim=1] calc_lfp_som_as_point(cell,
     r2 = _r2_calc(xend, yend, zend, x, y, z, h)
     r_soma = _r_soma_calc(xmid, ymid, zmid, x, y, z)
     if r_soma < s_limit:
-        print 'Adjusting r-distance to soma segment from %g to %g' \
-                % (r_soma, s_limit)
+        print('Adjusting r-distance to soma segment from %g to %g' \
+                % (r_soma, s_limit))
         r_soma = s_limit
 
     # Check that no segment is close the electrode than r_limit
@@ -185,8 +185,9 @@ cpdef np.ndarray[DTYPE_t, ndim=1] calc_lfp_som_as_point(cell,
         for idx in np.nonzero( r2[1:] < r_limit[1:] * r_limit[1:] )[0]+1:
             if (h[idx] < r_limit[idx]) and \
             ((deltaS[idx] + h[idx]) > -r_limit[idx]):
-                print 'Adjusting distance to segment ', str(idx), ' from ',\
-                str(np.sqrt(r2[idx])), ' to ', str(r_limit[idx]), '.'
+                print('%s%s%s%s%s%s%s%s' % ('Adjusting distance to segment ',
+                                str(idx), ' from ', str(np.sqrt(r2[idx])),
+                                ' to ', str(r_limit[idx]), '.'))
                 r2[idx] = r_limit[idx] * r_limit[idx]
 
     l = h + deltaS
@@ -397,8 +398,8 @@ cpdef calc_lfp_pointsource(cell, x=0, y=0, z=0, sigma=0.3,
     if type(r_limit) == int or type(r_limit) == float:
         r_limit = np.ones(np.shape(cell.diam))*abs(r_limit)
     elif np.shape(r_limit) != np.shape(cell.diam):
-        raise Exception, 'r_limit is neither a float- or int- value, nor is \
-            r_limit.shape() equal to cell.diam.shape()'
+        raise Exception('r_limit is neither a float- or int- value, nor is \
+            r_limit.shape() equal to cell.diam.shape()')
 
     if timestep != None:
         currmem = cell.imem[:, timestep]
