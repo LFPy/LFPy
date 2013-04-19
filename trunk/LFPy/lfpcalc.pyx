@@ -185,7 +185,7 @@ cpdef np.ndarray[DTYPE_t, ndim=1] calc_lfp_som_as_point(cell,
         for idx in np.nonzero( r2[1:] < r_limit[1:] * r_limit[1:] )[0]+1:
             if (h[idx] < r_limit[idx]) and \
             ((deltaS[idx] + h[idx]) > -r_limit[idx]):
-                print('%s%s%s%s%s%s%s%s' % ('Adjusting distance to segment ',
+                print('%s%s%s%s%s%s%s' % ('Adjusting distance to segment ',
                                 str(idx), ' from ', str(np.sqrt(r2[idx])),
                                 ' to ', str(r_limit[idx]), '.'))
                 r2[idx] = r_limit[idx] * r_limit[idx]
