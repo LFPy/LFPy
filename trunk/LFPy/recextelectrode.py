@@ -94,7 +94,7 @@ class RecExtElectrodeSetup(object):
         
         #None-type some attributes created by the Cell class
         self.electrodecoeff = None
-        self.tvec = np.array([])
+        #self.tvec = np.array([])
         self.cells = {}
         self.nCells = None
         self.CellLFP = None
@@ -170,7 +170,9 @@ class RecExtElectrodeSetup(object):
                     setattr(self.cells[0], v, getattr(cell, v))
                 except:
                     raise ValueError('cell.%s missing' % v)
-
+        #
+        #self.dt = self.cells[0].timeres_python
+        #self.tvec = np.arange(self.cells[0].tstopms/self.dt + 1) * self.dt
         setattr(self, 'tvec', self.cells[0].tvec)
         #setattr(self, 'dt', self.cells[self.cells.keys()[0]].timeres_python)
         

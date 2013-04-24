@@ -27,10 +27,10 @@
 '''
 
 #import some plotting stuff and the LFPy-module
-import LFPy
 import numpy as np
 import matplotlib.pyplot as plt
 from mpi4py import MPI
+import LFPy
 
 #MPI stuff we're using
 COMM = MPI.COMM_WORLD
