@@ -146,8 +146,6 @@ def _run_simulation_with_electrode(cell, electrode=None,
         except:
             del cell.imem
     
-    #just for safekeeping
-    lendotrodcoeffs1 = len(dotprodcoeffs)
 
     # Initialize NEURON simulations of cell object    
     neuron.h.dt = cell.timeres_NEURON
@@ -208,15 +206,19 @@ def _run_simulation_with_electrode(cell, electrode=None,
                                     cell.tstopms / cell.timeres_NEURON + 1))
             i += 1
     
+    #multiply segment areas with specific membrane currents later,
+    #mum2 conversion factor:
+    area = cell.area * 1E-2
     #run fadvance until time limit, and calculate LFPs for each timestep
-    area = cell.area
     while neuron.h.t < cell.tstopms:
         if neuron.h.t >= 0:
             i = 0
             for sec in cell.allseclist:
                 for seg in sec:
-                    imem[i] = seg.i_membrane * area[i] * 1E-2
+                    imem[i] = seg.i_membrane
                     i += 1
+            #pA/mum2 -> nA conversion
+            imem *= area
             
             if to_memory:
                 for j, coeffs in enumerate(dotprodcoeffs):
@@ -229,7 +231,7 @@ def _run_simulation_with_electrode(cell, electrode=None,
             tstep += 1
         neuron.h.fadvance()
         counter += 1.
-        if np.mod(counter, interval) == 0:
+        if divmod(counter, interval)[1] == 0:
             rtfactor = (neuron.h.t - ti) * 1E-3 / (time() - t0)
             print('t = %.0f, realtime factor: %.3f' % (neuron.h.t, rtfactor))
             t0 = time()
@@ -240,12 +242,14 @@ def _run_simulation_with_electrode(cell, electrode=None,
         i = 0
         for sec in cell.allseclist:
             for seg in sec:
-                imem[i] = seg.i_membrane * area[i] * 1E-2
+                imem[i] = seg.i_membrane
                 i += 1
+        #pA/mum2 -> nA conversion
+        imem *= area
+            
         if to_memory:
             for j, coeffs in enumerate(dotprodcoeffs):
                 electrodesLFP[j][:, tstep] = np.dot(coeffs, imem)
-                #j += 1
         if to_file:
             for j, coeffs in enumerate(dotprodcoeffs):
                 el_LFP_file['electrode%.3i' % j][:, tstep] = np.dot(coeffs, imem)
