@@ -79,6 +79,64 @@ class testLFPy(unittest.TestCase):
                                            places=3)
 
 
+    def test_method_pointsource_dotprodcoeffs(self):
+        #create LFPs using LFPy-model
+        LFP_LFPy = self.stickSimulationDotprodcoeffs(method='pointsource')
+        
+        #create LFPs using the analytical approac
+        time = np.linspace(0, 100, 10001)
+        R = np.ones(11)*100
+        Z = np.linspace(1000, 0, 11)
+        
+        LFP_analytic = np.empty((R.size, time.size))
+        for i in range(R.size):
+            LFP_analytic[i, ] = self.analytical_LFP(time, electrodeR=R[i],
+                                                    electrodeZ=Z[i])
+        (a, b) = LFP_LFPy.shape
+        for i in range(a):
+            for j in range(b):
+                self.failUnlessAlmostEqual(LFP_LFPy[i, j], LFP_analytic[i, j],
+                                           places=3)
+    
+    def test_method_linesource_dotprodcoeffs(self):
+        #create LFPs using LFPy-model
+        LFP_LFPy = self.stickSimulationDotprodcoeffs(method='linesource')
+        
+        #create LFPs using the analytical approac
+        time = np.linspace(0, 100, 10001)
+        R = np.ones(11)*100
+        Z = np.linspace(1000, 0, 11)
+        
+        LFP_analytic = np.empty((R.size, time.size))
+        for i in range(R.size):
+            LFP_analytic[i, ] = self.analytical_LFP(time, electrodeR=R[i],
+                                                    electrodeZ=Z[i])
+        (a, b) = LFP_LFPy.shape
+        for i in range(a):
+            for j in range(b):
+                self.failUnlessAlmostEqual(LFP_LFPy[i, j], LFP_analytic[i, j],
+                                           places=3)
+    
+    def test_method_som_as_point_dotprodcoeffs(self):
+        #create LFPs using LFPy-model
+        LFP_LFPy = self.stickSimulationDotprodcoeffs(method='som_as_point')
+        
+        #create LFPs using the analytical approac
+        time = np.linspace(0, 100, 10001)
+        R = np.ones(11)*100
+        Z = np.linspace(1000, 0, 11)
+        
+        LFP_analytic = np.empty((R.size, time.size))
+        for i in range(R.size):
+            LFP_analytic[i, ] = self.analytical_LFP(time, electrodeR=R[i],
+                                                    electrodeZ=Z[i])
+        (a, b) = LFP_LFPy.shape
+        for i in range(a):
+            for j in range(b):
+                self.failUnlessAlmostEqual(LFP_LFPy[i, j], LFP_analytic[i, j],
+                                           places=3)
+
+
     def test_method_pointsource_contact_average_r10n100(self):
         #create LFPs using LFPy-model
         LFP_LFPy = self.stickSimulationAveragingElectrode(
@@ -477,6 +535,59 @@ class testLFPy(unittest.TestCase):
         stick.simulate(electrode, rec_imem=True, rec_istim=True, rec_vmem=True)
         
         return electrode.LFP
+
+    def stickSimulationDotprodcoeffs(self, method):
+        stickParams = {
+            'morphology' : 'stick.hoc',
+            'rm' : 30000,
+            'cm' : 1,
+            'Ra' : 150,
+            'tstartms' : -100,
+            'tstopms' : 100,
+            'timeres_python' : 0.01,
+            'timeres_NEURON' : 0.01,
+            'nsegs_method' : 'lambda_f',
+            'lambda_f' : 100,
+            
+        }
+        
+        electrodeParams = {
+            'sigma' : 0.3,
+            'x' : np.ones(11) * 100.,
+            'y' : np.zeros(11),
+            'z' : np.linspace(1000, 0, 11),
+            'method' : method
+        }
+        
+        stimParams = {
+            'pptype' : 'SinSyn',
+            'delay' : -100.,
+            'dur' : 1000.,
+            'pkamp' : 1.,
+            'freq' : 100.,
+            'phase' : -np.pi/2,
+            'bias' : 0.,
+            'record_current' : True
+        }
+        
+        
+        
+        stick = LFPy.Cell(**stickParams)
+        #dummy variables for mapping
+        stick.imem = np.eye(stick.totnsegs)
+        stick.tvec = np.arange(stick.totnsegs)*stick.timeres_python
+        
+        electrode = LFPy.RecExtElectrode(stick, **electrodeParams)
+        electrode.calc_lfp()
+        #not needed anymore:
+        del stick.imem, stick.tvec
+        
+        synapse = LFPy.StimIntElectrode(stick, stick.get_closest_idx(0, 0, 1000),
+                               **stimParams)
+        stick.simulate(dotprodcoeffs=electrode.LFP,
+                       rec_imem=True, rec_istim=True, rec_vmem=True)
+        
+        return stick.dotprodresults[0]
 
     
     def analytical_LFP(self, time=np.linspace(0, 100, 1001),
