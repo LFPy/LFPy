@@ -97,7 +97,7 @@ def _run_simulation_with_electrode(cell, electrode=None,
     cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] imem = \
         np.empty(totnsegs)
     cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] area = \
-        cell.area
+        cell.area.copy()
     
     #check if h5py exist and saving is possible
     try:
