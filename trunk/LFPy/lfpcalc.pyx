@@ -186,7 +186,7 @@ cpdef np.ndarray[DTYPE_t, ndim=1] calc_lfp_som_as_point(cell,
             if (h[idx] < r_limit[idx]) and \
             ((deltaS[idx] + h[idx]) > -r_limit[idx]):
                 print('%s%s%s%s%s%s%s' % ('Adjusting distance to segment ',
-                                str(idx), ' from ', str(np.sqrt(r2[idx])),
+                                str(idx), ' from ', str(r2[idx]**0.5),
                                 ' to ', str(r_limit[idx]), '.'))
                 r2[idx] = r_limit[idx] * r_limit[idx]
 
@@ -224,8 +224,8 @@ cpdef np.ndarray[DTYPE_t, ndim=1] calc_lfp_som_as_point(cell,
 cdef double _r_soma_calc(double xmid, double ymid, double zmid,
                         double x, double y, double z):
     '''Calculate the distance to the soma midpoint'''
-    r_soma = np.sqrt((x - xmid)*(x - xmid) + (y - ymid)*(y - ymid) + \
-        (z - zmid)*(z - zmid))
+    r_soma = ((x - xmid)*(x - xmid) + (y - ymid)*(y - ymid) + \
+        (z - zmid)*(z - zmid))**0.5
 
     return r_soma
 
@@ -241,7 +241,7 @@ cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] _check_rlimit(
         for idx in np.nonzero( r2 < r_limit*r_limit )[0]:
             if (h[idx] < r_limit[idx]) and ((deltaS[idx]+h[idx])>-r_limit[idx]):
                 print 'Adjusting distance to segment ',str(idx),' from ', \
-                     str(np.sqrt(r2[idx])),' to ',str(r_limit[idx]),'.'
+                     str(r2[idx]**0.5),' to ',str(r_limit[idx]),'.'
                 r2[idx] = r_limit[idx]**2
     return r2
 
@@ -266,10 +266,10 @@ cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] _Ememi_calc(
 
     cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] aa = 4 * \
                                                     np.pi * sigma * deltaS_i
-    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] bb = np.sqrt(h_i *
-                                                    h_i + r2_i) - h_i
-    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] cc = np.sqrt(l_i *
-                                                    l_i + r2_i) - l_i
+    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] bb = (h_i *
+                                                    h_i + r2_i)**0.5 - h_i
+    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] cc = (l_i *
+                                                    l_i + r2_i)**0.5 - l_i
     cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] dd = \
                                                     np.log(bb / cc) / aa
 
@@ -298,10 +298,10 @@ cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] _Ememii_calc(
 
     cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] aa = 4 * \
                                                 np.pi * sigma * deltaS_ii
-    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] bb = np.sqrt(
-                                                h_ii*h_ii + r2_ii) - h_ii
+    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] bb = (
+                                                h_ii*h_ii + r2_ii)**0.5 - h_ii
     cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] cc = (l_ii +
-                                        np.sqrt(l_ii*l_ii + r2_ii)) / r2_ii
+                                        (l_ii*l_ii + r2_ii)**0.5) / r2_ii
     cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] dd = \
                                         np.log(bb * cc) / aa
 
@@ -329,10 +329,10 @@ cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] _Ememiii_calc(
 
     cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] aa = 4 * \
                                                 np.pi * sigma * deltaS_iii
-    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] bb = np.sqrt(
-                                                l_iii*l_iii + r2_iii) + l_iii
-    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] cc = np.sqrt(
-                                                h_iii*h_iii + r2_iii) + h_iii
+    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] bb = (l_iii*l_iii +
+                                                            r2_iii)**0.5 + l_iii
+    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] cc = (h_iii*h_iii +
+                                                            r2_iii)**0.5 + h_iii
     cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] dd = \
                                                 np.log(bb / cc) / aa
 
@@ -349,9 +349,9 @@ cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] _deltaS_calc(
                 np.ndarray[DTYPE_t, ndim=1, negative_indices=False] zstart,
                 np.ndarray[DTYPE_t, ndim=1, negative_indices=False] zend):
     '''Subroutine used by calc_lfp_som_as_point()'''
-    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] deltaS = \
-    np.sqrt( (xstart - xend)*(xstart - xend) \
-        + (ystart - yend)*(ystart - yend) + (zstart-zend)*(zstart-zend))
+    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] deltaS = (
+        (xstart - xend)*(xstart - xend) + (ystart - yend)*(ystart - yend) +
+        (zstart-zend)*(zstart-zend))**0.5
 
     return deltaS
 
@@ -410,7 +410,7 @@ cpdef calc_lfp_pointsource(cell, x=0, y=0, z=0, sigma=0.3,
 
     r2 = (cell.xmid - x)**2 + (cell.ymid - y)**2 + (cell.zmid - z)**2
     r2 = _check_rlimit_point(r2, r_limit)
-    r = np.sqrt(r2)
+    r = r2**0.5
 
     Emem = 1 / (4 * np.pi * sigma) * np.dot(currmem.T, 1/r)
 
