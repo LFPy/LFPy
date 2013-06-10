@@ -94,17 +94,21 @@ class TemplateCell(Cell):
         self.templatename = templatename
         self.templateargs = templateargs
         
-        neuron.h.load_file('stdlib.hoc', 'String')    #NEURON std. library
-        neuron.h.load_file('import3d.hoc')  #import 3D morphology lib
+        if not hasattr(neuron.h, 'd_lambda'):
+            neuron.h.load_file('stdlib.hoc', 'String')    #NEURON std. library
+            neuron.h.load_file('import3d.hoc')  #import 3D morphology lib
                 
         #load the cell template specification
-        if type(self.templatefile) == str:
-            neuron.h.load_file(self.templatefile)
-        elif type(self.templatefile) == list:
-            for template in self.templatefile:
-                neuron.h.load_file(template)
-
-
+        #check if templatename exist in neuron.h namespace:
+        if hasattr(neuron.h, self.templatename):
+            print 'template %s exist already' % self.templatename
+        else:
+            if type(self.templatefile) == str:
+                neuron.h.load_file(self.templatefile)
+            elif type(self.templatefile) == list:
+                for template in self.templatefile:
+                    neuron.h.load_file(template)
+        
         #initialize the cell object
         Cell.__init__(self, **kwargs)
         
@@ -119,6 +123,7 @@ class TemplateCell(Cell):
         #the python cell object we are loading the morphology into:
         celltemplate = getattr(neuron.h, self.templatename)
         self.cell = celltemplate(self.templateargs)
+        #self.cell = getattr(neuron.h, self.templatename)(self.templateargs)
         
         #perform a test if the morphology is already loaded:
         seccount = 0
