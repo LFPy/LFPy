@@ -96,8 +96,9 @@ class Cell(object):
         self.verbose = verbose
         self.pt3d = pt3d
         
-        neuron.h.load_file('stdlib.hoc')    #NEURON std. library
-        neuron.h.load_file('import3d.hoc')  #import 3D morphology lib
+        if not hasattr(neuron.h, 'd_lambda'):
+            neuron.h.load_file('stdlib.hoc')    #NEURON std. library
+            neuron.h.load_file('import3d.hoc')  #import 3D morphology lib
         
         #load morphology
         self.morphology = morphology
