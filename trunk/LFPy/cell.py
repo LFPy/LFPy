@@ -21,6 +21,7 @@ from LFPy import RecExtElectrode
 from LFPy.run_simulation import _run_simulation, _run_simulation_with_electrode
 from LFPy.run_simulation import _collect_geometry_neuron
 import sys
+from warnings import warn
 
 class Cell(object):
     '''
@@ -99,6 +100,14 @@ class Cell(object):
         if not hasattr(neuron.h, 'd_lambda'):
             neuron.h.load_file('stdlib.hoc')    #NEURON std. library
             neuron.h.load_file('import3d.hoc')  #import 3D morphology lib
+        
+        #print a warning if neuron have existing sections
+        numsec = 0
+        for numsec, sec in enumerate(neuron.h.allsec()): pass
+        if numsec >= 1:
+            mssg = "existing sections detected! Consider running: \n" + \
+                   "neuron.h('forall delete_section()')"
+            warn(mssg)
         
         #load morphology
         self.morphology = morphology
