@@ -7,6 +7,8 @@ import numpy as np
 from scipy.integrate import quad
 from scipy import real, imag
 import LFPy
+import neuron
+from warnings import warn
 
 class testLFPy(unittest.TestCase):
     '''
@@ -678,5 +680,16 @@ class testLFPy(unittest.TestCase):
         return real_integral[0] + 1j*imag_integral[0]
 
 
-suite = unittest.TestLoader().loadTestsFromTestCase(testLFPy)
-unittest.TextTestRunner(verbosity=2).run(suite)
+if __name__ == '__main__':
+    #check if sinsyn.mod is compiled, if it isn't try and run nrnivmodl on it
+    if not hasattr(neuron.h, 'SinSyn'):
+        print __file__
+        import os
+        os.system('nrnivmodl')
+        neuron.load_mechanisms('.')
+    if not hasattr(neuron.h, 'SinSyn'):
+        warn('tests will fail because nrnivmodl did not compile sinsyn.mod')
+        
+
+    suite = unittest.TestLoader().loadTestsFromTestCase(testLFPy)
+    unittest.TextTestRunner(verbosity=2).run(suite)
