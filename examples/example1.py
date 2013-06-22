@@ -5,6 +5,7 @@ Example plot for LFPy: Single-synapse contribution to the LFP
 import LFPy
 import numpy as np
 import matplotlib.pyplot as plt
+plt.ion()
 
 ################################################################################
 # Main script, set parameters and create cell, synapse and electrode objects
@@ -12,10 +13,11 @@ import matplotlib.pyplot as plt
 
 # Define cell parameters
 cell_parameters = {          # various cell parameters,
-    'morphology' : 'morphologies/L5_Mainen96_LFPy.hoc', # Mainen&Sejnowski, 1996
+#     'morphology' : 'morphologies/L5_Mainen96_LFPy.hoc', # Mainen&Sejnowski, 1996
+    'morphology' : 'patdemo/cells/j4a.hoc', # Mainen&Sejnowski, 1996
     'rm' : 30000.,      # membrane resistance
     'cm' : 1.0,         # membrane capacitance
-    'Ra' : 150.,        # axial resistance
+    'Ra' : 150,        # axial resistance
     'v_init' : -65.,    # initial crossmembrane potential
     'e_pas' : -65.,     # reversal potential passive mechs
     'passive' : True,   # switch on passive mechs
@@ -25,7 +27,7 @@ cell_parameters = {          # various cell parameters,
     'timeres_python' : 2.**-3,   # need binary representation
     'tstartms' : -100., # start time of simulation, recorders start at t=0
     'tstopms' : 100.,   # stop simulation at 200 ms. These can be overridden
-                        # by setting these arguments in cell.simulation()
+                        # by setting these arguments i cell.simulation()
 }
 
 # Create cell
@@ -36,7 +38,7 @@ synapse_parameters = {
     'idx' : cell.get_closest_idx(x=0., y=0., z=900.),
     'e' : 0.,                   # reversal potential
     'syntype' : 'ExpSyn',       # synapse type
-    'tau' : 10.,                # syn. time constant
+    'tau' : 5.,                # syn. time constant
     'weight' : .001,            # syn. weight
     'record_current' : True,
 }
