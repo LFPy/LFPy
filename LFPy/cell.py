@@ -49,7 +49,7 @@ class Cell(object):
         max_nsegs_length: [None]: max segment length for method 'fixed_length'
         lambda_f: [100]: AC frequency for method 'lambda_f'
         
-        delete_previous_cells [True] : delete any already existing cells
+        delete_previous_cells [True]:delete any already existing cells in NEURON
         
         custom_code: [None]: list of model-specific code files ([.py/.hoc])
         custom_fun: [None]: list of model-specific functions with args
