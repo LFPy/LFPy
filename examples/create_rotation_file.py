@@ -70,7 +70,7 @@ def plot_morpho_indices(cell, new_fig = True):
     #ax.set_ylim3d(-lim_3d,lim_3d)
     #ax.set_zlim3d(-lim_3d,lim_3d)
     
-#     ax.axis(ax.axis('equal'))
+    ax.axis(ax.axis('equal'))
     
 
 def plot_morpho_3D_simple(cell, new_fig = True, color = 'k'):
