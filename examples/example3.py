@@ -31,7 +31,7 @@ plt.rcParams.update({'font.size' : 12,
 
 #seed for random generation
 np.random.seed(1234)
-pl.ion()
+
 ################################################################################
 # A couple of function declarations
 ################################################################################
