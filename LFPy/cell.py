@@ -48,11 +48,13 @@ class Cell(object):
         nsegs_method: ['lambda100']/'lambda_f'/'fixed_length': nseg rule
         max_nsegs_length: [None]: max segment length for method 'fixed_length'
         lambda_f: [100]: AC frequency for method 'lambda_f'
-    
+        
+        delete_previous_cells [True] : delete any already existing cells
+        
         custom_code: [None]: list of model-specific code files ([.py/.hoc])
         custom_fun: [None]: list of model-specific functions with args
         custom_fun_args: [None]: list of args passed to custom_fun functions
-        pt3d: True/[False]: Use pt3d-info of the cell geometries switch
+        pt3d: True/[False]: use pt3d-info of the cell geometries switch
         verbose: True/[False]: verbose output switch
     
     Usage of cell class:
@@ -86,6 +88,7 @@ class Cell(object):
                     nsegs_method='lambda100',
                     lambda_f = 100,
                     max_nsegs_length=None,
+                    delete_previous_cells = True,
                     custom_code=None,
                     custom_fun=None,
                     custom_fun_args=None,
@@ -100,15 +103,17 @@ class Cell(object):
         if not hasattr(neuron.h, 'd_lambda'):
             neuron.h.load_file('stdlib.hoc')    #NEURON std. library
             neuron.h.load_file('import3d.hoc')  #import 3D morphology lib
-        
+
+        if delete_previous_cells:
+            neuron.h('forall delete_section()')
+
         #print a warning if neuron have existing sections
         numsec = 0
         for numsec, sec in enumerate(neuron.h.allsec()): pass
         if numsec >= 1:
-            mssg = "existing sections detected! Consider running: \n" + \
-                   "neuron.h('forall delete_section()')"
+            mssg = "existing sections detected! Consider setting 'delete_previous_cells'=True"
             warn(mssg)
-        
+                
         #load morphology
         self.morphology = morphology
         if self.morphology != None:
