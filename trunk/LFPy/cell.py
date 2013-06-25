@@ -105,13 +105,16 @@ class Cell(object):
             neuron.h.load_file('import3d.hoc')  #import 3D morphology lib
 
         if delete_previous_cells:
+            for numsec, sec in enumerate(neuron.h.allsec()): pass
+            warn('%s existing sections deleted from memory' % numsec)
             neuron.h('forall delete_section()')
 
         #print a warning if neuron have existing sections
         numsec = 0
         for numsec, sec in enumerate(neuron.h.allsec()): pass
         if numsec >= 1:
-            mssg = "existing sections detected! Consider setting 'delete_previous_cells'=True"
+            mssg = "%s sections detected! " % numsec + \
+                   "Consider setting 'delete_previous_cells=True'"
             warn(mssg)
                 
         #load morphology
