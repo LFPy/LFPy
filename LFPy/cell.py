@@ -107,13 +107,14 @@ class Cell(object):
         if delete_previous_cells:
             numsec = 0
             for numsec, sec in enumerate(neuron.h.allsec()): pass
-            warn('%s existing sections deleted from memory' % numsec)
+            if numsec > 0:
+                print('%s existing sections deleted from memory' % numsec)
             neuron.h('forall delete_section()')
 
         #print a warning if neuron have existing sections
         numsec = 0
         for numsec, sec in enumerate(neuron.h.allsec()): pass
-        if numsec >= 1:
+        if numsec > 0:
             mssg = "%s sections detected! " % numsec + \
                    "Consider setting 'delete_previous_cells=True'"
             warn(mssg)
