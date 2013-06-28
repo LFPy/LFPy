@@ -49,7 +49,7 @@ class Cell(object):
         max_nsegs_length: [None]: max segment length for method 'fixed_length'
         lambda_f: [100]: AC frequency for method 'lambda_f'
         
-        delete_previous_cells [True]:delete any already existing cells in NEURON
+        delete_sections: [True]: delete pre-existing section-references
         
         custom_code: [None]: list of model-specific code files ([.py/.hoc])
         custom_fun: [None]: list of model-specific functions with args
@@ -88,7 +88,7 @@ class Cell(object):
                     nsegs_method='lambda100',
                     lambda_f = 100,
                     max_nsegs_length=None,
-                    delete_previous_cells = True,
+                    delete_sections = True,
                     custom_code=None,
                     custom_fun=None,
                     custom_fun_args=None,
@@ -104,7 +104,7 @@ class Cell(object):
             neuron.h.load_file('stdlib.hoc')    #NEURON std. library
             neuron.h.load_file('import3d.hoc')  #import 3D morphology lib
 
-        if delete_previous_cells:
+        if delete_sections:
             numsec = 0
             for numsec, sec in enumerate(neuron.h.allsec()): pass
             if numsec > 0:
@@ -232,8 +232,9 @@ class Cell(object):
             elif fileEnding == 'xml' or fileEnding ==  'XML':
                 Import = neuron.h.Import3d_MorphML()
             else:
-                raise ValueError('%s is not a recognised morphology file format! ').with_traceback('Should be either .hoc, .asc, .swc, .xml!' \
-                     % self.morphology)
+                raise ValueError('%s is not a recognised morphology file format!'
+                                 ).with_traceback(
+                    'Should be either .hoc, .asc, .swc, .xml!' %self.morphology)
             
             #assuming now that morphologies file is the correct format
             try:
