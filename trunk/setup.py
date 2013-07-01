@@ -24,9 +24,9 @@ try:
         include_dirs=[numpy.get_include()]),
         ]
 except:
-    print("'from Cython.Distutils import build_ext' failed!!!!")
+    print("'from Cython.Distutils import build_ext' failed!")
     print("Cython extensions will not be compiled, and")
-    print("Simulations in LFPy will run slower")
+    print("simulations in LFPy may run slower")
     cmdclass = {}
     ext_modules = []
 
@@ -35,7 +35,7 @@ with open('README.txt') as file:
 
 setup(
     name = "LFPy",
-    version = "0.9.4", 
+    version = "0.9.5", 
     maintainer = "Espen Hagen",
         maintainer_email = 'ehagen@umb.no',
     packages = ['LFPy'], 

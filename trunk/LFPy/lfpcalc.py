@@ -16,7 +16,22 @@ import numpy as np
 def calc_lfp_choose(cell, x=0, y=0, z=0, sigma=0.3,
                     r_limit=None,
                     timestep=None, t_indices=None, method='linesource'):
-    '''Determine which method to use, line-source for soma default'''
+    '''
+    Determine which method to use, line-source for soma default
+    
+    kwargs:
+    ::
+        cell: LFPy.Cell or LFPy.TemplateCell instance
+        x : double, extracellular position, x-axis
+        y : double, extracellular position, y-axis
+        z : double, extracellular position, z-axis
+        sigma : double, extracellular conductivity
+        r_limit : [None]/float/np.ndarray: minimum distance to source current
+        timestep : [None]/int, calculate LFP at this timestep
+        t_indices : [None]/np.ndarray, calculate LFP at specific timesteps
+        method=['linesource']/'point_source'/'som_as_point'
+            switch for choosing underlying methods
+    '''
     if method == 'som_as_point':
         return calc_lfp_som_as_point(cell, x=x, y=y, z=z, sigma=sigma,
                                      r_limit=r_limit,
@@ -34,7 +49,19 @@ def calc_lfp_linesource(cell, x=0, y=0, z=0, sigma=0.3,
                         r_limit=None,
                         timestep=None, t_indices=None):
     '''Calculate electric field potential using the line-source method, all
-    compartments treated as line sources, even soma.'''
+    compartments treated as line sources, even soma.
+    
+    kwargs:
+    ::
+        cell: LFPy.Cell or LFPy.TemplateCell instance
+        x : double, extracellular position, x-axis
+        y : double, extracellular position, y-axis
+        z : double, extracellular position, z-axis
+        sigma : double, extracellular conductivity
+        r_limit : [None]/float/np.ndarray: minimum distance to source current
+        timestep : [None]/int, calculate LFP at this timestep
+        t_indices : [None]/np.ndarray, calculate LFP at specific timesteps
+    '''
     # Handling the r_limits. If a r_limit is a single value, an array r_limit
     # of shape cell.diam is returned.
     if type(r_limit) == int or type(r_limit) == float:
@@ -91,7 +118,19 @@ def calc_lfp_som_as_point(cell, x=0, y=0, z=0, sigma=0.3,
                           r_limit=None,
                           timestep=None, t_indices=None):
     '''Calculate electric field potential using the line-source method,
-    soma is treated as point/sphere source'''
+    soma is treated as point/sphere source
+    
+    kwargs:
+    ::
+        cell: LFPy.Cell or LFPy.TemplateCell instance
+        x : double, extracellular position, x-axis
+        y : double, extracellular position, y-axis
+        z : double, extracellular position, z-axis
+        sigma : double, extracellular conductivity
+        r_limit : [None]/float/np.ndarray: minimum distance to source current
+        timestep : [None]/int, calculate LFP at this timestep
+        t_indices : [None]/np.ndarray, calculate LFP at specific timesteps
+    '''
     #Handling the r_limits. If a r_limit is a single value,
     #an array r_limit of shape cell.diam is returned.
     if type(r_limit) != type(np.array([])):
@@ -276,7 +315,19 @@ def calc_lfp_pointsource(cell, x=0, y=0, z=0, sigma=0.3,
                         r_limit=None, 
                         timestep=None, t_indices=None):
     '''Calculate local field potentials using the point-source equation on all
-    compartments'''
+    compartments
+
+    kwargs:
+    ::
+        cell: LFPy.Cell or LFPy.TemplateCell instance
+        x : double, extracellular position, x-axis
+        y : double, extracellular position, y-axis
+        z : double, extracellular position, z-axis
+        sigma : double, extracellular conductivity
+        r_limit : [None]/float/np.ndarray: minimum distance to source current
+        timestep : [None]/int, calculate LFP at this timestep
+        t_indices : [None]/np.ndarray, calculate LFP at specific timesteps
+    '''
     # Handling the r_limits. If a r_limit is a single value, an array r_limit
     # of shape cell.diam is returned.
     if type(r_limit) == int or type(r_limit) == float:

@@ -29,7 +29,7 @@ class Cell(object):
     
     Arguments:
     ::
-        morphology : path/to/morphology/file
+        morphology : [str]: path/to/morphology/file
     
         v_init: [-65.]: initial potential
         passive: [True]/False: passive mechs are initialized if True
@@ -568,7 +568,11 @@ class Cell(object):
         Returns neuron idx of segments from sections with names that match
         the pattern defined in input section on interval [z_min, z_max].
         
-        Section can be any entry in cell.allsecnames, or 'allsec'.
+        kwargs:
+        ::
+            section: str, any entry in cell.allsecnames or just 'allsec'.
+            z_min: float, depth filter
+            z_max: float depth filter
         
         Usage:
         ::
@@ -603,6 +607,12 @@ class Cell(object):
     def get_closest_idx(self, x=0, y=0, z=0, section='allsec'):
         '''Get the index number of a segment in specified section which 
         midpoint is closest to the coordinates defined by the user
+        kwargs:
+        ::
+            x: float, coordinate
+            y: float, coordinate
+            z: float, coordinate
+            section: str, string matching a section-name
         '''
         idx = self.get_idx(section)
         dist = np.sqrt((self.xmid[idx] - x)**2 + \
@@ -617,6 +627,13 @@ class Cell(object):
         '''Return nidx segment indices in section with random probability
         normalized to the membrane area of segment on 
         interval [z_min, z_max]
+        
+        kwargs:
+        ::
+            section: str, string matching a section-name
+            nidx: int, number of random indices
+            z_min: float, depth filter
+            z_max: float depth filter            
         '''
         poss_idx = self.get_idx(section=section, z_min=z_min, z_max=z_max)
         if nidx < 1:
@@ -1070,6 +1087,12 @@ class Cell(object):
         '''
         Mirror the morphology around given axis, (default x-axis),
         useful to introduce more heterogeneouties in morphology shapes
+        
+        kwargs:
+        ::
+            axis : str
+                'x' or 'y' or 'z'
+        
         '''
         #morphology relative to soma-position
         rel_start, rel_end = self._rel_positions()
@@ -1142,6 +1165,13 @@ class Cell(object):
         Return the probability (0-1) for synaptic coupling on segments
         in section sum(prob)=1 over all segments in section.
         Prob. determined by area.
+
+        kwargs:
+        ::
+            section: str, string matching a section-name
+            z_min: float, depth filter
+            z_max: float depth filter            
+
         '''
         idx = self.get_idx(section=section, z_min=z_min, z_max = z_max)
         prob = self.area[idx] / sum(self.area[idx])
@@ -1153,6 +1183,14 @@ class Cell(object):
         Return the normalized probability (0-1) for synaptic coupling on
         segments in idx-array.
         Normalised probability determined by area of segments.
+
+        kwargs:
+        ::
+            idx : np.ndarray, dtype=int.
+                array of segment indices
+            z_min: float, depth filter
+            z_max: float depth filter            
+
         '''
         prob = self.area[idx] / sum(self.area[idx])
         return prob
@@ -1162,6 +1200,11 @@ class Cell(object):
         Return the distance between midpoints of two segments with index
         idx0 and idx1. The argument returned is a vector [x, y, z], where
         x = self.xmid[idx1] - self.xmid[idx0] etc.
+        
+        kwargs:
+        ::
+            idx0 : int
+            idx1 : int
         '''
         vector = []
         try:
@@ -1191,7 +1234,13 @@ class Cell(object):
     def get_idx_children(self, parent="soma[0]"):
         '''
         Get the idx of parent's children sections, i.e. compartments ids
-        of sections connected to parent-argument'''
+        of sections connected to parent-argument
+        
+        kwargs:
+        ::
+            parent: str
+                name-pattern matching a sectionname
+        '''
         idxvec = np.zeros(self.totnsegs)
         secnamelist = []
         childseclist = []
@@ -1219,6 +1268,11 @@ class Cell(object):
         Get all idx of segments of parent and children sections, i.e. segment
         idx of sections connected to parent-argument, and also of the parent
         segments
+        
+        kwargs:
+        ::
+            parent: str
+                name-pattern matching a sectionname
         '''
         idxvec = np.zeros(self.totnsegs)
         secnamelist = []
@@ -1249,7 +1303,7 @@ class Cell(object):
         segment idx, section name, and position along the section, like;
         [(0, 'neuron.h.soma[0]', 0.5),]
         
-        args:
+        kwargs:
         ::
             idx : np.ndarray, dtype int
                 segment indices, must be between 0 and cell.totnsegs        

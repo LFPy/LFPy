@@ -86,10 +86,10 @@ More examples
 More examples of LFPy usage are provided in the "trunk/examples" folder in the
 source code release, displaying different usage scenarios;
 
-- `example1.py <http://bebiservice.umb.no/projects-public/LFPy-release/browser/trunk/examples/example1.py>`_
-- `example2.py <http://bebiservice.umb.no/projects-public/LFPy-release/browser/trunk/examples/example2.py>`_
-- `example3.py <http://bebiservice.umb.no/projects-public/LFPy-release/browser/trunk/examples/example3.py>`_
 - `example4.py <http://bebiservice.umb.no/projects-public/LFPy-release/browser/trunk/examples/example4.py>`_
+- `example5.py <http://bebiservice.umb.no/projects-public/LFPy-release/browser/trunk/examples/example5.py>`_
+- `example6.py <http://bebiservice.umb.no/projects-public/LFPy-release/browser/trunk/examples/example6.py>`_
+- `example7.py <http://bebiservice.umb.no/projects-public/LFPy-release/browser/trunk/examples/example7.py>`_
 - `example_mpi.py <http://bebiservice.umb.no/projects-public/LFPy-release/browser/trunk/examples/example_mpi.py>`_
 
 The examples rely on files present inside the `examples folder <http://bebiservice.umb.no/projects-public/LFPy-release/browser/trunk/examples>`_,
