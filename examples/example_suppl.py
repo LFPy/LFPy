@@ -179,13 +179,14 @@ def plot_ex3(cell, electrode):
     
     #plot the LFP as image plot
     ax = fig.add_axes([0.1, 0.1, 0.5, 0.2])
+    cax = fig.add_axes([0.61, 0.1, 0.01, 0.2])
     absmaxLFP = abs(np.array([electrode.LFP.max(), electrode.LFP.min()])).max()
     im = ax.pcolormesh(cell.tvec, electrode.z, electrode.LFP,
                   vmax=absmaxLFP, vmin=-absmaxLFP,
            cmap='spectral_r')
-    cbar = plt.colorbar(im)
+    cbar = plt.colorbar(im, cax=cax)
     cbar.set_label('LFP (mV)')
-    plt.axis('tight')
+    ax.axis(ax.axis('tight'))
     ax.set_xlabel('Time [ms]')
     ax.set_ylabel('z [$\mu$m]')
     
