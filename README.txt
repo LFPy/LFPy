@@ -81,8 +81,8 @@ There are few options to install LFPy:
 4.  Development version from subversion repository:
     ::
     
-        svn checkout http://bebiservice.umb.no/svn-public/LFPy-release/
-        cd LFPy-release/trunk
+        svn checkout http://bebiservice.umb.no/svn-public/LFPy-release/trunk LFPy
+        cd LFPy
         (sudo) python setup.py install (--user)
 
 
@@ -92,6 +92,7 @@ Documentation
 
 To generate the html documentation issue from the LFPy source code directory:
 ::
+    
     sphinx-build -b html /path/to/LFPy/documentation/sources path/to/dest
 
 The main html file is now in path/to/dest/index.html
