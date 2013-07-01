@@ -62,24 +62,26 @@ class RecExtElectrodeSetup(object):
         if type(x) == float or type(x) == int:
             self.x = np.array([x])
         else:
-            self.x = x
+            self.x = np.array(x).flatten()
         if type(y) == float or type(y) == int:
             self.y = np.array([y])
         else:
-            self.y = y
+            self.y = np.array(y).flatten()
         if type(z) == float or type(z) == int:
             self.z = np.array([z])
         else:
-            self.z = z
+            self.z = np.array(z).flatten()
         self.color = color
         self.marker = marker
         if N != None:
+            if type(N) == list:
+                N = np.array(N)
             if N.shape[-1] == 3:
                 self.N = N
             else:
                 self.N = N.T
                 if N.shape[-1] != 3:
-                    raise Exception('N.shape must be (n contacts, 1, 3)!')
+                    raise Exception('N.shape must be (n_contacts, 1, 3)!')
         else:
             self.N = N
             
