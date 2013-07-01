@@ -4,18 +4,27 @@ Download LFPy
 
 Downlad stable versions of LFPy here:
 
+- `LFPy-0.9.5.tar.gz <http://compneuro.umb.no/LFPy/downloads/LFPy-0.9.5.tar.gz>`_
 - `LFPy-0.9.4.tar.gz <http://compneuro.umb.no/LFPy/downloads/LFPy-0.9.4.tar.gz>`_
 - `LFPy-0.9.3.tar.gz <http://compneuro.umb.no/LFPy/downloads/LFPy-0.9.3.tar.gz>`_
 - `LFPy-0.9.2.tar.gz <http://compneuro.umb.no/LFPy/downloads/LFPy-0.9.2.tar.gz>`_
 - `LFPy-0.9.1.tar.gz <http://compneuro.umb.no/LFPy/downloads/LFPy-0.9.1.tar.gz>`_
 - `LFPy-0.9.tar.gz <http://compneuro.umb.no/LFPy/downloads/LFPy-0.9.tar.gz>`_
 
+Or, from the Python Package Index: `http://pypi.python.org/pypi/LFPy <https://pypi.python.org/pypi/LFPy>`_
+
 Or, download the development version of LFPy using `subversion <http://subversion.apache.org/>`_ into a local folder:
 ::
     
-    svn checkout http://bebiservice.umb.no/svn-public/LFPy-release
+    svn checkout http://bebiservice.umb.no/svn-public/LFPy-release/trunk LFPy
 
-The development code is then found under "LFPy-release/trunk/", and different numbered releases under "LFPy-release/tags/".
+The development code and examples is then found under "LFPy".
+
+Different numbered releases of "LFPy" can be found by checking out:
+::
+    
+    svn checkout http://bebiservice.umb.no/svn-public/LFPy-release/tags
+
 
 To browse the source codes online, see http://bebiservice.umb.no/projects-public/LFPy-release/browser.
 
@@ -30,7 +39,7 @@ Dependencies
 To install LFPy you will need the following:
 
 1.  Python, seems to work fine with recent python since 2.6.x (2.6.6 or newer recommended), 2.7.x works fine.
-    Not tested with Python 3.x.
+    Only checked for consistency with Python 3.x.
 
 2.  Python modules numpy, scipy, matplotlib
 
@@ -87,8 +96,8 @@ There are few options to install LFPy:
 4.  Development version from subversion repository:
     ::
     
-        svn checkout http://bebiservice.umb.no/svn-public/LFPy-release/
-        cd LFPy-release/trunk
+        svn checkout http://bebiservice.umb.no/svn-public/LFPy-release/trunk LFPy
+        cd LFPy
         (sudo) python setup.py install (--user)
     
 5.  If you only want to have LFPy in one place, you can add this working folder to your $PYTHONPATH, and just compile the Cython extensions;
@@ -109,7 +118,7 @@ Installing NEURON with Python
 Some users have difficulties install NEURON as a Python module,
 depending on their platform. 
 We will provide some explanations here, and otherwise direct to the NEURON download pages;
-http://www.neuron.yale.edu/neuron/download and http://www.neuron.yale.edu/neuron/download/getstd. The NEURON forums are
+http://www.neuron.yale.edu/neuron/download and http://www.neuron.yale.edu/neuron/download/getstd. The NEURON forum is
 also a useful resource for installation problems.
 
 Dependencies: Ubuntu 10.4LTS and other Debian-based Linux versions
@@ -207,10 +216,11 @@ Make the installed Python and IPython default:
 Install the necessary packages for cloning into repository and compiling NEURON:
 ::
 
-    sudo port install automake autoconf libtool libxext xorg-libXext ncurses mercurial bison flex
+    sudo port install automake autoconf libtool xorg-libXext ncurses mercurial bison flex
 
 Install NEURON from the bleeding edge source code. The following recipe assumes a 64 bit build of NEURON and Python on OSX 10.7 Lion, so change
-"x86_64-apple-darwin10.7.0" throughout to facilitate your system accordingly;
+"x86_64-apple-darwin10.7.0" throughout to facilitate your system accordingly,
+as found by running "./config.guess" in the root of the NEURON source code;
 ::
 
     #create a directory in home directory                                                                                                                                                               
