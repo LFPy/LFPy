@@ -1,0 +1,17 @@
+begintemplate LFPyCellTemplate
+public soma, axon, dend, apic         
+public all, somatic, axonal, basal, apical 
+objref all, somatic, axonal, basal, apical
+proc init() {
+    all = new SectionList()
+    somatic = new SectionList()
+    axonal = new SectionList()
+    basal = new SectionList()
+    apical = new SectionList()
+}
+
+create soma[1], axon[1], dend[1], apic[1]
+
+endtemplate LFPyCellTemplate
+
+
