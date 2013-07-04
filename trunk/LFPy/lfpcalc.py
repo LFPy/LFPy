@@ -29,7 +29,7 @@ def calc_lfp_choose(cell, x=0, y=0, z=0, sigma=0.3,
         r_limit : [None]/float/np.ndarray: minimum distance to source current
         timestep : [None]/int, calculate LFP at this timestep
         t_indices : [None]/np.ndarray, calculate LFP at specific timesteps
-        method=['linesource']/'point_source'/'som_as_point'
+        method=['linesource']/'pointsource'/'som_as_point'
             switch for choosing underlying methods
     '''
     if method == 'som_as_point':
