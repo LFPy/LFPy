@@ -186,7 +186,7 @@ class RecExtElectrodeSetup(object):
         self._test_imem_sum()
             
     
-    def _test_imem_sum(self, tolerance=1E-12):
+    def _test_imem_sum(self, tolerance=1E-9):
         '''Test that the membrane currents sum to zero'''
         for cellkey in self.cells.keys():
             sum_imem = self.cells[cellkey].imem.sum(axis=0)
