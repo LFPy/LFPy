@@ -23,7 +23,7 @@ cell_parameters = {          # various cell parameters,
     'lambda_f' : 100.,
     'timeres_NEURON' : 2.**-3,   # [ms] dt's should be in powers of 2 for both,
     'timeres_python' : 2.**-3,   # need binary representation
-    'tstartms' : -100., # start time of simulation, recorders start at t=0
+    'tstartms' : 0.,    # start time of simulation, recorders start at t=0
     'tstopms' : 100.,   # stop simulation at 200 ms. These can be overridden
                         # by setting these arguments in cell.simulation()
 }
@@ -70,5 +70,5 @@ print("done")
 from example_suppl import plot_ex1
 fig = plot_ex1(cell, electrode, X, Y, Z)
 # Optionally save figure (uncomment the line below)
-# fig.savefig('example1.pdf')
+fig.savefig('example4.png', dpi=300)
 plt.show()
