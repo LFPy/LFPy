@@ -10,6 +10,7 @@
 '''
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.collections import PolyCollection
 import LFPy
 from mpi4py import MPI
 
@@ -160,7 +161,8 @@ class Population:
         if RANK == 0:
             fig = plt.figure(figsize=(12, 8))
             
-            ax = fig.add_subplot(121, aspect='equal', frameon=False,
+            ax = fig.add_axes([0.05, 0.0, 0.45, 1.0],
+                        aspect='equal', frameon=False,
                         xticks=[], xticklabels=[], yticks=[], yticklabels=[])
             for cellindex in range(self.POPULATION_SIZE):
                 cell = LFPy.Cell(**self.cellParameters)
@@ -168,38 +170,47 @@ class Population:
                      ypos = self.cellPositions[cellindex, 1],
                      zpos = self.cellPositions[cellindex, 2])
                 cell.set_rotation(z = self.cellRotations[cellindex])
-                for sec in LFPy.cell.neuron.h.allsec():
-                    idx = cell.get_idx(sec.name())
-                    ax.plot(np.r_[cell.xstart[idx], cell.xend[idx][-1]],
-                            np.r_[cell.zstart[idx], cell.zend[idx][-1]],
-                            color='bgrcmykbgrcmykbgrcmyk'[cellindex])
+
+                zips = []
+                for x, z in cell.get_idx_polygons():
+                    zips.append(zip(x, z))
+                
+                polycol = PolyCollection(zips,
+                                edgecolors='none',
+                                facecolors='bgrcmykbgrcmykbgrcmyk'[cellindex],
+                                zorder = self.cellPositions[cellindex, 1])
+       
+                ax.add_collection(polycol)
+
             ax.plot(self.electrodeParameters['x'],
-                    self.electrodeParameters['z'], '.', marker='o', color='g')
+                    self.electrodeParameters['z'],
+                    marker='o', color='g', clip_on=False, zorder=0)
             
-            ax = fig.add_subplot(222)
+            ax = fig.add_axes([0.5, 0.55, 0.40, 0.4])
             for key, value in self.results.items():
                 tvec = np.arange(value['somav'].size) * \
                                         self.cellParameters['timeres_python']
                 ax.plot(tvec, value['somav'],
                         label = 'cell %i' % key)
             leg = ax.legend()
-            ax.set_xlabel('time (ms)')
+            #ax.set_xlabel('time (ms)')
             ax.set_ylabel('$V_{soma}$ (mV)')
             ax.set_title('somatic potentials')
             
-            ax = fig.add_subplot(224)
+            ax = fig.add_axes([0.5, 0.075, 0.40, 0.4])
+            cax = fig.add_axes([0.91, 0.075, 0.02, 0.40])
             im = ax.pcolormesh(tvec, self.electrodeParameters['z'], self.LFP,
                            cmap='spectral_r',
                            vmin = -abs(self.LFP).max(),
                            vmax = abs(self.LFP).max())
             ax.axis(ax.axis('tight'))
-            cbar = plt.colorbar(im)
+            cbar = plt.colorbar(im, cax=cax)
             cbar.set_label('LFP (mV)')
             ax.set_title('superimposed LFP')
             ax.set_xlabel('time (ms)')
             ax.set_ylabel('$z$ ($\mu$m)')
             
-            fig.savefig('example_mpi.pdf')
+            fig.savefig('example_mpi.png', dpi=300)
         
 
 if __name__ == '__main__':
@@ -214,7 +225,7 @@ if __name__ == '__main__':
         'e_pas' : -65,              # reversal potential passive mechs
         'passive' : True,           # switch on passive mechs
         'nsegs_method' : 'lambda_f',# method for setting number of segments,
-        'lambda_f' : 1,           # segments are isopotential at frequency
+        'lambda_f' : 10,            # segments are isopotential at frequency
         'timeres_NEURON' : 2**-3,   # dt of LFP and NEURON simulation.
         'timeres_python' : 2**-3,
         'tstartms' : -100,          #start time, recorders start at t=0
