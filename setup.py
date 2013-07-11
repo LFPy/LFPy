@@ -35,7 +35,7 @@ with open('README.txt') as file:
 
 setup(
     name = "LFPy",
-    version = "0.9.5", 
+    version = "0.9.6", 
     maintainer = "Espen Hagen",
         maintainer_email = 'ehagen@umb.no',
     packages = ['LFPy'], 
