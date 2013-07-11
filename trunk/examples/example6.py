@@ -313,5 +313,5 @@ print('done')
 #plotting some variables and geometry, saving output to .pdf.
 from example_suppl import plot_ex3
 fig = plot_ex3(cell, electrode)
-#fig.savefig('example3.pdf')
+fig.savefig('example6.png', dpi=300)
 plt.show()
