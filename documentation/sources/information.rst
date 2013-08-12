@@ -54,7 +54,7 @@ To install LFPy you will need the following:
     LFPy was tested to work with NEURON 7.2 and the 7.3 development branch, we had some issues with a precompiled version of NEURON 7.1.
 
 4.  `Cython <http://cython.org>`_ (C-extensions for python) to speed up simulations of extracellular fields. Tested with version > 0.14,
-    and known to fail with version 0.11. LFPy works without Cython, but simulations will run slow and is therefore recommended.
+    and known to fail with version 0.11. LFPy works without Cython, but simulations will run slow and is not recommended.
 
 
 Installing LFPy

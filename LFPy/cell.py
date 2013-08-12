@@ -1294,7 +1294,8 @@ class Cell(object):
             i += 1
             
         [idx] = np.where(idxvec)
-        return idx
+        return np.r_[self.get_idx(parent), idx]
+
 
     def get_idx_name(self, idx=np.array([0])):
         '''
