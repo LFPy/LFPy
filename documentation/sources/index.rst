@@ -19,7 +19,8 @@ The extracellular potentials are calculated from transmembrane currents in multi
 
 - K.H. Pettersen, H. Linden, A.M. Dale and G.T. Einevoll: Extracellular spikes and current-source density, in *Handbook of Neural Activity Measurement*, edited by R. Brette and A. Destexhe, Cambridge, to appear `[preprint PDF, 5.7MB] <http://arken.umb.no/~gautei/forskning/PettersenLindenDaleEinevoll-BookChapter-revised.pdf>`_
 
-In the present version LFPy is mainly designed for simulation of single neurons.
+In the present version LFPy is mainly designed for simulation of single neurons,
+but the forward modeling scheme is in general applicable to neuronal populations. 
 
 LFPy was developed in the `Computational Neuroscience Group <http://compneuro.umb.no>`_, `Department of Mathemathical Sciences and Technology <http://www.umb.no/imt>`_,
 at the `Norwegian University of Life Sciences <http://www.umb.no>`_ ,
@@ -29,11 +30,12 @@ in collaboration with the `Laboratory of Neuroinformatics <http://www.nencki.gov
 
 This scientific software is released under the GNU Public License `GPLv3 <http://www.gnu.org/copyleft/gpl.html>`_.
 
-CNS2012 slides on LFPy
+Tutorial slides on LFPy
 ----------------------
 
-As part of the CNS 2012 meeting workshop `Modeling and interpretation of extracellular potentials <http://www.cnsorg.org/cns-2012-tutorials#EinevollLeskiHagen>`_, there was a talk on LFPy.
-The slides can be found here: `LFPy_tutorial_OCNS2012.pdf  <http://compneuro.umb.no/LFPy/downloads/LFPy_tutorial_OCNS2012.pdf>`_.
+As part of the CNS 2013 meeting workshop `Modeling and interpretation of extracellular potentials <http://www.cnsorg.org/cns-2013-tutorials#extracellular_potentials>`_,
+there was a talk on LFPy.
+The slides can be found here: `LFPy-tutorial_2013.pdf  <http://compneuro.umb.no/LFPy/downloads/LFPy-tutorial_2013.pdf>`_.
 
 
 Contents
