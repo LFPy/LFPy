@@ -35,7 +35,7 @@ Tutorial slides on LFPy
 
 As part of the CNS 2013 meeting workshop `Modeling and interpretation of extracellular potentials <http://www.cnsorg.org/cns-2013-tutorials#extracellular_potentials>`_,
 there was a talk on LFPy.
-The slides can be found here: `LFPy-tutorial_2013.pdf  <http://compneuro.umb.no/LFPy/downloads/LFPy-tutorial_2013.pdf>`_.
+The slides can be found here: `lfpy-tutorial_2013.pdf  <http://compneuro.umb.no/LFPy/downloads/lfpy-tutorial_2013.pdf>`_.
 
 
 Contents
