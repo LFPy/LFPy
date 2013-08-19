@@ -316,15 +316,16 @@ class RecExtElectrode(RecExtElectrodeSetup):
                 [self.circle, self.offsets, LFP_temp[cellkey, :, :]] = \
                     self._lfp_el_pos_calc_dist(cellkey, **variables)
                 if self.verbose:
-                    print('Calculated potential contribution, cell %i.' % cellkey)
+                    print('Calculated potential contrib., cell %i.' % cellkey)
         else:
             for cellkey in self.cells.keys():
                 variables.update({
-                    'r_limit' : self.cells[cellkey].diam/2
+                    'r_limit' : self.cells[cellkey].diam/2,
                 })
-                LFP_temp[cellkey, :, :] = self._loop_over_contacts(**variables)
+                LFP_temp[cellkey, :, :] = self._loop_over_contacts(cellkey,
+                                                                   **variables)
                 if self.verbose:
-                    print('Calculated potential contribution, cell %i.' % cellkey)
+                    print('Calculated potential contrib., cell %i.' % cellkey)
         if self.perCellLFP:
             self.CellLFP = []
             for LFPtrace in LFP_temp:
@@ -352,7 +353,8 @@ class RecExtElectrode(RecExtElectrodeSetup):
         return LFP_temp
 
     
-    def _lfp_el_pos_calc_dist(self, cellkey=0, r_limit=None, sigma=0.3, radius=10, n=10,
+    def _lfp_el_pos_calc_dist(self, cellkey=0, r_limit=None,
+                             sigma=0.3, radius=10, n=10,
                              m=50, N=None, t_indices=None, 
                              method='linesource'):
         '''
@@ -417,8 +419,8 @@ class RecExtElectrode(RecExtElectrodeSetup):
                 lfp_el_pos[i] = lfp_e.mean(axis=0)
 
             else:
-                lfp_el_pos[i] = lfpcalc.calc_lfp_choose(self.cells[cellkey], \
-                    x=self.x[i], y=self.y[i], z=self.z[i], r_limit = r_limit, \
+                lfp_el_pos[i] = lfpcalc.calc_lfp_choose(self.cells[cellkey], 
+                    x=self.x[i], y=self.y[i], z=self.z[i], r_limit = r_limit, 
                     sigma=sigma, t_indices=t_indices)
             offsets[i] = {
                 'x_n' : x_n,
