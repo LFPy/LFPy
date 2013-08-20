@@ -183,9 +183,14 @@ def plot_ex3(cell, electrode):
     im = ax.pcolormesh(cell.tvec, electrode.z, electrode.LFP,
                   vmax=absmaxLFP, vmin=-absmaxLFP,
            cmap='spectral_r')
-    cbar = plt.colorbar(im)
+    
+    rect = np.array(ax.get_position().bounds)
+    rect[0] += rect[2] + 0.01
+    rect[2] = 0.02
+    cax = fig.add_axes(rect)
+    cbar = plt.colorbar(im, cax=cax)
     cbar.set_label('LFP (mV)')
-    plt.axis('tight')
+    ax.axis(ax.axis('tight'))
     ax.set_xlabel('Time [ms]')
     ax.set_ylabel('z [$\mu$m]')
     
