@@ -424,8 +424,8 @@ class Cell(object):
             self.synireclist = neuron.h.List()
         if not hasattr(self, 'synvreclist'):
             self.synvreclist = neuron.h.List()
-        if not hasattr(self, 'netstimlist'):
-            self.netstimlist = neuron.h.List()
+        #if not hasattr(self, 'netstimlist'):
+        #    self.netstimlist = neuron.h.List()
         if not hasattr(self, 'netconlist'):
             self.netconlist = neuron.h.List()
         if not hasattr(self, 'sptimeslist'):
@@ -449,9 +449,8 @@ class Cell(object):
                     #create NetCon
                     ns = neuron.h.NetStim(0.5)
                     ns.number = 0
-                    #ns = None
                     nc = neuron.h.NetCon(ns, syn)
-                    self.netstimlist.append(ns)
+                    #self.netstimlist.append(ns)
                     nc.weight[0] = weight
                     self.netconlist.append(nc)
 
