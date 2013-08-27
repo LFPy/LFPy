@@ -239,6 +239,8 @@ if RANK==0:
 
     plt.xlim([0,cell_parameters['tstopms']])
     plt.ylim([0,10.])
+    
+    tvec = np.arange(point_electrode.LFP.shape[1])*cell.timeres_python 
 
     plt.xlabel('$t$ (ms)')
     plt.ylabel('Rate (spike/s)')
@@ -257,7 +259,7 @@ if RANK==0:
     plt.axis('off')
 
     for i_cell in xrange(n_cells):
-        plt.plot(point_electrode.tvec,
+        plt.plot(tvec,
                         i_cell+2.e3*single_LFPs[i_cell],
                         color=color_vec[i_cell], lw=1,
                         )
@@ -266,7 +268,7 @@ if RANK==0:
 
     #Summed LFPs axes
     plt.axes([.7,.12,.25,.2])
-    plt.plot(point_electrode.tvec, 1E3*summed_LFP, color='black', lw=1)
+    plt.plot(tvec, 1E3*summed_LFP, color='black', lw=1)
     plt.ylim([-5.e-1,5e-1])
 
     plt.title('Summed extracellular potentials')
