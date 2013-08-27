@@ -14,6 +14,26 @@ from matplotlib.collections import PolyCollection
 import LFPy
 from mpi4py import MPI
 
+#Fetch Mainen&Sejnowski 1996 model files
+if not os.path.isfile('patdemo/cells/j4a.hoc'):
+    #get the model files:
+    u = urllib2.urlopen('http://senselab.med.yale.edu/ModelDB/eavBinDown.asp?o=2488&a=23&mime=application/zip')
+    localFile = open('patdemo.zip', 'w')
+    localFile.write(u.read())
+    localFile.close()
+    #unzip:
+    myzip = zipfile.ZipFile('patdemo.zip', 'r')
+    myzip.extractall('.')
+    myzip.close()
+
+#compile mod files every time, because of incompatibility with Hay2011 files:
+os.system('''
+          cd patdemo
+          nrnivmodl
+          ''')
+#os.system('nrnivmodl')
+LFPy.cell.neuron.load_mechanisms('patdemo')
+
 #set one global seed, ensure all randomizations are set on RANK 0 in script!
 np.random.seed(12345)
 

@@ -17,12 +17,34 @@ cell responses.
 import LFPy
 import neuron
 import matplotlib.pyplot as plt
+import os
+import urllib2
+import zipfile
+
+
+
+#Fetch Hay et al. 2011 model files
+if not os.path.isfile('L5bPCmodelsEH/morphologies/cell1.asc'):
+    #get the model files:
+    u = urllib2.urlopen('http://senselab.med.yale.edu/ModelDB/eavBinDown.asp?o=139653&a=23&mime=application/zip')
+    localFile = open('L5bPCmodelsEH.zip', 'w')
+    localFile.write(u.read())
+    localFile.close()
+    #unzip:
+    myzip = zipfile.ZipFile('L5bPCmodelsEH.zip', 'r')
+    myzip.extractall('.')
+    myzip.close()
+
+#compile mod files every time, because of incompatibility with Mainen96 files:
+os.system('''
+          cd L5bPCmodelsEH/mod/
+          nrnivmodl
+          ''')
+#os.system('nrnivmodl')
+LFPy.cell.neuron.load_mechanisms('L5bPCmodelsEH/mod/')
 
 #remove cells from previous script executions
 neuron.h('forall delete_section()')
-
-#load the corresponding neuron mech's, but run nrnivmodl here first!
-neuron.load_mechanisms('L5bPCmodelsEH/mod/')
 
 #cell parameters with additional arguments for the TemplateCell-class.
 #Note that 'morphology' is required, even though it is loaded through
