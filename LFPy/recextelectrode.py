@@ -120,71 +120,100 @@ class RecExtElectrodeSetup(object):
             self._import_cell(cell)
 
 
-    class cell():
-        '''Empty object that cell-specific variables are stored in'''
-        def __init__(self):
-            '''Just a container'''
-            pass
+    #class cell():
+    #    '''Empty object that cell-specific variables are stored in'''
+    #    def __init__(self):
+    #        '''Just a container'''
+    #        pass
+
+    #def _import_cell(self, cell):
+    #    '''Keeps the relevant variables for LFP-calculation from cell'''
+    #    #keeping these variables:
+    #    variables = [
+    #        #'somaidx',
+    #        'timeres_python',
+    #        'tstopms',
+    #        'tvec',
+    #        'imem',
+    #        'diam',
+    #        'xstart',
+    #        'xmid',
+    #        'xend',
+    #        'ystart',
+    #        'ymid',
+    #        'yend',
+    #        'zstart',
+    #        'zmid',
+    #        'zend',
+    #        'totnsegs',
+    #        #'synapses',
+    #    ]
+    #    
+        ##redefine list of cells as dict of cells
+        #if type(cell) == list:
+        #    cellkey = 0
+        #    celldict = {}
+        #    for c in cell:
+        #        celldict[cellkey] = c
+        #        cellkey += 1
+        #    cell = celldict
+        #
+        #
+        #if type(cell) == dict:
+        #    for cellkey in cell:
+        #        self.cells[cellkey] = self.cell()
+        #        for v in variables:
+        #            try:
+        #                setattr(self.cells[cellkey], v, getattr(cell[cellkey], v))
+        #            except:
+        #                raise ValueError('cell[%s].%s missing' % (str(cellkey), v))
+        #else:
+        #    self.cells[0] = self.cell()
+        #    for v in variables:
+        #        try:
+        #            setattr(self.cells[0], v, getattr(cell, v))
+        #        except:
+        #            raise ValueError('cell.%s missing' % v)
+    #    #
+    #    #self.dt = self.cells[0].timeres_python
+    #    #self.tvec = np.arange(self.cells[0].tstopms/self.dt + 1) * self.dt
+    #    setattr(self, 'tvec', self.cells[0].tvec)
+    #    #setattr(self, 'dt', self.cells[self.cells.keys()[0]].timeres_python)
+    #    
+    #    self.nCells = np.array(list(self.cells.keys())).size 
+    #    
+    #    #test that currents sum towards zero        
+    #    self._test_imem_sum()
+            
 
     def _import_cell(self, cell):
-        '''Keeps the relevant variables for LFP-calculation from cell'''
-        #keeping these variables:
-        variables = [
-            #'somaidx',
-            'timeres_python',
-            'tstopms',
-            'tvec',
-            'imem',
-            'diam',
-            'xstart',
-            'xmid',
-            'xend',
-            'ystart',
-            'ymid',
-            'yend',
-            'zstart',
-            'zmid',
-            'zend',
-            'totnsegs',
-            #'synapses',
-        ]
-        
+        '''collect references of of LFPy.Cell objects'''
+
         #redefine list of cells as dict of cells
         if type(cell) == list:
             cellkey = 0
             celldict = {}
-            for c in cell:
-                celldict[cellkey] = c
+            for cellobj in cell:
+                celldict[cellkey] = cellobj
                 cellkey += 1
             cell = celldict
         
         
         if type(cell) == dict:
-            for cellkey in cell:
-                self.cells[cellkey] = self.cell()
-                for v in variables:
-                    try:
-                        setattr(self.cells[cellkey], v, getattr(cell[cellkey], v))
-                    except:
-                        raise ValueError('cell[%s].%s missing' % (str(cellkey), v))
+            for cellkey, cellobj in cell.items():
+                self.cells[cellkey] = cellobj
         else:
-            self.cells[0] = self.cell()
-            for v in variables:
-                try:
-                    setattr(self.cells[0], v, getattr(cell, v))
-                except:
-                    raise ValueError('cell.%s missing' % v)
-        #
-        #self.dt = self.cells[0].timeres_python
-        #self.tvec = np.arange(self.cells[0].tstopms/self.dt + 1) * self.dt
-        setattr(self, 'tvec', self.cells[0].tvec)
-        #setattr(self, 'dt', self.cells[self.cells.keys()[0]].timeres_python)
+            self.cells[0] = cell
         
+        #setattr(self, 'tvec', self.cells[0].tvec)
+        self.tvec = self.cells[0].tvec.copy()
+        
+        #number of cells
         self.nCells = np.array(list(self.cells.keys())).size 
         
         #test that currents sum towards zero        
         self._test_imem_sum()
-            
+        
     
     def _test_imem_sum(self, tolerance=1E-8):
         '''Test that the membrane currents sum to zero'''
