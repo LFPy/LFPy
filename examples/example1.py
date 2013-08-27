@@ -27,6 +27,7 @@ if not os.path.isfile('patdemo/cells/j4a.hoc'):
     myzip.close()
 
 
+
 ################################################################################
 # Main script, set parameters and create cell, synapse and electrode objects
 ################################################################################

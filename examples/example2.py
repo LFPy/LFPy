@@ -22,9 +22,14 @@ if not os.path.isfile('L5bPCmodelsEH/morphologies/cell1.asc'):
     myzip = zipfile.ZipFile('L5bPCmodelsEH.zip', 'r')
     myzip.extractall('.')
     myzip.close()
-    #compile mod files:
-    os.system('nrnivmodl L5bPCmodelsEH/mod/')
-    LFPy.cell.neuron.load_mechanisms('.')
+
+#compile mod files every time, because of incompatibility with Mainen96 files:
+os.system('''
+          cd L5bPCmodelsEH/mod/
+          nrnivmodl
+          ''')
+#os.system('nrnivmodl')
+LFPy.cell.neuron.load_mechanisms('L5bPCmodelsEH/mod/')
 
     
 
