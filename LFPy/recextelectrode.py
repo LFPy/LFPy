@@ -122,6 +122,10 @@ class RecExtElectrodeSetup(object):
         
     def _test_imem_sum(self, tolerance=1E-8):
         '''Test that the membrane currents sum to zero'''
+        if type(self.cell) == dict or type(self.cell) == list:
+            raise DeprecationWarning, 'no support for more than one cell-object'
+        
+        
         if self.cell != None:
             
             sum_imem = self.cell.imem.sum(axis=0)
