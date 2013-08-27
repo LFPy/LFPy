@@ -406,12 +406,13 @@ cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] _h_calc(
                 np.ndarray[DTYPE_t, ndim=1, negative_indices=False] deltaS,
                 double x, double y, double z):
     '''Subroutine used by calc_lfp_som_as_point()'''
-    cdef np.ndarray[DTYPE_t, ndim=2, negative_indices=False] aa, bb
+    cdef np.ndarray[DTYPE_t, ndim=2, negative_indices=False] aa, aaT, bb
     cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] cc, hh
 
     aa = np.array([x - xend, y - yend, z-zend])
+    aaT = aa.T
     bb = np.array([xend - xstart, yend - ystart, zend - zstart])
-    cc = np.dot(aa.T, bb).diagonal().copy()
+    cc = np.dot(aaT, bb).diagonal().copy()
     hh = cc / deltaS
     hh[0] = 0
     return hh
