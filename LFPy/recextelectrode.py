@@ -20,12 +20,14 @@ class RecExtElectrodeSetup(object):
     RecExtElectrode superclass. 
     If (optional) cell argument is given then the it is imported,
     otherwise the cell argument has to be passed later on to calc_lfp.
-    The argument cell can be an LFPy.cell.Cell object 
-    or either a list or a dictionary containing such Cell objects. 
+    The argument cell can be an LFPy.cell.Cell or LFPy.templatecell.TemplateCell
+    object
     Keyword arguments determine properties of later LFP-calculations
     
     Arguments:
     ::
+        cell : object,
+            LFPy.cell.Cell or LFPy.templatecell.TemplateCell
         sigma : float,
             extracellular conductivity
         x, y, z : np.ndarray,
@@ -60,6 +62,7 @@ class RecExtElectrodeSetup(object):
                  from_file=False, cellfile=None, verbose=False,
                  seedvalue=None):
         '''Initialize class RecExtElectrodeSetup'''
+        self.cell = cell
         self.sigma = sigma
         if type(x) == float or type(x) == int:
             self.x = np.array([x])
@@ -96,15 +99,12 @@ class RecExtElectrodeSetup(object):
         self.verbose = verbose
         self.seedvalue = seedvalue
         
+        
         #None-type some attributes created by the Cell class
         self.electrodecoeff = None
-        #self.tvec = np.array([])
-        self.cells = {}
-        self.nCells = None
-        self.CellLFP = None
         self.circle = None
-        #self.LFP = None
         self.offsets = None
+        
 
         if from_file:
             if type(cellfile) == type(str()):
@@ -116,120 +116,29 @@ class RecExtElectrodeSetup(object):
             else:
                 raise ValueError('cell either string or list of strings')
 
-        if cell is not None:
-            self._import_cell(cell)
-
-
-    #class cell():
-    #    '''Empty object that cell-specific variables are stored in'''
-    #    def __init__(self):
-    #        '''Just a container'''
-    #        pass
-
-    #def _import_cell(self, cell):
-    #    '''Keeps the relevant variables for LFP-calculation from cell'''
-    #    #keeping these variables:
-    #    variables = [
-    #        #'somaidx',
-    #        'timeres_python',
-    #        'tstopms',
-    #        'tvec',
-    #        'imem',
-    #        'diam',
-    #        'xstart',
-    #        'xmid',
-    #        'xend',
-    #        'ystart',
-    #        'ymid',
-    #        'yend',
-    #        'zstart',
-    #        'zmid',
-    #        'zend',
-    #        'totnsegs',
-    #        #'synapses',
-    #    ]
-    #    
-        ##redefine list of cells as dict of cells
-        #if type(cell) == list:
-        #    cellkey = 0
-        #    celldict = {}
-        #    for c in cell:
-        #        celldict[cellkey] = c
-        #        cellkey += 1
-        #    cell = celldict
-        #
-        #
-        #if type(cell) == dict:
-        #    for cellkey in cell:
-        #        self.cells[cellkey] = self.cell()
-        #        for v in variables:
-        #            try:
-        #                setattr(self.cells[cellkey], v, getattr(cell[cellkey], v))
-        #            except:
-        #                raise ValueError('cell[%s].%s missing' % (str(cellkey), v))
-        #else:
-        #    self.cells[0] = self.cell()
-        #    for v in variables:
-        #        try:
-        #            setattr(self.cells[0], v, getattr(cell, v))
-        #        except:
-        #            raise ValueError('cell.%s missing' % v)
-    #    #
-    #    #self.dt = self.cells[0].timeres_python
-    #    #self.tvec = np.arange(self.cells[0].tstopms/self.dt + 1) * self.dt
-    #    setattr(self, 'tvec', self.cells[0].tvec)
-    #    #setattr(self, 'dt', self.cells[self.cells.keys()[0]].timeres_python)
-    #    
-    #    self.nCells = np.array(list(self.cells.keys())).size 
-    #    
-    #    #test that currents sum towards zero        
-    #    self._test_imem_sum()
+        if self.cell is not None:
+            self._test_imem_sum()
             
-
-    def _import_cell(self, cell):
-        '''collect references of of LFPy.Cell objects'''
-
-        #redefine list of cells as dict of cells
-        if type(cell) == list:
-            cellkey = 0
-            celldict = {}
-            for cellobj in cell:
-                celldict[cellkey] = cellobj
-                cellkey += 1
-            cell = celldict
         
-        
-        if type(cell) == dict:
-            for cellkey, cellobj in cell.items():
-                self.cells[cellkey] = cellobj
-        else:
-            self.cells[0] = cell
-        
-        #setattr(self, 'tvec', self.cells[0].tvec)
-        self.tvec = self.cells[0].tvec.copy()
-        
-        #number of cells
-        self.nCells = np.array(list(self.cells.keys())).size 
-        
-        #test that currents sum towards zero        
-        self._test_imem_sum()
-        
-    
     def _test_imem_sum(self, tolerance=1E-8):
         '''Test that the membrane currents sum to zero'''
-        for cellkey in self.cells.keys():
-            sum_imem = self.cells[cellkey].imem.sum(axis=0)
-            if np.any(sum_imem == np.ones(self.cells[cellkey].totnsegs)):
+        if self.cell != None:
+            
+            sum_imem = self.cell.imem.sum(axis=0)
+            #check if eye matrix is supplied:
+            if np.any(sum_imem == np.ones(self.cell.totnsegs)):
                 pass
             else:
                 if abs(sum_imem).max() >= tolerance:
                     warnings.warn('Membrane currents do not sum to zero')
                     [inds] = np.where((abs(sum_imem) >= tolerance))
                     for i in inds:
-                        print('membrane current sum cell %i, timestep %i: %.3e'\
-                            % (cellkey, i, sum_imem[i]))
+                        print('membrane current sum of celltimestep %i: %.3e' \
+                            % (i, sum_imem[i]))
                 else:
                     pass
+        else:
+            pass
 
 
 class RecExtElectrode(RecExtElectrodeSetup):
@@ -307,160 +216,189 @@ class RecExtElectrode(RecExtElectrodeSetup):
         '''Calculate LFP on electrode geometry from all cell instances.
         Will chose distributed calculated if electrode contain 'n', 'N', and 'r'
         '''
-        if not hasattr(self, 'cells') or len(list(self.cells.keys())) == 0:
-            self._import_cell(cell)
+        if cell != None:
+            self.cell = cell
+            self._test_imem_sum()
        
         if not hasattr(self,  'LFP'):
             if t_indices != None:
                 self.LFP = np.zeros((self.x.size, t_indices.size))
             else:
-                self.LFP = np.zeros((self.x.size, self.tvec.size))
-        if t_indices != None:
-            LFP_temp = np.zeros((self.nCells, self.x.size, t_indices.size))
-        else:
-            LFP_temp = np.zeros((self.nCells, self.x.size, self.tvec.size))
-            
-        variables = {
-            'sigma' : self.sigma,
-            't_indices' : t_indices,
-            'method' : self.method,
-        }
+                self.LFP = np.zeros((self.x.size, self.cell.imem.shape[1]))
+                    
         
         if self.n != None and self.N != None and self.r != None:
             if self.n <= 1:
                 raise ValueError("n = %i must be larger that 1" % self.n)
             else:
-                variables.update({
-                    'radius' : self.r,
-                    'n' : self.n,
-                    'N' : self.N,
-                    't_indices' : t_indices,
-                    })
-
-
-            for cellkey in self.cells.keys():                    
-                variables.update({
-                    'r_limit' : self.cells[cellkey].diam/2,
-                    })
-                [self.circle, self.offsets, LFP_temp[cellkey, :, :]] = \
-                    self._lfp_el_pos_calc_dist(cellkey, **variables)
-                if self.verbose:
-                    print('Calculated potential contrib., cell %i.' % cellkey)
+                pass
+            
+            [self.circle, self.offsets, LFP_temp] = \
+                self._lfp_el_pos_calc_dist(t_indices=t_indices,
+                                           r_limit=self.cell.diam/2)
+            if self.verbose:
+                print('calculations finished, %s, %s' % (str(self),
+                                                         str(self.cell)))
         else:
-            for cellkey in self.cells.keys():
-                variables.update({
-                    'r_limit' : self.cells[cellkey].diam/2,
-                })
-                LFP_temp[cellkey, :, :] = self._loop_over_contacts(cellkey,
-                                                                   **variables)
-                if self.verbose:
-                    print('Calculated potential contrib., cell %i.' % cellkey)
-        if self.perCellLFP:
-            self.CellLFP = []
-            for LFPtrace in LFP_temp:
-                self.CellLFP.append(LFPtrace)
+            LFP_temp = self._loop_over_contacts(t_indices=t_indices,
+                                                r_limit=self.cell.diam/2)
+            if self.verbose:
+                print('calculations finished, %s, %s' % (str(self),
+                                                         str(self.cell)))
         
-        self.LFP = LFP_temp.sum(axis=0)
+        #dump results:
+        self.LFP = LFP_temp
 
-    def _loop_over_contacts(self, cellkey=0, sigma=0.3,
+
+    def _loop_over_contacts(self,
                     r_limit=None,
-                    timestep=None, t_indices=None, method='linesource'):
-        '''Loop over electrode contacts, and will return LFP_temp filled'''
+                    timestep=None,
+                    t_indices=None):
+        '''Loop over electrode contacts, and will return LFPs across channels'''
         if t_indices != None:
             LFP_temp = np.zeros((self.x.size, t_indices.size))
         else:
-            LFP_temp = np.zeros((self.x.size, self.tvec.size))
+            LFP_temp = np.zeros((self.x.size, self.cell.imem.shape[1]))
             
         for i in range(self.x.size):
             LFP_temp[i, :] = LFP_temp[i, :] + \
-                    lfpcalc.calc_lfp_choose(self.cells[cellkey], x = self.x[i],
-                                            y = self.y[i], z = self.z[i],
-                                            sigma=sigma, r_limit=r_limit,
-                                            timestep=timestep,
-                                            t_indices=t_indices, method=method)
+                    lfpcalc.calc_lfp_choose(self.cell,
+                                            x = self.x[i],
+                                            y = self.y[i],
+                                            z = self.z[i],
+                                            sigma = self.sigma,
+                                            r_limit = r_limit,
+                                            timestep = timestep,
+                                            t_indices = t_indices,
+                                            method = self.method)
             
         return LFP_temp
 
     
-    def _lfp_el_pos_calc_dist(self, cellkey=0, r_limit=None,
-                             sigma=0.3, radius=10, n=10,
-                             m=50, N=None, t_indices=None, 
-                             method='linesource'):
+    def _lfp_el_pos_calc_dist(self,
+                              r_limit=None,
+                             m=50,
+                             t_indices=None,
+                             ):
         '''
         Calc. of LFP over an n-point integral approximation over flat
         electrode surface with radius r. The locations of these n points on
-        the electrode surface are random,  within the given radius. The '''
+        the electrode surface are random,  within the given radius. '''
         lfp_el_pos = np.zeros(self.LFP.shape)
         offsets = {}
         circle = {}
-        for i in range(len(self.x)):
-            if n > 1:
-                lfp_e = np.zeros((n, self.LFP.shape[1]))
 
-                offs = np.zeros((n, 3))
-                r2 = np.zeros(n)
+        def create_crcl(m, i):
+            '''make circumsize of contact point'''
+            crcl = np.zeros((m, 3))
+            for j in range(m):
+                B = [(np.random.rand()-0.5),
+                    (np.random.rand()-0.5),
+                    (np.random.rand()-0.5)]
+                crcl[j, ] = np.cross(self.N[i, ], B)
+                crcl[j, ] = crcl[j, ]/np.sqrt(crcl[j, 0]**2 +
+                                           crcl[j, 1]**2 + \
+                                           crcl[j, 2]**2)*self.r
 
-                crcl = np.zeros((m, 3))
-                
-                #assert the same random numbers are drawn every time
-                if self.seedvalue != None:
-                    np.random.seed(self.seedvalue)
-                for j in range(n):
-                    A = [(np.random.rand()-0.5)*radius*2,
-                        (np.random.rand()-0.5)*radius*2,
-                        (np.random.rand()-0.5)*radius*2]
-                    offs[j, ] = np.cross(N[i, ], A)
+            crclx = crcl[:, 0] + self.x[i]
+            crcly = crcl[:, 1] + self.y[i]
+            crclz = crcl[:, 2] + self.z[i]
+            
+            return crclx, crcly, crclz
+
+        def calc_xyz_n(i):
+            '''calculate some offsets'''
+            #offsets and radii init
+            offs = np.zeros((self.n, 3))
+            r2 = np.zeros(self.n)
+            
+            #assert the same random numbers are drawn every time
+            if self.seedvalue != None:
+                np.random.seed(self.seedvalue)
+            for j in range(self.n):
+                A = [(np.random.rand()-0.5)*self.r*2,
+                    (np.random.rand()-0.5)*self.r*2,
+                    (np.random.rand()-0.5)*self.r*2]
+                offs[j, ] = np.cross(self.N[i, ], A)
+                r2[j] = offs[j, 0]**2 + offs[j, 1]**2 + offs[j, 2]**2
+                while r2[j] > self.r**2:
+                    A = [(np.random.rand()-0.5)*self.r*2,
+                        (np.random.rand()-0.5)*self.r*2,
+                        (np.random.rand()-0.5)*self.r*2]
+                    offs[j, ] = np.cross(self.N[i, ], A)
                     r2[j] = offs[j, 0]**2 + offs[j, 1]**2 + offs[j, 2]**2
-                    while r2[j] > radius**2:
-                        A = [(np.random.rand()-0.5)*radius*2,
-                            (np.random.rand()-0.5)*radius*2,
-                            (np.random.rand()-0.5)*radius*2]
-                        offs[j, ] = np.cross(N[i, ], A)
-                        r2[j] = offs[j, 0]**2 + offs[j, 1]**2 + offs[j, 2]**2
 
-                x_n = offs[:, 0] + self.x[i]
-                y_n = offs[:, 1] + self.y[i]
-                z_n = offs[:, 2] + self.z[i]
+            x_n = offs[:, 0] + self.x[i]
+            y_n = offs[:, 1] + self.y[i]
+            z_n = offs[:, 2] + self.z[i]
+            
+            return x_n, y_n, z_n
 
-                for j in range(m):
-                    B = [(np.random.rand()-0.5),
-                        (np.random.rand()-0.5),
-                        (np.random.rand()-0.5)]
-                    crcl[j, ] = np.cross(N[i, ], B)
-                    crcl[j, ] = crcl[j, ]/np.sqrt(crcl[j, 0]**2 +
-                                               crcl[j, 1]**2 + \
-                                               crcl[j, 2]**2)*radius
+        def loop_over_points(x_n, y_n, z_n):
 
-                crclx = crcl[:, 0] + self.x[i]
-                crcly = crcl[:, 1] + self.y[i]
-                crclz = crcl[:, 2] + self.z[i]
+            #loop over points on contact
+            for j in range(self.n):
+                tmp = lfpcalc.calc_lfp_choose(self.cell,
+                                                    x = x_n[j],
+                                                    y = y_n[j],
+                                                    z = z_n[j],
+                                                    r_limit = r_limit,
+                                                    sigma = self.sigma,
+                                                    t_indices = t_indices,
+                                                    method = self.method)
 
-                for j in range(n):
-                    lfp_e[j, ] = lfpcalc.calc_lfp_choose(self.cells[cellkey],
-                                                        x = x_n[j],
-                                                        y = y_n[j],
-                                                        z = z_n[j],
-                                                        r_limit = r_limit,
-                                                        sigma = sigma,
-                                                        t_indices = t_indices,
-                                                        method = method)
+                
+                if j == 0:
+                    lfp_e = tmp
+                else:
+                    lfp_e = np.r_['0,2', lfp_e, tmp]
+                
+                #no longer needed
+                del tmp
+            
+            return lfp_e.mean(axis=0)
 
-                lfp_el_pos[i] = lfp_e.mean(axis=0)
+        #loop over contacts
+        for i in range(len(self.x)):
+            if self.n > 1:
+            
+                #fetch offsets:
+                x_n, y_n, z_n = calc_xyz_n(i)
+                
+                
 
+                
+                #fill in with contact average
+                lfp_el_pos[i] = loop_over_points(x_n, y_n, z_n) #lfp_e.mean(axis=0)
+                
+                ##no longer needed
+                #del lfp_e
+                
             else:
-                lfp_el_pos[i] = lfpcalc.calc_lfp_choose(self.cells[cellkey], 
-                    x=self.x[i], y=self.y[i], z=self.z[i], r_limit = r_limit, 
-                    sigma=sigma, t_indices=t_indices)
+                lfp_el_pos[i] = lfpcalc.calc_lfp_choose(
+                    self.cell, 
+                    x=self.x[i],
+                    y=self.y[i],
+                    z=self.z[i],
+                    r_limit = r_limit, 
+                    sigma=self.sigma,
+                    t_indices=t_indices)
+                
             offsets[i] = {
                 'x_n' : x_n,
                 'y_n' : y_n,
                 'z_n' : z_n
             }
+
+            
+            #fetch circle around contact
+            crcl = create_crcl(m, i)
             circle[i] = {
-                'x' : crclx,
-                'y' : crcly,
-                'z' : crclz
+                'x' : crcl[0],
+                'y' : crcl[1],
+                'z' : crcl[2],
             }
+        
         return circle,  offsets,  lfp_el_pos
 
 
