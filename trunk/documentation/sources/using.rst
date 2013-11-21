@@ -113,7 +113,7 @@ The units in LFPy for given quantities are:
 +-------------+-----------+
 | Dimension   | [μm]      |
 +-------------+-----------+
-| Syn. weight | [nS]      |
+| Syn. weight | [µS]      |
 +-------------+-----------+
 
 Note: resistance, conductance and capacitance are usually specific values, i.e per membrane area (lowercase r_m, g, c_m)
