@@ -48,6 +48,7 @@ class Cell(object):
         nsegs_method: ['lambda100']/'lambda_f'/'fixed_length': nseg rule
         max_nsegs_length: [None]: max segment length for method 'fixed_length'
         lambda_f: [100]: AC frequency for method 'lambda_f'
+        d_lambda: [0.1]: parameter for d_lambda rule
         
         delete_sections: [True]: delete pre-existing section-references
         
@@ -87,6 +88,7 @@ class Cell(object):
                     tstopms=100,
                     nsegs_method='lambda100',
                     lambda_f = 100,
+                    d_lambda = 0.1,
                     max_nsegs_length=None,
                     delete_sections = True,
                     custom_code=None,
@@ -186,7 +188,7 @@ class Cell(object):
                 print("no extracellular mechanism inserted, can't access imem!")
         
         #set number of segments accd to rule, and calculate the number
-        self._set_nsegs(nsegs_method, lambda_f, max_nsegs_length)
+        self._set_nsegs(nsegs_method, lambda_f, d_lambda, max_nsegs_length)
         self.totnsegs = self._calc_totnsegs()
         if self.verbose:
             print("Total number of segments: %i" % self.totnsegs)
@@ -289,13 +291,13 @@ class Cell(object):
         self._create_sectionlists()
 
     
-    def _set_nsegs(self, nsegs_method, lambda_f, max_nsegs_length):
+    def _set_nsegs(self, nsegs_method, lambda_f, d_lambda, max_nsegs_length):
         '''Set number of segments per section according to the lambda-rule,
         or according to maximum length of segments'''
         if nsegs_method == 'lambda100':
-            self._set_nsegs_lambda100()
+            self._set_nsegs_lambda100(d_lambda)
         elif nsegs_method == 'lambda_f':
-            self._set_nsegs_lambda_f(lambda_f)
+            self._set_nsegs_lambda_f(lambda_f, d_lambda)
         elif nsegs_method == 'fixed_length':
             self._set_nsegs_fixed_length(max_nsegs_length)
         else:
@@ -364,19 +366,25 @@ class Cell(object):
 
             return idxvec
     
-    def _set_nsegs_lambda_f(self, frequency):
+    def _set_nsegs_lambda_f(self, frequency=100, d_lambda=0.1):
         '''Set the number of segments for section according to the 
-        d_lambda-rule for a given input frequency'''
+        d_lambda-rule for a given input frequency
+        
+        kwargs:
+        ::
+            frequency: float, frequency at whihc AC length constant is computed
+            d_lambda: float, 
+        '''
         for sec in self.allseclist:
-            sec.nseg = int((sec.L / (0.1*neuron.h.lambda_f(frequency,
+            sec.nseg = int((sec.L / (d_lambda*neuron.h.lambda_f(frequency,
                                                            sec=sec)) + .9)
                 / 2 )*2 + 1
         if self.verbose:
             print("set nsegs using lambda-rule with frequency %i." % frequency)
    
-    def _set_nsegs_lambda100(self):
+    def _set_nsegs_lambda100(self, d_lambda=0.1):
         '''Set the numbers of segments using d_lambda(100)'''
-        self._set_nsegs_lambda_f(100)
+        self._set_nsegs_lambda_f(frequency=100, d_lambda=d_lambda)
     
     def _set_nsegs_fixed_length(self, maxlength):
         '''Set nseg for sections so that every segment L < maxlength'''
