@@ -1514,10 +1514,12 @@ class Cell(object):
         
         return x, y, z
     
-    def _create_polygon(self, i):
+    def _create_polygon(self, i, projection=('x', 'z')):
         '''create a polygon to fill for each section'''        
-        x = self.x3d[i]
-        z = self.z3d[i]
+        x = getattr(self, projection[0]+'3d')[i]
+        y = getattr(self, projection[1]+'3d')[i]
+        #x = self.x3d[i]
+        #z = self.z3d[i]
         d = self.diam3d[i]
         
         #calculate angles        
@@ -1562,9 +1564,10 @@ class Cell(object):
         
         return x, z
     
-    def get_pt3d_polygons(self):
-        '''for each section create a polygon in the (x,z)-plane, that can be
-        visualized using plt.fill()
+    def get_pt3d_polygons(self, projection=('x', 'z')):
+        '''for each section create a polygon in the plane determined by keyword
+        argument projection=('x', 'z'), that can be
+        visualized using e.g., plt.fill()
         
         Returned argument is a list of (x, z) tuples giving the trajectory
         of each section that can be plotted using PolyCollection
@@ -1590,17 +1593,34 @@ class Cell(object):
             
             plt.show()
         '''
+        if len(projection) != 2:
+            raise ValueError, "projection arg be a tuple like ('x', 'y')"
+        if 'x' in projection and 'y' in projection:
+            pass
+        elif 'x' in projection and 'z' in projection:
+            pass
+        elif 'y' in projection and 'z' in projection:
+            pass
+        else:
+            mssg = "projection must be a length 2 tuple of 'x', 'y' or 'z'!"
+            raise ValueError, messg
+
         polygons = []
         for i in range(len(self.x3d)):
-            polygons.append(self._create_polygon(i))
+            polygons.append(self._create_polygon(i, projection))
         
         return polygons
 
 
-    def _create_segment_polygon(self, i):
-        '''create a polygon to fill for segment i'''        
-        x = [self.xstart[i], self.xend[i]]
-        z = [self.zstart[i], self.zend[i]]
+    def _create_segment_polygon(self, i, projection=('x', 'z')):
+        '''create a polygon to fill for segment i, in the plane
+        determined by kwarg projection'''        
+        x = [getattr(self, projection[0]+'start')[i],
+             getattr(self, projection[0]+'end')[i]]
+        z = [getattr(self, projection[1]+'start')[i],
+             getattr(self, projection[1]+'end')[i]]        
+        #x = [self.xstart[i], self.xend[i]]
+        #z = [self.zstart[i], self.zend[i]]
         d = self.diam[i]
         
         #calculate angles        
@@ -1631,13 +1651,18 @@ class Cell(object):
         return x, z
 
 
-    def get_idx_polygons(self):
-        '''for each segment idx in celll create a polygon in the (x,z)-plane,
+    def get_idx_polygons(self, projection=('x', 'z')):
+        '''for each segment idx in celll create a polygon in the plane
+        determined by the projection kwarg (default ('x', 'z')),
         that can be visualized using plt.fill() or
         mpl.collections.PolyCollection
         
         Returned argument is a list of (np.ndarray, np.ndarray) tuples
         giving the trajectory of each section
+        
+        kwargs:
+        ::
+            projection : ('x', 'z') tuple of two strings determining projection 
         
         The most efficient way of using this would be something like
         ::
@@ -1647,7 +1672,7 @@ class Cell(object):
             cell = LFPy.Cell(morphology='PATH/TO/MORPHOLOGY')
             
             zips = []
-            for x, z in cell.get_idx_polygons():
+            for x, z in cell.get_idx_polygons(projection=('x', 'z'):
                 zips.append(zip(x, z))
             
             polycol = PolyCollection(zips,
@@ -1662,9 +1687,21 @@ class Cell(object):
             
             plt.show()
         '''
+        if len(projection) != 2:
+            raise ValueError, "projection arg be a tuple like ('x', 'y')"
+        if 'x' in projection and 'y' in projection:
+            pass
+        elif 'x' in projection and 'z' in projection:
+            pass
+        elif 'y' in projection and 'z' in projection:
+            pass
+        else:
+            mssg = "projection must be a length 2 tuple of 'x', 'y' or 'z'!"
+            raise ValueError, messg
+
         polygons = []
         for i in np.arange(self.totnsegs):
-            polygons.append(self._create_segment_polygon(i))
+            polygons.append(self._create_segment_polygon(i, projection))
         
         return polygons
 

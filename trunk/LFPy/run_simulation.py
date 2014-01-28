@@ -196,7 +196,7 @@ def _run_simulation_with_electrode(cell, electrode=None,
         electrodesLFP = []
         for coeffs in dotprodcoeffs:
             electrodesLFP.append(np.empty((coeffs.shape[0],
-                                    cell.tstopms / cell.timeres_NEURON + 1)))
+                                int(cell.tstopms / cell.timeres_NEURON) + 1)))
     #LFPs for each electrode will be put here during simulations
     if to_file:
         #ensure right ending:
