@@ -51,10 +51,10 @@ def _run_simulation(cell, variable_dt=False, atol=0.001):
     counter = 0.
     t0 = time()
     ti = neuron.h.t
-    if cell.tstopms > 1000:
-        interval = 1 / cell.timeres_NEURON * 100
+    if cell.tstopms > 10000:
+        interval = 1 / cell.timeres_NEURON * 1000
     else:
-        interval = 1 / cell.timeres_NEURON * 10
+        interval = 1 / cell.timeres_NEURON * 100
     
     while neuron.h.t < cell.tstopms:
         neuron.h.fadvance()
@@ -184,10 +184,10 @@ def _run_simulation_with_electrode(cell, electrode=None,
     tstep = 0
     t0 = time()
     ti = neuron.h.t
-    if cell.tstopms > 1000:
-        interval = 1 / cell.timeres_NEURON * 100
+    if cell.tstopms > 10000:
+        interval = 1 / cell.timeres_NEURON * 1000
     else:
-        interval = 1 / cell.timeres_NEURON * 10
+        interval = 1 / cell.timeres_NEURON * 100
     
     #temp vector to store membrane currents at each timestep
     imem = np.empty(cell.totnsegs)
@@ -349,40 +349,6 @@ def _collect_geometry_neuron(cell):
                 lengthvec[counter] = sec.L/nseg
 
                 counter += 1
-
-    ##loop over all segments
-    #for sec in cell.allseclist:
-    #    n3d = neuron.h.n3d()
-    #    if n3d > 0:
-    #        #length of sections
-    #        x3d = neuron.h.x3d(0)
-    #        y3d = neuron.h.y3d(0)
-    #        z3d = neuron.h.z3d(0)
-    #        xlength = neuron.h.x3d(n3d - 1) - x3d
-    #        ylength = neuron.h.y3d(n3d - 1) - y3d
-    #        zlength = neuron.h.z3d(n3d - 1) - z3d
-    #        
-    #        secL = sec.L
-    #        nseg = sec.nseg
-    #        gsen2 = 1. / 2. / nseg
-    #        
-    #        for seg in sec:
-    #            segx = seg.x
-    #            
-    #            areavec[counter] = neuron.h.area(segx)
-    #            diamvec[counter] = seg.diam
-    #            lengthvec[counter] = secL / nseg
-    #            
-    #            xstartvec[counter] = x3d + xlength * (segx - gsen2)
-    #            xendvec[counter] = x3d + xlength * (segx + gsen2)
-    #            
-    #            ystartvec[counter] = y3d + ylength * (segx - gsen2)
-    #            yendvec[counter] = y3d + ylength * (segx + gsen2)
-    #            
-    #            zstartvec[counter] = z3d + zlength * (segx - gsen2)
-    #            zendvec[counter] = z3d + zlength * (segx + gsen2)
-    #            
-    #            counter += 1
     
     #set cell attributes
     cell.xstart = xstartvec
