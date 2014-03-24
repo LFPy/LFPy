@@ -1524,45 +1524,45 @@ class Cell(object):
         
         #calculate angles        
         dx = np.diff(x)
-        dz = np.diff(z)
-        theta = np.arctan2(dz, dx)
+        dy = np.diff(y)
+        theta = np.arctan2(dy, dx)
         
         x = np.r_[x, x[::-1]]
-        z = np.r_[z, z[::-1]]
+        y = np.r_[y, y[::-1]]
         
         theta = np.r_[theta, theta[::-1]]
         d = np.r_[d, d[::-1]]
         
         #1st corner:
         x[0] -= 0.5 * d[0] * np.sin(theta[0])
-        z[0] += 0.5 * d[0] * np.cos(theta[0])
+        y[0] += 0.5 * d[0] * np.cos(theta[0])
         
         ##pt3d points between start and end of section, first side
         x[1:dx.size] -= 0.25 * d[1:dx.size] * (
             np.sin(theta[:dx.size-1]) + np.sin(theta[1:dx.size]))
-        z[1:dz.size] += 0.25 * d[1:dz.size] * (
-            np.cos(theta[:dz.size-1]) + np.cos(theta[1:dx.size]))
+        y[1:dy.size] += 0.25 * d[1:dy.size] * (
+            np.cos(theta[:dy.size-1]) + np.cos(theta[1:dx.size]))
         
         #end of section, first side
         x[dx.size] -= 0.5 * d[dx.size] * np.sin(theta[dx.size])
-        z[dz.size] += 0.5 * d[dz.size] * np.cos(theta[dz.size])
+        y[dy.size] += 0.5 * d[dy.size] * np.cos(theta[dy.size])
         
         #other side
         #end of section, second side
         x[dx.size+1] += 0.5 * d[dx.size+1] * np.sin(theta[dx.size])
-        z[dz.size+1] -= 0.5 * d[dz.size+1] * np.cos(theta[dz.size])
+        y[dy.size+1] -= 0.5 * d[dy.size+1] * np.cos(theta[dy.size])
         
         ##pt3d points between start and end of section, second side
         x[::-1][1:dx.size] += 0.25 * d[::-1][1:dx.size] * (
             np.sin(theta[::-1][:dx.size-1]) + np.sin(theta[::-1][1:dx.size]))
-        z[::-1][1:dz.size] -= 0.25 * d[::-1][1:dz.size] * (
-            np.cos(theta[::-1][:dz.size-1]) + np.cos(theta[::-1][1:dx.size]))
+        y[::-1][1:dy.size] -= 0.25 * d[::-1][1:dy.size] * (
+            np.cos(theta[::-1][:dy.size-1]) + np.cos(theta[::-1][1:dx.size]))
 
         #last corner:
         x[-1] += 0.5 * d[-1] * np.sin(theta[-1])
-        z[-1] -= 0.5 * d[-1] * np.cos(theta[-1])
+        y[-1] -= 0.5 * d[-1] * np.cos(theta[-1])
         
-        return x, z
+        return x, y
     
     def get_pt3d_polygons(self, projection=('x', 'z')):
         '''for each section create a polygon in the plane determined by keyword
