@@ -472,7 +472,7 @@ cpdef calc_lfp_pointsource(cell, x=0, y=0, z=0, sigma=0.3,
 
 cdef _check_rlimit_point(r2, r_limit):
     '''Correct r2 so that r2 >= r_limit for all values'''
-    [inds] = np.where(r2 < r_limit)
-    r2[inds] = r_limit[inds]
+    [inds] = r2 < r_limit*r_limit
+    r2[inds] = r_limit[inds]*r_limit[inds]
 
     return r2
