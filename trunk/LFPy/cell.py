@@ -458,6 +458,7 @@ class Cell(object):
                     ns = neuron.h.NetStim(0.5)
                     ns.number = 0
                     nc = neuron.h.NetCon(ns, syn)
+                    #did keeping track of netstims cause segfaults or not????
                     #self.netstimlist.append(ns)
                     nc.weight[0] = weight
                     self.netconlist.append(nc)
