@@ -8,6 +8,7 @@
 # The example uses mpi4py with openmpi, and do not rely on NEURON's MPI.
 ################################################################################
 '''
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.collections import PolyCollection
