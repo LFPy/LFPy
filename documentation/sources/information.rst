@@ -268,6 +268,58 @@ as found by running "./config.guess" in the root of the NEURON source code;
 
 If you prefer to use Enthough Python distribution, see this forum post: https://www.neuron.yale.edu/phpBB/viewtopic.php?f=2&t=2191 
 
+
+OSX 10.9.x with Anaconda Scientific Python distribution
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+By far the simplest solution relying on no source code compilation.
+
+1. Download and install Anaconda using the 64-bit graphical installer from http://continuum.io/downloads
+2. Download and install the 64-bit Mac .dmg file with NEURON from http://www.neuron.yale.edu/neuron/download
+3. Edit your .bash_profile or similar file located in the $HOME folder, e.g., using "open -t $HOME/.bash_profile":
+::
+    
+    # added by Anaconda 2.0.1 installer
+    export PATH="/Users/ehagen_test/anaconda/bin:$PATH"
+    
+    # make neuron executable from terminal
+    export PATH="/Applications/NEURON-7.3/nrn/x86_64/bin:$PATH"
+    
+    # add NEURON python module available to Anaconda python
+    export PYTHONPATH="/Applications/NEURON-7.3/nrn/lib/python/:$PYTHONPATH"
+4. Open a fresh terminal window
+5. Install LFPy, e.g., from the python package index
+::
+    
+    pip install LFPy
+    
+6. Test the installation
+::
+    
+    Espens-MacBook-Pro:~ ehagen_test$ ipython
+    Python 2.7.7 |Anaconda 2.0.1 (x86_64)| (default, Jun  2 2014, 12:48:16) 
+    Type "copyright", "credits" or "license" for more information.
+    
+    IPython 2.1.0 -- An enhanced Interactive Python.
+    Anaconda is brought to you by Continuum Analytics.
+    Please check out: http://continuum.io/thanks and https://binstar.org
+    ?         -> Introduction and overview of IPython's features.
+    %quickref -> Quick reference.
+    help      -> Python's own help system.
+    object?   -> Details about 'object', use 'object??' for extra details.
+    
+    In [1]: import LFPy
+    Warning: no DISPLAY environment variable.
+    --No graphics will be displayed.
+    NEURON -- VERSION 7.3 ansi (1078:2b0c984183df) 2b0c984183df
+    Duke, Yale, and the BlueBrain Project -- Copyright 1984-2014
+    See http://www.neuron.yale.edu/neuron/credits
+
+If everything worked, one should now have a working Python/NEURON/LFPy environment. 
+
+
+
+
 Windows
 ^^^^^^^
 
