@@ -118,7 +118,7 @@ class Cell(object):
         for numsec, sec in enumerate(neuron.h.allsec()): pass
         if numsec > 0:
             mssg = "%s sections detected! " % numsec + \
-                   "Consider setting 'delete_previous_cells=True'"
+                   "Consider setting 'delete_sections=True'"
             warn(mssg)
                 
         #load morphology

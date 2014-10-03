@@ -216,7 +216,7 @@ if RANK==0:
 
     plt.ylim([0,n_pre_syn])
     plt.xlim([0,cell_parameters['tstopms']])
-    plt.ylabel('train #', ha='left')
+    plt.ylabel('train #', ha='left', labelpad=0)
     plt.title('Presynaptic spike times')
     
     ax = plt.gca()
@@ -284,3 +284,4 @@ if RANK==0:
 
 
     fig.savefig('example3.png', dpi=300)
+    fig.savefig('example3.pdf', dpi=300)
