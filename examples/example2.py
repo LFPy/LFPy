@@ -238,6 +238,6 @@ def plotstuff(cell, electrode):
   
 #Plotting of simulation results:
 fig = plotstuff(cell, electrode)
-fig.savefig('example2.png', dpi=300)
+fig.savefig('example2.pdf', dpi=300)
 
 plt.show()

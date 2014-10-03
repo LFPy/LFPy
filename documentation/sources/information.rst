@@ -276,7 +276,8 @@ By far the simplest solution relying on no source code compilation.
 
 1. Download and install Anaconda using the 64-bit graphical installer from http://continuum.io/downloads
 2. Download and install the 64-bit Mac .dmg file with NEURON from http://www.neuron.yale.edu/neuron/download
-3. Edit your .bash_profile or similar file located in the $HOME folder, e.g., using "open -t $HOME/.bash_profile":
+3. Edit your .bash_profile or similar file located in the $HOME folder, e.g., by calling in the Terminal.app "open -t $HOME/.bash_profile":
+
 ::
     
     # added by Anaconda 2.0.1 installer
@@ -287,13 +288,16 @@ By far the simplest solution relying on no source code compilation.
     
     # add NEURON python module available to Anaconda python
     export PYTHONPATH="/Applications/NEURON-7.3/nrn/lib/python/:$PYTHONPATH"
+
 4. Open a fresh terminal window
 5. Install LFPy, e.g., from the python package index
+
 ::
     
     pip install LFPy
     
 6. Test the installation
+
 ::
     
     Espens-MacBook-Pro:~ ehagen_test$ ipython
@@ -309,8 +313,6 @@ By far the simplest solution relying on no source code compilation.
     object?   -> Details about 'object', use 'object??' for extra details.
     
     In [1]: import LFPy
-    Warning: no DISPLAY environment variable.
-    --No graphics will be displayed.
     NEURON -- VERSION 7.3 ansi (1078:2b0c984183df) 2b0c984183df
     Duke, Yale, and the BlueBrain Project -- Copyright 1984-2014
     See http://www.neuron.yale.edu/neuron/credits
@@ -323,10 +325,31 @@ If everything worked, one should now have a working Python/NEURON/LFPy environme
 Windows
 ^^^^^^^
 
-There is a package PyNEURON on the Python package index, PiPy: http://pypi.python.org/pypi/PyNEURON/
-and a corresponding forum thread on the NEURON homepage here; http://www.neuron.yale.edu/phpBB/viewtopic.php?f=2&t=2501
 
-If you have pip installed, try:
-::
+We have had some success on getting LFPy and NEURON to run on the Windows platform.
 
-    pip install PyNEURON
+The following procedure was tested on a 32 bit Windows 7 Ultimate virtual machine, using Anaconda Python distribution and the MinGW-built release of NEURON.
+However, the procedure may or may not be similar on other versions of Windows.
+
+1.  Download and install 32-bit Anaconda Python using the graphical installer from http://continuum.io/downloads
+2.  Download and install the 32-bit (MinGW) setup.exe file for NEURON from http://www.neuron.yale.edu/neuron/download
+3.  Some PATH variables are needed to enable Anaconda Python and NEURON to interact nicely.
+    Go through "Control Panel" --> "System and Security" --> "System" --> "Advanced System Settings" --> "Environment Variables"
+    and add the following variables and values to the list of "System variables":
+    ::
+        
+        Append ";/nrn73w/bin/" to "Path"
+        Create new entry: "NEURONHOME", value "/nrn73w/"
+        Create second entry "PYTHONPATH", value "/nrn73w/lib/python/"
+    
+    if running with 64 bit Windows and software, exchange "nrn73w" with "nrn73w64" and "bin" with "bin64" above. 
+
+4.  Issue in the "Anaconda Command Prompt":
+    ::
+    
+        pip install LFPy --user
+
+5.  Check if "import neuron" and "import LFPy" works both from within Spyder, IPython and the NEURON supplied Python interpreter.
+        
+
+If everything worked, one should now have a working Python/NEURON/LFPy environment. 
