@@ -107,13 +107,17 @@ class Cell(object):
             neuron.h.load_file('import3d.hoc')  #import 3D morphology lib
 
         if delete_sections:
-            for numsec, sec in enumerate(neuron.h.allsec()): pass
+            numsec = 0
+            for numsec, sec in enumerate(neuron.h.allsec()):
+                pass
             if numsec > 0 and self.verbose:
                 print('%s existing sections deleted from memory' % numsec)
             neuron.h('forall delete_section()')
 
         #print a warning if neuron have existing sections
-        for numsec, sec in enumerate(neuron.h.allsec()): pass
+        numsec = 0
+        for numsec, sec in enumerate(neuron.h.allsec()):
+            pass
         if numsec > 0 and self.verbose:
             mssg = "%s sections detected! " % numsec + \
                    "Consider setting 'delete_sections=True'"
