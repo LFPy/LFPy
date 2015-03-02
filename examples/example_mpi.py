@@ -13,35 +13,45 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.collections import PolyCollection
 import LFPy
+import urllib2
+import zipfile
 from mpi4py import MPI
+
+#MPI stuff we're using
+COMM = MPI.COMM_WORLD
+SIZE = COMM.Get_size()
+RANK = COMM.Get_rank()
 
 #Fetch Mainen&Sejnowski 1996 model files
 if not os.path.isfile('patdemo/cells/j4a.hoc'):
-    #get the model files:
-    u = urllib2.urlopen('http://senselab.med.yale.edu/ModelDB/eavBinDown.asp?o=2488&a=23&mime=application/zip')
-    localFile = open('patdemo.zip', 'w')
-    localFile.write(u.read())
-    localFile.close()
-    #unzip:
-    myzip = zipfile.ZipFile('patdemo.zip', 'r')
-    myzip.extractall('.')
-    myzip.close()
+    if RANK == 0:
+        #get the model files:
+        u = urllib2.urlopen('http://senselab.med.yale.edu/ModelDB/eavBinDown.asp?o=2488&a=23&mime=application/zip')
+        localFile = open('patdemo.zip', 'w')
+        localFile.write(u.read())
+        localFile.close()
+        #unzip:
+        myzip = zipfile.ZipFile('patdemo.zip', 'r')
+        myzip.extractall('.')
+        myzip.close()
 
-#compile mod files every time, because of incompatibility with Hay2011 files:
-os.system('''
-          cd patdemo
-          nrnivmodl
-          ''')
+        #compile mod files
+        os.system('''
+                  cd patdemo
+                  nrnivmodl
+                  ''')
+    else:
+        pass
+    
+    #sync threads
+    COMM.Barrier()
+    
 #os.system('nrnivmodl')
 LFPy.cell.neuron.load_mechanisms('patdemo')
 
 #set one global seed, ensure all randomizations are set on RANK 0 in script!
 np.random.seed(12345)
 
-#MPI stuff we're using
-COMM = MPI.COMM_WORLD
-SIZE = COMM.Get_size()
-RANK = COMM.Get_rank()
 
 class Population:
     '''prototype population class'''

@@ -19,8 +19,9 @@ import LFPy
 import numpy as np
 import matplotlib.pyplot as plt
 plt.rcParams.update({'font.size' : 12,
-    'figure.facecolor' : '1',
-    'wspace' : 0.5, 'hspace' : 0.5})
+                     'figure.facecolor' : '1',
+                     'figure.subplot.wspace' : 0.5,
+                     'figure.subplot.hspace' : 0.5})
 
 #seed for random generation
 np.random.seed(1234)
