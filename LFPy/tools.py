@@ -27,7 +27,7 @@ def noise_brown(ncols, nrows=1, weight=1, filter=None, filterargs=None):
     '''Return 1/f^2 noise of shape(nrows, ncols obtained by taking 
     the cumulative sum of gaussian white noise, with rms weight.
     
-    If filter != None, this function will apply the filter coefficients obtained
+    If filter is not None, this function will apply the filter coefficients obtained
     by:
     ::
         
@@ -36,13 +36,13 @@ def noise_brown(ncols, nrows=1, weight=1, filter=None, filterargs=None):
     '''
     from matplotlib.mlab import rms_flat
 
-    if filter != None:
+    if filter is not None:
         coeff_b, coeff_a = list(filter(**filterargs))
     
     noise = np.empty((nrows, ncols))    
     for i in range(nrows):
         signal = np.random.normal(size=ncols+10000).cumsum()
-        if filter != None:
+        if filter is not None:
             signal = ss.lfilter(coeff_b, coeff_a, signal)
         noise[i, :] = signal[10000:]
         noise[i, :] /= rms_flat(noise[i, :])

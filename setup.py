@@ -37,7 +37,7 @@ setup(
     name = "LFPy",
     version = "1.0", 
     maintainer = "Espen Hagen",
-        maintainer_email = 'ehagen@nmbu.no',
+        maintainer_email = 'e.hagen@fz-juelich.de',
     packages = ['LFPy'], 
     cmdclass = cmdclass, 
     ext_modules = ext_modules,

@@ -37,7 +37,7 @@ class RecExtElectrodeSetup(object):
         r : float,
             radius of contact surface, default None
         n : int,
-            if N != None and r > 0, the number of points to use for each
+            if N is not None and r > 0, the number of points to use for each
                   contact point in order to calculate average
         method : str,
             ['linesource']/'pointsource'/'som_as_point' switch
@@ -78,9 +78,15 @@ class RecExtElectrodeSetup(object):
             self.z = np.array(z).flatten()
         self.color = color
         self.marker = marker
-        if N != None:
-            if type(N) == list:
-                N = np.array(N)
+        if N is not None:
+            if type(N) != np.array:
+                try:
+                    N = np.array(N)
+                except:
+                    print('Keyword argument N could not be converted to a '
+                          'numpy.ndarray of shape (n_contacts, 3)')
+                    print sys.exc_info()[0]
+                    raise
             if N.shape[-1] == 3:
                 self.N = N
             else:
@@ -126,7 +132,7 @@ class RecExtElectrodeSetup(object):
             raise DeprecationWarning, 'no support for more than one cell-object'
         
         
-        if self.cell != None:
+        if self.cell is not None:
             
             sum_imem = self.cell.imem.sum(axis=0)
             #check if eye matrix is supplied:
@@ -220,18 +226,18 @@ class RecExtElectrode(RecExtElectrodeSetup):
         '''Calculate LFP on electrode geometry from all cell instances.
         Will chose distributed calculated if electrode contain 'n', 'N', and 'r'
         '''
-        if cell != None:
+        if cell is not None:
             self.cell = cell
             self._test_imem_sum()
        
         if not hasattr(self,  'LFP'):
-            if t_indices != None:
+            if t_indices is not None:
                 self.LFP = np.zeros((self.x.size, t_indices.size))
             else:
                 self.LFP = np.zeros((self.x.size, self.cell.imem.shape[1]))
                     
         
-        if self.n != None and self.N != None and self.r != None:
+        if self.n is not None and self.N is not None and self.r is not None:
             if self.n <= 1:
                 raise ValueError("n = %i must be larger that 1" % self.n)
             else:
@@ -259,7 +265,7 @@ class RecExtElectrode(RecExtElectrodeSetup):
                     timestep=None,
                     t_indices=None):
         '''Loop over electrode contacts, and will return LFPs across channels'''
-        if t_indices != None:
+        if t_indices is not None:
             LFP_temp = np.zeros((self.x.size, t_indices.size))
         else:
             LFP_temp = np.zeros((self.x.size, self.cell.imem.shape[1]))
@@ -317,7 +323,7 @@ class RecExtElectrode(RecExtElectrodeSetup):
             r2 = np.zeros(self.n)
             
             #assert the same random numbers are drawn every time
-            if self.seedvalue != None:
+            if self.seedvalue is not None:
                 np.random.seed(self.seedvalue)
             for j in range(self.n):
                 A = [(np.random.rand()-0.5)*self.r*2,

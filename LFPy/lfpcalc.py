@@ -70,9 +70,9 @@ def calc_lfp_linesource(cell, x=0, y=0, z=0, sigma=0.3,
         raise Exception('r_limit is neither a float- or int- value, nor is \
             r_limit.shape() equal to cell.diam.shape()')
     
-    if timestep != None:
+    if timestep is not None:
         currmem = cell.imem[:, timestep]
-    if t_indices != None:
+    if t_indices is not None:
         currmem = cell.imem[:, t_indices]
     else:
         currmem = cell.imem
@@ -149,9 +149,9 @@ def calc_lfp_som_as_point(cell, x=0, y=0, z=0, sigma=0.3,
             on the form r_limit=[s_limit, r_limit],  \
             nor is shape(r_limit) equal to shape(cell.diam)!')
 
-    if timestep != None:
+    if timestep is not None:
         currmem = cell.imem[:, timestep]
-    if t_indices != None:
+    if t_indices is not None:
         currmem = cell.imem[:, t_indices]
     else:
         currmem = cell.imem
@@ -336,9 +336,9 @@ def calc_lfp_pointsource(cell, x=0, y=0, z=0, sigma=0.3,
         raise Exception('r_limit is neither a float- or int- value, nor is \
             r_limit.shape() equal to cell.diam.shape()')
 
-    if timestep != None:
+    if timestep is not None:
         currmem = cell.imem[:, timestep]
-    if t_indices != None:
+    if t_indices is not None:
         currmem = cell.imem[:, t_indices]
     else:
         currmem = cell.imem
