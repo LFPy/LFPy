@@ -283,5 +283,5 @@ if RANK==0:
     ax.yaxis.set_ticks_position('left')
 
 
-    fig.savefig('example3.png', dpi=300)
     fig.savefig('example3.pdf', dpi=300)
+
