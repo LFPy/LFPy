@@ -121,7 +121,7 @@ cell.simulate(electrode = electrode, rec_isyn=True)
 from example_suppl import plot_ex2
 fig = plot_ex2(cell, electrode)
 #Optional: saving the figure
-fig.savefig('example5.png', dpi=300)
+fig.savefig('example5.pdf', dpi=300)
 
 plt.show()
 

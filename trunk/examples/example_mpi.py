@@ -231,7 +231,7 @@ class Population:
             ax.set_xlabel('time (ms)')
             ax.set_ylabel('$z$ ($\mu$m)')
             
-            fig.savefig('example_mpi.png', dpi=300)
+            fig.savefig('example_mpi.pdf', dpi=300)
         
 
 if __name__ == '__main__':
