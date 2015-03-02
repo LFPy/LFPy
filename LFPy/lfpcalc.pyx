@@ -417,6 +417,7 @@ cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] _h_calc(
     hh[0] = 0
     return hh
 
+
 cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] _r2_calc(
             np.ndarray[DTYPE_t, ndim=1] xend,
             np.ndarray[DTYPE_t, ndim=1, negative_indices=False] yend,
@@ -429,9 +430,11 @@ cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] _r2_calc(
 
     return abs(r2)
 
-cpdef calc_lfp_pointsource(cell, x=0, y=0, z=0, sigma=0.3,
-                        r_limit=None, 
-                        timestep=None, t_indices=None):
+
+cpdef calc_lfp_pointsource(cell, double x=0, double y=0, double z=0,
+                           double sigma=0.3,
+                           r_limit=None, 
+                           timestep=None, t_indices=None):
     '''
     Calculate local field potentials using the point-source equation on all
     compartments
@@ -470,9 +473,13 @@ cpdef calc_lfp_pointsource(cell, x=0, y=0, z=0, sigma=0.3,
 
     return Emem.transpose()
 
-cdef _check_rlimit_point(r2, r_limit):
+
+cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] _check_rlimit_point(
+                np.ndarray[DTYPE_t, ndim=1, negative_indices=False] r2,
+                np.ndarray[DTYPE_t, ndim=1, negative_indices=False] r_limit):
     '''Correct r2 so that r2 >= r_limit for all values'''
-    [inds] = r2 < r_limit*r_limit
+    
+    inds = r2 < (r_limit*r_limit)
     r2[inds] = r_limit[inds]*r_limit[inds]
 
     return r2
