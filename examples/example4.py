@@ -70,5 +70,5 @@ print("done")
 from example_suppl import plot_ex1
 fig = plot_ex1(cell, electrode, X, Y, Z)
 # Optionally save figure (uncomment the line below)
-fig.savefig('example4.png', dpi=300)
+fig.savefig('example4.pdf', dpi=300)
 plt.show()

@@ -195,5 +195,4 @@ ax.set_xticklabels([])
 
 # fig = plot_ex1(cell, electrode, X, Y, Z)
 # Optionally save figure (uncomment the line below)
-plt.savefig('example1.png', dpi=300)
 plt.savefig('example1.pdf', dpi=300)
