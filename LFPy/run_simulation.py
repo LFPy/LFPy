@@ -88,7 +88,7 @@ def _run_simulation_with_electrode(cell, electrode=None,
         print('precalculating geometry - LFP mapping')
         
     #put electrodecoeff in a list, if it isn't already
-    if dotprodcoeffs != None:
+    if dotprodcoeffs is not None:
         if type(dotprodcoeffs) != list:
             dotprodcoeffs = [dotprodcoeffs]
         electrodes = []
@@ -100,7 +100,7 @@ def _run_simulation_with_electrode(cell, electrode=None,
     lendotrodcoeffs0 = len(dotprodcoeffs)
     
     #access electrode object and append dotprodcoeffs
-    if electrode != None:
+    if electrode is not None:
         #put electrode argument in list if needed
         if type(electrode) == list:
             electrodes = electrode
@@ -146,7 +146,7 @@ def _run_simulation_with_electrode(cell, electrode=None,
             cell.imem = cellImem
         except:
             del cell.imem
-    elif electrode == None:
+    elif electrode is None:
         electrodes = None
    
 
@@ -267,7 +267,7 @@ def _run_simulation_with_electrode(cell, electrode=None,
         #the first few belong to input dotprodcoeffs
         cell.dotprodresults = electrodesLFP[:lendotrodcoeffs0]
         #the remaining belong to input electrode arguments
-        if electrodes != None:
+        if electrodes is not None:
             for j, LFP in enumerate(electrodesLFP):
                 if not j < lendotrodcoeffs0:
                     if hasattr(electrodes[j-lendotrodcoeffs0], 'LFP'):

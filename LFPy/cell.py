@@ -125,7 +125,7 @@ class Cell(object):
                 
         #load morphology
         self.morphology = morphology
-        if self.morphology != None:
+        if self.morphology is not None:
             if os.path.isfile(self.morphology):
                 self._load_geometry()
             else:
@@ -178,7 +178,7 @@ class Cell(object):
                 print('No passive properties added')
         
         #run user specified code and functions if argument given
-        if custom_code != None or custom_fun != None:
+        if custom_code is not None or custom_fun is not None:
             self._run_custom_codes(custom_code, custom_fun, custom_fun_args)
         
         #Insert extracellular mech on all segments
@@ -263,7 +263,7 @@ class Cell(object):
     def _run_custom_codes(self, custom_code, custom_fun, custom_fun_args):
         '''Execute custom model code and functions with arguments'''
         # load custom codes
-        if custom_code != None:
+        if custom_code is not None:
             for code in custom_code:
                 if code.split('.')[-1] == 'hoc':
                     try:
@@ -283,7 +283,7 @@ class Cell(object):
         
         # run custom functions with arguments
         i = 0
-        if custom_fun != None:
+        if custom_fun is not None:
             for fun in custom_fun:
                 fun(**custom_fun_args[i])
                 i +=  1
@@ -309,7 +309,7 @@ class Cell(object):
     def _get_rotation(self):
         '''Check if there exists a corresponding file
         with rotation angles'''
-        if self.morphology != None:
+        if self.morphology is not None:
             base = os.path.splitext(self.morphology)[0]        
             if os.path.isfile(base+'.rot'):
                 rotation_file = base+'.rot'
@@ -718,7 +718,7 @@ class Cell(object):
             self._set_variable_recorders(rec_variables)
         
         #run fadvance until t >= tstopms, and calculate LFP if asked for
-        if electrode == None and dotprodcoeffs == None:
+        if electrode is None and dotprodcoeffs is None:
             if not rec_imem:
                 print("rec_imem = %s, membrane currents will not be recorded!" \
                                   % str(rec_imem))
@@ -1043,7 +1043,7 @@ class Cell(object):
             rotation = {'x' : 1.233, 'y' : 0.236, 'z' : np.pi}
             cell.set_rotation(**rotation)
         '''
-        if x != None:
+        if x is not None:
             theta = -x
             rotation_x = np.matrix([[1, 0, 0],
                 [0, np.cos(theta), -np.sin(theta)],
@@ -1061,7 +1061,7 @@ class Cell(object):
             if self.verbose:
                 print('Geometry not rotated around x-axis')
         
-        if y != None:
+        if y is not None:
             phi = -y
             rotation_y = np.matrix([[np.cos(phi), 0, np.sin(phi)],
                 [0, 1, 0],
@@ -1079,7 +1079,7 @@ class Cell(object):
             if self.verbose:
                 print('Geometry not rotated around y-axis')
         
-        if z != None:
+        if z is not None:
             gamma = -z
             rotation_z = np.matrix([[np.cos(gamma), -np.sin(gamma), 0],
                     [np.sin(gamma), np.cos(gamma), 0],
@@ -1434,7 +1434,7 @@ class Cell(object):
             rotation = {'x' : 1.233, 'y' : 0.236, 'z' : np.pi}
             cell.set_pt3d_rotation(**rotation)
         '''
-        if x != None:
+        if x is not None:
             theta = -x
             rotation_x = np.matrix([[1, 0, 0],
                 [0, np.cos(theta), -np.sin(theta)],
@@ -1453,7 +1453,7 @@ class Cell(object):
             if self.verbose:
                 print('Geometry not rotated around x-axis')
         
-        if y != None:
+        if y is not None:
             phi = -y
             rotation_y = np.matrix([[np.cos(phi), 0, np.sin(phi)],
                 [0, 1, 0],
@@ -1472,7 +1472,7 @@ class Cell(object):
             if self.verbose:
                 print('Geometry not rotated around y-axis')
         
-        if z != None:
+        if z is not None:
             gamma = -z
             rotation_z = np.matrix([[np.cos(gamma), -np.sin(gamma), 0],
                     [np.sin(gamma), np.cos(gamma), 0],

@@ -90,9 +90,9 @@ cpdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] calc_lfp_linesource(
         Ememi, Ememii, Ememiii, Emem, r_lims
     cdef np.ndarray[LTYPE_t, ndim=1, negative_indices=False] i, ii, iii
 
-    if timestep != None:
+    if timestep is not None:
         currmem = cell.imem[:, timestep]
-    if t_indices != None:
+    if t_indices is not None:
         currmem = cell.imem[:, t_indices]
     else:
         currmem = cell.imem
@@ -192,9 +192,9 @@ cpdef np.ndarray[DTYPE_t, ndim=1] calc_lfp_som_as_point(cell,
     cdef double xmid, ymid, zmid
 
 
-    if timestep != None:
+    if timestep is not None:
         currmem = cell.imem[:, timestep]
-    if t_indices != None:
+    if t_indices is not None:
         currmem = cell.imem[:, t_indices]
     else:
         currmem = cell.imem
@@ -455,9 +455,9 @@ cpdef calc_lfp_pointsource(cell, x=0, y=0, z=0, sigma=0.3,
         raise Exception('r_limit is neither a float- or int- value, nor is \
             r_limit.shape() equal to cell.diam.shape()')
 
-    if timestep != None:
+    if timestep is not None:
         currmem = cell.imem[:, timestep]
-    if t_indices != None:
+    if t_indices is not None:
         currmem = cell.imem[:, t_indices]
     else:
         currmem = cell.imem
