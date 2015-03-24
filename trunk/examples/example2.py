@@ -1,7 +1,11 @@
 #!/usr/bin/env python
 '''Run Hay et al. (2011), generating and plotting a single action potential'''
 import numpy as np
-import urllib2
+import sys
+if sys.version < '3':
+    from urllib2 import urlopen
+else:    
+    from urllib.request import urlopen
 import zipfile
 import os
 import matplotlib.pyplot as plt
@@ -14,7 +18,7 @@ plt.close('all')
 #Fetch Hay et al. 2011 model files
 if not os.path.isfile('L5bPCmodelsEH/morphologies/cell1.asc'):
     #get the model files:
-    u = urllib2.urlopen('http://senselab.med.yale.edu/ModelDB/eavBinDown.asp?o=139653&a=23&mime=application/zip')
+    u = urlopen('http://senselab.med.yale.edu/ModelDB/eavBinDown.asp?o=139653&a=23&mime=application/zip')
     localFile = open('L5bPCmodelsEH.zip', 'w')
     localFile.write(u.read())
     localFile.close()
@@ -111,8 +115,8 @@ def plotstuff(cell, electrode):
     i = 0
     zips = []
     for x in LFPnorm:
-        zips.append(zip(cell.tvec*1.6 + electrode.x[i] + 2,
-                        x*12 + electrode.z[i]))
+        zips.append(list(zip(cell.tvec*1.6 + electrode.x[i] + 2,
+                        x*12 + electrode.z[i])))
         i += 1
     
     line_segments = LineCollection(zips,
@@ -147,7 +151,7 @@ def plotstuff(cell, electrode):
     #plot morphology
     zips = []
     for x, z in cell.get_pt3d_polygons():
-        zips.append(zip(x, z))
+        zips.append(list(zip(x, z)))
     from matplotlib.collections import PolyCollection
     polycol = PolyCollection(zips, edgecolors='none',
                              facecolors='gray', zorder=-1, rasterized=False)
@@ -186,7 +190,7 @@ def plotstuff(cell, electrode):
     ax2.axis(ax2.axis('tight'))
     ax2.set_ylabel(r'$V_\mathrm{soma}(t)$ (mV)')
     
-    for loc, spine in ax2.spines.iteritems():
+    for loc, spine in ax2.spines.items():
         if loc in ['right', 'top']:
             spine.set_color('none')            
     ax2.xaxis.set_ticks_position('bottom')
@@ -214,7 +218,7 @@ def plotstuff(cell, electrode):
     ax3.set_xticklabels(xticks)
     ax3.axis(ax3.axis('tight'))
     
-    for loc, spine in ax3.spines.iteritems():
+    for loc, spine in ax3.spines.items():
         if loc in ['right', 'top']:
             spine.set_color('none')            
     ax3.xaxis.set_ticks_position('bottom')

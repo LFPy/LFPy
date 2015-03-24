@@ -111,7 +111,7 @@ class Cell(object):
             for numsec, sec in enumerate(neuron.h.allsec()):
                 pass
             if numsec > 0 and self.verbose:
-                print('%s existing sections deleted from memory' % numsec)
+                print(('%s existing sections deleted from memory' % numsec))
             neuron.h('forall delete_section()')
 
         #print a warning if neuron have existing sections
@@ -193,7 +193,7 @@ class Cell(object):
         self._set_nsegs(nsegs_method, lambda_f, d_lambda, max_nsegs_length)
         self.totnsegs = self._calc_totnsegs()
         if self.verbose:
-            print("Total number of segments: %i" % self.totnsegs)
+            print(("Total number of segments: %i" % self.totnsegs))
         
         #extract pt3d info from NEURON, and set these with the same rotation
         #and position in space as in our simulations, assuming RH rule, which
@@ -304,7 +304,7 @@ class Cell(object):
             self._set_nsegs_fixed_length(max_nsegs_length)
         else:
             if self.verbose:
-                print('No nsegs_method applied (%s)' % nsegs_method)
+                print(('No nsegs_method applied (%s)' % nsegs_method))
     
     def _get_rotation(self):
         '''Check if there exists a corresponding file
@@ -382,7 +382,7 @@ class Cell(object):
                                                            sec=sec)) + .9)
                 / 2 )*2 + 1
         if self.verbose:
-            print("set nsegs using lambda-rule with frequency %i." % frequency)
+            print(("set nsegs using lambda-rule with frequency %i." % frequency))
    
     def _set_nsegs_lambda100(self, d_lambda=0.1):
         '''Set the numbers of segments using d_lambda(100)'''
@@ -612,7 +612,7 @@ class Cell(object):
                             seclist.append(sec=sec)
             else:
                 if self.verbose:
-                    print('%s did not match any section name' % str(section))
+                    print(('%s did not match any section name' % str(section)))
 
         idx = np.where(self._get_idx(seclist))[0]
         sel_z_idx = (self.zmid[idx] > z_min) & (self.zmid[idx] < z_max)
@@ -720,8 +720,8 @@ class Cell(object):
         #run fadvance until t >= tstopms, and calculate LFP if asked for
         if electrode is None and dotprodcoeffs is None:
             if not rec_imem:
-                print("rec_imem = %s, membrane currents will not be recorded!" \
-                                  % str(rec_imem))
+                print(("rec_imem = %s, membrane currents will not be recorded!" \
+                                  % str(rec_imem)))
             _run_simulation(self, variable_dt, atol)
         else:
             #allow using both electrode and additional coefficients:
@@ -837,7 +837,7 @@ class Cell(object):
         for values in self.recvariablesreclist:
             self.rec_variables.update({rec_variables[i] : np.array(values)})
             if self.verbose:
-                print('collected recorded variable %s' % rec_variables[i]) 
+                print(('collected recorded variable %s' % rec_variables[i])) 
             i += 1
         del self.recvariablesreclist
     
@@ -849,7 +849,7 @@ class Cell(object):
             if len(self.synlist) > 0 and len(self.sptimeslist) == 0:
                 errmsg = 'please run method "set_spike_times() for every' + \
                         '\n' + 'instance of LFPy.pointprocess.Synapse'
-                raise Exception, errmsg
+                raise Exception(errmsg)
             for i in range(int(self.synlist.count())):
                 for ii in range(int(self.sptimeslist.o(i).size)):
                     self.netconlist.o(i).event(float(self.sptimeslist.o(i)[ii]))
@@ -951,8 +951,8 @@ class Cell(object):
                         recvector.record(getattr(seg, '_ref_%s' % variable),
                                          self.timeres_python)
                     else:
-                        print('non-existing variable %s, section %s.%f' % \
-                                (variable, sec.name(), seg.x))
+                        print(('non-existing variable %s, section %s.%f' % \
+                                (variable, sec.name(), seg.x)))
                     variablereclist.append(recvector)
         
     
@@ -995,7 +995,7 @@ class Cell(object):
             if type(getattr(self, varname)) == type(neuron.h.List()):
                 setattr(self, varname, None)
                 if self.verbose:
-                    print('None-typed %s in cell instance' % varname)
+                    print(('None-typed %s in cell instance' % varname))
         
     def cellpickler(self, filename):
         '''Save data in cell to filename, using cPickle. It will however destroy
@@ -1056,7 +1056,7 @@ class Cell(object):
             
             self._real_positions(rel_start, rel_end)
             if self.verbose:
-                print('Rotated geometry %g radians around x-axis' % (-theta))
+                print(('Rotated geometry %g radians around x-axis' % (-theta)))
         else:
             if self.verbose:
                 print('Geometry not rotated around x-axis')
@@ -1074,7 +1074,7 @@ class Cell(object):
             
             self._real_positions(rel_start, rel_end)
             if self.verbose:
-                print('Rotated geometry %g radians around y-axis' % (-phi))
+                print(('Rotated geometry %g radians around y-axis' % (-phi)))
         else:
             if self.verbose:
                 print('Geometry not rotated around y-axis')
@@ -1092,7 +1092,7 @@ class Cell(object):
             
             self._real_positions(rel_start, rel_end)
             if self.verbose:
-                print('Rotated geometry %g radians around z-axis' % (-gamma))
+                print(('Rotated geometry %g radians around z-axis' % (-gamma)))
         else:
             if self.verbose:
                 print('Geometry not rotated around z-axis')
@@ -1128,7 +1128,7 @@ class Cell(object):
             raise Exception("axis must be either 'x', 'y' or 'z'")
         
         if self.verbose:
-            print('morphology mirrored across %s-axis' % axis)
+            print(('morphology mirrored across %s-axis' % axis))
         
         #set the proper 3D positions
         self._real_positions(rel_start, rel_end)
@@ -1448,7 +1448,7 @@ class Cell(object):
                 self.x3d[i], self.y3d[i], self.z3d[i] = \
                                             self._real_pt3d_positions(rel_pos)
             if self.verbose:
-                print('Rotated geometry %g radians around x-axis' % (-theta))
+                print(('Rotated geometry %g radians around x-axis' % (-theta)))
         else:
             if self.verbose:
                 print('Geometry not rotated around x-axis')
@@ -1467,7 +1467,7 @@ class Cell(object):
                 self.x3d[i], self.y3d[i], self.z3d[i] = \
                                             self._real_pt3d_positions(rel_pos)
             if self.verbose:
-                print('Rotated geometry %g radians around y-axis' % (-phi))
+                print(('Rotated geometry %g radians around y-axis' % (-phi)))
         else:
             if self.verbose:
                 print('Geometry not rotated around y-axis')
@@ -1486,7 +1486,7 @@ class Cell(object):
                 self.x3d[i], self.y3d[i], self.z3d[i] = \
                                             self._real_pt3d_positions(rel_pos)
             if self.verbose:
-                print('Rotated geometry %g radians around z-axis' % (-gamma))
+                print(('Rotated geometry %g radians around z-axis' % (-gamma)))
         else:
             if self.verbose:
                 print('Geometry not rotated around z-axis')
@@ -1597,7 +1597,7 @@ class Cell(object):
             plt.show()
         '''
         if len(projection) != 2:
-            raise ValueError, "projection arg be a tuple like ('x', 'y')"
+            raise ValueError("projection arg be a tuple like ('x', 'y')")
         if 'x' in projection and 'y' in projection:
             pass
         elif 'x' in projection and 'z' in projection:
@@ -1606,7 +1606,7 @@ class Cell(object):
             pass
         else:
             mssg = "projection must be a length 2 tuple of 'x', 'y' or 'z'!"
-            raise ValueError, messg
+            raise ValueError(messg)
 
         polygons = []
         for i in range(len(self.x3d)):
@@ -1691,7 +1691,7 @@ class Cell(object):
             plt.show()
         '''
         if len(projection) != 2:
-            raise ValueError, "projection arg be a tuple like ('x', 'y')"
+            raise ValueError("projection arg be a tuple like ('x', 'y')")
         if 'x' in projection and 'y' in projection:
             pass
         elif 'x' in projection and 'z' in projection:
@@ -1700,7 +1700,7 @@ class Cell(object):
             pass
         else:
             mssg = "projection must be a length 2 tuple of 'x', 'y' or 'z'!"
-            raise ValueError, messg
+            raise ValueError(messg)
 
         polygons = []
         for i in np.arange(self.totnsegs):

@@ -35,7 +35,7 @@ with open('README.txt') as file:
 
 setup(
     name = "LFPy",
-    version = "1.0", 
+    version = "1.1", 
     maintainer = "Espen Hagen",
         maintainer_email = 'e.hagen@fz-juelich.de',
     packages = ['LFPy'], 
@@ -50,7 +50,7 @@ setup(
         'Programming Language :: Python',
         'Programming Language :: Python :: 2.6',
         'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3.3',
+        'Programming Language :: Python :: 3.4',
         'Programming Language :: Cython',
         'Operating System :: OS Independent',
         'Topic :: Scientific/Engineering',
