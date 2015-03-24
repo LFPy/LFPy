@@ -62,7 +62,7 @@ def _run_simulation(cell, variable_dt=False, atol=0.001):
         if np.mod(counter, interval) == 0:
             rtfactor = (neuron.h.t - ti)  * 1E-3 / (time() - t0)
             if cell.verbose:
-                print('t = %.0f, realtime factor: %.3f' % (neuron.h.t, rtfactor))
+                print(('t = %.0f, realtime factor: %.3f' % (neuron.h.t, rtfactor)))
             t0 = time()
             ti = neuron.h.t
 
@@ -237,7 +237,7 @@ def _run_simulation_with_electrode(cell, electrode=None,
         if divmod(counter, interval)[1] == 0:
             rtfactor = (neuron.h.t - ti) * 1E-3 / (time() - t0)
             if cell.verbose:
-                print('t = %.0f, realtime factor: %.3f' % (neuron.h.t, rtfactor))
+                print(('t = %.0f, realtime factor: %.3f' % (neuron.h.t, rtfactor)))
             t0 = time()
             ti = neuron.h.t
     

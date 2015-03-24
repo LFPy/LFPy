@@ -29,13 +29,13 @@ GNU General Public License for more details.
   * inputgenerators - functions for synaptic input time generation
 '''
 
-from pointprocess import Synapse, PointProcess, StimIntElectrode
-from recextelectrode import RecExtElectrode, RecExtElectrodeSetup
-from cell import Cell
-from templatecell import TemplateCell
+from .pointprocess import Synapse, PointProcess, StimIntElectrode
+from .recextelectrode import RecExtElectrode, RecExtElectrodeSetup
+from .cell import Cell
+from .templatecell import TemplateCell
 
-import lfpcalc
-import tools
-import inputgenerators
-import run_simulation
+from . import lfpcalc
+from . import tools
+from . import inputgenerators
+from . import run_simulation
 

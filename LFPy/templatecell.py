@@ -105,7 +105,7 @@ class TemplateCell(Cell):
         #load the cell template specification
         #check if templatename exist in neuron.h namespace:
         if hasattr(neuron.h, self.templatename):
-            print 'template %s exist already' % self.templatename
+            print('template %s exist already' % self.templatename)
         else:
             if type(self.templatefile) == str:
                 neuron.h.load_file(self.templatefile)

@@ -85,7 +85,7 @@ class RecExtElectrodeSetup(object):
                 except:
                     print('Keyword argument N could not be converted to a '
                           'numpy.ndarray of shape (n_contacts, 3)')
-                    print sys.exc_info()[0]
+                    print(sys.exc_info()[0])
                     raise
             if N.shape[-1] == 3:
                 self.N = N
@@ -129,7 +129,7 @@ class RecExtElectrodeSetup(object):
     def _test_imem_sum(self, tolerance=1E-8):
         '''Test that the membrane currents sum to zero'''
         if type(self.cell) == dict or type(self.cell) == list:
-            raise DeprecationWarning, 'no support for more than one cell-object'
+            raise DeprecationWarning('no support for more than one cell-object')
         
         
         if self.cell is not None:
@@ -143,8 +143,8 @@ class RecExtElectrodeSetup(object):
                     warnings.warn('Membrane currents do not sum to zero')
                     [inds] = np.where((abs(sum_imem) >= tolerance))
                     for i in inds:
-                        print('membrane current sum of celltimestep %i: %.3e' \
-                            % (i, sum_imem[i]))
+                        print(('membrane current sum of celltimestep %i: %.3e' \
+                            % (i, sum_imem[i])))
                 else:
                     pass
         else:
@@ -247,14 +247,14 @@ class RecExtElectrode(RecExtElectrodeSetup):
                 self._lfp_el_pos_calc_dist(t_indices=t_indices,
                                            r_limit=self.cell.diam/2)
             if self.verbose:
-                print('calculations finished, %s, %s' % (str(self),
-                                                         str(self.cell)))
+                print(('calculations finished, %s, %s' % (str(self),
+                                                         str(self.cell))))
         else:
             LFP_temp = self._loop_over_contacts(t_indices=t_indices,
                                                 r_limit=self.cell.diam/2)
             if self.verbose:
-                print('calculations finished, %s, %s' % (str(self),
-                                                         str(self.cell)))
+                print(('calculations finished, %s, %s' % (str(self),
+                                                         str(self.cell))))
         
         #dump results:
         self.LFP = LFP_temp
