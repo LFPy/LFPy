@@ -13,7 +13,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.collections import PolyCollection
 import LFPy
-import urllib2
+import sys
+if sys.version < '3':
+    from urllib2 import urlopen
+else:    
+    from urllib.request import urlopen
 import zipfile
 from mpi4py import MPI
 
@@ -26,7 +30,7 @@ RANK = COMM.Get_rank()
 if not os.path.isfile('patdemo/cells/j4a.hoc'):
     if RANK == 0:
         #get the model files:
-        u = urllib2.urlopen('http://senselab.med.yale.edu/ModelDB/eavBinDown.asp?o=2488&a=23&mime=application/zip')
+        u = urlopen('http://senselab.med.yale.edu/ModelDB/eavBinDown.asp?o=2488&a=23&mime=application/zip')
         localFile = open('patdemo.zip', 'w')
         localFile.write(u.read())
         localFile.close()
@@ -92,7 +96,7 @@ class Population:
         
         #superimpose local LFPs on every RANK, then sum using MPI to RANK 0
         self.LFP = []
-        for key, value in self.results.items():
+        for key, value in list(self.results.items()):
             self.LFP.append(value['LFP'])
         self.LFP = np.array(self.LFP).sum(axis=0)
         self.LFP = COMM.reduce(self.LFP)        #LFP is None on all but RANK 0
@@ -204,7 +208,7 @@ class Population:
 
                 zips = []
                 for x, z in cell.get_idx_polygons():
-                    zips.append(zip(x, z))
+                    zips.append(list(zip(x, z)))
                 
                 polycol = PolyCollection(zips,
                                 edgecolors='none',
@@ -218,7 +222,7 @@ class Population:
                     marker='o', color='g', clip_on=False, zorder=0)
             
             ax = fig.add_axes([0.5, 0.55, 0.40, 0.4])
-            for key, value in self.results.items():
+            for key, value in list(self.results.items()):
                 tvec = np.arange(value['somav'].size) * \
                                         self.cellParameters['timeres_python']
                 ax.plot(tvec, value['somav'],

@@ -39,7 +39,7 @@ class testLFPy(unittest.TestCase):
         (a, b) = LFP_LFPy.shape
         for i in range(a):
             for j in range(b):
-                self.failUnlessAlmostEqual(LFP_LFPy[i, j], LFP_analytic[i, j],
+                self.assertAlmostEqual(LFP_LFPy[i, j], LFP_analytic[i, j],
                                            places=3)
     
     def test_method_linesource(self):
@@ -58,7 +58,7 @@ class testLFPy(unittest.TestCase):
         (a, b) = LFP_LFPy.shape
         for i in range(a):
             for j in range(b):
-                self.failUnlessAlmostEqual(LFP_LFPy[i, j], LFP_analytic[i, j],
+                self.assertAlmostEqual(LFP_LFPy[i, j], LFP_analytic[i, j],
                                            places=3)
     
     def test_method_som_as_point(self):
@@ -77,7 +77,7 @@ class testLFPy(unittest.TestCase):
         (a, b) = LFP_LFPy.shape
         for i in range(a):
             for j in range(b):
-                self.failUnlessAlmostEqual(LFP_LFPy[i, j], LFP_analytic[i, j],
+                self.assertAlmostEqual(LFP_LFPy[i, j], LFP_analytic[i, j],
                                            places=3)
 
 
@@ -97,7 +97,7 @@ class testLFPy(unittest.TestCase):
         (a, b) = LFP_LFPy.shape
         for i in range(a):
             for j in range(b):
-                self.failUnlessAlmostEqual(LFP_LFPy[i, j], LFP_analytic[i, j],
+                self.assertAlmostEqual(LFP_LFPy[i, j], LFP_analytic[i, j],
                                            places=3)
     
     def test_method_linesource_dotprodcoeffs(self):
@@ -116,7 +116,7 @@ class testLFPy(unittest.TestCase):
         (a, b) = LFP_LFPy.shape
         for i in range(a):
             for j in range(b):
-                self.failUnlessAlmostEqual(LFP_LFPy[i, j], LFP_analytic[i, j],
+                self.assertAlmostEqual(LFP_LFPy[i, j], LFP_analytic[i, j],
                                            places=3)
     
     def test_method_som_as_point_dotprodcoeffs(self):
@@ -135,7 +135,7 @@ class testLFPy(unittest.TestCase):
         (a, b) = LFP_LFPy.shape
         for i in range(a):
             for j in range(b):
-                self.failUnlessAlmostEqual(LFP_LFPy[i, j], LFP_analytic[i, j],
+                self.assertAlmostEqual(LFP_LFPy[i, j], LFP_analytic[i, j],
                                            places=3)
 
 
@@ -156,7 +156,7 @@ class testLFPy(unittest.TestCase):
         (a, b) = LFP_LFPy.shape
         for i in range(a):
             for j in range(b):
-                self.failUnlessAlmostEqual(LFP_LFPy[i, j], LFP_analytic[i, j],
+                self.assertAlmostEqual(LFP_LFPy[i, j], LFP_analytic[i, j],
                                            places=3)
     
     def test_method_linesource_contact_average_r10n100(self):
@@ -176,7 +176,7 @@ class testLFPy(unittest.TestCase):
         (a, b) = LFP_LFPy.shape
         for i in range(a):
             for j in range(b):
-                self.failUnlessAlmostEqual(LFP_LFPy[i, j], LFP_analytic[i, j],
+                self.assertAlmostEqual(LFP_LFPy[i, j], LFP_analytic[i, j],
                                            places=3)
 
     def test_method_som_as_point_contact_average_r10n100(self):
@@ -196,7 +196,7 @@ class testLFPy(unittest.TestCase):
         (a, b) = LFP_LFPy.shape
         for i in range(a):
             for j in range(b):
-                self.failUnlessAlmostEqual(LFP_LFPy[i, j], LFP_analytic[i, j],
+                self.assertAlmostEqual(LFP_LFPy[i, j], LFP_analytic[i, j],
                                            places=3)
 
     
@@ -683,7 +683,7 @@ class testLFPy(unittest.TestCase):
 if __name__ == '__main__':
     #check if sinsyn.mod is compiled, if it isn't try and run nrnivmodl on it
     if not hasattr(neuron.h, 'SinSyn'):
-        print __file__
+        print(__file__)
         import os
         os.system('nrnivmodl')
         neuron.load_mechanisms('.')

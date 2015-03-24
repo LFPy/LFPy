@@ -5,7 +5,11 @@ Example plot for LFPy: Single-synapse contribution to the LFP
 import LFPy
 import numpy as np
 import os
-import urllib2
+import sys
+if sys.version < '3':
+    from urllib2 import urlopen
+else:    
+    from urllib.request import urlopen
 import zipfile
 import matplotlib.pyplot as plt
 from matplotlib.collections import PolyCollection
@@ -17,7 +21,7 @@ plt.close('all')
 #Fetch Mainen&Sejnowski 1996 model files
 if not os.path.isfile('patdemo/cells/j4a.hoc'):
     #get the model files:
-    u = urllib2.urlopen('http://senselab.med.yale.edu/ModelDB/eavBinDown.asp?o=2488&a=23&mime=application/zip')
+    u = urlopen('http://senselab.med.yale.edu/ModelDB/eavBinDown.asp?o=2488&a=23&mime=application/zip')
     localFile = open('patdemo.zip', 'w')
     localFile.write(u.read())
     localFile.close()
@@ -94,7 +98,7 @@ point_electrode_parameters = {
 
 
 # Run simulation, electrode object argument in cell.simulate
-print "running simulation..."
+print("running simulation...")
 cell.simulate(rec_imem=True,rec_isyn=True)
 
 # Create electrode objects
@@ -105,7 +109,7 @@ point_electrode = LFPy.RecExtElectrode(cell,**point_electrode_parameters)
 grid_electrode.calc_lfp()
 point_electrode.calc_lfp()
 
-print "done"
+print("done")
 
 #create a plot
 #fig = prepfig(1, 8.5, 6.)
@@ -133,7 +137,7 @@ cbar.set_ticklabels(10.**ticks * 1E6) #mV -> nV
 #plot morphology
 zips = []
 for x, z in cell.get_idx_polygons():
-    zips.append(zip(x, z))
+    zips.append(list(zip(x, z)))
 polycol = PolyCollection(zips,
                          edgecolors='none',
                          facecolors='k')
@@ -150,7 +154,7 @@ ax.plot(cell.xmid[cell.synidx],cell.zmid[cell.synidx], 'o', ms=5,
         markerfacecolor='r')
 
 color_vec = ['blue','green']
-for i in xrange(2):
+for i in range(2):
     ax.plot(point_electrode_parameters['x'][i],
                     point_electrode_parameters['z'][i],'o',ms=6,
                     markeredgecolor='none',
@@ -162,7 +166,7 @@ plt.ylabel(r'$\Phi_2(\mathbf{r},t)$ (nV)') #rotation='horizontal')
 plt.xlabel(r'$t$ (ms)')
 plt.axis('tight')
 ax = plt.gca()
-for loc, spine in ax.spines.iteritems():
+for loc, spine in ax.spines.items():
     if loc in ['right', 'top']:
         spine.set_color('none')            
 ax.xaxis.set_ticks_position('bottom')
@@ -174,7 +178,7 @@ plt.plot(cell.tvec,point_electrode.LFP[1]*1e6,color=color_vec[1], clip_on=False)
 plt.ylabel(r'$\Phi_1(\mathbf{r}, t)$ (nV)') #rotation='horizontal')
 plt.axis('tight')
 ax = plt.gca()
-for loc, spine in ax.spines.iteritems():
+for loc, spine in ax.spines.items():
     if loc in ['right', 'top']:
         spine.set_color('none')            
 ax.xaxis.set_ticks_position('bottom')
@@ -186,7 +190,7 @@ plt.plot(cell.tvec,synapse.i*1E3, color='red', clip_on=False)
 plt.ylabel(r'$i_\mathrm{syn}(t)$ (pA)') #, rotation='horizontal')
 plt.axis('tight')
 ax = plt.gca()
-for loc, spine in ax.spines.iteritems():
+for loc, spine in ax.spines.items():
     if loc in ['right', 'top']:
         spine.set_color('none')            
 ax.xaxis.set_ticks_position('bottom')

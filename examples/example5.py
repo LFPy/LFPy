@@ -22,7 +22,11 @@
 
 #import some plotting stuff and the LFPy-module
 import os
-import urllib2
+import sys
+if sys.version < '3':
+    from urllib2 import urlopen
+else:    
+    from urllib.request import urlopen
 import zipfile
 import LFPy
 import numpy as np
@@ -31,7 +35,7 @@ import matplotlib.pyplot as plt
 #Fetch Mainen&Sejnowski 1996 model files
 if not os.path.isfile('patdemo/cells/j4a.hoc'):
     #get the model files:
-    u = urllib2.urlopen('http://senselab.med.yale.edu/ModelDB/eavBinDown.asp?o=2488&a=23&mime=application/zip')
+    u = urlopen('http://senselab.med.yale.edu/ModelDB/eavBinDown.asp?o=2488&a=23&mime=application/zip')
     localFile = open('patdemo.zip', 'w')
     localFile.write(u.read())
     localFile.close()

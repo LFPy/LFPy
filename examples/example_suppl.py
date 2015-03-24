@@ -33,7 +33,7 @@ def plot_ex1(cell, electrode, X, Y, Z):
         ax1.plot(np.r_[cell.xstart[idx], cell.xend[idx][-1]],
                 np.r_[cell.zstart[idx], cell.zend[idx][-1]],
                 color='k')
-    for i in xrange(len(cell.synapses)):
+    for i in range(len(cell.synapses)):
         ax1.plot([cell.synapses[i].x], [cell.synapses[i].z],
             color=cell.synapses[i].color, marker=cell.synapses[i].marker, 
             markersize=10)
@@ -74,7 +74,7 @@ def plot_ex1(cell, electrode, X, Y, Z):
 def plot_ex2(cell, electrode):
     '''example2.py plotting function'''
     #creating array of points and corresponding diameters along structure
-    for i in xrange(cell.xend.size):
+    for i in range(cell.xend.size):
         if i == 0:
             xcoords = np.array([cell.xmid[i]])
             ycoords = np.array([cell.ymid[i]])
@@ -172,7 +172,7 @@ def plot_ex3(cell, electrode):
     
     #plot the synaptic current
     ax = fig.add_axes([0.1, 0.4, 0.5, 0.2])
-    for i in xrange(len(cell.synapses)):
+    for i in range(len(cell.synapses)):
         ax.plot(cell.tvec, cell.synapses[i].i, color=cell.synapses[i].color)
     ax.set_xlabel('Time [ms]')
     ax.set_ylabel('Syn. i [nA]')
@@ -201,10 +201,10 @@ def plot_ex3(cell, electrode):
         ax.plot(np.r_[cell.xstart[idx], cell.xend[idx][-1]],
                 np.r_[cell.zstart[idx], cell.zend[idx][-1]],
                 color='k')
-    for i in xrange(len(cell.synapses)):
+    for i in range(len(cell.synapses)):
         ax.plot([cell.synapses[i].x], [cell.synapses[i].z], \
             color=cell.synapses[i].color, marker=cell.synapses[i].marker)
-    for i in xrange(electrode.x.size):
+    for i in range(electrode.x.size):
         ax.plot(electrode.x[i], electrode.z[i], color='g', marker='o')
     plt.axis('equal')
     plt.axis(np.array(plt.axis())*0.8)

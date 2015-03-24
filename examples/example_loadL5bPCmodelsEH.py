@@ -18,7 +18,11 @@ import LFPy
 import neuron
 import matplotlib.pyplot as plt
 import os
-import urllib2
+import sys
+if sys.version < '3':
+    from urllib2 import urlopen
+else:    
+    from urllib.request import urlopen
 import zipfile
 
 
@@ -26,7 +30,7 @@ import zipfile
 #Fetch Hay et al. 2011 model files
 if not os.path.isfile('L5bPCmodelsEH/morphologies/cell1.asc'):
     #get the model files:
-    u = urllib2.urlopen('http://senselab.med.yale.edu/ModelDB/eavBinDown.asp?o=139653&a=23&mime=application/zip')
+    u = urlopen('http://senselab.med.yale.edu/ModelDB/eavBinDown.asp?o=139653&a=23&mime=application/zip')
     localFile = open('L5bPCmodelsEH.zip', 'w')
     localFile.write(u.read())
     localFile.close()

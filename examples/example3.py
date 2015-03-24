@@ -6,7 +6,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.collections import PolyCollection, LineCollection
 import os
-import urllib2
+import sys
+if sys.version < '3':
+    from urllib2 import urlopen
+else:    
+    from urllib.request import urlopen
 import zipfile
 import LFPy
 import neuron
@@ -23,7 +27,7 @@ def stationary_poisson(nsyn,lambd,tstart,tstop):
     ''' Generates nsyn stationary possion processes with rate lambda between tstart and tstop'''
     interval_s = (tstop-tstart)*.001
     spiketimes = []
-    for i in xrange(nsyn):
+    for i in range(nsyn):
         spikecount = np.random.poisson(interval_s*lambd)
         spikevec = np.empty(spikecount)
         if spikecount==0:
@@ -38,7 +42,7 @@ def stationary_poisson(nsyn,lambd,tstart,tstop):
 #Fetch Mainen&Sejnowski 1996 model files
 if not os.path.isfile('patdemo/cells/j4a.hoc') and RANK==0:
     #get the model files:
-    u = urllib2.urlopen('http://senselab.med.yale.edu/ModelDB/eavBinDown.asp?o=2488&a=23&mime=application/zip')
+    u = urlopen('http://senselab.med.yale.edu/ModelDB/eavBinDown.asp?o=2488&a=23&mime=application/zip')
     localFile = open('patdemo.zip', 'w')
     localFile.write(u.read())
     localFile.close()
@@ -122,7 +126,7 @@ n_synapses = 100
 # Create synapse and set time of synaptic input
 pre_syn_pick = np.random.permutation(np.arange(n_pre_syn))[0:n_synapses]
 
-for i_syn in xrange(n_synapses):
+for i_syn in range(n_synapses):
     syn_idx = int(cell.get_rand_idx_area_norm())
     synapse_parameters.update({'idx' : syn_idx})
     synapse = LFPy.Synapse(cell, **synapse_parameters)
@@ -137,7 +141,7 @@ point_electrode.calc_lfp()
 
 if RANK==0:
     single_LFPs = [point_electrode.LFP[0]]
-    for i_proc in xrange(1, SIZE):
+    for i_proc in range(1, SIZE):
         single_LFPs = np.r_['0,2', single_LFPs, COMM.recv(source=i_proc)]
 else:
     COMM.send(point_electrode.LFP[0], dest=0)
@@ -148,7 +152,7 @@ summed_LFP = COMM.reduce(point_electrode.LFP[0])
 
 if RANK==0:
     #assign color to each unit
-    color_vec = [plt.cm.rainbow(int(x*256./n_cells)) for x in xrange(n_cells)]
+    color_vec = [plt.cm.rainbow(int(x*256./n_cells)) for x in range(n_cells)]
 
     #figure
     fig = plt.figure(figsize=(12, 8))
@@ -157,7 +161,7 @@ if RANK==0:
     plt.axes([.175, .0, .65, 1], aspect='equal')
     plt.axis('off')
 
-    for i_cell in xrange(n_cells):
+    for i_cell in range(n_cells):
         cell = LFPy.Cell('patdemo/cells/j4a.hoc',
                          nsegs_method='lambda_f',
                          lambda_f=5)
@@ -166,7 +170,7 @@ if RANK==0:
 
         zips = []
         for x, z in cell.get_idx_polygons():
-            zips.append(zip(x, z))
+            zips.append(list(zip(x, z)))
         linecol = LineCollection(zips,
                     edgecolor = 'none',
                     facecolor = color_vec[i_cell],
@@ -204,12 +208,12 @@ if RANK==0:
     plt.axes([.05, .35, .25, .55])
 
     pop_sptimes = []
-    for i_pre in xrange(n_pre_syn):
+    for i_pre in range(n_pre_syn):
         sp = pre_syn_sptimes[i_pre]
-        for i_sp in xrange(len(sp)):
+        for i_sp in range(len(sp)):
             pop_sptimes.append(sp[i_sp])
                
-    for i_pre in xrange(n_pre_syn):
+    for i_pre in range(n_pre_syn):
         plt.scatter(pre_syn_sptimes[i_pre],
                     i_pre*np.ones(len(pre_syn_sptimes[i_pre])),
                     s=1, edgecolors='none', facecolors='k')
@@ -220,7 +224,7 @@ if RANK==0:
     plt.title('Presynaptic spike times')
     
     ax = plt.gca()
-    for loc, spine in ax.spines.iteritems():
+    for loc, spine in ax.spines.items():
         if loc in ['right', 'top']:
             spine.set_color('none')            
     ax.xaxis.set_ticks_position('bottom')
@@ -246,7 +250,7 @@ if RANK==0:
     plt.ylabel('Rate (spike/s)')
     
     ax = plt.gca()
-    for loc, spine in ax.spines.iteritems():
+    for loc, spine in ax.spines.items():
         if loc in ['right', 'top']:
             spine.set_color('none')            
     ax.xaxis.set_ticks_position('bottom')
@@ -258,7 +262,7 @@ if RANK==0:
     plt.title('Single neuron extracellular potentials')
     plt.axis('off')
 
-    for i_cell in xrange(n_cells):
+    for i_cell in range(n_cells):
         plt.plot(tvec,
                         i_cell+2.e3*single_LFPs[i_cell],
                         color=color_vec[i_cell], lw=1,
@@ -276,7 +280,7 @@ if RANK==0:
     plt.ylabel(r'$\mu$V',ha='left',rotation='horizontal')
 
     ax = plt.gca()
-    for loc, spine in ax.spines.iteritems():
+    for loc, spine in ax.spines.items():
         if loc in ['right', 'top']:
             spine.set_color('none')            
     ax.xaxis.set_ticks_position('bottom')
