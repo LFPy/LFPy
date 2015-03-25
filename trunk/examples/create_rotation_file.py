@@ -34,7 +34,7 @@ def plot_morpho_indices(cell, new_fig = True):
         apic = cell.get_idx(section='apic')
     else:
         apic = cell.get_idx(section='dend')
-    for i in xrange(apic.size):
+    for i in range(apic.size):
         try:
             ax.text(cell.xmid[apic[i]],cell.ymid[apic[i]],cell.zmid[apic[i]], 
                 str(apic[i]), fontsize=8)
@@ -131,8 +131,8 @@ MAIN SCRIPT
 
 pl.close('all')
 
-morphologyPath = raw_input('Enter path to morphology file: ')
-print 'You entered %s.' % morphologyPath
+morphologyPath = input('Enter path to morphology file: ')
+print('You entered %s.' % morphologyPath)
 
 cellparams = {
     'morphology' : morphologyPath,
@@ -143,11 +143,11 @@ cellparams = {
 rotationFilePath = morphologyPath[:-4]+'.rot'
 
 if os.path.isfile(rotationFilePath):
-    print('It appear as though there exist a file %s already' % rotationFilePath)
+    print(('It appear as though there exist a file %s already' % rotationFilePath))
     print('I don\'t know what to do with all of this...')
     print('It\'s soo depressive....')
 else:
-    print 'Will create file %s with the rotation information' % rotationFilePath
+    print('Will create file %s with the rotation information' % rotationFilePath)
 
     ok = 'n'
 
@@ -159,7 +159,7 @@ else:
 
         print('Identify TWO indices to be aligned with the z-axis in the plot')
         
-        [a, b] = input('Type them in here (sep. by comma): ')
+        [a, b] = eval(input('Type them in here (sep. by comma): '))
 
         r_a = pl.sqrt(cell.xmid[a]**2 + cell.ymid[a]**2 + cell.zmid[a]**2)
         r_b = pl.sqrt(cell.xmid[b]**2 + cell.ymid[b]**2 + cell.zmid[b]**2)
@@ -172,16 +172,16 @@ else:
             b1 = b
 
         rotation = det_rotationangles2(cell, segment1=a1,segment2=b1)
-        print 'Determined rotation angles to be (in radians): ', rotation
+        print('Determined rotation angles to be (in radians): ', rotation)
 
         cell.set_rotation(**rotation)
 
         plot_morpho_3D_simple(cell)
 
-        ok = raw_input('Does it look correctly rotated (y)? ')
-        print ok
+        ok = input('Does it look correctly rotated (y)? ')
+        print(ok)
 
-    printtofile = raw_input('Shall I write the file %s then (y) ? ' % rotationFilePath)
+    printtofile = input('Shall I write the file %s then (y) ? ' % rotationFilePath)
     if printtofile == 'y':
         F = file(rotationFilePath,'w')
 
@@ -191,4 +191,4 @@ else:
 
         F.close()
         
-        print 'file %s created!' % rotationFilePath
+        print('file %s created!' % rotationFilePath)
