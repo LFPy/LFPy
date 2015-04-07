@@ -41,7 +41,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'LFPy'
-copyright = u'2015, Computational Neuroscience Group, UMB'
+copyright = u'2015, Computational Neuroscience Group, NMBU'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
