@@ -14,7 +14,7 @@ Cell morphologies can be specified manually in a ``hoc`` file. For a simple exam
    -  ``dend*[]`` for dendritic sections
    -  ``apic*[]`` for apical dendrite sections
    -  ``axon*[]`` for axonal sections
--  Sections must be defined as SectionList (use ``soma[1]``, not ``soma``)
+-  Sections must be defined as SectionList (therefore use ``soma[1]``, not ``soma``)
 
 
 Also the morphologies exported from the NEURON simulator 
