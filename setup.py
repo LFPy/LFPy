@@ -30,7 +30,7 @@ except:
     cmdclass = {}
     ext_modules = []
 
-with open('README.txt') as file:
+with open('README.md') as file:
     long_description = file.read()
 
 setup(
@@ -42,7 +42,7 @@ setup(
     cmdclass = cmdclass, 
     ext_modules = ext_modules,
     url='http://compneuro.umb.no/LFPy/',
-    license='LICENSE.txt',
+    license='LICENSE',
     description='A module for modeling Local Field Potentials built on NEURON',
     long_description=long_description,
     classifiers=[
