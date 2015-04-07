@@ -1,4 +1,13 @@
-include *.txt 
-recursive-include examples *
+include README.md
+include LICENSE
+
+recursive-include examples *.py
+recursive-include examples *.ipynb
+recursive-include examples *.hoc
+recursive-include examples morphologies
+
 recursive-include html *
-recursive-include unittest *
+
+recursive-include unittest *.py
+recursive-include unittest *.mod
+recursive-include unittest *.hoc
