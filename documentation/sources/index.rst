@@ -38,13 +38,25 @@ in collaboration with the `Laboratory of Neuroinformatics <http://www.nencki.gov
 This scientific software is released under the GNU Public License `GPLv3 <http://www.gnu.org/copyleft/gpl.html>`_.
 
 Tutorial slides on LFPy
-----------------------
+-----------------------
 
 Slides from OCNS 2014 meeting tutorial `T4:  Modeling and analysis of extracellular potentials <http://www.cnsorg.org/cns-2014-tutorials#T4>`_ hosted in Quebec City: `lfpy_tutorial_OCNS2014.pdf  <http://compneuro.umb.no/LFPy/downloads/lfpy_tutorial_OCNS2014.pdf>`_
 
 As part of the OCNS 2013 meeting workshop `Modeling and interpretation of extracellular potentials <http://www.cnsorg.org/cns-2013-tutorials#extracellular_potentials>`_,
 there was also a talk on LFPy.
 The slides can be found here: `lfpy-tutorial_2013.pdf  <http://compneuro.umb.no/LFPy/downloads/lfpy-tutorial_2013.pdf>`_.
+
+
+Related projects
+----------------
+
+LFPy has been used extensively in ongoing and published work, and is a required dependency by the publicly available Python modules: 
+
+- ViSAPy - Virtual Spiking Activity in Python (https://github.com/espenhgn/ViSAPy, http://software.incf.org/software/visapy), as described in Hagen, E., et al. (2015), J Neurosci Meth, DOI:`10.1016/j.jneumeth.2015.01.029 <http://dx.doi.org/10.1016/j.jneumeth.2015.01.029>`_ 
+- hybridLFPy - biophysics-based hybrid scheme for calculating the local field potential (LFP) of spiking activity in simplified point-neuron network models (https://github.com/INM-6/hybridLFPy)
+
+
+See also ViMEAPy that can be used to incorporate heterogeneous conductivity in calculations of extracellular potentials with LFPy (https://bitbucket.org/torbness/vimeapy, http://software.incf.org/software/vimeapy). 
 
 
 Contents

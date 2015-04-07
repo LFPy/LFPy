@@ -98,7 +98,7 @@ source code release, displaying different usage scenarios;
 The examples rely on files present inside the `examples folder <http://bebiservice.umb.no/projects-public/LFPy-release/browser/trunk/examples>`_,
 such as morphology files and .mod files.
 
-The easyest way of accessing all of these files is cloning the examples directory using subversion:
+The easyest way of accessing all of these files is cloning the examples directory using subversion (https://subversion.apache.org):
 ::
     
     svn checkout http://bebiservice.umb.no/svn-public/LFPy-release/trunk/examples

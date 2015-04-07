@@ -20,9 +20,9 @@ LFPy was developed by:
 Want to contribute to LFPy?
 ---------------------------
 
-We are interested in having more people contributing on the LFPy-project.
+We are interested in having more people contributing on the LFPy project.
 If you would like to contribute, you are very welcome to contact us by email to
-`Henrik <mailto:helinden@kth.se?Subject=LFPy-Develop>`_ or
-`Espen <mailto:e.hagen@fz-juelich.de?Subject=LFPy-Develop>`_,
+`Espen <mailto:e.hagen@fz-juelich.de?Subject=LFPy Development>`_ or
+`Henrik <mailto:hlinden@sund.ku.dk?Subject=LFPy Development>`_,
 and tell us a bit about who you are and what your contributions may be. 
 
