@@ -27,27 +27,27 @@ Module :mod:`LFPy`
         :undoc-members:
 
     class :class:`Synapse`
-    ==================================
+    ======================
     .. autoclass:: Synapse
         :members:
         :show-inheritance:
         :undoc-members:
 
     class :class:`StimIntElectrode`
-    ====================================
+    ===============================
     .. autoclass:: StimIntElectrode
         :members:
         :show-inheritance:
         :undoc-members:
 
     class :class:`RecExtElectrodeSetup`
-    =============================
+    ===================================
     .. autoclass:: RecExtElectrodeSetup
         :members:
         :undoc-members:
 
     class :class:`RecExtElectrode`
-    ========================
+    ==============================
     .. autoclass:: RecExtElectrode
         :members:
         :show-inheritance:

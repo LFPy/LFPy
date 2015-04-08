@@ -29,6 +29,7 @@ class Cell(object):
     
     Arguments:
     ::
+        
         morphology : [str]: path/to/morphology/file
     
         v_init: [-65.]: initial potential
@@ -60,6 +61,7 @@ class Cell(object):
     
     Usage of cell class:
     ::
+        
         import LFPy
         cellParameters = {                          
             'morphology' : 'path/to/morphology',
@@ -374,6 +376,7 @@ class Cell(object):
         
         kwargs:
         ::
+            
             frequency: float, frequency at whihc AC length constant is computed
             d_lambda: float, 
         '''
@@ -426,7 +429,16 @@ class Cell(object):
                     weight=None, **kwargs):
         '''
         Insert syntype (e.g. ExpSyn) synapse on segment with index idx, 
-        **kwargs passed on from class PointProcessSynapse.
+        
+        Arguments:
+        ::
+            
+            idx : int
+            syntype : str
+            record_current : bool
+            record_potential : bool
+            weight : float            
+            kwargs : arguments passed on from class Synapse
         '''
         if not hasattr(self, 'synlist'):
             self.synlist = neuron.h.List()
@@ -486,9 +498,17 @@ class Cell(object):
     def set_point_process(self, idx, pptype, record_current=False, **kwargs):
         '''
         Insert pptype-electrode type pointprocess on segment numbered
-        idx on cell object, with keyword arguments according to types:
+        idx on cell object, with keyword arguments according to types 
         SEClamp, VClamp, IClamp, SinIClamp, ChirpIClamp.
-        idx, pptype, **kwargs is passed on from PointProcessElectrode class.
+        
+        Arguments:
+        ::
+            
+            idx : int
+            pptype : str
+            record_current : bool
+            kwargs : arguments passed on from class StimIntElectrode
+            
         '''
         
         if not hasattr(self, 'stimlist'):
@@ -585,12 +605,14 @@ class Cell(object):
         
         kwargs:
         ::
+            
             section: str, any entry in cell.allsecnames or just 'allsec'.
             z_min: float, depth filter
             z_max: float depth filter
         
         Usage:
         ::
+            
             idx = cell.get_idx(section='allsec')
             print idx
             idx = cell.get_idx(section=['soma', 'dend', 'apic'])
@@ -624,6 +646,7 @@ class Cell(object):
         midpoint is closest to the coordinates defined by the user
         kwargs:
         ::
+            
             x: float, coordinate
             y: float, coordinate
             z: float, coordinate
@@ -645,6 +668,7 @@ class Cell(object):
         
         kwargs:
         ::
+            
             section: str, string matching a section-name
             nidx: int, number of random indices
             z_min: float, depth filter
@@ -679,6 +703,7 @@ class Cell(object):
         
         Arguments:
         ::
+            
             electrode:  Either an LFPy.RecExtElectrode object or a list of such.
                         If supplied, LFPs will be calculated at every time step
                         and accessible as electrode.LFP. If a list of objects
@@ -998,23 +1023,29 @@ class Cell(object):
                     print(('None-typed %s in cell instance' % varname))
         
     def cellpickler(self, filename):
-        '''Save data in cell to filename, using cPickle. It will however destroy
-        any neuron.h objects upon saving, as they cannot be pickled
+        '''
+        Save data in cell to filename, using cPickle. It will however destroy
+        any neuron.h objects upon saving, as c-objects cannot be pickled
         
         Usage:
         ::
+            
             cell.cellpickler('cell.cpickle')
         
         To load this cell again in another session:
         ::
+            
             import cPickle
             f = file('cell.cpickle', 'rb')
             cell = cPickle.load(f)
             f.close()
-        or
+        
+        alternatively:
         ::
+            
             import LFPy
             cell = LFPy.tools.load('cell.cpickle')
+            
         '''
         self.strip_hoc_objects()
         filen = open(filename, 'wb')
@@ -1039,6 +1070,7 @@ class Cell(object):
         
         Usage:
         ::
+            
             cell = LFPy.Cell(**kwargs)
             rotation = {'x' : 1.233, 'y' : 0.236, 'z' : np.pi}
             cell.set_rotation(**rotation)
@@ -1109,6 +1141,7 @@ class Cell(object):
         
         kwargs:
         ::
+            
             axis : str
                 'x' or 'y' or 'z'
         
@@ -1187,6 +1220,7 @@ class Cell(object):
 
         kwargs:
         ::
+           
             section: str, string matching a section-name
             z_min: float, depth filter
             z_max: float depth filter            
@@ -1205,6 +1239,7 @@ class Cell(object):
 
         kwargs:
         ::
+            
             idx : np.ndarray, dtype=int.
                 array of segment indices
             z_min: float, depth filter
@@ -1222,6 +1257,7 @@ class Cell(object):
         
         kwargs:
         ::
+            
             idx0 : int
             idx1 : int
         '''
@@ -1257,6 +1293,7 @@ class Cell(object):
         
         kwargs:
         ::
+            
             parent: str
                 name-pattern matching a sectionname
         '''
@@ -1290,6 +1327,7 @@ class Cell(object):
         
         kwargs:
         ::
+            
             parent: str
                 name-pattern matching a sectionname
         '''
@@ -1325,6 +1363,7 @@ class Cell(object):
         
         kwargs:
         ::
+            
             idx : np.ndarray, dtype int
                 segment indices, must be between 0 and cell.totnsegs        
         '''
@@ -1430,6 +1469,7 @@ class Cell(object):
         
         Usage:
         ::
+            
             cell = LFPy.Cell(**kwargs)
             rotation = {'x' : 1.233, 'y' : 0.236, 'z' : np.pi}
             cell.set_pt3d_rotation(**rotation)
@@ -1575,6 +1615,7 @@ class Cell(object):
         Returned argument is a list of (x, z) tuples giving the trajectory
         of each section that can be plotted using PolyCollection
         ::
+            
             from matplotlib.collections import PolyCollection
             import matplotlib.pyplot as plt
             
@@ -1665,10 +1706,12 @@ class Cell(object):
         
         kwargs:
         ::
+            
             projection : ('x', 'z') tuple of two strings determining projection 
         
         The most efficient way of using this would be something like
         ::
+            
             from matplotlib.collections import PolyCollection
             import matplotlib.pyplot as plt
             
@@ -1727,11 +1770,13 @@ class Cell(object):
         
         Args:
         ::
+            
             v_ext : cell.totnsegs x t_ext.size np.array, unit mV
             t_ext : np.array, time vector of v_ext
         
         Simple usage:
         ::
+            
             import LFPy
             import numpy as np
             import matplotlib.pyplot as plt

@@ -21,6 +21,7 @@ def calc_lfp_choose(cell, x=0, y=0, z=0, sigma=0.3,
     
     kwargs:
     ::
+        
         cell: LFPy.Cell or LFPy.TemplateCell instance
         x : double, extracellular position, x-axis
         y : double, extracellular position, y-axis
@@ -53,6 +54,7 @@ def calc_lfp_linesource(cell, x=0, y=0, z=0, sigma=0.3,
     
     kwargs:
     ::
+        
         cell: LFPy.Cell or LFPy.TemplateCell instance
         x : double, extracellular position, x-axis
         y : double, extracellular position, y-axis
@@ -122,6 +124,7 @@ def calc_lfp_som_as_point(cell, x=0, y=0, z=0, sigma=0.3,
     
     kwargs:
     ::
+        
         cell: LFPy.Cell or LFPy.TemplateCell instance
         x : double, extracellular position, x-axis
         y : double, extracellular position, y-axis
@@ -318,6 +321,7 @@ def calc_lfp_pointsource(cell, x=0, y=0, z=0, sigma=0.3,
 
     kwargs:
     ::
+        
         cell: LFPy.Cell or LFPy.TemplateCell instance
         x : double, extracellular position, x-axis
         y : double, extracellular position, y-axis
