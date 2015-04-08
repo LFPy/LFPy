@@ -21,6 +21,7 @@ class PointProcess:
     
     Arguments:
     ::
+        
         cell    : LFPy.Cell object
         idx     : index of segment
         color   : color in plot (optional) 
@@ -60,6 +61,7 @@ class Synapse(PointProcess):
     
     Usage:
     ::
+        
         #!/usr/bin/env python
 
         import LFPy
@@ -138,6 +140,7 @@ class StimIntElectrode(PointProcess):
             
     Usage example:
     ::
+        
         #/usr/bin/python
         
         import LFPy

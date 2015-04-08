@@ -28,6 +28,7 @@ cpdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] calc_lfp_choose(cell,
     
     kwargs:
     ::
+        
         cell: LFPy.Cell or LFPy.TemplateCell instance
         x : double, extracellular position, x-axis
         y : double, extracellular position, y-axis
@@ -67,6 +68,7 @@ cpdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] calc_lfp_linesource(
 
     kwargs:
     ::
+        
         cell: LFPy.Cell or LFPy.TemplateCell instance
         x : double, extracellular position, x-axis
         y : double, extracellular position, y-axis
@@ -157,6 +159,7 @@ cpdef np.ndarray[DTYPE_t, ndim=1] calc_lfp_som_as_point(cell,
     
     kwargs:
     ::
+        
         cell: LFPy.Cell or LFPy.TemplateCell instance
         x : double, extracellular position, x-axis
         y : double, extracellular position, y-axis
@@ -440,6 +443,7 @@ cpdef calc_lfp_pointsource(cell, double x=0, double y=0, double z=0,
 
     kwargs:
     ::
+        
         cell: LFPy.Cell or LFPy.TemplateCell instance
         x : double, extracellular position, x-axis
         y : double, extracellular position, y-axis

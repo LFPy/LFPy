@@ -26,6 +26,7 @@ class RecExtElectrodeSetup(object):
     
     Arguments:
     ::
+        
         cell : object,
             LFPy.cell.Cell or LFPy.templatecell.TemplateCell
         sigma : float,
@@ -155,10 +156,10 @@ class RecExtElectrode(RecExtElectrodeSetup):
     '''
     RecExtElectrode class with inheritance from LFPy.RecExtElectrodeSetup 
     able to actually calculate local field potentials from LFPy.Cell objects. 
-    **kwargs are passed on to LFPy.RecExtElectrodeSetup
-    
+     
     Usage:
     ::
+        
         import numpy as np
         import import matplotlib.pyplot as plt
         import LFPy
@@ -215,7 +216,14 @@ class RecExtElectrode(RecExtElectrodeSetup):
                  from_file=False, cellfile=None, verbose=False,
                  seedvalue=None):
         '''This is the regular implementation of the RecExtElectrode class
-        that calculates the LFP serially using a single core'''
+        that calculates the LFP serially using a single core
+        
+        Arguments:
+        ::
+            
+            cell : LFPy.Cell like object
+            sigma : 
+        '''
         RecExtElectrodeSetup.__init__(self, cell, sigma, x, y, z,
                                 N, r, n, r_z, perCellLFP,
                                 method, color, marker, from_file,

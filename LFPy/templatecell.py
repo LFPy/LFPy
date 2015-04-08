@@ -27,6 +27,7 @@ class TemplateCell(Cell):
     
     Arguments:
     ::
+        
         morphology : [str]: path to morphology file;
         
         templatefile :  [str]: Cell template definition(s)
@@ -61,6 +62,7 @@ class TemplateCell(Cell):
     
     Usage of TemplateCell class:
     ::
+        
         import LFPy
         cellParameters = {                      
             'morphology' : 'path/to/morphology',
@@ -89,6 +91,7 @@ class TemplateCell(Cell):
         
         Arguments:
         ::
+            
             templatefile :  Cell template definition(s)
             templatename :  Cell template-name used for this cell object
             templateargs :  Arguments provided to template-definition
