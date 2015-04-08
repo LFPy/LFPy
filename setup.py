@@ -2,6 +2,7 @@
 '''LFPy setup.py file'''
 
 import os
+import shutil
 # patch distutils if it can't cope with the "classifiers" or
 # "download_url" keywords
 from sys import version
@@ -37,6 +38,9 @@ except:
 import distutils.spawn as ds
 if ds.find_executable('nrnivmodl') is not None:
     os.chdir('LFPy')
+    for path in ['x86_64', 'i686', 'powerpc']:
+        if os.path.isdir(path):
+            shutil.rmtree(path)
     ds.spawn([ds.find_executable('nrnivmodl')])
     os.chdir('..')
 else:
@@ -48,7 +52,7 @@ with open('README.md') as file:
 
 setup(
     name = "LFPy",
-    version = "1.1", 
+    version = "1.1.0", 
     maintainer = "Espen Hagen",
         maintainer_email = 'e.hagen@fz-juelich.de',
     packages = ['LFPy'],
