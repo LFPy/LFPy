@@ -1,0 +1,11 @@
+include README.md
+include LICENSE
+
+recursive-include examples *.py
+recursive-include examples *.ipynb
+recursive-include examples *.hoc
+recursive-include examples morphologies
+
+recursive-include documentation *
+
+recursive-include html *
