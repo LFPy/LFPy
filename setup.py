@@ -32,7 +32,7 @@ except:
     ext_modules = []
 
 #try and locate the nrnivmodl script of NEURON in PATH so that the
-#NEURON exctention file LFPy/sinsyn.mod can be compiled in place and be copied
+#NEURON extension file LFPy/sinsyn.mod can be compiled in place and be copied
 #as part of the package_data, allowing unit tests to run
 import distutils.spawn as ds
 if ds.find_executable('nrnivmodl') is not None:
@@ -40,8 +40,8 @@ if ds.find_executable('nrnivmodl') is not None:
     ds.spawn([ds.find_executable('nrnivmodl')])
     os.chdir('..')
 else:
-    print("nrnivmodl script not found in PATH, thus NEURON .mod files could not be compiled, " +
-          "LFPy.test() functions will fail")
+    print("nrnivmodl script not found in PATH, thus NEURON .mod files could" +
+          "not be compiled, and LFPy.test() functions will fail")
 
 with open('README.md') as file:
     long_description = file.read()
