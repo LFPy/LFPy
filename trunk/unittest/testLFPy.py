@@ -2,6 +2,7 @@
 '''A few tests for LFPy, most importantly the calculations of
 extracellular field potentials'''
 
+import os
 import unittest
 import numpy as np
 from scipy.integrate import quad
@@ -438,13 +439,13 @@ class testLFPy(unittest.TestCase):
     
     ######## Functions used by tests: ##########################################
     def stickSimulationTesttvec(self, **kwargs):
-        stick = LFPy.Cell(morphology = 'stick.hoc', verbose=True, **kwargs)
+        stick = LFPy.Cell(morphology = os.path.join(LFPy.__path__[0], 'stick.hoc'), verbose=True, **kwargs)
         stick.simulate(rec_imem=False)    
         return stick.tvec
     
     def stickSimulation(self, method):
         stickParams = {
-            'morphology' : 'stick.hoc',
+            'morphology' : os.path.join(LFPy.__path__[0], 'stick.hoc'),
             'rm' : 30000,
             'cm' : 1,
             'Ra' : 150,
@@ -490,7 +491,7 @@ class testLFPy(unittest.TestCase):
     def stickSimulationAveragingElectrode(self,
                         contactRadius, contactNPoints, method):
         stickParams = {
-            'morphology' : 'stick.hoc',
+            'morphology' : os.path.join(LFPy.__path__[0], 'stick.hoc'),
             'rm' : 30000,
             'cm' : 1,
             'Ra' : 150,
@@ -540,7 +541,7 @@ class testLFPy(unittest.TestCase):
 
     def stickSimulationDotprodcoeffs(self, method):
         stickParams = {
-            'morphology' : 'stick.hoc',
+            'morphology' : os.path.join(LFPy.__path__[0], 'stick.hoc'),
             'rm' : 30000,
             'cm' : 1,
             'Ra' : 150,
@@ -680,16 +681,42 @@ class testLFPy(unittest.TestCase):
         return real_integral[0] + 1j*imag_integral[0]
 
 
-if __name__ == '__main__':
-    #check if sinsyn.mod is compiled, if it isn't try and run nrnivmodl on it
-    if not hasattr(neuron.h, 'SinSyn'):
-        print(__file__)
-        import os
-        os.system('nrnivmodl')
-        neuron.load_mechanisms('.')
-    if not hasattr(neuron.h, 'SinSyn'):
-        warn('tests will fail because nrnivmodl did not compile sinsyn.mod')
+def test(verbosity=2):
+    '''
+    Run tests for the LFPy module implemented using the unittest module.
+    
+    Note:
+    if the NEURON extension file LFPy/sinsyn.mod could not be compiled using the
+    neuron-provided nrnivmodl script (linux/OSX) upon installation of LFPy,
+    tests will fail. Consider reinstalling LFPy e.g., issuing
+    ::
         
+        pip install LFPy --upgrade
+    or
+    ::
+        
+        cd /path/to/LFPy/sources
+        python setup.py install
+    
+    Arguments:
+    ::
+        
+        verbosity : int
+            unittest.TextTestRunner verbosity level
+    '''
+    #load sinusoid synapse currrent mechanism
+    neuron.load_mechanisms(LFPy.__path__[0])
 
+    #check if sinsyn.mod is compiled, if it isn't, some tests will fail
+    if not hasattr(neuron.h, 'SinSyn'):
+        warn('tests will fail because the sinsyn.mod mechanism is not compiled')
+        
+    #load and execute testing suite
     suite = unittest.TestLoader().loadTestsFromTestCase(testLFPy)
-    unittest.TextTestRunner(verbosity=2).run(suite)
+    unittest.TextTestRunner(verbosity=verbosity).run(suite)
+    
+
+
+if __name__ == '__main__':
+    #run test function
+    test()
