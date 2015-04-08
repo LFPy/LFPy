@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 '''LFPy setup.py file'''
 
+import os
 # patch distutils if it can't cope with the "classifiers" or
 # "download_url" keywords
 from sys import version
@@ -30,6 +31,18 @@ except:
     cmdclass = {}
     ext_modules = []
 
+#try and locate the nrnivmodl script of NEURON in PATH so that the
+#NEURON exctention file LFPy/sinsyn.mod can be compiled in place and be copied
+#as part of the package_data, allowing unit tests to run
+import distutils.spawn as ds
+if ds.find_executable('nrnivmodl') is not None:
+    os.chdir('LFPy')
+    ds.spawn([ds.find_executable('nrnivmodl')])
+    os.chdir('..')
+else:
+    print("nrnivmodl script not found in PATH, thus NEURON .mod files could not be compiled, " +
+          "LFPy.test() functions will fail")
+
 with open('README.md') as file:
     long_description = file.read()
 
@@ -38,7 +51,15 @@ setup(
     version = "1.1", 
     maintainer = "Espen Hagen",
         maintainer_email = 'e.hagen@fz-juelich.de',
-    packages = ['LFPy'], 
+    packages = ['LFPy'],
+    package_data = {'LFPy' : ['stick.hoc', 'sinsyn.mod',
+                              os.path.join('i686', '*'),
+                              os.path.join('i686', '.libs', '*'),
+                              os.path.join('x86_64', '*'),
+                              os.path.join('x86_64', '.libs', '*'),
+                              os.path.join('powerpc', '*'),
+                              os.path.join('powerpc', '.libs', '*'),
+                              ]},
     cmdclass = cmdclass, 
     ext_modules = ext_modules,
     url='http://compneuro.umb.no/LFPy/',

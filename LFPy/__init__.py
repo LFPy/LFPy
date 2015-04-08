@@ -35,6 +35,7 @@ from .pointprocess import Synapse, PointProcess, StimIntElectrode
 from .recextelectrode import RecExtElectrode, RecExtElectrodeSetup
 from .cell import Cell
 from .templatecell import TemplateCell
+from .testing import test
 
 from . import lfpcalc
 from . import tools

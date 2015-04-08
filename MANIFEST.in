@@ -1,13 +1,12 @@
 include README.md
 include LICENSE
 
+recursive-include LFPy stick.hoc
+recursive-include LFPy sinsyn.mod
+
 recursive-include examples *.py
 recursive-include examples *.ipynb
 recursive-include examples *.hoc
 recursive-include examples morphologies
 
 recursive-include html *
-
-recursive-include unittest *.py
-recursive-include unittest *.mod
-recursive-include unittest *.hoc
