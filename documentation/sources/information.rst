@@ -31,6 +31,12 @@ Different numbered releases of "LFPy" can be found by checking out:
 To browse the source codes online, see http://bebiservice.umb.no/projects-public/LFPy-release/browser.
 
 
+LFPy on GitHub
+--------------
+
+Active development of LFPy will soon move to GitHub (http://github.com).
+An unofficial clone of the subversion repository above can be found at https://github.com/espenhgn/LFPy, before we move the repository entirely.
+
 
 Getting started
 ===============
@@ -390,5 +396,25 @@ as found by running "./config.guess" in the root of the NEURON source code;
     sudo python setup.py install
 
 
+LFPy on the Neuroscience Gateway Portal
+=======================================
 
+LFPy is installed on the Neuroscience Gateway Portal (NSG, see http://www.nsgportal.org), and can be used to execute simulations with LFPy both serially and in parallel applications on high-performance computing facilities.
+The access to the NSG is entirely free, and provide also access to other neuronal simulation software (NEST, NEURON, etc.). The procedure for getting started with LFPy on NSG is quite straightforward through their web-based interface:
 
+1. First, apply for a NSG user account by filling out their application form and sending it by email (follow instructions on http://www.nsgportal.org/portal2)
+2. After approval, log in using your credentials, change password if necessary
+3. As a first step after log in, create a new folder, e.g., named "LFPyTest" and with some description. This will be the home for your input files and output files, and should contain empty Data and Tasks folders
+4. Press the "Data (0)" folder in the left margin. Press the "Upload/Enter Data" button, showing the Upload File interface. Add a label, e.g., "LFPyTest".
+5. Next, LFPy simulation files have to be uploaded. As an example, download the example LFPy files https://github.com/espenhgn/LFPy/blob/master/examples/nsg_example/L5_Mainen96_wAxon_LFPy.hoc
+   and https://github.com/espenhgn/LFPy/blob/master/examples/nsg_example/nsg_example.py into a new local folder "nsg_example". Modify as needed. 
+6. Zip the "nsg_example" folder, upload it to the NSG (cf. step 4) and press "Save"
+7. Press "Tasks (0)" in the left margin and "Create New Task"
+8. Enter some Description, e.g., "LFPyTest", and "Select Input Data". Hook off "LFPyTest" and press "Select Data"
+9. Next, press "Select Tool", and then "Python (2.7.x)"
+10. Then, go to the "Set Parameters" tab. This allows for specifying simulation time, main simulation script, and number of parallel threads. Set "Maximum Hours" to 0.1,
+    and "Main Input Python Filename" to "nsg_example.py". Node number and number of cores per node should both be 1. Press "Save Parameters"
+11. Everything that is needed has been set up, thus "Save and Run Task" in the Task Summary tab is all that is needed to start the job, but expect some delay for it to start. 
+12. Once the job is finished, you will be notified by email, or keep refreshing the Task window. The simulation output can be accessed through "View Output". Download the "output.tar.gz" file and unzip it.
+    Among the output files, including stdout.txt and stderr.txt text files and jobscript details, the included folder "nsg_example" will contain the input files and any output files.
+    For this particular example, only a pdf image file is generated, "nsg_example.pdf"
