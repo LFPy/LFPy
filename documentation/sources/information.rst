@@ -15,27 +15,30 @@ Downlad stable versions of LFPy here:
 
 Or, from the Python Package Index: `http://pypi.python.org/pypi/LFPy <https://pypi.python.org/pypi/LFPy>`_
 
-Or, download the development version of LFPy using `subversion <http://subversion.apache.org/>`_ into a local folder:
+Or, download the development version of LFPy using `git <https://git-scm.com>`_ into a local folder:
 ::
     
-    svn checkout http://bebiservice.umb.no/svn-public/LFPy-release/trunk LFPy
+    cd /where/to/put/repositories
+    git clone https://github.com/LFPy/LFPy.git
 
-The development code and examples is then found under "LFPy".
+The LFPy source code and examples is then found under "LFPy".
 
-Different numbered releases of "LFPy" can be found by checking out:
+The stable versions of LFPy can be accessed by listing and checking out tags, e.g.,
 ::
     
-    svn checkout http://bebiservice.umb.no/svn-public/LFPy-release/tags
+    cd /path/to/LFPy
+    git tag -l
+    git checkout tags/<tag name>
+    
+
+To browse the source codes online, see http://lfpy.github.io/classes.html.
 
 
-To browse the source codes online, see http://bebiservice.umb.no/projects-public/LFPy-release/browser.
+Developing LFPy
+===============
 
-
-LFPy on GitHub
---------------
-
-Active development of LFPy will soon move to GitHub (http://github.com).
-An unofficial clone of the subversion repository above can be found at https://github.com/espenhgn/LFPy, before we move the repository entirely.
+As development of LFPy is now moved onto GitHub (https://github.com/LFPy), one can now fully benefit on working with forks of LFPy, implement new features, and share code improvements through pull requests.
+We hope that LFPy can be improved continously through such a collaborative effort.
 
 
 Getting started
@@ -47,7 +50,7 @@ Dependencies
 To install LFPy you will need the following:
 
 1.  Python, seems to work fine with recent python since 2.6.x (2.6.6 or newer recommended), 2.7.x works fine.
-    LFPy has only been thoroghly checked for code consistency with Python 3.x., and can be assumed to be untested with these versions. 
+    LFPy has only been thoroughly checked for code consistency with Python 3.x., and can be assumed to be untested with Python 3.x. 
 
 2.  Python modules numpy, scipy, matplotlib
 
@@ -59,7 +62,7 @@ To install LFPy you will need the following:
     
     If this step fails, see the next section.
     
-    LFPy was tested to work with NEURON 7.2 and the 7.3 development branch, we had some issues with a precompiled version of NEURON 7.1.
+    LFPy has been tested to work with NEURON 7.2 and the 7.3 branches, we had some issues with a precompiled version of NEURON 7.1.
 
 4.  `Cython <http://cython.org>`_ (C-extensions for python) to speed up simulations of extracellular fields. Tested with version > 0.14,
     and known to fail with version 0.11. LFPy works without Cython, but simulations will run slower and is therefore not recommended.
@@ -101,10 +104,10 @@ There are few options to install LFPy:
         cd LFPy-x.x
         (sudo) python setup.py install (--user)
 
-4.  From development version in our subversion (https://subversion.apache.org) repository:
+4.  From development version in our git (https://git-scm.com) repository:
     ::
     
-        svn checkout http://bebiservice.umb.no/svn-public/LFPy-release/trunk LFPy
+        git clone https://github.com/LFPy/LFPy.git
         cd LFPy
         (sudo) python setup.py install (--user)
     
@@ -400,7 +403,7 @@ LFPy on the Neuroscience Gateway Portal
 =======================================
 
 LFPy is installed on the Neuroscience Gateway Portal (NSG, see http://www.nsgportal.org), and can be used to execute simulations with LFPy both serially and in parallel applications on high-performance computing facilities.
-The access to the NSG is entirely free, and provide also access to other neuronal simulation software (NEST, NEURON, etc.). The procedure for getting started with LFPy on NSG is quite straightforward through their web-based interface:
+The access to the NSG is entirely free, and access to other neuronal simulation software (NEST, NEURON, etc.) is also provided. The procedure for getting started with LFPy on the NSG is quite straightforward through their web-based interface:
 
 1. First, apply for a NSG user account by filling out their application form and sending it by email (follow instructions on http://www.nsgportal.org/portal2)
 2. After approval, log in using your credentials, change password if necessary

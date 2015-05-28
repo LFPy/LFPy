@@ -14,13 +14,13 @@ Cell morphologies can be specified manually in a ``hoc`` file. For a simple exam
    -  ``dend*[]`` for dendritic sections
    -  ``apic*[]`` for apical dendrite sections
    -  ``axon*[]`` for axonal sections
--  Sections must be defined as SectionList (therefore use ``soma[1]``, not ``soma``)
+-  Sections must be defined as types Section or SectionList (as ``soma[1]`` or ``soma``)
 
 
 Also the morphologies exported from the NEURON simulator 
 (for example using Cell Builder -> Export) should
-work with LFPy, but often ``create soma`` must be corrected to
-``create soma[1]`` in those files.
+work with LFPy, but some times ``create soma`` must be corrected to
+``create soma[1]`` directly in the files.
 
 
 NEURON convention for creating morphology files in ``hoc``:
@@ -119,3 +119,28 @@ The units in LFPy for given quantities are:
 Note: resistance, conductance and capacitance are usually specific values, i.e per membrane area (lowercase r_m, g, c_m)
 Depending on the mechanism files, some may use different units altogether, but this should be taken care of internally by NEURON.
 
+
+Contributors
+============
+
+LFPy was developed by:
+
+*	Henrik Lindén https://lindenh.wordpress.com
+
+*	Espen Hagen http://www.fz-juelich.de/SharedDocs/Personen/INM/INM-6/EN/Hagen_Espen.html?nn=724694
+
+*	Szymon Łęski http://www.neuroinf.pl/Members/szleski
+
+*	Eivind Norheim 
+
+*       Klas H. Pettersen http://arken.umb.no/~klaspe/
+
+*       Gaute T. Einevoll http://arken.umb.no/~gautei/index_english.html
+
+
+Contact
+=======
+
+If you want to contact us with questions, bugs and comments,
+you can send us an email to either `Espen <mailto:e.hagen@fz-juelich.de?Subject=LFPy-Questions/Comments>`_ or `Henrik <mailto:helinden@kth.se?Subject=LFPy-Question/Comments>`_.
+We are of course happy to receive feedback of any kind.

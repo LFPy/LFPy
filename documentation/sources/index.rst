@@ -50,13 +50,13 @@ The slides can be found here: `lfpy-tutorial_2013.pdf  <http://compneuro.umb.no/
 Related projects
 ----------------
 
-LFPy has been used extensively in ongoing and published work, and is a required dependency by the publicly available Python modules: 
+LFPy has been used extensively in ongoing and published work, and may be a required dependency by the publicly available Python modules: 
 
 - ViSAPy - Virtual Spiking Activity in Python (https://github.com/espenhgn/ViSAPy, http://software.incf.org/software/visapy), as described in Hagen, E., et al. (2015), J Neurosci Meth, DOI:`10.1016/j.jneumeth.2015.01.029 <http://dx.doi.org/10.1016/j.jneumeth.2015.01.029>`_ 
+- ViMEAPy that can be used to incorporate heterogeneous conductivity in calculations of extracellular potentials with LFPy (https://bitbucket.org/torbness/vimeapy, http://software.incf.org/software/vimeapy). ViMEAPy and it's application is described in Ness, T. V., et al. (2015), Neuroinform, DOI:`10.1007/s12021-015-9265-6 <http://dx.doi.org/10.1007/s12021-015-9265-6>`_. 
 - hybridLFPy - biophysics-based hybrid scheme for calculating the local field potential (LFP) of spiking activity in simplified point-neuron network models (https://github.com/INM-6/hybridLFPy)
 
 
-See also ViMEAPy that can be used to incorporate heterogeneous conductivity in calculations of extracellular potentials with LFPy (https://bitbucket.org/torbness/vimeapy, http://software.incf.org/software/vimeapy). 
 
 
 Contents
@@ -66,9 +66,7 @@ Contents
    
     information
     tutorial
-    using
-    contributors
-    contact
+    more
     classes
 
 Indices and tables

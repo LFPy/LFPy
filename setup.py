@@ -66,7 +66,7 @@ setup(
                               ]},
     cmdclass = cmdclass, 
     ext_modules = ext_modules,
-    url='http://compneuro.umb.no/LFPy/',
+    url='http://LFPy.github.io',
     license='LICENSE',
     description='A module for modeling Local Field Potentials built on NEURON',
     long_description=long_description,
