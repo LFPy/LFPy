@@ -66,7 +66,7 @@ Contents
    
     information
     tutorial
-    more
+    additional
     classes
 
 Indices and tables
