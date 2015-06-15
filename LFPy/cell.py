@@ -683,18 +683,11 @@ class Cell(object):
             print('No possible segment idx match enquire! returning empty array')
             return np.array([])
         else:
-            #idx = np.empty(nidx, dtype=int)
             area = self.area[poss_idx]
             area /= area.sum()
             idx = alias_method(poss_idx, area, nidx)
+
             return idx
-            #norm_area_cumsum = np.cumsum(self.area[poss_idx] / 
-            #                             self.area[poss_idx].sum())
-            #
-            #for i in range(nidx):
-            #    idx[i] = np.nonzero(np.random.rand() < norm_area_cumsum)[0].min()
-            
-            #return poss_idx[idx]
     
     def simulate(self, electrode=None, rec_imem=False, rec_vmem=False,
                  rec_ipas=False, rec_icap=False,
