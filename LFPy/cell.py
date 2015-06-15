@@ -351,9 +351,9 @@ class Cell(object):
         matches segments in neuron.h.allsec(), rewritten from 
         LFPy.hoc function get_idx()'''
         if neuron.h.allsec() == seclist:
-            return np.ones(self.totnsegs)
+            return np.ones(self.totnsegs, dtype=bool)
         else:
-            idxvec = np.zeros(self.totnsegs)
+            idxvec = np.zeros(self.totnsegs, dtype=bool)
             #get sectionnames from seclist
             seclistnames = []
             for sec in seclist:
@@ -367,7 +367,7 @@ class Cell(object):
                     segnames[i] = secname
                     i += 1
             for name in seclistnames:
-                idxvec[segnames == name] = 1
+                idxvec[segnames == name] = True
 
             return idxvec
     
@@ -637,7 +637,7 @@ class Cell(object):
                 if self.verbose:
                     print(('%s did not match any section name' % str(section)))
 
-        idx = self._get_idx(seclist).astype(bool)
+        idx = self._get_idx(seclist)
         sel_z_idx = (self.zmid[idx] > z_min) & (self.zmid[idx] < z_max)
         return np.arange(self.totnsegs)[idx][sel_z_idx]
                             
