@@ -24,6 +24,9 @@ try:
         Extension('LFPy.run_simulation', 
         ['LFPy/run_simulation.pyx'],
         include_dirs=[numpy.get_include()]),
+        Extension('LFPy.alias_method', 
+        ['LFPy/alias_method.pyx'],
+        include_dirs=[numpy.get_include()]),
         ]
 except:
     print("'from Cython.Distutils import build_ext' failed!")
