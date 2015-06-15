@@ -637,9 +637,9 @@ class Cell(object):
                 if self.verbose:
                     print(('%s did not match any section name' % str(section)))
 
-        idx = np.where(self._get_idx(seclist))[0]
+        idx = self._get_idx(seclist).astype(bool)
         sel_z_idx = (self.zmid[idx] > z_min) & (self.zmid[idx] < z_max)
-        return idx[sel_z_idx]
+        return np.arange(self.totnsegs)[idx][sel_z_idx]
                             
                 
     def get_closest_idx(self, x=0, y=0, z=0, section='allsec'):
