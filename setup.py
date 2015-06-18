@@ -11,17 +11,16 @@ if version < '2.2.3':
     DistributionMetadata.classifiers = None
     DistributionMetadata.download_url = None
 
-from distutils.core import setup 
+from distutils.core import setup
 from distutils.extension import Extension
-import numpy
 try:
     from Cython.Distutils import build_ext
     cmdclass = { 'build_ext' : build_ext}
     ext_modules = [
-        Extension('LFPy.lfpcalc', 
+        Extension('LFPy.lfpcalc',
         ['LFPy/lfpcalc.pyx'],
         include_dirs=[numpy.get_include()]),
-        Extension('LFPy.run_simulation', 
+        Extension('LFPy.run_simulation',
         ['LFPy/run_simulation.pyx'],
         include_dirs=[numpy.get_include()]),
         ]
@@ -52,7 +51,7 @@ with open('README.md') as file:
 
 setup(
     name = "LFPy",
-    version = "1.1.0", 
+    version = "1.1.0",
     maintainer = "Espen Hagen",
         maintainer_email = 'e.hagen@fz-juelich.de',
     packages = ['LFPy'],
@@ -64,7 +63,7 @@ setup(
                               os.path.join('powerpc', '*'),
                               os.path.join('powerpc', '.libs', '*'),
                               ]},
-    cmdclass = cmdclass, 
+    cmdclass = cmdclass,
     ext_modules = ext_modules,
     url='http://LFPy.github.io',
     license='LICENSE',
@@ -84,7 +83,7 @@ setup(
         'Intended Audience :: Science/Research',
         'Development Status :: 4 - Beta',
         ],
-    requires = [
+    install_requires = [
         'numpy', 'scipy', 'matplotlib', 'neuron', 'Cython'
         ],
     provides = ['LFPy'],
