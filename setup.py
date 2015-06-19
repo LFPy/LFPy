@@ -87,7 +87,7 @@ setup(
         'Development Status :: 4 - Beta',
         ],
     install_requires = [
-        'numpy', 'scipy', 'matplotlib', 'neuron', 'Cython', 'alias_method'
+        'numpy', 'scipy', 'matplotlib', 'neuron', 'Cython'
         ],
     provides = ['LFPy'],
     )
