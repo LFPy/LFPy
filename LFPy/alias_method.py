@@ -1,28 +1,30 @@
 #!/usr/bin/env python
 from time import time
 import numpy as np
-cimport numpy as np
-cimport cython
 
-DTYPE = np.float64
-ctypedef np.float64_t DTYPE_t
-ctypedef Py_ssize_t   LTYPE_t
-
-cdef extern from "math.h":
-    int floor(DTYPE_t x)
-
-
-@cython.boundscheck(False)
-@cython.wraparound(False)
-cpdef np.ndarray[LTYPE_t, ndim=1, negative_indices=False] alias_method(np.ndarray[LTYPE_t, ndim=1, negative_indices=False] idx,
-                 np.ndarray[DTYPE_t, ndim=1, negative_indices=False] area,
-                 int nsyn):
-    #C-declare variables
-    cdef np.ndarray[LTYPE_t, ndim=1, negative_indices=False] J, spc
-    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] q
-    cdef np.ndarray[DTYPE_t, ndim=2, negative_indices=False] rands
-    cdef int nn, j, ad, K, kk
+def alias_method(idx, area, nsyn):
+    '''
+    Alias method for drawing random numbers from a discrete probability
+    distribution. See http://www.keithschwarz.com/darts-dice-coins/
     
+    Arguments
+    ::
+        
+        idx : np.ndarray
+            compartment indices as array of ints
+        area : np.ndarray
+            compartment areas as array of floats
+        nsyn : int
+            number of randomized compartment indices
+            
+    
+    Returns
+    ::
+        
+        out : np.ndarray
+            integer array of randomly drawn compartment indices
+            
+    '''
     # Construct the table.
     J, q = alias_setup(area)
      
@@ -35,7 +37,7 @@ cpdef np.ndarray[LTYPE_t, ndim=1, negative_indices=False] alias_method(np.ndarra
     K = J.size 
     # Generate variates using alias draw method
     for nn in range(nsyn):
-        kk = floor(rands[nn, 0]*K)
+        kk = np.floor(rands[nn, 0]*K)
         if rands[nn, 1] < q[kk]:
             spc[nn] = idx[kk]
         else:
@@ -44,15 +46,25 @@ cpdef np.ndarray[LTYPE_t, ndim=1, negative_indices=False] alias_method(np.ndarra
     return spc
 
 
-@cython.boundscheck(False)
-@cython.wraparound(False)
-cpdef alias_setup(np.ndarray[DTYPE_t, ndim=1, negative_indices=False] area):
-    #C-declare variables
-    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] q
-    cdef np.ndarray[LTYPE_t, ndim=1, negative_indices=False] J, smaller, larger
-    cdef int K, small, large, kk, s_i, l_i
-    cdef DTYPE_t prob
+def alias_setup(area):
+    '''
+    Set up function for alias method.
+    See http://www.keithschwarz.com/darts-dice-coins/
+    
+    Arguments
+    ::
         
+        area : np.ndarray
+            float array of compartment areas
+    
+    Returns
+    ::
+        
+        J : np.ndarray
+            array of ints
+        q : np.ndarray
+            array of floats
+    '''        
     K = area.size
     q = area*K
     J = np.zeros(K, dtype=int)

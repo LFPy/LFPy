@@ -3,6 +3,7 @@
 
 import os
 import shutil
+import numpy
 # patch distutils if it can't cope with the "classifiers" or
 # "download_url" keywords
 from sys import version
@@ -86,7 +87,7 @@ setup(
         'Intended Audience :: Science/Research',
         'Development Status :: 4 - Beta',
         ],
-    install_requires = [
+    requires = [
         'numpy', 'scipy', 'matplotlib', 'neuron', 'Cython'
         ],
     provides = ['LFPy'],
