@@ -3,7 +3,6 @@
 
 import os
 import shutil
-import numpy
 # patch distutils if it can't cope with the "classifiers" or
 # "download_url" keywords
 from sys import version
@@ -14,6 +13,7 @@ if version < '2.2.3':
 
 from distutils.core import setup
 from distutils.extension import Extension
+import numpy
 try:
     from Cython.Distutils import build_ext
     cmdclass = { 'build_ext' : build_ext}
