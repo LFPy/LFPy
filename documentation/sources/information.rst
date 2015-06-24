@@ -2,20 +2,9 @@
 Download LFPy
 =============
 
-Downlad stable versions of LFPy here:
+Downlad the latest version of LFPy from the Python Package Index: `http://pypi.python.org/pypi/LFPy <https://pypi.python.org/pypi/LFPy>`_
 
-- `LFPy-1.1.tar.gz <http://compneuro.umb.no/LFPy/downloads/LFPy-1.1.tar.gz>`_
-- `LFPy-1.0.tar.gz <http://compneuro.umb.no/LFPy/downloads/LFPy-1.0.tar.gz>`_
-- `LFPy-0.9.5.tar.gz <http://compneuro.umb.no/LFPy/downloads/LFPy-0.9.5.tar.gz>`_
-- `LFPy-0.9.4.tar.gz <http://compneuro.umb.no/LFPy/downloads/LFPy-0.9.4.tar.gz>`_
-- `LFPy-0.9.3.tar.gz <http://compneuro.umb.no/LFPy/downloads/LFPy-0.9.3.tar.gz>`_
-- `LFPy-0.9.2.tar.gz <http://compneuro.umb.no/LFPy/downloads/LFPy-0.9.2.tar.gz>`_
-- `LFPy-0.9.1.tar.gz <http://compneuro.umb.no/LFPy/downloads/LFPy-0.9.1.tar.gz>`_
-- `LFPy-0.9.tar.gz <http://compneuro.umb.no/LFPy/downloads/LFPy-0.9.tar.gz>`_
-
-Or, from the Python Package Index: `http://pypi.python.org/pypi/LFPy <https://pypi.python.org/pypi/LFPy>`_
-
-Or, download the development version of LFPy using `git <https://git-scm.com>`_ into a local folder:
+Or, download the development version of LFPy using `git <https://git-scm.com>`_ from `GitHub.com <https://github.com/LFPy/LFPy>`_ into a local folder:
 ::
     
     cd /where/to/put/repositories

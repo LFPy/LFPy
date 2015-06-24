@@ -12,6 +12,8 @@ LFPy is a `Python <http://www.python.org>`_ package for calculation of extracell
 It relies on the `NEURON simulator <http://www.neuron.yale.edu/neuron/>`_ and uses the 
 `Python interface <http://www.frontiersin.org/neuroinformatics/10.3389/neuro.11.001.2009/abstract>`_ it provides.
 
+Clone LFPy on `GitHub.com <https://github.com/LFPy/LFPy>`_: ``git clone https://github.com/LFPy/LFPy.git``
+
 LFPy provides a set of easy-to-use Python classes for setting up your model, running your simulations and calculating the extracellular potentials arising from activity in your model neuron. If you have a model working in `NEURON <http://www.neuron.yale.edu>`_
 already, it is likely that it can be adapted to work with LFPy.
 
@@ -40,11 +42,11 @@ This scientific software is released under the GNU Public License `GPLv3 <http:/
 Tutorial slides on LFPy
 -----------------------
 
-Slides from OCNS 2014 meeting tutorial `T4:  Modeling and analysis of extracellular potentials <http://www.cnsorg.org/cns-2014-tutorials#T4>`_ hosted in Quebec City: `lfpy_tutorial_OCNS2014.pdf  <http://compneuro.umb.no/LFPy/downloads/lfpy_tutorial_OCNS2014.pdf>`_
+Slides from OCNS 2014 meeting tutorial `T4:  Modeling and analysis of extracellular potentials <http://www.cnsorg.org/cns-2014-tutorials#T4>`_ hosted in Quebec City: `hybridlfpy_tutorial_OCNS2014.pdf  <http://LFPy.github.io/downloads/hybridlfpy_tutorial_OCNS2014.pdf>`_
 
 As part of the OCNS 2013 meeting workshop `Modeling and interpretation of extracellular potentials <http://www.cnsorg.org/cns-2013-tutorials#extracellular_potentials>`_,
 there was also a talk on LFPy.
-The slides can be found here: `lfpy-tutorial_2013.pdf  <http://compneuro.umb.no/LFPy/downloads/lfpy-tutorial_2013.pdf>`_.
+The slides can be found here: `lfpy-tutorial_OCNS2013.pdf  <http://LFPy.github.io/downloads/lfpy-tutorial_OCNS2013.pdf>`_.
 
 
 Related projects
