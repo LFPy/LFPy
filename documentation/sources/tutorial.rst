@@ -98,7 +98,7 @@ source code release, displaying different usage scenarios;
 The examples rely on files present inside the `examples folder <https://github.com/LFPy/LFPy/blob/master/examples>`_,
 such as morphology files and .mod files.
 
-The easyest way of accessing all of these files is cloning the examples directory using git (https://git-scm.com):
+The easiest way of accessing all of these files is cloning the examples directory using git (https://git-scm.com):
 ::
     
     git clone https://github.com/LFPy/LFPy.git
