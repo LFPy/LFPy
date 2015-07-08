@@ -1622,7 +1622,7 @@ class Cell(object):
             cell = LFPy.Cell(morphology='PATH/TO/MORPHOLOGY')
             
             zips = []
-            for x, z in cell.get_idx_polygons():
+            for x, z in cell.get_idx_polygons(projection=('x', 'z')):
                 zips.append(zip(x, z))
             
             polycol = PolyCollection(zips,
@@ -1718,7 +1718,7 @@ class Cell(object):
             cell = LFPy.Cell(morphology='PATH/TO/MORPHOLOGY')
             
             zips = []
-            for x, z in cell.get_idx_polygons(projection=('x', 'z'):
+            for x, z in cell.get_idx_polygons(projection=('x', 'z')):
                 zips.append(zip(x, z))
             
             polycol = PolyCollection(zips,
