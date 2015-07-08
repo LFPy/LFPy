@@ -13,7 +13,6 @@ if version < '2.2.3':
 
 from distutils.core import setup
 from distutils.extension import Extension
-import numpy
 try:
     from Cython.Distutils import build_ext
     cmdclass = { 'build_ext' : build_ext}
@@ -87,7 +86,7 @@ setup(
         'Intended Audience :: Science/Research',
         'Development Status :: 4 - Beta',
         ],
-    requires = [
+    install_requires = [
         'numpy', 'scipy', 'matplotlib', 'neuron', 'Cython'
         ],
     provides = ['LFPy'],
