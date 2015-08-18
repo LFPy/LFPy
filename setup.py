@@ -3,17 +3,12 @@
 
 import os
 import shutil
-# patch distutils if it can't cope with the "classifiers" or
-# "download_url" keywords
-from sys import version
-if version < '2.2.3':
-    from distutils.dist import DistributionMetadata
-    DistributionMetadata.classifiers = None
-    DistributionMetadata.download_url = None
-
-from distutils.core import setup
-from distutils.extension import Extension
 try:
+    from setuptools import setup, Extension
+except ImportError as ie:
+    raise ie, 'please install setuptools'
+try:
+    import numpy
     from Cython.Distutils import build_ext
     cmdclass = { 'build_ext' : build_ext}
     ext_modules = [
@@ -27,8 +22,8 @@ try:
         ['LFPy/alias_method.pyx'],
         include_dirs=[numpy.get_include()]),
         ]
-except:
-    print("'from Cython.Distutils import build_ext' failed!")
+except ImportError as ie:
+    print("'from Cython.Distutils import build_ext' or 'import numpy' failed!")
     print("Cython extensions will not be compiled, and")
     print("simulations in LFPy may run slower")
     cmdclass = {}
@@ -37,13 +32,13 @@ except:
 #try and locate the nrnivmodl script of NEURON in PATH so that the
 #NEURON extension file LFPy/sinsyn.mod can be compiled in place and be copied
 #as part of the package_data, allowing unit tests to run
-import distutils.spawn as ds
-if ds.find_executable('nrnivmodl') is not None:
+from distutils.spawn import find_executable, spawn
+if find_executable('nrnivmodl') is not None:
     os.chdir('LFPy')
     for path in ['x86_64', 'i686', 'powerpc']:
         if os.path.isdir(path):
             shutil.rmtree(path)
-    ds.spawn([ds.find_executable('nrnivmodl')])
+    spawn([find_executable('nrnivmodl')])
     os.chdir('..')
 else:
     print("nrnivmodl script not found in PATH, thus NEURON .mod files could" +
