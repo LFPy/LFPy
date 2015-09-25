@@ -1,8 +1,9 @@
 #!/usr/bin/env python
-from time import time
+from __future__ import division
 import numpy as np
 
-def alias_method(idx, area, nsyn):
+
+def alias_method(idx, probs, nsyn):
     '''
     Alias method for drawing random numbers from a discrete probability
     distribution. See http://www.keithschwarz.com/darts-dice-coins/
@@ -12,7 +13,7 @@ def alias_method(idx, area, nsyn):
         
         idx : np.ndarray
             compartment indices as array of ints
-        area : np.ndarray
+        probs : np.ndarray
             compartment areas as array of floats
         nsyn : int
             number of randomized compartment indices
@@ -26,7 +27,7 @@ def alias_method(idx, area, nsyn):
             
     '''
     # Construct the table.
-    J, q = alias_setup(area)
+    J, q = alias_setup(probs)
      
     #output array
     spc = np.zeros(nsyn, dtype=int)
@@ -46,7 +47,7 @@ def alias_method(idx, area, nsyn):
     return spc
 
 
-def alias_setup(area):
+def alias_setup(probs):
     '''
     Set up function for alias method.
     See http://www.keithschwarz.com/darts-dice-coins/
@@ -54,7 +55,7 @@ def alias_setup(area):
     Arguments
     ::
         
-        area : np.ndarray
+        probs : np.ndarray
             float array of compartment areas
     
     Returns
@@ -65,8 +66,8 @@ def alias_setup(area):
         q : np.ndarray
             array of floats
     '''        
-    K = area.size
-    q = area*K
+    K = probs.size
+    q = probs*K
     J = np.zeros(K, dtype=int)
 
     # Sort the data into the outcomes with probabilities
@@ -82,14 +83,14 @@ def alias_setup(area):
         else:
             larger[l_i] = kk
             l_i += 1
-            
+
     s_i -= 1
     l_i -= 1
     
     # Loop though and create little binary mixtures that
     # appropriately allocate the larger outcomes over the
     # overall uniform mixture.
-    while s_i > 0 and l_i > 0:
+    while s_i >= 0 and l_i >= 0:
         small = smaller[s_i]
         large = larger[l_i]
         
@@ -104,3 +105,4 @@ def alias_setup(area):
             smaller[s_i] = large
  
     return J, q
+

@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-from time import time
 import numpy as np
 cimport numpy as np
 cimport cython
@@ -15,8 +14,30 @@ cdef extern from "math.h":
 @cython.boundscheck(False)
 @cython.wraparound(False)
 cpdef np.ndarray[LTYPE_t, ndim=1, negative_indices=False] alias_method(np.ndarray[LTYPE_t, ndim=1, negative_indices=False] idx,
-                 np.ndarray[DTYPE_t, ndim=1, negative_indices=False] area,
+                 np.ndarray[DTYPE_t, ndim=1, negative_indices=False] probs,
                  int nsyn):
+    '''
+    Alias method for drawing random numbers from a discrete probability
+    distribution. See http://www.keithschwarz.com/darts-dice-coins/
+    
+    Arguments
+    ::
+        
+        idx : np.ndarray
+            compartment indices as array of ints
+        probs : np.ndarray
+            compartment areas as array of floats
+        nsyn : int
+            number of randomized compartment indices
+            
+    
+    Returns
+    ::
+        
+        out : np.ndarray
+            integer array of randomly drawn compartment indices
+            
+    '''
     #C-declare variables
     cdef np.ndarray[LTYPE_t, ndim=1, negative_indices=False] J, spc
     cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] q
@@ -24,7 +45,7 @@ cpdef np.ndarray[LTYPE_t, ndim=1, negative_indices=False] alias_method(np.ndarra
     cdef int nn, j, ad, K, kk
     
     # Construct the table.
-    J, q = alias_setup(area)
+    J, q = alias_setup(probs)
      
     #output array
     spc = np.zeros(nsyn, dtype=int)
@@ -46,15 +67,33 @@ cpdef np.ndarray[LTYPE_t, ndim=1, negative_indices=False] alias_method(np.ndarra
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
-cpdef alias_setup(np.ndarray[DTYPE_t, ndim=1, negative_indices=False] area):
+cpdef alias_setup(np.ndarray[DTYPE_t, ndim=1, negative_indices=False] probs):
+    '''
+    Set up function for alias method.
+    See http://www.keithschwarz.com/darts-dice-coins/
+    
+    Arguments
+    ::
+        
+        probs : np.ndarray
+            float array of compartment areas
+    
+    Returns
+    ::
+        
+        J : np.ndarray
+            array of ints
+        q : np.ndarray
+            array of floats
+    '''
     #C-declare variables
     cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] q
     cdef np.ndarray[LTYPE_t, ndim=1, negative_indices=False] J, smaller, larger
     cdef int K, small, large, kk, s_i, l_i
     cdef DTYPE_t prob
         
-    K = area.size
-    q = area*K
+    K = probs.size
+    q = probs*K
     J = np.zeros(K, dtype=int)
 
     # Sort the data into the outcomes with probabilities
@@ -77,7 +116,7 @@ cpdef alias_setup(np.ndarray[DTYPE_t, ndim=1, negative_indices=False] area):
     # Loop though and create little binary mixtures that
     # appropriately allocate the larger outcomes over the
     # overall uniform mixture.
-    while s_i > 0 and l_i > 0:
+    while s_i >= 0 and l_i >= 0:
         small = smaller[s_i]
         large = larger[l_i]
         
