@@ -4,9 +4,7 @@ Mazzoni A, Lindén H, Cuntz H, Lansner A, Panzeri S and Einevoll GT. Computing 
 field potential (LFP) from integrate-and-fire network models. PLoS Computational
 Biology (accepted).
 
-The example provides a downsized simulation of 50 cells (compared to 5000 in the paper) where the detailed morphologies have been replaced with two template ball-and-stick neurons for all pyramidal cell and interneurons respectively. 
-
-A further difference with the simulations used in the paper is that thalamic and corticortical inputs are not included. Code for the external input is commented out in 'single_cell.py' but can be included by uncommented the code on lines 121-159.
+The example provides a downsized simulation of 50 cells* (compared to 5000 in the paper) where the detailed morphologies have been replaced with two template ball-and-stick neurons for all pyramidal cell and interneurons respectively. 
 
 The simulation can be run with or without an MPI environment (set by the parameter 'with_MPI' in 'ref_sim.py'. If the simulation is run without MPI all cell with be simulated serially. If the simulation is run with MPI the simulations of invidual cells are distributed on all available MPI processes. 
 
@@ -41,5 +39,8 @@ data = pickle.load( open("results/input15_output_data_rank0.p15", "rb" ) )
 
 data is a dictionary containing all simulation output:
 - data['LFP'] contains the LFP contributions from all single neurons at all electrode positions: 'data['LFP'][cell_id][electrode_id]
+
+* A further difference with the simulations used in the paper is that thalamic and corticortical inputs are not included. Code for the external input is commented out in 'single_cell.py' but can be included by uncommented the code on lines 121-159.
+
 
 # HL 2015-11-02
