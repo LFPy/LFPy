@@ -24,7 +24,7 @@ Auxilliary files:
 - INTsXYZ.txt: Soma positions for interneurons
 
 How to run the simulation example:
-1. Compile the synapse model by calling 'nrnivmodl' (Linux/OSX) or ... (Windows), only necessary first time the example is run.
+1. Compile the synapse model by calling 'nrnivmodl' (Linux/OSX) or 'mknrndll' (Windows), only necessary first time the example is run.
 2. Run 'python ref_sim.py' 
 
 Output data:
