@@ -334,7 +334,6 @@ cpdef _collect_geometry_neuron(cell):
     cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] zstartvec = np.zeros(cell.totnsegs)
     cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] zendvec = np.zeros(cell.totnsegs)
     
-    #cdef DTYPE_t xlength, ylength, zlength, segx, gsen2, secL, x3d, y3d, z3d
     cdef DTYPE_t gsen2, secL
     cdef LTYPE_t counter, nseg, n3d, i
     
@@ -367,12 +366,16 @@ cpdef _collect_geometry_neuron(cell):
             
             #temporary store position of segment midpoints
             segx = np.zeros(nseg)
-            for i, seg in enumerate(sec):
+            i = 0
+            for seg in sec:
                 segx[i] = seg.x
+                i += 1
             
             #can't be >0 which may happen due to NEURON->Python float transfer:
-            segx0 = (segx - gsen2).round(decimals=6)
-            segx1 = (segx + gsen2).round(decimals=6)
+            #segx0 = (segx - gsen2).round(decimals=6)
+            #segx1 = (segx + gsen2).round(decimals=6)
+            segx0 = segx - gsen2
+            segx1 = segx + gsen2
 
             #fill vectors with interpolated coordinates of start and end points
             xstartvec[counter:counter+nseg] = np.interp(segx0, L, x)
@@ -385,7 +388,7 @@ cpdef _collect_geometry_neuron(cell):
             zendvec[counter:counter+nseg] = np.interp(segx1, L, z)
 
             #fill in values area, diam, length
-            for i, seg in enumerate(sec):
+            for seg in sec:
                 areavec[counter] = neuron.h.area(seg.x)
                 diamvec[counter] = seg.diam
                 lengthvec[counter] = secL/nseg

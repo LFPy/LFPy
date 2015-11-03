@@ -436,7 +436,40 @@ class testLFPy(unittest.TestCase):
         
         for i in range(tvec.size):
             self.assertAlmostEqual(tvec[i], tvec_numpy[i])    
-    
+
+    def test_alias_method_01(self):
+        '''deterministic probabilities 0.0 and 1.0'''
+        idx = np.arange(2)
+        probs = np.arange(2).astype(float)
+        nidx = 1000000
+        bins = np.arange(3)
+        
+        hist, _ = np.histogram(LFPy.alias_method.alias_method(idx, probs, nidx), bins)
+        
+        self.assertEqual(nidx, hist[1])
+        
+    def test_alias_method_02(self):
+        '''probabilities 0.5 and 0.5'''
+        idx = np.arange(2)
+        probs = np.array([0.5, 0.5])
+        nidx = 1000000
+        bins = np.arange(3)
+        
+        hist, _ = np.histogram(LFPy.alias_method.alias_method(idx, probs, nidx), bins)
+        
+        self.assertAlmostEqual(hist[0], hist[1], delta=2*np.sqrt(nidx))
+
+    def test_alias_method_03(self):
+        '''deterministic probabilities 1.0 and 0.0'''
+        idx = np.arange(2)
+        probs = np.arange(2).astype(float)[::-1]
+        nidx = 1000000
+        bins = np.arange(3)
+        
+        hist, _ = np.histogram(LFPy.alias_method.alias_method(idx, probs, nidx), bins)
+        
+        self.assertEqual(nidx, hist[0])
+        
     ######## Functions used by tests: ##########################################
     def stickSimulationTesttvec(self, **kwargs):
         stick = LFPy.Cell(morphology = os.path.join(LFPy.__path__[0], 'stick.hoc'), verbose=True, **kwargs)

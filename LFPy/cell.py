@@ -20,6 +20,7 @@ import pickle
 from LFPy import RecExtElectrode
 from LFPy.run_simulation import _run_simulation, _run_simulation_with_electrode
 from LFPy.run_simulation import _collect_geometry_neuron
+from LFPy.alias_method import alias_method
 import sys
 from warnings import warn
 
@@ -350,9 +351,9 @@ class Cell(object):
         matches segments in neuron.h.allsec(), rewritten from 
         LFPy.hoc function get_idx()'''
         if neuron.h.allsec() == seclist:
-            return np.ones(self.totnsegs)
+            return np.ones(self.totnsegs, dtype=bool)
         else:
-            idxvec = np.zeros(self.totnsegs)
+            idxvec = np.zeros(self.totnsegs, dtype=bool)
             #get sectionnames from seclist
             seclistnames = []
             for sec in seclist:
@@ -366,7 +367,7 @@ class Cell(object):
                     segnames[i] = secname
                     i += 1
             for name in seclistnames:
-                idxvec[segnames == name] = 1
+                idxvec[segnames == name] = True
 
             return idxvec
     
@@ -636,9 +637,9 @@ class Cell(object):
                 if self.verbose:
                     print(('%s did not match any section name' % str(section)))
 
-        idx = np.where(self._get_idx(seclist))[0]
+        idx = self._get_idx(seclist)
         sel_z_idx = (self.zmid[idx] > z_min) & (self.zmid[idx] < z_max)
-        return idx[sel_z_idx]
+        return np.arange(self.totnsegs)[idx][sel_z_idx]
                             
                 
     def get_closest_idx(self, x=0, y=0, z=0, section='allsec'):
@@ -682,14 +683,11 @@ class Cell(object):
             print('No possible segment idx match enquire! returning empty array')
             return np.array([])
         else:
-            idx = np.empty(nidx, dtype=int)
-            norm_area_cumsum = np.cumsum(self.area[poss_idx] / 
-                                         sum(self.area[poss_idx]))
-            
-            for i in range(nidx):
-                idx[i] = np.nonzero(np.random.rand() < norm_area_cumsum)[0].min()
-            
-            return poss_idx[idx]
+            area = self.area[poss_idx]
+            area /= area.sum()
+            idx = alias_method(poss_idx, area, nidx)
+
+            return idx
     
     def simulate(self, electrode=None, rec_imem=False, rec_vmem=False,
                  rec_ipas=False, rec_icap=False,
