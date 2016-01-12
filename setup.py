@@ -49,7 +49,7 @@ with open('README.md') as file:
 
 setup(
     name = "LFPy",
-    version = "1.1.0",
+    version = "1.1.1",
     maintainer = "Espen Hagen",
         maintainer_email = 'e.hagen@fz-juelich.de',
     packages = ['LFPy'],
