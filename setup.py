@@ -51,7 +51,7 @@ setup(
     name = "LFPy",
     version = "1.1.1",
     maintainer = "Espen Hagen",
-        maintainer_email = 'e.hagen@fz-juelich.de',
+    maintainer_email = 'e.hagen@fz-juelich.de',
     packages = ['LFPy'],
     package_data = {'LFPy' : ['stick.hoc', 'sinsyn.mod',
                               os.path.join('i686', '*'),
@@ -64,6 +64,7 @@ setup(
     cmdclass = cmdclass,
     ext_modules = ext_modules,
     url='http://LFPy.github.io',
+    download_url = 'https://github.com/LFPy/LFPy/tarball/v1.1.1',
     license='LICENSE',
     description='A module for modeling Local Field Potentials built on NEURON',
     long_description=long_description,
@@ -77,9 +78,10 @@ setup(
         'Operating System :: OS Independent',
         'Topic :: Scientific/Engineering',
         'Topic :: Scientific/Engineering :: Physics',
+        'Topic :: Utilities',
         'Intended Audience :: Developers',
         'Intended Audience :: Science/Research',
-        'Development Status :: 4 - Beta',
+        'Development Status :: 5 - Production/Stable',
         ],
     install_requires = [
         'numpy', 'scipy', 'matplotlib', 'neuron', 'Cython'
