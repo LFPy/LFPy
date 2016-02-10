@@ -72,8 +72,12 @@ There are few options to install LFPy:
     ::
     
         sudo pip install LFPy
-
-
+    
+    Upgrading LFPy from the Python package index (without attempts at upgrading dependencies):
+    ::
+        
+        pip install --upgrade --no-deps LFPy
+        
 
 2.  From the Python Package Index with only local access using easy_install
     ::
@@ -86,6 +90,7 @@ There are few options to install LFPy:
     
         sudo easy_install LFPy
 
+
 3.  From source:
     ::
     
@@ -93,17 +98,20 @@ There are few options to install LFPy:
         cd LFPy-x.x
         (sudo) python setup.py install (--user)
 
+
 4.  From development version in our git (https://git-scm.com) repository:
     ::
     
         git clone https://github.com/LFPy/LFPy.git
         cd LFPy
         (sudo) python setup.py install (--user)
+
     
-5.  If you only want to have LFPy in one place, you can add this working folder to your $PYTHONPATH, and just compile the Cython extensions;
+5.  If you only want to have LFPy in one place, you can add this working folder to your $PYTHONPATH, and just compile the Cython extensions inplace;
     ::
     
         python setup.py build_ext -i
+
     
 In a fresh terminal and python-session you should now be able to issue: 
 ::  
@@ -125,7 +133,7 @@ Ubuntu 10.04 LTS 64-bit with Anaconda Scientific Python distribution
 By far the simplest solution relying on no source code compilation.
 
 1. Download and install Anaconda using the 64-bit Linux installer script from http://continuum.io/downloads
-2. Download and install the 64-bit Mac .dmg file with NEURON from http://www.neuron.yale.edu/neuron/download
+2. Download and install the 64-bit Debian/Ubuntu .deb file with NEURON from http://www.neuron.yale.edu/neuron/download
 3. Edit your .bashrc or similar file located in the $HOME folder, e.g., by calling in the Terminal.app "gedit $HOME/.bashrc", to include the lines:
 
 ::
@@ -161,7 +169,7 @@ OSX 10.9.x with Anaconda Scientific Python distribution
 By far the simplest solution relying on no source code compilation.
 
 1. Download and install Anaconda using the 64-bit graphical installer from http://continuum.io/downloads
-2. Download and install the 64-bit Debian/Ubuntu .deb file with NEURON from http://www.neuron.yale.edu/neuron/download
+2. Download and install the 64-bit Mac .dmg file with NEURON from http://www.neuron.yale.edu/neuron/download
 3. Edit your .bash_profile or similar file located in the $HOME folder, e.g., by calling in the Terminal.app "open -t $HOME/.bash_profile", to include the lines:
 
 ::
