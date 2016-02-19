@@ -26,6 +26,11 @@ def alias_method(idx, probs, nsyn):
             integer array of randomly drawn compartment indices
             
     '''
+    try:
+        assert idx.size == probs.size
+    except AssertionError as ae:
+        raise ae, 'length of idx and probs arrays must be equal'
+
     # Construct the table.
     J, q = alias_setup(probs)
      
