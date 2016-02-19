@@ -38,6 +38,11 @@ cpdef np.ndarray[LTYPE_t, ndim=1, negative_indices=False] alias_method(np.ndarra
             integer array of randomly drawn compartment indices
             
     '''
+    try:
+        assert idx.size == probs.size
+    except AssertionError as ae:
+        raise ae, 'length of idx and probs arrays must be equal'
+    
     #C-declare variables
     cdef np.ndarray[LTYPE_t, ndim=1, negative_indices=False] J, spc
     cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] q
