@@ -84,7 +84,7 @@ setup(
         'Development Status :: 5 - Production/Stable',
         ],
     install_requires = [
-        'numpy', 'scipy', 'matplotlib', 'neuron', 'Cython'
+        'numpy', 'scipy', 'matplotlib', 'Cython'
         ],
     provides = ['LFPy'],
     )
