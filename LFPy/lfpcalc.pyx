@@ -132,13 +132,6 @@ cpdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] calc_lfp_linesource(
     #case iii, h > 0, l > 0
     [iii] = np.where(hposi & lposi)
     
-    ##case i, h < 0, l < 0
-    #[i] = np.where((h < 0) & (l < 1))
-    ##case ii, h < 0, l >= 0
-    #[ii] = np.where((h < 0) & (l >= 0))
-    ##case iii, h >= 0, l >= 0
-    #[iii] = np.where((h >= 0) & (l >= 1))
-    #
 
     Ememi = _Ememi_calc(i, currmem, sigma, deltaS, l, r2, h)
     Ememii = _Ememii_calc(ii, currmem, sigma, deltaS, l, r2, h)
