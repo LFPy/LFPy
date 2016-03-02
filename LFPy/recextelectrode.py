@@ -61,7 +61,8 @@ class RecExtElectrodeSetup(object):
                  perCellLFP=False, method='linesource', 
                  color='g', marker='o',
                  from_file=False, cellfile=None, verbose=False,
-                 seedvalue=None):
+                 seedvalue=None,
+                 **kwargs):
         '''Initialize class RecExtElectrodeSetup'''
         self.cell = cell
         self.sigma = sigma
@@ -106,6 +107,7 @@ class RecExtElectrodeSetup(object):
         self.verbose = verbose
         self.seedvalue = seedvalue
         
+        self.kwargs = kwargs
         
         #None-type some attributes created by the Cell class
         self.electrodecoeff = None
@@ -214,7 +216,7 @@ class RecExtElectrode(RecExtElectrodeSetup):
                  perCellLFP=False, method='linesource', 
                  color='g', marker='o',
                  from_file=False, cellfile=None, verbose=False,
-                 seedvalue=None):
+                 seedvalue=None, **kwargs):
         '''This is the regular implementation of the RecExtElectrode class
         that calculates the LFP serially using a single core
         
@@ -227,7 +229,7 @@ class RecExtElectrode(RecExtElectrodeSetup):
         RecExtElectrodeSetup.__init__(self, cell, sigma, x, y, z,
                                 N, r, n, r_z, perCellLFP,
                                 method, color, marker, from_file,
-                                cellfile, verbose, seedvalue)
+                                cellfile, verbose, seedvalue, **kwargs)
         
         
     def calc_lfp(self, t_indices=None, cell=None):
@@ -288,7 +290,8 @@ class RecExtElectrode(RecExtElectrodeSetup):
                                             r_limit = r_limit,
                                             timestep = timestep,
                                             t_indices = t_indices,
-                                            method = self.method)
+                                            method = self.method,
+                                            **self.kwargs)
             
         return LFP_temp
 
@@ -357,13 +360,14 @@ class RecExtElectrode(RecExtElectrodeSetup):
             #loop over points on contact
             for j in range(self.n):
                 tmp = lfpcalc.calc_lfp_choose(self.cell,
-                                                    x = x_n[j],
-                                                    y = y_n[j],
-                                                    z = z_n[j],
-                                                    r_limit = r_limit,
-                                                    sigma = self.sigma,
-                                                    t_indices = t_indices,
-                                                    method = self.method)
+                                              x = x_n[j],
+                                              y = y_n[j],
+                                              z = z_n[j],
+                                              r_limit = r_limit,
+                                              sigma = self.sigma,
+                                              t_indices = t_indices,
+                                              method = self.method,
+                                              **self.kwargs)
 
                 
                 if j == 0:
@@ -393,14 +397,14 @@ class RecExtElectrode(RecExtElectrodeSetup):
                 #del lfp_e
                 
             else:
-                lfp_el_pos[i] = lfpcalc.calc_lfp_choose(
-                    self.cell, 
-                    x=self.x[i],
-                    y=self.y[i],
-                    z=self.z[i],
-                    r_limit = r_limit, 
-                    sigma=self.sigma,
-                    t_indices=t_indices)
+                lfp_el_pos[i] = lfpcalc.calc_lfp_choose(self.cell, 
+                                                        x=self.x[i],
+                                                        y=self.y[i],
+                                                        z=self.z[i],
+                                                        r_limit = r_limit, 
+                                                        sigma=self.sigma,
+                                                        t_indices=t_indices,
+                                                        **self.kwargs)
                 
             offsets[i] = {
                 'x_n' : x_n,
