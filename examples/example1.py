@@ -13,13 +13,13 @@ else:
 import zipfile
 import matplotlib.pyplot as plt
 from matplotlib.collections import PolyCollection
-
+from os.path import join
 plt.interactive(1)
 plt.close('all')
 
 
 #Fetch Mainen&Sejnowski 1996 model files
-if not os.path.isfile('patdemo/cells/j4a.hoc'):
+if not os.path.isfile(join('patdemo', 'cells', 'cells', 'j4a.hoc')):
     #get the model files:
     u = urlopen('http://senselab.med.yale.edu/ModelDB/eavBinDown.asp?o=2488&a=23&mime=application/zip')
     localFile = open('patdemo.zip', 'w')
@@ -27,7 +27,7 @@ if not os.path.isfile('patdemo/cells/j4a.hoc'):
     localFile.close()
     #unzip:
     myzip = zipfile.ZipFile('patdemo.zip', 'r')
-    myzip.extractall('.')
+    myzip.extractall('patdemo')
     myzip.close()
 
 
@@ -38,7 +38,7 @@ if not os.path.isfile('patdemo/cells/j4a.hoc'):
 
 # Define cell parameters
 cell_parameters = {          # various cell parameters,
-    'morphology' : 'patdemo/cells/j4a.hoc', # Mainen&Sejnowski, 1996
+    'morphology' : join('patdemo', 'cells', 'cells', 'j4a.hoc'), # Mainen&Sejnowski, 1996
     'rm' : 30000.,      # membrane resistance
     'cm' : 1.0,         # membrane capacitance
     'Ra' : 150,        # axial resistance
