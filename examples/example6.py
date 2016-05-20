@@ -23,6 +23,7 @@
 # importing some modules, including LFPy
 import LFPy
 import os
+from os.path import join
 import sys
 if sys.version < '3':
     from urllib2 import urlopen
@@ -41,7 +42,7 @@ plt.rcParams.update({'font.size' : 12,
 np.random.seed(1234)
 
 #Fetch Mainen&Sejnowski 1996 model files
-if not os.path.isfile('patdemo/cells/j4a.hoc'):
+if not os.path.isfile(join('cells', 'cells', 'j4a.hoc')):
     #get the model files:
     u = urlopen('http://senselab.med.yale.edu/ModelDB/eavBinDown.asp?o=2488&a=23&mime=application/zip')
     localFile = open('patdemo.zip', 'w')
@@ -54,11 +55,11 @@ if not os.path.isfile('patdemo/cells/j4a.hoc'):
 
 #compile mod files every time, because of incompatibility with Hay2011 files:
 os.system('''
-          cd patdemo
+          cd cells
           nrnivmodl
           ''')
 #os.system('nrnivmodl')
-LFPy.cell.neuron.load_mechanisms('patdemo')
+LFPy.cell.neuron.load_mechanisms('cells')
 
 ################################################################################
 # A couple of function declarations
@@ -219,7 +220,7 @@ def insert_synapses(synparams, section, n, spTimesFun, args):
 
 #define cell parameters used as input to cell-class
 cellParameters = {
-    'morphology' : 'morphologies/L5_Mainen96_wAxon_LFPy.hoc',
+    'morphology' : join('morphologies', 'L5_Mainen96_wAxon_LFPy.hoc'),
     'rm' : 30000,               # membrane resistance
     'cm' : 1.0,                 # membrane capacitance
     'Ra' : 150,                 # axial resistance

@@ -2,10 +2,12 @@
 '''
 LFPs from a population of cells relying on MPI
 '''
+
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.collections import PolyCollection, LineCollection
 import os
+from os.path import join
 import sys
 if sys.version < '3':
     from urllib2 import urlopen
@@ -15,7 +17,6 @@ import zipfile
 import LFPy
 import neuron
 from mpi4py import MPI
-
 
 #initialize the MPI interface
 COMM = MPI.COMM_WORLD
@@ -40,7 +41,7 @@ def stationary_poisson(nsyn,lambd,tstart,tstop):
 
 
 #Fetch Mainen&Sejnowski 1996 model files
-if not os.path.isfile('patdemo/cells/j4a.hoc') and RANK==0:
+if not os.path.isfile(join('cells', 'cells', 'j4a.hoc')) and RANK==0:
     #get the model files:
     u = urlopen('http://senselab.med.yale.edu/ModelDB/eavBinDown.asp?o=2488&a=23&mime=application/zip')
     localFile = open('patdemo.zip', 'w')
@@ -56,7 +57,7 @@ COMM.Barrier()
 
 # Define cell parameters
 cell_parameters = {          # various cell parameters,
-    'morphology' : 'patdemo/cells/j4a.hoc', # Mainen&Sejnowski, 1996
+    'morphology' : join('cells', 'cells', 'j4a.hoc'), # Mainen&Sejnowski, 1996
     'rm' : 30000.,      # membrane resistance
     'cm' : 1.0,         # membrane capacitance
     'Ra' : 150,         # axial resistance
@@ -162,7 +163,7 @@ if RANK==0:
     plt.axis('off')
 
     for i_cell in range(n_cells):
-        cell = LFPy.Cell('patdemo/cells/j4a.hoc',
+        cell = LFPy.Cell(join('cells', 'cells', 'j4a.hoc'),
                          nsegs_method='lambda_f',
                          lambda_f=5)
         cell.set_rotation(x=4.99, y=-4.33, z=z_rotation[i_cell])
@@ -188,8 +189,8 @@ if RANK==0:
     ax.plot(point_electrode.x, point_electrode.z, 'o',
             markeredgecolor='none', markerfacecolor='b', markersize=3,
             zorder=10, clip_on=False)
-    plt.annotate("Electrode",\
-            xy=(0., 0.), xycoords='data',\
+    plt.annotate("Electrode",
+            xy=(0., 0.), xycoords='data',
             xytext=(-100., 1000.),
             arrowprops=dict(arrowstyle='wedge',
                             shrinkA=1,
