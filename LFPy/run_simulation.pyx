@@ -53,7 +53,7 @@ def _run_simulation(cell, variable_dt=False, atol=0.001):
     cell._loadspikes()
         
     #print sim.time at intervals
-    cdef double counter = 0.
+    cdef int counter = 0
     cdef double interval
     cdef double tstopms = cell.tstopms
     cdef double t0 = time()
@@ -66,7 +66,7 @@ def _run_simulation(cell, variable_dt=False, atol=0.001):
     
     while neuron.h.t < tstopms:
         neuron.h.fadvance()
-        counter += 1.
+        counter += 1
         if divmod(counter, interval)[1] == 0:
             rtfactor = (neuron.h.t - ti)  * 1E-3 / (time() - t0)
             if cell.verbose:
@@ -90,7 +90,8 @@ def _run_simulation_with_electrode(cell, electrode=None,
     cdef int i, j, tstep, ncoeffs
     cdef int totnsegs = cell.totnsegs
     cdef double tstopms = cell.tstopms
-    cdef double counter, interval
+    cdef int counter
+    cdef double interval
     cdef double t0
     cdef double ti
     cdef double rtfactor
@@ -211,7 +212,7 @@ def _run_simulation_with_electrode(cell, electrode=None,
     cell._loadspikes()
     
     #print sim.time at intervals
-    counter = 0.
+    counter = 0
     tstep = 0
     t0 = time()
     ti = neuron.h.t
@@ -264,7 +265,7 @@ def _run_simulation_with_electrode(cell, electrode=None,
             
             tstep += 1
         neuron.h.fadvance()
-        counter += 1.
+        counter += 1
         if divmod(counter, interval)[1] == 0:
             rtfactor = (neuron.h.t - ti) * 1E-3 / (time() - t0)
             if cell.verbose:
