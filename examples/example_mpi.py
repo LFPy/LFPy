@@ -8,7 +8,9 @@
 # The example uses mpi4py with openmpi, and do not rely on NEURON's MPI.
 ################################################################################
 '''
+
 import os
+from os.path import join
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.collections import PolyCollection
@@ -27,31 +29,30 @@ SIZE = COMM.Get_size()
 RANK = COMM.Get_rank()
 
 #Fetch Mainen&Sejnowski 1996 model files
-if not os.path.isfile('patdemo/cells/j4a.hoc'):
-    if RANK == 0:
-        #get the model files:
-        u = urlopen('http://senselab.med.yale.edu/ModelDB/eavBinDown.asp?o=2488&a=23&mime=application/zip')
-        localFile = open('patdemo.zip', 'w')
-        localFile.write(u.read())
-        localFile.close()
-        #unzip:
-        myzip = zipfile.ZipFile('patdemo.zip', 'r')
-        myzip.extractall('.')
-        myzip.close()
+if not os.path.isfile(join('cells', 'cells', 'j4a.hoc')) and RANK == 0:
 
-        #compile mod files
-        os.system('''
-                  cd patdemo
-                  nrnivmodl
-                  ''')
-    else:
-        pass
-    
+    #get the model files:
+    u = urlopen('http://senselab.med.yale.edu/ModelDB/eavBinDown.asp?o=2488&a=23&mime=application/zip')
+    localFile = open('patdemo.zip', 'w')
+    localFile.write(u.read())
+    localFile.close()
+    #unzip:
+    myzip = zipfile.ZipFile('patdemo.zip', 'r')
+    myzip.extractall('.')
+    myzip.close()
+
+if RANK == 0:
+    #compile mod files
+    os.system('''
+              cd cells
+              nrnivmodl
+              ''')
+
     #sync threads
-    COMM.Barrier()
+COMM.Barrier()
     
 #os.system('nrnivmodl')
-LFPy.cell.neuron.load_mechanisms('patdemo')
+LFPy.cell.neuron.load_mechanisms('cells')
 
 #set one global seed, ensure all randomizations are set on RANK 0 in script!
 np.random.seed(12345)
@@ -252,7 +253,7 @@ if __name__ == '__main__':
     ########### PARAMETERS ##################
     #define cell parameters used as input to cell-class
     cellParameters = {
-        'morphology' : 'morphologies/L5_Mainen96_wAxon_LFPy.hoc',
+        'morphology' : join('morphologies', 'L5_Mainen96_wAxon_LFPy.hoc'),
         'rm' : 30000,               # membrane resistance
         'cm' : 1.0,                 # membrane capacitance
         'Ra' : 150,                 # axial resistance
