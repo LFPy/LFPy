@@ -58,6 +58,7 @@ class Cell(object):
         custom_fun: [None]: list of model-specific functions with args
         custom_fun_args: [None]: list of args passed to custom_fun functions
         pt3d: True/[False]: use pt3d-info of the cell geometries switch
+        celsius: [None]: Temperature in celsius. If nothing is specified here or in custom code it is 6.3 C
         verbose: True/[False]: verbose output switch
     
     Usage of cell class:
@@ -98,6 +99,7 @@ class Cell(object):
                     custom_fun=None,
                     custom_fun_args=None,
                     pt3d=False,
+                    celsius=None,
                     verbose=False):
         '''
         Initialization of the Cell object.
@@ -196,7 +198,7 @@ class Cell(object):
         self._set_nsegs(nsegs_method, lambda_f, d_lambda, max_nsegs_length)
         self.totnsegs = self._calc_totnsegs()
         if self.verbose:
-            print(("Total number of segments: %i" % self.totnsegs))
+            print("Total number of segments: %i" % self.totnsegs)
         
         #extract pt3d info from NEURON, and set these with the same rotation
         #and position in space as in our simulations, assuming RH rule, which
@@ -213,8 +215,11 @@ class Cell(object):
                 print('no soma, using the midpoint if initial segment.')
         self.set_rotation(**self.default_rotation)
 
-    
-
+        if celsius is not None:
+            if neuron.h.celsius != 6.3:
+                print("Overwriting custom temperature of %1.2f. New temperature is %1.2f"
+                      % (neuron.h.celsius, celsius))
+            neuron.h.celsius = celsius
 
 
     def _load_geometry(self):
@@ -234,14 +239,14 @@ class Cell(object):
                 Import = neuron.h.Import3d_Neurolucida3()
                 if not self.verbose:
                     Import.quiet = 1
-            elif fileEnding == 'swc' or fileEnding ==  'SWC':
+            elif fileEnding == 'swc' or fileEnding == 'SWC':
                 Import = neuron.h.Import3d_SWC_read()
-            elif fileEnding == 'xml' or fileEnding ==  'XML':
+            elif fileEnding == 'xml' or fileEnding == 'XML':
                 Import = neuron.h.Import3d_MorphML()
             else:
                 raise ValueError('%s is not a recognised morphology file format!'
                                  ).with_traceback(
-                    'Should be either .hoc, .asc, .swc, .xml!' %self.morphology)
+                    'Should be either .hoc, .asc, .swc, .xml!' % self.morphology)
             
             #assuming now that morphologies file is the correct format
             try:
