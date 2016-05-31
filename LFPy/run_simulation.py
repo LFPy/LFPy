@@ -62,7 +62,8 @@ def _run_simulation(cell, variable_dt=False, atol=0.001):
         if np.mod(counter, interval) == 0:
             rtfactor = (neuron.h.t - ti)  * 1E-3 / (time() - t0)
             if cell.verbose:
-                print(('t = %.0f, realtime factor: %.3f' % (neuron.h.t, rtfactor)))
+                print(('t = {:.0f}, realtime factor: {:.3f}'.format(neuron.h.t,
+                                                                    rtfactor)))
             t0 = time()
             ti = neuron.h.t
 
@@ -205,8 +206,8 @@ def _run_simulation_with_electrode(cell, electrode=None,
         el_LFP_file = h5py.File(file_name, 'w')
         i = 0
         for coeffs in dotprodcoeffs:
-            el_LFP_file['electrode%.3i' % i] = np.empty((coeffs.shape[0],
-                                    cell.tstopms / cell.timeres_NEURON + 1))
+            el_LFP_file['electrode{:03d}'.format(i)] = np.empty((coeffs.shape[0],
+                                    int(cell.tstopms / cell.timeres_NEURON + 1)))
             i += 1
     
     #multiply segment areas with specific membrane currents later,
@@ -229,7 +230,8 @@ def _run_simulation_with_electrode(cell, electrode=None,
                     
             if to_file:
                 for j, coeffs in enumerate(dotprodcoeffs):
-                    el_LFP_file['electrode%.3i' % j][:, tstep] = np.dot(coeffs, imem)
+                    el_LFP_file['electrode{:03d}'.format(j)
+                                ][:, tstep] = np.dot(coeffs, imem)
             
             tstep += 1
         neuron.h.fadvance()
@@ -237,7 +239,8 @@ def _run_simulation_with_electrode(cell, electrode=None,
         if divmod(counter, interval)[1] == 0:
             rtfactor = (neuron.h.t - ti) * 1E-3 / (time() - t0)
             if cell.verbose:
-                print(('t = %.0f, realtime factor: %.3f' % (neuron.h.t, rtfactor)))
+                print('t = {:.0f}, realtime factor: {:.3f}'.format(neuron.h.t,
+                                                                   rtfactor))
             t0 = time()
             ti = neuron.h.t
     
@@ -256,7 +259,8 @@ def _run_simulation_with_electrode(cell, electrode=None,
                 electrodesLFP[j][:, tstep] = np.dot(coeffs, imem)
         if to_file:
             for j, coeffs in enumerate(dotprodcoeffs):
-                el_LFP_file['electrode%.3i' % j][:, tstep] = np.dot(coeffs, imem)
+                el_LFP_file['electrode{:03d}'.format(j)
+                            ][:, tstep] = np.dot(coeffs, imem)
 
     except:
         pass
