@@ -111,10 +111,36 @@ class Synapse(PointProcess):
         cell.synidx.append(idx)
 
     def set_spike_times(self, sptimes=numpy.zeros(0)):
-        '''Set the spike times'''
+        '''Set the spike times explicitly using numpy arrays'''
         self.sptimes = sptimes
         self.cell.sptimeslist.append(sptimes)
+    
+    def set_spike_times_w_netstim(self, noise=1., start=0., number=1E3,
+                                  interval=10., seed=1234.):
+        '''
+        Generate a train of pre-synaptic stimulus times by setting up the
+        neuron NetStim object associated with this synapse
         
+        Arguments
+        ---------
+        noise : float in [0, 1]
+            Fractional randomness, from deterministic to intervals that drawn
+            from negexp distribution (Poisson spiketimes).
+        start : float
+            ms, (most likely) start time of first spike
+        number : int
+            (average) number of spikes
+        interval : float
+            ms, (mean) time between spikes
+        seed : float
+            random seed value
+        '''
+        self.cell.netstimlist[-1].noise = noise
+        self.cell.netstimlist[-1].start = start
+        self.cell.netstimlist[-1].number = number
+        self.cell.netstimlist[-1].interval = interval        
+        self.cell.netstimlist[-1].seed(seed)
+
     def collect_current(self, cell):
         '''Collect synapse current'''
         try:

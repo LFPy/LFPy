@@ -452,8 +452,8 @@ class Cell(object):
             self.synireclist = neuron.h.List()
         if not hasattr(self, 'synvreclist'):
             self.synvreclist = neuron.h.List()
-        #if not hasattr(self, 'netstimlist'):
-        #    self.netstimlist = neuron.h.List()
+        if not hasattr(self, 'netstimlist'):
+           self.netstimlist = neuron.h.List()
         if not hasattr(self, 'netconlist'):
             self.netconlist = neuron.h.List()
         if not hasattr(self, 'sptimeslist'):
@@ -474,12 +474,11 @@ class Cell(object):
                             pass
                     self.synlist.append(syn)  
 
-                    #create NetCon
-                    ns = neuron.h.NetStim(0.5)
-                    ns.number = 0
-                    nc = neuron.h.NetCon(ns, syn)
-                    #did keeping track of netstims cause segfaults or not????
-                    #self.netstimlist.append(ns)
+                    #create NetStim (generator) and NetCon (connection) objects
+                    self.netstimlist.append(neuron.h.NetStim(0.5))
+                    self.netstimlist[-1].number = 0
+                    
+                    nc = neuron.h.NetCon(self.netstimlist[-1], syn)
                     nc.weight[0] = weight
                     self.netconlist.append(nc)
 
@@ -775,6 +774,8 @@ class Cell(object):
             self._collect_istim()
         if len(rec_variables) > 0:
             self._collect_rec_variables(rec_variables)
+        if hasattr(self, 'netstimlist'):
+            del self.netstimlist
 
     def _collect_tvec(self):
         '''
@@ -874,13 +875,17 @@ class Cell(object):
         Initialize spiketimes from netcon if they exist
         '''
         if hasattr(self, 'synlist'):
-            if len(self.synlist) > 0 and len(self.sptimeslist) == 0:
-                errmsg = 'please run method "set_spike_times() for every' + \
-                        '\n' + 'instance of LFPy.pointprocess.Synapse'
-                raise Exception(errmsg)
-            for i in range(int(self.synlist.count())):
-                for ii in range(int(self.sptimeslist.o(i).size)):
-                    self.netconlist.o(i).event(float(self.sptimeslist.o(i)[ii]))
+            if len(self.synlist) == len(self.sptimeslist):
+                for i in range(int(self.synlist.count())):
+                    for ii in range(int(self.sptimeslist.o(i).size)):
+                        self.netconlist.o(i).event(float(self.sptimeslist.o(i)[ii]))
+            # elif len(self.synlist) > 0 and len(self.sptimeslist) == 0:
+            #     errmsg = 'please run method "set_spike_times() for every' + \
+            #             '\n' + 'instance of LFPy.pointprocess.Synapse'
+            #     raise Exception(errmsg)
+            # else:
+            #     pass
+            
 
     
     def _set_soma_volt_recorder(self):
