@@ -19,7 +19,7 @@ from time import time
 def _run_simulation(cell, variable_dt=False, atol=0.001):
     '''
     Running the actual simulation in NEURON, simulations in NEURON
-    is now interruptable.
+    are now interruptable.
     '''
     neuron.h.dt = cell.timeres_NEURON
     
