@@ -39,7 +39,7 @@ class Cell(object):
         rm: [30000]: membrane resistivity
         cm: [1.0]: membrane capacitance
         e_pas: [-65.]: passive mechanism reversal potential
-        extracellular: [True]/False: switch for NEURON's extracellular mechanism
+        extracellular: [False]/True: switch for NEURON's extracellular mechanism
     
         timeres_NEURON: [0.1]: internal dt for NEURON simulation
         timeres_python: [0.1]: overall dt for python simulation
@@ -85,7 +85,7 @@ class Cell(object):
                     rm=30000,
                     cm=1.0,
                     e_pas=-65.,
-                    extracellular = True,
+                    extracellular = False,
                     timeres_NEURON=2**-3,
                     timeres_python=2**-3,
                     tstartms=0,
@@ -192,7 +192,7 @@ class Cell(object):
             self._set_extracellular()
         else:
             if self.verbose:
-                print("no extracellular mechanism inserted, can't access imem!")
+                print("no extracellular mechanism inserted")
         
         #set number of segments accd to rule, and calculate the number
         self._set_nsegs(nsegs_method, lambda_f, d_lambda, max_nsegs_length)
@@ -426,7 +426,7 @@ class Cell(object):
     
     def _set_extracellular(self):
         '''Insert extracellular mechanism on all sections
-        to access i_membrane'''
+        to set a V_ext as boundary condition'''
         for sec in self.allseclist:
             sec.insert('extracellular')
             
@@ -790,8 +790,6 @@ class Cell(object):
         containing all the membrane currents.
         '''
         self.imem = np.array(self.memireclist)
-        for i in range(self.imem.shape[0]):
-            self.imem[i, ] *= self.area[i] * 1E-2
         self.memireclist = None
         del self.memireclist
     
@@ -920,12 +918,16 @@ class Cell(object):
         '''
         Record membrane currents for all segments
         '''
+        # set up NEURON to use the use_fast_imem solver instead of
+        # extracellular mech
+        cvode = neuron.h.CVode()
+        cvode.use_fast_imem(1)
         self.memireclist = neuron.h.List()
         for sec in self.allseclist:
             for seg in sec:
                 memirec = neuron.h.Vector(int(self.tstopms / 
                                               self.timeres_python+1))
-                memirec.record(seg._ref_i_membrane, self.timeres_python)
+                memirec.record(seg._ref_i_membrane_, self.timeres_python)
                 self.memireclist.append(memirec)
     
     def _set_ipas_recorders(self):

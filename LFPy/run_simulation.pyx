@@ -196,6 +196,8 @@ def _run_simulation_with_electrode(cell, electrode=None,
         cvode.atol(atol)
     else:
         cvode.active(0)
+        # allow fast calculation of i_membrane_
+        cvode.use_fast_imem(1)
     
     #initialize state
     neuron.h.finitialize(cell.v_init)
@@ -244,19 +246,14 @@ def _run_simulation_with_electrode(cell, electrode=None,
             i += 1
 
 
-    #multiply segment areas with specific membrane currents later:
-    #mum2 conversion factor:
-    area *= 1E-2    
     #run fadvance until time limit, and calculate LFPs for each timestep
     while neuron.h.t < tstopms:
         if neuron.h.t >= 0:
             i = 0
             for sec in cell.allseclist:
                 for seg in sec:
-                    imem[i] = seg.i_membrane
+                    imem[i] = seg.i_membrane_
                     i += 1
-            #pA/mum2 -> nA conversion
-            imem *= area
 
             if to_memory:
                 for j, coeffs in enumerate(dotprodcoeffs):
@@ -285,8 +282,6 @@ def _run_simulation_with_electrode(cell, electrode=None,
             for seg in sec:
                 imem[i] = seg.i_membrane
                 i += 1
-        #pA/mum2 -> nA conversion
-        imem *= area
 
         if to_memory:
             for j, coeffs in enumerate(dotprodcoeffs):
