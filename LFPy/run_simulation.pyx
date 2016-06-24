@@ -280,7 +280,7 @@ def _run_simulation_with_electrode(cell, electrode=None,
         i = 0
         for sec in cell.allseclist:
             for seg in sec:
-                imem[i] = seg.i_membrane
+                imem[i] = seg.i_membrane_
                 i += 1
 
         if to_memory:
