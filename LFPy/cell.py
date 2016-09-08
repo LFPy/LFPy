@@ -343,6 +343,7 @@ class Cell(object):
             self.allsecnames.append(sec.name())
             self.allseclist.append(sec=sec)
         
+        
         #list of soma sections, assuming it is named on the format "soma*"
         self.nsomasec = 0
         self.somalist = neuron.h.SectionList()
@@ -1364,7 +1365,7 @@ class Cell(object):
         return np.r_[self.get_idx(parent), idx]
 
 
-    def get_idx_name(self, idx=np.array([0])):
+    def get_idx_name(self, idx=np.array([0], dtype=int)):
         '''
         Return NEURON convention name of segments with index idx.
         The returned argument is a list of tuples with corresponding
@@ -1398,7 +1399,7 @@ class Cell(object):
                 allsegnames.append((segidx, '%s'  % sec.name(), seg.x))
                 segidx += 1
         
-        return allsegnames[idx]
+        return np.array(allsegnames, dtype=object)[idx]
 
     def _collect_pt3d(self):
         '''collect the pt3d info, for each section'''
