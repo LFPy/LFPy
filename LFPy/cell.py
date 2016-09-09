@@ -737,7 +737,10 @@ class Cell(object):
         # set up integrator, use the CVode().fast_imem method by default
         # as it doesn't hurt sim speeds much if at all. 
         cvode = neuron.h.CVode()
-        cvode.use_fast_imem(1)
+        try:
+            cvode.use_fast_imem(1)
+        except AttributeError as ae:
+            raise ae, 'NEURON appears to be outdated, CVode().use_fast_imem() method not found.'
 
         if rec_imem:
             self._set_imem_recorders()
