@@ -21,16 +21,14 @@ ctypedef np.float64_t DTYPE_t
 ctypedef Py_ssize_t   LTYPE_t
 
 
-def _run_simulation(cell, variable_dt=False, atol=0.001):
+def _run_simulation(cell, cvode, variable_dt=False, atol=0.001):
     '''
     Running the actual simulation in NEURON, simulations in NEURON
     is now interruptable.
     '''
     neuron.h.dt = cell.timeres_NEURON
     
-    cvode = neuron.h.CVode()
-    
-    #don't know if this is the way to do, but needed for variable dt method
+    # variable dt method
     if variable_dt:
         cvode.active(1)
         cvode.atol(atol)
@@ -76,7 +74,7 @@ def _run_simulation(cell, variable_dt=False, atol=0.001):
             ti = neuron.h.t
 
 
-def _run_simulation_with_electrode(cell, electrode=None,
+def _run_simulation_with_electrode(cell, cvode, electrode=None,
                                    variable_dt=False, atol=0.001,
                                    to_memory=True, to_file=False,
                                    file_name=None, dotprodcoeffs=None):
@@ -186,10 +184,7 @@ def _run_simulation_with_electrode(cell, electrode=None,
     
     # Initialize NEURON simulations of cell object    
     neuron.h.dt = timeres_NEURON
-    
-    #integrator
-    cvode = neuron.h.CVode()
-    
+        
     #don't know if this is the way to do, but needed for variable dt method
     if variable_dt:
         cvode.active(1)

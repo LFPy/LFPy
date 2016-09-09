@@ -734,6 +734,11 @@ class Cell(object):
         self._set_soma_volt_recorder()
         self._collect_tvec()
         
+        # set up integrator, use the CVode().fast_imem method by default
+        # as it doesn't hurt sim speeds much if at all. 
+        cvode = neuron.h.CVode()
+        cvode.use_fast_imem(1)
+
         if rec_imem:
             self._set_imem_recorders()
         if rec_vmem:
@@ -745,18 +750,19 @@ class Cell(object):
         if len(rec_variables) > 0:
             self._set_variable_recorders(rec_variables)
         
+        
         #run fadvance until t >= tstopms, and calculate LFP if asked for
         if electrode is None and dotprodcoeffs is None:
             if not rec_imem:
                 print(("rec_imem = %s, membrane currents will not be recorded!" \
                                   % str(rec_imem)))
-            _run_simulation(self, variable_dt, atol)
+            _run_simulation(self, cvode, variable_dt, atol)
         else:
             #allow using both electrode and additional coefficients:
-            _run_simulation_with_electrode(self, electrode, variable_dt, atol,
+            _run_simulation_with_electrode(self, cvode, electrode, variable_dt, atol,
                                                to_memory, to_file, file_name,
                                                dotprodcoeffs)
-        #somatic trace
+        # somatic trace
         self.somav = np.array(self.somav)
         
         if rec_imem:
@@ -919,10 +925,8 @@ class Cell(object):
         '''
         Record membrane currents for all segments
         '''
-        # set up NEURON to use the use_fast_imem solver instead of
-        # extracellular mech
-        cvode = neuron.h.CVode()
-        cvode.use_fast_imem(1)
+        neuron.h.finitialize(self.v_init) # need to set voltage, otherwise the
+                                          # returned currents will be wrong
         self.memireclist = neuron.h.List()
         for sec in self.allseclist:
             for seg in sec:
