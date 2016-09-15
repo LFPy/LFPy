@@ -6,15 +6,16 @@ file LFPyCellTemplate.hoc
 '''
 import LFPy
 import neuron
-import pylab as pl
+import numpy as np
+import matplotlib.pyplot as plt
 
 #A plottin' function
 def plotcell(cell, color='k'):
     for sec in cell.cell.all:
         idx = cell.get_idx(sec.name())
-        pl.plot(pl.r_[cell.xstart[idx], cell.xend[idx][-1]],
-                pl.r_[cell.zstart[idx], cell.zend[idx][-1]],
-                color=color)
+        plt.plot(np.r_[cell.xstart[idx], cell.xend[idx][-1]],
+                 np.r_[cell.zstart[idx], cell.zend[idx][-1]],
+                 color=color)
     print(' ')
 
 #delete cell instances from previous script executions,
@@ -46,8 +47,5 @@ cell3 = LFPy.TemplateCell(
     templateargs=None)
 cell3.set_pos(400)
 plotcell(cell=cell3, color='b')
-
-
-
-pl.show()
+plt.show()
 

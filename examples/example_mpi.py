@@ -247,6 +247,7 @@ class Population:
             ax.set_ylabel('$z$ ($\mu$m)')
             
             fig.savefig('example_mpi.pdf', dpi=300)
+            plt.show()
         
 
 if __name__ == '__main__':
@@ -322,5 +323,4 @@ if __name__ == '__main__':
                      stationaryGammaArgs,)
     population.run()
     population.plotstuff()
-    plt.show()
-
+    

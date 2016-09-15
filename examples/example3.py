@@ -289,4 +289,5 @@ if RANK==0:
 
 
     fig.savefig('example3.pdf', dpi=300)
+    plt.show()
 

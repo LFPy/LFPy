@@ -94,7 +94,7 @@ There are few options to install LFPy:
 Documentation
 =============
 
-To generate the html documentation issue from the LFPy source code directory:
+To generate the html documentation, issue from the LFPy source code directory:
 ::
     
     sphinx-build -b html /path/to/LFPy/documentation/sources path/to/dest

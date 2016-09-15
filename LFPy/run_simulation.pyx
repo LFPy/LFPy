@@ -21,16 +21,14 @@ ctypedef np.float64_t DTYPE_t
 ctypedef Py_ssize_t   LTYPE_t
 
 
-def _run_simulation(cell, variable_dt=False, atol=0.001):
+def _run_simulation(cell, cvode, variable_dt=False, atol=0.001):
     '''
     Running the actual simulation in NEURON, simulations in NEURON
     is now interruptable.
     '''
     neuron.h.dt = cell.timeres_NEURON
     
-    cvode = neuron.h.CVode()
-    
-    #don't know if this is the way to do, but needed for variable dt method
+    # variable dt method
     if variable_dt:
         cvode.active(1)
         cvode.atol(atol)
@@ -76,7 +74,7 @@ def _run_simulation(cell, variable_dt=False, atol=0.001):
             ti = neuron.h.t
 
 
-def _run_simulation_with_electrode(cell, electrode=None,
+def _run_simulation_with_electrode(cell, cvode, electrode=None,
                                    variable_dt=False, atol=0.001,
                                    to_memory=True, to_file=False,
                                    file_name=None, dotprodcoeffs=None):
@@ -186,16 +184,15 @@ def _run_simulation_with_electrode(cell, electrode=None,
     
     # Initialize NEURON simulations of cell object    
     neuron.h.dt = timeres_NEURON
-    
-    #integrator
-    cvode = neuron.h.CVode()
-    
+        
     #don't know if this is the way to do, but needed for variable dt method
     if variable_dt:
         cvode.active(1)
         cvode.atol(atol)
     else:
         cvode.active(0)
+        # allow fast calculation of i_membrane_
+        cvode.use_fast_imem(1)
     
     #initialize state
     neuron.h.finitialize(cell.v_init)
@@ -244,19 +241,14 @@ def _run_simulation_with_electrode(cell, electrode=None,
             i += 1
 
 
-    #multiply segment areas with specific membrane currents later:
-    #mum2 conversion factor:
-    area *= 1E-2    
     #run fadvance until time limit, and calculate LFPs for each timestep
     while neuron.h.t < tstopms:
         if neuron.h.t >= 0:
             i = 0
             for sec in cell.allseclist:
                 for seg in sec:
-                    imem[i] = seg.i_membrane
+                    imem[i] = seg.i_membrane_
                     i += 1
-            #pA/mum2 -> nA conversion
-            imem *= area
 
             if to_memory:
                 for j, coeffs in enumerate(dotprodcoeffs):
@@ -283,10 +275,8 @@ def _run_simulation_with_electrode(cell, electrode=None,
         i = 0
         for sec in cell.allseclist:
             for seg in sec:
-                imem[i] = seg.i_membrane
+                imem[i] = seg.i_membrane_
                 i += 1
-        #pA/mum2 -> nA conversion
-        imem *= area
 
         if to_memory:
             for j, coeffs in enumerate(dotprodcoeffs):
