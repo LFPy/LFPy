@@ -49,7 +49,7 @@ with open('README.md') as file:
 
 setup(
     name = "LFPy",
-    version = "1.1.2",
+    version = "1.1.3",
     maintainer = "Espen Hagen",
     maintainer_email = 'e.hagen@fz-juelich.de',
     packages = ['LFPy'],
@@ -64,7 +64,7 @@ setup(
     cmdclass = cmdclass,
     ext_modules = ext_modules,
     url='http://LFPy.github.io',
-    download_url = 'https://github.com/LFPy/LFPy/tarball/v1.1.1',
+    download_url = 'https://github.com/LFPy/LFPy/tarball/v1.1.3',
     license='LICENSE',
     description='A module for modeling Local Field Potentials built on NEURON',
     long_description=long_description,

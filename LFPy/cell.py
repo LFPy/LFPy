@@ -740,8 +740,8 @@ class Cell(object):
         try:
             cvode.use_fast_imem(1)
         except AttributeError as ae:
-            raise ae, 'NEURON appears to be outdated, CVode().use_fast_imem() method not found.'
-
+            raise Exception, 'neuron.h.CVode().use_fast_imem() not found. Please update NEURON to v.7.4 or newer'
+        
         if rec_imem:
             self._set_imem_recorders()
         if rec_vmem:

@@ -167,15 +167,15 @@ def plot_ex3(cell, electrode):
     #plot the somatic trace
     ax = fig.add_axes([0.1, 0.7, 0.5, 0.2])
     ax.plot(cell.tvec, cell.somav)
-    ax.set_xlabel('Time [ms]')
-    ax.set_ylabel('Soma pot. [mV]')
+    ax.set_xlabel('Time (ms)')
+    ax.set_ylabel('Soma pot. (mV)')
     
     #plot the synaptic current
     ax = fig.add_axes([0.1, 0.4, 0.5, 0.2])
     for i in range(len(cell.synapses)):
         ax.plot(cell.tvec, cell.synapses[i].i, color=cell.synapses[i].color)
-    ax.set_xlabel('Time [ms]')
-    ax.set_ylabel('Syn. i [nA]')
+    ax.set_xlabel('Time (ms)')
+    ax.set_ylabel('Syn. i (nA)')
     
     #plot the LFP as image plot
     ax = fig.add_axes([0.1, 0.1, 0.5, 0.2])
@@ -191,8 +191,8 @@ def plot_ex3(cell, electrode):
     cbar = plt.colorbar(im, cax=cax)
     cbar.set_label('LFP (mV)')
     ax.axis(ax.axis('tight'))
-    ax.set_xlabel('Time [ms]')
-    ax.set_ylabel('z [$\mu$m]')
+    ax.set_xlabel('Time (ms)')
+    ax.set_ylabel('z ($\mu$m)')
     
     #plot the morphology, electrode contacts and synapses
     ax = fig.add_axes([0.65, 0.1, 0.25, 0.8], frameon=False)
