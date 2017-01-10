@@ -236,7 +236,6 @@ class RecExtElectrode(RecExtElectrodeSetup):
             cell : LFPy.Cell like object
             sigma : 
         '''
-        
         RecExtElectrodeSetup.__init__(self, cell, sigma, x, y, z,
                                 N, r, n, shape, r_z, perCellLFP,
                                 method, color, marker, from_file,
