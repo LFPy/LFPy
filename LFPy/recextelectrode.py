@@ -40,9 +40,9 @@ class RecExtElectrodeSetup(object):
         n : int,
             if N is not None and r > 0, the number of points to use for each
                   contact point in order to calculate average
-        square : bool,
-            if square is True, the electrode shape is a square and r is used
-                  as square side
+        shape : str,
+            'circle'/'square' (default 'circle') defines the contact point shape
+                  If 'circle' r is the radius, if 'square' r is the side length
         method : str,
             ['linesource']/'pointsource'/'som_as_point' switch
         color : str,
