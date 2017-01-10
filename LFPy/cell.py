@@ -1643,6 +1643,7 @@ class Cell(object):
             
             plt.show()
         '''
+        
         if len(projection) != 2:
             raise ValueError("projection arg be a tuple like ('x', 'y')")
         if 'x' in projection and 'y' in projection:
