@@ -1001,8 +1001,6 @@ class Cell(object):
         diffy = ypos-self.somapos[1]
         diffz = zpos-self.somapos[2]
 
-        print diffx, diffy, diffz
-
         self.somapos[0] = xpos
         self.somapos[1] = ypos
         self.somapos[2] = zpos
