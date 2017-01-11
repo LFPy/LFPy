@@ -209,6 +209,7 @@ class Cell(object):
         #Gather geometry, set position and rotation of morphology
         self._collect_geometry()
         if hasattr(self, 'somapos'):
+            self.somapos = [0, 0, 0]
             self.set_pos()
         else:
             if self.verbose:
@@ -568,9 +569,9 @@ class Cell(object):
         
         _collect_geometry_neuron(self)
         self._calc_midpoints()
-        
+
         self.somaidx = self.get_idx(section='soma')
-                
+
         if self.somaidx.size > 1:
             xmids = self.xmid[self.somaidx]
             ymids = self.ymid[self.somaidx]
@@ -595,6 +596,8 @@ class Cell(object):
             self.somapos[2] = self.zmid[self.somaidx]
         else:
             raise Exception('Huh?!')
+        
+
     
     def _calc_midpoints(self):
         '''Calculate midpoints of each segment'''
@@ -998,6 +1001,8 @@ class Cell(object):
         diffy = ypos-self.somapos[1]
         diffz = zpos-self.somapos[2]
 
+        print diffx, diffy, diffz
+
         self.somapos[0] = xpos
         self.somapos[1] = ypos
         self.somapos[2] = zpos
@@ -1013,7 +1018,7 @@ class Cell(object):
             self.xend += diffx
             self.yend += diffy
             self.zend += diffz
-        
+
         self._calc_midpoints()
         self._update_synapse_positions()
 
