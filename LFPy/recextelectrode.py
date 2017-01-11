@@ -40,6 +40,9 @@ class RecExtElectrodeSetup(object):
         n : int,
             if N is not None and r > 0, the number of points to use for each
                   contact point in order to calculate average
+        shape : str,
+            'circle'/'square' (default 'circle') defines the contact point shape
+                  If 'circle' r is the radius, if 'square' r is the side length
         method : str,
             ['linesource']/'pointsource'/'som_as_point' switch
         color : str,
@@ -57,7 +60,7 @@ class RecExtElectrodeSetup(object):
     '''
     def __init__(self, cell=None, sigma=0.3,
                  x=np.array([0]), y=np.array([0]), z=np.array([0]),
-                 N=None, r=None, n=None, r_z=None,
+                 N=None, r=None, n=None, shape=None, r_z=None,
                  perCellLFP=False, method='linesource', 
                  color='g', marker='o',
                  from_file=False, cellfile=None, verbose=False,
@@ -100,6 +103,13 @@ class RecExtElectrodeSetup(object):
             
         self.r = r
         self.n = n
+        if shape is None:
+            self.shape = 'circle'
+        elif shape in ['circle', 'square']:
+            self.shape = shape
+        else:
+            raise ValueError('The shape argument must be either: None, \'circle\', \'square\'')
+
         self.r_z = r_z
         self.perCellLFP = perCellLFP
         
@@ -212,7 +222,7 @@ class RecExtElectrode(RecExtElectrodeSetup):
 
     def __init__(self, cell=None, sigma=0.3,
                  x=np.array([0]), y=np.array([0]), z=np.array([0]),
-                 N=None, r=None, n=0, r_z=None,
+                 N=None, r=None, n=0, shape=None, r_z=None,
                  perCellLFP=False, method='linesource', 
                  color='g', marker='o',
                  from_file=False, cellfile=None, verbose=False,
@@ -227,7 +237,7 @@ class RecExtElectrode(RecExtElectrodeSetup):
             sigma : 
         '''
         RecExtElectrodeSetup.__init__(self, cell, sigma, x, y, z,
-                                N, r, n, r_z, perCellLFP,
+                                N, r, n, shape, r_z, perCellLFP,
                                 method, color, marker, from_file,
                                 cellfile, verbose, seedvalue, **kwargs)
         
@@ -236,6 +246,7 @@ class RecExtElectrode(RecExtElectrodeSetup):
         '''Calculate LFP on electrode geometry from all cell instances.
         Will chose distributed calculated if electrode contain 'n', 'N', and 'r'
         '''
+
         if cell is not None:
             self.cell = cell
             self._test_imem_sum()
@@ -252,8 +263,8 @@ class RecExtElectrode(RecExtElectrodeSetup):
                 raise ValueError("n = %i must be larger that 1" % self.n)
             else:
                 pass
-            
-            [self.circle, self.offsets, LFP_temp] = \
+
+            [self.circle_circum, self.offsets, LFP_temp] = \
                 self._lfp_el_pos_calc_dist(t_indices=t_indices,
                                            r_limit=self.cell.diam/2)
             if self.verbose:
@@ -303,11 +314,12 @@ class RecExtElectrode(RecExtElectrodeSetup):
                              ):
         '''
         Calc. of LFP over an n-point integral approximation over flat
-        electrode surface with radius r. The locations of these n points on
-        the electrode surface are random,  within the given radius. '''
+        electrode surface: circle of radius r or square of side r. The
+        locations of these n points on the electrode surface are random,
+        within the given surface. '''
         lfp_el_pos = np.zeros(self.LFP.shape)
         offsets = {}
-        circle = {}
+        circle_circ = {}
 
         def create_crcl(m, i):
             '''make circumsize of contact point'''
@@ -327,6 +339,21 @@ class RecExtElectrode(RecExtElectrodeSetup):
             
             return crclx, crcly, crclz
 
+        def create_sqr(m, i):
+            '''make circle in which square contact is circumscribed'''
+            sqr = np.zeros((m, 3))
+            for j in range(m):
+                B = [(np.random.rand() - 0.5),
+                     (np.random.rand() - 0.5),
+                     (np.random.rand() - 0.5)]
+                sqr[j,] = np.cross(self.N[i,], B)/np.linalg.norm(np.cross(self.N[i,], B)) * self.r * np.sqrt(2)/2
+
+            sqrx = sqr[:, 0] + self.x[i]
+            sqry = sqr[:, 1] + self.y[i]
+            sqrz = sqr[:, 2] + self.z[i]
+
+            return sqrx, sqry, sqrz
+
         def calc_xyz_n(i):
             '''calculate some offsets'''
             #offsets and radii init
@@ -336,17 +363,26 @@ class RecExtElectrode(RecExtElectrodeSetup):
             #assert the same random numbers are drawn every time
             if self.seedvalue is not None:
                 np.random.seed(self.seedvalue)
-            for j in range(self.n):
-                A = [(np.random.rand()-0.5)*self.r*2,
-                    (np.random.rand()-0.5)*self.r*2,
-                    (np.random.rand()-0.5)*self.r*2]
-                offs[j, ] = np.cross(self.N[i, ], A)
-                r2[j] = offs[j, 0]**2 + offs[j, 1]**2 + offs[j, 2]**2
-                while r2[j] > self.r**2:
+
+            if self.shape is 'circle':
+                for j in range(self.n):
                     A = [(np.random.rand()-0.5)*self.r*2,
                         (np.random.rand()-0.5)*self.r*2,
                         (np.random.rand()-0.5)*self.r*2]
                     offs[j, ] = np.cross(self.N[i, ], A)
+                    r2[j] = offs[j, 0]**2 + offs[j, 1]**2 + offs[j, 2]**2
+                    while r2[j] > self.r**2:
+                        A = [(np.random.rand()-0.5)*self.r*2,
+                            (np.random.rand()-0.5)*self.r*2,
+                            (np.random.rand()-0.5)*self.r*2]
+                        offs[j, ] = np.cross(self.N[i, ], A)
+                        r2[j] = offs[j, 0]**2 + offs[j, 1]**2 + offs[j, 2]**2
+            elif self.shape is 'square':
+                for j in range(self.n):
+                    A = [(np.random.rand()-0.5),
+                        (np.random.rand()-0.5),
+                        (np.random.rand()-0.5)]
+                    offs[j, ] = np.cross(self.N[i, ], A)*self.r
                     r2[j] = offs[j, 0]**2 + offs[j, 1]**2 + offs[j, 2]**2
 
             x_n = offs[:, 0] + self.x[i]
@@ -387,9 +423,6 @@ class RecExtElectrode(RecExtElectrodeSetup):
                 #fetch offsets:
                 x_n, y_n, z_n = calc_xyz_n(i)
                 
-                
-
-                
                 #fill in with contact average
                 lfp_el_pos[i] = loop_over_points(x_n, y_n, z_n) #lfp_e.mean(axis=0)
                 
@@ -413,15 +446,24 @@ class RecExtElectrode(RecExtElectrodeSetup):
             }
 
             
-            #fetch circle around contact
-            crcl = create_crcl(m, i)
-            circle[i] = {
-                'x' : crcl[0],
-                'y' : crcl[1],
-                'z' : crcl[2],
-            }
+            #fetch circumscribed circle around contact
+            if self.shape is 'circle':
+                crcl = create_crcl(m, i)
+                circle_circ[i] = {
+                    'x' : crcl[0],
+                    'y' : crcl[1],
+                    'z' : crcl[2],
+                }
+            elif self.shape  is 'square':
+                sqr = create_sqr(m, i)
+                circle_circ[i] = {
+                    'x': sqr[0],
+                    'y': sqr[1],
+                    'z': sqr[2],
+                }
+
         
-        return circle,  offsets,  lfp_el_pos
+        return circle_circ,  offsets,  lfp_el_pos
 
 
 
