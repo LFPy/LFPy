@@ -1005,14 +1005,14 @@ class Cell(object):
         #also update the pt3d_pos:
         if self.pt3d and hasattr(self, 'x3d'):
                 self._set_pt3d_pos(diffx, diffy, diffz)
+        else:
+            self.xstart += diffx
+            self.ystart += diffy
+            self.zstart += diffz
 
-        self.xstart += diffx
-        self.ystart += diffy
-        self.zstart += diffz
-
-        self.xend += diffx
-        self.yend += diffy
-        self.zend += diffz
+            self.xend += diffx
+            self.yend += diffy
+            self.zend += diffz
         
         self._calc_midpoints()
         self._update_synapse_positions()
