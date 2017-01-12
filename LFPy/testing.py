@@ -11,6 +11,9 @@ import LFPy
 import neuron
 from warnings import warn
 
+# for nosetests to run load the SinSyn sinusoid synapse currrent mechanism
+neuron.load_mechanisms(LFPy.__path__[0])
+
 class testLFPy(unittest.TestCase):
     '''
     A set of test functions for each method of calculating the LFP, where the
@@ -737,9 +740,6 @@ def test(verbosity=2):
         verbosity : int
             unittest.TextTestRunner verbosity level
     '''
-    #load sinusoid synapse currrent mechanism
-    neuron.load_mechanisms(LFPy.__path__[0])
-
     #check if sinsyn.mod is compiled, if it isn't, some tests will fail
     if not hasattr(neuron.h, 'SinSyn'):
         warn('tests will fail because the sinsyn.mod mechanism is not compiled')
