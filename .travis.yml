@@ -11,7 +11,7 @@ addons:
       - gfortran
 install:
   - travis_wait 30 pip install scipy -q
-  - pip install cython coveralls -q
+  - pip install setuptools cython coveralls -q
   - source continuous_integration/install.sh
 script: bash continuous_integration/test_script.sh
 after_success:

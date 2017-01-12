@@ -6,7 +6,7 @@ import shutil
 try:
     from setuptools import setup, Extension
 except ImportError as ie:
-    raise ie, 'please install setuptools'
+    raise ie('please install setuptools')
 try:
     import numpy
     from Cython.Distutils import build_ext
@@ -71,7 +71,6 @@ setup(
     classifiers=[
         'License :: OSI Approved :: GNU General Public License (GPL)',
         'Programming Language :: Python',
-        'Programming Language :: Python :: 2.6',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
@@ -85,7 +84,7 @@ setup(
         'Development Status :: 5 - Production/Stable',
         ],
     install_requires = [
-        'numpy', 'scipy', 'matplotlib', 'Cython'
+        'setuptools', 'numpy', 'scipy', 'matplotlib', 'Cython'
         ],
     provides = ['LFPy'],
     )

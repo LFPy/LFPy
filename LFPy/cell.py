@@ -116,7 +116,7 @@ class Cell(object):
             for numsec, sec in enumerate(neuron.h.allsec()):
                 pass
             if numsec > 0 and self.verbose:
-                print(('%s existing sections deleted from memory' % numsec))
+                print('%s existing sections deleted from memory' % numsec)
             neuron.h('forall delete_section()')
 
         #print a warning if neuron have existing sections
@@ -623,9 +623,9 @@ class Cell(object):
         ::
             
             idx = cell.get_idx(section='allsec')
-            print idx
+            print(idx)
             idx = cell.get_idx(section=['soma', 'dend', 'apic'])
-            print idx
+            print(idx)
             
         '''
         if section == 'allsec': 
@@ -1283,7 +1283,7 @@ class Cell(object):
         vector = []
         try:
             if idx1 < 0 or idx0 < 0:
-                raise Exception
+                raise Exception('idx0 < 0 or idx1 < 0')
             vector.append(self.xmid[idx1] - self.xmid[idx0])
             vector.append(self.ymid[idx1] - self.ymid[idx0])
             vector.append(self.zmid[idx1] - self.zmid[idx0])
