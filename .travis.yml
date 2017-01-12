@@ -7,7 +7,8 @@ addons:
       - liblapack-dev
       - gfortran
 install:
-  - pip install scipy cython coveralls
+  - travis_wait pip install scipy
+  - pip install cython coveralls
   - source continuous_integration/install.sh
 script: bash continuous_integration/test_script.sh
 after_success:
@@ -15,14 +16,5 @@ after_success:
 cache:
   - apt
   - pip
-
-
-#Running a Container Based Docker Image Locally:
-#-Download and install the Docker Engine.
-#-Select an image from Quay.io. If you're not using a language-specific image pick travis-ruby. Open a terminal and start an interactive Docker session using the image URL:
-#   docker run -it quay.io/travisci/travis-python /bin/bash #using travis-python
-#-Switch to the travis user:
-#   su - travis
-#-Clone your git repository into the / folder of the image.
-#-Manually install any dependencies.
-#-Manually run your Travis CI build command.
+  directories:
+    - $HOME/.local/nrn
