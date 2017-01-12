@@ -1,5 +1,5 @@
 #!/bin/bash/sh
-pip install --user scipy cython #numpy nose
+pip install scipy cython #numpy nose
 # install NEURON
 export PWD=pwd
 cd $HOME

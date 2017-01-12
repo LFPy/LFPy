@@ -7,7 +7,7 @@ addons:
       - liblapack-dev
       - gfortran
 install: source continuous_integration/install.sh
-script: nose
+script: nosetests
 
 
 
