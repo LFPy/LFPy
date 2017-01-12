@@ -7,7 +7,7 @@ addons:
       - liblapack-dev
       - gfortran
 install:
-  - travis_wait pip install scipy -q
+  - travis_wait 30 pip install scipy -q
   - pip install cython coveralls -q
   - source continuous_integration/install.sh
 script:
@@ -17,5 +17,5 @@ after_success:
 cache:
   - apt
   - pip
-  - directories:
-    - $HOME/.local/nrn
+  #- directories:
+  #  - $HOME/.local/nrn
