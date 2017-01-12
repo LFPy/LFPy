@@ -286,7 +286,10 @@ class Cell(object):
                             'try running nrnivmodl. ',])
                         raise Exception(ERRMSG)
                 elif code.split('.')[-1] == 'py':
-                    exec(code)
+                    if sys.version >= "3.4":
+                        exec(code, globals())
+                    else:
+                        exec(code)
                 else:
                     raise Exception('%s not a .hoc- nor .py-file' % code)
         
@@ -467,11 +470,18 @@ class Cell(object):
         for sec in self.allseclist:
             for seg in sec:
                 if i == idx:
-                    command = cmd1 + syntype + cmd2  
-                    exec(command)
+                    command = cmd1 + syntype + cmd2
+                    if sys.version >= "3.4":
+                        exec(command, globals())
+                    else:
+                        exec(command)
                     for param in list(kwargs.keys()):
                         try:
-                            exec('syn.' + param + '=' + str(kwargs[param]))
+                            if sys.version >= "3.4":
+                                exec('syn.' + param + '=' + str(kwargs[param]),
+                                     globals())
+                            else:
+                                exec('syn.' + param + '=' + str(kwargs[param]))
                         except:
                             pass
                     self.synlist.append(syn)  
@@ -529,11 +539,18 @@ class Cell(object):
         for sec in self.allseclist:
             for seg in sec:
                 if i == idx:
-                    command = cmd1 + pptype + cmd2  
-                    exec(command)
+                    command = cmd1 + pptype + cmd2
+                    if sys.version >= 3.4:
+                        exec(command)
+                    else:
+                        exec(command, globals())
                     for param in list(kwargs.keys()):
                         try:
-                            exec('stim.' + param + '=' + str(kwargs[param]))
+                            if sys.version >= 3.4:
+                                exec('stim.' + param + '=' + str(kwargs[param]))
+                            else:
+                                exec('stim.' + param + '=' + str(kwargs[param]),
+                                     globals())
                         except SyntaxError:
                             ERRMSG = ''.join(['',
                                 'Point process type "{0}" might not '.format(
