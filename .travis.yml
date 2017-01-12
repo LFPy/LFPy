@@ -16,5 +16,5 @@ after_success:
 cache:
   - apt
   - pip
-  directories:
+  - directories:
     - $HOME/.local/nrn
