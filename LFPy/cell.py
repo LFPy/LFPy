@@ -209,6 +209,7 @@ class Cell(object):
         #Gather geometry, set position and rotation of morphology
         self._collect_geometry()
         if hasattr(self, 'somapos'):
+            self.somapos = [0, 0, 0]
             self.set_pos()
         else:
             if self.verbose:
@@ -569,9 +570,9 @@ class Cell(object):
         
         _collect_geometry_neuron(self)
         self._calc_midpoints()
-        
+
         self.somaidx = self.get_idx(section='soma')
-                
+
         if self.somaidx.size > 1:
             xmids = self.xmid[self.somaidx]
             ymids = self.ymid[self.somaidx]
@@ -596,6 +597,8 @@ class Cell(object):
             self.somapos[2] = self.zmid[self.somaidx]
         else:
             raise Exception('Huh?!')
+        
+
     
     def _calc_midpoints(self):
         '''Calculate midpoints of each segment'''
@@ -1004,30 +1007,28 @@ class Cell(object):
         Move the cell geometry so that midpoint of soma section is
         in (xpos, ypos, zpos). If no soma pos, use the first segment
         '''
-        diffx = self.somapos[0]-xpos
-        diffy = self.somapos[1]-ypos
-        diffz = self.somapos[2]-zpos
-        
-        
+        diffx = xpos-self.somapos[0]
+        diffy = ypos-self.somapos[1]
+        diffz = zpos-self.somapos[2]
+
         self.somapos[0] = xpos
         self.somapos[1] = ypos
         self.somapos[2] = zpos
 
         #also update the pt3d_pos:
         if self.pt3d and hasattr(self, 'x3d'):
-                self._set_pt3d_pos()
+                self._set_pt3d_pos(diffx, diffy, diffz)
         else:
-            self.xstart -= diffx
-            self.ystart -= diffy
-            self.zstart -= diffz
-            
-            self.xend -= diffx
-            self.yend -= diffy
-            self.zend -= diffz
-        
+            self.xstart += diffx
+            self.ystart += diffy
+            self.zstart += diffz
+
+            self.xend += diffx
+            self.yend += diffy
+            self.zend += diffz
+
         self._calc_midpoints()
         self._update_synapse_positions()
-        
 
     
     def strip_hoc_objects(self):
@@ -1464,14 +1465,14 @@ class Cell(object):
         self._collect_geometry()
 
 
-    def _set_pt3d_pos(self):
+    def _set_pt3d_pos(self, diffx=0, diffy=0, diffz=0):
         '''
-        Offset pt3d geometry with cell.somapos
+        Offset pt3d geometry with differential displacement indicated in Cell.set_pos()
         '''
         for i in range(len(self.x3d)):
-            self.x3d[i] += self.somapos[0]
-            self.y3d[i] += self.somapos[1]
-            self.z3d[i] += self.somapos[2]
+            self.x3d[i] += diffx
+            self.y3d[i] += diffy
+            self.z3d[i] += diffz
         self._update_pt3d()
 
 
@@ -1576,43 +1577,43 @@ class Cell(object):
         return x, y, z
     
     def _create_polygon(self, i, projection=('x', 'z')):
-        '''create a polygon to fill for each section'''        
+        '''create a polygon to fill for each section'''
         x = getattr(self, projection[0]+'3d')[i]
         y = getattr(self, projection[1]+'3d')[i]
         #x = self.x3d[i]
         #z = self.z3d[i]
         d = self.diam3d[i]
-        
-        #calculate angles        
+
+        #calculate angles
         dx = np.diff(x)
         dy = np.diff(y)
         theta = np.arctan2(dy, dx)
-        
+
         x = np.r_[x, x[::-1]]
         y = np.r_[y, y[::-1]]
-        
+
         theta = np.r_[theta, theta[::-1]]
         d = np.r_[d, d[::-1]]
-        
+
         #1st corner:
         x[0] -= 0.5 * d[0] * np.sin(theta[0])
         y[0] += 0.5 * d[0] * np.cos(theta[0])
-        
+
         ##pt3d points between start and end of section, first side
         x[1:dx.size] -= 0.25 * d[1:dx.size] * (
             np.sin(theta[:dx.size-1]) + np.sin(theta[1:dx.size]))
         y[1:dy.size] += 0.25 * d[1:dy.size] * (
             np.cos(theta[:dy.size-1]) + np.cos(theta[1:dx.size]))
-        
+
         #end of section, first side
         x[dx.size] -= 0.5 * d[dx.size] * np.sin(theta[dx.size])
         y[dy.size] += 0.5 * d[dy.size] * np.cos(theta[dy.size])
-        
+
         #other side
         #end of section, second side
         x[dx.size+1] += 0.5 * d[dx.size+1] * np.sin(theta[dx.size])
         y[dy.size+1] -= 0.5 * d[dy.size+1] * np.cos(theta[dy.size])
-        
+
         ##pt3d points between start and end of section, second side
         x[::-1][1:dx.size] += 0.25 * d[::-1][1:dx.size] * (
             np.sin(theta[::-1][:dx.size-1]) + np.sin(theta[::-1][1:dx.size]))
@@ -1622,7 +1623,7 @@ class Cell(object):
         #last corner:
         x[-1] += 0.5 * d[-1] * np.sin(theta[-1])
         y[-1] -= 0.5 * d[-1] * np.cos(theta[-1])
-        
+
         return x, y
     
     def get_pt3d_polygons(self, projection=('x', 'z')):
@@ -1665,7 +1666,7 @@ class Cell(object):
             pass
         else:
             mssg = "projection must be a length 2 tuple of 'x', 'y' or 'z'!"
-            raise ValueError(messg)
+            raise ValueError(mssg)
 
         polygons = []
         for i in range(len(self.x3d)):
@@ -1761,7 +1762,7 @@ class Cell(object):
             pass
         else:
             mssg = "projection must be a length 2 tuple of 'x', 'y' or 'z'!"
-            raise ValueError(messg)
+            raise ValueError(mssg)
 
         polygons = []
         for i in np.arange(self.totnsegs):
