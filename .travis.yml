@@ -6,17 +6,15 @@ addons:
       packages:
       - liblapack-dev
       - gfortran
-#cache:
-#  bundler: true
-#  directories:
-#    - $HOME/.local
-
-#install: source continuous_integration/install.sh
-#script: nosetests
+install:
+  - pip install scipy cython coveralls
+  - source continuous_integration/install.sh
 script: bash continuous_integration/test_script.sh
 after_success:
   coveralls
-cache: apt
+cache:
+  - apt
+  - pip
 
 
 #Running a Container Based Docker Image Locally:
