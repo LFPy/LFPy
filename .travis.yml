@@ -10,12 +10,9 @@ install:
   - travis_wait 30 pip install scipy -q
   - pip install cython coveralls -q
   - source continuous_integration/install.sh
-script:
-  - source continuous_integration/test_script.sh
+script: bash continuous_integration/test_script.sh
 after_success:
   coveralls
 cache:
   - apt
   - pip
-  #- directories:
-  #  - $HOME/.local/nrn
