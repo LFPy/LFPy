@@ -6,9 +6,17 @@ addons:
       packages:
       - liblapack-dev
       - gfortran
-install: source continuous_integration/install.sh
-script: nosetests
+#cache:
+#  bundler: true
+#  directories:
+#    - $HOME/.local
 
+#install: source continuous_integration/install.sh
+#script: nosetests
+script: bash continuous_integration/test_script.sh
+after_success:
+  coveralls
+cache: apt
 
 
 #Running a Container Based Docker Image Locally:

@@ -1,5 +1,5 @@
-#!/bin/bash/sh
-pip install scipy cython #numpy nose
+#!/bin/bash
+pip install scipy cython coveralls #numpy nose
 # install NEURON
 export PWD=pwd
 cd $HOME
