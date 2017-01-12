@@ -540,13 +540,13 @@ class Cell(object):
             for seg in sec:
                 if i == idx:
                     command = cmd1 + pptype + cmd2
-                    if sys.version >= 3.4:
+                    if sys.version >= "3.4":
                         exec(command)
                     else:
                         exec(command, globals())
                     for param in list(kwargs.keys()):
                         try:
-                            if sys.version >= 3.4:
+                            if sys.version >= "3.4":
                                 exec('stim.' + param + '=' + str(kwargs[param]))
                             else:
                                 exec('stim.' + param + '=' + str(kwargs[param]),
