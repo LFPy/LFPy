@@ -16,6 +16,5 @@ echo "running make install"
 make install > /dev/null
 cd src/nrnpython
 echo "installing neuron python module"
-python setup.py install --user > /def/null
-
+python setup.py install
 cd $TRAVIS_BUILD_DIR
