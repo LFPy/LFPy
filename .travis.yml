@@ -7,10 +7,11 @@ addons:
       - liblapack-dev
       - gfortran
 install:
-  - travis_wait pip install scipy
-  - pip install cython coveralls
+  - travis_wait pip install scipy -q
+  - pip install cython coveralls -q
   - source continuous_integration/install.sh
-script: bash continuous_integration/test_script.sh
+script:
+  - source continuous_integration/test_script.sh
 after_success:
   coveralls
 cache:

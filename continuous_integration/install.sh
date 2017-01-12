@@ -15,7 +15,7 @@ else
     echo "running ./configure"
     ./configure --prefix=$HOME/.local/nrn --without-iv --with-nrnpython > configure.outp
     echo "running make"
-    make -j4 > make.outp
+    make > make.outp
     echo "running make install"
     make install > make_install.outp
     cd src/nrnpython
