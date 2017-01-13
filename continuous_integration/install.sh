@@ -18,3 +18,4 @@ cd src/nrnpython
 echo "installing neuron python module"
 python setup.py install > /dev/null
 cd $TRAVIS_BUILD_DIR
+

@@ -717,7 +717,7 @@ class testLFPy(unittest.TestCase):
         return real_integral[0] + 1j*imag_integral[0]
 
 
-def test(verbosity=2):
+def _test(verbosity=2):
     '''
     Run tests for the LFPy module implemented using the unittest module.
     
@@ -748,8 +748,3 @@ def test(verbosity=2):
     suite = unittest.TestLoader().loadTestsFromTestCase(testLFPy)
     unittest.TextTestRunner(verbosity=verbosity).run(suite)
     
-
-
-if __name__ == '__main__':
-    #run test function
-    test()

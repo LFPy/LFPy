@@ -11,3 +11,4 @@ python setup.py build_ext -i
 
 # run tests
 nosetests --with-coverage --cover-package=LFPy
+
