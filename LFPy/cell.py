@@ -472,14 +472,14 @@ class Cell(object):
                 if i == idx:
                     command = cmd1 + syntype + cmd2
                     if sys.version >= "3.4":
-                        exec(command, globals())
+                        exec(command, locals(), globals())
                     else:
                         exec(command)
                     for param in list(kwargs.keys()):
                         try:
                             if sys.version >= "3.4":
                                 exec('syn.' + param + '=' + str(kwargs[param]),
-                                     globals())
+                                     locals(), globals())
                             else:
                                 exec('syn.' + param + '=' + str(kwargs[param]))
                         except:
@@ -541,14 +541,14 @@ class Cell(object):
                 if i == idx:
                     command = cmd1 + pptype + cmd2
                     if sys.version >= "3.4":
-                        exec(command, globals())
+                        exec(command, locals(), globals())
                     else:
                         exec(command)
                     for param in list(kwargs.keys()):
                         try:
                             if sys.version >= "3.4":
                                 exec('stim.' + param + '=' + str(kwargs[param]),
-                                     globals())
+                                     locals(), globals())
                             else:
                                 exec('stim.' + param + '=' + str(kwargs[param]))
                         except SyntaxError:

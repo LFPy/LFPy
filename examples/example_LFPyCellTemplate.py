@@ -32,7 +32,7 @@ plotcell(cell=cell1, color='r')
 
 
 cell2 = LFPy.TemplateCell(
-    morphology='morphologies/markram/Source-version/C010398B-P2.asc',
+    morphology='morphologies/markram/Source-Version/C010398B-P2.asc',
     templatefile='LFPyCellTemplate.hoc',
     templatename='LFPyCellTemplate',
     templateargs=None)
