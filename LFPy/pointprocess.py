@@ -11,7 +11,7 @@ but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.'''
 
-import numpy
+import numpy as np
 import neuron
 
 class PointProcess:
@@ -110,7 +110,7 @@ class Synapse(PointProcess):
         cell.synapses.append(self)
         cell.synidx.append(idx)
 
-    def set_spike_times(self, sptimes=numpy.zeros(0)):
+    def set_spike_times(self, sptimes=np.zeros(0)):
         '''Set the spike times explicitly using numpy arrays'''
         self.sptimes = sptimes
         self.cell.sptimeslist.append(sptimes)
@@ -145,14 +145,14 @@ class Synapse(PointProcess):
     def collect_current(self, cell):
         '''Collect synapse current'''
         try:
-            self.i = numpy.array(cell.synireclist.o(self.hocidx))
+            self.i = np.array(cell.synireclist.o(self.hocidx))
         except:
             raise Exception('cell.synireclist deleted from consequtive runs')
     
     def collect_potential(self, cell):
         '''Collect membrane potential of segment with synapse'''
         try:
-            self.v = numpy.array(cell.synvreclist.o(self.hocidx))
+            self.v = np.array(cell.synvreclist.o(self.hocidx))
         except:
             raise Exception('cell.synvreclist deleted from consequtive runs')
         
@@ -243,13 +243,13 @@ class StimIntElectrode(PointProcess):
         '''
         Fetch electrode current from recorder list
         '''
-        self.i = numpy.array(cell.stimireclist.o(self.hocidx))
+        self.i = np.array(cell.stimireclist.o(self.hocidx))
     
     def collect_potential(self, cell):
         '''
         Collect membrane potential of segment with PointProcess
         '''
-        self.v = numpy.array(cell.synvreclist.o(self.hocidx))
+        self.v = np.array(cell.synvreclist.o(self.hocidx))
 
 class PointProcessPlayInSoma:
     '''
@@ -262,19 +262,19 @@ class PointProcessPlayInSoma:
         '''
         self.soma_trace = soma_trace
     
-    def set_play_in_soma(self, cell, t_on=numpy.array([0])):
+    def set_play_in_soma(self, cell, t_on=np.array([0])):
         '''
         Set mechanisms for playing soma trace at time(s) t_on,
         where t_on is a numpy.array
         '''
-        if type(t_on) != numpy.ndarray:
-            t_on = numpy.array(t_on)
+        if type(t_on) != np.ndarray:
+            t_on = np.array(t_on)
         
         f = file(self.soma_trace)
         x = []
         for line in f.readlines():
             x.append(list(map(float, line.split())))
-        x = numpy.array(x)
+        x = np.array(x)
         X = x.T
         f.close()
         
@@ -293,13 +293,13 @@ class PointProcessPlayInSoma:
         somaTrace = trace
         
         for i in range(1, t_on.size):
-            numpy.concatenate((somaTvec, somaTvec0 + t_on[i]))
-            numpy.concatenate((somaTrace, trace))
+            np.concatenate((somaTvec, somaTvec0 + t_on[i]))
+            np.concatenate((somaTrace, trace))
         
-        somaTvec1 = numpy.interp(numpy.arange(somaTvec[0], somaTvec[-1], 
+        somaTvec1 = np.interp(np.arange(somaTvec[0], somaTvec[-1],
                                 cell.timeres_NEURON),
                                 somaTvec, somaTvec)
-        somaTrace1 = numpy.interp(numpy.arange(somaTvec[0], somaTvec[-1],
+        somaTrace1 = np.interp(np.arange(somaTvec[0], somaTvec[-1],
                                 cell.timeres_NEURON),
                                 somaTvec, somaTrace)
         

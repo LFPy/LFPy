@@ -11,10 +11,10 @@ but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.'''
 
+from time import time
 import numpy as np
 cimport numpy as np
 import neuron
-from time import time
 
 DTYPE = np.float64
 ctypedef np.float64_t DTYPE_t

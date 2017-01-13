@@ -10,9 +10,9 @@ This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.'''
-
-import numpy as np
+import sys
 import warnings
+import numpy as np
 from LFPy import lfpcalc, tools
 
 class RecExtElectrodeSetup(object):

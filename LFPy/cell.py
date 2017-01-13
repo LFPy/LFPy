@@ -14,15 +14,15 @@ GNU General Public License for more details.
 '''
 
 import os
-import neuron
-import numpy as np
+import sys
+from warnings import warn
 import pickle
+import numpy as np
+import neuron
 from LFPy import RecExtElectrode
 from LFPy.run_simulation import _run_simulation, _run_simulation_with_electrode
 from LFPy.run_simulation import _collect_geometry_neuron
 from LFPy.alias_method import alias_method
-import sys
-from warnings import warn
 
 class Cell(object):
     '''

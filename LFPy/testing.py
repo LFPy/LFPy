@@ -3,13 +3,13 @@
 extracellular field potentials'''
 
 import os
+from warnings import warn
 import unittest
 import numpy as np
 from scipy.integrate import quad
 from scipy import real, imag
 import LFPy
 import neuron
-from warnings import warn
 
 class testLFPy(unittest.TestCase):
     '''
