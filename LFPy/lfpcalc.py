@@ -13,7 +13,7 @@ GNU General Public License for more details.'''
 
 import numpy as np
 
-def calc_lfp_choose(cell, x=0, y=0, z=0, sigma=0.3,
+def calc_lfp_choose(cell, x=0., y=0., z=0., sigma=0.3,
                     r_limit=None,
                     timestep=None, t_indices=None, method='linesource'):
     '''
@@ -46,7 +46,7 @@ def calc_lfp_choose(cell, x=0, y=0, z=0, sigma=0.3,
                                     r_limit=r_limit,
                                     timestep=timestep, t_indices=t_indices)
 
-def calc_lfp_linesource(cell, x=0, y=0, z=0, sigma=0.3,
+def calc_lfp_linesource(cell, x=0., y=0., z=0., sigma=0.3,
                         r_limit=None,
                         timestep=None, t_indices=None):
     '''Calculate electric field potential using the line-source method, all
@@ -102,9 +102,9 @@ def calc_lfp_linesource(cell, x=0, y=0, z=0, sigma=0.3,
 
     #case i, h < 0, l < 0
     [i] = np.where(hnegi & lnegi)
-    #case ii, h < 0, l > 0
+    #case ii, h < 0, l >= 0
     [ii] = np.where(hnegi & lposi)
-    #case iii, h > 0, l > 0
+    #case iii, h >= 0, l >= 0
     [iii] = np.where(hposi & lposi)
     
     Ememi = _Ememi_calc(i, currmem, sigma, deltaS, l, r2, h)
@@ -116,7 +116,7 @@ def calc_lfp_linesource(cell, x=0, y=0, z=0, sigma=0.3,
     
     return Emem.transpose()
 
-def calc_lfp_som_as_point(cell, x=0, y=0, z=0, sigma=0.3,
+def calc_lfp_som_as_point(cell, x=0., y=0., z=0., sigma=0.3,
                           r_limit=None,
                           timestep=None, t_indices=None):
     '''Calculate electric field potential using the line-source method,
@@ -180,7 +180,7 @@ def calc_lfp_som_as_point(cell, x=0, y=0, z=0, sigma=0.3,
                 % (r_soma, s_limit)))
         r_soma = s_limit
 
-    # Check that no segment is close the electrode than r_limit
+    # Check that no segment is closer to the electrode than r_limit
     if np.sum(np.nonzero( r2 < r_limit*r_limit )) > 0:
         for idx in np.nonzero( r2[1:] < r_limit[1:] * r_limit[1:] )[0]+1:
             if (h[idx] < r_limit[idx]) and \
@@ -202,9 +202,9 @@ def calc_lfp_som_as_point(cell, x=0, y=0, z=0, sigma=0.3,
     #Line sources
     #case i,  h < 0,  l < 0
     i = np.where(hnegi & lnegi)
-    #case ii,  h < 0,  l > 0
+    #case ii,  h < 0,  l >= 0
     ii = np.where(hnegi & lposi)
-    #case iii,  h > 0,  l > 0
+    #case iii,  h >= 0,  l >= 0
     iii = np.where(hposi & lposi)
     
     Ememi = _Ememi_calc(i, currmem, sigma, deltaS, l, r2, h)
@@ -281,12 +281,8 @@ def _h_calc(xstart, xend, ystart, yend, zstart, zend, deltaS, x, y, z):
     '''Subroutine used by calc_lfp_*()'''
     aa = np.array([x - xend, y - yend, z-zend])
     bb = np.array([xend - xstart, yend - ystart, zend - zstart])
-    try:
-        cc = np.dot(aa.T, bb).diagonal().copy()
-    except:
-        raise ValueError
+    cc = np.dot(aa.T, bb).diagonal()
     hh = cc / deltaS
-    hh[0] = 0
     return hh
 
 def _r2_calc(xend, yend, zend, x, y, z, h):
