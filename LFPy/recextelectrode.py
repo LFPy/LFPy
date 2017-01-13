@@ -147,7 +147,6 @@ class RecExtElectrodeSetup(object):
         
         
         if self.cell is not None:
-            
             sum_imem = self.cell.imem.sum(axis=0)
             #check if eye matrix is supplied:
             if np.any(sum_imem == np.ones(self.cell.totnsegs)):
@@ -156,9 +155,10 @@ class RecExtElectrodeSetup(object):
                 if abs(sum_imem).max() >= tolerance:
                     warnings.warn('Membrane currents do not sum to zero')
                     [inds] = np.where((abs(sum_imem) >= tolerance))
-                    for i in inds:
-                        print('membrane current sum of celltimestep %i: %.3e'
-                            % (i, sum_imem[i]))
+                    if self.cell.verbose:
+                        for i in inds:
+                            print('membrane current sum of celltimestep %i: %.3e'
+                                % (i, sum_imem[i]))
                 else:
                     pass
         else:
