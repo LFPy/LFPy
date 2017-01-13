@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-'''Copyright (C) 2012 Computational Neuroscience Group, NMBU.
+"""Copyright (C) 2012 Computational Neuroscience Group, NMBU.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -9,7 +9,9 @@ the Free Software Foundation, either version 3 of the License, or
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.'''
+GNU General Public License for more details.
+
+"""
 
 from time import time
 import numpy as np
@@ -22,10 +24,10 @@ ctypedef Py_ssize_t   LTYPE_t
 
 
 def _run_simulation(cell, variable_dt=False, atol=0.001):
-    '''
+    """
     Running the actual simulation in NEURON, simulations in NEURON
     is now interruptable.
-    '''
+    """
     neuron.h.dt = cell.timeres_NEURON
     
     cvode = neuron.h.CVode()
@@ -80,11 +82,11 @@ def _run_simulation_with_electrode(cell, electrode=None,
                                    variable_dt=False, atol=0.001,
                                    to_memory=True, to_file=False,
                                    file_name=None, dotprodcoeffs=None):
-    '''
+    """
     Running the actual simulation in NEURON.
     electrode argument used to determine coefficient
     matrix, and calculate the LFP on every time step.
-    '''
+    """
     
     #c-declare some variables
     cdef int i, j, tstep, ncoeffs
@@ -325,8 +327,8 @@ def _run_simulation_with_electrode(cell, electrode=None,
 
 
 cpdef _collect_geometry_neuron(cell):
-    '''Loop over allseclist to determine area, diam, xyz-start- and
-    endpoints, embed geometry to cell object'''
+    """Loop over allseclist to determine area, diam, xyz-start- and
+    endpoints, embed geometry to cell object"""
     
     
     cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] areavec = np.zeros(cell.totnsegs)

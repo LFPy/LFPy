@@ -4,7 +4,7 @@ import numpy as np
 
 
 def alias_method(idx, probs, nsyn):
-    '''
+    """
     Alias method for drawing random numbers from a discrete probability
     distribution. See http://www.keithschwarz.com/darts-dice-coins/
     
@@ -25,7 +25,7 @@ def alias_method(idx, probs, nsyn):
         out : np.ndarray
             integer array of randomly drawn compartment indices
             
-    '''
+    """
     try:
         assert idx.size == probs.size
     except AssertionError as ae:
@@ -53,7 +53,7 @@ def alias_method(idx, probs, nsyn):
 
 
 def alias_setup(probs):
-    '''
+    """
     Set up function for alias method.
     See http://www.keithschwarz.com/darts-dice-coins/
     
@@ -70,7 +70,7 @@ def alias_setup(probs):
             array of ints
         q : np.ndarray
             array of floats
-    '''        
+    """        
     K = probs.size
     q = probs*K
     J = np.zeros(K, dtype=int)

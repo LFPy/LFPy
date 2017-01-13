@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-'''Copyright (C) 2012 Computational Neuroscience Group, NMBU.
+"""Copyright (C) 2012 Computational Neuroscience Group, NMBU.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -9,13 +9,15 @@ the Free Software Foundation, either version 3 of the License, or
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.'''
+GNU General Public License for more details.
+
+"""
 
 import numpy as np
 import neuron
 
 class PointProcess:
-    '''
+    """
     Superclass on top of Synapse, StimIntElectrode, 
     just to import and set some shared variables.
     
@@ -28,13 +30,13 @@ class PointProcess:
         marker  : marker in plot (optional) 
         record_current : Must be set True for recording of pointprocess currents
         kwargs  : pointprocess specific variables passed on to cell/neuron
-    '''
+    """
     def __init__(self, cell, idx, color='k', marker='o', 
                  record_current=False, **kwargs):
-        '''
+        """
         cell is an LFPy.Cell object, idx index of segment. This class
         sets some variables and extracts Cartesian coordinates of a segment
-        '''
+        """
         self.idx = idx
         self.color = color
         self.marker = marker
@@ -43,15 +45,15 @@ class PointProcess:
         self.update_pos(cell)
 
     def update_pos(self, cell):
-        '''
+        """
         Extract coordinates of point-process 
-        '''
+        """
         self.x = cell.xmid[self.idx]
         self.y = cell.ymid[self.idx]
         self.z = cell.zmid[self.idx]
         
 class Synapse(PointProcess):
-    '''
+    """
     The synapse class, pointprocesses that spawn membrane currents.
     See http://www.neuron.yale.edu/neuron/static/docs/help/neuron/neuron/mech.html#pointprocesses
     for details, or corresponding mod-files.
@@ -94,12 +96,12 @@ class Synapse(PointProcess):
         pl.plot(cell.tvec, cell.somav)
         pl.title('Somatic potential (mV)')
         
-    '''
+    """
     def __init__(self, cell, idx, syntype, color='r', marker='o',
                  record_current=False, **kwargs):
-        '''
+        """
         Initialization of class Synapse
-        '''
+        """
         PointProcess.__init__(self, cell, idx, color, marker, record_current, 
                               **kwargs)
             
@@ -111,13 +113,13 @@ class Synapse(PointProcess):
         cell.synidx.append(idx)
 
     def set_spike_times(self, sptimes=np.zeros(0)):
-        '''Set the spike times explicitly using numpy arrays'''
+        """Set the spike times explicitly using numpy arrays"""
         self.sptimes = sptimes
         self.cell.sptimeslist.append(sptimes)
     
     def set_spike_times_w_netstim(self, noise=1., start=0., number=1E3,
                                   interval=10., seed=1234.):
-        '''
+        """
         Generate a train of pre-synaptic stimulus times by setting up the
         neuron NetStim object associated with this synapse
         
@@ -135,7 +137,7 @@ class Synapse(PointProcess):
                 ms, (mean) time between spikes
             seed : float
                 random seed value
-        '''
+        """
         self.cell.netstimlist[-1].noise = noise
         self.cell.netstimlist[-1].start = start
         self.cell.netstimlist[-1].number = number
@@ -143,21 +145,21 @@ class Synapse(PointProcess):
         self.cell.netstimlist[-1].seed(seed)
 
     def collect_current(self, cell):
-        '''Collect synapse current'''
+        """Collect synapse current"""
         try:
             self.i = np.array(cell.synireclist.o(self.hocidx))
         except:
             raise Exception('cell.synireclist deleted from consequtive runs')
     
     def collect_potential(self, cell):
-        '''Collect membrane potential of segment with synapse'''
+        """Collect membrane potential of segment with synapse"""
         try:
             self.v = np.array(cell.synvreclist.o(self.hocidx))
         except:
             raise Exception('cell.synvreclist deleted from consequtive runs')
         
 class StimIntElectrode(PointProcess):
-    '''
+    """
     Class for NEURON point processes, ie VClamp, SEClamp and ICLamp,
     SinIClamp, ChirpIClamp with arguments.
     Electrode currents go here.
@@ -224,14 +226,14 @@ class StimIntElectrode(PointProcess):
             pl.plot(cell.tvec, cell.somav, label=pointprocess['pptype'])
             pl.legend(loc='best')
             pl.title('Somatic potential (mV)')
-    '''    
+    """    
     def __init__(self, cell, idx, pptype='SEClamp',
                  color='p', marker='*', record_current=False, **kwargs):
-        '''
+        """
         Will insert pptype on
         cell-instance, pass the corresponding kwargs onto
         cell.set_point_process.
-        '''
+        """
         PointProcess.__init__(self, cell, idx, color, marker, record_current)
         self.pptype = pptype
         self.hocidx = int(cell.set_point_process(idx, pptype,
@@ -240,33 +242,33 @@ class StimIntElectrode(PointProcess):
         cell.pointprocess_idx.append(idx)
 
     def collect_current(self, cell):
-        '''
+        """
         Fetch electrode current from recorder list
-        '''
+        """
         self.i = np.array(cell.stimireclist.o(self.hocidx))
     
     def collect_potential(self, cell):
-        '''
+        """
         Collect membrane potential of segment with PointProcess
-        '''
+        """
         self.v = np.array(cell.synvreclist.o(self.hocidx))
 
 class PointProcessPlayInSoma:
-    '''
+    """
     Class implementation of Eivind's playback alghorithm
-    '''
+    """
     def __init__(self, soma_trace):
-        '''
+        """
         Class for playing back somatic trace at specific time points
         into soma as boundary condition for the membrane voltage
-        '''
+        """
         self.soma_trace = soma_trace
     
     def set_play_in_soma(self, cell, t_on=np.array([0])):
-        '''
+        """
         Set mechanisms for playing soma trace at time(s) t_on,
         where t_on is a numpy.array
-        '''
+        """
         if type(t_on) != np.ndarray:
             t_on = np.array(t_on)
         
@@ -317,10 +319,10 @@ class PointProcessPlayInSoma:
         self._play_in_soma(somaTvecVec, somaTraceVec)
             
     def _play_in_soma(self, somaTvecVec, somaTraceVec):
-        '''
+        """
         Replacement of LFPy.hoc "proc play_in_soma()",
         seems necessary that this function lives in hoc
-        '''
+        """
         neuron.h('objref soma_tvec, soma_trace')
         
         neuron.h('soma_tvec = new Vector()')

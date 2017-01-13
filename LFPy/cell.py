@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-'''
+"""
 Copyright (C) 2012 Computational Neuroscience Group, NMBU.
 
 This program is free software: you can redistribute it and/or modify
@@ -11,7 +11,8 @@ This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
-'''
+
+"""
 
 import os
 import sys
@@ -24,72 +25,93 @@ from LFPy.run_simulation import _run_simulation, _run_simulation_with_electrode
 from LFPy.run_simulation import _collect_geometry_neuron
 from LFPy.alias_method import alias_method
 
+
 class Cell(object):
-    '''
+    """
     The main cell class used in LFPy.
     
-    Arguments:
-    ::
-        
-        morphology : [str]: path/to/morphology/file
+    Parameters
+    ----------
+    morphology : str
+        path/to/morphology/file
+    v_init : float
+        Initial membrane potential. Default to -65.
+    passive : bool
+        Passive mechanisms are initialized if True. Defaults to True
+    Ra : float
+        axial resistance. Defaults to 150.
+    rm : float
+        membrane resistivity. Defaults to 30000.
+    cm : float
+        membrane capacitance. Defaults to 1.0
+    e_pas : float
+        passive mechanism reversal potential. Defaults to -65.
+    extracellular : bool
+        switch for NEURON's extracellular mechanism. Defaults to True
+    timeres_NEURON : float
+        internal dt for NEURON simulation. Defaults to 0.1
+    timeres_python : float
+        overall dt for python simulation. Defaults to 0.1
+    tstartms : float
+        initialization time for simulation <= 0 ms. Defaults to 0.
+    tstopms : float
+        stop time for simulation > 0 ms. Defaults to 100.
+    nsegs_method : 'lambda100' or 'lambda_f' or 'fixed_length' or None
+        nseg rule, used by NEURON to determine number of compartments.
+        Defaults to 'lambda100'
+    max_nsegs_length : float or None
+        max segment length for method 'fixed_length'. Defaults to None
+    lambda_f : int
+        AC frequency for method 'lambda_f'. Defaults to 100
+    d_lambda : float
+        parameter for d_lambda rule. Defaults to 0.1
+    delete_sections : bool
+        delete pre-existing section-references. Defaults to True
+    custom_code : list or None
+        list of model-specific code files ([.py/.hoc]). Defaults to None
+    custom_fun : list or None
+        list of model-specific functions with args. Defaults to None
+    custom_fun_args : list or None
+        list of args passed to custom_fun functions. Defaults to None
+    pt3d : bool
+        use pt3d-info of the cell geometries switch. Defaults to False
+    celsius : float or None
+        Temperature in celsius. If nothing is specified here
+        or in custom code it is 6.3 celcius
+    verbose : bool
+        verbose output switch. Defaults to False
     
-        v_init: [-65.]: initial potential
-        passive: [True]/False: passive mechs are initialized if True
-        Ra: [150.]: axial resistance
-        rm: [30000]: membrane resistivity
-        cm: [1.0]: membrane capacitance
-        e_pas: [-65.]: passive mechanism reversal potential
-        extracellular: [True]/False: switch for NEURON's extracellular mechanism
-    
-        timeres_NEURON: [0.1]: internal dt for NEURON simulation
-        timeres_python: [0.1]: overall dt for python simulation
-    
-        tstartms: [0.]:  initialization time for simulation <= 0 ms
-        tstopms: [100.]: stop time for simulation > 0 ms
-    
-        nsegs_method: ['lambda100']/'lambda_f'/'fixed_length': nseg rule
-        max_nsegs_length: [None]: max segment length for method 'fixed_length'
-        lambda_f: [100]: AC frequency for method 'lambda_f'
-        d_lambda: [0.1]: parameter for d_lambda rule
-        
-        delete_sections: [True]: delete pre-existing section-references
-        
-        custom_code: [None]: list of model-specific code files ([.py/.hoc])
-        custom_fun: [None]: list of model-specific functions with args
-        custom_fun_args: [None]: list of args passed to custom_fun functions
-        pt3d: True/[False]: use pt3d-info of the cell geometries switch
-        celsius: [None]: Temperature in celsius. If nothing is specified here or in custom code it is 6.3 C
-        verbose: True/[False]: verbose output switch
-    
-    Usage of cell class:
-    ::
-        
-        import LFPy
-        cellParameters = {                          
-            'morphology' : 'path/to/morphology',
-            'rm' : 30000,
-            'cm' : 1.0,
-            'Ra' : 150,
-            'timeres_NEURON' : 0.1,
-            'timeres_python' : 0.1,
-            'tstartms' : -50,
-            'tstopms' : 50,
-        }
-        cell = LFPy.Cell(**cellParameters)
-        cell.simulate()
-    '''
+    Examples
+    --------
+    Here is an example of how to use the cell class.
+
+    >>> import LFPy
+    >>> cellParameters = {
+    >>>     'morphology' : 'path/to/morphology',
+    >>>     'rm' : 30000,
+    >>>     'cm' : 1.0,
+    >>>     'Ra' : 150,
+    >>>     'timeres_NEURON' : 0.1,
+    >>>     'timeres_python' : 0.1,
+    >>>     'tstartms' : -50,
+    >>>     'tstopms' : 50,
+    >>> }
+    >>> cell = LFPy.Cell(**cellParameters)
+    >>> cell.simulate()
+
+    """
     def __init__(self, morphology,
                     v_init=-65.,
-                    passive = True,
-                    Ra=150,
-                    rm=30000,
+                    passive=True,
+                    Ra=150.,
+                    rm=30000.,
                     cm=1.0,
                     e_pas=-65.,
                     extracellular = True,
                     timeres_NEURON=2**-3,
                     timeres_python=2**-3,
-                    tstartms=0,
-                    tstopms=100,
+                    tstartms=0.,
+                    tstopms=100.,
                     nsegs_method='lambda100',
                     lambda_f = 100,
                     d_lambda = 0.1,
@@ -101,9 +123,7 @@ class Cell(object):
                     pt3d=False,
                     celsius=None,
                     verbose=False):
-        '''
-        Initialization of the Cell object.
-        '''
+        """Initialization of the Cell object. """
         self.verbose = verbose
         self.pt3d = pt3d
         
@@ -224,7 +244,7 @@ class Cell(object):
 
 
     def _load_geometry(self):
-        '''Load the morphology-file in NEURON''' 
+        """Load the morphology-file in NEURON""" 
         try: 
             neuron.h.sec_counted = 0
         except LookupError:
@@ -254,8 +274,8 @@ class Cell(object):
                 Import.input(self.morphology)
             except:
                 if not hasattr(neuron, 'neuroml'):
-                    raise Exception('Can not import, try and copy the ' + \
-                    'nrn/share/lib/python/neuron/neuroml ' + \
+                    raise Exception('Can not import, try and copy the ' +
+                    'nrn/share/lib/python/neuron/neuroml ' +
                     'folder into %s' % neuron.__path__[0])
                 else:
                     raise Exception('something wrong with file, see output')
@@ -270,7 +290,7 @@ class Cell(object):
 
         
     def _run_custom_codes(self, custom_code, custom_fun, custom_fun_args):
-        '''Execute custom model code and functions with arguments'''
+        """Execute custom model code and functions with arguments"""
         # load custom codes
         if custom_code is not None:
             for code in custom_code:
@@ -303,8 +323,8 @@ class Cell(object):
 
     
     def _set_nsegs(self, nsegs_method, lambda_f, d_lambda, max_nsegs_length):
-        '''Set number of segments per section according to the lambda-rule,
-        or according to maximum length of segments'''
+        """Set number of segments per section according to the lambda-rule,
+        or according to maximum length of segments"""
         if nsegs_method == 'lambda100':
             self._set_nsegs_lambda100(d_lambda)
         elif nsegs_method == 'lambda_f':
@@ -316,8 +336,8 @@ class Cell(object):
                 print(('No nsegs_method applied (%s)' % nsegs_method))
     
     def _get_rotation(self):
-        '''Check if there exists a corresponding file
-        with rotation angles'''
+        """Check if there exists a corresponding file
+        with rotation angles"""
         if self.morphology is not None:
             base = os.path.splitext(self.morphology)[0]        
             if os.path.isfile(base+'.rot'):
@@ -336,7 +356,7 @@ class Cell(object):
         return rotation
 
     def _create_sectionlists(self):
-        '''Create section lists for different kinds of sections'''
+        """Create section lists for different kinds of sections"""
         #list with all sections
         self.allsecnames = []
         self.allseclist = neuron.h.SectionList()
@@ -353,9 +373,9 @@ class Cell(object):
                 self.nsomasec += 1
             
     def _get_idx(self, seclist):
-        '''Return boolean vector which indexes where segments in seclist 
+        """Return boolean vector which indexes where segments in seclist 
         matches segments in neuron.h.allsec(), rewritten from 
-        LFPy.hoc function get_idx()'''
+        LFPy.hoc function get_idx()"""
         if neuron.h.allsec() == seclist:
             return np.ones(self.totnsegs, dtype=bool)
         else:
@@ -378,7 +398,7 @@ class Cell(object):
             return idxvec
     
     def _set_nsegs_lambda_f(self, frequency=100, d_lambda=0.1):
-        '''Set the number of segments for section according to the 
+        """Set the number of segments for section according to the 
         d_lambda-rule for a given input frequency
         
         kwargs:
@@ -386,7 +406,7 @@ class Cell(object):
             
             frequency: float, frequency at whihc AC length constant is computed
             d_lambda: float, 
-        '''
+        """
         for sec in self.allseclist:
             sec.nseg = int((sec.L / (d_lambda*neuron.h.lambda_f(frequency,
                                                 sec=sec)) + .9) / 2)*2 + 1
@@ -394,16 +414,16 @@ class Cell(object):
             print("set nsegs using lambda-rule with frequency %i." % frequency)
    
     def _set_nsegs_lambda100(self, d_lambda=0.1):
-        '''Set the numbers of segments using d_lambda(100)'''
+        """Set the numbers of segments using d_lambda(100)"""
         self._set_nsegs_lambda_f(frequency=100, d_lambda=d_lambda)
     
     def _set_nsegs_fixed_length(self, maxlength):
-        '''Set nseg for sections so that every segment L < maxlength'''
+        """Set nseg for sections so that every segment L < maxlength"""
         for sec in self.allseclist:
             sec.nseg = int(sec.L / maxlength) + 1
     
     def _calc_totnsegs(self):
-        '''Calculate the number of segments in the allseclist'''
+        """Calculate the number of segments in the allseclist"""
         i = 0
         for sec in self.allseclist:
             i += sec.nseg
@@ -411,12 +431,12 @@ class Cell(object):
         return i
     
     def _check_currents(self):
-        '''Check that the sum of all membrane and electrode currents over all
-        segments is sufficiently close to zero'''
+        """Check that the sum of all membrane and electrode currents over all
+        segments is sufficiently close to zero"""
         raise NotImplementedError('this function need to be written')
     
     def _set_passive(self):
-        '''Insert passive mechanism on all segments'''
+        """Insert passive mechanism on all segments"""
         for sec in self.allseclist:
             sec.insert('pas')
             sec.Ra = self.Ra
@@ -425,15 +445,15 @@ class Cell(object):
             sec.e_pas = self.e_pas
     
     def _set_extracellular(self):
-        '''Insert extracellular mechanism on all sections
-        to access i_membrane'''
+        """Insert extracellular mechanism on all sections
+        to access i_membrane"""
         for sec in self.allseclist:
             sec.insert('extracellular')
             
     def set_synapse(self, idx, syntype,
                     record_current=False, record_potential=False,
                     weight=None, **kwargs):
-        '''
+        """
         Insert syntype (e.g. ExpSyn) synapse on segment with index idx, 
         
         Arguments:
@@ -445,7 +465,7 @@ class Cell(object):
             record_potential : bool
             weight : float            
             kwargs : arguments passed on from class Synapse
-        '''
+        """
         if not hasattr(self, 'synlist'):
             self.synlist = neuron.h.List()
         if not hasattr(self, 'synireclist'):
@@ -501,7 +521,7 @@ class Cell(object):
         return self.synlist.count() - 1
 
     def set_point_process(self, idx, pptype, record_current=False, **kwargs):
-        '''
+        """
         Insert pptype-electrode type pointprocess on segment numbered
         idx on cell object, with keyword arguments according to types 
         SEClamp, VClamp, IClamp, SinIClamp, ChirpIClamp.
@@ -514,7 +534,7 @@ class Cell(object):
             record_current : bool
             kwargs : arguments passed on from class StimIntElectrode
             
-        '''
+        """
         
         if not hasattr(self, 'stimlist'):
             self.stimlist = neuron.h.List()
@@ -553,7 +573,7 @@ class Cell(object):
         return self.stimlist.count() - 1
     
     def _collect_geometry(self):
-        '''Collects x, y, z-coordinates from NEURON'''
+        """Collects x, y, z-coordinates from NEURON"""
         #None-type some attributes if they do not exis:
         if not hasattr(self, 'xstart'):
             self.xstart = None
@@ -599,14 +619,14 @@ class Cell(object):
 
     
     def _calc_midpoints(self):
-        '''Calculate midpoints of each segment'''
+        """Calculate midpoints of each segment"""
         self.xmid = .5*(self.xstart+self.xend).flatten()
         self.ymid = .5*(self.ystart+self.yend).flatten()
         self.zmid = .5*(self.zstart+self.zend).flatten()
 
 
     def get_idx(self, section='allsec', z_min=-10000, z_max=10000):
-        '''
+        """
         Returns neuron idx of segments from sections with names that match
         the pattern defined in input section on interval [z_min, z_max].
         
@@ -625,7 +645,7 @@ class Cell(object):
             idx = cell.get_idx(section=['soma', 'dend', 'apic'])
             print idx
             
-        '''
+        """
         if section == 'allsec': 
             seclist = neuron.h.allsec()
         else:
@@ -649,7 +669,7 @@ class Cell(object):
                             
                 
     def get_closest_idx(self, x=0, y=0, z=0, section='allsec'):
-        '''Get the index number of a segment in specified section which 
+        """Get the index number of a segment in specified section which 
         midpoint is closest to the coordinates defined by the user
         kwargs:
         ::
@@ -658,7 +678,7 @@ class Cell(object):
             y: float, coordinate
             z: float, coordinate
             section: str, string matching a section-name
-        '''
+        """
         idx = self.get_idx(section)
         dist = np.sqrt((self.xmid[idx] - x)**2 +
                        (self.ymid[idx] - y)**2 + (self.zmid[idx] - z)**2)
@@ -669,7 +689,7 @@ class Cell(object):
     
     def get_rand_idx_area_norm(self, section='allsec', nidx=1,
                                z_min=-10000, z_max=10000):
-        '''Return nidx segment indices in section with random probability
+        """Return nidx segment indices in section with random probability
         normalized to the membrane area of segment on 
         interval [z_min, z_max]
         
@@ -680,7 +700,7 @@ class Cell(object):
             nidx: int, number of random indices
             z_min: float, depth filter
             z_max: float depth filter            
-        '''
+        """
         poss_idx = self.get_idx(section=section, z_min=z_min, z_max=z_max)
         if nidx < 1:
             print('nidx < 1, returning empty array')
@@ -701,7 +721,7 @@ class Cell(object):
                  rec_variables=[], variable_dt=False, atol=0.001,
                  to_memory=True, to_file=False, file_name=None,
                  dotprodcoeffs=None):
-        '''
+        """
         This is the main function running the simulation of the NEURON model.
         Start NEURON simulation and record variables specified by arguments.
         
@@ -731,7 +751,7 @@ class Cell(object):
             dotprodcoeffs :  list of N x Nseg np.ndarray. These arrays will at
                         every timestep be multiplied by the membrane currents.
                         Presumably useful for memory efficient csd or lfp calcs
-            '''
+            """
         self._set_soma_volt_recorder()
         self._collect_tvec()
         
@@ -780,17 +800,17 @@ class Cell(object):
             del self.netstimlist
 
     def _collect_tvec(self):
-        '''
+        """
         Set the tvec to be a monotonically increasing numpy array after sim.
-        '''
+        """
         self.tvec = np.arange(self.tstopms / self.timeres_python + 1) \
                             * self.timeres_python
         
     def _calc_imem(self):
-        '''
+        """
         Fetch the vectors from the memireclist and calculate self.imem
         containing all the membrane currents.
-        '''
+        """
         self.imem = np.array(self.memireclist)
         for i in range(self.imem.shape[0]):
             self.imem[i, ] *= self.area[i] * 1E-2
@@ -798,9 +818,9 @@ class Cell(object):
         del self.memireclist
     
     def _calc_ipas(self):
-        '''
+        """
         Get the passive currents
-        '''
+        """
         self.ipas = np.array(self.memipasreclist)
         for i in range(self.ipas.shape[0]):
             self.ipas[i, ] *= self.area[i] * 1E-2
@@ -808,9 +828,9 @@ class Cell(object):
         del self.memipasreclist
     
     def _calc_icap(self):
-        '''
+        """
         Get the capacitive currents
-        '''
+        """
         self.icap = np.array(self.memicapreclist)
         for i in range(self.icap.shape[0]):
             self.icap[i, ] *= self.area[i] * 1E-2
@@ -818,17 +838,17 @@ class Cell(object):
         del self.memicapreclist
     
     def _collect_vmem(self):
-        '''
+        """
         Get the membrane currents
-        '''
+        """
         self.vmem = np.array(self.memvreclist)
         self.memvreclist = None
         del self.memvreclist
     
     def _collect_isyn(self):
-        '''
+        """
         Get the synaptic currents
-        '''
+        """
         for syn in self.synapses:
             if syn.record_current:
                 syn.collect_current(self)
@@ -838,18 +858,18 @@ class Cell(object):
         del self.synireclist
     
     def _collect_vsyn(self):
-        '''
+        """
         Collect the membrane voltage of segments with synapses
-        '''
+        """
         for i in range(len(self.synapses)):
             self.synapses[i].collect_potential(self)
         self.synvreclist = None
         del self.synvreclist
     
     def _collect_istim(self):
-        '''
+        """
         Get the pointprocess currents
-        '''
+        """
         for i in range(len(self.pointprocesses)):
             if self.pointprocesses[i].record_current:
                 self.pointprocesses[i].collect_current(self)
@@ -859,10 +879,10 @@ class Cell(object):
         del self.stimireclist
         
     def _collect_rec_variables(self, rec_variables):
-        '''
+        """
         Create dict of np.arrays from recorded variables, each dictionary
         element named as the corresponding recorded variable name, i.e 'cai'
-        '''
+        """
         self.rec_variables = {}
         i = 0
         for values in self.recvariablesreclist:
@@ -873,9 +893,9 @@ class Cell(object):
         del self.recvariablesreclist
     
     def _loadspikes(self):
-        '''
+        """
         Initialize spiketimes from netcon if they exist
-        '''
+        """
         if hasattr(self, 'synlist'):
             if len(self.synlist) == len(self.sptimeslist):
                 for i in range(int(self.synlist.count())):
@@ -891,9 +911,9 @@ class Cell(object):
 
     
     def _set_soma_volt_recorder(self):
-        '''
+        """
         Record somatic membrane potential
-        '''
+        """
         self.somav = neuron.h.Vector(int(self.tstopms / 
                                          self.timeres_python+1))
         if self.nsomasec == 0:
@@ -919,9 +939,9 @@ class Cell(object):
                     k += 1
     
     def _set_imem_recorders(self):
-        '''
+        """
         Record membrane currents for all segments
-        '''
+        """
         self.memireclist = neuron.h.List()
         for sec in self.allseclist:
             for seg in sec:
@@ -931,9 +951,9 @@ class Cell(object):
                 self.memireclist.append(memirec)
     
     def _set_ipas_recorders(self):
-        '''
+        """
         Record passive membrane currents for all segments
-        '''
+        """
         self.memipasreclist = neuron.h.List()
         for sec in self.allseclist:
             for seg in sec:
@@ -943,9 +963,9 @@ class Cell(object):
                 self.memipasreclist.append(memipasrec)
     
     def _set_icap_recorders(self):
-        '''
+        """
         Record capacitive membrane currents for all segments
-        '''
+        """
         self.memicapreclist = neuron.h.List()
         for sec in self.allseclist:
             for seg in sec:
@@ -955,9 +975,9 @@ class Cell(object):
                 self.memicapreclist.append(memicaprec)
     
     def _set_voltage_recorders(self):
-        '''
+        """
         Record membrane potentials for all segments
-        '''
+        """
         self.memvreclist = neuron.h.List()
         for sec in self.allseclist:
             for seg in sec:
@@ -968,12 +988,12 @@ class Cell(object):
 
     
     def _set_variable_recorders(self, rec_variables):
-        '''
+        """
         Create a recorder for each variable name in list
         rec_variables
         
         Variables is stored in nested list self.recvariablesreclist
-        '''
+        """
         self.recvariablesreclist = neuron.h.List()        
         for variable in rec_variables:
             variablereclist = neuron.h.List()
@@ -992,10 +1012,10 @@ class Cell(object):
         
     
     def set_pos(self, xpos=0, ypos=0, zpos=0):
-        '''
+        """
         Move the cell geometry so that midpoint of soma section is
         in (xpos, ypos, zpos). If no soma pos, use the first segment
-        '''
+        """
         diffx = xpos-self.somapos[0]
         diffy = ypos-self.somapos[1]
         diffz = zpos-self.somapos[2]
@@ -1021,9 +1041,7 @@ class Cell(object):
 
     
     def strip_hoc_objects(self):
-        '''
-        Destroy any NEURON hoc objects in the cell object
-        '''
+        """Destroy any NEURON hoc objects in the cell object"""
         for varname in dir(self):
             if type(getattr(self, varname)) == type(neuron.h.List()):
                 setattr(self, varname, None)
@@ -1031,44 +1049,47 @@ class Cell(object):
                     print('None-typed %s in cell instance' % varname)
         
     def cellpickler(self, filename):
-        '''
-        Save data in cell to filename, using cPickle. It will however destroy
+        """Save data in cell to filename, using cPickle. It will however destroy
         any neuron.h objects upon saving, as c-objects cannot be pickled
-        
-        Usage:
-        ::
-            
-            cell.cellpickler('cell.cpickle')
+
+        Parameters
+        ----------
+        filename : str
+            where to save cell
+
+        Examples
+        --------
+        To save a cell, use:
+
+        >>> cell.cellpickler('cell.cpickle')
         
         To load this cell again in another session:
-        ::
-            
-            import cPickle
-            f = file('cell.cpickle', 'rb')
-            cell = cPickle.load(f)
-            f.close()
+
+        >>> import cPickle
+        >>> f = file('cell.cpickle', 'rb')
+        >>> cell = cPickle.load(f)
+        >>> f.close()
         
         alternatively:
-        ::
-            
-            import LFPy
-            cell = LFPy.tools.load('cell.cpickle')
-            
-        '''
+
+        >>> import LFPy
+        >>> cell = LFPy.tools.load('cell.cpickle')
+
+        """
         self.strip_hoc_objects()
         filen = open(filename, 'wb')
         pickle.dump(self, filen, protocol=2)
         filen.close()
     
     def _update_synapse_positions(self):
-        '''
+        """
         Update synapse positions after rotation of morphology
-        '''
+        """
         for i in range(len(self.synapses)):
             self.synapses[i].update_pos(self)
     
     def set_rotation(self, x=None, y=None, z=None):
-        '''
+        """
         Rotate geometry of cell object around the x-, y-, z-axis in that order.
         Input should be angles in radians.
         
@@ -1082,7 +1103,7 @@ class Cell(object):
             cell = LFPy.Cell(**kwargs)
             rotation = {'x' : 1.233, 'y' : 0.236, 'z' : np.pi}
             cell.set_rotation(**rotation)
-        '''
+        """
         if x is not None:
             theta = -x
             rotation_x = np.matrix([[1, 0, 0],
@@ -1143,7 +1164,7 @@ class Cell(object):
 
     
     def chiral_morphology(self, axis='x'):
-        '''
+        """
         Mirror the morphology around given axis, (default x-axis),
         useful to introduce more heterogeneouties in morphology shapes
         
@@ -1153,7 +1174,7 @@ class Cell(object):
             axis : str
                 'x' or 'y' or 'z'
         
-        '''
+        """
         #morphology relative to soma-position
         rel_start, rel_end = self._rel_positions()
         if axis == 'x':
@@ -1175,9 +1196,9 @@ class Cell(object):
         self._real_positions(rel_start, rel_end)
         
     def _squeeze_me_macaroni(self):
-        '''
+        """
         Reducing the dimensions of the morphology matrices from 3D->1D
-        '''
+        """
         self.xstart = np.array(self.xstart).flatten()
         self.xend = np.array(self.xend).flatten()
         
@@ -1189,9 +1210,9 @@ class Cell(object):
         
     
     def _rel_positions(self):
-        '''
+        """
         Morphology relative to soma position
-        '''
+        """
         rel_start = np.array([self.xstart-self.somapos[0],
                               self.ystart-self.somapos[1],
                               self.zstart-self.somapos[2]]).T    
@@ -1203,9 +1224,9 @@ class Cell(object):
 
     
     def _real_positions(self, rel_start, rel_end):
-        '''
+        """
         Morphology coordinates relative to Origo
-        '''
+        """
         self.xstart = rel_start[:, 0] + self.somapos[0]
         self.ystart = rel_start[:, 1] + self.somapos[1]
         self.zstart = rel_start[:, 2] + self.somapos[2]
@@ -1221,7 +1242,7 @@ class Cell(object):
     
     def get_rand_prob_area_norm(self, section='allsec', 
                                 z_min=-10000, z_max=10000):
-        '''
+        """
         Return the probability (0-1) for synaptic coupling on segments
         in section sum(prob)=1 over all segments in section.
         Prob. determined by area.
@@ -1233,14 +1254,14 @@ class Cell(object):
             z_min: float, depth filter
             z_max: float depth filter            
 
-        '''
+        """
         idx = self.get_idx(section=section, z_min=z_min, z_max = z_max)
         prob = self.area[idx] / sum(self.area[idx])
         return prob
 
     def get_rand_prob_area_norm_from_idx(self, idx=np.array([0]), 
                                 z_min=-10000, z_max=10000):
-        '''
+        """
         Return the normalized probability (0-1) for synaptic coupling on
         segments in idx-array.
         Normalised probability determined by area of segments.
@@ -1253,12 +1274,12 @@ class Cell(object):
             z_min: float, depth filter
             z_max: float depth filter            
 
-        '''
+        """
         prob = self.area[idx] / sum(self.area[idx])
         return prob
     
     def get_intersegment_vector(self, idx0=0, idx1=0):
-        '''
+        """
         Return the distance between midpoints of two segments with index
         idx0 and idx1. The argument returned is a vector [x, y, z], where
         x = self.xmid[idx1] - self.xmid[idx0] etc.
@@ -1268,7 +1289,7 @@ class Cell(object):
             
             idx0 : int
             idx1 : int
-        '''
+        """
         vector = []
         try:
             if idx1 < 0 or idx0 < 0:
@@ -1282,10 +1303,10 @@ class Cell(object):
             raise ValueError(ERRMSG)
         
     def get_intersegment_distance(self, idx0=0, idx1=0):
-        '''
+        """
         Return the Euclidean distance between midpoints of two segments 
         with indices idx0 and idx1. Will return a float in unit of micrometers.
-        '''
+        """
         try:
             vector = np.array(self.get_intersegment_vector(idx0, idx1))
             return np.sqrt((vector**2).sum())
@@ -1295,7 +1316,7 @@ class Cell(object):
     
     
     def get_idx_children(self, parent="soma[0]"):
-        '''
+        """
         Get the idx of parent's children sections, i.e. compartments ids
         of sections connected to parent-argument
         
@@ -1304,7 +1325,7 @@ class Cell(object):
             
             parent: str
                 name-pattern matching a sectionname
-        '''
+        """
         idxvec = np.zeros(self.totnsegs)
         secnamelist = []
         childseclist = []
@@ -1328,7 +1349,7 @@ class Cell(object):
         return idx
 
     def get_idx_parent_children(self, parent="soma[0]"):
-        '''
+        """
         Get all idx of segments of parent and children sections, i.e. segment
         idx of sections connected to parent-argument, and also of the parent
         segments
@@ -1338,7 +1359,7 @@ class Cell(object):
             
             parent: str
                 name-pattern matching a sectionname
-        '''
+        """
         idxvec = np.zeros(self.totnsegs)
         secnamelist = []
         childseclist = [parent]
@@ -1363,7 +1384,7 @@ class Cell(object):
 
 
     def get_idx_name(self, idx=np.array([0])):
-        '''
+        """
         Return NEURON convention name of segments with index idx.
         The returned argument is a list of tuples with corresponding
         segment idx, section name, and position along the section, like;
@@ -1374,7 +1395,7 @@ class Cell(object):
             
             idx : np.ndarray, dtype int
                 segment indices, must be between 0 and cell.totnsegs        
-        '''
+        """
         #ensure idx is array-like, or convert
         if type(idx) == int:
             idx = np.array([idx])
@@ -1399,7 +1420,7 @@ class Cell(object):
         return allsegnames[idx]
 
     def _collect_pt3d(self):
-        '''collect the pt3d info, for each section'''
+        """collect the pt3d info, for each section"""
         x = []
         y = []
         z = []
@@ -1435,9 +1456,9 @@ class Cell(object):
 
             
     def _update_pt3d(self):
-        '''
+        """
         update the locations in neuron.hoc.space using neuron.h.pt3dchange()
-        '''
+        """
         i = 0
         for sec in self.allseclist:
             n3d = int(neuron.h.n3d())
@@ -1455,9 +1476,9 @@ class Cell(object):
 
 
     def _set_pt3d_pos(self, diffx=0, diffy=0, diffz=0):
-        '''
+        """
         Offset pt3d geometry with differential displacement indicated in Cell.set_pos()
-        '''
+        """
         for i in range(len(self.x3d)):
             self.x3d[i] += diffx
             self.y3d[i] += diffy
@@ -1466,7 +1487,7 @@ class Cell(object):
 
 
     def _set_pt3d_rotation(self, x=None, y=None, z=None):
-        '''
+        """
         Rotate pt3d geometry of cell object around the x-, y-, z-axis
         in that order.
         Input should be angles in radians.
@@ -1481,7 +1502,7 @@ class Cell(object):
             cell = LFPy.Cell(**kwargs)
             rotation = {'x' : 1.233, 'y' : 0.236, 'z' : np.pi}
             cell.set_pt3d_rotation(**rotation)
-        '''
+        """
         if x is not None:
             theta = -x
             rotation_x = np.matrix([[1, 0, 0],
@@ -1542,9 +1563,9 @@ class Cell(object):
         self._update_pt3d()
 
     def _rel_pt3d_positions(self, x, y, z):
-        '''
+        """
         Morphology relative to soma position
-        '''
+        """
         rel_pos = np.transpose(np.array([x - self.somapos[0],
                                          y - self.somapos[1],
                                          z - self.somapos[2]]))
@@ -1552,9 +1573,9 @@ class Cell(object):
         return rel_pos
     
     def _real_pt3d_positions(self, rel_pos):
-        '''
+        """
         Morphology coordinates relative to Origo
-        '''
+        """
         x = rel_pos[:, 0] + self.somapos[0]
         y = rel_pos[:, 1] + self.somapos[1]
         z = rel_pos[:, 2] + self.somapos[2]
@@ -1566,7 +1587,7 @@ class Cell(object):
         return x, y, z
     
     def _create_polygon(self, i, projection=('x', 'z')):
-        '''create a polygon to fill for each section'''
+        """create a polygon to fill for each section"""
         x = getattr(self, projection[0]+'3d')[i]
         y = getattr(self, projection[1]+'3d')[i]
         #x = self.x3d[i]
@@ -1616,7 +1637,7 @@ class Cell(object):
         return x, y
     
     def get_pt3d_polygons(self, projection=('x', 'z')):
-        '''for each section create a polygon in the plane determined by keyword
+        """for each section create a polygon in the plane determined by keyword
         argument projection=('x', 'z'), that can be
         visualized using e.g., plt.fill()
         
@@ -1644,7 +1665,7 @@ class Cell(object):
             ax.axis(ax.axis('equal'))
             
             plt.show()
-        '''
+        """
         if len(projection) != 2:
             raise ValueError("projection arg be a tuple like ('x', 'y')")
         if 'x' in projection and 'y' in projection:
@@ -1665,8 +1686,8 @@ class Cell(object):
 
 
     def _create_segment_polygon(self, i, projection=('x', 'z')):
-        '''create a polygon to fill for segment i, in the plane
-        determined by kwarg projection'''        
+        """create a polygon to fill for segment i, in the plane
+        determined by kwarg projection"""        
         x = [getattr(self, projection[0]+'start')[i],
              getattr(self, projection[0]+'end')[i]]
         z = [getattr(self, projection[1]+'start')[i],
@@ -1704,7 +1725,7 @@ class Cell(object):
 
 
     def get_idx_polygons(self, projection=('x', 'z')):
-        '''for each segment idx in celll create a polygon in the plane
+        """for each segment idx in celll create a polygon in the plane
         determined by the projection kwarg (default ('x', 'z')),
         that can be visualized using plt.fill() or
         mpl.collections.PolyCollection
@@ -1740,7 +1761,7 @@ class Cell(object):
             ax.axis(ax.axis('equal'))
             
             plt.show()
-        '''
+        """
         if len(projection) != 2:
             raise ValueError("projection arg be a tuple like ('x', 'y')")
         if 'x' in projection and 'y' in projection:
@@ -1762,7 +1783,7 @@ class Cell(object):
 
 
     def insert_v_ext(self, v_ext, t_ext):
-        '''
+        """
         playback of some extracellular potential v_ext on each cell.totnseg
         compartments. Assumes that the "extracellular"-mechanism is inserted
         on each compartment.
@@ -1821,7 +1842,7 @@ class Cell(object):
             plt.show()
         
         
-        '''
+        """
         #test dimensions of input
         try:
             if v_ext.shape[0] != self.totnsegs:

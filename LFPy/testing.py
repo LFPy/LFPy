@@ -1,6 +1,8 @@
 #!/usr/bin/env python
-'''A few tests for LFPy, most importantly the calculations of
-extracellular field potentials'''
+"""A few tests for LFPy, most importantly the calculations of
+extracellular field potentials
+
+"""
 
 import os
 from warnings import warn
@@ -12,7 +14,7 @@ import LFPy
 import neuron
 
 class testLFPy(unittest.TestCase):
-    '''
+    """
     A set of test functions for each method of calculating the LFP, where the
     model outcome from LFPy is compared with analytically obtained results for
     a stick neuron with sinusoid synaptic current input at the end, and LFP
@@ -22,7 +24,7 @@ class testLFPy(unittest.TestCase):
     of compartmentalising the stick is prominent.
     
     Some tests of cell.tvec is also executed
-    '''
+    """
     
     def test_method_pointsource(self):
         #create LFPs using LFPy-model
@@ -438,7 +440,7 @@ class testLFPy(unittest.TestCase):
             self.assertAlmostEqual(tvec[i], tvec_numpy[i])    
 
     def test_alias_method_01(self):
-        '''deterministic probabilities 0.0 and 1.0'''
+        """deterministic probabilities 0.0 and 1.0"""
         idx = np.arange(2)
         probs = np.arange(2).astype(float)
         nidx = 1000000
@@ -449,7 +451,7 @@ class testLFPy(unittest.TestCase):
         self.assertEqual(nidx, hist[1])
         
     def test_alias_method_02(self):
-        '''probabilities 0.5 and 0.5'''
+        """probabilities 0.5 and 0.5"""
         idx = np.arange(2)
         probs = np.array([0.5, 0.5])
         nidx = 1000000
@@ -460,7 +462,7 @@ class testLFPy(unittest.TestCase):
         self.assertAlmostEqual(hist[0], hist[1], delta=2*np.sqrt(nidx))
 
     def test_alias_method_03(self):
-        '''deterministic probabilities 1.0 and 0.0'''
+        """deterministic probabilities 1.0 and 0.0"""
         idx = np.arange(2)
         probs = np.arange(2).astype(float)[::-1]
         nidx = 1000000
@@ -637,7 +639,7 @@ class testLFPy(unittest.TestCase):
                        sigma=0.3,
                        electrodeR=100.,
                        electrodeZ=0.):
-        '''
+        """
         Will calculate the analytical LFP from a dendrite stick aligned with z-axis.
         The synaptic current is always assumed to be at the end of the stick, i.e.
         Zin = stickLength.
@@ -656,7 +658,7 @@ class testLFPy(unittest.TestCase):
             sigma : Extracellular conductivity (muS/mum)
             electrodeR : Radial distance from stick (mum)
             electrodeZ : Longitudal distance along stick(mum)
-        '''    
+        """    
         Gm = 1. / Rm            # specific membrane conductivity (S/cm2)
         gm = 1E2 * np.pi * stickDiam / Rm     # absolute membrane conductance (muS / mum)
         ri = 1E-2 * 4. * Ri / (np.pi * stickDiam**2) # intracellular resistance  (Mohm/mum)
@@ -702,9 +704,9 @@ class testLFPy(unittest.TestCase):
         return PhiEx
     
     def complex_quadrature(self, func, a, b, **kwargs):
-        '''
+        """
         Will return the complex integral value.
-        '''
+        """
         def real_func(x):
             return real(func(x))
         def imag_func(x):
@@ -715,7 +717,7 @@ class testLFPy(unittest.TestCase):
 
 
 def test(verbosity=2):
-    '''
+    """
     Run tests for the LFPy module implemented using the unittest module.
     
     Note:
@@ -736,7 +738,7 @@ def test(verbosity=2):
         
         verbosity : int
             unittest.TextTestRunner verbosity level
-    '''
+    """
     #load sinusoid synapse currrent mechanism
     neuron.load_mechanisms(LFPy.__path__[0])
 
