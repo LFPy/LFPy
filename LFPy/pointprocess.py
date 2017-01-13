@@ -121,19 +121,20 @@ class Synapse(PointProcess):
         Generate a train of pre-synaptic stimulus times by setting up the
         neuron NetStim object associated with this synapse
         
-        Arguments
-        ---------
-        noise : float in [0, 1]
-            Fractional randomness, from deterministic to intervals that drawn
-            from negexp distribution (Poisson spiketimes).
-        start : float
-            ms, (most likely) start time of first spike
-        number : int
-            (average) number of spikes
-        interval : float
-            ms, (mean) time between spikes
-        seed : float
-            random seed value
+        kwargs:
+        ::
+
+            noise : float in [0, 1]
+                Fractional randomness, from deterministic to intervals that drawn
+                from negexp distribution (Poisson spiketimes).
+            start : float
+                ms, (most likely) start time of first spike
+            number : int
+                (average) number of spikes
+            interval : float
+                ms, (mean) time between spikes
+            seed : float
+                random seed value
         '''
         self.cell.netstimlist[-1].noise = noise
         self.cell.netstimlist[-1].start = start

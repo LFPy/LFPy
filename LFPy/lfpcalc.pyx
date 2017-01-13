@@ -127,9 +127,9 @@ cpdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] calc_lfp_linesource(
 
     #case i, h < 0, l < 0
     [i] = np.where(hnegi & lnegi)
-    #case ii, h < 0, l > 0
+    #case ii, h < 0, l >= 0
     [ii] = np.where(hnegi & lposi)
-    #case iii, h > 0, l > 0
+    #case iii, h >= 0, l >= 0
     [iii] = np.where(hposi & lposi)
     
 
@@ -238,9 +238,9 @@ cpdef np.ndarray[DTYPE_t, ndim=1] calc_lfp_som_as_point(cell,
     #Line sources
     #case i,  h < 0,  l < 0
     [i] = np.where(hnegi & lnegi)
-    #case ii,  h < 0,  l > 0
+    #case ii,  h < 0,  l >= 0
     [ii] = np.where(hnegi & lposi)
-    #case iii,  h > 0,  l > 0
+    #case iii,  h >= 0,  l >= 0
     [iii] = np.where(hposi & lposi)
 
     Ememi = _Ememi_calc(i, currmem, sigma, deltaS, l, r2, h)
@@ -407,9 +407,8 @@ cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] _h_calc(
     aa = np.array([x - xend, y - yend, z-zend])
     aaT = aa.T
     bb = np.array([xend - xstart, yend - ystart, zend - zstart])
-    cc = np.dot(aaT, bb).diagonal().copy()
+    cc = np.dot(aaT, bb).diagonal()
     hh = cc / deltaS
-    hh[0] = 0
     return hh
 
 

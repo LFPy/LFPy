@@ -69,18 +69,23 @@ class RecExtElectrodeSetup(object):
         '''Initialize class RecExtElectrodeSetup'''
         self.cell = cell
         self.sigma = sigma
-        if type(x) == float or type(x) == int:
+        if type(x) is float or type(x) is int:
             self.x = np.array([x])
         else:
             self.x = np.array(x).flatten()
-        if type(y) == float or type(y) == int:
+        if type(y) is float or type(y) is int:
             self.y = np.array([y])
         else:
             self.y = np.array(y).flatten()
-        if type(z) == float or type(z) == int:
+        if type(z) is float or type(z) is int:
             self.z = np.array([z])
         else:
             self.z = np.array(z).flatten()
+        try:
+            assert((self.x.size==self.y.size) and (self.x.size==self.z.size))
+        except AssertionError as ae:
+            raise ae, "The number of elements in [x, y, z] must be identical"
+        
         self.color = color
         self.marker = marker
         if N is not None:

@@ -29,7 +29,7 @@ GNU General Public License for more details.
   * inputgenerators - functions for synaptic input time generation
 '''
 
-__version__ = "1.1.2"
+__version__ = "1.1.3"
 
 from .pointprocess import Synapse, PointProcess, StimIntElectrode
 from .recextelectrode import RecExtElectrode, RecExtElectrodeSetup
