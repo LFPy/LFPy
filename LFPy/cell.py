@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 '''
-Copyright (C) 2012 Computational Neuroscience Group, UMB.
+Copyright (C) 2012 Computational Neuroscience Group, NMBU.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -116,7 +116,7 @@ class Cell(object):
             for numsec, sec in enumerate(neuron.h.allsec()):
                 pass
             if numsec > 0 and self.verbose:
-                print(('%s existing sections deleted from memory' % numsec))
+                print('%s existing sections deleted from memory' % numsec)
             neuron.h('forall delete_section()')
 
         #print a warning if neuron have existing sections
@@ -154,7 +154,7 @@ class Cell(object):
             else:
                 pass
         if timeres_python < timeres_NEURON:
-            raise ValueError('timeres_python = %.3e < timeres_NEURON = %.3e' \
+            raise ValueError('timeres_python = %.3e < timeres_NEURON = %.3e'
                                         % (timeres_python, timeres_NEURON))
         self.timeres_python = timeres_python
         self.timeres_NEURON = timeres_NEURON
@@ -295,7 +295,7 @@ class Cell(object):
         if custom_fun is not None:
             for fun in custom_fun:
                 fun(**custom_fun_args[i])
-                i +=  1
+                i += 1
         
         #recreate sectionlists in case something changed
         neuron.h.define_shape()
@@ -390,10 +390,9 @@ class Cell(object):
         '''
         for sec in self.allseclist:
             sec.nseg = int((sec.L / (d_lambda*neuron.h.lambda_f(frequency,
-                                                           sec=sec)) + .9)
-                / 2 )*2 + 1
+                                                sec=sec)) + .9) / 2)*2 + 1
         if self.verbose:
-            print(("set nsegs using lambda-rule with frequency %i." % frequency))
+            print("set nsegs using lambda-rule with frequency %i." % frequency)
    
     def _set_nsegs_lambda100(self, d_lambda=0.1):
         '''Set the numbers of segments using d_lambda(100)'''
@@ -643,7 +642,7 @@ class Cell(object):
                             seclist.append(sec=sec)
             else:
                 if self.verbose:
-                    print(('%s did not match any section name' % str(section)))
+                    print('%s did not match any section name' % str(section))
 
         idx = self._get_idx(seclist)
         sel_z_idx = (self.zmid[idx] > z_min) & (self.zmid[idx] < z_max)
@@ -662,8 +661,8 @@ class Cell(object):
             section: str, string matching a section-name
         '''
         idx = self.get_idx(section)
-        dist = np.sqrt((self.xmid[idx] - x)**2 + \
-            (self.ymid[idx] - y)**2 + (self.zmid[idx] - z)**2)
+        dist = np.sqrt((self.xmid[idx] - x)**2 +
+                       (self.ymid[idx] - y)**2 + (self.zmid[idx] - z)**2)
         
         mindist = np.where(dist == np.min(dist))
         
@@ -877,7 +876,7 @@ class Cell(object):
         for values in self.recvariablesreclist:
             self.rec_variables.update({rec_variables[i] : np.array(values)})
             if self.verbose:
-                print(('collected recorded variable %s' % rec_variables[i])) 
+                print('collected recorded variable %s' % rec_variables[i])
             i += 1
         del self.recvariablesreclist
     
@@ -997,8 +996,8 @@ class Cell(object):
                         recvector.record(getattr(seg, '_ref_%s' % variable),
                                          self.timeres_python)
                     else:
-                        print(('non-existing variable %s, section %s.%f' % \
-                                (variable, sec.name(), seg.x)))
+                        print('non-existing variable %s, section %s.%f' %
+                                (variable, sec.name(), seg.x))
                     variablereclist.append(recvector)
         
     
@@ -1039,7 +1038,7 @@ class Cell(object):
             if type(getattr(self, varname)) == type(neuron.h.List()):
                 setattr(self, varname, None)
                 if self.verbose:
-                    print(('None-typed %s in cell instance' % varname))
+                    print('None-typed %s in cell instance' % varname)
         
     def cellpickler(self, filename):
         '''
@@ -1107,7 +1106,7 @@ class Cell(object):
             
             self._real_positions(rel_start, rel_end)
             if self.verbose:
-                print(('Rotated geometry %g radians around x-axis' % (-theta)))
+                print('Rotated geometry %g radians around x-axis' % (-theta))
         else:
             if self.verbose:
                 print('Geometry not rotated around x-axis')
@@ -1125,7 +1124,7 @@ class Cell(object):
             
             self._real_positions(rel_start, rel_end)
             if self.verbose:
-                print(('Rotated geometry %g radians around y-axis' % (-phi)))
+                print('Rotated geometry %g radians around y-axis' % (-phi))
         else:
             if self.verbose:
                 print('Geometry not rotated around y-axis')
@@ -1143,7 +1142,7 @@ class Cell(object):
             
             self._real_positions(rel_start, rel_end)
             if self.verbose:
-                print(('Rotated geometry %g radians around z-axis' % (-gamma)))
+                print('Rotated geometry %g radians around z-axis' % (-gamma))
         else:
             if self.verbose:
                 print('Geometry not rotated around z-axis')
@@ -1180,7 +1179,7 @@ class Cell(object):
             raise Exception("axis must be either 'x', 'y' or 'z'")
         
         if self.verbose:
-            print(('morphology mirrored across %s-axis' % axis))
+            print('morphology mirrored across %s-axis' % axis)
         
         #set the proper 3D positions
         self._real_positions(rel_start, rel_end)
@@ -1404,7 +1403,7 @@ class Cell(object):
         segidx = 0
         for sec in self.allseclist:
             for seg in sec:
-                allsegnames.append((segidx, '%s'  % sec.name(), seg.x))
+                allsegnames.append((segidx, '%s' % sec.name(), seg.x))
                 segidx += 1
         
         return np.array(allsegnames, dtype=object)[idx]
@@ -1445,7 +1444,7 @@ class Cell(object):
         return x, y, z, d
 
             
-    def _update_pt3d(self):           
+    def _update_pt3d(self):
         '''
         update the locations in neuron.hoc.space using neuron.h.pt3dchange()
         '''
@@ -1526,7 +1525,7 @@ class Cell(object):
                 self.x3d[i], self.y3d[i], self.z3d[i] = \
                                             self._real_pt3d_positions(rel_pos)
             if self.verbose:
-                print(('Rotated geometry %g radians around y-axis' % (-phi)))
+                print('Rotated geometry %g radians around y-axis' % (-phi))
         else:
             if self.verbose:
                 print('Geometry not rotated around y-axis')
@@ -1545,7 +1544,7 @@ class Cell(object):
                 self.x3d[i], self.y3d[i], self.z3d[i] = \
                                             self._real_pt3d_positions(rel_pos)
             if self.verbose:
-                print(('Rotated geometry %g radians around z-axis' % (-gamma)))
+                print('Rotated geometry %g radians around z-axis' % (-gamma))
         else:
             if self.verbose:
                 print('Geometry not rotated around z-axis')
@@ -1772,7 +1771,7 @@ class Cell(object):
 
 
 
-    def insert_v_ext(self, v_ext, t_ext):        
+    def insert_v_ext(self, v_ext, t_ext):
         '''
         playback of some extracellular potential v_ext on each cell.totnseg
         compartments. Assumes that the "extracellular"-mechanism is inserted

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-'''Copyright (C) 2012 Computational Neuroscience Group, UMB.
+'''Copyright (C) 2012 Computational Neuroscience Group, NMBU.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -48,4 +48,4 @@ def noise_brown(ncols, nrows=1, weight=1, filter=None, filterargs=None):
         noise[i, :] /= rms_flat(noise[i, :])
         noise[i, :] *= weight
     return noise
-    
+

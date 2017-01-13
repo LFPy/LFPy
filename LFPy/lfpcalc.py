@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-'''Copyright (C) 2012 Computational Neuroscience Group, UMB.
+'''Copyright (C) 2012 Computational Neuroscience Group, NMBU.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -176,8 +176,8 @@ def calc_lfp_som_as_point(cell, x=0., y=0., z=0., sigma=0.3,
     r2 = _r2_calc(xend, yend, zend, x, y, z, h)
     r_soma = _r_soma_calc(xmid, ymid, zmid, x, y, z)
     if r_soma < s_limit:
-        print(('Adjusting r-distance to soma segment from %g to %g' \
-                % (r_soma, s_limit)))
+        print('Adjusting r-distance to soma segment from %g to %g'
+                % (r_soma, s_limit))
         r_soma = s_limit
 
     # Check that no segment is closer to the electrode than r_limit
@@ -304,7 +304,7 @@ def _check_rlimit(r2, r_limit, h, deltaS):
 
 def _r_soma_calc(xmid, ymid, zmid, x, y, z):
     '''calculate the distance to soma midpoint'''
-    r_soma = np.sqrt((x - xmid)**2 + (y - ymid)**2 + \
+    r_soma = np.sqrt((x - xmid)**2 + (y - ymid)**2 +
         (z - zmid)**2)
 
     return r_soma
