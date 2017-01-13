@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 '''Initialization of LFPy, a module for simulating extracellular potentials.
 
-Group of Computational Neuroscience (compneuro.umb.no),
+Group of Computational Neuroscience,
 Department of Mathematical Sciences and Technology,
 Norwegian University of Life Sciences.
 
-Copyright (C) 2012 Computational Neuroscience Group, UMB.
+Copyright (C) 2012 Computational Neuroscience Group, NMBU.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

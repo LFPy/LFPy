@@ -51,7 +51,7 @@ setup(
     name = "LFPy",
     version = "1.1.2",
     maintainer = "Espen Hagen",
-    maintainer_email = 'e.hagen@fz-juelich.de',
+    maintainer_email = 'espen.hagen@fys.uio.no',
     packages = ['LFPy'],
     package_data = {'LFPy' : ['stick.hoc', 'sinsyn.mod',
                               os.path.join('i686', '*'),
