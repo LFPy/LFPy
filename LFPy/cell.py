@@ -541,16 +541,16 @@ class Cell(object):
                 if i == idx:
                     command = cmd1 + pptype + cmd2
                     if sys.version >= "3.4":
-                        exec(command)
-                    else:
                         exec(command, globals())
+                    else:
+                        exec(command)
                     for param in list(kwargs.keys()):
                         try:
                             if sys.version >= "3.4":
-                                exec('stim.' + param + '=' + str(kwargs[param]))
-                            else:
                                 exec('stim.' + param + '=' + str(kwargs[param]),
                                      globals())
+                            else:
+                                exec('stim.' + param + '=' + str(kwargs[param]))
                         except SyntaxError:
                             ERRMSG = ''.join(['',
                                 'Point process type "{0}" might not '.format(
