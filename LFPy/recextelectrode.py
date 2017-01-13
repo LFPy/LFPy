@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-'''Copyright (C) 2012 Computational Neuroscience Group, UMB.
+'''Copyright (C) 2012 Computational Neuroscience Group, NMBU.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -152,7 +152,6 @@ class RecExtElectrodeSetup(object):
         
         
         if self.cell is not None:
-            
             sum_imem = self.cell.imem.sum(axis=0)
             #check if eye matrix is supplied:
             if np.any(sum_imem == np.ones(self.cell.totnsegs)):
@@ -161,9 +160,10 @@ class RecExtElectrodeSetup(object):
                 if abs(sum_imem).max() >= tolerance:
                     warnings.warn('Membrane currents do not sum to zero')
                     [inds] = np.where((abs(sum_imem) >= tolerance))
-                    for i in inds:
-                        print(('membrane current sum of celltimestep %i: %.3e' \
-                            % (i, sum_imem[i])))
+                    if self.cell.verbose:
+                        for i in inds:
+                            print('membrane current sum of celltimestep %i: %.3e'
+                                % (i, sum_imem[i]))
                 else:
                     pass
         else:
@@ -274,14 +274,14 @@ class RecExtElectrode(RecExtElectrodeSetup):
                 self._lfp_el_pos_calc_dist(t_indices=t_indices,
                                            r_limit=self.cell.diam/2)
             if self.verbose:
-                print(('calculations finished, %s, %s' % (str(self),
-                                                         str(self.cell))))
+                print('calculations finished, %s, %s' % (str(self),
+                                                         str(self.cell)))
         else:
             LFP_temp = self._loop_over_contacts(t_indices=t_indices,
                                                 r_limit=self.cell.diam/2)
             if self.verbose:
-                print(('calculations finished, %s, %s' % (str(self),
-                                                         str(self.cell))))
+                print('calculations finished, %s, %s' % (str(self),
+                                                         str(self.cell)))
         
         #dump results:
         self.LFP = LFP_temp
@@ -336,7 +336,7 @@ class RecExtElectrode(RecExtElectrodeSetup):
                     (np.random.rand()-0.5)]
                 crcl[j, ] = np.cross(self.N[i, ], B)
                 crcl[j, ] = crcl[j, ]/np.sqrt(crcl[j, 0]**2 +
-                                           crcl[j, 1]**2 + \
+                                           crcl[j, 1]**2 +
                                            crcl[j, 2]**2)*self.r
 
             crclx = crcl[:, 0] + self.x[i]

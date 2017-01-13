@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-'''Copyright (C) 2012 Computational Neuroscience Group, UMB.
+'''Copyright (C) 2012 Computational Neuroscience Group, NMBU.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -60,10 +60,10 @@ def _run_simulation(cell, variable_dt=False, atol=0.001):
         neuron.h.fadvance()
         counter += 1.
         if np.mod(counter, interval) == 0:
-            rtfactor = (neuron.h.t - ti)  * 1E-3 / (time() - t0)
+            rtfactor = (neuron.h.t - ti) * 1E-3 / (time() - t0)
             if cell.verbose:
-                print(('t = {:.0f}, realtime factor: {:.3f}'.format(neuron.h.t,
-                                                                    rtfactor)))
+                print('t = {:.0f}, realtime factor: {:.3f}'.format(neuron.h.t,
+                                                                    rtfactor))
             t0 = time()
             ti = neuron.h.t
 
@@ -158,7 +158,7 @@ def _run_simulation_with_electrode(cell, electrode=None,
     cvode = neuron.h.CVode()
     
     #don't know if this is the way to do, but needed for variable dt method
-    if cell.timeres_NEURON<=1E-8:
+    if cell.timeres_NEURON <= 1E-8:
         cvode.active(1)
         cvode.atol(atol)
     else:
