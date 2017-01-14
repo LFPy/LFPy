@@ -333,7 +333,7 @@ class Cell(object):
             self._set_nsegs_fixed_length(max_nsegs_length)
         else:
             if self.verbose:
-                print(('No nsegs_method applied (%s)' % nsegs_method))
+                print('No nsegs_method applied (%s)' % nsegs_method)
     
     def _get_rotation(self):
         """Check if there exists a corresponding file
@@ -401,11 +401,11 @@ class Cell(object):
         """Set the number of segments for section according to the 
         d_lambda-rule for a given input frequency
         
-        kwargs:
-        ::
-            
-            frequency: float, frequency at whihc AC length constant is computed
-            d_lambda: float, 
+        Parameters
+        ----------
+        frequency: float
+            frequency at which AC length constant is computed
+        d_lambda: float
         """
         for sec in self.allseclist:
             sec.nseg = int((sec.L / (d_lambda*neuron.h.lambda_f(frequency,
@@ -446,25 +446,32 @@ class Cell(object):
     
     def _set_extracellular(self):
         """Insert extracellular mechanism on all sections
-        to access i_membrane"""
+        to access i_membrane
+
+        """
         for sec in self.allseclist:
             sec.insert('extracellular')
             
     def set_synapse(self, idx, syntype,
                     record_current=False, record_potential=False,
                     weight=None, **kwargs):
-        """
-        Insert syntype (e.g. ExpSyn) synapse on segment with index idx, 
-        
-        Arguments:
-        ::
-            
-            idx : int
-            syntype : str
-            record_current : bool
-            record_potential : bool
-            weight : float            
-            kwargs : arguments passed on from class Synapse
+        """Insert synapse on cell segment
+
+        Parameters
+        ----------
+        idx : int
+            Index of compartment where synapse is inserted
+        syntype : str
+            Type of synapse. Built-in examples: ExpSyn, Exp2Syn
+        record_current : bool
+            Decides if potential is recorded
+        record_potential : bool
+            Decides if potential is recorded
+        weight : float
+            Strength of synapse
+        kwargs
+            arguments passed on from class Synapse
+
         """
         if not hasattr(self, 'synlist'):
             self.synlist = neuron.h.List()
@@ -521,18 +528,20 @@ class Cell(object):
         return self.synlist.count() - 1
 
     def set_point_process(self, idx, pptype, record_current=False, **kwargs):
-        """
-        Insert pptype-electrode type pointprocess on segment numbered
-        idx on cell object, with keyword arguments according to types 
-        SEClamp, VClamp, IClamp, SinIClamp, ChirpIClamp.
+        """Insert pptype-electrode type pointprocess on segment numbered
+        idx on cell object
         
-        Arguments:
-        ::
-            
-            idx : int
-            pptype : str
-            record_current : bool
-            kwargs : arguments passed on from class StimIntElectrode
+        Parameters
+        ----------
+        idx : int
+            Index of compartment where point process is inserted
+        pptype : str
+            Type of pointprocess. Examples: SEClamp, VClamp,
+            IClamp, SinIClamp, ChirpIClamp
+        record_current : bool
+            Decides if current is stored
+        kwargs
+            arguments passed on from class StimIntElectrode
             
         """
         
@@ -615,35 +624,33 @@ class Cell(object):
             self.somapos[2] = self.zmid[self.somaidx]
         else:
             raise Exception('Huh?!')
-        
 
-    
     def _calc_midpoints(self):
         """Calculate midpoints of each segment"""
         self.xmid = .5*(self.xstart+self.xend).flatten()
         self.ymid = .5*(self.ystart+self.yend).flatten()
         self.zmid = .5*(self.zstart+self.zend).flatten()
 
-
     def get_idx(self, section='allsec', z_min=-10000, z_max=10000):
-        """
-        Returns neuron idx of segments from sections with names that match
+        """Returns compartment idx of segments from sections with names that match
         the pattern defined in input section on interval [z_min, z_max].
         
-        kwargs:
-        ::
-            
-            section: str, any entry in cell.allsecnames or just 'allsec'.
-            z_min: float, depth filter
-            z_max: float depth filter
+        Parameters
+        ----------
+        section : str
+            any entry in cell.allsecnames or just 'allsec'.
+        z_min : float
+            depth filter. Specify minimum z-position
+        z_max : float
+            depth filter. Specify maximum z-position
         
-        Usage:
-        ::
-            
-            idx = cell.get_idx(section='allsec')
-            print idx
-            idx = cell.get_idx(section=['soma', 'dend', 'apic'])
-            print idx
+        Examples
+        --------
+
+        >>> idx = cell.get_idx(section='allsec')
+        >>> print idx
+        >>> idx = cell.get_idx(section=['soma', 'dend', 'apic'])
+        >>> print idx
             
         """
         if section == 'allsec': 
@@ -666,22 +673,27 @@ class Cell(object):
         idx = self._get_idx(seclist)
         sel_z_idx = (self.zmid[idx] > z_min) & (self.zmid[idx] < z_max)
         return np.arange(self.totnsegs)[idx][sel_z_idx]
-                            
-                
-    def get_closest_idx(self, x=0, y=0, z=0, section='allsec'):
+
+    def get_closest_idx(self, x=0., y=0., z=0., section='allsec'):
         """Get the index number of a segment in specified section which 
         midpoint is closest to the coordinates defined by the user
-        kwargs:
-        ::
-            
-            x: float, coordinate
-            y: float, coordinate
-            z: float, coordinate
-            section: str, string matching a section-name
+
+        Parameters
+        ----------
+        x: float
+            coordinate
+        y: float
+            coordinate
+        z: float
+            coordinate
+        section: str
+            string matching a section-name. Defaults to 'allsec'.
+
         """
         idx = self.get_idx(section)
         dist = np.sqrt((self.xmid[idx] - x)**2 +
-                       (self.ymid[idx] - y)**2 + (self.zmid[idx] - z)**2)
+                       (self.ymid[idx] - y)**2 +
+                       (self.zmid[idx] - z)**2)
         
         mindist = np.where(dist == np.min(dist))
         
@@ -693,13 +705,17 @@ class Cell(object):
         normalized to the membrane area of segment on 
         interval [z_min, z_max]
         
-        kwargs:
-        ::
-            
-            section: str, string matching a section-name
-            nidx: int, number of random indices
-            z_min: float, depth filter
-            z_max: float depth filter            
+        Parameters
+        ----------
+        section : str
+            string matching a section-name
+        nidx : int
+            number of random indices
+        z_min : float
+            depth filter
+        z_max : float
+            depth filter
+
         """
         poss_idx = self.get_idx(section=section, z_min=z_min, z_max=z_max)
         if nidx < 1:
@@ -725,33 +741,48 @@ class Cell(object):
         This is the main function running the simulation of the NEURON model.
         Start NEURON simulation and record variables specified by arguments.
         
-        Arguments:
-        ::
-            
-            electrode:  Either an LFPy.RecExtElectrode object or a list of such.
-                        If supplied, LFPs will be calculated at every time step
-                        and accessible as electrode.LFP. If a list of objects
-                        is given, accessible as electrode[0].LFP etc.
-            rec_imem:   If true, segment membrane currents will be recorded
-                        If no electrode argument is given, it is necessary to
-                        set rec_imem=True in order to calculate LFP later on.
-                        Units of (nA).
-            rec_vmem:   record segment membrane voltages (mV)
-            rec_ipas:   record passive segment membrane currents (nA)
-            rec_icap:   record capacitive segment membrane currents (nA)
-            rec_isyn:   record synaptic currents of from Synapse class (nA)
-            rec_vmemsyn:    record membrane voltage of segments with Synapse(mV)
-            rec_istim:  record currents of StimIntraElectrode (nA)
-            rec_variables: list of variables to record, i.e arg=['cai', ]
-            variable_dt: boolean, using variable timestep in NEURON
-            atol:       absolute tolerance used with NEURON variable timestep 
-            to_memory:  only valid with electrode, store lfp in -> electrode.LFP 
-            to_file:    only valid with electrode, save LFPs in hdf5 file format 
-            file_name:  name of hdf5 file, '.h5' is appended if it doesnt exist
-            dotprodcoeffs :  list of N x Nseg np.ndarray. These arrays will at
-                        every timestep be multiplied by the membrane currents.
-                        Presumably useful for memory efficient csd or lfp calcs
-            """
+        Parameters
+        ----------
+        electrode :  :obj: or list, optional
+            Either an LFPy.RecExtElectrode object or a list of such.
+            If supplied, LFPs will be calculated at every time step
+            and accessible as `electrode.LFP`. If a list of objects
+            is given, accessible as `electrode[0].LFP` etc.
+        rec_imem : bool
+            If true, segment membrane currents will be recorded
+            If no electrode argument is given, it is necessary to
+            set rec_imem=True in order to calculate LFP later on.
+            Units of (nA).
+        rec_vmem : bool
+            record segment membrane voltages (mV)
+        rec_ipas : bool
+            record passive segment membrane currents (nA)
+        rec_icap : bool
+            record capacitive segment membrane currents (nA)
+        rec_isyn : bool
+            record synaptic currents of from Synapse class (nA)
+        rec_vmemsyn : bool
+            record membrane voltage of segments with Synapse(mV)
+        rec_istim :  bool
+            record currents of StimIntraElectrode (nA)
+        rec_variables : list
+            list of variables to record, i.e arg=['cai', ]
+        variable_dt : bool
+            use variable timestep in NEURON
+        atol : float
+            absolute tolerance used with NEURON variable timestep
+        to_memory : bool
+            only valid with electrode, store lfp in -> electrode.LFP
+        to_file : bool
+            only valid with electrode, save LFPs in hdf5 file format
+        file_name : str
+            name of hdf5 file, '.h5' is appended if it doesnt exist
+        dotprodcoeffs : list
+            list of N x Nseg np.ndarray. These arrays will at
+            every timestep be multiplied by the membrane currents.
+            Presumably useful for memory efficient csd or lfp calcs
+
+        """
         self._set_soma_volt_recorder()
         self._collect_tvec()
         
@@ -769,8 +800,8 @@ class Cell(object):
         #run fadvance until t >= tstopms, and calculate LFP if asked for
         if electrode is None and dotprodcoeffs is None:
             if not rec_imem:
-                print(("rec_imem = %s, membrane currents will not be recorded!" \
-                                  % str(rec_imem)))
+                print("rec_imem = %s, membrane currents will not be recorded!"
+                                  % str(rec_imem))
             _run_simulation(self, variable_dt, atol)
         else:
             #allow using both electrode and additional coefficients:
@@ -907,9 +938,7 @@ class Cell(object):
             #     raise Exception(errmsg)
             # else:
             #     pass
-            
 
-    
     def _set_soma_volt_recorder(self):
         """
         Record somatic membrane potential
@@ -986,7 +1015,6 @@ class Cell(object):
                 memvrec.record(seg._ref_v, self.timeres_python)
                 self.memvreclist.append(memvrec)
 
-    
     def _set_variable_recorders(self, rec_variables):
         """
         Create a recorder for each variable name in list
@@ -1009,12 +1037,21 @@ class Cell(object):
                         print('non-existing variable %s, section %s.%f' %
                                 (variable, sec.name(), seg.x))
                     variablereclist.append(recvector)
-        
-    
-    def set_pos(self, xpos=0, ypos=0, zpos=0):
-        """
+
+    def set_pos(self, xpos=0., ypos=0., zpos=0.):
+        """Set the cell position.
+
         Move the cell geometry so that midpoint of soma section is
         in (xpos, ypos, zpos). If no soma pos, use the first segment
+
+        Parameters
+        ----------
+        xpos : float
+            x position defaults to 0.0
+        ypos : float
+            y position defaults to 0.0
+        zpos : float
+            z position defaults to 0.0
         """
         diffx = xpos-self.somapos[0]
         diffy = ypos-self.somapos[1]
@@ -1039,7 +1076,6 @@ class Cell(object):
         self._calc_midpoints()
         self._update_synapse_positions()
 
-    
     def strip_hoc_objects(self):
         """Destroy any NEURON hoc objects in the cell object"""
         for varname in dir(self):
@@ -1097,12 +1133,13 @@ class Cell(object):
         where x, y, z are the rotation angles around respective axes.
         All rotation angles are optional.
         
-        Usage:
-        ::
-            
-            cell = LFPy.Cell(**kwargs)
-            rotation = {'x' : 1.233, 'y' : 0.236, 'z' : np.pi}
-            cell.set_rotation(**rotation)
+        Examples
+        --------
+
+        >>> cell = LFPy.Cell(**kwargs)
+        >>> rotation = {'x' : 1.233, 'y' : 0.236, 'z' : np.pi}
+        >>> cell.set_rotation(**rotation)
+
         """
         if x is not None:
             theta = -x
@@ -1162,17 +1199,15 @@ class Cell(object):
         if self.pt3d and hasattr(self, 'x3d'):
             self._set_pt3d_rotation(x, y, z)
 
-    
     def chiral_morphology(self, axis='x'):
         """
         Mirror the morphology around given axis, (default x-axis),
         useful to introduce more heterogeneouties in morphology shapes
-        
-        kwargs:
-        ::
-            
-            axis : str
-                'x' or 'y' or 'z'
+
+        Parameters
+        ----------
+        axis : str
+            'x' or 'y' or 'z'
         
         """
         #morphology relative to soma-position
@@ -1207,8 +1242,7 @@ class Cell(object):
         
         self.zstart = np.array(self.zstart).flatten()
         self.zend = np.array(self.zend).flatten()
-        
-    
+
     def _rel_positions(self):
         """
         Morphology relative to soma position
@@ -1222,7 +1256,6 @@ class Cell(object):
 
         return rel_start, rel_end
 
-    
     def _real_positions(self, rel_start, rel_end):
         """
         Morphology coordinates relative to Origo
@@ -1239,56 +1272,52 @@ class Cell(object):
         self._calc_midpoints()
         self._update_synapse_positions()
 
-    
     def get_rand_prob_area_norm(self, section='allsec', 
                                 z_min=-10000, z_max=10000):
         """
         Return the probability (0-1) for synaptic coupling on segments
         in section sum(prob)=1 over all segments in section.
-        Prob. determined by area.
+        Probability normalized by area.
 
-        kwargs:
-        ::
-           
-            section: str, string matching a section-name
-            z_min: float, depth filter
-            z_max: float depth filter            
+        Parameters
+        ----------
+        section : str
+            string matching a section-name. Defaults to 'allsec'
+        z_min : float
+            depth filter
+        z_max : float
+            depth filter
 
         """
         idx = self.get_idx(section=section, z_min=z_min, z_max = z_max)
         prob = self.area[idx] / sum(self.area[idx])
         return prob
 
-    def get_rand_prob_area_norm_from_idx(self, idx=np.array([0]), 
-                                z_min=-10000, z_max=10000):
+    def get_rand_prob_area_norm_from_idx(self, idx=np.array([0])):
         """
         Return the normalized probability (0-1) for synaptic coupling on
         segments in idx-array.
         Normalised probability determined by area of segments.
 
-        kwargs:
-        ::
-            
-            idx : np.ndarray, dtype=int.
-                array of segment indices
-            z_min: float, depth filter
-            z_max: float depth filter            
+        Parameters
+        ----------
+        idx : np.ndarray, dtype=int.
+            array of segment indices
 
         """
         prob = self.area[idx] / sum(self.area[idx])
         return prob
     
     def get_intersegment_vector(self, idx0=0, idx1=0):
-        """
-        Return the distance between midpoints of two segments with index
+        """Return the distance between midpoints of two segments with index
         idx0 and idx1. The argument returned is a vector [x, y, z], where
         x = self.xmid[idx1] - self.xmid[idx0] etc.
         
-        kwargs:
-        ::
-            
-            idx0 : int
-            idx1 : int
+        Parameters
+        ----------
+        idx0 : int
+        idx1 : int
+
         """
         vector = []
         try:
@@ -1304,8 +1333,18 @@ class Cell(object):
         
     def get_intersegment_distance(self, idx0=0, idx1=0):
         """
-        Return the Euclidean distance between midpoints of two segments 
-        with indices idx0 and idx1. Will return a float in unit of micrometers.
+        Return the Euclidean distance between midpoints of two segments.
+
+        Parameters
+        ----------
+        idx0 : int
+        idx1 : int
+
+        Returns
+        -------
+        float
+            Will return a float in unit of micrometers.
+
         """
         try:
             vector = np.array(self.get_intersegment_vector(idx0, idx1))
@@ -1313,18 +1352,17 @@ class Cell(object):
         except:
             ERRMSG = 'idx0 and idx1 must be ints on [0, %i]' % self.totnsegs
             raise ValueError(ERRMSG)
-    
-    
+
     def get_idx_children(self, parent="soma[0]"):
         """
         Get the idx of parent's children sections, i.e. compartments ids
         of sections connected to parent-argument
         
-        kwargs:
-        ::
-            
-            parent: str
-                name-pattern matching a sectionname
+        Parameters
+        ----------
+        parent : str
+            name-pattern matching a sectionname. Defaults to "soma[0]"
+
         """
         idxvec = np.zeros(self.totnsegs)
         secnamelist = []
@@ -1354,11 +1392,10 @@ class Cell(object):
         idx of sections connected to parent-argument, and also of the parent
         segments
         
-        kwargs:
-        ::
-            
-            parent: str
-                name-pattern matching a sectionname
+        Parameters
+        ----------
+        parent: str
+            name-pattern matching a sectionname. Defaults to "soma[0]"
         """
         idxvec = np.zeros(self.totnsegs)
         secnamelist = []
@@ -1382,19 +1419,20 @@ class Cell(object):
         [idx] = np.where(idxvec)
         return np.r_[self.get_idx(parent), idx]
 
-
     def get_idx_name(self, idx=np.array([0])):
-        """
-        Return NEURON convention name of segments with index idx.
-        The returned argument is a list of tuples with corresponding
-        segment idx, section name, and position along the section, like;
-        [(0, 'neuron.h.soma[0]', 0.5),]
-        
-        kwargs:
-        ::
-            
-            idx : np.ndarray, dtype int
-                segment indices, must be between 0 and cell.totnsegs        
+        """Return NEURON convention name of segments with index idx.
+
+        Parameters
+        ---------
+            idx : np.ndarray or int
+                segment indices, must be between 0 and cell.totnsegs
+
+        Returns
+        -------
+        list
+            The returned argument is a list of tuples with corresponding
+            segment idx, section name, and position along the section, like;
+            [(0, 'neuron.h.soma[0]', 0.5),]
         """
         #ensure idx is array-like, or convert
         if type(idx) == int:
@@ -1454,7 +1492,6 @@ class Cell(object):
 
         return x, y, z, d
 
-            
     def _update_pt3d(self):
         """
         update the locations in neuron.hoc.space using neuron.h.pt3dchange()
@@ -1474,7 +1511,6 @@ class Cell(object):
         #must recollect the geometry, otherwise we get roundoff errors!
         self._collect_geometry()
 
-
     def _set_pt3d_pos(self, diffx=0, diffy=0, diffz=0):
         """
         Offset pt3d geometry with differential displacement indicated in Cell.set_pos()
@@ -1484,7 +1520,6 @@ class Cell(object):
             self.y3d[i] += diffy
             self.z3d[i] += diffz
         self._update_pt3d()
-
 
     def _set_pt3d_rotation(self, x=None, y=None, z=None):
         """
@@ -1496,12 +1531,13 @@ class Cell(object):
         where x, y, z are the rotation angles around respective axes.
         All rotation angles are optional.
         
-        Usage:
-        ::
-            
-            cell = LFPy.Cell(**kwargs)
-            rotation = {'x' : 1.233, 'y' : 0.236, 'z' : np.pi}
-            cell.set_pt3d_rotation(**rotation)
+        Examples
+        --------
+
+        >>> cell = LFPy.Cell(**kwargs)
+        >>> rotation = {'x' : 1.233, 'y' : 0.236, 'z' : np.pi}
+        >>> cell.set_pt3d_rotation(**rotation)
+
         """
         if x is not None:
             theta = -x
@@ -1637,34 +1673,40 @@ class Cell(object):
         return x, y
     
     def get_pt3d_polygons(self, projection=('x', 'z')):
-        """for each section create a polygon in the plane determined by keyword
+        """For each section create a polygon in the plane determined by keyword
         argument projection=('x', 'z'), that can be
         visualized using e.g., plt.fill()
         
-        Returned argument is a list of (x, z) tuples giving the trajectory
-        of each section that can be plotted using PolyCollection
-        ::
-            
-            from matplotlib.collections import PolyCollection
-            import matplotlib.pyplot as plt
-            
-            cell = LFPy.Cell(morphology='PATH/TO/MORPHOLOGY')
-            
-            zips = []
-            for x, z in cell.get_idx_polygons(projection=('x', 'z')):
-                zips.append(zip(x, z))
-            
-            polycol = PolyCollection(zips,
-                                     edgecolors='none',
-                                     facecolors='gray')
-            
-            fig = plt.figure()
-            ax = fig.add_subplot(111)
-            
-            ax.add_collection(polycol)
-            ax.axis(ax.axis('equal'))
-            
-            plt.show()
+        Returns
+        -------
+        list
+            list of (x, z) tuples giving the trajectory
+            of each section that can be plotted using PolyCollection
+
+        Examples
+        --------
+
+        >>> from matplotlib.collections import PolyCollection
+        >>> import matplotlib.pyplot as plt
+
+        >>> cell = LFPy.Cell(morphology='PATH/TO/MORPHOLOGY')
+
+        >>> zips = []
+        >>> for x, z in cell.get_idx_polygons(projection=('x', 'z')):
+        >>>     zips.append(zip(x, z))
+
+        >>> polycol = PolyCollection(zips,
+        >>>                          edgecolors='none',
+        >>>                          facecolors='gray')
+
+        >>> fig = plt.figure()
+        >>> ax = fig.add_subplot(111)
+
+        >>> ax.add_collection(polycol)
+        >>> ax.axis(ax.axis('equal'))
+
+        >>> plt.show()
+
         """
         if len(projection) != 2:
             raise ValueError("projection arg be a tuple like ('x', 'y')")
@@ -1683,7 +1725,6 @@ class Cell(object):
             polygons.append(self._create_polygon(i, projection))
         
         return polygons
-
 
     def _create_segment_polygon(self, i, projection=('x', 'z')):
         """create a polygon to fill for segment i, in the plane
@@ -1723,44 +1764,46 @@ class Cell(object):
         
         return x, z
 
-
     def get_idx_polygons(self, projection=('x', 'z')):
-        """for each segment idx in celll create a polygon in the plane
+        """For each segment idx in cell create a polygon in the plane
         determined by the projection kwarg (default ('x', 'z')),
         that can be visualized using plt.fill() or
         mpl.collections.PolyCollection
+
+        Paramters
+        ---------
+        projection : tuple of strings
+            Determining projection. Defaults to ('x', 'z')
+
+        Returns
+        -------
+        list
+            list of (np.ndarray, np.ndarray) tuples
+            giving the trajectory of each section
         
-        Returned argument is a list of (np.ndarray, np.ndarray) tuples
-        giving the trajectory of each section
-        
-        kwargs:
-        ::
-            
-            projection : ('x', 'z') tuple of two strings determining projection 
-        
+        Examples
+        --------
         The most efficient way of using this would be something like
-        ::
-            
-            from matplotlib.collections import PolyCollection
-            import matplotlib.pyplot as plt
-            
-            cell = LFPy.Cell(morphology='PATH/TO/MORPHOLOGY')
-            
-            zips = []
-            for x, z in cell.get_idx_polygons(projection=('x', 'z')):
-                zips.append(zip(x, z))
-            
-            polycol = PolyCollection(zips,
-                                     edgecolors='none',
-                                     facecolors='gray')
-            
-            fig = plt.figure()
-            ax = fig.add_subplot(111)
-            
-            ax.add_collection(polycol)
-            ax.axis(ax.axis('equal'))
-            
-            plt.show()
+
+        >>> from matplotlib.collections import PolyCollection
+        >>> import matplotlib.pyplot as plt
+
+        >>> cell = LFPy.Cell(morphology='PATH/TO/MORPHOLOGY')
+
+        >>> zips = []
+        >>> for x, z in cell.get_idx_polygons(projection=('x', 'z')):
+        >>>     zips.append(zip(x, z))
+
+        >>> polycol = PolyCollection(zips,
+        >>>                          edgecolors='none',
+        >>>                          facecolors='gray')
+
+        >>> fig = plt.figure()
+        >>> ax = fig.add_subplot(111)
+        >>> ax.add_collection(polycol)
+        >>> ax.axis(ax.axis('equal'))
+        >>> plt.show()
+
         """
         if len(projection) != 2:
             raise ValueError("projection arg be a tuple like ('x', 'y')")
@@ -1783,65 +1826,64 @@ class Cell(object):
 
 
     def insert_v_ext(self, v_ext, t_ext):
-        """
-        playback of some extracellular potential v_ext on each cell.totnseg
+        """Set external extracellular potential around cell.
+
+        Playback of some extracellular potential v_ext on each cell.totnseg
         compartments. Assumes that the "extracellular"-mechanism is inserted
         on each compartment.
-        
         Can be used to study ephaptic effects and similar
-        
         The inputs will be copied and attached to the cell object as
         cell.v_ext, cell.t_ext, and converted
         to (list of) neuron.h.Vector types, to allow playback into each
         compartment e_extracellular reference.
-        
         Can not be deleted prior to running cell.simulate() 
         
-        Args:
-        ::
+        Parameters
+        ----------
             
-            v_ext : cell.totnsegs x t_ext.size np.array, unit mV
-            t_ext : np.array, time vector of v_ext
+        v_ext : numpy array
+            Numpy array of size cell.totnsegs x t_ext.size, unit mV
+        t_ext : np.array
+            time vector of v_ext
         
-        Simple usage:
-        ::
-            
-            import LFPy
-            import numpy as np
-            import matplotlib.pyplot as plt
-            
-            #create cell
-            cell = LFPy.Cell(morphology='morphologies/example_morphology.hoc')
-            
-            #time vector and extracellular field for every segment:
-            t_ext = np.arange(cell.tstopms / cell.timeres_python+ 1) * \
-                    cell.timeres_python
-            v_ext = np.random.rand(cell.totnsegs, t_ext.size)-0.5
-        
-            #insert potentials and record response:
-            cell.insert_v_ext(v_ext, t_ext)
-            cell.simulate(rec_imem=True, rec_vmem=True)
-        
-            fig = plt.figure()
-            ax1 = fig.add_subplot(311)
-            ax2 = fig.add_subplot(312)
-            ax3 = fig.add_subplot(313)
-            eim = ax1.matshow(np.array(cell.v_ext), cmap='spectral')
-            cb1 = fig.colorbar(eim, ax=ax1)
-            cb1.set_label('v_ext')
-            ax1.axis(ax1.axis('tight'))
-            iim = ax2.matshow(cell.imem, cmap='spectral')
-            cb2 = fig.colorbar(iim, ax=ax2)
-            cb2.set_label('imem')
-            ax2.axis(ax2.axis('tight'))
-            vim = ax3.matshow(cell.vmem, cmap='spectral')
-            ax3.axis(ax3.axis('tight'))
-            cb3 = fig.colorbar(vim, ax=ax3)
-            cb3.set_label('vmem')
-            ax3.set_xlabel('tstep')
-            plt.show()
-        
-        
+        Examples
+        --------
+
+        >>> import LFPy
+        >>> import numpy as np
+        >>> import matplotlib.pyplot as plt
+
+        >>> #create cell
+        >>> cell = LFPy.Cell(morphology='morphologies/example_morphology.hoc')
+
+        >>> #time vector and extracellular field for every segment:
+        >>> t_ext = np.arange(cell.tstopms / cell.timeres_python+ 1) * \
+        >>>         cell.timeres_python
+        >>> v_ext = np.random.rand(cell.totnsegs, t_ext.size)-0.5
+
+        >>> #insert potentials and record response:
+        >>> cell.insert_v_ext(v_ext, t_ext)
+        >>> cell.simulate(rec_imem=True, rec_vmem=True)
+
+        >>> fig = plt.figure()
+        >>> ax1 = fig.add_subplot(311)
+        >>> ax2 = fig.add_subplot(312)
+        >>> ax3 = fig.add_subplot(313)
+        >>> eim = ax1.matshow(np.array(cell.v_ext), cmap='spectral')
+        >>> cb1 = fig.colorbar(eim, ax=ax1)
+        >>> cb1.set_label('v_ext')
+        >>> ax1.axis(ax1.axis('tight'))
+        >>> iim = ax2.matshow(cell.imem, cmap='spectral')
+        >>> cb2 = fig.colorbar(iim, ax=ax2)
+        >>> cb2.set_label('imem')
+        >>> ax2.axis(ax2.axis('tight'))
+        >>> vim = ax3.matshow(cell.vmem, cmap='spectral')
+        >>> ax3.axis(ax3.axis('tight'))
+        >>> cb3 = fig.colorbar(vim, ax=ax3)
+        >>> cb3.set_label('vmem')
+        >>> ax3.set_xlabel('tstep')
+        >>> plt.show()
+
         """
         #test dimensions of input
         try:
