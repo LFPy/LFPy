@@ -21,14 +21,16 @@ def calc_lfp_choose(cell, x=0., y=0., z=0., sigma=0.3,
     """
     Determine which method to use. line-source for soma default
 
-    TODO: Remove timestep argument? It will not work
-    in the current implementation
+    TODO: Remove timestep argument, or fix implementation. It will not work
+    in the current implementation, since currmem is overwritten.
 
     TODO: Set som_as_point as default?
 
     TODO: x, y, z, sigma, r_limit, timestep, t_indices are given default values
     both in this function and in the calc_lfp_* funcions. Cleaner to
-    only give default values at one level?
+    only give default values at one level? From looking at functions here,
+    one would think r_limit defaults to None, while it actually defaults to
+    cell.diam/2 as set in recextelectrode.py
 
     Parameters
     ----------
@@ -150,17 +152,24 @@ def calc_lfp_som_as_point(cell, x=0., y=0., z=0., sigma=0.3,
     """Calculate electric field potential using the line-source method,
     soma is treated as point/sphere source
     
-    kwargs:
-    ::
-        
-        cell: LFPy.Cell or LFPy.TemplateCell instance
-        x : float, extracellular position, x-axis
-        y : float, extracellular position, y-axis
-        z : float, extracellular position, z-axis
-        sigma : float, extracellular conductivity
-        r_limit : [None]/float/np.ndarray: minimum distance to source current
-        timestep : [None]/int, calculate LFP at this timestep
-        t_indices : [None]/np.ndarray, calculate LFP at specific timesteps
+    Parameters
+    ----------
+    cell: obj
+        LFPy.Cell or LFPy.TemplateCell instance
+    x : float
+        extracellular position, x-axis
+    y : float
+        extracellular position, y-axis
+    z : float
+        extracellular position, z-axis
+    sigma : float
+        extracellular conductivity
+    r_limit : float or np.ndarray or None
+        [None]/float/np.ndarray: minimum distance to source current. Defaults
+        to None, which
+
+    timestep : [None]/int, calculate LFP at this timestep
+    t_indices : [None]/np.ndarray, calculate LFP at specific timesteps
     """
     #Handling the r_limits. If a r_limit is a single value,
     #an array r_limit of shape cell.diam is returned.
@@ -321,7 +330,7 @@ def _r2_calc(xend, yend, zend, x, y, z, h):
 
 def _check_rlimit(r2, r_limit, h, deltaS):
     """Check that no segment is close the electrode than r_limit"""
-    if np.sum(np.nonzero( r2 < r_limit*r_limit )) > 0:
+    if np.sum(np.nonzero(r2 < r_limit*r_limit)) > 0:
         for idx in np.nonzero( r2 < r_limit*r_limit )[0]:
             if (h[idx] < r_limit[idx]) and ((deltaS[idx]+h[idx]) >
                                              -r_limit[idx]):
