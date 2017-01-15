@@ -26,7 +26,7 @@ def load(filename):
     return obj
 
 def noise_brown(ncols, nrows=1, weight=1, filter=None, filterargs=None):
-    """Return 1/f^2 noise of shape(nrows, ncols obtained by taking 
+    """Return 1/f^2 noise of shape(nrows, ncols obtained by taking
     the cumulative sum of gaussian white noise, with rms weight.
     
     If filter is not None, this function will apply
