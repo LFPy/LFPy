@@ -45,8 +45,7 @@ cell_parameters = {          # various cell parameters,
     'passive' : True,   # switch on passive mechs
     'nsegs_method' : 'lambda_f',
     'lambda_f' : 100.,
-    'timeres_NEURON' : 2.**-3,   # [ms] dt's should be in powers of 2 for both,
-    'timeres_python' : 2.**-3,   # need binary representation
+    'dt' : 2.**-3,      # simulation time step size
     'tstartms' : 0.,    # start time of simulation, recorders start at t=0
     'tstopms' : 100.,   # stop simulation at 200 ms. These can be overridden
                         # by setting these arguments i cell.simulation()

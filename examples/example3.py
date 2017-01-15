@@ -66,8 +66,7 @@ cell_parameters = {          # various cell parameters,
     'passive' : True,   # switch on passive mechs
     'nsegs_method' : 'lambda_f',
     'lambda_f' : 100.,
-    'timeres_NEURON' : 2.**-3,   # [ms] dt's should be in powers of 2 for both,
-    'timeres_python' : 2.**-3,   # need binary representation
+    'dt' : 2.**-3,      # simulation time step size
     'tstartms' :  0.,   # start time of simulation, recorders start at t=0
     'tstopms' : 300.,   # stop simulation at 200 ms. These can be overridden
                         # by setting these arguments i cell.simulation()
@@ -245,7 +244,7 @@ if RANK==0:
     plt.xlim([0,cell_parameters['tstopms']])
     plt.ylim([0,10.])
     
-    tvec = np.arange(point_electrode.LFP.shape[1])*cell.timeres_python 
+    tvec = np.arange(point_electrode.LFP.shape[1])*cell.dt 
 
     plt.xlabel('$t$ (ms)')
     plt.ylabel('Rate (spike/s)')

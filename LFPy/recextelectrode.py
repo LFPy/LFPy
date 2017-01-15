@@ -199,8 +199,7 @@ class RecExtElectrode(RecExtElectrodeSetup):
             'rm' : 30000,                           # membrane resistivity
             'cm' : 1.0,                             # membrane capacitance
             'Ra' : 150,                             # axial resistivity
-            'timeres_NEURON' : 2**-4,                # dt for NEURON sim.
-            'timeres_python' : 2**-4,                 # dt for python output
+            'dt' : 0.1,                             # simulation time res
             'tstartms' : -50,                         # start t of simulation
             'tstopms' : 50,                        # end t of simulation
         }

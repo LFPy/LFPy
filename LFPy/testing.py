@@ -203,58 +203,54 @@ class testLFPy(unittest.TestCase):
     
     def test_tvec_00(self):
         stickParams = {
-            'timeres_python' : 2**-3,
-            'timeres_NEURON' : 2**-3,
+            'dt' : 2**-3,
             'tstartms' : 0.,
             'tstopms' : 100.,
         }
         
         tvec = self.stickSimulationTesttvec(**stickParams)
         tvec_numpy = np.linspace(0, stickParams['tstopms'],
-                    stickParams['tstopms']/stickParams['timeres_python'] + 1)
+                    stickParams['tstopms']/stickParams['dt'] + 1)
         
         self.assertEqual(tvec.size, tvec_numpy.size)
         
     def test_tvec_01(self):
         stickParams = {
-            'timeres_python' : 2**-3,
-            'timeres_NEURON' : 2**-3,
+            'dt' : 2**-3,
             'tstartms' : 0.,
             'tstopms' : 100.,
         }
         
         tvec = self.stickSimulationTesttvec(**stickParams)
         tvec_numpy = np.linspace(0, stickParams['tstopms'],
-                    stickParams['tstopms']/stickParams['timeres_python'] + 1)
+                    stickParams['tstopms']/stickParams['dt'] + 1)
         
         for i in range(tvec.size):
             self.assertEqual(tvec[i], tvec_numpy[i])
 
     def test_tvec_02(self):
         stickParams = {
-            'timeres_python' : 2**-3,
-            'timeres_NEURON' : 2**-4,
+            'dt' : 2**-3,
             'tstartms' : 0.,
-            'tstopms' : 100.,
+            'tstopms' : 10000.,
         }
         
         tvec = self.stickSimulationTesttvec(**stickParams)
         tvec_numpy = np.linspace(0, stickParams['tstopms'],
-                    stickParams['tstopms']/stickParams['timeres_python'] + 1)
+                    stickParams['tstopms']/stickParams['dt'] + 1)
         
         self.assertEqual(tvec.size, tvec_numpy.size)
 
     def test_tvec_03(self):
         stickParams = {
-            'timeres_python' : 2**-3,
-            'timeres_NEURON' : 2**-4,
+            'dt' : 2**-3,
             'tstartms' : 0.,
-            'tstopms' : 100.,
+            'tstopms' : 10000.,
         }
         
         tvec = self.stickSimulationTesttvec(**stickParams)
         tvec_numpy = np.linspace(0, stickParams['tstopms'],
-                    stickParams['tstopms']/stickParams['timeres_python'] + 1)
+                    stickParams['tstopms']/stickParams['dt'] + 1)
         
         
         for i in range(tvec.size):
@@ -263,176 +259,164 @@ class testLFPy(unittest.TestCase):
 
     def test_tvec_04(self):
         stickParams = {
-            'timeres_python' : 0.1,
-            'timeres_NEURON' : 0.1,
+            'dt' : 0.1,
             'tstartms' : 0,
             'tstopms' : 100,
         }
         
         tvec = self.stickSimulationTesttvec(**stickParams)
         tvec_numpy = np.linspace(0, stickParams['tstopms'],
-                    stickParams['tstopms']/stickParams['timeres_python'] + 1)
+                    stickParams['tstopms']/stickParams['dt'] + 1)
         
         self.assertEqual(tvec.size, tvec_numpy.size)
     
     def test_tvec_05(self):
         stickParams = {
-            'timeres_python' : 0.1,
-            'timeres_NEURON' : 0.1,
+            'dt' : 0.1,
             'tstartms' : 0.,
             'tstopms' : 100.,
         }
         
         tvec = self.stickSimulationTesttvec(**stickParams)
         tvec_numpy = np.linspace(0, stickParams['tstopms'],
-                    stickParams['tstopms']/stickParams['timeres_python'] + 1)
+                    stickParams['tstopms']/stickParams['dt'] + 1)
         
         for i in range(tvec.size):
             self.assertAlmostEqual(tvec[i], tvec_numpy[i])
 
     def test_tvec_06(self):
         stickParams = {
-            'timeres_python' : 0.10,
-            'timeres_NEURON' : 0.05,
+            'dt' : 0.1,
             'tstartms' : 0,
-            'tstopms' : 100,
+            'tstopms' : 10000,
         }
         
         tvec = self.stickSimulationTesttvec(**stickParams)
         tvec_numpy = np.linspace(0, stickParams['tstopms'],
-                    stickParams['tstopms']/stickParams['timeres_python'] + 1)
+                    stickParams['tstopms']/stickParams['dt'] + 1)
         
         self.assertEqual(tvec.size, tvec_numpy.size)
     
     def test_tvec_07(self):
         stickParams = {
-            'timeres_python' : 0.10,
-            'timeres_NEURON' : 0.05,
+            'dt' : 0.1,
             'tstartms' : 0.,
-            'tstopms' : 100.,
+            'tstopms' : 10000.,
         }
         
         tvec = self.stickSimulationTesttvec(**stickParams)
         tvec_numpy = np.linspace(0, stickParams['tstopms'],
-                    stickParams['tstopms']/stickParams['timeres_python'] + 1)
+                    stickParams['tstopms']/stickParams['dt'] + 1)
         
         for i in range(tvec.size):
             self.assertEqual(tvec[i], tvec_numpy[i])
 
     def test_tvec_08(self):
         stickParams = {
-            'timeres_python' : 2**-3,
-            'timeres_NEURON' : 2**-3,
+            'dt' : 2**-3,
             'tstartms' : -100,
             'tstopms' : 100,
         }
         
         tvec = self.stickSimulationTesttvec(**stickParams)
         tvec_numpy = np.linspace(0, stickParams['tstopms'],
-                    stickParams['tstopms']/stickParams['timeres_python'] + 1)
+                    stickParams['tstopms']/stickParams['dt'] + 1)
         
         self.assertEqual(tvec.size, tvec_numpy.size)
 
         
     def test_tvec_09(self):
         stickParams = {
-            'timeres_python' : 2**-3,
-            'timeres_NEURON' : 2**-3,
+            'dt' : 2**-3,
             'tstartms' : -100,
             'tstopms' : 100,
         }
         
         tvec = self.stickSimulationTesttvec(**stickParams)
         tvec_numpy = np.linspace(0, stickParams['tstopms'],
-                    stickParams['tstopms']/stickParams['timeres_python'] + 1)
+                    stickParams['tstopms']/stickParams['dt'] + 1)
         
         for i in range(tvec.size):
             self.assertEqual(tvec[i], tvec_numpy[i])
 
     def test_tvec_10(self):
         stickParams = {
-            'timeres_python' : 2**-3,
-            'timeres_NEURON' : 2**-4,
+            'dt' : 2**-3,
             'tstartms' : -100,
-            'tstopms' : 100,
+            'tstopms' : 10000,
         }
         
         tvec = self.stickSimulationTesttvec(**stickParams)
         tvec_numpy = np.linspace(0, stickParams['tstopms'],
-                    stickParams['tstopms']/stickParams['timeres_python'] + 1)
+                    stickParams['tstopms']/stickParams['dt'] + 1)
         
         self.assertEqual(tvec.size, tvec_numpy.size)
 
         
     def test_tvec_11(self):
         stickParams = {
-            'timeres_python' : 2**-3,
-            'timeres_NEURON' : 2**-4,
+            'dt' : 2**-3,
             'tstartms' : -100,
-            'tstopms' : 100,
+            'tstopms' : 10000,
         }
         
         tvec = self.stickSimulationTesttvec(**stickParams)
         tvec_numpy = np.linspace(0, stickParams['tstopms'],
-                    stickParams['tstopms']/stickParams['timeres_python'] + 1)
+                    stickParams['tstopms']/stickParams['dt'] + 1)
         
         for i in range(tvec.size):
             self.assertEqual(tvec[i], tvec_numpy[i])
 
     def test_tvec_12(self):
         stickParams = {
-            'timeres_python' : 0.10,
-            'timeres_NEURON' : 0.10,
+            'dt' : 0.1,
             'tstartms' : -100,
             'tstopms' : 100,
         }
         
         tvec = self.stickSimulationTesttvec(**stickParams)
         tvec_numpy = np.linspace(0, stickParams['tstopms'],
-                    stickParams['tstopms']/stickParams['timeres_python'] + 1)
+                    stickParams['tstopms']/stickParams['dt'] + 1)
         
         self.assertEqual(tvec.size, tvec_numpy.size)
 
     def test_tvec_13(self):
         stickParams = {
-            'timeres_python' : 0.10,
-            'timeres_NEURON' : 0.10,
+            'dt' : 0.10,
             'tstartms' : -100,
             'tstopms' : 100,
         }
         
         tvec = self.stickSimulationTesttvec(**stickParams)
         tvec_numpy = np.linspace(0, stickParams['tstopms'],
-                    stickParams['tstopms']/stickParams['timeres_python'] + 1)
+                    stickParams['tstopms']/stickParams['dt'] + 1)
         
         for i in range(tvec.size):
             self.assertAlmostEqual(tvec[i], tvec_numpy[i])
 
     def test_tvec_14(self):
         stickParams = {
-            'timeres_python' : 0.10,
-            'timeres_NEURON' : 0.05,
+            'dt' : 0.1,
             'tstartms' : -100,
-            'tstopms' : 100,
+            'tstopms' : 10000,
         }
         
         tvec = self.stickSimulationTesttvec(**stickParams)
         tvec_numpy = np.linspace(0, stickParams['tstopms'],
-                    stickParams['tstopms']/stickParams['timeres_python'] + 1)
+                    stickParams['tstopms']/stickParams['dt'] + 1)
         
         self.assertEqual(tvec.size, tvec_numpy.size)
 
     def test_tvec_15(self):
         stickParams = {
-            'timeres_python' : 0.10,
-            'timeres_NEURON' : 0.05,
+            'dt' : 0.1,
             'tstartms' : -100,
-            'tstopms' : 100,
+            'tstopms' : 10000,
         }
         
         tvec = self.stickSimulationTesttvec(**stickParams)
         tvec_numpy = np.linspace(0, stickParams['tstopms'],
-                    stickParams['tstopms']/stickParams['timeres_python'] + 1)
+                    stickParams['tstopms']/stickParams['dt'] + 1)
         
         for i in range(tvec.size):
             self.assertAlmostEqual(tvec[i], tvec_numpy[i])    
@@ -484,8 +468,7 @@ class testLFPy(unittest.TestCase):
             'Ra' : 150,
             'tstartms' : -100,
             'tstopms' : 100,
-            'timeres_python' : 0.01,
-            'timeres_NEURON' : 0.01,
+            'dt' : 0.01,
             'nsegs_method' : 'lambda_f',
             'lambda_f' : 100,
             
@@ -530,8 +513,7 @@ class testLFPy(unittest.TestCase):
             'Ra' : 150,
             'tstartms' : -100,
             'tstopms' : 100,
-            'timeres_python' : 0.01,
-            'timeres_NEURON' : 0.01,
+            'dt' : 0.01,
             'nsegs_method' : 'lambda_f',
             'lambda_f' : 100,
             
@@ -580,8 +562,7 @@ class testLFPy(unittest.TestCase):
             'Ra' : 150,
             'tstartms' : -100,
             'tstopms' : 100,
-            'timeres_python' : 0.01,
-            'timeres_NEURON' : 0.01,
+            'dt' : 0.01,
             'nsegs_method' : 'lambda_f',
             'lambda_f' : 100,
             
@@ -611,7 +592,7 @@ class testLFPy(unittest.TestCase):
         stick = LFPy.Cell(**stickParams)
         #dummy variables for mapping
         stick.imem = np.eye(stick.totnsegs)
-        stick.tvec = np.arange(stick.totnsegs)*stick.timeres_python
+        stick.tvec = np.arange(stick.totnsegs)*stick.dt
         
         electrode = LFPy.RecExtElectrode(stick, **electrodeParams)
         electrode.calc_lfp()
