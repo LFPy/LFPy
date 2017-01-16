@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-'''
+"""
 Copyright (C) 2012 Computational Neuroscience Group, NMBU.
 
 This program is free software: you can redistribute it and/or modify
@@ -11,92 +11,112 @@ This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
-'''
+
+"""
 
 import os
-import neuron
-import numpy as np
+import sys
 import pickle
+import numpy as np
+import neuron
 from LFPy import Cell, RecExtElectrode
 from LFPy.run_simulation import _run_simulation, _run_simulation_with_electrode
-import sys
 
 class TemplateCell(Cell):
-    '''
-    This class allow using cell templates with some limitations
-    
-    Arguments:
-    ::
-        
-        morphology : [str]: path to morphology file;
-        
-        templatefile :  [str]: Cell template definition(s)
-        templatename :  [str]: Cell template-name used for this cell object
-        templateargs :  [str]: Arguments provided to template-definition
-    
-        v_init: [-65.]: initial potential
-        passive: [True]/False: passive mechs are initialized if True
-        Ra: [150.]: axial resistance
-        rm: [30000]: membrane resistivity
-        cm: [1.0]: membrane capacitance
-        e_pas: [-65.]: passive mechanism reversal potential
-        extracellular: [True]/False: switch for NEURON's extracellular mechanism
-    
-        timeres_NEURON: [0.1]: internal dt for NEURON simulation
-        timeres_python: [0.1]: overall dt for python simulation
-    
-        tstartms: [0.]:  initialization time for simulation <= 0 ms
-        tstopms: [100.]: stop time for simulation > 0 ms
-    
-        nsegs_method: ['lambda100']/'lambda_f'/'fixed_length': nseg rule
-        max_nsegs_length: [None]: max segment length for method 'fixed_length'
-        lambda_f: [100]: AC frequency for method 'lambda_f'
-        
-        delete_sections: [True]: delete pre-existing section-references
-        
-        custom_code: [None]: list of model-specific code files ([.py/.hoc])
-        custom_fun: [None]: list of model-specific functions with args
-        custom_fun_args: [None]: list of args passed to custom_fun functions
-        pt3d: True/[False]: use pt3d-info of the cell geometries switch
-        verbose: True/[False]: verbose output switch
-    
-    Usage of TemplateCell class:
-    ::
-        
-        import LFPy
-        cellParameters = {                      
-            'morphology' : 'path/to/morphology',
-            'templatefile' :  'path/to/template-file (.hoc)
-            'templatename' :  'templatename'
-            'templateargs' :  None
+    """
+    This class allow using cell templates with some limitations.
+    TODO: Specify which limitations
 
-            'rm' : 30000,
-            'cm' : 1.0,
-            'Ra' : 150,
-            'timeres_NEURON' : 0.1,
-            'timeres_python' : 0.1,
-            'tstartms' : -50,
-            'tstopms' : 50,
-        }
-        cell = LFPy.TemplateCell(**cellParameters)
-        cell.simulate()
-    '''
+    This takes all the same parameters as the Cell class, but requires three
+    more template related arguments
+    
+    Parameters
+    ----------
+    morphology : str
+        path to morphology file
+    templatefile : str
+        File with cell template definition(s)
+    templatename : str
+        Cell template-name used for this cell object
+    templateargs : str
+        Arguments provided to template-definition
+    v_init : float
+        Initial membrane potential. Default to -65.
+    passive : bool
+        Passive mechanisms are initialized if True. Defaults to True
+    Ra : float
+        axial resistance. Defaults to 150.
+    rm : float
+        membrane resistivity. Defaults to 30000.
+    cm : float
+        membrane capacitance. Defaults to 1.0
+    e_pas : float
+        passive mechanism reversal potential. Defaults to -65.
+    extracellular : bool
+        switch for NEURON's extracellular mechanism. Defaults to True
+    timeres_NEURON : float
+        internal dt for NEURON simulation. Defaults to 0.1
+    timeres_python : float
+        overall dt for python simulation. Defaults to 0.1
+    tstartms : float
+        initialization time for simulation <= 0 ms. Defaults to 0.
+    tstopms : float
+        stop time for simulation > 0 ms. Defaults to 100.
+    nsegs_method : 'lambda100' or 'lambda_f' or 'fixed_length' or None
+        nseg rule, used by NEURON to determine number of compartments.
+        Defaults to 'lambda100'
+    max_nsegs_length : float or None
+        max segment length for method 'fixed_length'. Defaults to None
+    lambda_f : int
+        AC frequency for method 'lambda_f'. Defaults to 100
+    d_lambda : float
+        parameter for d_lambda rule. Defaults to 0.1
+    delete_sections : bool
+        delete pre-existing section-references. Defaults to True
+    custom_code : list or None
+        list of model-specific code files ([.py/.hoc]). Defaults to None
+    custom_fun : list or None
+        list of model-specific functions with args. Defaults to None
+    custom_fun_args : list or None
+        list of args passed to custom_fun functions. Defaults to None
+    pt3d : bool
+        use pt3d-info of the cell geometries switch. Defaults to False
+    celsius : float or None
+        Temperature in celsius. If nothing is specified here
+        or in custom code it is 6.3 celcius
+    verbose : bool
+        verbose output switch. Defaults to False
+
+    Examples
+    --------
+
+    >>> import LFPy
+    >>> cellParameters = {
+    >>>     'morphology' : 'path/to/morphology',
+    >>>     'templatefile' :  'path/to/template-file (.hoc)'
+    >>>     'templatename' :  'templatename'
+    >>>     'templateargs' :  None
+    >>>     'rm' : 30000,
+    >>>     'cm' : 1.0,
+    >>>     'Ra' : 150,
+    >>>     'timeres_NEURON' : 0.1,
+    >>>     'timeres_python' : 0.1,
+    >>>     'tstartms' : -50,
+    >>>     'tstopms' : 50,
+    >>> }
+    >>> cell = LFPy.TemplateCell(**cellParameters)
+    >>> cell.simulate()
+
+    """
     def __init__(self,
                  templatefile='LFPyCellTemplate.hoc',
                  templatename='LFPyCellTemplate',
                  templateargs=None,
                  **kwargs):
-        '''
-        Initialization of the Cell object.
-        
-        Arguments:
-        ::
-            
-            templatefile :  Cell template definition(s)
-            templatename :  Cell template-name used for this cell object
-            templateargs :  Arguments provided to template-definition
-            **kwargs :      See docstring of LFPy.Cell
-        '''
+        """
+        Initialization of the Template Cell object.
+
+        """
         self.templatefile = templatefile
         self.templatename = templatename
         self.templateargs = templateargs
@@ -118,10 +138,9 @@ class TemplateCell(Cell):
         
         #initialize the cell object
         Cell.__init__(self, **kwargs)
-        
-        
+
     def _load_geometry(self):
-        '''Load the morphology-file in NEURON''' 
+        """Load the morphology-file in NEURON""" 
         try: 
             neuron.h.sec_counted = 0
         except LookupError:
@@ -187,9 +206,8 @@ class TemplateCell(Cell):
         neuron.h.define_shape()
         self._create_sectionlists()
 
-
     def _create_sectionlists(self):
-        '''Create section lists for different kinds of sections'''
+        """Create section lists for different kinds of sections"""
         #list with all sections
         
         #test if list self.cell.all is not empty
@@ -229,12 +247,11 @@ class TemplateCell(Cell):
                 if sec.name().find('soma') >= 0:
                     self.somalist.append(sec=sec)
                     self.nsomasec += 1
- 
 
-    def _update_pt3d(self):           
-        '''
+    def _update_pt3d(self):
+        """
         update the locations in neuron.hoc.space using neuron.h.pt3dchange()
-        '''
+        """
         for i, sec in enumerate(self.allseclist):
             n3d = int(neuron.h.n3d())
             for n in range(n3d):

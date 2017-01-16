@@ -9,12 +9,14 @@ the Free Software Foundation, either version 3 of the License, or
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.'''
+GNU General Public License for more details.
 
+'''
+
+from time import time
 import numpy as np
 import neuron
 
-from time import time
 
 def _run_simulation(cell, cvode, variable_dt=False, atol=0.001):
     '''
