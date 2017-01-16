@@ -479,20 +479,20 @@ class testLFPy(unittest.TestCase):
     def test_cell_method_set_pos_00(self):
         '''test LFPy.Cell.set_pos'''
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
-                                                  'ball_and_Y.hoc'))
+                                                  'ball_and_sticks.hoc' ))
         np.testing.assert_allclose(cell.somapos, [0, 0, 0])
         
     def test_cell_method_set_pos_01(self):
         '''test LFPy.Cell.set_pos'''
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
-                                                  'ball_and_Y.hoc'))
+                                                  'ball_and_sticks.hoc' ))
         cell.set_pos(10., 20., -30.)
         np.testing.assert_allclose(cell.somapos, [10., 20., -30.])
 
     def test_cell_method_set_pos_02(self):
         '''test LFPy.Cell.set_pos'''
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
-                                                  'ball_and_Y.hoc'),
+                                                  'ball_and_sticks.hoc' ),
                           pt3d=True)
         cell.set_pos(10., 20., -30.)
         np.testing.assert_allclose(cell.somapos, [10., 20., -30.])
@@ -500,7 +500,7 @@ class testLFPy(unittest.TestCase):
     def test_cell_method_set_pos_03(self):
         '''test LFPy.Cell.set_pos'''
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
-                                                  'ball_and_Y.hoc'))
+                                                  'ball_and_sticks.hoc' ))
         cell.set_pos(10., 20., -30.)
         cell.set_pos(10., 20., -30.)
         cell.set_pos(10., 20., -30.)
@@ -509,7 +509,7 @@ class testLFPy(unittest.TestCase):
     def test_cell_method_set_pos_04(self):
         '''test LFPy.Cell.set_pos'''
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
-                                                  'ball_and_Y.hoc'),
+                                                  'ball_and_sticks.hoc' ),
                           pt3d=True)
         cell.set_pos(10., 20., -30.)
         cell.set_pos(10., 20., -30.)
@@ -521,7 +521,7 @@ class testLFPy(unittest.TestCase):
     def test_cell_method_set_pos_05(self):
         '''test LFPy.Cell.set_pos'''
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
-                                                  'ball_and_Y.hoc'))
+                                                  'ball_and_sticks.hoc' ))
         np.testing.assert_allclose(cell.somapos,
                                    [cell.xmid[0], cell.ymid[0], cell.zmid[0]])
             
@@ -529,7 +529,7 @@ class testLFPy(unittest.TestCase):
     def test_cell_method_set_pos_06(self):
         '''test LFPy.Cell.set_pos'''
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
-                                                  'ball_and_Y.hoc'),
+                                                  'ball_and_sticks.hoc' ),
                          pt3d=True)
         np.testing.assert_allclose(cell.somapos,
                                    [cell.xmid[0], cell.ymid[0], cell.zmid[0]])
@@ -538,7 +538,7 @@ class testLFPy(unittest.TestCase):
     def test_cell_method_set_rotation_00(self):
         '''test LFPy.Cell.set_rotation()'''
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
-                                                  'ball_and_Y.hoc'))
+                                                  'ball_and_sticks.hoc' ))
         
         ystarts = cell.ystart.copy()
         ymids = cell.ymid.copy()
@@ -561,7 +561,7 @@ class testLFPy(unittest.TestCase):
     def test_cell_method_set_rotation_01(self):
         '''test LFPy.Cell.set_rotation()'''
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
-                                                  'ball_and_Y.hoc'))
+                                                  'ball_and_sticks.hoc' ))
         
         xstarts = cell.xstart.copy()
         xmids = cell.xmid.copy()
@@ -584,7 +584,7 @@ class testLFPy(unittest.TestCase):
     def test_cell_method_set_rotation_03(self):
         '''test LFPy.Cell.set_rotation()'''
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
-                                                  'ball_and_Y.hoc'))
+                                                  'ball_and_sticks.hoc' ))
         
         xstarts = cell.xstart.copy()
         xmids = cell.xmid.copy()
@@ -606,7 +606,7 @@ class testLFPy(unittest.TestCase):
     def test_cell_method_set_rotation_03(self):
         '''test LFPy.Cell.set_rotation()'''
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
-                                                  'ball_and_Y.hoc'),
+                                                  'ball_and_sticks.hoc' ),
                          pt3d=True)
         
         ystarts = cell.ystart.copy()
@@ -630,7 +630,7 @@ class testLFPy(unittest.TestCase):
     def test_cell_method_set_rotation_04(self):
         '''test LFPy.Cell.set_rotation()'''
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
-                                                  'ball_and_Y.hoc'),
+                                                  'ball_and_sticks.hoc' ),
                          pt3d=True)
         
         xstarts = cell.xstart.copy()
@@ -654,7 +654,7 @@ class testLFPy(unittest.TestCase):
     def test_cell_method_set_rotation_05(self):
         '''test LFPy.Cell.set_rotation()'''
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
-                                                  'ball_and_Y.hoc'),
+                                                  'ball_and_sticks.hoc' ),
                          pt3d=True)
         
         xstarts = cell.xstart.copy()
@@ -679,7 +679,7 @@ class testLFPy(unittest.TestCase):
     def test_cell_method_chiral_morphology_00(self):
         '''test LFPy.Cell.chiral_morphology()'''
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
-                                                  'ball_and_Y.hoc'))
+                                                  'ball_and_sticks.hoc' ))
         
         xstarts = cell.xstart.copy()
         xmids = cell.xmid.copy()
@@ -708,7 +708,7 @@ class testLFPy(unittest.TestCase):
     def test_cell_method_chiral_morphology_00(self):
         '''test LFPy.Cell.chiral_morphology()'''
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
-                                                  'ball_and_Y.hoc'))
+                                                  'ball_and_sticks.hoc' ))
         
         xstarts = cell.xstart.copy()
         xmids = cell.xmid.copy()
@@ -736,7 +736,7 @@ class testLFPy(unittest.TestCase):
     def test_cell_method_chiral_morphology_00(self):
         '''test LFPy.Cell.chiral_morphology()'''
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
-                                                  'ball_and_Y.hoc'))
+                                                  'ball_and_sticks.hoc' ))
         
         xstarts = cell.xstart.copy()
         xmids = cell.xmid.copy()
@@ -765,7 +765,7 @@ class testLFPy(unittest.TestCase):
     def test_cell_get_rand_prob_area_norm_00(self):
         '''test LFPy.Cell.get_rand_prob_area_norm()'''
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
-                                                  'ball_and_Y.hoc'))
+                                                  'ball_and_sticks.hoc' ))
         p = cell.get_rand_prob_area_norm()
         self.assertAlmostEqual(p.sum(), 1.)
         self.assertTrue(p.min() >= 0.)
@@ -775,14 +775,14 @@ class testLFPy(unittest.TestCase):
     def test_cell_get_rand_prob_area_norm_from_idx_00(self):
         '''test LFPy.Cell.get_rand_prob_area_norm()'''
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
-                                                  'ball_and_Y.hoc'))
+                                                  'ball_and_sticks.hoc' ))
         p = cell.get_rand_prob_area_norm_from_idx(idx=np.array([0]))
         np.testing.assert_equal(p, np.array([1.]))
 
     
     def test_cell_get_intersegment_vector(self):
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
-                                                  'ball_and_Y.hoc'))
+                                                  'ball_and_sticks.hoc' ))
         idx0 = 0
         idx1 = 1
         vector = cell.get_intersegment_vector(idx0=idx0, idx1=idx1)
@@ -795,7 +795,7 @@ class testLFPy(unittest.TestCase):
 
     def test_cell_get_intersegment_distance(self):
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
-                                                  'ball_and_Y.hoc'))
+                                                  'ball_and_sticks.hoc' ))
         idx0 = 0
         idx1 = 1
         distance = cell.get_intersegment_distance(idx0=idx0, idx1=idx1)
@@ -804,9 +804,26 @@ class testLFPy(unittest.TestCase):
         self.assertEqual(np.sqrt(np.array(vector)**2).sum(), distance)
 
 
+    def test_cell_get_idx(self):
+        cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
+                                                  'ball_and_sticks.hoc' ),
+                         nsegs_method=None)
+        self.assertListEqual(cell.get_idx(section='soma').tolist(), [0])
+        self.assertListEqual(cell.get_idx(section='soma[0]').tolist(), [0])
+        self.assertListEqual(cell.get_idx(section='dend[0]').tolist(), [1])
+        self.assertListEqual(cell.get_idx(section='dend[1]').tolist(), [2])
+        self.assertListEqual(cell.get_idx(section='dend[2]').tolist(), [3])
+        self.assertListEqual(cell.get_idx(section='dend').tolist(), [1, 2, 3])
+        self.assertListEqual(cell.get_idx(section='allsec').tolist(),
+                             [0, 1, 2, 3])
+        self.assertListEqual(cell.get_idx(section=['soma', 'dend']).tolist(),
+                             [0, 1, 2, 3])
+        self.assertListEqual(cell.get_idx(section='apic').tolist(), [])
+
+
     def test_cell_get_idx_children(self):
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
-                                                  'ball_and_Y.hoc'))
+                                                  'ball_and_sticks.hoc' ))
     
         np.testing.assert_array_equal(cell.get_idx_children(parent='soma[0]'),
                                       cell.get_idx(section='dend[0]'))
@@ -814,16 +831,18 @@ class testLFPy(unittest.TestCase):
       
     def test_cell_get_idx_parent_children(self):
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
-                                                  'ball_and_Y.hoc'))
+                                                  'ball_and_sticks.hoc' ))
         np.testing.assert_array_equal(cell.get_idx_parent_children(parent='soma[0]'),
                                       cell.get_idx(section=['soma[0]',
                                                             'dend[0]']))
     
     
-    # def test_cell_get_idx_name(self):
-    #     cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
-    #                                               'ball_and_Y.hoc'))    
-    
+    def test_cell_get_idx_name(self):
+        cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
+                                                  'ball_and_sticks.hoc' ))    
+        np.testing.assert_array_equal(cell.get_idx_name(idx=np.array([0])),
+                                                np.array([[0, 'soma[0]', 0.5]],
+                                                         dtype=object))
     
     
     

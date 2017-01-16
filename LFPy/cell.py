@@ -1366,27 +1366,12 @@ class Cell(object):
             parent: str
                 name-pattern matching a sectionname
         '''
-        idxvec = np.zeros(self.totnsegs)
-        secnamelist = []
-        childseclist = [parent]
-        #filling list of sectionnames for all sections, one entry per segment
-        for sec in self.allseclist:
-            for seg in sec:
-                secnamelist.append(sec.name())
-        #filling list of children section-names
+        seclist = [parent]
         sref = neuron.h.SectionRef(parent)
         for sec in sref.child:
-            childseclist.append(sec.name())
-        #idxvec=1 where both coincide
-        i = 0
-        for sec in secnamelist:
-            for childsec in childseclist:
-                if sec == childsec:
-                    idxvec[i] += 1
-            i += 1
-            
-        [idx] = np.where(idxvec)
-        return np.r_[self.get_idx(parent), idx]
+            seclist.append(sec.name())
+        
+        return self.get_idx(section=seclist)
 
 
     def get_idx_name(self, idx=np.array([0], dtype=int)):
