@@ -779,7 +779,55 @@ class testLFPy(unittest.TestCase):
         p = cell.get_rand_prob_area_norm_from_idx(idx=np.array([0]))
         np.testing.assert_equal(p, np.array([1.]))
 
+    
+    def test_cell_get_intersegment_vector(self):
+        cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
+                                                  'ball_and_Y.hoc'))
+        idx0 = 0
+        idx1 = 1
+        vector = cell.get_intersegment_vector(idx0=idx0, idx1=idx1)
+
+        self.assertListEqual(vector,
+                            [cell.xmid[idx1] - cell.xmid[idx0],
+                             cell.ymid[idx1] - cell.ymid[idx0],
+                             cell.zmid[idx1] - cell.zmid[idx0]])
+
+
+    def test_cell_get_intersegment_distance(self):
+        cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
+                                                  'ball_and_Y.hoc'))
+        idx0 = 0
+        idx1 = 1
+        distance = cell.get_intersegment_distance(idx0=idx0, idx1=idx1)
+        vector = cell.get_intersegment_vector(idx0=idx0, idx1=idx1)
         
+        self.assertEqual(np.sqrt(np.array(vector)**2).sum(), distance)
+
+
+    def test_cell_get_idx_children(self):
+        cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
+                                                  'ball_and_Y.hoc'))
+    
+        np.testing.assert_array_equal(cell.get_idx_children(parent='soma[0]'),
+                                      cell.get_idx(section='dend[0]'))
+        
+      
+    def test_cell_get_idx_parent_children(self):
+        cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
+                                                  'ball_and_Y.hoc'))
+        np.testing.assert_array_equal(cell.get_idx_parent_children(parent='soma[0]'),
+                                      cell.get_idx(section=['soma[0]',
+                                                            'dend[0]']))
+    
+    
+    # def test_cell_get_idx_name(self):
+    #     cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
+    #                                               'ball_and_Y.hoc'))    
+    
+    
+    
+    
+    
     ######## Functions used by tests: ##########################################
     def stickSimulationTesttvec(self, **kwargs):
         stick = LFPy.Cell(morphology = os.path.join(LFPy.__path__[0],
