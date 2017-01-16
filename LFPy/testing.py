@@ -30,7 +30,7 @@ class testLFPy(unittest.TestCase):
         #create LFPs using LFPy-model
         LFP_LFPy = self.stickSimulation(method='pointsource')
         
-        #create LFPs using the analytical approac
+        #create LFPs using the analytical approach
         time = np.linspace(0, 100, 10001)
         R = np.ones(11)*100
         Z = np.linspace(1000, 0, 11)
@@ -49,7 +49,7 @@ class testLFPy(unittest.TestCase):
         #create LFPs using LFPy-model
         LFP_LFPy = self.stickSimulation(method='linesource')
         
-        #create LFPs using the analytical approac
+        #create LFPs using the analytical approach
         time = np.linspace(0, 100, 10001)
         R = np.ones(11)*100
         Z = np.linspace(1000, 0, 11)
@@ -68,7 +68,7 @@ class testLFPy(unittest.TestCase):
         #create LFPs using LFPy-model
         LFP_LFPy = self.stickSimulation(method='som_as_point')
         
-        #create LFPs using the analytical approac
+        #create LFPs using the analytical approach
         time = np.linspace(0, 100, 10001)
         R = np.ones(11)*100
         Z = np.linspace(1000, 0, 11)
@@ -88,7 +88,7 @@ class testLFPy(unittest.TestCase):
         #create LFPs using LFPy-model
         LFP_LFPy = self.stickSimulationDotprodcoeffs(method='pointsource')
         
-        #create LFPs using the analytical approac
+        #create LFPs using the analytical approach
         time = np.linspace(0, 100, 10001)
         R = np.ones(11)*100
         Z = np.linspace(1000, 0, 11)
@@ -107,7 +107,7 @@ class testLFPy(unittest.TestCase):
         #create LFPs using LFPy-model
         LFP_LFPy = self.stickSimulationDotprodcoeffs(method='linesource')
         
-        #create LFPs using the analytical approac
+        #create LFPs using the analytical approach
         time = np.linspace(0, 100, 10001)
         R = np.ones(11)*100
         Z = np.linspace(1000, 0, 11)
@@ -126,7 +126,7 @@ class testLFPy(unittest.TestCase):
         #create LFPs using LFPy-model
         LFP_LFPy = self.stickSimulationDotprodcoeffs(method='som_as_point')
         
-        #create LFPs using the analytical approac
+        #create LFPs using the analytical approach
         time = np.linspace(0, 100, 10001)
         R = np.ones(11)*100
         Z = np.linspace(1000, 0, 11)
@@ -147,7 +147,7 @@ class testLFPy(unittest.TestCase):
         LFP_LFPy = self.stickSimulationAveragingElectrode(
             contactRadius=10, contactNPoints=100, method='som_as_point')
         
-        #create LFPs using the analytical approac
+        #create LFPs using the analytical approach
         time = np.linspace(0, 100, 10001)
         R = np.ones(11)*100
         Z = np.linspace(1000, 0, 11)
@@ -167,7 +167,7 @@ class testLFPy(unittest.TestCase):
         LFP_LFPy = self.stickSimulationAveragingElectrode(
             contactRadius=10, contactNPoints=100, method='linesource')
         
-        #create LFPs using the analytical approac
+        #create LFPs using the analytical approach
         time = np.linspace(0, 100, 10001)
         R = np.ones(11)*100
         Z = np.linspace(1000, 0, 11)
@@ -187,7 +187,7 @@ class testLFPy(unittest.TestCase):
         LFP_LFPy = self.stickSimulationAveragingElectrode(
             contactRadius=10, contactNPoints=100, method='som_as_point')
         
-        #create LFPs using the analytical approac
+        #create LFPs using the analytical approach
         time = np.linspace(0, 100, 10001)
         R = np.ones(11)*100
         Z = np.linspace(1000, 0, 11)

@@ -14,8 +14,6 @@ import zipfile
 import matplotlib.pyplot as plt
 from matplotlib.collections import PolyCollection
 from os.path import join
-plt.interactive(1)
-plt.close('all')
 
 
 #Fetch Mainen&Sejnowski 1996 model files
@@ -200,3 +198,4 @@ ax.set_xticklabels([])
 # fig = plot_ex1(cell, electrode, X, Y, Z)
 # Optionally save figure (uncomment the line below)
 plt.savefig('example1.pdf', dpi=300)
+plt.show()

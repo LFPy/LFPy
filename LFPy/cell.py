@@ -29,7 +29,7 @@ from LFPy.alias_method import alias_method
 class Cell(object):
     """
     The main cell class used in LFPy.
-    
+
     Parameters
     ----------
     morphology : str
@@ -80,6 +80,7 @@ class Cell(object):
         or in custom code it is 6.3 celcius
     verbose : bool
         Verbose output switch. Defaults to False
+
     
     Examples
     --------
@@ -108,7 +109,7 @@ class Cell(object):
                     rm=30000.,
                     cm=1.0,
                     e_pas=-65.,
-                    extracellular = True,
+                    extracellular = False,
                     timeres_NEURON=2**-3,
                     timeres_python=2**-3,
                     tstartms=0.,
@@ -213,7 +214,7 @@ class Cell(object):
             self._set_extracellular()
         else:
             if self.verbose:
-                print("no extracellular mechanism inserted, can't access imem!")
+                print("no extracellular mechanism inserted")
         
         #set number of segments accd to rule, and calculate the number
         self._set_nsegs(nsegs_method, lambda_f, d_lambda, max_nsegs_length)
@@ -365,6 +366,7 @@ class Cell(object):
             self.allsecnames.append(sec.name())
             self.allseclist.append(sec=sec)
         
+        
         #list of soma sections, assuming it is named on the format "soma*"
         self.nsomasec = 0
         self.somalist = neuron.h.SectionList()
@@ -447,9 +449,9 @@ class Cell(object):
     
     def _set_extracellular(self):
         """Insert extracellular mechanism on all sections
-        to access i_membrane
-
+        to set an external potential V_ext as boundary condition.
         """
+
         for sec in self.allseclist:
             sec.insert('extracellular')
             
@@ -786,6 +788,14 @@ class Cell(object):
         self._set_soma_volt_recorder()
         self._collect_tvec()
         
+        # set up integrator, use the CVode().fast_imem method by default
+        # as it doesn't hurt sim speeds much if at all. 
+        cvode = neuron.h.CVode()
+        try:
+            cvode.use_fast_imem(1)
+        except AttributeError as ae:
+            raise Exception, 'neuron.h.CVode().use_fast_imem() not found. Please update NEURON to v.7.4 or newer'
+        
         if rec_imem:
             self._set_imem_recorders()
         if rec_vmem:
@@ -797,18 +807,20 @@ class Cell(object):
         if len(rec_variables) > 0:
             self._set_variable_recorders(rec_variables)
         
+        
         #run fadvance until t >= tstopms, and calculate LFP if asked for
         if electrode is None and dotprodcoeffs is None:
             if not rec_imem:
                 print("rec_imem = %s, membrane currents will not be recorded!"
                                   % str(rec_imem))
-            _run_simulation(self, variable_dt, atol)
+            _run_simulation(self, cvode, variable_dt, atol)
+
         else:
             #allow using both electrode and additional coefficients:
-            _run_simulation_with_electrode(self, electrode, variable_dt, atol,
+            _run_simulation_with_electrode(self, cvode, electrode, variable_dt, atol,
                                                to_memory, to_file, file_name,
                                                dotprodcoeffs)
-        #somatic trace
+        # somatic trace
         self.somav = np.array(self.somav)
         
         if rec_imem:
@@ -843,8 +855,6 @@ class Cell(object):
         containing all the membrane currents.
         """
         self.imem = np.array(self.memireclist)
-        for i in range(self.imem.shape[0]):
-            self.imem[i, ] *= self.area[i] * 1E-2
         self.memireclist = None
         del self.memireclist
     
@@ -971,12 +981,15 @@ class Cell(object):
         """
         Record membrane currents for all segments
         """
+        neuron.h.finitialize(self.v_init) # need to set voltage, otherwise the
+                                          # returned currents will be wrong
+
         self.memireclist = neuron.h.List()
         for sec in self.allseclist:
             for seg in sec:
                 memirec = neuron.h.Vector(int(self.tstopms / 
                                               self.timeres_python+1))
-                memirec.record(seg._ref_i_membrane, self.timeres_python)
+                memirec.record(seg._ref_i_membrane_, self.timeres_python)
                 self.memireclist.append(memirec)
     
     def _set_ipas_recorders(self):
@@ -1418,7 +1431,7 @@ class Cell(object):
         [idx] = np.where(idxvec)
         return np.r_[self.get_idx(parent), idx]
 
-    def get_idx_name(self, idx=np.array([0])):
+    def get_idx_name(self, idx=np.array([0], dtype=int)):
         """Return NEURON convention name of segments with index idx.
 
         Parameters
@@ -1434,6 +1447,7 @@ class Cell(object):
             [(0, 'neuron.h.soma[0]', 0.5),]
 
         """
+
         #ensure idx is array-like, or convert
         if type(idx) == int:
             idx = np.array([idx])
@@ -1455,7 +1469,7 @@ class Cell(object):
                 allsegnames.append((segidx, '%s' % sec.name(), seg.x))
                 segidx += 1
         
-        return allsegnames[idx]
+        return np.array(allsegnames, dtype=object)[idx]
 
     def _collect_pt3d(self):
         """collect the pt3d info, for each section"""
@@ -1554,7 +1568,7 @@ class Cell(object):
                 self.x3d[i], self.y3d[i], self.z3d[i] = \
                                             self._real_pt3d_positions(rel_pos)
             if self.verbose:
-                print(('Rotated geometry %g radians around x-axis' % (-theta)))
+                print('Rotated geometry %g radians around x-axis' % (-theta))
         else:
             if self.verbose:
                 print('Geometry not rotated around x-axis')

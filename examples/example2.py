@@ -12,8 +12,6 @@ import matplotlib.pyplot as plt
 from matplotlib.collections import LineCollection
 import LFPy
 
-plt.interactive(1)
-plt.close('all')
 
 #Fetch Hay et al. 2011 model files
 if not os.path.isfile('L5bPCmodelsEH/morphologies/cell1.asc'):
@@ -244,5 +242,4 @@ def plotstuff(cell, electrode):
 #Plotting of simulation results:
 fig = plotstuff(cell, electrode)
 fig.savefig('example2.pdf', dpi=300)
-
 plt.show()

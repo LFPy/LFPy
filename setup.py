@@ -64,7 +64,7 @@ setup(
     cmdclass = cmdclass,
     ext_modules = ext_modules,
     url='http://LFPy.github.io',
-    download_url = 'https://github.com/LFPy/LFPy/tarball/v1.1.1',
+    download_url = 'https://github.com/LFPy/LFPy/tarball/v1.1.3',
     license='LICENSE',
     description='A module for modeling Local Field Potentials built on NEURON',
     long_description=long_description,
