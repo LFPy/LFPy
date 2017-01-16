@@ -279,7 +279,7 @@ class RecExtElectrode(RecExtElectrodeSetup):
         Parameters
         ----------
         cell : obj, optinal
-            LFPy.Cell or LFPy.TemplateCell instance. Must be specified here
+            `LFPy.Cell` or `LFPy.TemplateCell` instance. Must be specified here
             if it was not specified at the initiation of the `RecExtElectrode`
             class
         t_indices : np.ndarray
