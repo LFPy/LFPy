@@ -207,9 +207,11 @@ class Cell(object):
             self.x3d, self.y3d, self.z3d, self.diam3d = self._collect_pt3d()
 
         #Gather geometry, set position and rotation of morphology
+        if pt3d:
+            self._update_pt3d()
         self._collect_geometry()
         if hasattr(self, 'somapos'):
-            self.somapos = [0, 0, 0]
+            # self.somapos = [0, 0, 0]
             self.set_pos()
         else:
             if self.verbose:
@@ -565,7 +567,7 @@ class Cell(object):
             self.area = None
             self.diam = None
             self.length = None
-        
+
         _collect_geometry_neuron(self)
         self._calc_midpoints()
 
@@ -595,6 +597,11 @@ class Cell(object):
             self.somapos[2] = self.zmid[self.somaidx]
         else:
             raise Exception('Huh?!')
+
+        # print 'LFPy cg start: ', self.xstart[0], self.ystart[0], self.zstart[0]
+        # print 'LFPy cg mids: ', self.xmid[0], self.ymid[0], self.zmid[0]
+        # print 'LFPy cg end: ', self.xend[0], self.yend[0], self.zend[0]
+        # print 'LFPy soma: ', self.somapos
         
 
     
@@ -1000,14 +1007,20 @@ class Cell(object):
         diffy = ypos-self.somapos[1]
         diffz = zpos-self.somapos[2]
 
-        self.somapos[0] = xpos
-        self.somapos[1] = ypos
-        self.somapos[2] = zpos
+        # print 'LFPy start: ', self.xstart[0], self.ystart[0], self.zstart[0]
+        # print 'LFPy mids: ', self.xmid[0], self.ymid[0], self.zmid[0]
+        # print 'LFPy end: ', self.xend[0], self.yend[0], self.zend[0]
+        # print 'LFPy diff wrt soma: ', diffx, diffy, diffz
 
         #also update the pt3d_pos:
         if self.pt3d and hasattr(self, 'x3d'):
-                self._set_pt3d_pos(diffx, diffy, diffz)
+            # print '3d: ', self.x3d[0], self.y3d[0], self.z3d[0]
+            self._set_pt3d_pos(diffx, diffy, diffz)
         else:
+            self.somapos[0] = xpos
+            self.somapos[1] = ypos
+            self.somapos[2] = zpos
+
             self.xstart += diffx
             self.ystart += diffy
             self.zstart += diffz
@@ -1015,6 +1028,7 @@ class Cell(object):
             self.xend += diffx
             self.yend += diffy
             self.zend += diffz
+            # self._collect_geometry()
 
         self._calc_midpoints()
         self._update_synapse_positions()
