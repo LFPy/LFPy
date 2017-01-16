@@ -444,7 +444,8 @@ class testLFPy(unittest.TestCase):
         nidx = 1000000
         bins = np.arange(3)
         
-        hist, _ = np.histogram(LFPy.alias_method.alias_method(idx, probs, nidx), bins)
+        hist, _ = np.histogram(LFPy.alias_method.alias_method(idx, probs, nidx),
+                               bins)
         
         self.assertEqual(nidx, hist[1])
         
@@ -455,7 +456,8 @@ class testLFPy(unittest.TestCase):
         nidx = 1000000
         bins = np.arange(3)
         
-        hist, _ = np.histogram(LFPy.alias_method.alias_method(idx, probs, nidx), bins)
+        hist, _ = np.histogram(LFPy.alias_method.alias_method(idx, probs, nidx),
+                               bins)
         
         self.assertAlmostEqual(hist[0], hist[1], delta=2*np.sqrt(nidx))
 
@@ -466,13 +468,57 @@ class testLFPy(unittest.TestCase):
         nidx = 1000000
         bins = np.arange(3)
         
-        hist, _ = np.histogram(LFPy.alias_method.alias_method(idx, probs, nidx), bins)
+        hist, _ = np.histogram(LFPy.alias_method.alias_method(idx, probs, nidx),
+                               bins)
         
         self.assertEqual(nidx, hist[0])
+    
+    def test_cell_method_set_pos_00(self):
+        '''test LFPy.Cell.set_pos'''
+        stick = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
+                                                  'stick.hoc'))
+        np.testing.assert_allclose(stick.somapos, [0, 0, 0])
+        
+    def test_cell_method_set_pos_01(self):
+        '''test LFPy.Cell.set_pos'''
+        stick = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
+                                                  'stick.hoc'))
+        stick.set_pos(10., 20., -30.)
+        np.testing.assert_allclose(stick.somapos, [10., 20., -30.])
+
+    def test_cell_method_set_pos_02(self):
+        '''test LFPy.Cell.set_pos'''
+        stick = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
+                                                  'stick.hoc'),
+                          pt3d=True)
+        stick.set_pos(10., 20., -30.)
+        np.testing.assert_allclose(stick.somapos, [10., 20., -30.])
+
+    def test_cell_method_set_pos_03(self):
+        '''test LFPy.Cell.set_pos'''
+        stick = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
+                                                  'stick.hoc'))
+        stick.set_pos(10., 20., -30.)
+        stick.set_pos(10., 20., -30.)
+        stick.set_pos(10., 20., -30.)
+        np.testing.assert_allclose(stick.somapos, [10., 20., -30.])
+
+    def test_cell_method_set_pos_04(self):
+        '''test LFPy.Cell.set_pos'''
+        stick = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
+                                                  'stick.hoc'),
+                          pt3d=True)
+        stick.set_pos(10., 20., -30.)
+        stick.set_pos(10., 20., -30.)
+        stick.set_pos(10., 20., -30.)
+        np.testing.assert_allclose(stick.somapos, [10., 20., -30.])
+
         
     ######## Functions used by tests: ##########################################
     def stickSimulationTesttvec(self, **kwargs):
-        stick = LFPy.Cell(morphology = os.path.join(LFPy.__path__[0], 'stick.hoc'), verbose=True, **kwargs)
+        stick = LFPy.Cell(morphology = os.path.join(LFPy.__path__[0],
+                                                    'stick.hoc'), verbose=True,
+                          **kwargs)
         stick.simulate(rec_imem=False)    
         return stick.tvec
     
