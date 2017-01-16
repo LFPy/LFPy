@@ -108,7 +108,6 @@ class RecExtElectrodeSetup(object):
             
         self.r = r
         self.n = n
-
         if shape is None:
             self.shape = 'circle'
         elif shape in ['circle', 'square']:
