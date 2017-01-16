@@ -9,6 +9,7 @@ from scipy.integrate import quad
 from scipy import real, imag
 import LFPy
 import neuron
+import pickle
 from warnings import warn
 
 # for nosetests to run load the SinSyn sinusoid synapse currrent mechanism
@@ -765,11 +766,18 @@ class testLFPy(unittest.TestCase):
     def test_cell_get_rand_prob_area_norm_00(self):
         '''test LFPy.Cell.get_rand_prob_area_norm()'''
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
-                                                  'ball_and_sticks.hoc' ))
+                                                 'ball_and_sticks.hoc' ))
         p = cell.get_rand_prob_area_norm()
         self.assertAlmostEqual(p.sum(), 1.)
         self.assertTrue(p.min() >= 0.)
         self.assertTrue(p.max() <= 1.)
+        
+
+    def test_cell_get_rand_prob_area_norm_from_idx(self):
+        cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
+                                                 'ball_and_sticks.hoc' ))
+        p = cell.get_rand_prob_area_norm_from_idx(idx=cell.get_idx(section='allsec'))
+        self.assertListEqual(cell.get_rand_prob_area_norm().tolist(), p.tolist())
         
 
     def test_cell_get_rand_prob_area_norm_from_idx_00(self):
@@ -780,7 +788,7 @@ class testLFPy(unittest.TestCase):
         np.testing.assert_equal(p, np.array([1.]))
 
     
-    def test_cell_get_intersegment_vector(self):
+    def test_cell_get_intersegment_vector_00(self):
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
                                                   'ball_and_sticks.hoc' ))
         idx0 = 0
@@ -793,7 +801,7 @@ class testLFPy(unittest.TestCase):
                              cell.zmid[idx1] - cell.zmid[idx0]])
 
 
-    def test_cell_get_intersegment_distance(self):
+    def test_cell_get_intersegment_distance_00(self):
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
                                                   'ball_and_sticks.hoc' ))
         idx0 = 0
@@ -804,7 +812,7 @@ class testLFPy(unittest.TestCase):
         self.assertEqual(np.sqrt(np.array(vector)**2).sum(), distance)
 
 
-    def test_cell_get_idx(self):
+    def test_cell_get_idx_00(self):
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
                                                   'ball_and_sticks.hoc' ),
                          nsegs_method=None)
@@ -821,7 +829,18 @@ class testLFPy(unittest.TestCase):
         self.assertListEqual(cell.get_idx(section='apic').tolist(), [])
 
 
-    def test_cell_get_idx_children(self):
+    def test_cell_get_closest_idx_00(self):
+        cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
+                                                  'ball_and_sticks.hoc' ),
+                         nsegs_method=None)
+        self.assertEqual(cell.get_closest_idx(x=0, y=0, z=0),
+                             cell.get_idx(section='soma')[0])
+                         
+        self.assertEqual(cell.get_closest_idx(x=-25, y=0, z=175),
+                             cell.get_idx(section='dend[1]')[0])
+        
+
+    def test_cell_get_idx_children_00(self):
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
                                                   'ball_and_sticks.hoc' ))
     
@@ -829,7 +848,7 @@ class testLFPy(unittest.TestCase):
                                       cell.get_idx(section='dend[0]'))
         
       
-    def test_cell_get_idx_parent_children(self):
+    def test_cell_get_idx_parent_children_00(self):
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
                                                   'ball_and_sticks.hoc' ))
         np.testing.assert_array_equal(cell.get_idx_parent_children(parent='soma[0]'),
@@ -837,15 +856,81 @@ class testLFPy(unittest.TestCase):
                                                             'dend[0]']))
     
     
-    def test_cell_get_idx_name(self):
+    def test_cell_get_idx_name_00(self):
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
                                                   'ball_and_sticks.hoc' ))    
         np.testing.assert_array_equal(cell.get_idx_name(idx=np.array([0])),
                                                 np.array([[0, 'soma[0]', 0.5]],
                                                          dtype=object))
+
+
+    def test_cell_get_rand_idx_area_norm_00(self):
+        cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
+                                                  'ball_and_sticks.hoc' ))
+        idx = cell.get_rand_idx_area_norm(nidx=1000000)
+        
+        
+        # compute histogram and correlate with segment area
+        bins = np.arange(cell.totnsegs+1)
+        hist, bin_edges = np.histogram(idx, bins=bins)
+        
+        # compute Pearson correlation coefficients between area and histogram
+        # reporting success if within 5 decimal places
+        self.assertAlmostEqual(np.corrcoef(cell.area, hist)[0, 1], 1., places=5)
+
+        # check if min and max is in the range of segment indices
+        self.assertEqual(idx.min(), 0)
+        self.assertEqual(idx.max(), cell.totnsegs-1)
     
     
+    def test_cell_set_synapse_00(self):
+        cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
+                                                  'ball_and_sticks.hoc' ))
+        cell.set_synapse(idx=0, syntype='ExpSyn', record_curret=False,
+                         record_potential=False, weight=1.,
+                         **dict(e=10., tau=2.))
+        
+        self.assertEqual(str(cell.synlist[0]), 'ExpSyn[0]')
+        self.assertEqual(len(cell.synlist), 1)
+        self.assertEqual(len(cell.netconlist), 1)
+        self.assertEqual(len(cell.netstimlist), 1)
+        self.assertEqual(cell.synlist[0].e, 10.)
+        self.assertEqual(cell.synlist[0].tau, 2.)
+        self.assertEqual(cell.netconlist[0].weight[0], 1.)
+        
     
+    def test_cell_set_point_process_00(self):
+        cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
+                                                  'ball_and_sticks.hoc' ))
+        cell.set_point_process(idx=0, pptype='IClamp', record_current=False,
+                               **dict(delay=1., amp=1.))
+        self.assertEqual(str(cell.stimlist[0]), 'IClamp[0]')
+        self.assertEqual(len(cell.stimlist), 1)
+        self.assertEqual(cell.stimlist[0].delay, 1.)
+        self.assertEqual(cell.stimlist[0].amp, 1.)
+        
+    
+    def test_cell_strip_hoc_objects_00(self):
+        cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
+                                                  'ball_and_sticks.hoc' ))
+        cell.strip_hoc_objects()
+        for attribute in dir(cell):
+            self.assertNotEqual(str(type(getattr(cell, attribute))),
+                                'hoc.HocObject')
+
+    def test_cell_cellpickler_00(self):
+        cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
+                                                  'ball_and_sticks.hoc' ))
+        cell_pickle = cell.cellpickler(filename=None, pickler=pickle.dumps)
+        pickled_cell = pickle.loads(cell_pickle)
+        
+        for attribute in dir(cell):
+            if attribute.startswith('__') or attribute.startswith('_'):
+                pass
+            else:
+                self.assertEqual(type(getattr(cell, attribute)),
+                                 type(getattr(pickled_cell, attribute)))
+
     
     ######## Functions used by tests: ##########################################
     def stickSimulationTesttvec(self, **kwargs):
