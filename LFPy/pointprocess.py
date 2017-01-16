@@ -34,6 +34,7 @@ class PointProcess:
     record_current : bool
         Must be set True for recording of pointprocess currents
     kwargs : pointprocess specific variables passed on to cell/neuron
+
     """
     def __init__(self, cell, idx, color='k', marker='o', 
                  record_current=False, **kwargs):
@@ -54,7 +55,8 @@ class PointProcess:
         self.x = cell.xmid[self.idx]
         self.y = cell.ymid[self.idx]
         self.z = cell.zmid[self.idx]
-        
+
+
 class Synapse(PointProcess):
     """
     The synapse class, pointprocesses that spawn membrane currents.
@@ -71,10 +73,10 @@ class Synapse(PointProcess):
         input
     idx : int
         Cell index where the synaptic input arrives
-    syntype: str
+    syntype : str
         Type of synapse. Built-in examples: ExpSyn, Exp2Syn
     record_current : bool
-            Decides if current is recorded
+        Decides if current is recorded
     color : str
         Color of synapse for plotting purposes. Defaults to 'r'
     marker : str
@@ -85,7 +87,6 @@ class Synapse(PointProcess):
 
     Examples
     --------
-        
     >>> import LFPy
     >>> import pylab as pl
     >>> pl.interactive(1)
@@ -113,7 +114,7 @@ class Synapse(PointProcess):
     >>> pl.subplot(212)
     >>> pl.plot(cell.tvec, cell.somav)
     >>> pl.title('Somatic potential (mV)')
-        
+
     """
     def __init__(self, cell, idx, syntype, color='r', marker='o',
                  record_current=False, **kwargs):
@@ -143,7 +144,6 @@ class Synapse(PointProcess):
         
         Parameters
         ----------
-
         noise : float in range [0, 1]
             Fractional randomness, from deterministic to intervals that drawn
             from negexp distribution (Poisson spiketimes).
@@ -154,7 +154,7 @@ class Synapse(PointProcess):
         interval : float
             ms, (mean) time between spikes
         seed : float
-            random seed value
+            Random seed value
         """
         self.cell.netstimlist[-1].noise = noise
         self.cell.netstimlist[-1].start = start
@@ -184,9 +184,8 @@ class StimIntElectrode(PointProcess):
     Membrane currents will no longer sum to zero if these mechanisms are used.
     
     Refer to NEURON documentation @ neuron.yale.edu for kwargs
-    Will insert pptype on
-        cell-instance, pass the corresponding kwargs onto
-        cell.set_point_process.
+    Will insert pptype on cell-instance, pass the corresponding kwargs onto
+    cell.set_point_process.
 
     Parameters
     ----------
@@ -195,7 +194,7 @@ class StimIntElectrode(PointProcess):
          electrode input
     idx : int
         Cell index where the stimulation electrode is placed
-    pptype: str
+    pptype : str
         Type of point process. Built-in examples: VClamp, SEClamp and ICLamp.
         Defaults to 'SEClamp'.
     record_current : bool
@@ -210,7 +209,6 @@ class StimIntElectrode(PointProcess):
 
     Examples
     --------
-
     >>> import LFPy
     >>> import pylab as pl
     >>> pl.interactive(1)
@@ -279,6 +277,7 @@ class StimIntElectrode(PointProcess):
     def collect_potential(self, cell):
         """Collect membrane potential of segment with PointProcess"""
         self.v = np.array(cell.synvreclist.o(self.hocidx))
+
 
 class PointProcessPlayInSoma:
     """Class implementation of Eivind's playback alghorithm"""

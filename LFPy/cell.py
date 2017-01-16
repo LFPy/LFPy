@@ -35,59 +35,60 @@ class Cell(object):
     morphology : str
         path/to/morphology/file
     v_init : float
-        Initial membrane potential. Default to -65.
+        Initial membrane potential. Default to -65 mV.
     passive : bool
         Passive mechanisms are initialized if True. Defaults to True
     Ra : float
-        axial resistance. Defaults to 150.
+        Axial resistance. Defaults to 150 Ohm/cm
     rm : float
-        membrane resistivity. Defaults to 30000.
+        Membrane resistivity. Defaults to 30000 Ohm cm^2.
     cm : float
-        membrane capacitance. Defaults to 1.0
+        Membrane capacitance. Defaults to 1.0 uF/cm2.
     e_pas : float
-        passive mechanism reversal potential. Defaults to -65.
+        Passive mechanism reversal potential. Defaults to -65 mV.
     extracellular : bool
-        switch for NEURON's extracellular mechanism. Defaults to True
+        Switch for NEURON's extracellular mechanism. Defaults to True
     timeres_NEURON : float
-        internal dt for NEURON simulation. Defaults to 0.1
+        Internal dt for NEURON simulation. Defaults to 0.1 ms
     timeres_python : float
-        overall dt for python simulation. Defaults to 0.1
+        Overall dt for python simulation. Defaults to 0.1 ms
     tstartms : float
-        initialization time for simulation <= 0 ms. Defaults to 0.
+        Initialization time for simulation <= 0 ms. Defaults to 0.
     tstopms : float
-        stop time for simulation > 0 ms. Defaults to 100.
+        Stop time for simulation > 0 ms. Defaults to 100 ms.
     nsegs_method : 'lambda100' or 'lambda_f' or 'fixed_length' or None
         nseg rule, used by NEURON to determine number of compartments.
         Defaults to 'lambda100'
     max_nsegs_length : float or None
-        max segment length for method 'fixed_length'. Defaults to None
+        Maximum segment length for method 'fixed_length'. Defaults to None
     lambda_f : int
         AC frequency for method 'lambda_f'. Defaults to 100
     d_lambda : float
-        parameter for d_lambda rule. Defaults to 0.1
+        Parameter for d_lambda rule. Defaults to 0.1
     delete_sections : bool
-        delete pre-existing section-references. Defaults to True
+        Delete pre-existing section-references. Defaults to True
     custom_code : list or None
-        list of model-specific code files ([.py/.hoc]). Defaults to None
+        List of model-specific code files ([.py/.hoc]). Defaults to None
     custom_fun : list or None
-        list of model-specific functions with args. Defaults to None
+        List of model-specific functions with args. Defaults to None
     custom_fun_args : list or None
-        list of args passed to custom_fun functions. Defaults to None
+        List of args passed to custom_fun functions. Defaults to None
     pt3d : bool
-        use pt3d-info of the cell geometries switch. Defaults to False
+        Use pt3d-info of the cell geometries switch. Defaults to False
     celsius : float or None
         Temperature in celsius. If nothing is specified here
         or in custom code it is 6.3 celcius
     verbose : bool
-        verbose output switch. Defaults to False
+        Verbose output switch. Defaults to False
     
     Examples
     --------
     Here is an example of how to use the cell class.
 
+    >>> import os
     >>> import LFPy
     >>> cellParameters = {
-    >>>     'morphology' : 'path/to/morphology',
+    >>>     'morphology' : os.path.join(LFPy.__path__[0], 'stick.hoc'),
     >>>     'rm' : 30000,
     >>>     'cm' : 1.0,
     >>>     'Ra' : 150,
@@ -541,7 +542,7 @@ class Cell(object):
         record_current : bool
             Decides if current is stored
         kwargs
-            arguments passed on from class StimIntElectrode
+            Arguments passed on from class StimIntElectrode
             
         """
         
@@ -638,15 +639,14 @@ class Cell(object):
         Parameters
         ----------
         section : str
-            any entry in cell.allsecnames or just 'allsec'.
+            Any entry in cell.allsecnames or just 'allsec'.
         z_min : float
-            depth filter. Specify minimum z-position
+            Depth filter. Specify minimum z-position
         z_max : float
-            depth filter. Specify maximum z-position
+            Depth filter. Specify maximum z-position
         
         Examples
         --------
-
         >>> idx = cell.get_idx(section='allsec')
         >>> print idx
         >>> idx = cell.get_idx(section=['soma', 'dend', 'apic'])
@@ -681,13 +681,13 @@ class Cell(object):
         Parameters
         ----------
         x: float
-            coordinate
+            x-coordinate
         y: float
-            coordinate
+            y-coordinate
         z: float
-            coordinate
+            z-coordinate
         section: str
-            string matching a section-name. Defaults to 'allsec'.
+            String matching a section-name. Defaults to 'allsec'.
 
         """
         idx = self.get_idx(section)
@@ -708,13 +708,13 @@ class Cell(object):
         Parameters
         ----------
         section : str
-            string matching a section-name
+            String matching a section-name
         nidx : int
-            number of random indices
+            Number of random indices
         z_min : float
-            depth filter
+            Depth filter
         z_max : float
-            depth filter
+            Depth filter
 
         """
         poss_idx = self.get_idx(section=section, z_min=z_min, z_max=z_max)
@@ -743,7 +743,7 @@ class Cell(object):
         
         Parameters
         ----------
-        electrode :  :obj: or list, optional
+        electrode : :obj: or list, optional
             Either an LFPy.RecExtElectrode object or a list of such.
             If supplied, LFPs will be calculated at every time step
             and accessible as `electrode.LFP`. If a list of objects
@@ -754,31 +754,31 @@ class Cell(object):
             set rec_imem=True in order to calculate LFP later on.
             Units of (nA).
         rec_vmem : bool
-            record segment membrane voltages (mV)
+            Record segment membrane voltages (mV)
         rec_ipas : bool
-            record passive segment membrane currents (nA)
+            Record passive segment membrane currents (nA)
         rec_icap : bool
-            record capacitive segment membrane currents (nA)
+            Record capacitive segment membrane currents (nA)
         rec_isyn : bool
-            record synaptic currents of from Synapse class (nA)
+            Record synaptic currents of from Synapse class (nA)
         rec_vmemsyn : bool
-            record membrane voltage of segments with Synapse(mV)
+            Record membrane voltage of segments with Synapse(mV)
         rec_istim :  bool
-            record currents of StimIntraElectrode (nA)
+            Record currents of StimIntraElectrode (nA)
         rec_variables : list
-            list of variables to record, i.e arg=['cai', ]
+            List of variables to record, i.e arg=['cai', ]
         variable_dt : bool
-            use variable timestep in NEURON
+            Use variable timestep in NEURON
         atol : float
-            absolute tolerance used with NEURON variable timestep
+            Absolute tolerance used with NEURON variable timestep
         to_memory : bool
-            only valid with electrode, store lfp in -> electrode.LFP
+            Only valid with electrode, store lfp in -> electrode.LFP
         to_file : bool
-            only valid with electrode, save LFPs in hdf5 file format
+            Only valid with electrode, save LFPs in hdf5 file format
         file_name : str
-            name of hdf5 file, '.h5' is appended if it doesnt exist
+            Name of hdf5 file, '.h5' is appended if it doesnt exist
         dotprodcoeffs : list
-            list of N x Nseg np.ndarray. These arrays will at
+            List of N x Nseg np.ndarray. These arrays will at
             every timestep be multiplied by the membrane currents.
             Presumably useful for memory efficient csd or lfp calcs
 
@@ -1091,7 +1091,7 @@ class Cell(object):
         Parameters
         ----------
         filename : str
-            where to save cell
+            Where to save cell
 
         Examples
         --------
@@ -1135,7 +1135,6 @@ class Cell(object):
         
         Examples
         --------
-
         >>> cell = LFPy.Cell(**kwargs)
         >>> rotation = {'x' : 1.233, 'y' : 0.236, 'z' : np.pi}
         >>> cell.set_rotation(**rotation)
@@ -1354,8 +1353,7 @@ class Cell(object):
             raise ValueError(ERRMSG)
 
     def get_idx_children(self, parent="soma[0]"):
-        """
-        Get the idx of parent's children sections, i.e. compartments ids
+        """Get the idx of parent's children sections, i.e. compartments ids
         of sections connected to parent-argument
         
         Parameters
@@ -1394,8 +1392,9 @@ class Cell(object):
         
         Parameters
         ----------
-        parent: str
+        parent : str
             name-pattern matching a sectionname. Defaults to "soma[0]"
+
         """
         idxvec = np.zeros(self.totnsegs)
         secnamelist = []
@@ -1423,7 +1422,7 @@ class Cell(object):
         """Return NEURON convention name of segments with index idx.
 
         Parameters
-        ---------
+        ----------
             idx : np.ndarray or int
                 segment indices, must be between 0 and cell.totnsegs
 
@@ -1433,6 +1432,7 @@ class Cell(object):
             The returned argument is a list of tuples with corresponding
             segment idx, section name, and position along the section, like;
             [(0, 'neuron.h.soma[0]', 0.5),]
+
         """
         #ensure idx is array-like, or convert
         if type(idx) == int:
@@ -1513,7 +1513,8 @@ class Cell(object):
 
     def _set_pt3d_pos(self, diffx=0, diffy=0, diffz=0):
         """
-        Offset pt3d geometry with differential displacement indicated in Cell.set_pos()
+        Offset pt3d geometry with differential displacement
+        indicated in Cell.set_pos()
         """
         for i in range(len(self.x3d)):
             self.x3d[i] += diffx
@@ -1599,9 +1600,7 @@ class Cell(object):
         self._update_pt3d()
 
     def _rel_pt3d_positions(self, x, y, z):
-        """
-        Morphology relative to soma position
-        """
+        """Morphology relative to soma position """
         rel_pos = np.transpose(np.array([x - self.somapos[0],
                                          y - self.somapos[1],
                                          z - self.somapos[2]]))
@@ -1609,9 +1608,7 @@ class Cell(object):
         return rel_pos
     
     def _real_pt3d_positions(self, rel_pos):
-        """
-        Morphology coordinates relative to Origo
-        """
+        """Morphology coordinates relative to Origo """
         x = rel_pos[:, 0] + self.somapos[0]
         y = rel_pos[:, 1] + self.somapos[1]
         z = rel_pos[:, 2] + self.somapos[2]
@@ -1688,23 +1685,17 @@ class Cell(object):
 
         >>> from matplotlib.collections import PolyCollection
         >>> import matplotlib.pyplot as plt
-
         >>> cell = LFPy.Cell(morphology='PATH/TO/MORPHOLOGY')
-
         >>> zips = []
         >>> for x, z in cell.get_idx_polygons(projection=('x', 'z')):
         >>>     zips.append(zip(x, z))
-
         >>> polycol = PolyCollection(zips,
         >>>                          edgecolors='none',
         >>>                          facecolors='gray')
-
         >>> fig = plt.figure()
         >>> ax = fig.add_subplot(111)
-
         >>> ax.add_collection(polycol)
         >>> ax.axis(ax.axis('equal'))
-
         >>> plt.show()
 
         """
@@ -1727,7 +1718,7 @@ class Cell(object):
         return polygons
 
     def _create_segment_polygon(self, i, projection=('x', 'z')):
-        """create a polygon to fill for segment i, in the plane
+        """Create a polygon to fill for segment i, in the plane
         determined by kwarg projection"""        
         x = [getattr(self, projection[0]+'start')[i],
              getattr(self, projection[0]+'end')[i]]
@@ -1770,14 +1761,14 @@ class Cell(object):
         that can be visualized using plt.fill() or
         mpl.collections.PolyCollection
 
-        Paramters
-        ---------
+        Parameters
+        ----------
         projection : tuple of strings
             Determining projection. Defaults to ('x', 'z')
 
         Returns
         -------
-        list
+        polygons : list
             list of (np.ndarray, np.ndarray) tuples
             giving the trajectory of each section
         
@@ -1787,17 +1778,13 @@ class Cell(object):
 
         >>> from matplotlib.collections import PolyCollection
         >>> import matplotlib.pyplot as plt
-
         >>> cell = LFPy.Cell(morphology='PATH/TO/MORPHOLOGY')
-
         >>> zips = []
         >>> for x, z in cell.get_idx_polygons(projection=('x', 'z')):
         >>>     zips.append(zip(x, z))
-
         >>> polycol = PolyCollection(zips,
         >>>                          edgecolors='none',
         >>>                          facecolors='gray')
-
         >>> fig = plt.figure()
         >>> ax = fig.add_subplot(111)
         >>> ax.add_collection(polycol)
@@ -1840,11 +1827,10 @@ class Cell(object):
         
         Parameters
         ----------
-            
         v_ext : numpy array
             Numpy array of size cell.totnsegs x t_ext.size, unit mV
         t_ext : np.array
-            time vector of v_ext
+            Time vector of v_ext
         
         Examples
         --------
