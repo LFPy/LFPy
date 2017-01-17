@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-'''Copyright (C) 2012 Computational Neuroscience Group, NMBU.
+"""Copyright (C) 2012 Computational Neuroscience Group, NMBU.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -9,30 +9,52 @@ the Free Software Foundation, either version 3 of the License, or
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.'''
+GNU General Public License for more details.
+
+"""
 
 import numpy as np
 
 def calc_lfp_choose(cell, x=0., y=0., z=0., sigma=0.3,
                     r_limit=None,
                     timestep=None, t_indices=None, method='linesource'):
-    '''
-    Determine which method to use, line-source for soma default
-    
-    kwargs:
-    ::
-        
-        cell: LFPy.Cell or LFPy.TemplateCell instance
-        x : double, extracellular position, x-axis
-        y : double, extracellular position, y-axis
-        z : double, extracellular position, z-axis
-        sigma : double, extracellular conductivity
-        r_limit : [None]/float/np.ndarray: minimum distance to source current
-        timestep : [None]/int, calculate LFP at this timestep
-        t_indices : [None]/np.ndarray, calculate LFP at specific timesteps
-        method=['linesource']/'pointsource'/'som_as_point'
-            switch for choosing underlying methods
-    '''
+    """
+    Determine which method to use. line-source for soma default
+
+    TODO: Remove timestep argument, or fix implementation. It will not work
+    in the current implementation, since currmem is overwritten.
+
+    TODO: Set som_as_point as default?
+
+    TODO: x, y, z, sigma, r_limit, timestep, t_indices are given default values
+    both in this function and in the calc_lfp_* funcions. Cleaner to
+    only give default values at one level? From looking at functions here,
+    one would think r_limit defaults to None, while it actually defaults to
+    cell.diam/2 as set in recextelectrode.py
+
+    Parameters
+    ----------
+    cell : obj
+        LFPy.Cell or LFPy.TemplateCell instance
+    x : float
+        extracellular position, x-axis. Defaults to 0.
+    y : float
+        extracellular position, y-axis. Defaults to 0.
+    z : float
+        extracellular position, z-axis. Defaults to 0.
+    sigma : float
+        extracellular conductivity. Defaults to 0.3
+    r_limit : [None]/float/np.ndarray:
+        minimum distance to source current
+    timestep : [None]/int
+        calculate LFP at this timestep
+    t_indices : np.ndarray or None. optional
+        If array is given, LFP is calculated at specified timesteps
+    method : str
+        switch for choosing underlying methods. Can be one of the following:
+        'linesource'/'pointsource'/'som_as_point'. Defaults to linesource
+
+    """
     if method == 'som_as_point':
         return calc_lfp_som_as_point(cell, x=x, y=y, z=z, sigma=sigma,
                                      r_limit=r_limit,
@@ -49,21 +71,29 @@ def calc_lfp_choose(cell, x=0., y=0., z=0., sigma=0.3,
 def calc_lfp_linesource(cell, x=0., y=0., z=0., sigma=0.3,
                         r_limit=None,
                         timestep=None, t_indices=None):
-    '''Calculate electric field potential using the line-source method, all
+    """Calculate electric field potential using the line-source method, all
     compartments treated as line sources, even soma.
     
-    kwargs:
-    ::
-        
-        cell: LFPy.Cell or LFPy.TemplateCell instance
-        x : double, extracellular position, x-axis
-        y : double, extracellular position, y-axis
-        z : double, extracellular position, z-axis
-        sigma : double, extracellular conductivity
-        r_limit : [None]/float/np.ndarray: minimum distance to source current
-        timestep : [None]/int, calculate LFP at this timestep
-        t_indices : [None]/np.ndarray, calculate LFP at specific timesteps
-    '''
+    Parameters
+    ----------        
+    cell: obj
+        LFPy.Cell or LFPy.TemplateCell instance
+    x : float
+        extracellular position, x-axis
+    y : float
+        extracellular position, y-axis
+    z : float
+        extracellular position, z-axis
+    sigma : float
+        extracellular conductivity
+    r_limit : [None]/float/np.ndarray
+        minimum distance to source current. Can be scalar or numpy array with
+        a limit for each cell compartment. Defaults to [None]
+    timestep : [None]/int
+        calculate LFP at this timestep index
+    t_indices : [None]/np.ndarray
+        calculate LFP at specific timesteps
+    """
     # Handling the r_limits. If a r_limit is a single value, an array r_limit
     # of shape cell.diam is returned.
     if type(r_limit) == int or type(r_limit) == float:
@@ -119,21 +149,28 @@ def calc_lfp_linesource(cell, x=0., y=0., z=0., sigma=0.3,
 def calc_lfp_som_as_point(cell, x=0., y=0., z=0., sigma=0.3,
                           r_limit=None,
                           timestep=None, t_indices=None):
-    '''Calculate electric field potential using the line-source method,
+    """Calculate electric field potential using the line-source method,
     soma is treated as point/sphere source
     
-    kwargs:
-    ::
-        
-        cell: LFPy.Cell or LFPy.TemplateCell instance
-        x : double, extracellular position, x-axis
-        y : double, extracellular position, y-axis
-        z : double, extracellular position, z-axis
-        sigma : double, extracellular conductivity
-        r_limit : [None]/float/np.ndarray: minimum distance to source current
-        timestep : [None]/int, calculate LFP at this timestep
-        t_indices : [None]/np.ndarray, calculate LFP at specific timesteps
-    '''
+    Parameters
+    ----------
+    cell: obj
+        `LFPy.Cell` or `LFPy.TemplateCell` instance
+    x : float
+        extracellular position, x-axis
+    y : float
+        extracellular position, y-axis
+    z : float
+        extracellular position, z-axis
+    sigma : float
+        extracellular conductivity in S/m
+    r_limit : float or np.ndarray or None
+        [None]/float/np.ndarray: minimum distance to source current.
+    timestep : [None]/int
+        calculate LFP at this timestep
+    t_indices : [None]/np.ndarray
+        calculate LFP at specific timesteps
+    """
     #Handling the r_limits. If a r_limit is a single value,
     #an array r_limit of shape cell.diam is returned.
     if type(r_limit) != type(np.array([])):
@@ -169,7 +206,6 @@ def calc_lfp_som_as_point(cell, x=0., y=0., z=0., sigma=0.3,
     zstart = cell.zstart
     zmid = cell.zmid[0]
     zend = cell.zend
-
 
     deltaS = _deltaS_calc(xstart, xend, ystart, yend, zstart, zend)
     h = _h_calc(xstart, xend, ystart, yend, zstart, zend, deltaS, x, y, z)
@@ -220,7 +256,7 @@ def calc_lfp_som_as_point(cell, x=0., y=0., z=0., sigma=0.3,
     return Emem.transpose()
 
 def _Ememi_calc(i, currmem, sigma, deltaS, l, r2, h):
-    '''Subroutine used by calc_lfp_*()'''
+    """Subroutine used by calc_lfp_*()"""
     currmem_iT = currmem[i].transpose()
     deltaS_i = deltaS[i]
     l_i = l[i]
@@ -237,7 +273,7 @@ def _Ememi_calc(i, currmem, sigma, deltaS, l, r2, h):
     return Emem_i
 
 def _Ememii_calc(ii, currmem, sigma, deltaS, l, r2, h):
-    '''Subroutine used by calc_lfp_*()'''
+    """Subroutine used by calc_lfp_*()"""
     currmem_iiT = currmem[ii].transpose()
     deltaS_ii = deltaS[ii]
     l_ii = l[ii]
@@ -254,7 +290,7 @@ def _Ememii_calc(ii, currmem, sigma, deltaS, l, r2, h):
     return Emem_ii
     
 def _Ememiii_calc(iii, currmem, sigma, deltaS, l, r2, h):
-    '''Subroutine used by calc_lfp_*()'''
+    """Subroutine used by calc_lfp_*()"""
     currmem_iiiT = currmem[iii].transpose()
     l_iii = l[iii]
     r2_iii = r2[iii]
@@ -271,14 +307,13 @@ def _Ememiii_calc(iii, currmem, sigma, deltaS, l, r2, h):
     return Emem_iii
 
 def _deltaS_calc(xstart, xend, ystart, yend, zstart, zend):
-    '''Subroutine used by calc_lfp_*()'''
-    deltaS = np.sqrt( (xstart - xend)**2 + (ystart - yend)**2 + \
-        (zstart-zend)**2)
-
+    """Subroutine used by calc_lfp_*()"""
+    deltaS = np.sqrt((xstart - xend)**2 + (ystart - yend)**2 +
+                     (zstart-zend)**2)
     return deltaS
 
 def _h_calc(xstart, xend, ystart, yend, zstart, zend, deltaS, x, y, z):
-    '''Subroutine used by calc_lfp_*()'''
+    """Subroutine used by calc_lfp_*()"""
     aa = np.array([x - xend, y - yend, z-zend])
     bb = np.array([xend - xstart, yend - ystart, zend - zstart])
     cc = np.dot(aa.T, bb).diagonal()
@@ -286,14 +321,13 @@ def _h_calc(xstart, xend, ystart, yend, zstart, zend, deltaS, x, y, z):
     return hh
 
 def _r2_calc(xend, yend, zend, x, y, z, h):
-    '''Subroutine used by calc_lfp_*()'''
+    """Subroutine used by calc_lfp_*()"""
     r2 = (x-xend)**2 + (y-yend)**2 + (z-zend)**2 - h**2
-    
     return abs(r2)
 
 def _check_rlimit(r2, r_limit, h, deltaS):
-    '''Check that no segment is close the electrode than r_limit'''
-    if np.sum(np.nonzero( r2 < r_limit*r_limit )) > 0:
+    """Check that no segment is close the electrode than r_limit"""
+    if np.sum(np.nonzero(r2 < r_limit*r_limit)) > 0:
         for idx in np.nonzero( r2 < r_limit*r_limit )[0]:
             if (h[idx] < r_limit[idx]) and ((deltaS[idx]+h[idx]) >
                                              -r_limit[idx]):
@@ -303,7 +337,7 @@ def _check_rlimit(r2, r_limit, h, deltaS):
     return r2
 
 def _r_soma_calc(xmid, ymid, zmid, x, y, z):
-    '''calculate the distance to soma midpoint'''
+    """calculate the distance to soma midpoint"""
     r_soma = np.sqrt((x - xmid)**2 + (y - ymid)**2 +
         (z - zmid)**2)
 
@@ -312,21 +346,28 @@ def _r_soma_calc(xmid, ymid, zmid, x, y, z):
 def calc_lfp_pointsource(cell, x=0, y=0, z=0, sigma=0.3,
                         r_limit=None, 
                         timestep=None, t_indices=None):
-    '''Calculate local field potentials using the point-source equation on all
-    compartments
+    """Calculate extracellular potentials using the point-source
+    equation on all compartments
 
-    kwargs:
-    ::
-        
-        cell: LFPy.Cell or LFPy.TemplateCell instance
-        x : double, extracellular position, x-axis
-        y : double, extracellular position, y-axis
-        z : double, extracellular position, z-axis
-        sigma : double, extracellular conductivity
-        r_limit : [None]/float/np.ndarray: minimum distance to source current
-        timestep : [None]/int, calculate LFP at this timestep
-        t_indices : [None]/np.ndarray, calculate LFP at specific timesteps
-    '''
+    Parameters
+    ----------
+    cell: obj
+        LFPy.Cell or LFPy.TemplateCell instance
+    x : float
+        extracellular position, x-axis
+    y : float
+        extracellular position, y-axis
+    z : float
+        extracellular position, z-axis
+    sigma : float
+        extracellular conductivity
+    r_limit : [None]/float/np.ndarray
+        minimum distance to source current
+    timestep : [None]/int
+        calculate LFP at this timestep
+    t_indices : [None]/np.ndarray
+        calculate LFP at specific timesteps
+    """
     # Handling the r_limits. If a r_limit is a single value, an array r_limit
     # of shape cell.diam is returned.
     if type(r_limit) == int or type(r_limit) == float:
@@ -351,7 +392,7 @@ def calc_lfp_pointsource(cell, x=0, y=0, z=0, sigma=0.3,
     return Emem.transpose()
 
 def _check_rlimit_point(r2, r_limit):
-    '''Correct r2 so that r2 >= r_limit**2 for all values'''
+    """Correct r2 so that r2 >= r_limit**2 for all values"""
     inds = r2 < r_limit*r_limit
     r2[inds] = r_limit[inds]*r_limit[inds]
     
