@@ -469,6 +469,45 @@ class testLFPy(unittest.TestCase):
         hist, _ = np.histogram(LFPy.alias_method.alias_method(idx, probs, nidx), bins)
         
         self.assertEqual(nidx, hist[0])
+
+    def test_cell_set_rotation_06(self):
+        '''test LFPy.Cell.set_rotation()'''
+        cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'stick.hoc'))
+
+        xstarts = cell.xstart.copy()
+        xmids = cell.xmid.copy()
+        xends = cell.xend.copy()
+        ystarts = cell.ystart.copy()
+        ymids = cell.ymid.copy()
+        yends = cell.yend.copy()
+        zstarts = cell.zstart.copy()
+        zmids = cell.zmid.copy()
+        zends = cell.zend.copy()
+        # test rotation: 90 deg around x-axis, 90 deg around y-axis, 90 deg around z-axis
+        cell.set_rotation(x=np.pi / 2., y=np.pi, z=np.pi / 4.)
+        # revert rotation: -90 deg around x-axis, -90 deg around y-axis, -90 deg around z-axis, rotation_order='zyx'
+        cell.set_rotation(x=-np.pi / 2., y=-np.pi, z=-np.pi / 4., rotation_order='zyx')
+        # assert that x-, y- and z-coordinates are same as beginning, using absolute
+        # tolerances
+        np.testing.assert_allclose(cell.xstart, xstarts, atol=1e-07)
+        np.testing.assert_allclose(cell.xmid, xmids, atol=1e-07)
+        np.testing.assert_allclose(cell.xend, xends, atol=1e-07)
+        np.testing.assert_allclose(cell.ystart, ystarts, atol=1e-07)
+        np.testing.assert_allclose(cell.ymid, ymids, atol=1e-07)
+        np.testing.assert_allclose(cell.yend, yends, atol=1e-07)
+        np.testing.assert_allclose(cell.zstart, zstarts, atol=1e-07)
+        np.testing.assert_allclose(cell.zmid, zmids, atol=1e-07)
+        np.testing.assert_allclose(cell.zend, zends, atol=1e-07)
+
+    def test_cell_set_rotation_07(self):
+        '''test LFPy.Cell.set_rotation()'''
+        cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'stick.hoc'))
+
+        # cell.set_rotation(rotation_order='yzx')
+        self.assertRaises(AttributeError, cell.set_rotation, rotation_order='yz')
+        self.assertRaises(AttributeError, cell.set_rotation, rotation_order='yxzz')
+        self.assertRaises(AttributeError, cell.set_rotation, rotation_order=45)
+        self.assertRaises(AttributeError, cell.set_rotation, rotation_order='ayx')
         
     ######## Functions used by tests: ##########################################
     def stickSimulationTesttvec(self, **kwargs):
