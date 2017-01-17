@@ -1147,9 +1147,13 @@ class Cell(object):
         for i in range(len(self.synapses)):
             self.synapses[i].update_pos(self)
     
-    def set_rotation(self, x=None, y=None, z=None):
+    def set_rotation(self, x=None, y=None, z=None, rotation_order='xyz'):
         """
-        Rotate geometry of cell object around the x-, y-, z-axis in that order.
+        Rotate geometry of cell object around the x-, y-, z-axis in the order
+        described by rotation_order parameter.
+        rotation_order should be a string with 3 elements containing x, y, and z
+        e.g. 'xyz', 'zyx'
+
         Input should be angles in radians.
         
         using rotation matrices, takes dict with rot. angles,
@@ -1161,65 +1165,72 @@ class Cell(object):
         >>> cell = LFPy.Cell(**kwargs)
         >>> rotation = {'x' : 1.233, 'y' : 0.236, 'z' : np.pi}
         >>> cell.set_rotation(**rotation)
-
         """
-        if x is not None:
-            theta = -x
-            rotation_x = np.matrix([[1, 0, 0],
-                [0, np.cos(theta), -np.sin(theta)],
-                [0, np.sin(theta), np.cos(theta)]])
-            
-            rel_start, rel_end = self._rel_positions()
-            
-            rel_start = rel_start * rotation_x
-            rel_end = rel_end * rotation_x
-            
-            self._real_positions(rel_start, rel_end)
-            if self.verbose:
-                print('Rotated geometry %g radians around x-axis' % (-theta))
-        else:
-            if self.verbose:
-                print('Geometry not rotated around x-axis')
-        
-        if y is not None:
-            phi = -y
-            rotation_y = np.matrix([[np.cos(phi), 0, np.sin(phi)],
-                [0, 1, 0],
-                [-np.sin(phi), 0, np.cos(phi)]])
-            
-            rel_start, rel_end = self._rel_positions()
-            
-            rel_start = rel_start * rotation_y
-            rel_end = rel_end * rotation_y
-            
-            self._real_positions(rel_start, rel_end)
-            if self.verbose:
-                print('Rotated geometry %g radians around y-axis' % (-phi))
-        else:
-            if self.verbose:
-                print('Geometry not rotated around y-axis')
-        
-        if z is not None:
-            gamma = -z
-            rotation_z = np.matrix([[np.cos(gamma), -np.sin(gamma), 0],
-                    [np.sin(gamma), np.cos(gamma), 0],
-                    [0, 0, 1]])
-            
-            rel_start, rel_end = self._rel_positions()
-            
-            rel_start = rel_start * rotation_z
-            rel_end = rel_end * rotation_z
-            
-            self._real_positions(rel_start, rel_end)
-            if self.verbose:
-                print('Rotated geometry %g radians around z-axis' % (-gamma))
-        else:
-            if self.verbose:
-                print('Geometry not rotated around z-axis')
+        if type(rotation_order) is not str:
+            raise AttributeError('rotation_order must be a string')
+        elif 'x' not in rotation_order or 'y' not in rotation_order or 'z' not in rotation_order:
+            raise AttributeError("'x', 'y', and 'z' must be in rotation_order")
+        elif len(rotation_order) is not 3:
+            raise AttributeError("rotation_order should have 3 elements (e.g. 'zyx')")
+
+        for ax in rotation_order:
+            if ax is 'x' and x is not None:
+                theta = -x
+                rotation_x = np.matrix([[1, 0, 0],
+                    [0, np.cos(theta), -np.sin(theta)],
+                    [0, np.sin(theta), np.cos(theta)]])
+
+                rel_start, rel_end = self._rel_positions()
+
+                rel_start = rel_start * rotation_x
+                rel_end = rel_end * rotation_x
+
+                self._real_positions(rel_start, rel_end)
+                if self.verbose:
+                    print('Rotated geometry %g radians around x-axis' % (-theta))
+            else:
+                if self.verbose:
+                    print('Geometry not rotated around x-axis')
+
+            if ax is 'y' and y is not None:
+                phi = -y
+                rotation_y = np.matrix([[np.cos(phi), 0, np.sin(phi)],
+                    [0, 1, 0],
+                    [-np.sin(phi), 0, np.cos(phi)]])
+
+                rel_start, rel_end = self._rel_positions()
+
+                rel_start = rel_start * rotation_y
+                rel_end = rel_end * rotation_y
+
+                self._real_positions(rel_start, rel_end)
+                if self.verbose:
+                    print('Rotated geometry %g radians around y-axis' % (-phi))
+            else:
+                if self.verbose:
+                    print('Geometry not rotated around y-axis')
+
+            if ax is 'z' and z is not None:
+                gamma = -z
+                rotation_z = np.matrix([[np.cos(gamma), -np.sin(gamma), 0],
+                        [np.sin(gamma), np.cos(gamma), 0],
+                        [0, 0, 1]])
+
+                rel_start, rel_end = self._rel_positions()
+
+                rel_start = rel_start * rotation_z
+                rel_end = rel_end * rotation_z
+
+                self._real_positions(rel_start, rel_end)
+                if self.verbose:
+                    print('Rotated geometry %g radians around z-axis' % (-gamma))
+            else:
+                if self.verbose:
+                    print('Geometry not rotated around z-axis')
 
         #rotate the pt3d geometry accordingly
         if self.pt3d and hasattr(self, 'x3d'):
-            self._set_pt3d_rotation(x, y, z)
+            self._set_pt3d_rotation(x, y, z, rotation_order)
 
     def chiral_morphology(self, axis='x'):
         """
@@ -1546,10 +1557,14 @@ class Cell(object):
             self.z3d[i] += diffz
         self._update_pt3d()
 
-    def _set_pt3d_rotation(self, x=None, y=None, z=None):
+
+    def _set_pt3d_rotation(self, x=None, y=None, z=None, rotation_order='xyz'):
         """
         Rotate pt3d geometry of cell object around the x-, y-, z-axis
-        in that order.
+        in the order described by rotation_order parameter.
+        rotation_order should be a string with 3 elements containing x, y, and z
+        e.g. 'xyz', 'zyx'
+
         Input should be angles in radians.
         
         using rotation matrices, takes dict with rot. angles,
@@ -1562,65 +1577,64 @@ class Cell(object):
         >>> cell = LFPy.Cell(**kwargs)
         >>> rotation = {'x' : 1.233, 'y' : 0.236, 'z' : np.pi}
         >>> cell.set_pt3d_rotation(**rotation)
-
         """
-        if x is not None:
-            theta = -x
-            rotation_x = np.matrix([[1, 0, 0],
-                [0, np.cos(theta), -np.sin(theta)],
-                [0, np.sin(theta), np.cos(theta)]])
-            for i in range(len(self.x3d)):
-                rel_pos = self._rel_pt3d_positions(self.x3d[i],
-                                                   self.y3d[i], self.z3d[i])
-                
-                rel_pos = rel_pos * rotation_x
-                
-                self.x3d[i], self.y3d[i], self.z3d[i] = \
-                                            self._real_pt3d_positions(rel_pos)
-            if self.verbose:
-                print('Rotated geometry %g radians around x-axis' % (-theta))
-        else:
-            if self.verbose:
-                print('Geometry not rotated around x-axis')
-        
-        if y is not None:
-            phi = -y
-            rotation_y = np.matrix([[np.cos(phi), 0, np.sin(phi)],
-                [0, 1, 0],
-                [-np.sin(phi), 0, np.cos(phi)]])
-            for i in range(len(self.x3d)):
-                rel_pos = self._rel_pt3d_positions(self.x3d[i],
-                                                   self.y3d[i], self.z3d[i])
-                
-                rel_pos = rel_pos * rotation_y
-                                
-                self.x3d[i], self.y3d[i], self.z3d[i] = \
-                                            self._real_pt3d_positions(rel_pos)
-            if self.verbose:
-                print('Rotated geometry %g radians around y-axis' % (-phi))
-        else:
-            if self.verbose:
-                print('Geometry not rotated around y-axis')
-        
-        if z is not None:
-            gamma = -z
-            rotation_z = np.matrix([[np.cos(gamma), -np.sin(gamma), 0],
-                    [np.sin(gamma), np.cos(gamma), 0],
-                    [0, 0, 1]])
-            for i in range(len(self.x3d)):
-                rel_pos = self._rel_pt3d_positions(self.x3d[i],
-                                                   self.y3d[i], self.z3d[i])
-                
-                rel_pos = rel_pos * rotation_z
-                
-                self.x3d[i], self.y3d[i], self.z3d[i] = \
-                                            self._real_pt3d_positions(rel_pos)
-            if self.verbose:
-                print('Rotated geometry %g radians around z-axis' % (-gamma))
-        else:
-            if self.verbose:
-                print('Geometry not rotated around z-axis')
-        
+        for ax in rotation_order:
+            if ax is 'x' and x is not None:
+                theta = -x
+                rotation_x = np.matrix([[1, 0, 0],
+                    [0, np.cos(theta), -np.sin(theta)],
+                    [0, np.sin(theta), np.cos(theta)]])
+                for i in range(len(self.x3d)):
+                    rel_pos = self._rel_pt3d_positions(self.x3d[i],
+                                                       self.y3d[i], self.z3d[i])
+
+                    rel_pos = rel_pos * rotation_x
+
+                    self.x3d[i], self.y3d[i], self.z3d[i] = \
+                                                self._real_pt3d_positions(rel_pos)
+                if self.verbose:
+                    print(('Rotated geometry %g radians around x-axis' % (-theta)))
+            else:
+                if self.verbose:
+                    print('Geometry not rotated around x-axis')
+
+            if ax is 'y' and y is not None:
+                phi = -y
+                rotation_y = np.matrix([[np.cos(phi), 0, np.sin(phi)],
+                    [0, 1, 0],
+                    [-np.sin(phi), 0, np.cos(phi)]])
+                for i in range(len(self.x3d)):
+                    rel_pos = self._rel_pt3d_positions(self.x3d[i],
+                                                       self.y3d[i], self.z3d[i])
+
+                    rel_pos = rel_pos * rotation_y
+
+                    self.x3d[i], self.y3d[i], self.z3d[i] = \
+                                                self._real_pt3d_positions(rel_pos)
+                if self.verbose:
+                    print('Rotated geometry %g radians around y-axis' % (-phi))
+            else:
+                if self.verbose:
+                    print('Geometry not rotated around y-axis')
+
+            if ax is 'z' and z is not None:
+                gamma = -z
+                rotation_z = np.matrix([[np.cos(gamma), -np.sin(gamma), 0],
+                        [np.sin(gamma), np.cos(gamma), 0],
+                        [0, 0, 1]])
+                for i in range(len(self.x3d)):
+                    rel_pos = self._rel_pt3d_positions(self.x3d[i],
+                                                       self.y3d[i], self.z3d[i])
+
+                    rel_pos = rel_pos * rotation_z
+
+                    self.x3d[i], self.y3d[i], self.z3d[i] = \
+                                                self._real_pt3d_positions(rel_pos)
+                if self.verbose:
+                    print('Rotated geometry %g radians around z-axis' % (-gamma))
+            else:
+                if self.verbose:
+                    print('Geometry not rotated around z-axis')
         self._update_pt3d()
 
     def _rel_pt3d_positions(self, x, y, z):
