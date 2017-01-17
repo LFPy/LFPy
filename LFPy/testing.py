@@ -922,7 +922,7 @@ class testLFPy(unittest.TestCase):
                          record_potential=False, weight=1.,
                          **dict(e=10., tau=2.))
         
-        self.assertEqual(str(cell.synlist[0]), 'ExpSyn[0]')
+        self.assertEqual(cell.synlist[0].hname(), 'ExpSyn[0]')
         self.assertEqual(len(cell.synlist), 1)
         self.assertEqual(len(cell.netconlist), 1)
         self.assertEqual(len(cell.netstimlist), 1)
@@ -936,7 +936,7 @@ class testLFPy(unittest.TestCase):
                                                   'ball_and_sticks.hoc' ))
         cell.set_point_process(idx=0, pptype='IClamp', record_current=False,
                                **dict(delay=1., amp=1.))
-        self.assertEqual(str(cell.stimlist[0]), 'IClamp[0]')
+        self.assertEqual(cell.stimlist[0].hname(), 'IClamp[0]')
         self.assertEqual(len(cell.stimlist), 1)
         self.assertEqual(cell.stimlist[0].delay, 1.)
         self.assertEqual(cell.stimlist[0].amp, 1.)
