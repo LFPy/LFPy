@@ -297,10 +297,10 @@ class PointProcessPlayInSoma:
             numpy.concatenate((somaTrace, trace))
         
         somaTvec1 = numpy.interp(numpy.arange(somaTvec[0], somaTvec[-1], 
-                                cell.timeres_NEURON),
+                                cell.dt),
                                 somaTvec, somaTvec)
         somaTrace1 = numpy.interp(numpy.arange(somaTvec[0], somaTvec[-1],
-                                cell.timeres_NEURON),
+                                cell.dt),
                                 somaTvec, somaTrace)
         
         somaTvecVec = neuron.h.Vector(somaTvec1)

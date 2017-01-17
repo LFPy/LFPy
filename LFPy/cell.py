@@ -41,8 +41,7 @@ class Cell(object):
         e_pas: [-65.]: passive mechanism reversal potential
         extracellular: [False]/True: switch for NEURON's extracellular mechanism
     
-        timeres_NEURON: [0.1]: internal dt for NEURON simulation
-        timeres_python: [0.1]: overall dt for python simulation
+        dt : [0.1]: simulation timestep size
     
         tstartms: [0.]:  initialization time for simulation <= 0 ms
         tstopms: [100.]: stop time for simulation > 0 ms
@@ -70,8 +69,7 @@ class Cell(object):
             'rm' : 30000,
             'cm' : 1.0,
             'Ra' : 150,
-            'timeres_NEURON' : 0.1,
-            'timeres_python' : 0.1,
+            'dt' : 0.1,
             'tstartms' : -50,
             'tstopms' : 50,
         }
@@ -86,8 +84,7 @@ class Cell(object):
                     cm=1.0,
                     e_pas=-65.,
                     extracellular = False,
-                    timeres_NEURON=2**-3,
-                    timeres_python=2**-3,
+                    dt = 0.1,
                     tstartms=0,
                     tstopms=100,
                     nsegs_method='lambda100',
@@ -100,12 +97,19 @@ class Cell(object):
                     custom_fun_args=None,
                     pt3d=False,
                     celsius=None,
-                    verbose=False):
+                    verbose=False,
+                    **kwargs):
         '''
         Initialization of the Cell object.
         '''
+        # set attributes
         self.verbose = verbose
         self.pt3d = pt3d
+        
+        # raise Exceptions on deprecated input arguments
+        for key in ['timeres_NEURON', 'timeres_python']:
+            if key in kwargs.keys():
+                raise DeprecationWarning('cell keyword argument {} is deprecated. Use dt=float instead'.format(key))
         
         if not hasattr(neuron.h, 'd_lambda'):
             neuron.h.load_file('stdlib.hoc')    #NEURON std. library
@@ -145,19 +149,14 @@ class Cell(object):
                 raise Exception("Could not load existent top-level cell")
         
         #Some parameters and lists initialised
-        if timeres_python not in 2.**np.arange(-16, -1) or timeres_NEURON \
-                not in 2.**np.arange(-16, -1):
+        if dt not in 2.**np.arange(-16, -1):
             if self.verbose:
-                print('timeres_python and or timeres_NEURON not a power of 2,')
+                print('dt not a power of 2,')
                 print('cell.tvec errors may occur.')
                 print('Initialization will continue.')
             else:
                 pass
-        if timeres_python < timeres_NEURON:
-            raise ValueError('timeres_python = %.3e < timeres_NEURON = %.3e'
-                                        % (timeres_python, timeres_NEURON))
-        self.timeres_python = timeres_python
-        self.timeres_NEURON = timeres_NEURON
+        self.dt = dt
         
         self.tstartms = tstartms
         self.tstopms = tstopms
@@ -498,15 +497,15 @@ class Cell(object):
                     #record currents
                     if record_current:
                         synirec = neuron.h.Vector(int(self.tstopms /
-                                                      self.timeres_python+1))
-                        synirec.record(syn._ref_i, self.timeres_python)
+                                                      self.dt+1))
+                        synirec.record(syn._ref_i, self.dt)
                         self.synireclist.append(synirec)
 
                     #record potential
                     if record_potential:
                         synvrec = neuron.h.Vector(int(self.tstopms /
-                                                      self.timeres_python+1))
-                        synvrec.record(seg._ref_v, self.timeres_python)
+                                                      self.dt+1))
+                        synvrec.record(seg._ref_v, self.dt)
                         self.synvreclist.append(synvrec)
 
                 i += 1
@@ -564,8 +563,8 @@ class Cell(object):
                     #record current
                     if record_current:
                         stimirec = neuron.h.Vector(int(self.tstopms /
-                                                       self.timeres_python+1))
-                        stimirec.record(stim._ref_i, self.timeres_python)
+                                                       self.dt+1))
+                        stimirec.record(stim._ref_i, self.dt)
                         self.stimireclist.append(stimirec)
                 
                 i += 1
@@ -811,8 +810,7 @@ class Cell(object):
         '''
         Set the tvec to be a monotonically increasing numpy array after sim.
         '''
-        self.tvec = np.arange(self.tstopms / self.timeres_python + 1) \
-                            * self.timeres_python
+        self.tvec = np.arange(self.tstopms / self.dt + 1) * self.dt
         
     def _calc_imem(self):
         '''
@@ -920,14 +918,12 @@ class Cell(object):
         '''
         Record somatic membrane potential
         '''
-        self.somav = neuron.h.Vector(int(self.tstopms / 
-                                         self.timeres_python+1))
+        self.somav = neuron.h.Vector(int(self.tstopms / self.dt+1))
         if self.nsomasec == 0:
             pass
         elif self.nsomasec == 1:
             for sec in self.somalist:
-                self.somav.record(sec(0.5)._ref_v, 
-                              self.timeres_python)
+                self.somav.record(sec(0.5)._ref_v, self.dt)
         elif self.nsomasec > 1:
             nseg = self.get_idx('soma').size
             i, j = divmod(nseg, 2)
@@ -936,12 +932,11 @@ class Cell(object):
                 for seg in sec:
                     if nseg==2 and k == 1:
                         #if 2 segments, record from the first one: 
-                        self.somav.record(seg._ref_v, self.timeres_python)
+                        self.somav.record(seg._ref_v, self.dt)
                     else:
                         if k == i*2:
                             #record from one of the middle segments:
-                            self.somav.record(seg._ref_v,
-                                              self.timeres_python)
+                            self.somav.record(seg._ref_v, self.dt)
                     k += 1
     
     def _set_imem_recorders(self):
@@ -953,9 +948,8 @@ class Cell(object):
         self.memireclist = neuron.h.List()
         for sec in self.allseclist:
             for seg in sec:
-                memirec = neuron.h.Vector(int(self.tstopms / 
-                                              self.timeres_python+1))
-                memirec.record(seg._ref_i_membrane_, self.timeres_python)
+                memirec = neuron.h.Vector(int(self.tstopms / self.dt+1))
+                memirec.record(seg._ref_i_membrane_, self.dt)
                 self.memireclist.append(memirec)
     
     def _set_ipas_recorders(self):
@@ -965,9 +959,8 @@ class Cell(object):
         self.memipasreclist = neuron.h.List()
         for sec in self.allseclist:
             for seg in sec:
-                memipasrec = neuron.h.Vector(int(self.tstopms / 
-                                                 self.timeres_python+1))
-                memipasrec.record(seg._ref_i_pas, self.timeres_python)
+                memipasrec = neuron.h.Vector(int(self.tstopms / self.dt+1))
+                memipasrec.record(seg._ref_i_pas, self.dt)
                 self.memipasreclist.append(memipasrec)
     
     def _set_icap_recorders(self):
@@ -977,9 +970,8 @@ class Cell(object):
         self.memicapreclist = neuron.h.List()
         for sec in self.allseclist:
             for seg in sec:
-                memicaprec = neuron.h.Vector(int(self.tstopms / 
-                                                 self.timeres_python+1))
-                memicaprec.record(seg._ref_i_cap, self.timeres_python)
+                memicaprec = neuron.h.Vector(int(self.tstopms / self.dt+1))
+                memicaprec.record(seg._ref_i_cap, self.dt)
                 self.memicapreclist.append(memicaprec)
     
     def _set_voltage_recorders(self):
@@ -989,9 +981,8 @@ class Cell(object):
         self.memvreclist = neuron.h.List()
         for sec in self.allseclist:
             for seg in sec:
-                memvrec = neuron.h.Vector(int(self.tstopms / 
-                                              self.timeres_python+1))
-                memvrec.record(seg._ref_v, self.timeres_python)
+                memvrec = neuron.h.Vector(int(self.tstopms / self.dt+1))
+                memvrec.record(seg._ref_v, self.dt)
                 self.memvreclist.append(memvrec)
 
     
@@ -1009,10 +1000,10 @@ class Cell(object):
             for sec in self.allseclist:
                 for seg in sec:
                     recvector = neuron.h.Vector(int(self.tstopms /
-                                                    self.timeres_python + 1))
+                                                    self.dt + 1))
                     if hasattr(seg, variable):
                         recvector.record(getattr(seg, '_ref_%s' % variable),
-                                         self.timeres_python)
+                                         self.dt)
                     else:
                         print('non-existing variable %s, section %s.%f' %
                                 (variable, sec.name(), seg.x))
@@ -1821,8 +1812,7 @@ class Cell(object):
             cell = LFPy.Cell(morphology='morphologies/example_morphology.hoc')
             
             #time vector and extracellular field for every segment:
-            t_ext = np.arange(cell.tstopms / cell.timeres_python+ 1) * \
-                    cell.timeres_python
+            t_ext = np.arange(cell.tstopms / cell.dt + 1) * cell.dt
             v_ext = np.random.rand(cell.totnsegs, t_ext.size)-0.5
         
             #insert potentials and record response:

@@ -19,10 +19,9 @@ cell_parameters = {          # various cell parameters,
     'v_init' : -65.,    # initial crossmembrane potential
     'e_pas' : -65.,     # reversal potential passive mechs
     'passive' : True,   # switch on passive mechs
-    'nsegs_method' : 'lambda_f',
-    'lambda_f' : 100.,
-    'timeres_NEURON' : 2.**-3,   # [ms] dt's should be in powers of 2 for both,
-    'timeres_python' : 2.**-3,   # need binary representation
+    'nsegs_method' : 'lambda_f', # lambda_f method
+    'lambda_f' : 100.,  # lambda_f critical frequency
+    'dt' : 2.**-3,      # simulation time step size
     'tstartms' : 0.,    # start time of simulation, recorders start at t=0
     'tstopms' : 100.,   # stop simulation at 200 ms. These can be overridden
                         # by setting these arguments in cell.simulation()
