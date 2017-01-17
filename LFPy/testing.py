@@ -518,7 +518,6 @@ class testLFPy(unittest.TestCase):
         np.testing.assert_allclose(cell.somapos, [10., 20., -30.])
 
 
-    @unittest.expectedFailure
     def test_cell_method_set_pos_05(self):
         '''test LFPy.Cell.set_pos'''
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
