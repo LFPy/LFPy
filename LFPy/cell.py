@@ -207,9 +207,11 @@ class Cell(object):
             self.x3d, self.y3d, self.z3d, self.diam3d = self._collect_pt3d()
 
         #Gather geometry, set position and rotation of morphology
-        self._collect_geometry()
+        if self.pt3d:
+            self._update_pt3d()
+        else: # self._update_pt3d itself makes a call to self._collect_geometry()
+            self._collect_geometry()
         if hasattr(self, 'somapos'):
-            self.somapos = [0, 0, 0]
             self.set_pos()
         else:
             if self.verbose:
@@ -565,7 +567,7 @@ class Cell(object):
             self.area = None
             self.diam = None
             self.length = None
-        
+
         _collect_geometry_neuron(self)
         self._calc_midpoints()
 
@@ -595,7 +597,6 @@ class Cell(object):
             self.somapos[2] = self.zmid[self.somaidx]
         else:
             raise Exception('Huh?!')
-        
 
     
     def _calc_midpoints(self):
@@ -1000,14 +1001,14 @@ class Cell(object):
         diffy = ypos-self.somapos[1]
         diffz = zpos-self.somapos[2]
 
-        self.somapos[0] = xpos
-        self.somapos[1] = ypos
-        self.somapos[2] = zpos
-
         #also update the pt3d_pos:
         if self.pt3d and hasattr(self, 'x3d'):
-                self._set_pt3d_pos(diffx, diffy, diffz)
+            self._set_pt3d_pos(diffx, diffy, diffz)
         else:
+            self.somapos[0] = xpos
+            self.somapos[1] = ypos
+            self.somapos[2] = zpos
+
             self.xstart += diffx
             self.ystart += diffy
             self.zstart += diffz
