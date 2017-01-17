@@ -14,7 +14,7 @@ install:
   - source continuous_integration/install.sh
 script:
   - bash continuous_integration/test_script.sh
-  - nosetests --processes=-1 --process-timeout=20 --with-coverage --cover-package=LFPy
+  - nosetests --processes=-1 --process-timeout=30 --with-coverage --cover-package=LFPy
 after_success:
   coveralls
 cache:
