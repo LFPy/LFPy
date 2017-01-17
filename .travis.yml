@@ -14,10 +14,8 @@ install:
   - source continuous_integration/install.sh
 script:
   - bash continuous_integration/test_script.sh
-  - nosetests
 after_success:
-  - coverage report -m
-  - coveralls
+  coveralls
 cache:
   - apt
   - pip
