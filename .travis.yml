@@ -10,11 +10,11 @@ addons:
       - gfortran
 install:
   - travis_wait 30 pip install scipy -q
-  - pip install setuptools cython coveralls -q
+  - pip install setuptools cython pytest pytest-cov coveralls -q
   - source continuous_integration/install.sh
 script:
   - bash continuous_integration/test_script.sh
-  - nosetests --with-coverage --cover-package=LFPy
+  - py.test LFPy/testing.py
 after_success:
   coveralls
 cache:
