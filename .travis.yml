@@ -16,7 +16,8 @@ script:
   - bash continuous_integration/test_script.sh
   - nosetests
 after_success:
-  coveralls
+  - coverage report -m
+  - coveralls
 cache:
   - apt
   - pip
