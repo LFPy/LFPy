@@ -26,8 +26,7 @@ population_parameters = {
 
 cell_parameters = {
      'morphology' : '', # set in 'single_cell.py'
-    'timeres_NEURON' : 2**-4, # 2**-4=0.0625 ms
-    'timeres_python' : 16*2**-4, # 16*2**-4=1.0 ms
+    'dt' : 2**-4, # 2**-4=0.0625 ms
     'nsegs_method' : 'lambda100',
     'Ra' : 150., 
     'rm' : 30000., # later modifised in 'single_cell.py'
