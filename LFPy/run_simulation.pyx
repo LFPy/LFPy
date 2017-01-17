@@ -28,8 +28,8 @@ def _run_simulation(cell, cvode, variable_dt=False, atol=0.001):
     Running the actual simulation in NEURON, simulations in NEURON
     is now interruptable.
     """
-    neuron.h.dt = cell.timeres_NEURON
-    
+    neuron.h.dt = cell.dt
+
     # variable dt method
     if variable_dt:
         cvode.active(1)
@@ -59,15 +59,15 @@ def _run_simulation(cell, cvode, variable_dt=False, atol=0.001):
     cdef double t0 = time()
     cdef double ti = neuron.h.t
     cdef double rtfactor
-    if tstopms > 10000:
-        interval = 1 / cell.timeres_NEURON * 1000
+    if tstopms >= 10000:
+        interval = 1000. / cell.dt
     else:
-        interval = 1 / cell.timeres_NEURON * 100
+        interval = 100. / cell.dt
     
     while neuron.h.t < tstopms:
         neuron.h.fadvance()
         counter += 1
-        if divmod(counter, interval)[1] == 0:
+        if counter % interval == 0:
             rtfactor = (neuron.h.t - ti)  * 1E-3 / (time() - t0)
             if cell.verbose:
                 print('t = {:.0f}, realtime factor: {:.3f}'.format(neuron.h.t,
@@ -96,8 +96,7 @@ def _run_simulation_with_electrode(cell, cvode, electrode=None,
     cdef double t0
     cdef double ti
     cdef double rtfactor
-    cdef double timeres_NEURON = cell.timeres_NEURON
-    cdef double timeres_python = cell.timeres_python
+    cdef double dt = cell.dt
     cdef np.ndarray[DTYPE_t, ndim=2, negative_indices=False] coeffs
     cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] imem = \
         np.empty(totnsegs)
@@ -147,7 +146,7 @@ def _run_simulation_with_electrode(cell, cvode, electrode=None,
             pass
         
         cell.imem = np.eye(totnsegs)
-        cell.tvec = np.arange(totnsegs) * timeres_python
+        cell.tvec = np.arange(totnsegs) * dt
         electrodeLFP = []   #list of electrode.LFP objects if they exist
         restoreLFP = False
         restoreCellLFP = False
@@ -185,7 +184,7 @@ def _run_simulation_with_electrode(cell, cvode, electrode=None,
 
     
     # Initialize NEURON simulations of cell object    
-    neuron.h.dt = timeres_NEURON
+    neuron.h.dt = dt
         
     #don't know if this is the way to do, but needed for variable dt method
     if variable_dt:
@@ -217,10 +216,10 @@ def _run_simulation_with_electrode(cell, cvode, electrode=None,
     tstep = 0
     t0 = time()
     ti = neuron.h.t
-    if tstopms > 10000:
-        interval = 1. / timeres_NEURON * 1000
+    if tstopms >= 10000:
+        interval = 1000. / dt
     else:
-        interval = 1. / timeres_NEURON * 100
+        interval = 100. / dt
         
     #temp vector to store membrane currents at each timestep
     imem = np.empty(cell.totnsegs)
@@ -229,7 +228,7 @@ def _run_simulation_with_electrode(cell, cvode, electrode=None,
         electrodesLFP = []
         for coeffs in dotprodcoeffs:
             electrodesLFP.append(np.empty((coeffs.shape[0],
-                                    int(tstopms / timeres_NEURON + 1))))
+                                    int(tstopms / dt + 1))))
     #LFPs for each electrode will be put here during simulations
     if to_file:
         #ensure right ending:
@@ -239,9 +238,8 @@ def _run_simulation_with_electrode(cell, cvode, electrode=None,
         i = 0
         for coeffs in dotprodcoeffs:
             el_LFP_file['electrode{:03d}'.format(i)] = np.empty((coeffs.shape[0],
-                                            int(tstopms / timeres_NEURON + 1)))
+                                            int(tstopms / dt + 1)))
             i += 1
-
 
     #run fadvance until time limit, and calculate LFPs for each timestep
     while neuron.h.t < tstopms:

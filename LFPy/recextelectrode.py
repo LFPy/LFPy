@@ -83,10 +83,9 @@ class RecExtElectrodeSetup(object):
         else:
             self.z = np.array(z).flatten()
         try:
-            assert((self.x.size == self.y.size) and
-                   (self.x.size == self.z.size))
-        except AssertionError as ae:
-            raise ae, "The number of elements in [x, y, z] must be identical"
+            assert((self.x.size==self.y.size) and (self.x.size==self.z.size))
+        except AssertionError:
+            raise AssertionError("The number of elements in [x, y, z] must be identical")
         
         self.color = color
         self.marker = marker
@@ -220,9 +219,8 @@ class RecExtElectrode(RecExtElectrodeSetup):
     >>>     'morphology' : 'L5_Mainen96_LFPy.hoc',  # morphology file
     >>>     'rm' : 30000,                           # membrane resistivity
     >>>     'cm' : 1.0,                             # membrane capacitance
-    >>>    'Ra' : 150,                             # axial resistivity
-    >>>    'timeres_NEURON' : 2**-4,                # dt for NEURON sim.
-    >>>     'timeres_python' : 2**-4,                 # dt for python output
+    >>>     'Ra' : 150,                             # axial resistivity
+            'dt' : 0.1,                             # simulation time res
     >>>     'tstartms' : -50,                         # start t of simulation
     >>>     'tstopms' : 50,                        # end t of simulation
     >>> }

@@ -23,6 +23,7 @@ from LFPy import Cell, RecExtElectrode
 from LFPy.run_simulation import _run_simulation, _run_simulation_with_electrode
 
 class TemplateCell(Cell):
+
     """
     This class allow using cell templates with some limitations.
     TODO: Specify which limitations
@@ -53,11 +54,9 @@ class TemplateCell(Cell):
     e_pas : float
         passive mechanism reversal potential. Defaults to -65.
     extracellular : bool
-        switch for NEURON's extracellular mechanism. Defaults to True
-    timeres_NEURON : float
-        internal dt for NEURON simulation. Defaults to 0.1
-    timeres_python : float
-        overall dt for python simulation. Defaults to 0.1
+        switch for NEURON's extracellular mechanism. Defaults to False
+    dt: float
+        Simulation time step. Defaults to 0.1
     tstartms : float
         initialization time for simulation <= 0 ms. Defaults to 0.
     tstopms : float
@@ -99,8 +98,7 @@ class TemplateCell(Cell):
     >>>     'rm' : 30000,
     >>>     'cm' : 1.0,
     >>>     'Ra' : 150,
-    >>>     'timeres_NEURON' : 0.1,
-    >>>     'timeres_python' : 0.1,
+    >>>     'dt' : 0.1,
     >>>     'tstartms' : -50,
     >>>     'tstopms' : 50,
     >>> }
@@ -108,6 +106,7 @@ class TemplateCell(Cell):
     >>> cell.simulate()
 
     """
+
     def __init__(self,
                  templatefile='LFPyCellTemplate.hoc',
                  templatename='LFPyCellTemplate',
@@ -264,3 +263,5 @@ class TemplateCell(Cell):
             neuron.h.define_shape()
         #must recollect the geometry, otherwise we get roundoff errors!
         self._collect_geometry()
+
+

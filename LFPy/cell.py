@@ -47,11 +47,9 @@ class Cell(object):
     e_pas : float
         Passive mechanism reversal potential. Defaults to -65 mV.
     extracellular : bool
-        Switch for NEURON's extracellular mechanism. Defaults to True
-    timeres_NEURON : float
-        Internal dt for NEURON simulation. Defaults to 0.1 ms
-    timeres_python : float
-        Overall dt for python simulation. Defaults to 0.1 ms
+        Switch for NEURON's extracellular mechanism. Defaults to False
+    dt : float
+        simulation timestep. Defaults to 0.1 ms
     tstartms : float
         Initialization time for simulation <= 0 ms. Defaults to 0.
     tstopms : float
@@ -81,7 +79,6 @@ class Cell(object):
     verbose : bool
         Verbose output switch. Defaults to False
 
-    
     Examples
     --------
     Here is an example of how to use the cell class.
@@ -109,11 +106,10 @@ class Cell(object):
                     rm=30000.,
                     cm=1.0,
                     e_pas=-65.,
-                    extracellular = False,
-                    timeres_NEURON=2**-3,
-                    timeres_python=2**-3,
+                    extracellular=False,
                     tstartms=0.,
                     tstopms=100.,
+                    dt = 0.1,
                     nsegs_method='lambda100',
                     lambda_f = 100,
                     d_lambda = 0.1,
@@ -124,10 +120,18 @@ class Cell(object):
                     custom_fun_args=None,
                     pt3d=False,
                     celsius=None,
-                    verbose=False):
-        """Initialization of the Cell object. """
+                    verbose=False,
+                    **kwargs):
+        """
+        Initialization of the Cell object.
+        """
         self.verbose = verbose
         self.pt3d = pt3d
+        
+        # raise Exceptions on deprecated input arguments
+        for key in ['timeres_NEURON', 'timeres_python']:
+            if key in kwargs.keys():
+                raise DeprecationWarning('cell keyword argument {} is deprecated. Use dt=float instead'.format(key))
         
         if not hasattr(neuron.h, 'd_lambda'):
             neuron.h.load_file('stdlib.hoc')    #NEURON std. library
@@ -167,19 +171,14 @@ class Cell(object):
                 raise Exception("Could not load existent top-level cell")
         
         #Some parameters and lists initialised
-        if timeres_python not in 2.**np.arange(-16, -1) or timeres_NEURON \
-                not in 2.**np.arange(-16, -1):
+        if dt not in 2.**np.arange(-16, -1):
             if self.verbose:
-                print('timeres_python and or timeres_NEURON not a power of 2,')
+                print('dt not a power of 2,')
                 print('cell.tvec errors may occur.')
                 print('Initialization will continue.')
             else:
                 pass
-        if timeres_python < timeres_NEURON:
-            raise ValueError('timeres_python = %.3e < timeres_NEURON = %.3e'
-                                        % (timeres_python, timeres_NEURON))
-        self.timeres_python = timeres_python
-        self.timeres_NEURON = timeres_NEURON
+        self.dt = dt
         
         self.tstartms = tstartms
         self.tstopms = tstopms
@@ -229,9 +228,11 @@ class Cell(object):
             self.x3d, self.y3d, self.z3d, self.diam3d = self._collect_pt3d()
 
         #Gather geometry, set position and rotation of morphology
-        self._collect_geometry()
+        if self.pt3d:
+            self._update_pt3d()
+        else: # self._update_pt3d itself makes a call to self._collect_geometry()
+            self._collect_geometry()
         if hasattr(self, 'somapos'):
-            self.somapos = [0, 0, 0]
             self.set_pos()
         else:
             if self.verbose:
@@ -308,7 +309,10 @@ class Cell(object):
                             'try running nrnivmodl. ',])
                         raise Exception(ERRMSG)
                 elif code.split('.')[-1] == 'py':
-                    exec(code)
+                    if sys.version >= "3.4":
+                        exec(code, globals())
+                    else:
+                        exec(code)
                 else:
                     raise Exception('%s not a .hoc- nor .py-file' % code)
         
@@ -406,9 +410,9 @@ class Cell(object):
         
         Parameters
         ----------
-        frequency: float
+        frequency : float
             frequency at which AC length constant is computed
-        d_lambda: float
+        d_lambda : float
         """
         for sec in self.allseclist:
             sec.nseg = int((sec.L / (d_lambda*neuron.h.lambda_f(frequency,
@@ -495,11 +499,18 @@ class Cell(object):
         for sec in self.allseclist:
             for seg in sec:
                 if i == idx:
-                    command = cmd1 + syntype + cmd2  
-                    exec(command)
+                    command = cmd1 + syntype + cmd2
+                    if sys.version >= "3.4":
+                        exec(command, locals(), globals())
+                    else:
+                        exec(command)
                     for param in list(kwargs.keys()):
                         try:
-                            exec('syn.' + param + '=' + str(kwargs[param]))
+                            if sys.version >= "3.4":
+                                exec('syn.' + param + '=' + str(kwargs[param]),
+                                     locals(), globals())
+                            else:
+                                exec('syn.' + param + '=' + str(kwargs[param]))
                         except:
                             pass
                     self.synlist.append(syn)  
@@ -515,15 +526,15 @@ class Cell(object):
                     #record currents
                     if record_current:
                         synirec = neuron.h.Vector(int(self.tstopms /
-                                                      self.timeres_python+1))
-                        synirec.record(syn._ref_i, self.timeres_python)
+                                                      self.dt+1))
+                        synirec.record(syn._ref_i, self.dt)
                         self.synireclist.append(synirec)
 
                     #record potential
                     if record_potential:
                         synvrec = neuron.h.Vector(int(self.tstopms /
-                                                      self.timeres_python+1))
-                        synvrec.record(seg._ref_v, self.timeres_python)
+                                                      self.dt+1))
+                        synvrec.record(seg._ref_v, self.dt)
                         self.synvreclist.append(synvrec)
 
                 i += 1
@@ -559,11 +570,18 @@ class Cell(object):
         for sec in self.allseclist:
             for seg in sec:
                 if i == idx:
-                    command = cmd1 + pptype + cmd2  
-                    exec(command)
+                    command = cmd1 + pptype + cmd2
+                    if sys.version >= "3.4":
+                        exec(command, locals(), globals())
+                    else:
+                        exec(command)
                     for param in list(kwargs.keys()):
                         try:
-                            exec('stim.' + param + '=' + str(kwargs[param]))
+                            if sys.version >= "3.4":
+                                exec('stim.' + param + '=' + str(kwargs[param]),
+                                     locals(), globals())
+                            else:
+                                exec('stim.' + param + '=' + str(kwargs[param]))
                         except SyntaxError:
                             ERRMSG = ''.join(['',
                                 'Point process type "{0}" might not '.format(
@@ -576,8 +594,8 @@ class Cell(object):
                     #record current
                     if record_current:
                         stimirec = neuron.h.Vector(int(self.tstopms /
-                                                       self.timeres_python+1))
-                        stimirec.record(stim._ref_i, self.timeres_python)
+                                                       self.dt+1))
+                        stimirec.record(stim._ref_i, self.dt)
                         self.stimireclist.append(stimirec)
                 
                 i += 1
@@ -597,7 +615,7 @@ class Cell(object):
             self.area = None
             self.diam = None
             self.length = None
-        
+
         _collect_geometry_neuron(self)
         self._calc_midpoints()
 
@@ -650,11 +668,12 @@ class Cell(object):
         Examples
         --------
         >>> idx = cell.get_idx(section='allsec')
-        >>> print idx
+        >>> print(idx)
         >>> idx = cell.get_idx(section=['soma', 'dend', 'apic'])
-        >>> print idx
+        >>> print(idx)
             
         """
+
         if section == 'allsec': 
             seclist = neuron.h.allsec()
         else:
@@ -794,7 +813,7 @@ class Cell(object):
         try:
             cvode.use_fast_imem(1)
         except AttributeError as ae:
-            raise Exception, 'neuron.h.CVode().use_fast_imem() not found. Please update NEURON to v.7.4 or newer'
+            raise Exception('neuron.h.CVode().use_fast_imem() not found. Please update NEURON to v.7.4 or newer')
         
         if rec_imem:
             self._set_imem_recorders()
@@ -846,8 +865,7 @@ class Cell(object):
         """
         Set the tvec to be a monotonically increasing numpy array after sim.
         """
-        self.tvec = np.arange(self.tstopms / self.timeres_python + 1) \
-                            * self.timeres_python
+        self.tvec = np.arange(self.tstopms / self.dt + 1) * self.dt
         
     def _calc_imem(self):
         """
@@ -950,17 +968,14 @@ class Cell(object):
             #     pass
 
     def _set_soma_volt_recorder(self):
-        """
-        Record somatic membrane potential
-        """
-        self.somav = neuron.h.Vector(int(self.tstopms / 
-                                         self.timeres_python+1))
+        """Record somatic membrane potential"""
+        self.somav = neuron.h.Vector(int(self.tstopms / self.dt+1))
+
         if self.nsomasec == 0:
             pass
         elif self.nsomasec == 1:
             for sec in self.somalist:
-                self.somav.record(sec(0.5)._ref_v, 
-                              self.timeres_python)
+                self.somav.record(sec(0.5)._ref_v, self.dt)
         elif self.nsomasec > 1:
             nseg = self.get_idx('soma').size
             i, j = divmod(nseg, 2)
@@ -969,12 +984,11 @@ class Cell(object):
                 for seg in sec:
                     if nseg==2 and k == 1:
                         #if 2 segments, record from the first one: 
-                        self.somav.record(seg._ref_v, self.timeres_python)
+                        self.somav.record(seg._ref_v, self.dt)
                     else:
                         if k == i*2:
                             #record from one of the middle segments:
-                            self.somav.record(seg._ref_v,
-                                              self.timeres_python)
+                            self.somav.record(seg._ref_v, self.dt)
                     k += 1
     
     def _set_imem_recorders(self):
@@ -987,9 +1001,8 @@ class Cell(object):
         self.memireclist = neuron.h.List()
         for sec in self.allseclist:
             for seg in sec:
-                memirec = neuron.h.Vector(int(self.tstopms / 
-                                              self.timeres_python+1))
-                memirec.record(seg._ref_i_membrane_, self.timeres_python)
+                memirec = neuron.h.Vector(int(self.tstopms / self.dt+1))
+                memirec.record(seg._ref_i_membrane_, self.dt)
                 self.memireclist.append(memirec)
     
     def _set_ipas_recorders(self):
@@ -999,9 +1012,8 @@ class Cell(object):
         self.memipasreclist = neuron.h.List()
         for sec in self.allseclist:
             for seg in sec:
-                memipasrec = neuron.h.Vector(int(self.tstopms / 
-                                                 self.timeres_python+1))
-                memipasrec.record(seg._ref_i_pas, self.timeres_python)
+                memipasrec = neuron.h.Vector(int(self.tstopms / self.dt+1))
+                memipasrec.record(seg._ref_i_pas, self.dt)
                 self.memipasreclist.append(memipasrec)
     
     def _set_icap_recorders(self):
@@ -1011,9 +1023,8 @@ class Cell(object):
         self.memicapreclist = neuron.h.List()
         for sec in self.allseclist:
             for seg in sec:
-                memicaprec = neuron.h.Vector(int(self.tstopms / 
-                                                 self.timeres_python+1))
-                memicaprec.record(seg._ref_i_cap, self.timeres_python)
+                memicaprec = neuron.h.Vector(int(self.tstopms / self.dt+1))
+                memicaprec.record(seg._ref_i_cap, self.dt)
                 self.memicapreclist.append(memicaprec)
     
     def _set_voltage_recorders(self):
@@ -1023,9 +1034,8 @@ class Cell(object):
         self.memvreclist = neuron.h.List()
         for sec in self.allseclist:
             for seg in sec:
-                memvrec = neuron.h.Vector(int(self.tstopms / 
-                                              self.timeres_python+1))
-                memvrec.record(seg._ref_v, self.timeres_python)
+                memvrec = neuron.h.Vector(int(self.tstopms / self.dt+1))
+                memvrec.record(seg._ref_v, self.dt)
                 self.memvreclist.append(memvrec)
 
     def _set_variable_recorders(self, rec_variables):
@@ -1042,10 +1052,10 @@ class Cell(object):
             for sec in self.allseclist:
                 for seg in sec:
                     recvector = neuron.h.Vector(int(self.tstopms /
-                                                    self.timeres_python + 1))
+                                                    self.dt + 1))
                     if hasattr(seg, variable):
                         recvector.record(getattr(seg, '_ref_%s' % variable),
-                                         self.timeres_python)
+                                         self.dt)
                     else:
                         print('non-existing variable %s, section %s.%f' %
                                 (variable, sec.name(), seg.x))
@@ -1070,14 +1080,14 @@ class Cell(object):
         diffy = ypos-self.somapos[1]
         diffz = zpos-self.somapos[2]
 
-        self.somapos[0] = xpos
-        self.somapos[1] = ypos
-        self.somapos[2] = zpos
-
         #also update the pt3d_pos:
         if self.pt3d and hasattr(self, 'x3d'):
-                self._set_pt3d_pos(diffx, diffy, diffz)
+            self._set_pt3d_pos(diffx, diffy, diffz)
         else:
+            self.somapos[0] = xpos
+            self.somapos[1] = ypos
+            self.somapos[2] = zpos
+
             self.xstart += diffx
             self.ystart += diffy
             self.zstart += diffz
@@ -1334,7 +1344,7 @@ class Cell(object):
         vector = []
         try:
             if idx1 < 0 or idx0 < 0:
-                raise Exception
+                raise Exception('idx0 < 0 or idx1 < 0')
             vector.append(self.xmid[idx1] - self.xmid[idx0])
             vector.append(self.ymid[idx1] - self.ymid[idx0])
             vector.append(self.zmid[idx1] - self.zmid[idx0])
@@ -1824,8 +1834,6 @@ class Cell(object):
         
         return polygons
 
-
-
     def insert_v_ext(self, v_ext, t_ext):
         """Set external extracellular potential around cell.
 
@@ -1838,7 +1846,7 @@ class Cell(object):
         to (list of) neuron.h.Vector types, to allow playback into each
         compartment e_extracellular reference.
         Can not be deleted prior to running cell.simulate() 
-        
+
         Parameters
         ----------
         v_ext : numpy array
@@ -1857,8 +1865,7 @@ class Cell(object):
         >>> cell = LFPy.Cell(morphology='morphologies/example_morphology.hoc')
 
         >>> #time vector and extracellular field for every segment:
-        >>> t_ext = np.arange(cell.tstopms / cell.timeres_python+ 1) * \
-        >>>         cell.timeres_python
+        >>> t_ext = np.arange(cell.tstopms / cell.dt+ 1) * cell.dt
         >>> v_ext = np.random.rand(cell.totnsegs, t_ext.size)-0.5
 
         >>> #insert potentials and record response:
@@ -1885,6 +1892,7 @@ class Cell(object):
         >>> plt.show()
 
         """
+
         #test dimensions of input
         try:
             if v_ext.shape[0] != self.totnsegs:

@@ -17,7 +17,7 @@ import LFPy
 if not os.path.isfile('L5bPCmodelsEH/morphologies/cell1.asc'):
     #get the model files:
     u = urlopen('http://senselab.med.yale.edu/ModelDB/eavBinDown.asp?o=139653&a=23&mime=application/zip')
-    localFile = open('L5bPCmodelsEH.zip', 'w')
+    localFile = open('L5bPCmodelsEH.zip', 'wb')
     localFile.write(u.read())
     localFile.close()
     #unzip:
@@ -48,8 +48,7 @@ cellParameters = {
     'templateargs'  : 'L5bPCmodelsEH/morphologies/cell1.asc',
     'passive' : False,
     'nsegs_method' : None,
-    'timeres_NEURON' : 2**-6,
-    'timeres_python' : 2**-6,
+    'dt' : 2**-6,
     'tstartms' : -159,
     'tstopms' : 10,
     'v_init' : -60,

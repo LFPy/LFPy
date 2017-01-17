@@ -70,8 +70,7 @@ cellParameters = {
     'passive' : True,           # switch on passive mechs
     'nsegs_method' : 'lambda_f',# method for setting number of segments,
     'lambda_f' : 500,           # segments are isopotential at this frequency
-    'timeres_NEURON' : 2**-5,   # dt of LFP and NEURON simulation.
-    'timeres_python' : 2**-5,
+    'dt' : 2**-5,               # dt of LFP and NEURON simulation.
     'tstartms' : -10,           #start time, recorders start at t=0
     'tstopms' : 10,             #stop time of simulation
     'custom_code'  : ['active_declarations_example2.hoc'], # will run this file

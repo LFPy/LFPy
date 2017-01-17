@@ -41,7 +41,7 @@ cpdef np.ndarray[LTYPE_t, ndim=1, negative_indices=False] alias_method(np.ndarra
     try:
         assert idx.size == probs.size
     except AssertionError as ae:
-        raise ae, 'length of idx and probs arrays must be equal'
+        raise ae('length of idx and probs arrays must be equal')
     
     #C-declare variables
     cdef np.ndarray[LTYPE_t, ndim=1, negative_indices=False] J, spc
