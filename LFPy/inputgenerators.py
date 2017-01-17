@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-'''Copyright (C) 2012 Computational Neuroscience Group, NMBU.
+"""Copyright (C) 2012 Computational Neuroscience Group, NMBU.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -9,21 +9,23 @@ the Free Software Foundation, either version 3 of the License, or
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.'''
+GNU General Public License for more details.
+
+"""
 
 import numpy as np
 
 def get_rand_spike_times(synpos, nspikes, tstart, tstop):
-    '''Return synpos times nspikes random spike times on the 
-    interval [tstart, tstop]'''
+    """Return synpos times nspikes random spike times on the 
+    interval [tstart, tstop]"""
     spiketimes = np.zeros([np.size(synpos), nspikes])
     for i in range(np.size(synpos)):
         spiketimes[i, :] = np.random.random_integers(tstart, tstop, nspikes)
     return spiketimes
 
 def stationary_poisson(nsyn, lambd, tstart, tstop):
-    '''Generate nsyn stationary possion processes with rate lambda 
-    between tstart and tstop'''
+    """Generate nsyn stationary possion processes with rate lambda 
+    between tstart and tstop"""
     interval_s = (tstop-tstart)*.001
     spiketimes = []
     for i in range(nsyn):
@@ -38,10 +40,10 @@ def stationary_poisson(nsyn, lambd, tstart, tstop):
     return spiketimes
 
 def stationary_gamma(tstart, tstop, k=2, theta=10, tmin = -1E3, tmax=1E6):
-    '''Generate spiketimes with interspike interval statistics according
+    """Generate spiketimes with interspike interval statistics according
     to gamma-distribution with 'shape' k and 'scale' theta between tstart and
     tstop. Spiketimes from tmin up to tmax is calculated,
-    times between 0 and tstop are returned'''
+    times between 0 and tstop are returned"""
     
     if tstop > tmax:
         tmax = tstop
@@ -58,7 +60,7 @@ def stationary_gamma(tstart, tstop, k=2, theta=10, tmin = -1E3, tmax=1E6):
 
 
 def test_spiketimes(spiketime):
-    '''Test and sort spike times'''
+    """Test and sort spike times"""
     spiketimes = []
     spikecount = 1
     spikevec = np.empty(spikecount)
@@ -67,8 +69,8 @@ def test_spiketimes(spiketime):
     return spiketimes
 
 def get_normal_spike_times(nsyn, mu, sigma, tstart, tstop):
-    '''Generate nsyn normal-distributed processes with mean mu and 
-    deviation sigma'''
+    """Generate nsyn normal-distributed processes with mean mu and 
+    deviation sigma"""
     spiketimes = []
     spikecount = nsyn
     spikevec = np.empty(spikecount)
@@ -81,8 +83,8 @@ def get_normal_spike_times(nsyn, mu, sigma, tstart, tstop):
     return spiketimes
 
 def get_normal_input_times(n, mu, sigma, tstart, tstop):
-    '''Generates n normal-distributed prosesses with mean mu and 
-    deviation sigma'''
+    """Generates n normal-distributed prosesses with mean mu and 
+    deviation sigma"""
     times = np.random.normal(mu, sigma, n)
     for i in range(n):
         while times[i] <= tstart or times[i] >= tstop:

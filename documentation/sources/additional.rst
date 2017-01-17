@@ -97,7 +97,7 @@ and before optionally running the ``_set_nsegs()`` and ``_collect_geometry()`` p
 Units
 =====
 
-Units follow the NEURON conventions.
+Units follow the NEURON conventions, `see here. <https://www.neuron.yale.edu/neuron/static/docs/units/unitchart.html>`_
 The units in LFPy for given quantities are:
 
 +-------------+-----------+
@@ -125,23 +125,23 @@ Contributors
 
 LFPy was developed by:
 
-*	Henrik Lindén https://lindenh.wordpress.com
+*	Henrik Lindén
 
-*	Espen Hagen http://www.fz-juelich.de/SharedDocs/Personen/INM/INM-6/EN/Hagen_Espen.html?nn=724694
+*	Espen Hagen 
 
-*	Szymon Łęski http://www.neuroinf.pl/Members/szleski
+*	Szymon Łęski
 
 *	Eivind Norheim 
 
-*       Klas H. Pettersen http://arken.umb.no/~klaspe/
+*   Klas H. Pettersen
 
-*       Gaute T. Einevoll http://arken.umb.no/~gautei/index_english.html
+*   Gaute T. Einevoll
 
 
 Contact
 =======
 
 If you want to contact us with questions, bugs and comments,
-you can send us an email to either `Espen <mailto:e.hagen@fz-juelich.de?Subject=LFPy-Questions/Comments>`_ or `Henrik <mailto:helinden@kth.se?Subject=LFPy-Question/Comments>`_.
+you can send us an email to either `Espen <mailto:espen.hagen@fys.uio.no?Subject=LFPy-Questions/Comments>`_ or `Henrik <mailto:helinden@kth.se?Subject=LFPy-Question/Comments>`_.
 We are of course happy to receive feedback of any kind.
 
