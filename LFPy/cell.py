@@ -207,9 +207,10 @@ class Cell(object):
             self.x3d, self.y3d, self.z3d, self.diam3d = self._collect_pt3d()
 
         #Gather geometry, set position and rotation of morphology
-        if pt3d:
+        if self.pt3d:
             self._update_pt3d()
-        self._collect_geometry()
+        else: # self._update_pt3d itself makes a call to self._collect_geometry()
+            self._collect_geometry()
         if hasattr(self, 'somapos'):
             self.set_pos()
         else:
