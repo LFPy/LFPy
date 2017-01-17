@@ -288,7 +288,10 @@ class Cell(object):
                             'try running nrnivmodl. ',])
                         raise Exception(ERRMSG)
                 elif code.split('.')[-1] == 'py':
-                    exec(code)
+                    if sys.version >= "3.4":
+                        exec(code, globals())
+                    else:
+                        exec(code)
                 else:
                     raise Exception('%s not a .hoc- nor .py-file' % code)
         
@@ -468,11 +471,18 @@ class Cell(object):
         for sec in self.allseclist:
             for seg in sec:
                 if i == idx:
-                    command = cmd1 + syntype + cmd2  
-                    exec(command)
+                    command = cmd1 + syntype + cmd2
+                    if sys.version >= "3.4":
+                        exec(command, locals(), globals())
+                    else:
+                        exec(command)
                     for param in list(kwargs.keys()):
                         try:
-                            exec('syn.' + param + '=' + str(kwargs[param]))
+                            if sys.version >= "3.4":
+                                exec('syn.' + param + '=' + str(kwargs[param]),
+                                     locals(), globals())
+                            else:
+                                exec('syn.' + param + '=' + str(kwargs[param]))
                         except:
                             pass
                     self.synlist.append(syn)  
@@ -530,11 +540,18 @@ class Cell(object):
         for sec in self.allseclist:
             for seg in sec:
                 if i == idx:
-                    command = cmd1 + pptype + cmd2  
-                    exec(command)
+                    command = cmd1 + pptype + cmd2
+                    if sys.version >= "3.4":
+                        exec(command, locals(), globals())
+                    else:
+                        exec(command)
                     for param in list(kwargs.keys()):
                         try:
-                            exec('stim.' + param + '=' + str(kwargs[param]))
+                            if sys.version >= "3.4":
+                                exec('stim.' + param + '=' + str(kwargs[param]),
+                                     locals(), globals())
+                            else:
+                                exec('stim.' + param + '=' + str(kwargs[param]))
                         except SyntaxError:
                             ERRMSG = ''.join(['',
                                 'Point process type "{0}" might not '.format(
@@ -623,9 +640,9 @@ class Cell(object):
         ::
             
             idx = cell.get_idx(section='allsec')
-            print idx
+            print(idx)
             idx = cell.get_idx(section=['soma', 'dend', 'apic'])
-            print idx
+            print(idx)
             
         '''
         if section == 'allsec': 
@@ -743,7 +760,7 @@ class Cell(object):
         try:
             cvode.use_fast_imem(1)
         except AttributeError as ae:
-            raise Exception, 'neuron.h.CVode().use_fast_imem() not found. Please update NEURON to v.7.4 or newer'
+            raise Exception('neuron.h.CVode().use_fast_imem() not found. Please update NEURON to v.7.4 or newer')
         
         if rec_imem:
             self._set_imem_recorders()
@@ -1283,7 +1300,7 @@ class Cell(object):
         vector = []
         try:
             if idx1 < 0 or idx0 < 0:
-                raise Exception
+                raise Exception('idx0 < 0 or idx1 < 0')
             vector.append(self.xmid[idx1] - self.xmid[idx0])
             vector.append(self.ymid[idx1] - self.ymid[idx0])
             vector.append(self.zmid[idx1] - self.zmid[idx0])
