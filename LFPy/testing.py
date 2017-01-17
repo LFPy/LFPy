@@ -454,18 +454,51 @@ class testLFPy(unittest.TestCase):
         self.assertEqual(nidx, hist[1])
         
     def test_alias_method_02(self):
-        '''probabilities 0.5 and 0.5'''
+        '''probabilities 0.25 and 0.75'''
         idx = np.arange(2)
-        probs = np.array([0.5, 0.5])
+        probs = np.array([0.25, 0.75])
         nidx = 1000000
         bins = np.arange(3)
         
         hist, _ = np.histogram(LFPy.alias_method.alias_method(idx, probs, nidx),
                                bins)
-        
-        self.assertAlmostEqual(hist[0], hist[1], delta=2*np.sqrt(nidx))
+
+        # compute Pearson correlation coefficients between area and histogram
+        # reporting success if within 7 decimal places
+        self.assertAlmostEqual(np.corrcoef(probs, hist.astype(float))[0, 1], 1., places=7)
 
     def test_alias_method_03(self):
+        '''probabilities 0.75 and 0.25'''
+        idx = np.arange(2)
+        probs = np.array([0.75, 0.25])
+        nidx = 1000000
+        bins = np.arange(3)
+        
+        hist, _ = np.histogram(LFPy.alias_method.alias_method(idx, probs, nidx),
+                               bins)
+
+        # compute Pearson correlation coefficients between area and histogram
+        # reporting success if within 7 decimal places
+        self.assertAlmostEqual(np.corrcoef(probs, hist.astype(float))[0, 1], 1., places=7)
+
+    def test_alias_method_04(self):
+        '''over range of normalized probabilities'''
+        size = 5
+        idx = np.arange(size)
+        probs = np.arange(size).astype(float)**2
+        probs /= probs.sum()
+        nidx = 1000000
+        bins = np.arange(probs.size + 1)
+        
+        hist, _ = np.histogram(LFPy.alias_method.alias_method(idx, probs, nidx),
+                               bins)
+
+        # compute Pearson correlation coefficients between area and histogram
+        # reporting success if within 5 decimal places
+        self.assertAlmostEqual(np.corrcoef(probs, hist.astype(float))[0, 1], 1., places=5)
+
+
+    def test_alias_method_05(self):
         '''deterministic probabilities 1.0 and 0.0'''
         idx = np.arange(2)
         probs = np.arange(2).astype(float)[::-1]
