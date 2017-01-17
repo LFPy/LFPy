@@ -42,8 +42,7 @@ class TemplateCell(Cell):
         e_pas: [-65.]: passive mechanism reversal potential
         extracellular: [True]/False: switch for NEURON's extracellular mechanism
     
-        timeres_NEURON: [0.1]: internal dt for NEURON simulation
-        timeres_python: [0.1]: overall dt for python simulation
+        dt: [0.1]: simulation time step size
     
         tstartms: [0.]:  initialization time for simulation <= 0 ms
         tstopms: [100.]: stop time for simulation > 0 ms
@@ -73,8 +72,7 @@ class TemplateCell(Cell):
             'rm' : 30000,
             'cm' : 1.0,
             'Ra' : 150,
-            'timeres_NEURON' : 0.1,
-            'timeres_python' : 0.1,
+            'dt' : 0.1, 
             'tstartms' : -50,
             'tstopms' : 50,
         }
