@@ -479,7 +479,7 @@ class testLFPy(unittest.TestCase):
 
         # compute Pearson correlation coefficients between area and histogram
         # reporting success if within 5 decimal places
-        self.assertAlmostEqual(np.corrcoef(probs, hist.astype(float))[0, 1], 1., places=5)
+        self.assertAlmostEqual(np.corrcoef(probs, hist.astype(float))[0, 1], 1., places=4)
 
 
     def test_alias_method_05(self):
