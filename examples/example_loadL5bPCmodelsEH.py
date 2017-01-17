@@ -65,8 +65,7 @@ cellParams = {
     'v_init' : -80,
     'tstartms' : 0,
     'tstopms' : 3000,
-    'timeres_NEURON' : 2**-3,
-    'timeres_python' : 2**-3,
+    'dt' : 2**-3,
     'verbose' : True,
     'extracellular' : False,
 }

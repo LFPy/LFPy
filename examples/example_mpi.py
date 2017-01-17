@@ -225,7 +225,7 @@ class Population:
             ax = fig.add_axes([0.5, 0.55, 0.40, 0.4])
             for key, value in list(self.results.items()):
                 tvec = np.arange(value['somav'].size) * \
-                                        self.cellParameters['timeres_python']
+                                        self.cellParameters['dt']
                 ax.plot(tvec, value['somav'],
                         label = 'cell %i' % key)
             leg = ax.legend()
@@ -263,8 +263,7 @@ if __name__ == '__main__':
         'passive' : True,           # switch on passive mechs
         'nsegs_method' : 'lambda_f',# method for setting number of segments,
         'lambda_f' : 10,            # segments are isopotential at frequency
-        'timeres_NEURON' : 2**-3,   # dt of LFP and NEURON simulation.
-        'timeres_python' : 2**-3,
+        'dt' : 2**-3,               # dt of LFP and NEURON simulation.
         'tstartms' : -100,          #start time, recorders start at t=0
         'tstopms' : 200,            #stop time of simulation
         'custom_code'  : ['active_declarations_example3.hoc'], #active decl.
