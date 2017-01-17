@@ -17,7 +17,7 @@ import LFPy
 if not os.path.isfile('L5bPCmodelsEH/morphologies/cell1.asc'):
     #get the model files:
     u = urlopen('http://senselab.med.yale.edu/ModelDB/eavBinDown.asp?o=139653&a=23&mime=application/zip')
-    localFile = open('L5bPCmodelsEH.zip', 'w')
+    localFile = open('L5bPCmodelsEH.zip', 'wb')
     localFile.write(u.read())
     localFile.close()
     #unzip:

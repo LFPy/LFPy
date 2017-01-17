@@ -206,9 +206,11 @@ class Cell(object):
             self.x3d, self.y3d, self.z3d, self.diam3d = self._collect_pt3d()
 
         #Gather geometry, set position and rotation of morphology
-        self._collect_geometry()
+        if self.pt3d:
+            self._update_pt3d()
+        else: # self._update_pt3d itself makes a call to self._collect_geometry()
+            self._collect_geometry()
         if hasattr(self, 'somapos'):
-            self.somapos = [0, 0, 0]
             self.set_pos()
         else:
             if self.verbose:
@@ -285,7 +287,10 @@ class Cell(object):
                             'try running nrnivmodl. ',])
                         raise Exception(ERRMSG)
                 elif code.split('.')[-1] == 'py':
-                    exec(code)
+                    if sys.version >= "3.4":
+                        exec(code, globals())
+                    else:
+                        exec(code)
                 else:
                     raise Exception('%s not a .hoc- nor .py-file' % code)
         
@@ -465,11 +470,18 @@ class Cell(object):
         for sec in self.allseclist:
             for seg in sec:
                 if i == idx:
-                    command = cmd1 + syntype + cmd2  
-                    exec(command)
+                    command = cmd1 + syntype + cmd2
+                    if sys.version >= "3.4":
+                        exec(command, locals(), globals())
+                    else:
+                        exec(command)
                     for param in list(kwargs.keys()):
                         try:
-                            exec('syn.' + param + '=' + str(kwargs[param]))
+                            if sys.version >= "3.4":
+                                exec('syn.' + param + '=' + str(kwargs[param]),
+                                     locals(), globals())
+                            else:
+                                exec('syn.' + param + '=' + str(kwargs[param]))
                         except:
                             pass
                     self.synlist.append(syn)  
@@ -527,11 +539,18 @@ class Cell(object):
         for sec in self.allseclist:
             for seg in sec:
                 if i == idx:
-                    command = cmd1 + pptype + cmd2  
-                    exec(command)
+                    command = cmd1 + pptype + cmd2
+                    if sys.version >= "3.4":
+                        exec(command, locals(), globals())
+                    else:
+                        exec(command)
                     for param in list(kwargs.keys()):
                         try:
-                            exec('stim.' + param + '=' + str(kwargs[param]))
+                            if sys.version >= "3.4":
+                                exec('stim.' + param + '=' + str(kwargs[param]),
+                                     locals(), globals())
+                            else:
+                                exec('stim.' + param + '=' + str(kwargs[param]))
                         except SyntaxError:
                             ERRMSG = ''.join(['',
                                 'Point process type "{0}" might not '.format(
@@ -565,7 +584,7 @@ class Cell(object):
             self.area = None
             self.diam = None
             self.length = None
-        
+
         _collect_geometry_neuron(self)
         self._calc_midpoints()
 
@@ -595,7 +614,6 @@ class Cell(object):
             self.somapos[2] = self.zmid[self.somaidx]
         else:
             raise Exception('Huh?!')
-        
 
     
     def _calc_midpoints(self):
@@ -621,9 +639,9 @@ class Cell(object):
         ::
             
             idx = cell.get_idx(section='allsec')
-            print idx
+            print(idx)
             idx = cell.get_idx(section=['soma', 'dend', 'apic'])
-            print idx
+            print(idx)
             
         '''
         if section == 'allsec': 
@@ -741,7 +759,7 @@ class Cell(object):
         try:
             cvode.use_fast_imem(1)
         except AttributeError as ae:
-            raise Exception, 'neuron.h.CVode().use_fast_imem() not found. Please update NEURON to v.7.4 or newer'
+            raise Exception('neuron.h.CVode().use_fast_imem() not found. Please update NEURON to v.7.4 or newer')
         
         if rec_imem:
             self._set_imem_recorders()
@@ -1001,14 +1019,14 @@ class Cell(object):
         diffy = ypos-self.somapos[1]
         diffz = zpos-self.somapos[2]
 
-        self.somapos[0] = xpos
-        self.somapos[1] = ypos
-        self.somapos[2] = zpos
-
         #also update the pt3d_pos:
         if self.pt3d and hasattr(self, 'x3d'):
-                self._set_pt3d_pos(diffx, diffy, diffz)
+            self._set_pt3d_pos(diffx, diffy, diffz)
         else:
+            self.somapos[0] = xpos
+            self.somapos[1] = ypos
+            self.somapos[2] = zpos
+
             self.xstart += diffx
             self.ystart += diffy
             self.zstart += diffz
@@ -1273,7 +1291,7 @@ class Cell(object):
         vector = []
         try:
             if idx1 < 0 or idx0 < 0:
-                raise Exception
+                raise Exception('idx0 < 0 or idx1 < 0')
             vector.append(self.xmid[idx1] - self.xmid[idx0])
             vector.append(self.ymid[idx1] - self.ymid[idx0])
             vector.append(self.zmid[idx1] - self.zmid[idx0])

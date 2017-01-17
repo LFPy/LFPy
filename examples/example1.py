@@ -20,7 +20,7 @@ from os.path import join
 if not os.path.isfile(join('cells', 'cells', 'j4a.hoc')):
     #get the model files:
     u = urlopen('http://senselab.med.yale.edu/ModelDB/eavBinDown.asp?o=2488&a=23&mime=application/zip')
-    localFile = open('patdemo.zip', 'w')
+    localFile = open('patdemo.zip', 'wb')
     localFile.write(u.read())
     localFile.close()
     #unzip:

@@ -83,8 +83,8 @@ class RecExtElectrodeSetup(object):
             self.z = np.array(z).flatten()
         try:
             assert((self.x.size==self.y.size) and (self.x.size==self.z.size))
-        except AssertionError as ae:
-            raise ae, "The number of elements in [x, y, z] must be identical"
+        except AssertionError:
+            raise AssertionError("The number of elements in [x, y, z] must be identical")
         
         self.color = color
         self.marker = marker
