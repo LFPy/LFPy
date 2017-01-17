@@ -219,7 +219,7 @@ class testLFPy(unittest.TestCase):
         
         self.assertEqual(tvec.size, tvec_numpy.size)
         
-    def test_tvec_01(self):
+    def test_cell_tvec_01(self):
         stickParams = {
             'timeres_python' : 2**-3,
             'timeres_NEURON' : 2**-3,
@@ -234,7 +234,7 @@ class testLFPy(unittest.TestCase):
         for i in range(tvec.size):
             self.assertEqual(tvec[i], tvec_numpy[i])
 
-    def test_tvec_02(self):
+    def test_cell_tvec_02(self):
         stickParams = {
             'timeres_python' : 2**-3,
             'timeres_NEURON' : 2**-4,
@@ -248,7 +248,7 @@ class testLFPy(unittest.TestCase):
         
         self.assertEqual(tvec.size, tvec_numpy.size)
 
-    def test_tvec_03(self):
+    def test_cell_tvec_03(self):
         stickParams = {
             'timeres_python' : 2**-3,
             'timeres_NEURON' : 2**-4,
@@ -265,7 +265,7 @@ class testLFPy(unittest.TestCase):
             self.assertEqual(tvec[i], tvec_numpy[i])
 
 
-    def test_tvec_04(self):
+    def test_cell_tvec_04(self):
         stickParams = {
             'timeres_python' : 0.1,
             'timeres_NEURON' : 0.1,
@@ -279,7 +279,7 @@ class testLFPy(unittest.TestCase):
         
         self.assertEqual(tvec.size, tvec_numpy.size)
     
-    def test_tvec_05(self):
+    def test_cell_tvec_05(self):
         stickParams = {
             'timeres_python' : 0.1,
             'timeres_NEURON' : 0.1,
@@ -294,7 +294,7 @@ class testLFPy(unittest.TestCase):
         for i in range(tvec.size):
             self.assertAlmostEqual(tvec[i], tvec_numpy[i])
 
-    def test_tvec_06(self):
+    def test_cell_tvec_06(self):
         stickParams = {
             'timeres_python' : 0.10,
             'timeres_NEURON' : 0.05,
@@ -308,7 +308,7 @@ class testLFPy(unittest.TestCase):
         
         self.assertEqual(tvec.size, tvec_numpy.size)
     
-    def test_tvec_07(self):
+    def test_cell_tvec_07(self):
         stickParams = {
             'timeres_python' : 0.10,
             'timeres_NEURON' : 0.05,
@@ -323,7 +323,7 @@ class testLFPy(unittest.TestCase):
         for i in range(tvec.size):
             self.assertEqual(tvec[i], tvec_numpy[i])
 
-    def test_tvec_08(self):
+    def test_cell_tvec_08(self):
         stickParams = {
             'timeres_python' : 2**-3,
             'timeres_NEURON' : 2**-3,
@@ -338,7 +338,7 @@ class testLFPy(unittest.TestCase):
         self.assertEqual(tvec.size, tvec_numpy.size)
 
         
-    def test_tvec_09(self):
+    def test_cell_tvec_09(self):
         stickParams = {
             'timeres_python' : 2**-3,
             'timeres_NEURON' : 2**-3,
@@ -353,7 +353,7 @@ class testLFPy(unittest.TestCase):
         for i in range(tvec.size):
             self.assertEqual(tvec[i], tvec_numpy[i])
 
-    def test_tvec_10(self):
+    def test_cell_tvec_10(self):
         stickParams = {
             'timeres_python' : 2**-3,
             'timeres_NEURON' : 2**-4,
@@ -368,7 +368,7 @@ class testLFPy(unittest.TestCase):
         self.assertEqual(tvec.size, tvec_numpy.size)
 
         
-    def test_tvec_11(self):
+    def test_cell_tvec_11(self):
         stickParams = {
             'timeres_python' : 2**-3,
             'timeres_NEURON' : 2**-4,
@@ -383,7 +383,7 @@ class testLFPy(unittest.TestCase):
         for i in range(tvec.size):
             self.assertEqual(tvec[i], tvec_numpy[i])
 
-    def test_tvec_12(self):
+    def test_cell_tvec_12(self):
         stickParams = {
             'timeres_python' : 0.10,
             'timeres_NEURON' : 0.10,
@@ -397,7 +397,7 @@ class testLFPy(unittest.TestCase):
         
         self.assertEqual(tvec.size, tvec_numpy.size)
 
-    def test_tvec_13(self):
+    def test_cell_tvec_13(self):
         stickParams = {
             'timeres_python' : 0.10,
             'timeres_NEURON' : 0.10,
@@ -412,7 +412,7 @@ class testLFPy(unittest.TestCase):
         for i in range(tvec.size):
             self.assertAlmostEqual(tvec[i], tvec_numpy[i])
 
-    def test_tvec_14(self):
+    def test_cell_tvec_14(self):
         stickParams = {
             'timeres_python' : 0.10,
             'timeres_NEURON' : 0.05,
@@ -426,7 +426,7 @@ class testLFPy(unittest.TestCase):
         
         self.assertEqual(tvec.size, tvec_numpy.size)
 
-    def test_tvec_15(self):
+    def test_cell_tvec_15(self):
         stickParams = {
             'timeres_python' : 0.10,
             'timeres_NEURON' : 0.05,
@@ -477,20 +477,20 @@ class testLFPy(unittest.TestCase):
         
         self.assertEqual(nidx, hist[0])
     
-    def test_cell_method_set_pos_00(self):
+    def test_cell_set_pos_00(self):
         '''test LFPy.Cell.set_pos'''
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
                                                   'ball_and_sticks.hoc' ))
         np.testing.assert_allclose(cell.somapos, [0, 0, 0])
         
-    def test_cell_method_set_pos_01(self):
+    def test_cell_set_pos_01(self):
         '''test LFPy.Cell.set_pos'''
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
                                                   'ball_and_sticks.hoc' ))
         cell.set_pos(10., 20., -30.)
         np.testing.assert_allclose(cell.somapos, [10., 20., -30.])
 
-    def test_cell_method_set_pos_02(self):
+    def test_cell_set_pos_02(self):
         '''test LFPy.Cell.set_pos'''
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
                                                   'ball_and_sticks.hoc' ),
@@ -498,7 +498,7 @@ class testLFPy(unittest.TestCase):
         cell.set_pos(10., 20., -30.)
         np.testing.assert_allclose(cell.somapos, [10., 20., -30.])
 
-    def test_cell_method_set_pos_03(self):
+    def test_cell_set_pos_03(self):
         '''test LFPy.Cell.set_pos'''
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
                                                   'ball_and_sticks.hoc' ))
@@ -507,7 +507,7 @@ class testLFPy(unittest.TestCase):
         cell.set_pos(10., 20., -30.)
         np.testing.assert_allclose(cell.somapos, [10., 20., -30.])
 
-    def test_cell_method_set_pos_04(self):
+    def test_cell_set_pos_04(self):
         '''test LFPy.Cell.set_pos'''
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
                                                   'ball_and_sticks.hoc' ),
@@ -518,7 +518,7 @@ class testLFPy(unittest.TestCase):
         np.testing.assert_allclose(cell.somapos, [10., 20., -30.])
 
 
-    def test_cell_method_set_pos_05(self):
+    def test_cell_set_pos_05(self):
         '''test LFPy.Cell.set_pos'''
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
                                                   'ball_and_sticks.hoc' ))
@@ -526,7 +526,7 @@ class testLFPy(unittest.TestCase):
                                    [cell.xmid[0], cell.ymid[0], cell.zmid[0]])
             
 
-    def test_cell_method_set_pos_06(self):
+    def test_cell_set_pos_06(self):
         '''test LFPy.Cell.set_pos'''
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
                                                   'ball_and_sticks.hoc' ),
@@ -535,7 +535,7 @@ class testLFPy(unittest.TestCase):
                                    [cell.xmid[0], cell.ymid[0], cell.zmid[0]])
 
 
-    def test_cell_method_set_rotation_00(self):
+    def test_cell_set_rotation_00(self):
         '''test LFPy.Cell.set_rotation()'''
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
                                                   'ball_and_sticks.hoc' ))
@@ -558,7 +558,7 @@ class testLFPy(unittest.TestCase):
         np.testing.assert_allclose(cell.zend, -zends, atol=1e-07)
 
 
-    def test_cell_method_set_rotation_01(self):
+    def test_cell_set_rotation_01(self):
         '''test LFPy.Cell.set_rotation()'''
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
                                                   'ball_and_sticks.hoc' ))
@@ -581,7 +581,7 @@ class testLFPy(unittest.TestCase):
         np.testing.assert_allclose(cell.zend, -zends, atol=1e-07)
 
 
-    def test_cell_method_set_rotation_03(self):
+    def test_cell_set_rotation_03(self):
         '''test LFPy.Cell.set_rotation()'''
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
                                                   'ball_and_sticks.hoc' ))
@@ -603,7 +603,7 @@ class testLFPy(unittest.TestCase):
         np.testing.assert_allclose(cell.ymid, -ymids, atol=1e-07)
         np.testing.assert_allclose(cell.yend, -yends, atol=1e-07)
 
-    def test_cell_method_set_rotation_03(self):
+    def test_cell_set_rotation_03(self):
         '''test LFPy.Cell.set_rotation()'''
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
                                                   'ball_and_sticks.hoc' ),
@@ -627,7 +627,7 @@ class testLFPy(unittest.TestCase):
         np.testing.assert_allclose(cell.zend, -zends, atol=1e-07)
 
 
-    def test_cell_method_set_rotation_04(self):
+    def test_cell_set_rotation_04(self):
         '''test LFPy.Cell.set_rotation()'''
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
                                                   'ball_and_sticks.hoc' ),
@@ -651,7 +651,7 @@ class testLFPy(unittest.TestCase):
         np.testing.assert_allclose(cell.zend, -zends, atol=1e-07)
 
 
-    def test_cell_method_set_rotation_05(self):
+    def test_cell_set_rotation_05(self):
         '''test LFPy.Cell.set_rotation()'''
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
                                                   'ball_and_sticks.hoc' ),
@@ -676,7 +676,7 @@ class testLFPy(unittest.TestCase):
 
 
 
-    def test_cell_method_chiral_morphology_00(self):
+    def test_cell_chiral_morphology_00(self):
         '''test LFPy.Cell.chiral_morphology()'''
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
                                                   'ball_and_sticks.hoc' ))
@@ -705,7 +705,7 @@ class testLFPy(unittest.TestCase):
         np.testing.assert_allclose(cell.zend, zends, atol=1e-07)
 
 
-    def test_cell_method_chiral_morphology_00(self):
+    def test_cell_chiral_morphology_00(self):
         '''test LFPy.Cell.chiral_morphology()'''
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
                                                   'ball_and_sticks.hoc' ))
@@ -733,7 +733,7 @@ class testLFPy(unittest.TestCase):
         np.testing.assert_allclose(cell.zmid, zmids, atol=1e-07)
         np.testing.assert_allclose(cell.zend, zends, atol=1e-07)
         
-    def test_cell_method_chiral_morphology_00(self):
+    def test_cell_chiral_morphology_00(self):
         '''test LFPy.Cell.chiral_morphology()'''
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
                                                   'ball_and_sticks.hoc' ))
