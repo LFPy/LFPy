@@ -1069,7 +1069,10 @@ class Cell(object):
     
     def set_rotation(self, x=None, y=None, z=None, rotation_order='xyz'):
         '''
-        Rotate geometry of cell object around the x-, y-, z-axis in that order.
+        Rotate geometry of cell object around the x-, y-, z-axis in the order
+        described by rotation_order parameter.
+        rotation_order should be a string with 3 elements containing x, y, and z
+        e.g. 'xyz', 'zyx'
         Input should be angles in radians.
         
         using rotation matrices, takes dict with rot. angles,
@@ -1083,6 +1086,13 @@ class Cell(object):
             rotation = {'x' : 1.233, 'y' : 0.236, 'z' : np.pi}
             cell.set_rotation(**rotation)
         '''
+        if type(rotation_order) is not str:
+            raise AttributeError('rotation_order must be a string')
+        elif 'x' not in rotation_order or 'y' not in rotation_order or 'z' not in rotation_order:
+            raise AttributeError("'x', 'y', and 'z' must be in rotation_order")
+        elif len(rotation_order) is not 3:
+            raise AttributeError("rotation_order should have 3 elements (e.g. 'zyx')")
+
         for ax in rotation_order:
             if ax is 'x' and x is not None:
                 theta = -x
@@ -1466,10 +1476,13 @@ class Cell(object):
         self._update_pt3d()
 
 
-    def _set_pt3d_rotation(self, x=None, y=None, z=None, rotation_order = 'xyz'):
+    def _set_pt3d_rotation(self, x=None, y=None, z=None, rotation_order='xyz'):
         '''
         Rotate pt3d geometry of cell object around the x-, y-, z-axis
-        in that order.
+        in the order described by rotation_order parameter.
+        rotation_order should be a string with 3 elements containing x, y, and z
+        e.g. 'xyz', 'zyx'
+
         Input should be angles in radians.
         
         using rotation matrices, takes dict with rot. angles,
@@ -1483,6 +1496,7 @@ class Cell(object):
             rotation = {'x' : 1.233, 'y' : 0.236, 'z' : np.pi}
             cell.set_pt3d_rotation(**rotation)
         '''
+
         for ax in rotation_order:
             if ax is 'x' and x is not None:
                 theta = -x
