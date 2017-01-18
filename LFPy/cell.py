@@ -1107,7 +1107,7 @@ class Cell(object):
                 if self.verbose:
                     print('None-typed %s in cell instance' % varname)
         
-    def cellpickler(self, filename):
+    def cellpickler(self, filename, pickler=pickle.dump):
         """Save data in cell to filename, using cPickle. It will however destroy
         any neuron.h objects upon saving, as c-objects cannot be pickled
 
@@ -1133,12 +1133,15 @@ class Cell(object):
 
         >>> import LFPy
         >>> cell = LFPy.tools.load('cell.cpickle')
-
         """
         self.strip_hoc_objects()
-        filen = open(filename, 'wb')
-        pickle.dump(self, filen, protocol=2)
-        filen.close()
+        if pickler==pickle.dump:
+            filen = open(filename, 'wb')
+            pickle.dump(self, filen, protocol=2)
+            filen.close()
+            return None
+        elif pickler==pickle.dumps:
+            return pickle.dumps(self)
     
     def _update_synapse_positions(self):
         """
@@ -1428,29 +1431,13 @@ class Cell(object):
         ----------
         parent : str
             name-pattern matching a sectionname. Defaults to "soma[0]"
-
         """
-        idxvec = np.zeros(self.totnsegs)
-        secnamelist = []
-        childseclist = [parent]
-        #filling list of sectionnames for all sections, one entry per segment
-        for sec in self.allseclist:
-            for seg in sec:
-                secnamelist.append(sec.name())
-        #filling list of children section-names
+        seclist = [parent]
         sref = neuron.h.SectionRef(parent)
         for sec in sref.child:
-            childseclist.append(sec.name())
-        #idxvec=1 where both coincide
-        i = 0
-        for sec in secnamelist:
-            for childsec in childseclist:
-                if sec == childsec:
-                    idxvec[i] += 1
-            i += 1
-            
-        [idx] = np.where(idxvec)
-        return np.r_[self.get_idx(parent), idx]
+            seclist.append(sec.name())
+        
+        return self.get_idx(section=seclist)
 
     def get_idx_name(self, idx=np.array([0], dtype=int)):
         """Return NEURON convention name of segments with index idx.

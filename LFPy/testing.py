@@ -12,6 +12,8 @@ from scipy.integrate import quad
 from scipy import real, imag
 import LFPy
 import neuron
+import pickle
+from warnings import warn
 
 # for nosetests to run load the SinSyn sinusoid synapse currrent mechanism
 neuron.load_mechanisms(LFPy.__path__[0])
@@ -219,7 +221,7 @@ class testLFPy(unittest.TestCase):
         
         self.assertEqual(tvec.size, tvec_numpy.size)
         
-    def test_tvec_01(self):
+    def test_cell_tvec_01(self):
         stickParams = {
             'dt' : 2**-3,
             'tstartms' : 0.,
@@ -233,7 +235,7 @@ class testLFPy(unittest.TestCase):
         for i in range(tvec.size):
             self.assertEqual(tvec[i], tvec_numpy[i])
 
-    def test_tvec_02(self):
+    def test_cell_tvec_02(self):
         stickParams = {
             'dt' : 2**-3,
             'tstartms' : 0.,
@@ -246,7 +248,7 @@ class testLFPy(unittest.TestCase):
         
         self.assertEqual(tvec.size, tvec_numpy.size)
 
-    def test_tvec_03(self):
+    def test_cell_tvec_03(self):
         stickParams = {
             'dt' : 2**-3,
             'tstartms' : 0.,
@@ -262,7 +264,7 @@ class testLFPy(unittest.TestCase):
             self.assertEqual(tvec[i], tvec_numpy[i])
 
 
-    def test_tvec_04(self):
+    def test_cell_tvec_04(self):
         stickParams = {
             'dt' : 0.1,
             'tstartms' : 0,
@@ -275,7 +277,7 @@ class testLFPy(unittest.TestCase):
         
         self.assertEqual(tvec.size, tvec_numpy.size)
     
-    def test_tvec_05(self):
+    def test_cell_tvec_05(self):
         stickParams = {
             'dt' : 0.1,
             'tstartms' : 0.,
@@ -289,7 +291,7 @@ class testLFPy(unittest.TestCase):
         for i in range(tvec.size):
             self.assertAlmostEqual(tvec[i], tvec_numpy[i])
 
-    def test_tvec_06(self):
+    def test_cell_tvec_06(self):
         stickParams = {
             'dt' : 0.1,
             'tstartms' : 0,
@@ -302,7 +304,7 @@ class testLFPy(unittest.TestCase):
         
         self.assertEqual(tvec.size, tvec_numpy.size)
     
-    def test_tvec_07(self):
+    def test_cell_tvec_07(self):
         stickParams = {
             'dt' : 0.1,
             'tstartms' : 0.,
@@ -316,7 +318,7 @@ class testLFPy(unittest.TestCase):
         for i in range(tvec.size):
             self.assertEqual(tvec[i], tvec_numpy[i])
 
-    def test_tvec_08(self):
+    def test_cell_tvec_08(self):
         stickParams = {
             'dt' : 2**-3,
             'tstartms' : -100,
@@ -330,7 +332,7 @@ class testLFPy(unittest.TestCase):
         self.assertEqual(tvec.size, tvec_numpy.size)
 
         
-    def test_tvec_09(self):
+    def test_cell_tvec_09(self):
         stickParams = {
             'dt' : 2**-3,
             'tstartms' : -100,
@@ -344,7 +346,7 @@ class testLFPy(unittest.TestCase):
         for i in range(tvec.size):
             self.assertEqual(tvec[i], tvec_numpy[i])
 
-    def test_tvec_10(self):
+    def test_cell_tvec_10(self):
         stickParams = {
             'dt' : 2**-3,
             'tstartms' : -100,
@@ -358,7 +360,7 @@ class testLFPy(unittest.TestCase):
         self.assertEqual(tvec.size, tvec_numpy.size)
 
         
-    def test_tvec_11(self):
+    def test_cell_tvec_11(self):
         stickParams = {
             'dt' : 2**-3,
             'tstartms' : -100,
@@ -372,7 +374,7 @@ class testLFPy(unittest.TestCase):
         for i in range(tvec.size):
             self.assertEqual(tvec[i], tvec_numpy[i])
 
-    def test_tvec_12(self):
+    def test_cell_tvec_12(self):
         stickParams = {
             'dt' : 0.1,
             'tstartms' : -100,
@@ -385,7 +387,7 @@ class testLFPy(unittest.TestCase):
         
         self.assertEqual(tvec.size, tvec_numpy.size)
 
-    def test_tvec_13(self):
+    def test_cell_tvec_13(self):
         stickParams = {
             'dt' : 0.10,
             'tstartms' : -100,
@@ -399,7 +401,7 @@ class testLFPy(unittest.TestCase):
         for i in range(tvec.size):
             self.assertAlmostEqual(tvec[i], tvec_numpy[i])
 
-    def test_tvec_14(self):
+    def test_cell_tvec_14(self):
         stickParams = {
             'dt' : 0.1,
             'tstartms' : -100,
@@ -412,7 +414,7 @@ class testLFPy(unittest.TestCase):
         
         self.assertEqual(tvec.size, tvec_numpy.size)
 
-    def test_tvec_15(self):
+    def test_cell_tvec_15(self):
         stickParams = {
             'dt' : 0.1,
             'tstartms' : -100,
@@ -433,31 +435,263 @@ class testLFPy(unittest.TestCase):
         nidx = 1000000
         bins = np.arange(3)
         
-        hist, _ = np.histogram(LFPy.alias_method.alias_method(idx, probs, nidx), bins)
+        hist, _ = np.histogram(LFPy.alias_method.alias_method(idx, probs, nidx),
+                               bins)
         
         self.assertEqual(nidx, hist[1])
         
     def test_alias_method_02(self):
-        """probabilities 0.5 and 0.5"""
+        """probabilities 0.25 and 0.75"""
         idx = np.arange(2)
-        probs = np.array([0.5, 0.5])
+        probs = np.array([0.25, 0.75])
         nidx = 1000000
         bins = np.arange(3)
         
-        hist, _ = np.histogram(LFPy.alias_method.alias_method(idx, probs, nidx), bins)
-        
-        self.assertAlmostEqual(hist[0], hist[1], delta=2*np.sqrt(nidx))
+        hist, _ = np.histogram(LFPy.alias_method.alias_method(idx, probs, nidx),
+                               bins)
+
+        # compute Pearson correlation coefficients between area and histogram
+        # reporting success if within 7 decimal places
+        self.assertAlmostEqual(np.corrcoef(probs, hist.astype(float))[0, 1], 1., places=7)
 
     def test_alias_method_03(self):
+        """probabilities 0.75 and 0.25"""
+        idx = np.arange(2)
+        probs = np.array([0.75, 0.25])
+        nidx = 1000000
+        bins = np.arange(3)
+        
+        hist, _ = np.histogram(LFPy.alias_method.alias_method(idx, probs, nidx),
+                               bins)
+
+        # compute Pearson correlation coefficients between area and histogram
+        # reporting success if within 7 decimal places
+        self.assertAlmostEqual(np.corrcoef(probs, hist.astype(float))[0, 1], 1., places=7)
+
+    def test_alias_method_04(self):
+        '''over range of normalized probabilities'''
+        size = 5
+        idx = np.arange(size)
+        probs = np.arange(size).astype(float)**2
+        probs /= probs.sum()
+        nidx = 1000000
+        bins = np.arange(probs.size + 1)
+        
+        hist, _ = np.histogram(LFPy.alias_method.alias_method(idx, probs, nidx),
+                               bins)
+
+        # compute Pearson correlation coefficients between area and histogram
+        # reporting success if within 5 decimal places
+        self.assertAlmostEqual(np.corrcoef(probs, hist.astype(float))[0, 1], 1., places=4)
+
+
+    def test_alias_method_05(self):
         """deterministic probabilities 1.0 and 0.0"""
         idx = np.arange(2)
         probs = np.arange(2).astype(float)[::-1]
         nidx = 1000000
         bins = np.arange(3)
         
-        hist, _ = np.histogram(LFPy.alias_method.alias_method(idx, probs, nidx), bins)
+        hist, _ = np.histogram(LFPy.alias_method.alias_method(idx, probs, nidx),
+                               bins)
         
         self.assertEqual(nidx, hist[0])
+    
+    def test_cell_set_pos_00(self):
+        '''test LFPy.Cell.set_pos'''
+        cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
+                                                  'ball_and_sticks.hoc' ))
+        np.testing.assert_allclose(cell.somapos, [0, 0, 0])
+        
+    def test_cell_set_pos_01(self):
+        '''test LFPy.Cell.set_pos'''
+        cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
+                                                  'ball_and_sticks.hoc' ))
+        cell.set_pos(10., 20., -30.)
+        np.testing.assert_allclose(cell.somapos, [10., 20., -30.])
+
+    def test_cell_set_pos_02(self):
+        '''test LFPy.Cell.set_pos'''
+        cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
+                                                  'ball_and_sticks.hoc' ),
+                          pt3d=True)
+        cell.set_pos(10., 20., -30.)
+        np.testing.assert_allclose(cell.somapos, [10., 20., -30.])
+
+    def test_cell_set_pos_03(self):
+        '''test LFPy.Cell.set_pos'''
+        cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
+                                                  'ball_and_sticks.hoc' ))
+        cell.set_pos(10., 20., -30.)
+        cell.set_pos(10., 20., -30.)
+        cell.set_pos(10., 20., -30.)
+        np.testing.assert_allclose(cell.somapos, [10., 20., -30.])
+
+    def test_cell_set_pos_04(self):
+        '''test LFPy.Cell.set_pos'''
+        cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
+                                                  'ball_and_sticks.hoc' ),
+                          pt3d=True)
+        cell.set_pos(10., 20., -30.)
+        cell.set_pos(10., 20., -30.)
+        cell.set_pos(10., 20., -30.)
+        np.testing.assert_allclose(cell.somapos, [10., 20., -30.])
+
+
+    def test_cell_set_pos_05(self):
+        '''test LFPy.Cell.set_pos'''
+        cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
+                                                  'ball_and_sticks.hoc' ))
+        np.testing.assert_allclose(cell.somapos,
+                                   [cell.xmid[0], cell.ymid[0], cell.zmid[0]])
+            
+
+    def test_cell_set_pos_06(self):
+        '''test LFPy.Cell.set_pos'''
+        cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
+                                                  'ball_and_sticks.hoc' ),
+                         pt3d=True)
+        np.testing.assert_allclose(cell.somapos,
+                                   [cell.xmid[0], cell.ymid[0], cell.zmid[0]])
+
+
+    def test_cell_set_rotation_00(self):
+        '''test LFPy.Cell.set_rotation()'''
+        cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
+                                                  'ball_and_sticks.hoc' ))
+        
+        ystarts = cell.ystart.copy()
+        ymids = cell.ymid.copy()
+        yends = cell.yend.copy()
+        zstarts = cell.zstart.copy()
+        zmids = cell.zmid.copy()
+        zends = cell.zend.copy()
+        # test rotation 180 deg around x-axis
+        cell.set_rotation(x=np.pi)
+        # assert that y- and z-coordinates are inverted, using absolute
+        # tolerances
+        np.testing.assert_allclose(cell.ystart, -ystarts, atol=1e-07)
+        np.testing.assert_allclose(cell.ymid, -ymids, atol=1e-07)
+        np.testing.assert_allclose(cell.yend, -yends, atol=1e-07)
+        np.testing.assert_allclose(cell.zstart, -zstarts, atol=1e-07)
+        np.testing.assert_allclose(cell.zmid, -zmids, atol=1e-07)
+        np.testing.assert_allclose(cell.zend, -zends, atol=1e-07)
+
+
+    def test_cell_set_rotation_01(self):
+        '''test LFPy.Cell.set_rotation()'''
+        cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
+                                                  'ball_and_sticks.hoc' ))
+        
+        xstarts = cell.xstart.copy()
+        xmids = cell.xmid.copy()
+        xends = cell.xend.copy()
+        zstarts = cell.zstart.copy()
+        zmids = cell.zmid.copy()
+        zends = cell.zend.copy()
+        # test rotation 180 deg around y-axis
+        cell.set_rotation(y=np.pi)
+        # assert that y- and z-coordinates are inverted, using absolute
+        # tolerances
+        np.testing.assert_allclose(cell.xstart, -xstarts, atol=1e-07)
+        np.testing.assert_allclose(cell.xmid, -xmids, atol=1e-07)
+        np.testing.assert_allclose(cell.xend, -xends, atol=1e-07)
+        np.testing.assert_allclose(cell.zstart, -zstarts, atol=1e-07)
+        np.testing.assert_allclose(cell.zmid, -zmids, atol=1e-07)
+        np.testing.assert_allclose(cell.zend, -zends, atol=1e-07)
+
+
+    def test_cell_set_rotation_02(self):
+        '''test LFPy.Cell.set_rotation()'''
+        cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
+                                                  'ball_and_sticks.hoc' ))
+        xstarts = cell.xstart.copy()
+        xmids = cell.xmid.copy()
+        xends = cell.xend.copy()
+        ystarts = cell.ystart.copy()
+        ymids = cell.ymid.copy()
+        yends = cell.yend.copy()
+        # test rotation 180 deg around z-axis
+        cell.set_rotation(z=np.pi)
+        # assert that y- and z-coordinates are inverted, using absolute
+        # tolerances
+        np.testing.assert_allclose(cell.xstart, -xstarts, atol=1e-07)
+        np.testing.assert_allclose(cell.xmid, -xmids, atol=1e-07)
+        np.testing.assert_allclose(cell.xend, -xends, atol=1e-07)
+        np.testing.assert_allclose(cell.ystart, -ystarts, atol=1e-07)
+        np.testing.assert_allclose(cell.ymid, -ymids, atol=1e-07)
+        np.testing.assert_allclose(cell.yend, -yends, atol=1e-07)
+
+    def test_cell_set_rotation_03(self):
+        '''test LFPy.Cell.set_rotation()'''
+        cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
+                                                  'ball_and_sticks.hoc' ),
+                         pt3d=True)
+        
+        ystarts = cell.ystart.copy()
+        ymids = cell.ymid.copy()
+        yends = cell.yend.copy()
+        zstarts = cell.zstart.copy()
+        zmids = cell.zmid.copy()
+        zends = cell.zend.copy()
+        # test rotation 180 deg around x-axis
+        cell.set_rotation(x=np.pi)
+        # assert that y- and z-coordinates are inverted, using absolute
+        # tolerances
+        np.testing.assert_allclose(cell.ystart, -ystarts, atol=1e-07)
+        np.testing.assert_allclose(cell.ymid, -ymids, atol=1e-07)
+        np.testing.assert_allclose(cell.yend, -yends, atol=1e-07)
+        np.testing.assert_allclose(cell.zstart, -zstarts, atol=1e-07)
+        np.testing.assert_allclose(cell.zmid, -zmids, atol=1e-07)
+        np.testing.assert_allclose(cell.zend, -zends, atol=1e-07)
+
+
+    def test_cell_set_rotation_04(self):
+        '''test LFPy.Cell.set_rotation()'''
+        cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
+                                                  'ball_and_sticks.hoc' ),
+                         pt3d=True)
+        
+        xstarts = cell.xstart.copy()
+        xmids = cell.xmid.copy()
+        xends = cell.xend.copy()
+        zstarts = cell.zstart.copy()
+        zmids = cell.zmid.copy()
+        zends = cell.zend.copy()
+        # test rotation 180 deg around y-axis
+        cell.set_rotation(y=np.pi)
+        # assert that y- and z-coordinates are inverted, using absolute
+        # tolerances
+        np.testing.assert_allclose(cell.xstart, -xstarts, atol=1e-07)
+        np.testing.assert_allclose(cell.xmid, -xmids, atol=1e-07)
+        np.testing.assert_allclose(cell.xend, -xends, atol=1e-07)
+        np.testing.assert_allclose(cell.zstart, -zstarts, atol=1e-07)
+        np.testing.assert_allclose(cell.zmid, -zmids, atol=1e-07)
+        np.testing.assert_allclose(cell.zend, -zends, atol=1e-07)
+
+
+    def test_cell_set_rotation_05(self):
+        '''test LFPy.Cell.set_rotation()'''
+        cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
+                                                  'ball_and_sticks.hoc' ),
+                         pt3d=True)
+        
+        xstarts = cell.xstart.copy()
+        xmids = cell.xmid.copy()
+        xends = cell.xend.copy()
+        ystarts = cell.ystart.copy()
+        ymids = cell.ymid.copy()
+        yends = cell.yend.copy()
+        # test rotation 180 deg around z-axis
+        cell.set_rotation(z=np.pi)
+        # assert that y- and z-coordinates are inverted, using absolute
+        # tolerances
+        np.testing.assert_allclose(cell.xstart, -xstarts, atol=1e-07)
+        np.testing.assert_allclose(cell.xmid, -xmids, atol=1e-07)
+        np.testing.assert_allclose(cell.xend, -xends, atol=1e-07)
+        np.testing.assert_allclose(cell.ystart, -ystarts, atol=1e-07)
+        np.testing.assert_allclose(cell.ymid, -ymids, atol=1e-07)
+        np.testing.assert_allclose(cell.yend, -yends, atol=1e-07)
 
     def test_cell_set_rotation_06(self):
         '''test LFPy.Cell.set_rotation()'''
@@ -488,19 +722,267 @@ class testLFPy(unittest.TestCase):
         np.testing.assert_allclose(cell.zmid, zmids, atol=1e-07)
         np.testing.assert_allclose(cell.zend, zends, atol=1e-07)
 
-    def test_cell_set_rotation_07(self):
-        '''test LFPy.Cell.set_rotation()'''
-        cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'stick.hoc'))
-
-        # cell.set_rotation(rotation_order='yzx')
-        self.assertRaises(AttributeError, cell.set_rotation, rotation_order='yz')
-        self.assertRaises(AttributeError, cell.set_rotation, rotation_order='yxzz')
-        self.assertRaises(AttributeError, cell.set_rotation, rotation_order=45)
-        self.assertRaises(AttributeError, cell.set_rotation, rotation_order='ayx')
+    def test_cell_chiral_morphology_00(self):
+        '''test LFPy.Cell.chiral_morphology()'''
+        cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
+                                                  'ball_and_sticks.hoc' ))
         
+        xstarts = cell.xstart.copy()
+        xmids = cell.xmid.copy()
+        xends = cell.xend.copy()
+        ystarts = cell.ystart.copy()
+        ymids = cell.ymid.copy()
+        yends = cell.yend.copy()
+        zstarts = cell.zstart.copy()
+        zmids = cell.zmid.copy()
+        zends = cell.zend.copy()
+        # test rotation 180 deg around x-axis
+        cell.chiral_morphology(axis='x')
+        # assert that y- and z-coordinates are inverted, using absolute
+        # tolerances
+        np.testing.assert_allclose(cell.xstart, -xstarts, atol=1e-07)
+        np.testing.assert_allclose(cell.xmid, -xmids, atol=1e-07)
+        np.testing.assert_allclose(cell.xend, -xends, atol=1e-07)
+        np.testing.assert_allclose(cell.ystart, ystarts, atol=1e-07)
+        np.testing.assert_allclose(cell.ymid, ymids, atol=1e-07)
+        np.testing.assert_allclose(cell.yend, yends, atol=1e-07)
+        np.testing.assert_allclose(cell.zstart, zstarts, atol=1e-07)
+        np.testing.assert_allclose(cell.zmid, zmids, atol=1e-07)
+        np.testing.assert_allclose(cell.zend, zends, atol=1e-07)
+
+
+    def test_cell_chiral_morphology_00(self):
+        '''test LFPy.Cell.chiral_morphology()'''
+        cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
+                                                  'ball_and_sticks.hoc' ))
+        
+        xstarts = cell.xstart.copy()
+        xmids = cell.xmid.copy()
+        xends = cell.xend.copy()
+        ystarts = cell.ystart.copy()
+        ymids = cell.ymid.copy()
+        yends = cell.yend.copy()
+        zstarts = cell.zstart.copy()
+        zmids = cell.zmid.copy()
+        zends = cell.zend.copy()
+        # test rotation 180 deg around x-axis
+        cell.chiral_morphology(axis='y')
+        # assert that y- and z-coordinates are inverted, using absolute
+        # tolerances
+        np.testing.assert_allclose(cell.xstart, xstarts, atol=1e-07)
+        np.testing.assert_allclose(cell.xmid, xmids, atol=1e-07)
+        np.testing.assert_allclose(cell.xend, xends, atol=1e-07)
+        np.testing.assert_allclose(cell.ystart, -ystarts, atol=1e-07)
+        np.testing.assert_allclose(cell.ymid, -ymids, atol=1e-07)
+        np.testing.assert_allclose(cell.yend, -yends, atol=1e-07)
+        np.testing.assert_allclose(cell.zstart, zstarts, atol=1e-07)
+        np.testing.assert_allclose(cell.zmid, zmids, atol=1e-07)
+        np.testing.assert_allclose(cell.zend, zends, atol=1e-07)
+        
+    def test_cell_chiral_morphology_00(self):
+        '''test LFPy.Cell.chiral_morphology()'''
+        cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
+                                                  'ball_and_sticks.hoc' ))
+        
+        xstarts = cell.xstart.copy()
+        xmids = cell.xmid.copy()
+        xends = cell.xend.copy()
+        ystarts = cell.ystart.copy()
+        ymids = cell.ymid.copy()
+        yends = cell.yend.copy()
+        zstarts = cell.zstart.copy()
+        zmids = cell.zmid.copy()
+        zends = cell.zend.copy()
+        # test rotation 180 deg around x-axis
+        cell.chiral_morphology(axis='z')
+        # assert that y- and z-coordinates are inverted, using absolute
+
+        # tolerances
+        np.testing.assert_allclose(cell.xstart, xstarts, atol=1e-07)
+        np.testing.assert_allclose(cell.xmid, xmids, atol=1e-07)
+        np.testing.assert_allclose(cell.xend, xends, atol=1e-07)
+        np.testing.assert_allclose(cell.ystart, ystarts, atol=1e-07)
+        np.testing.assert_allclose(cell.ymid, ymids, atol=1e-07)
+        np.testing.assert_allclose(cell.yend, yends, atol=1e-07)
+        np.testing.assert_allclose(cell.zstart, -zstarts, atol=1e-07)
+        np.testing.assert_allclose(cell.zmid, -zmids, atol=1e-07)
+        np.testing.assert_allclose(cell.zend, -zends, atol=1e-07)
+
+
+    def test_cell_get_rand_prob_area_norm_00(self):
+        '''test LFPy.Cell.get_rand_prob_area_norm()'''
+        cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
+                                                 'ball_and_sticks.hoc' ))
+        p = cell.get_rand_prob_area_norm()
+        self.assertAlmostEqual(p.sum(), 1.)
+        self.assertTrue(p.min() >= 0.)
+        self.assertTrue(p.max() <= 1.)
+        
+
+    def test_cell_get_rand_prob_area_norm_from_idx(self):
+        cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
+                                                 'ball_and_sticks.hoc' ))
+        p = cell.get_rand_prob_area_norm_from_idx(idx=cell.get_idx(section='allsec'))
+        self.assertListEqual(cell.get_rand_prob_area_norm().tolist(), p.tolist())
+        
+
+    def test_cell_get_rand_prob_area_norm_from_idx_00(self):
+        '''test LFPy.Cell.get_rand_prob_area_norm()'''
+        cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
+                                                  'ball_and_sticks.hoc' ))
+        p = cell.get_rand_prob_area_norm_from_idx(idx=np.array([0]))
+        np.testing.assert_equal(p, np.array([1.]))
+
+    
+    def test_cell_get_intersegment_vector_00(self):
+        cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
+                                                  'ball_and_sticks.hoc' ))
+        idx0 = 0
+        idx1 = 1
+        vector = cell.get_intersegment_vector(idx0=idx0, idx1=idx1)
+
+        self.assertListEqual(vector,
+                            [cell.xmid[idx1] - cell.xmid[idx0],
+                             cell.ymid[idx1] - cell.ymid[idx0],
+                             cell.zmid[idx1] - cell.zmid[idx0]])
+
+
+    def test_cell_get_intersegment_distance_00(self):
+        cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
+                                                  'ball_and_sticks.hoc' ))
+        idx0 = 0
+        idx1 = 1
+        distance = cell.get_intersegment_distance(idx0=idx0, idx1=idx1)
+        vector = cell.get_intersegment_vector(idx0=idx0, idx1=idx1)
+        
+        self.assertEqual(np.sqrt(np.array(vector)**2).sum(), distance)
+
+
+    def test_cell_get_idx_00(self):
+        cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
+                                                  'ball_and_sticks.hoc' ),
+                         nsegs_method=None)
+        self.assertListEqual(cell.get_idx(section='soma').tolist(), [0])
+        self.assertListEqual(cell.get_idx(section='soma[0]').tolist(), [0])
+        self.assertListEqual(cell.get_idx(section='dend[0]').tolist(), [1])
+        self.assertListEqual(cell.get_idx(section='dend[1]').tolist(), [2])
+        self.assertListEqual(cell.get_idx(section='dend[2]').tolist(), [3])
+        self.assertListEqual(cell.get_idx(section='dend').tolist(), [1, 2, 3])
+        self.assertListEqual(cell.get_idx(section='allsec').tolist(),
+                             [0, 1, 2, 3])
+        self.assertListEqual(cell.get_idx(section=['soma', 'dend']).tolist(),
+                             [0, 1, 2, 3])
+        self.assertListEqual(cell.get_idx(section='apic').tolist(), [])
+
+
+    def test_cell_get_closest_idx_00(self):
+        cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
+                                                  'ball_and_sticks.hoc' ),
+                         nsegs_method=None)
+        self.assertEqual(cell.get_closest_idx(x=0, y=0, z=0),
+                             cell.get_idx(section='soma')[0])
+                         
+        self.assertEqual(cell.get_closest_idx(x=-25, y=0, z=175),
+                             cell.get_idx(section='dend[1]')[0])
+        
+
+    def test_cell_get_idx_children_00(self):
+        cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
+                                                  'ball_and_sticks.hoc' ))
+    
+        np.testing.assert_array_equal(cell.get_idx_children(parent='soma[0]'),
+                                      cell.get_idx(section='dend[0]'))
+        
+      
+    def test_cell_get_idx_parent_children_00(self):
+        cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
+                                                  'ball_and_sticks.hoc' ))
+        np.testing.assert_array_equal(cell.get_idx_parent_children(parent='soma[0]'),
+                                      cell.get_idx(section=['soma[0]',
+                                                            'dend[0]']))
+    
+    
+    def test_cell_get_idx_name_00(self):
+        cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
+                                                  'ball_and_sticks.hoc' ))    
+        np.testing.assert_array_equal(cell.get_idx_name(idx=np.array([0])),
+                                                np.array([[0, 'soma[0]', 0.5]],
+                                                         dtype=object))
+
+
+    def test_cell_get_rand_idx_area_norm_00(self):
+        cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
+                                                  'ball_and_sticks.hoc' ))
+        idx = cell.get_rand_idx_area_norm(nidx=1000000)
+        
+        
+        # compute histogram and correlate with segment area
+        bins = np.arange(cell.totnsegs+1)
+        hist, bin_edges = np.histogram(idx, bins=bins)
+        
+        # compute Pearson correlation coefficients between area and histogram
+        # reporting success if within 5 decimal places
+        self.assertAlmostEqual(np.corrcoef(cell.area, hist)[0, 1], 1., places=5)
+
+        # check if min and max is in the range of segment indices
+        self.assertEqual(idx.min(), 0)
+        self.assertEqual(idx.max(), cell.totnsegs-1)
+    
+    
+    def test_cell_set_synapse_00(self):
+        cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
+                                                  'ball_and_sticks.hoc' ))
+        cell.set_synapse(idx=0, syntype='ExpSyn', record_curret=False,
+                         record_potential=False, weight=1.,
+                         **dict(e=10., tau=2.))
+        
+        self.assertEqual(cell.synlist[0].hname(), 'ExpSyn[0]')
+        self.assertEqual(len(cell.synlist), 1)
+        self.assertEqual(len(cell.netconlist), 1)
+        self.assertEqual(len(cell.netstimlist), 1)
+        self.assertEqual(cell.synlist[0].e, 10.)
+        self.assertEqual(cell.synlist[0].tau, 2.)
+        self.assertEqual(cell.netconlist[0].weight[0], 1.)
+        
+    
+    def test_cell_set_point_process_00(self):
+        cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
+                                                  'ball_and_sticks.hoc' ))
+        cell.set_point_process(idx=0, pptype='IClamp', record_current=False,
+                               **dict(delay=1., amp=1.))
+        self.assertEqual(cell.stimlist[0].hname(), 'IClamp[0]')
+        self.assertEqual(len(cell.stimlist), 1)
+        self.assertEqual(cell.stimlist[0].delay, 1.)
+        self.assertEqual(cell.stimlist[0].amp, 1.)
+        
+    
+    def test_cell_strip_hoc_objects_00(self):
+        cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
+                                                  'ball_and_sticks.hoc' ))
+        cell.strip_hoc_objects()
+        for attribute in dir(cell):
+            self.assertNotEqual(str(type(getattr(cell, attribute))),
+                                'hoc.HocObject')
+
+    def test_cell_cellpickler_00(self):
+        cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
+                                                  'ball_and_sticks.hoc' ))
+        cell_pickle = cell.cellpickler(filename=None, pickler=pickle.dumps)
+        pickled_cell = pickle.loads(cell_pickle)
+        
+        for attribute in dir(cell):
+            if attribute.startswith('__') or attribute.startswith('_'):
+                pass
+            else:
+                self.assertEqual(type(getattr(cell, attribute)),
+                                 type(getattr(pickled_cell, attribute)))
+
+    
     ######## Functions used by tests: ##########################################
     def stickSimulationTesttvec(self, **kwargs):
-        stick = LFPy.Cell(morphology = os.path.join(LFPy.__path__[0], 'stick.hoc'), verbose=True, **kwargs)
+        stick = LFPy.Cell(morphology = os.path.join(LFPy.__path__[0],
+                                                    'stick.hoc'), verbose=True,
+                          **kwargs)
         stick.simulate(rec_imem=False)    
         return stick.tvec
     
@@ -744,22 +1226,21 @@ def _test(verbosity=2):
     """
     Run tests for the LFPy module implemented using the unittest module.
 
-    Note:
+    Notes
+    -----
     if the NEURON extension file LFPy/sinsyn.mod could not be compiled using the
     neuron-provided nrnivmodl script (linux/OSX) upon installation of LFPy,
     tests will fail. Consider reinstalling LFPy e.g., issuing
-    ::
-
-        pip install LFPy --upgrade
+    
+        >>> pip install LFPy --upgrade
+    
     or
-    ::
+    
+        >>> cd /path/to/LFPy/sources
+        >>> python setup.py install
 
-        cd /path/to/LFPy/sources
-        python setup.py install
-
-    Arguments:
-    ::
-
+    Parameters
+    ----------
         verbosity : int
             unittest.TextTestRunner verbosity level
     """

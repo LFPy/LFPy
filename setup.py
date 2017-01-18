@@ -53,7 +53,7 @@ setup(
     maintainer = "Espen Hagen",
     maintainer_email = 'espen.hagen@fys.uio.no',
     packages = ['LFPy'],
-    package_data = {'LFPy' : ['stick.hoc', 'sinsyn.mod',
+    package_data = {'LFPy' : ['stick.hoc', 'ball_and_sticks.hoc', 'sinsyn.mod',
                               os.path.join('i686', '*'),
                               os.path.join('i686', '.libs', '*'),
                               os.path.join('x86_64', '*'),
