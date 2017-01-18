@@ -35,8 +35,8 @@ This scientific software is released under the GNU Public License GPLv3.
 ===========
 Code status
 ===========
-[![Build Status](https://travis-ci.org/espenhgn/LFPy.svg?branch=dev)](https://travis-ci.org/espenhgn/LFPy)
-[![Coverage Status](https://coveralls.io/repos/github/espenhgn/LFPy/badge.svg?branch=dev)](https://coveralls.io/github/espenhgn/LFPy)
+[![Build Status](https://travis-ci.org/LFPy/LFPy.svg?branch=dev)](https://travis-ci.org/LFPy/LFPy)
+[![Coverage Status](https://coveralls.io/repos/github/LFPy/LFPy/badge.svg?branch=dev)](https://coveralls.io/github/LFPy/LFPy)
 
 
 ============
