@@ -1,8 +1,11 @@
 #!/usr/bin/env python
-'''A few tests for LFPy, most importantly the calculations of
-extracellular field potentials'''
+"""A few tests for LFPy, most importantly the calculations of
+extracellular field potentials
+
+"""
 
 import os
+from warnings import warn
 import unittest
 import numpy as np
 from scipy.integrate import quad
@@ -16,7 +19,7 @@ from warnings import warn
 neuron.load_mechanisms(LFPy.__path__[0])
 
 class testLFPy(unittest.TestCase):
-    '''
+    """
     A set of test functions for each method of calculating the LFP, where the
     model outcome from LFPy is compared with analytically obtained results for
     a stick neuron with sinusoid synaptic current input at the end, and LFP
@@ -26,7 +29,7 @@ class testLFPy(unittest.TestCase):
     of compartmentalising the stick is prominent.
     
     Some tests of cell.tvec is also executed
-    '''
+    """
     
     def test_method_pointsource(self):
         #create LFPs using LFPy-model
@@ -426,7 +429,7 @@ class testLFPy(unittest.TestCase):
             self.assertAlmostEqual(tvec[i], tvec_numpy[i])    
 
     def test_alias_method_01(self):
-        '''deterministic probabilities 0.0 and 1.0'''
+        """deterministic probabilities 0.0 and 1.0"""
         idx = np.arange(2)
         probs = np.arange(2).astype(float)
         nidx = 1000000
@@ -438,7 +441,7 @@ class testLFPy(unittest.TestCase):
         self.assertEqual(nidx, hist[1])
         
     def test_alias_method_02(self):
-        '''probabilities 0.25 and 0.75'''
+        """probabilities 0.25 and 0.75"""
         idx = np.arange(2)
         probs = np.array([0.25, 0.75])
         nidx = 1000000
@@ -452,7 +455,7 @@ class testLFPy(unittest.TestCase):
         self.assertAlmostEqual(np.corrcoef(probs, hist.astype(float))[0, 1], 1., places=7)
 
     def test_alias_method_03(self):
-        '''probabilities 0.75 and 0.25'''
+        """probabilities 0.75 and 0.25"""
         idx = np.arange(2)
         probs = np.array([0.75, 0.25])
         nidx = 1000000
@@ -483,7 +486,7 @@ class testLFPy(unittest.TestCase):
 
 
     def test_alias_method_05(self):
-        '''deterministic probabilities 1.0 and 0.0'''
+        """deterministic probabilities 1.0 and 0.0"""
         idx = np.arange(2)
         probs = np.arange(2).astype(float)[::-1]
         nidx = 1000000
@@ -598,11 +601,10 @@ class testLFPy(unittest.TestCase):
         np.testing.assert_allclose(cell.zend, -zends, atol=1e-07)
 
 
-    def test_cell_set_rotation_03(self):
+    def test_cell_set_rotation_02(self):
         '''test LFPy.Cell.set_rotation()'''
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0],
                                                   'ball_and_sticks.hoc' ))
-        
         xstarts = cell.xstart.copy()
         xmids = cell.xmid.copy()
         xends = cell.xend.copy()
@@ -691,7 +693,34 @@ class testLFPy(unittest.TestCase):
         np.testing.assert_allclose(cell.ymid, -ymids, atol=1e-07)
         np.testing.assert_allclose(cell.yend, -yends, atol=1e-07)
 
+    def test_cell_set_rotation_06(self):
+        '''test LFPy.Cell.set_rotation()'''
+        cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'stick.hoc'))
 
+        xstarts = cell.xstart.copy()
+        xmids = cell.xmid.copy()
+        xends = cell.xend.copy()
+        ystarts = cell.ystart.copy()
+        ymids = cell.ymid.copy()
+        yends = cell.yend.copy()
+        zstarts = cell.zstart.copy()
+        zmids = cell.zmid.copy()
+        zends = cell.zend.copy()
+        # test rotation: 90 deg around x-axis, 90 deg around y-axis, 90 deg around z-axis
+        cell.set_rotation(x=np.pi / 2., y=np.pi, z=np.pi / 4.)
+        # revert rotation: -90 deg around x-axis, -90 deg around y-axis, -90 deg around z-axis, rotation_order='zyx'
+        cell.set_rotation(x=-np.pi / 2., y=-np.pi, z=-np.pi / 4., rotation_order='zyx')
+        # assert that x-, y- and z-coordinates are same as beginning, using absolute
+        # tolerances
+        np.testing.assert_allclose(cell.xstart, xstarts, atol=1e-07)
+        np.testing.assert_allclose(cell.xmid, xmids, atol=1e-07)
+        np.testing.assert_allclose(cell.xend, xends, atol=1e-07)
+        np.testing.assert_allclose(cell.ystart, ystarts, atol=1e-07)
+        np.testing.assert_allclose(cell.ymid, ymids, atol=1e-07)
+        np.testing.assert_allclose(cell.yend, yends, atol=1e-07)
+        np.testing.assert_allclose(cell.zstart, zstarts, atol=1e-07)
+        np.testing.assert_allclose(cell.zmid, zmids, atol=1e-07)
+        np.testing.assert_allclose(cell.zend, zends, atol=1e-07)
 
     def test_cell_chiral_morphology_00(self):
         '''test LFPy.Cell.chiral_morphology()'''
@@ -767,6 +796,7 @@ class testLFPy(unittest.TestCase):
         # test rotation 180 deg around x-axis
         cell.chiral_morphology(axis='z')
         # assert that y- and z-coordinates are inverted, using absolute
+
         # tolerances
         np.testing.assert_allclose(cell.xstart, xstarts, atol=1e-07)
         np.testing.assert_allclose(cell.xmid, xmids, atol=1e-07)
@@ -1114,7 +1144,7 @@ class testLFPy(unittest.TestCase):
                        sigma=0.3,
                        electrodeR=100.,
                        electrodeZ=0.):
-        '''
+        """
         Will calculate the analytical LFP from a dendrite stick aligned with z-axis.
         The synaptic current is always assumed to be at the end of the stick, i.e.
         Zin = stickLength.
@@ -1133,7 +1163,7 @@ class testLFPy(unittest.TestCase):
             sigma : Extracellular conductivity (muS/mum)
             electrodeR : Radial distance from stick (mum)
             electrodeZ : Longitudal distance along stick(mum)
-        '''    
+        """    
         Gm = 1. / Rm            # specific membrane conductivity (S/cm2)
         gm = 1E2 * np.pi * stickDiam / Rm     # absolute membrane conductance (muS / mum)
         ri = 1E-2 * 4. * Ri / (np.pi * stickDiam**2) # intracellular resistance  (Mohm/mum)
@@ -1179,9 +1209,9 @@ class testLFPy(unittest.TestCase):
         return PhiEx
     
     def complex_quadrature(self, func, a, b, **kwargs):
-        '''
+        """
         Will return the complex integral value.
-        '''
+        """
         def real_func(x):
             return real(func(x))
         def imag_func(x):
@@ -1191,34 +1221,34 @@ class testLFPy(unittest.TestCase):
         return real_integral[0] + 1j*imag_integral[0]
 
 
+
 def _test(verbosity=2):
-    '''
+    """
     Run tests for the LFPy module implemented using the unittest module.
-    
-    Note:
+
+    Notes
+    -----
     if the NEURON extension file LFPy/sinsyn.mod could not be compiled using the
     neuron-provided nrnivmodl script (linux/OSX) upon installation of LFPy,
     tests will fail. Consider reinstalling LFPy e.g., issuing
-    ::
-        
-        pip install LFPy --upgrade
-    or
-    ::
-        
-        cd /path/to/LFPy/sources
-        python setup.py install
     
-    Arguments:
-    ::
-        
+        >>> pip install LFPy --upgrade
+    
+    or
+    
+        >>> cd /path/to/LFPy/sources
+        >>> python setup.py install
+
+    Parameters
+    ----------
         verbosity : int
             unittest.TextTestRunner verbosity level
-    '''
+    """
     #check if sinsyn.mod is compiled, if it isn't, some tests will fail
     if not hasattr(neuron.h, 'SinSyn'):
         warn('tests will fail because the sinsyn.mod mechanism is not compiled')
-        
+
     #load and execute testing suite
     suite = unittest.TestLoader().loadTestsFromTestCase(testLFPy)
+
     unittest.TextTestRunner(verbosity=verbosity).run(suite)
-    
