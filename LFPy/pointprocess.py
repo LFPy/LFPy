@@ -11,7 +11,7 @@ but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.'''
 
-import numpy
+import numpy as np
 import neuron
 
 class PointProcess:
@@ -110,7 +110,7 @@ class Synapse(PointProcess):
         cell.synapses.append(self)
         cell.synidx.append(idx)
 
-    def set_spike_times(self, sptimes=numpy.zeros(0)):
+    def set_spike_times(self, sptimes=np.zeros(0)):
         '''Set the spike times explicitly using numpy arrays'''
         self.sptimes = sptimes
         self.cell.sptimeslist.append(sptimes)
@@ -145,14 +145,14 @@ class Synapse(PointProcess):
     def collect_current(self, cell):
         '''Collect synapse current'''
         try:
-            self.i = numpy.array(cell.synireclist.o(self.hocidx))
+            self.i = np.array(cell.synireclist.o(self.hocidx))
         except:
             raise Exception('cell.synireclist deleted from consequtive runs')
     
     def collect_potential(self, cell):
         '''Collect membrane potential of segment with synapse'''
         try:
-            self.v = numpy.array(cell.synvreclist.o(self.hocidx))
+            self.v = np.array(cell.synvreclist.o(self.hocidx))
         except:
             raise Exception('cell.synvreclist deleted from consequtive runs')
         
@@ -243,38 +243,83 @@ class StimIntElectrode(PointProcess):
         '''
         Fetch electrode current from recorder list
         '''
-        self.i = numpy.array(cell.stimireclist.o(self.hocidx))
+        self.i = np.array(cell.stimireclist.o(self.hocidx))
     
     def collect_potential(self, cell):
         '''
         Collect membrane potential of segment with PointProcess
         '''
-        self.v = numpy.array(cell.synvreclist.o(self.hocidx))
+        self.v = np.array(cell.synvreclist.o(self.hocidx))
 
-class PointProcessPlayInSoma:
+
+class PointProcessPlayInSoma(object):
     '''
-    Class implementation of Eivind's playback alghorithm
+    Sets an interpolated voltage trace as a boundary condition for the
+    soma compartment. Could for instance be used to play back an action
+    potential waveform as in Pettersen & Einevoll (2008) Biophys J 94.
     '''
     def __init__(self, soma_trace):
         '''
         Class for playing back somatic trace at specific time points
         into soma as boundary condition for the membrane voltage
+        
+        Parameters:
+        ::
+            
+            soma_trace : file, contains time (column 1) and voltage (column 2)
+                values, as floats in units of ms and mV respectively, separated
+                by space.
+        
+        Example:
+        ::
+            
+            from pylab import * # populate namespace with math and plot functions
+            import LFPy
+            import neuron
+            
+            # create cell
+            cell = LFPy.Cell(morphology='morphologies/example_morphology.hoc')
+            
+            # create 'action potential trace' as gaussian pulse, save to file
+            t = arange(0, 10., cell.timeres_python)
+            sigma = 0.5
+            v = exp(-(t-5.)**2 / (2*sigma**2))*100.
+            savetxt('vtrace.txt', zip(t, v))
+            
+            # set voltage trace as boundary condition in soma
+            stim = LFPy.pointprocess.PointProcessPlayInSoma('vtrace.txt')
+            stim.set_play_in_soma(cell, t_on = array([10., 50.]))
+            
+            # simulate, record transmembrane currents
+            cell.simulate(rec_imem=True, rec_vmem=True)
+            
+            subplot(311)
+            plot(cell.tvec, cell.somav)
+            subplot(312)
+            imshow(cell.imem, interpolation='nearest')
+            axis('tight')
+            colorbar(orientation='horizontal')
+            subplot(313)
+            imshow(cell.vmem, interpolation='nearest')
+            axis('tight')
+            colorbar(orientation='horizontal')
+            show()            
         '''
         self.soma_trace = soma_trace
     
-    def set_play_in_soma(self, cell, t_on=numpy.array([0])):
+    def set_play_in_soma(self, cell, t_on=np.array([0])):
         '''
         Set mechanisms for playing soma trace at time(s) t_on,
-        where t_on is a numpy.array
+        where t_on is a np.array
         '''
-        if type(t_on) != numpy.ndarray:
-            t_on = numpy.array(t_on)
+        if type(t_on) != np.ndarray:
+            t_on = np.array(t_on)
         
         f = file(self.soma_trace)
         x = []
         for line in f.readlines():
             x.append(list(map(float, line.split())))
-        x = numpy.array(x)
+        x = np.array(x)
         X = x.T
         f.close()
         
@@ -293,25 +338,19 @@ class PointProcessPlayInSoma:
         somaTrace = trace
         
         for i in range(1, t_on.size):
-            numpy.concatenate((somaTvec, somaTvec0 + t_on[i]))
-            numpy.concatenate((somaTrace, trace))
-        
-        somaTvec1 = numpy.interp(numpy.arange(somaTvec[0], somaTvec[-1], 
+            somaTvec = np.concatenate((somaTvec, somaTvec0 + t_on[i]))
+            somaTrace = np.concatenate((somaTrace, trace))
+                
+        somaTvecVec = np.interp(np.arange(somaTvec[0], somaTvec[-1], 
                                 cell.timeres_NEURON),
                                 somaTvec, somaTvec)
-        somaTrace1 = numpy.interp(numpy.arange(somaTvec[0], somaTvec[-1],
+        somaTraceVec = np.interp(np.arange(somaTvec[0], somaTvec[-1],
                                 cell.timeres_NEURON),
                                 somaTvec, somaTrace)
         
-        somaTvecVec = neuron.h.Vector(somaTvec1)
-        somaTraceVec = neuron.h.Vector(somaTrace1)
-        
-        for sec in neuron.h.somalist: #cell.somalist
+        for sec in neuron.h.soma:
             #ensure that soma is perfect capacitor
             sec.cm = 1E9
-            #Why the fuck doesnt this work:
-            #for seg in sec:
-            #    somaTraceVec.play(seg._ref_v, somaTvecVec)
         
         #call function that insert trace on soma
         self._play_in_soma(somaTvecVec, somaTraceVec)
