@@ -18,7 +18,6 @@ import random
 
 # for nosetests to run load the SinSyn sinusoid synapse currrent mechanism
 neuron.load_mechanisms(LFPy.__path__[0])
-# neuron.load_mechanisms('.')
 
 class testLFPy(unittest.TestCase):
     """

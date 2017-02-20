@@ -7,7 +7,6 @@ Created on Fri Jan 15 17:24:00 2015
 
 from __future__ import division
 from scipy.special import eval_legendre, lpmv
-import matplotlib.pyplot as plt
 import numpy as np
 
 class EEGMEGCalc:
