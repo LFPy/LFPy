@@ -1932,7 +1932,7 @@ class Cell(object):
             compartment halves in cell.
         """
         if not hasattr(self, 'vmem'):
-            raise AttributeError, 'no vmem, run cell.simulate(rec_vmem=True)'
+            raise AttributeError('no vmem, run cell.simulate(rec_vmem=True)')
 
         iaxial = []
         d_list = []
