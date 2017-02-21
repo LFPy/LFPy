@@ -937,7 +937,7 @@ class testLFPy(unittest.TestCase):
                          record_potential=False, weight=1.,
                          **dict(e=10., tau=2.))
 
-        self.assertEqual(cell.synlist[0].hname(), 'ExpSyn[0]')
+        self.assertTrue('ExpSyn' in cell.synlist[0].hname())
         self.assertEqual(len(cell.synlist), 1)
         self.assertEqual(len(cell.netconlist), 1)
         self.assertEqual(len(cell.netstimlist), 1)
@@ -1405,7 +1405,7 @@ class testLFPy(unittest.TestCase):
         synapse = LFPy.Synapse(cell, **synapse_parameters)
         synapse.set_spike_times(np.array([1.]))
         cell.simulate(rec_imem = True, rec_isyn = True, rec_vmem = True)
-        return synapse, cell
+        return cell
 
     def make_class_object(self, rz1, r_el):
         '''Return class object fs'''
