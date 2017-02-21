@@ -108,7 +108,6 @@ class EEGMEGCalc:
         """
 
         p_tot = np.linalg.norm(p_rad, axis=1)
-        print p_tot
         theta = self.calc_theta()
         s_vector = self.sign_rad_dipole(p_rad)
         phi_const = s_vector * p_tot / (4 * np.pi * self.sigma1 * self.rz ** 2) * self.k1

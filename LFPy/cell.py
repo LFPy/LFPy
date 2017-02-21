@@ -1959,7 +1959,6 @@ class Cell(object):
             parent_idx = self.get_idx(section=parentsec.name())[-1]
             seg_idx = self.get_idx(section=sec.name())[0]
 
-            print 'before looping over section:', sec.name()
             for _ in sec:
                 iseg, ipar = self._parent_and_segment_i(seg_idx, parent_idx,
                                                         bottom_seg,branch,
@@ -2085,23 +2084,17 @@ class Cell(object):
         vpar = self.vmem[parent_idx]
         vseg = self.vmem[seg_idx]
         children_dict = self.get_dict_of_children_idx()
-        print children_dict
         connection_dict = self.get_dict_parent_connections()
-        print connection_dict
 
         if not bottom_seg:
-            print 'not bottom_seg'
             iseg = (vpar - vseg) / seg_ri
             ipar = iseg
         else:
-            print 'bottom_seg'
             conn_point = neuron.h.parent_connection()
             if conn_point != 1:
-                print 'conn_point != 1 = ', conn_point
                 iseg = (vpar - vseg) / seg_ri
                 ipar = np.zeros(len(vpar))
             else:
-                print 'conn_point == 1', conn_point
                 parent_ri = neuron.h.ri(0)
                 if not branch:
                     ri = parent_ri + seg_ri
