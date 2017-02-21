@@ -936,7 +936,7 @@ class testLFPy(unittest.TestCase):
                          record_potential=False, weight=1.,
                          **dict(e=10., tau=2.))
         
-        self.assertEqual(cell.synlist[0].hname(), 'ExpSyn[0]')
+        self.assertTrue('ExpSyn' in cell.synlist[0].hname())
         self.assertEqual(len(cell.synlist), 1)
         self.assertEqual(len(cell.netconlist), 1)
         self.assertEqual(len(cell.netstimlist), 1)
@@ -976,6 +976,380 @@ class testLFPy(unittest.TestCase):
             else:
                 self.assertEqual(type(getattr(cell, attribute)),
                                  type(getattr(pickled_cell, attribute)))
+
+    def test_cell_simulate_current_dipole_moment_00(self):
+        stickParams = {
+            'morphology' : os.path.join(LFPy.__path__[0], 'stick.hoc'),
+            'rm' : 30000,
+            'cm' : 1,
+            'Ra' : 150,
+            'tstartms' : 0,
+            'tstopms' : 100,
+            'dt' : 0.1,
+            'nsegs_method' : 'lambda_f',
+            'lambda_f' : 100,   
+        }
+                
+        stimParams = {
+            'pptype' : 'SinSyn',
+            'delay' : 0.,
+            'dur' : 1000.,
+            'pkamp' : 1.,
+            'freq' : 100.,
+            'phase' : 0,
+            'bias' : 0.,
+            'record_current' : False
+        }
+        for idx in range(31): #31 segments
+            if idx != 15: # no net dipole moment because of stick symmetry
+                stick = LFPy.Cell(**stickParams)
+                synapse = LFPy.StimIntElectrode(stick, idx=idx,
+                                       **stimParams)
+                stick.simulate(rec_imem=True, rec_current_dipole_moment=True)
+                p = np.dot(stick.imem.T, np.c_[stick.xmid, stick.ymid, stick.zmid])
+                np.testing.assert_allclose(p, stick.current_dipole_moment)
+
+
+    def test_cell_simulate_current_dipole_moment_01(self):
+        stickParams = {
+            'morphology' : os.path.join(LFPy.__path__[0], 'stick.hoc'),
+            'rm' : 30000,
+            'cm' : 1,
+            'Ra' : 150,
+            'tstartms' : -100,
+            'tstopms' : 100,
+            'dt' : 0.1,
+            'nsegs_method' : 'lambda_f',
+            'lambda_f' : 100,   
+        }
+                
+        stimParams = {
+            'pptype' : 'SinSyn',
+            'delay' : 0., # -100
+            'dur' : 1000.,
+            'pkamp' : 1.,
+            'freq' : 100.,
+            'phase' : 0, #-np.pi/2,
+            'bias' : 0.,
+            'record_current' : False
+        }
+                
+        for idx in range(31): #31 segments
+            if idx != 15: # no net dipole moment because of stick symmetry
+                stick = LFPy.Cell(**stickParams)
+                synapse = LFPy.StimIntElectrode(stick, stick.get_closest_idx(0, 0, 1000),
+                                       **stimParams)
+                stick.simulate(rec_imem=True, rec_current_dipole_moment=True)
+                p = np.dot(stick.imem.T, np.c_[stick.xmid, stick.ymid, stick.zmid])
+                np.testing.assert_allclose(p, stick.current_dipole_moment)
+
+    
+    def test_cell_tstart_00(self):
+        stickParams = {
+            'morphology' : os.path.join(LFPy.__path__[0], 'stick.hoc'),
+            'rm' : 30000,
+            'cm' : 1,
+            'Ra' : 150,
+            'dt' : 0.1,
+            'nsegs_method' : 'lambda_f',
+            'lambda_f' : 100,   
+        }
+                
+        stimParams = {
+            'pptype' : 'SinSyn',
+            'dur' : 1000.,
+            'pkamp' : 1.,
+            'freq' : 100.,
+            'bias' : 0.,
+            'record_current' : False
+        }
+                
+        stick0 = LFPy.Cell(tstartms=0, tstopms=200, **stickParams)
+        synapse0 = LFPy.StimIntElectrode(stick0,
+                                         stick0.get_closest_idx(0, 0, 1000),
+                                         delay=0, phase=0.,
+                                         **stimParams)
+        stick0.simulate(rec_imem=True, rec_vmem=True, rec_current_dipole_moment=True)
+
+
+        stick1 = LFPy.Cell(tstartms=-100, tstopms=100, **stickParams)
+        synapse1 = LFPy.StimIntElectrode(stick1,
+                                         stick1.get_closest_idx(0, 0, 1000),
+                                         delay=-100, phase=0.,
+                                         **stimParams)
+        stick1.simulate(rec_imem=True, rec_vmem=True, rec_current_dipole_moment=True)
+
+        inds = stick0.tvec >= 100
+        np.testing.assert_allclose(stick0.vmem[:, inds], stick1.vmem)
+        np.testing.assert_allclose(stick0.imem[:, inds], stick1.imem)
+        np.testing.assert_allclose(stick0.current_dipole_moment[inds, :],
+                                   stick1.current_dipole_moment)
+        
+    
+    def test_cell_with_recextelectrode_00(self):
+        stickParams = {
+            'morphology' : os.path.join(LFPy.__path__[0], 'stick.hoc'),
+            'rm' : 30000,
+            'cm' : 1,
+            'Ra' : 150,
+            'tstartms' : 0,
+            'tstopms' : 100,
+            'dt' : 2**-4,
+            'nsegs_method' : 'lambda_f',
+            'lambda_f' : 100,
+            
+        }
+        
+        electrodeParams = {
+            'sigma' : 0.3,
+            'x' : np.ones(11) * 100.,
+            'y' : np.zeros(11),
+            'z' : np.linspace(1000, 0, 11),
+            'method' : 'pointsource'
+        }
+        
+        stimParams = {
+            'pptype' : 'SinSyn',
+            'delay' : 0.,
+            'dur' : 1000.,
+            'pkamp' : 1.,
+            'freq' : 100.,
+            'phase' : 0,
+            'bias' : 0.,
+            'record_current' : False
+        }
+
+        stick = LFPy.Cell(**stickParams)
+        synapse = LFPy.StimIntElectrode(stick, stick.get_closest_idx(0, 0, 1000),
+                               **stimParams)
+        electrode = LFPy.RecExtElectrode(**electrodeParams)
+        stick.simulate(electrode, rec_imem=True)
+
+        electrode1 = LFPy.RecExtElectrode(cell=stick, **electrodeParams)
+        electrode1.calc_lfp()
+        
+        np.testing.assert_allclose(electrode.LFP, electrode1.LFP)
+
+
+    def test_cell_with_recextelectrode_01(self):
+        stickParams = {
+            'morphology' : os.path.join(LFPy.__path__[0], 'stick.hoc'),
+            'rm' : 30000,
+            'cm' : 1,
+            'Ra' : 150,
+            'tstartms' : -100,
+            'tstopms' : 100,
+            'dt' : 2**-4,
+            'nsegs_method' : 'lambda_f',
+            'lambda_f' : 100,
+            
+        }
+        
+        electrodeParams = {
+            'sigma' : 0.3,
+            'x' : np.ones(11) * 100.,
+            'y' : np.zeros(11),
+            'z' : np.linspace(1000, 0, 11),
+            'method' : 'pointsource'
+        }
+        
+        stimParams = {
+            'pptype' : 'SinSyn',
+            'delay' : 0.,
+            'dur' : 1000.,
+            'pkamp' : 1.,
+            'freq' : 100.,
+            'phase' : 0,
+            'bias' : 0.,
+            'record_current' : False
+        }
+
+        stick = LFPy.Cell(**stickParams)
+        synapse = LFPy.StimIntElectrode(stick, stick.get_closest_idx(0, 0, 1000),
+                               **stimParams)
+        electrode = LFPy.RecExtElectrode(**electrodeParams)
+        stick.simulate(electrode, rec_imem=True)
+
+        electrode1 = LFPy.RecExtElectrode(cell=stick, **electrodeParams)
+        electrode1.calc_lfp()
+        
+        np.testing.assert_allclose(electrode.LFP, electrode1.LFP)
+        
+
+    def test_neuron_record_i_membrane_methods_00(self):
+        '''not a test of LFPy per se, but we're using this method for
+        calculating with the i_membrane_ attribute on each time step'''
+        # sections
+        soma = neuron.h.Section(name='soma')
+        dend = neuron.h.Section(name='dend')
+        
+        # connect sections
+        dend.connect(soma, 1, 0)
+        
+        # geometry
+        soma.L = 30.
+        soma.diam = 30.
+        soma.nseg = 1
+        dend.L = 500.
+        dend.diam = 2.
+        dend.nseg = 50
+        
+        # biophysical parameters
+        for sec in [soma, dend]:
+            sec.Ra = 100
+            sec.cm = 1
+            sec.insert('pas')
+            for seg in sec:
+                seg.pas.g = 0.0002
+                seg.pas.e = -65.
+                
+        # stimulus
+        syn = neuron.h.ExpSyn(0.5, sec=dend)
+        syn.e = 0.
+        syn.tau = 2.
+
+        # generators
+        ns = neuron.h.NetStim(0.5)
+        ns.noise = 1.
+        ns.start = 0.
+        ns.number = 1000
+        ns.interval = 10.
+        nc = neuron.h.NetCon(ns, syn)
+        nc.weight[0] = .01
+
+        # integrator
+        cvode = neuron.h.CVode()
+        cvode.use_fast_imem(1)
+        
+        # record
+        i_membrane_control = []     # record currents using Vector.record method
+        i_membrane_fadvance = []    # record seg._i_membrane_ at each timestep
+        for sec in [soma, dend]:
+            for seg in sec:
+                i = neuron.h.Vector()
+                i.record(seg._ref_i_membrane_)
+                i_membrane_control.append(i)
+                i_membrane_fadvance.append([])
+        
+        # Simulation control
+        neuron.h.dt =  2**-4          # simulation time resolution
+        tstop = 500.        # simulation duration
+        v_init = -65        # membrane voltage(s) at t = 0
+        
+        def initialize():
+            neuron.h.finitialize(v_init)
+            neuron.h.fcurrent()
+        
+        def collect_i_membrane():        
+            j = 0
+            for sec in [soma, dend]:
+                for seg in sec:
+                    i_membrane_fadvance[j].append(seg.i_membrane_)
+                    j += 1
+                        
+        def integrate():
+            while neuron.h.t < tstop:
+                collect_i_membrane()
+                neuron.h.fadvance()
+            collect_i_membrane() # otherwise shape mismatch 
+
+        initialize()
+        integrate()
+        
+        i_membrane_control = np.array(i_membrane_control)
+        i_membrane_fadvance = np.array(i_membrane_fadvance)
+        
+        np.testing.assert_equal(i_membrane_control, i_membrane_fadvance)
+        
+        
+    def test_neuron_record_i_membrane_methods_01(self):
+        '''not a test of LFPy per se, but we're using this method for
+        calculating with the i_membrane_ attribute on each time step'''
+        # sections
+        soma = neuron.h.Section(name='soma')
+        dend = neuron.h.Section(name='dend')
+        
+        # connect sections
+        dend.connect(soma, 1, 0)
+        
+        # geometry
+        soma.L = 30.
+        soma.diam = 30.
+        soma.nseg = 1
+        dend.L = 500.
+        dend.diam = 2.
+        dend.nseg = 50
+        
+        # biophysical parameters
+        for sec in [soma, dend]:
+            sec.Ra = 100
+            sec.cm = 1
+            sec.insert('pas')
+            for seg in sec:
+                seg.pas.g = 0.0002
+                seg.pas.e = -65.
+                
+        # stimulus
+        syn = neuron.h.ExpSyn(0.5, sec=dend)
+        syn.e = 0.
+        syn.tau = 2.
+
+        # generators
+        ns = neuron.h.NetStim(0.5)
+        ns.noise = 1.
+        ns.start = 0.
+        ns.number = 1000
+        ns.interval = 10.
+        nc = neuron.h.NetCon(ns, syn)
+        nc.weight[0] = .01
+
+        # integrator
+        cvode = neuron.h.CVode()
+        cvode.use_fast_imem(1)
+        
+        # record
+        i_membrane_control = []     # record currents using Vector.record method
+        i_membrane_fadvance = []    # record seg._i_membrane_ at each timestep
+        for sec in [soma, dend]:
+            for seg in sec:
+                i = neuron.h.Vector()
+                i.record(seg._ref_i_membrane_)
+                i_membrane_control.append(i)
+                i_membrane_fadvance.append([])
+        
+        # Simulation control
+        neuron.h.dt = 2**-4          # simulation time resolution
+        tstop = 500.        # simulation duration
+        v_init = -65        # membrane voltage(s) at t = 0
+        
+        def initialize():
+            neuron.h.finitialize(v_init)
+            neuron.h.fcurrent()
+            neuron.h.frecord_init()
+            neuron.h.t = -100. # force simulations to start at some negative t
+
+        def collect_i_membrane():        
+            j = 0
+            for sec in [soma, dend]:
+                for seg in sec:
+                    i_membrane_fadvance[j].append(seg.i_membrane_)
+                    j += 1
+                        
+        def integrate():
+            while neuron.h.t < tstop:
+                collect_i_membrane()
+                neuron.h.fadvance()
+            collect_i_membrane() # otherwise shape mismatch 
+
+        initialize()
+        integrate()
+        
+        i_membrane_control = np.array(i_membrane_control)
+        i_membrane_fadvance = np.array(i_membrane_fadvance)
+        
+        np.testing.assert_equal(i_membrane_control, i_membrane_fadvance)
+
+        
 
     
     ######## Functions used by tests: ##########################################

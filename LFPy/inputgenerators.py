@@ -30,7 +30,7 @@ def stationary_poisson(nsyn, lambd, tstart, tstop):
     spiketimes = []
     for i in range(nsyn):
         spikecount = np.random.poisson(interval_s*lambd)
-        spikevec = np.empty(spikecount)
+        spikevec = np.zeros(spikecount)
         if spikecount == 0:
             spiketimes.append(spikevec)
         else:
@@ -63,7 +63,7 @@ def test_spiketimes(spiketime):
     """Test and sort spike times"""
     spiketimes = []
     spikecount = 1
-    spikevec = np.empty(spikecount)
+    spikevec = np.zeros(spikecount)
     spikevec = spiketime
     spiketimes.append(np.sort(spikevec))
     return spiketimes
@@ -73,7 +73,7 @@ def get_normal_spike_times(nsyn, mu, sigma, tstart, tstop):
     deviation sigma"""
     spiketimes = []
     spikecount = nsyn
-    spikevec = np.empty(spikecount)
+    spikevec = np.zeros(spikecount)
     spikevec = np.random.normal(mu, sigma)
     while (np.squeeze(spikevec) <= tstart) and \
             (np.squeeze(spikevec) >= tstop):
