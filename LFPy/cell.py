@@ -1937,12 +1937,20 @@ class Cell(object):
         iaxial = []
         d_list = []
 
-        dseg = zip((self.xmid - self.xstart),
-                   (self.ymid - self.ystart),
-                   (self.zmid - self.zstart))
-        dpar = zip((self.xend - self.xmid),
-                   (self.yend - self.ymid),
-                   (self.zend - self.zmid))
+        # dseg = np.array(zip((self.xmid - self.xstart),
+        #            (self.ymid - self.ystart),
+        #            (self.zmid - self.zstart)))
+        # dpar = np.array(zip((self.xend - self.xmid),
+        #            (self.yend - self.ymid),
+        #            (self.zend - self.zmid)))
+
+        dseg = np.c_[self.xmid - self.xstart,
+                     self.ymid - self.ystart,
+                     self.zmid - self.zstart]
+        dpar = np.c_[self.xend - self.xmid,
+                     self.yend - self.ymid,
+                     self.zend - self.zmid]
+
         children_dict = self.get_dict_of_children_idx()
         for sec in neuron.h.allsec():
             if not neuron.h.SectionRef(sec.name()).has_parent():
@@ -1968,12 +1976,12 @@ class Cell(object):
                     # if a seg is connented to soma, it is
                     # connected to the middle of soma,
                     # and dpar needs to be altered.
-                    dpar[parent_idx] = [(self.xstart[seg_idx] -
-                                         self.xmid[parent_idx]),
-                                        (self.ystart[seg_idx] -
-                                         self.ymid[parent_idx]),
-                                        (self.zstart[seg_idx] -
-                                         self.zmid[parent_idx])]
+                    dpar[parent_idx] = np.array([self.xstart[seg_idx] -
+                                         self.xmid[parent_idx],
+                                        self.ystart[seg_idx] -
+                                         self.ymid[parent_idx],
+                                        self.zstart[seg_idx] -
+                                         self.zmid[parent_idx]])
 
                 d_list.append(dpar[parent_idx])
                 d_list.append(dseg[seg_idx])

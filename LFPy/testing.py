@@ -1405,7 +1405,7 @@ class testLFPy(unittest.TestCase):
         synapse = LFPy.Synapse(cell, **synapse_parameters)
         synapse.set_spike_times(np.array([1.]))
         cell.simulate(rec_imem = True, rec_isyn = True, rec_vmem = True)
-        return cell
+        return synapse, cell
 
     def make_class_object(self, rz1, r_el):
         '''Return class object fs'''
