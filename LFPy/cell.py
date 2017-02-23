@@ -1937,13 +1937,6 @@ class Cell(object):
         iaxial = []
         d_list = []
 
-        # dseg = np.array(zip((self.xmid - self.xstart),
-        #            (self.ymid - self.ystart),
-        #            (self.zmid - self.zstart)))
-        # dpar = np.array(zip((self.xend - self.xmid),
-        #            (self.yend - self.ymid),
-        #            (self.zend - self.zmid)))
-
         dseg = np.c_[self.xmid - self.xstart,
                      self.ymid - self.ystart,
                      self.zmid - self.zstart]
