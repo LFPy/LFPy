@@ -36,7 +36,7 @@ class testLFPy(unittest.TestCase):
         LFP_LFPy = self.stickSimulation(method='pointsource')
         
         #create LFPs using the analytical approach
-        time = np.linspace(0, 100, 10001)
+        time = np.linspace(0, 100, 100*2**6+1)
         R = np.ones(11)*100
         Z = np.linspace(1000, 0, 11)
         
@@ -55,7 +55,7 @@ class testLFPy(unittest.TestCase):
         LFP_LFPy = self.stickSimulation(method='linesource')
         
         #create LFPs using the analytical approach
-        time = np.linspace(0, 100, 10001)
+        time = np.linspace(0, 100, 100*2**6+1)
         R = np.ones(11)*100
         Z = np.linspace(1000, 0, 11)
         
@@ -74,7 +74,7 @@ class testLFPy(unittest.TestCase):
         LFP_LFPy = self.stickSimulation(method='som_as_point')
         
         #create LFPs using the analytical approach
-        time = np.linspace(0, 100, 10001)
+        time = np.linspace(0, 100, 100*2**6+1)
         R = np.ones(11)*100
         Z = np.linspace(1000, 0, 11)
         
@@ -94,7 +94,7 @@ class testLFPy(unittest.TestCase):
         LFP_LFPy = self.stickSimulationDotprodcoeffs(method='pointsource')
         
         #create LFPs using the analytical approach
-        time = np.linspace(0, 100, 10001)
+        time = np.linspace(0, 100, 100*2**6+1)
         R = np.ones(11)*100
         Z = np.linspace(1000, 0, 11)
         
@@ -113,7 +113,7 @@ class testLFPy(unittest.TestCase):
         LFP_LFPy = self.stickSimulationDotprodcoeffs(method='linesource')
         
         #create LFPs using the analytical approach
-        time = np.linspace(0, 100, 10001)
+        time = np.linspace(0, 100, 100*2**6+1)
         R = np.ones(11)*100
         Z = np.linspace(1000, 0, 11)
         
@@ -132,7 +132,7 @@ class testLFPy(unittest.TestCase):
         LFP_LFPy = self.stickSimulationDotprodcoeffs(method='som_as_point')
         
         #create LFPs using the analytical approach
-        time = np.linspace(0, 100, 10001)
+        time = np.linspace(0, 100, 100*2**6+1)
         R = np.ones(11)*100
         Z = np.linspace(1000, 0, 11)
         
@@ -153,7 +153,7 @@ class testLFPy(unittest.TestCase):
             contactRadius=10, contactNPoints=100, method='som_as_point')
         
         #create LFPs using the analytical approach
-        time = np.linspace(0, 100, 10001)
+        time = np.linspace(0, 100, 100*2**6+1)
         R = np.ones(11)*100
         Z = np.linspace(1000, 0, 11)
         
@@ -173,7 +173,7 @@ class testLFPy(unittest.TestCase):
             contactRadius=10, contactNPoints=100, method='linesource')
         
         #create LFPs using the analytical approach
-        time = np.linspace(0, 100, 10001)
+        time = np.linspace(0, 100, 100*2**6+1)
         R = np.ones(11)*100
         Z = np.linspace(1000, 0, 11)
         
@@ -193,7 +193,7 @@ class testLFPy(unittest.TestCase):
             contactRadius=10, contactNPoints=100, method='som_as_point')
         
         #create LFPs using the analytical approach
-        time = np.linspace(0, 100, 10001)
+        time = np.linspace(0, 100, 100*2**6+1)
         R = np.ones(11)*100
         Z = np.linspace(1000, 0, 11)
         
@@ -378,55 +378,13 @@ class testLFPy(unittest.TestCase):
         stickParams = {
             'dt' : 0.1,
             'tstartms' : -100,
-            'tstopms' : 100,
-        }
-        
-        tvec = self.stickSimulationTesttvec(**stickParams)
-        tvec_numpy = np.linspace(0, stickParams['tstopms'],
-                    stickParams['tstopms']/stickParams['dt'] + 1)
-        
-        self.assertEqual(tvec.size, tvec_numpy.size)
-
-    def test_cell_tvec_13(self):
-        stickParams = {
-            'dt' : 0.10,
-            'tstartms' : -100,
-            'tstopms' : 100,
-        }
-        
-        tvec = self.stickSimulationTesttvec(**stickParams)
-        tvec_numpy = np.linspace(0, stickParams['tstopms'],
-                    stickParams['tstopms']/stickParams['dt'] + 1)
-        
-        for i in range(tvec.size):
-            self.assertAlmostEqual(tvec[i], tvec_numpy[i])
-
-    def test_cell_tvec_14(self):
-        stickParams = {
-            'dt' : 0.1,
-            'tstartms' : -100,
             'tstopms' : 10000,
         }
         
-        tvec = self.stickSimulationTesttvec(**stickParams)
-        tvec_numpy = np.linspace(0, stickParams['tstopms'],
-                    stickParams['tstopms']/stickParams['dt'] + 1)
-        
-        self.assertEqual(tvec.size, tvec_numpy.size)
-
-    def test_cell_tvec_15(self):
-        stickParams = {
-            'dt' : 0.1,
-            'tstartms' : -100,
-            'tstopms' : 10000,
-        }
-        
-        tvec = self.stickSimulationTesttvec(**stickParams)
-        tvec_numpy = np.linspace(0, stickParams['tstopms'],
-                    stickParams['tstopms']/stickParams['dt'] + 1)
-        
-        for i in range(tvec.size):
-            self.assertAlmostEqual(tvec[i], tvec_numpy[i])    
+        try:
+            self.stickSimulationTesttvec(**stickParams)
+        except AssertionError:
+            pass
 
     def test_alias_method_01(self):
         """deterministic probabilities 0.0 and 1.0"""
@@ -1018,18 +976,18 @@ class testLFPy(unittest.TestCase):
             'Ra' : 150,
             'tstartms' : -100,
             'tstopms' : 100,
-            'dt' : 0.1,
+            'dt' : 2**-4,
             'nsegs_method' : 'lambda_f',
             'lambda_f' : 100,   
         }
                 
         stimParams = {
             'pptype' : 'SinSyn',
-            'delay' : 0., # -100
+            'delay' : 0., 
             'dur' : 1000.,
             'pkamp' : 1.,
             'freq' : 100.,
-            'phase' : 0, #-np.pi/2,
+            'phase' : 0,
             'bias' : 0.,
             'record_current' : False
         }
@@ -1037,12 +995,42 @@ class testLFPy(unittest.TestCase):
         for idx in range(31): #31 segments
             if idx != 15: # no net dipole moment because of stick symmetry
                 stick = LFPy.Cell(**stickParams)
-                synapse = LFPy.StimIntElectrode(stick, stick.get_closest_idx(0, 0, 1000),
+                synapse = LFPy.StimIntElectrode(stick, idx=idx,
                                        **stimParams)
                 stick.simulate(rec_imem=True, rec_current_dipole_moment=True)
                 p = np.dot(stick.imem.T, np.c_[stick.xmid, stick.ymid, stick.zmid])
                 np.testing.assert_allclose(p, stick.current_dipole_moment)
 
+    def test_cell_simulate_current_dipole_moment_02(self):
+        stickParams = {
+            'morphology' : os.path.join(LFPy.__path__[0], 'stick.hoc'),
+            'rm' : 30000,
+            'cm' : 1,
+            'Ra' : 150,
+            'tstartms' : -100,
+            'tstopms' : 100,
+            'dt' : 2**-4,
+            'nsegs_method' : 'lambda_f',
+            'lambda_f' : 100,   
+        }
+                
+        stimParams = {
+            'e' : 0,                                # reversal potential
+            'syntype' : 'Exp2Syn',                   # synapse type
+            'tau1' : 0.1,                              # syn. time constant
+            'tau2' : 2.,                              # syn. time constant
+            'weight' : 0.01,
+        }
+                
+        for idx in range(31): #31 segments
+            if idx != 15: # no net dipole moment because of stick symmetry
+                stick = LFPy.Cell(**stickParams)
+                synapse = LFPy.Synapse(stick, idx=idx,
+                                       **stimParams)
+                synapse.set_spike_times(np.array([10., 20., 30., 40., 50.]))
+                stick.simulate(rec_imem=True, rec_current_dipole_moment=True)
+                p = np.dot(stick.imem.T, np.c_[stick.xmid, stick.ymid, stick.zmid])
+                np.testing.assert_allclose(p, stick.current_dipole_moment)
     
     def test_cell_tstart_00(self):
         stickParams = {
@@ -1050,7 +1038,7 @@ class testLFPy(unittest.TestCase):
             'rm' : 30000,
             'cm' : 1,
             'Ra' : 150,
-            'dt' : 0.1,
+            'dt' : 2**-4,
             'nsegs_method' : 'lambda_f',
             'lambda_f' : 100,   
         }
@@ -1368,7 +1356,7 @@ class testLFPy(unittest.TestCase):
             'Ra' : 150,
             'tstartms' : -100,
             'tstopms' : 100,
-            'dt' : 0.01,
+            'dt' : 2**-6,
             'nsegs_method' : 'lambda_f',
             'lambda_f' : 100,
             
@@ -1413,7 +1401,7 @@ class testLFPy(unittest.TestCase):
             'Ra' : 150,
             'tstartms' : -100,
             'tstopms' : 100,
-            'dt' : 0.01,
+            'dt' : 2**-6,
             'nsegs_method' : 'lambda_f',
             'lambda_f' : 100,
             
@@ -1462,7 +1450,7 @@ class testLFPy(unittest.TestCase):
             'Ra' : 150,
             'tstartms' : -100,
             'tstopms' : 100,
-            'dt' : 0.01,
+            'dt' : 2**-6,
             'nsegs_method' : 'lambda_f',
             'lambda_f' : 100,
             

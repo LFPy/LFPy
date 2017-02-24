@@ -171,13 +171,20 @@ class Cell(object):
                 raise Exception("Could not load existent top-level cell")
         
         #Some parameters and lists initialised
-        if dt not in 2.**np.arange(-16, -1):
-            if self.verbose:
-                print('dt not a power of 2,')
-                print('cell.tvec errors may occur.')
-                print('Initialization will continue.')
-            else:
-                pass
+        try:
+            assert(tstartms <= 0)
+        except AssertionError:
+            raise AssertionError('tstartms must be <= 0.')
+
+        try:
+            assert(dt in 2.**np.arange(-16, -1))
+        except AssertionError:
+            if tstartms == 0.:
+                print('int(1./dt) not factorizable in base 2.' 
+                      'cell.tvec errors may occur, continuing initialization.')
+            elif tstartms < 0:
+                raise AssertionError('int(1./dt) must be factorizable in base 2 if tstartms < 0.')
+
         self.dt = dt
         
         self.tstartms = tstartms
