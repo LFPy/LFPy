@@ -1934,16 +1934,8 @@ class Cell(object):
         if not hasattr(self, 'vmem'):
             raise AttributeError('no vmem, run cell.simulate(rec_vmem=True)')
 
-        iaxial = []
-        d_list = []
-
-        # dseg = np.array(zip((self.xmid - self.xstart),
-        #            (self.ymid - self.ystart),
-        #            (self.zmid - self.zstart)))
-        # dpar = np.array(zip((self.xend - self.xmid),
-        #            (self.yend - self.ymid),
-        #            (self.zend - self.zmid)))
-
+        iaxial = np.zeros((self.totnsegs*2, len(self.tvec)))
+        d_list = np.zeros((self.totnsegs*2, 3))
         dseg = np.c_[self.xmid - self.xstart,
                      self.ymid - self.ystart,
                      self.zmid - self.zstart]
@@ -1957,9 +1949,10 @@ class Cell(object):
                 # skip soma, since soma is an orphan
                 continue
 
-            bottom_seg = True
 
-            parentseg = neuron.h.SectionRef(sec.name()).parent()
+            bottom_seg = True
+            secref = neuron.h.SectionRef(sec.name())
+            parentseg = secref.parent()
             parentsec = parentseg.sec
 
             branch = len(children_dict[parentsec.name()]) > 1
@@ -1969,7 +1962,7 @@ class Cell(object):
 
             for _ in sec:
                 iseg, ipar = self._parent_and_segment_i(seg_idx, parent_idx,
-                                                        bottom_seg,branch,
+                                                        bottom_seg, branch,
                                                         parentsec)
 
                 if bottom_seg and 'soma' in parentsec.name():
@@ -1983,18 +1976,19 @@ class Cell(object):
                                         self.zstart[seg_idx] -
                                          self.zmid[parent_idx]])
 
-                d_list.append(dpar[parent_idx])
-                d_list.append(dseg[seg_idx])
-                iaxial.append(ipar)
-                iaxial.append(iseg)
+                tot_parent_idx = int(parent_idx*2 + 1)
+                tot_seg_idx = seg_idx*2
+                d_list[tot_parent_idx] = dpar[parent_idx]
+                d_list[tot_seg_idx] = dseg[seg_idx]
+                iaxial[tot_parent_idx] += ipar
+                iaxial[tot_seg_idx] = iseg
 
                 parent_idx = seg_idx
                 seg_idx += 1
                 branch = False
                 bottom_seg = False
                 parent_ri = 0
-
-        return np.array(d_list), np.array(iaxial)
+        return d_list, iaxial
 
 
     def get_axial_resistance(self):

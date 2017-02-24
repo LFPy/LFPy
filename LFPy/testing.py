@@ -987,7 +987,7 @@ class testLFPy(unittest.TestCase):
         dend2.connect(dend1(1.), 0)
         cell = self.cell_w_synapse_from_sections()
         d_list, iaxial = cell.get_axial_currents()
-        np.testing.assert_almost_equal(-iaxial[0], cell.imem[0], decimal=9)
+        np.testing.assert_almost_equal(-iaxial[1], cell.imem[0], decimal=9)
 
     def test_soma_dend_mid(self):
         '''
@@ -998,7 +998,7 @@ class testLFPy(unittest.TestCase):
         dend.connect(soma(0.5), 0)
         cell = self.cell_w_synapse_from_sections()
         d_list, iaxial = cell.get_axial_currents()
-        np.testing.assert_almost_equal(-iaxial[1], cell.imem[0], decimal=9)
+        np.testing.assert_almost_equal(-iaxial[2], cell.imem[0], decimal=9)
 
     def test_soma_dend_end(self):
         '''
@@ -1009,7 +1009,7 @@ class testLFPy(unittest.TestCase):
         dend.connect(soma(1.0), 0)
         cell = self.cell_w_synapse_from_sections()
         d_list, iaxial = cell.get_axial_currents()
-        np.testing.assert_almost_equal(-iaxial[0], cell.imem[0], decimal=9)
+        np.testing.assert_almost_equal(-iaxial[1], cell.imem[0], decimal=9)
 
     def test_soma_dend_rand_conn_not_0(self):
         '''
@@ -1020,7 +1020,7 @@ class testLFPy(unittest.TestCase):
         dend.connect(soma(random.uniform(1e-2, 1.)), 0)
         cell = self.cell_w_synapse_from_sections()
         d_list, iaxial = cell.get_axial_currents()
-        np.testing.assert_almost_equal(-iaxial[1], cell.imem[0], decimal=9)
+        np.testing.assert_almost_equal(-iaxial[2], cell.imem[0], decimal=9)
 
     def test_soma_dends_mid(self):
         '''
@@ -1033,7 +1033,7 @@ class testLFPy(unittest.TestCase):
         dend2.connect(soma(0.5), 0)
         cell = self.cell_w_synapse_from_sections()
         d_list, iaxial = cell.get_axial_currents()
-        np.testing.assert_almost_equal(-iaxial[1]-iaxial[3], cell.imem[0], decimal=9)
+        np.testing.assert_almost_equal(-iaxial[2]-iaxial[4], cell.imem[0], decimal=9)
 
     def test_soma_dends_end(self):
         '''
@@ -1046,7 +1046,7 @@ class testLFPy(unittest.TestCase):
         dend2.connect(soma(1.), 0)
         cell = self.cell_w_synapse_from_sections()
         d_list, iaxial = cell.get_axial_currents()
-        np.testing.assert_almost_equal(-iaxial[1]-iaxial[3], cell.imem[0], decimal=9)
+        np.testing.assert_almost_equal(-iaxial[2]-iaxial[4], cell.imem[0], decimal=9)
 
     def test_soma_dends_diff(self):
         '''
@@ -1059,7 +1059,7 @@ class testLFPy(unittest.TestCase):
         dend2.connect(soma(.5), 0)
         cell = self.cell_w_synapse_from_sections()
         d_list, iaxial = cell.get_axial_currents()
-        np.testing.assert_almost_equal(-iaxial[1]-iaxial[3], cell.imem[0], decimal=9)
+        np.testing.assert_almost_equal(-iaxial[2]-iaxial[4], cell.imem[0], decimal=9)
 
     def test_soma_y_diff(self):
         '''
@@ -1074,7 +1074,7 @@ class testLFPy(unittest.TestCase):
         dend3.connect(dend1(1.), 0)
         cell = self.cell_w_synapse_from_sections()
         d_list, iaxial = cell.get_axial_currents()
-        np.testing.assert_almost_equal(-iaxial[1]+iaxial[3]+iaxial[5], -cell.imem[1], decimal=9)
+        np.testing.assert_almost_equal(-iaxial[2]+iaxial[4]+iaxial[6], -cell.imem[1], decimal=9)
 
     def test_3_dends_soma(self):
         '''
@@ -1089,8 +1089,22 @@ class testLFPy(unittest.TestCase):
         dend3.connect(soma(.8), 0)
         cell = self.cell_w_synapse_from_sections()
         d_list, iaxial = cell.get_axial_currents()
-        np.testing.assert_almost_equal(-iaxial[1]-iaxial[3]-iaxial[5], cell.imem[0], decimal=9)
+        np.testing.assert_almost_equal(-iaxial[2]-iaxial[4]-iaxial[6], cell.imem[0], decimal=9)
 
+    def test_len_iaxial(self):
+        '''
+        Check that len(iaxial) = cell.totnsegs - 1
+        '''
+        soma = neuron.h.Section(name='soma[0]')
+        dend1 = neuron.h.Section(name='dend1[0]')
+        dend2 = neuron.h.Section(name='dend2[0]')
+        dend3 = neuron.h.Section(name='dend3[0]')
+        dend1.connect(soma(1.0), 0)
+        dend2.connect(soma(.5), 0)
+        dend3.connect(soma(.8), 0)
+        cell = self.cell_w_synapse_from_sections()
+        d_list, iaxial = cell.get_axial_currents()
+        np.testing.assert_equal(len(iaxial)*0.5, cell.totnsegs)
 
     def test_decompose_dipole(self):
         '''Test radial and tangential parts of dipole sums to dipole'''
