@@ -987,8 +987,11 @@ class testLFPy(unittest.TestCase):
         dend2 = neuron.h.Section(name='dend2')
         dend2.connect(dend1(1.), 0)
         cell, synapse, d_list, iaxial = self.cell_w_synapse_from_sections(sections=[dend1, dend2])
+        self.assertEqual(iaxial.shape[0], cell.totnsegs*2)
         np.testing.assert_almost_equal(-iaxial[0], cell.imem[0], decimal=9)
         np.testing.assert_allclose(-iaxial[0], cell.imem[0], rtol=1E-5)
+        np.testing.assert_almost_equal(iaxial[1], cell.imem[1], decimal=9)
+        np.testing.assert_allclose(iaxial[1], cell.imem[1], rtol=1E-5)
         
     def test_soma_dend_mid(self):
         '''
@@ -999,6 +1002,8 @@ class testLFPy(unittest.TestCase):
         dend = neuron.h.Section(name='dend')
         dend.connect(soma(0.5), 0)
         cell, synapse, d_list, iaxial = self.cell_w_synapse_from_sections(sections=[soma, dend])
+        self.assertEqual(iaxial.shape[0], cell.totnsegs*2)
+        np.testing.assert_allclose(iaxial[0], np.zeros(cell.tvec.size))
         np.testing.assert_almost_equal(-iaxial[1], cell.imem[0], decimal=9)
         np.testing.assert_allclose(-iaxial[1], cell.imem[0], rtol=1E-4)
     
@@ -1011,6 +1016,7 @@ class testLFPy(unittest.TestCase):
         dend = neuron.h.Section(name='dend')
         dend.connect(soma(1.0), 0)
         cell, synapse, d_list, iaxial = self.cell_w_synapse_from_sections(sections=[soma, dend])
+        self.assertEqual(iaxial.shape[0], cell.totnsegs*2)
         np.testing.assert_almost_equal(-iaxial[0], cell.imem[0], decimal=9)
         np.testing.assert_allclose(-iaxial[0], cell.imem[0], rtol=1E-4)
     
@@ -1023,6 +1029,7 @@ class testLFPy(unittest.TestCase):
         dend = neuron.h.Section(name='dend')
         dend.connect(soma(random.uniform(1e-2, 1.)), 0)
         cell, synapse, d_list, iaxial = self.cell_w_synapse_from_sections(sections=[soma, dend])
+        self.assertEqual(iaxial.shape[0], cell.totnsegs*2)
         np.testing.assert_almost_equal(-iaxial[1], cell.imem[0], decimal=9)
         np.testing.assert_allclose(-iaxial[1], cell.imem[0], rtol=1E-4)
     
@@ -1037,6 +1044,7 @@ class testLFPy(unittest.TestCase):
         dend1.connect(soma(0.5), 0)
         dend2.connect(soma(0.5), 0)
         cell, synapse, d_list, iaxial = self.cell_w_synapse_from_sections(sections=[soma, dend1, dend2])
+        self.assertEqual(iaxial.shape[0], cell.totnsegs*2)
         np.testing.assert_almost_equal(-iaxial[1]-iaxial[3], cell.imem[0], decimal=9)
         np.testing.assert_allclose(-iaxial[1]-iaxial[3], cell.imem[0], rtol=1E-4)
     
@@ -1051,6 +1059,7 @@ class testLFPy(unittest.TestCase):
         dend1.connect(soma(1.), 0)
         dend2.connect(soma(1.), 0)
         cell, synapse, d_list, iaxial = self.cell_w_synapse_from_sections(sections=[soma, dend1, dend2])
+        self.assertEqual(iaxial.shape[0], cell.totnsegs*2)
         np.testing.assert_almost_equal(-iaxial[1]-iaxial[3], cell.imem[0], decimal=9)
         np.testing.assert_allclose(-iaxial[1]-iaxial[3], cell.imem[0], rtol=1E-4)
     
@@ -1065,6 +1074,7 @@ class testLFPy(unittest.TestCase):
         dend1.connect(soma(1.0), 0)
         dend2.connect(soma(.5), 0)
         cell, synapse, d_list, iaxial = self.cell_w_synapse_from_sections(sections=[soma, dend1, dend2])
+        self.assertEqual(iaxial.shape[0], cell.totnsegs*2)
         np.testing.assert_almost_equal(-iaxial[1]-iaxial[3], cell.imem[0], decimal=9)
         np.testing.assert_allclose(-iaxial[1]-iaxial[3], cell.imem[0], rtol=1E-4)
     
@@ -1081,6 +1091,7 @@ class testLFPy(unittest.TestCase):
         dend2.connect(dend1(.5), 0)
         dend3.connect(dend1(1.), 0)
         cell, synapse, d_list, iaxial = self.cell_w_synapse_from_sections(sections=[soma, dend1, dend2, dend3])
+        self.assertEqual(iaxial.shape[0], cell.totnsegs*2)
         np.testing.assert_almost_equal(-iaxial[1]+iaxial[3]+iaxial[5], -cell.imem[1], decimal=9)
         np.testing.assert_allclose(-iaxial[1]+iaxial[3]+iaxial[5], -cell.imem[1], rtol=1E-4)
     
@@ -1097,6 +1108,7 @@ class testLFPy(unittest.TestCase):
         dend2.connect(soma(.5), 0)
         dend3.connect(soma(0.8), 0)
         cell, synapse, d_list, iaxial = self.cell_w_synapse_from_sections(sections=[soma, dend1, dend2, dend3])
+        self.assertEqual(iaxial.shape[0], cell.totnsegs*2)
         np.testing.assert_almost_equal(-iaxial[1]-iaxial[3]-iaxial[5], cell.imem[0], decimal=9)
         np.testing.assert_allclose(-iaxial[1]-iaxial[3]-iaxial[5], cell.imem[0], rtol=1E-3)
 
