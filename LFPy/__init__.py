@@ -36,7 +36,7 @@ from .recextelectrode import RecExtElectrode, RecExtElectrodeSetup
 from .cell import Cell
 from .templatecell import TemplateCell
 from .testing import _test as test
-from .eegmegcalc import EEGMEGCalc
+from .eegmegcalc import EEGMEGCalc, MEG
 
 from . import lfpcalc
 from . import tools

@@ -474,3 +474,98 @@ class EEGMEGCalc:
     def calc_d4n(self, n, c4):
         d4 = n / (n + 1) * c4
         return d4
+
+
+
+class MEG(object):
+    """
+    Basic class for computing magnetic field from current dipole moment.
+    For this purpose we use the Biot-Savart law derived from Maxwell's equations
+    under the assumption of negligible magnetic induction effects (Nunez and
+    Srinivasan, Oxford University Press 2006):
+
+    .. math:: \mathbf{H} = \frac{\mathbf{p \times R}}{4 \pi R^3}
+
+    where :math:`\mathbf{p}` is the current dipole moment, :math:`\mathbf{R}`
+    the vector between dipole source location and measurement location.
+
+
+    Parameters
+    ----------
+    sensor_locations : np.ndarray
+        shape (n_locations x 3) array with x,y,z-locations of measurement
+        devices where magnetic field of current dipole moments is calculated
+
+
+    Examples
+    --------
+    >>> cell = LFPy.Cell(morphology='hoc')
+
+    .. note:: The magnetic field :math:`\mathbf{H}` is related to the magnetic
+              field :math:`\mathbf{B}` as
+              :math:`\mu_0 \mathbf{H} = \mathbf{B} - \mathbf{M}`
+              where :math:`\mu_0` is the permeability of free space (also in
+              biological tissues). :math:`M` denotes material magnetization
+              (also ignored)
+
+    """
+    def __init__(self, sensor_locations):
+        """
+        Initialize class MEG
+        """
+        try:
+            assert(sensor_locations.ndim == 2)
+        except AssertionError:
+            raise AssertionError('sensor_locations.ndim != 2')
+        try:
+            assert(sensor_locations.shape[1] == 3)
+        except AssertionError:
+            raise AssertionError('sensor_locations.shape[1] != 3')
+
+        # set attributes
+        self.sensor_locations = sensor_locations
+
+
+    def calculate_H(self, current_dipole_moment, dipole_location):
+        """
+        Parameters
+        ----------
+        current_dipole_moment : np.ndarray
+            shape (n_timesteps x 3) array with x,y,z-components of current-
+            dipole moment time series data in units of [nA µm]
+        dipole_location : np.ndarray
+            shape (3, ) array with x,y,z-location of dipole in units of [µm]
+
+        Returns
+        -------
+        np.ndarray
+            shape (n_locations x n_timesteps x 3) array with x,y,z-components of the magnetic
+            field :math:`\mathbf{H}` in units of [nA/µm]
+        """
+        try:
+            assert(current_dipole_moment.ndim == 2)
+        except AssertionError:
+            raise AssertionError('current_dipole_moment.ndim != 2')
+        try:
+            assert(current_dipole_moment.shape[1] == 3)
+        except AssertionError:
+            raise AssertionError('current_dipole_moment.shape[1] != 3')
+        try:
+            assert(dipole_location.shape == (3, ))
+        except AssertionError:
+            raise AssertionError('dipole_location.shape != (3, )')
+
+
+        # container
+        H = np.empty((self.sensor_locations.shape[0],
+                      current_dipole_moment.shape[0],
+                      3))
+        # iterate over sensor locations
+        for i, r in enumerate(self.sensor_locations):
+            R = r - dipole_location
+            assert(R.ndim==1)
+            H[i, ] = np.cross(current_dipole_moment,
+                              R) / (4 * np.pi * np.sqrt((R**2).sum())**3)
+
+        return H
+

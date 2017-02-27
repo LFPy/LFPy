@@ -992,7 +992,7 @@ class testLFPy(unittest.TestCase):
         np.testing.assert_allclose(-iaxial[0], cell.imem[0], rtol=1E-5)
         np.testing.assert_almost_equal(iaxial[1], cell.imem[1], decimal=9)
         np.testing.assert_allclose(iaxial[1], cell.imem[1], rtol=1E-5)
-        
+
     def test_soma_dend_mid(self):
         '''
         Check Kirchhoff in soma when single dend connected to soma mid.
@@ -1006,7 +1006,7 @@ class testLFPy(unittest.TestCase):
         np.testing.assert_allclose(iaxial[0], np.zeros(cell.tvec.size))
         np.testing.assert_almost_equal(-iaxial[1], cell.imem[0], decimal=9)
         np.testing.assert_allclose(-iaxial[1], cell.imem[0], rtol=1E-4)
-    
+
     def test_soma_dend_end(self):
         '''
         Check Kirchhoff in soma when single dend connected to soma end.
@@ -1019,7 +1019,7 @@ class testLFPy(unittest.TestCase):
         self.assertEqual(iaxial.shape[0], cell.totnsegs*2)
         np.testing.assert_almost_equal(-iaxial[0], cell.imem[0], decimal=9)
         np.testing.assert_allclose(-iaxial[0], cell.imem[0], rtol=1E-4)
-    
+
     def test_soma_dend_rand_conn_not_0(self):
         '''
         Check Kirchhoff in soma when single dend connected to random soma point.
@@ -1032,7 +1032,7 @@ class testLFPy(unittest.TestCase):
         self.assertEqual(iaxial.shape[0], cell.totnsegs*2)
         np.testing.assert_almost_equal(-iaxial[1], cell.imem[0], decimal=9)
         np.testing.assert_allclose(-iaxial[1], cell.imem[0], rtol=1E-4)
-    
+
     def test_soma_dends_mid(self):
         '''
         Check Kirchhoff in soma when two dends connected to soma mid.
@@ -1047,7 +1047,7 @@ class testLFPy(unittest.TestCase):
         self.assertEqual(iaxial.shape[0], cell.totnsegs*2)
         np.testing.assert_almost_equal(-iaxial[1]-iaxial[3], cell.imem[0], decimal=9)
         np.testing.assert_allclose(-iaxial[1]-iaxial[3], cell.imem[0], rtol=1E-4)
-    
+
     def test_soma_dends_end(self):
         '''
         Check Kirchhoff in soma when two dends connected to soma end.
@@ -1062,7 +1062,7 @@ class testLFPy(unittest.TestCase):
         self.assertEqual(iaxial.shape[0], cell.totnsegs*2)
         np.testing.assert_almost_equal(-iaxial[1]-iaxial[3], cell.imem[0], decimal=9)
         np.testing.assert_allclose(-iaxial[1]-iaxial[3], cell.imem[0], rtol=1E-4)
-    
+
     def test_soma_dends_diff(self):
         '''
         Check Kirchhoff in soma when two dends connected to diff soma points.
@@ -1077,7 +1077,7 @@ class testLFPy(unittest.TestCase):
         self.assertEqual(iaxial.shape[0], cell.totnsegs*2)
         np.testing.assert_almost_equal(-iaxial[1]-iaxial[3], cell.imem[0], decimal=9)
         np.testing.assert_allclose(-iaxial[1]-iaxial[3], cell.imem[0], rtol=1E-4)
-    
+
     def test_soma_y_diff(self):
         '''
         Check Kirchhoff in mid dend when two dends connected to dend.
@@ -1094,7 +1094,7 @@ class testLFPy(unittest.TestCase):
         self.assertEqual(iaxial.shape[0], cell.totnsegs*2)
         np.testing.assert_almost_equal(-iaxial[1]+iaxial[3]+iaxial[5], -cell.imem[1], decimal=9)
         np.testing.assert_allclose(-iaxial[1]+iaxial[3]+iaxial[5], -cell.imem[1], rtol=1E-4)
-    
+
     def test_3_dends_soma(self):
         '''
         Check Kirchhoff in soma when three dends connected to soma.
@@ -1155,6 +1155,116 @@ class testLFPy(unittest.TestCase):
         P1 = np.array([[0., 0., 1.], [0., 0., -2.]])
         s_vector = fs.sign_rad_dipole(P1)
         np.testing.assert_almost_equal(s_vector, np.array([1., -1.]))
+
+
+    def test_MEG_00(self):
+        '''test LFPy.MEG.calculate_H()'''
+        current_dipole_moment = np.zeros((11, 3))
+        current_dipole_moment[:, 0] += 1.
+        dipole_location = np.zeros(3)
+        sensor_locations = np.r_[np.eye(3), -np.eye(3)]
+
+        gt = np.zeros((sensor_locations.shape[0],
+                       current_dipole_moment.shape[0], 3))
+        gt[1, :, 2] = 1./4/np.pi
+        gt[2, :, 1] = -1./4/np.pi
+        gt[4, :, 2] = -1./4/np.pi
+        gt[5, :, 1] = 1./4/np.pi
+
+        meg = LFPy.MEG(sensor_locations)
+        np.testing.assert_equal(gt, meg.calculate_H(current_dipole_moment,
+                                                    dipole_location))
+
+    def test_MEG_01(self):
+        '''test LFPy.MEG.calculate_H()'''
+        current_dipole_moment = np.zeros((11, 3))
+        current_dipole_moment[:, 1] += 1.
+        dipole_location = np.zeros(3)
+        sensor_locations = np.r_[np.eye(3), -np.eye(3)]
+
+        gt = np.zeros((sensor_locations.shape[0],
+                       current_dipole_moment.shape[0], 3))
+        gt[0, :, 2] = -1./4/np.pi
+        gt[2, :, 0] = 1./4/np.pi
+        gt[3, :, 2] = 1./4/np.pi
+        gt[5, :, 0] = -1./4/np.pi
+
+        meg = LFPy.MEG(sensor_locations)
+        np.testing.assert_equal(gt, meg.calculate_H(current_dipole_moment,
+                                                    dipole_location))
+
+    def test_MEG_02(self):
+        '''test LFPy.MEG.calculate_H()'''
+        current_dipole_moment = np.zeros((11, 3))
+        current_dipole_moment[:, 2] += 1.
+        dipole_location = np.zeros(3)
+        sensor_locations = np.r_[np.eye(3), -np.eye(3)]
+
+        # ground truth
+        gt = np.zeros((sensor_locations.shape[0],
+                       current_dipole_moment.shape[0], 3))
+        gt[0, :, 1] = 1./4/np.pi
+        gt[1, :, 0] = -1./4/np.pi
+        gt[3, :, 1] = -1./4/np.pi
+        gt[4, :, 0] = 1./4/np.pi
+
+        meg = LFPy.MEG(sensor_locations)
+        np.testing.assert_equal(gt, meg.calculate_H(current_dipole_moment,
+                                                    dipole_location))
+
+    def test_MEG_03(self):
+        '''test LFPy.MEG.calculate_H()'''
+        current_dipole_moment = np.zeros((1, 3))
+        current_dipole_moment[:, 0] += 1.
+        dipole_location = np.zeros(3)
+        sensor_locations = np.r_[np.eye(3), -np.eye(3)]
+
+        gt = np.zeros((sensor_locations.shape[0],
+                       current_dipole_moment.shape[0], 3))
+        gt[1, :, 2] = 1./4/np.pi
+        gt[2, :, 1] = -1./4/np.pi
+        gt[4, :, 2] = -1./4/np.pi
+        gt[5, :, 1] = 1./4/np.pi
+
+        meg = LFPy.MEG(sensor_locations)
+        np.testing.assert_equal(gt, meg.calculate_H(current_dipole_moment,
+                                                    dipole_location))
+
+    def test_MEG_04(self):
+        '''test LFPy.MEG.calculate_H()'''
+        current_dipole_moment = np.zeros((1, 3))
+        current_dipole_moment[:, 1] += 1.
+        dipole_location = np.zeros(3)
+        sensor_locations = np.r_[np.eye(3), -np.eye(3)]
+
+        gt = np.zeros((sensor_locations.shape[0],
+                       current_dipole_moment.shape[0], 3))
+        gt[0, :, 2] = -1./4/np.pi
+        gt[2, :, 0] = 1./4/np.pi
+        gt[3, :, 2] = 1./4/np.pi
+        gt[5, :, 0] = -1./4/np.pi
+
+        meg = LFPy.MEG(sensor_locations)
+        np.testing.assert_equal(gt, meg.calculate_H(current_dipole_moment,
+                                                    dipole_location))
+
+    def test_MEG_05(self):
+        '''test LFPy.MEG.calculate_H()'''
+        current_dipole_moment = np.zeros((1, 3))
+        current_dipole_moment[:, 2] += 1.
+        dipole_location = np.zeros(3)
+        sensor_locations = np.r_[np.eye(3), -np.eye(3)]
+
+        gt = np.zeros((sensor_locations.shape[0],
+                       current_dipole_moment.shape[0], 3))
+        gt[0, :, 1] = 1./4/np.pi
+        gt[1, :, 0] = -1./4/np.pi
+        gt[3, :, 1] = -1./4/np.pi
+        gt[4, :, 0] = 1./4/np.pi
+
+        meg = LFPy.MEG(sensor_locations)
+        np.testing.assert_equal(gt, meg.calculate_H(current_dipole_moment,
+                                                    dipole_location))
 
 
     ######## Functions used by tests: ##########################################
