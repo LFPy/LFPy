@@ -482,12 +482,19 @@ class MEG(object):
     Basic class for computing magnetic field from current dipole moment.
     For this purpose we use the Biot-Savart law derived from Maxwell's equations
     under the assumption of negligible magnetic induction effects (Nunez and
-    Srinivasan, Oxford University Press 2006):
+    Srinivasan, Oxford University Press, 2006):
 
-    .. math:: \mathbf{H} = \frac{\mathbf{p \times R}}{4 \pi R^3}
+    .. math:: \mathbf{H} = \\frac{\\mathbf{p} \\times \\mathbf{R}}{4 \pi R^3}
 
     where :math:`\mathbf{p}` is the current dipole moment, :math:`\mathbf{R}`
-    the vector between dipole source location and measurement location.
+    the vector between dipole source location and measurement location, and
+    :math:`R=|\mathbf{R}|`
+ 
+    Note that the magnetic field :math:`\mathbf{H}` is related to the magnetic
+    field :math:`\mathbf{B}` as :math:`\mu_0 \mathbf{H} = \mathbf{B}-\mathbf{M}`
+    where :math:`\mu_0` is the permeability of free space (very close to
+    permebility of biological tissues). :math:`\mathbf{M}` denotes material
+    magnetization (also ignored)
 
 
     Parameters
@@ -499,16 +506,21 @@ class MEG(object):
 
     Examples
     --------
-    Define cell object, create synapse, compute current_dipole_moment
+    Define cell object, create synapse, compute current dipole moment
+    
     >>> import LFPy, os, numpy as np, matplotlib as plt
     >>> cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'ball_and_sticks.hoc'))
     >>> cell.set_pos(0., 0., 0.)
     >>> syn = LFPy.Synapse(cell, idx=0, syntype='ExpSyn', weight=0.01, rec_isyn=True)
     >>> syn.set_spike_times_w_netstim()
     >>> cell.simulate(rec_isyn=True, rec_current_dipole_moment=True)
-    # Compute the dipole location as an average of segment locations weighted by membrane area
+    
+    Compute the dipole location as an average of segment locations weighted by membrane area
+    
     >>> dipole_location = (cell.area * np.c_[cell.xmid, cell.ymid, cell.zmid].T / cell.area.sum()).sum(axis=1)
-    # Instantiate the LFPy.MEG object, compute and plot the magnetic signal in a sensor location
+    
+    Instantiate the LFPy.MEG object, compute and plot the magnetic signal in a sensor location
+    
     >>> sensor_locations = np.array([[1E4, 0, 0]])
     >>> meg = LFPy.MEG(sensor_locations)
     >>> H = meg.calculate_H(cell.current_dipole_location, dipole_location)
@@ -519,12 +531,11 @@ class MEG(object):
     >>> plt.subplot(313)
     >>> plt.plot(cell.tvec, H)
     
-    .. note:: The magnetic field :math:`\mathbf{H}` is related to the magnetic
-              field :math:`\mathbf{B}` as
-              :math:`\mu_0 \mathbf{H} = \mathbf{B} - \mathbf{M}`
-              where :math:`\mu_0` is the permeability of free space (also in
-              biological tissues). :math:`M` denotes material magnetization
-              (also ignored)
+    Raises
+    ------
+    AssertionError
+        If dimensionality of sensor_locations is wrong
+
 
     """
     def __init__(self, sensor_locations):
@@ -559,6 +570,11 @@ class MEG(object):
         np.ndarray
             shape (n_locations x n_timesteps x 3) array with x,y,z-components of the magnetic
             field :math:`\mathbf{H}` in units of [nA/µm]
+
+        Raises
+        ------
+        AssertionError
+            If dimensionality of current_dipole_moment and/or dipole_location is wrong
         """
         try:
             assert(current_dipole_moment.ndim == 2)
