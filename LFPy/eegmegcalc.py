@@ -499,8 +499,26 @@ class MEG(object):
 
     Examples
     --------
-    >>> cell = LFPy.Cell(morphology='hoc')
-
+    Define cell object, create synapse, compute current_dipole_moment
+    >>> import LFPy, os, numpy as np, matplotlib as plt
+    >>> cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'ball_and_sticks.hoc'))
+    >>> cell.set_pos(0., 0., 0.)
+    >>> syn = LFPy.Synapse(cell, idx=0, syntype='ExpSyn', weight=0.01, rec_isyn=True)
+    >>> syn.set_spike_times_w_netstim()
+    >>> cell.simulate(rec_isyn=True, rec_current_dipole_moment=True)
+    # Compute the dipole location as an average of segment locations weighted by membrane area
+    >>> dipole_location = (cell.area * np.c_[cell.xmid, cell.ymid, cell.zmid].T / cell.area.sum()).sum(axis=1)
+    # Instantiate the LFPy.MEG object, compute and plot the magnetic signal in a sensor location
+    >>> sensor_locations = np.array([[1E4, 0, 0]])
+    >>> meg = LFPy.MEG(sensor_locations)
+    >>> H = meg.calculate_H(cell.current_dipole_location, dipole_location)
+    >>> plt.subplot(311)
+    >>> plt.plot(cell.tvec, cell.somav)
+    >>> plt.subplot(312)
+    >>> plt.plot(cell.tvec, syn.i)
+    >>> plt.subplot(313)
+    >>> plt.plot(cell.tvec, H)
+    
     .. note:: The magnetic field :math:`\mathbf{H}` is related to the magnetic
               field :math:`\mathbf{B}` as
               :math:`\mu_0 \mathbf{H} = \mathbf{B} - \mathbf{M}`
@@ -563,7 +581,11 @@ class MEG(object):
         # iterate over sensor locations
         for i, r in enumerate(self.sensor_locations):
             R = r - dipole_location
-            assert(R.ndim==1)
+            assert(R.ndim==1 and R.size == 3)
+            try:
+                assert(np.allclose(R, np.zeros(3)) == False)
+            except AssertionError:
+                raise AssertionError('Identical dipole and sensor location.')
             H[i, ] = np.cross(current_dipole_moment,
                               R) / (4 * np.pi * np.sqrt((R**2).sum())**3)
 
