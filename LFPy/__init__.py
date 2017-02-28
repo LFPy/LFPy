@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 '''Initialization of LFPy, a module for simulating extracellular potentials.
 
 Group of Computational Neuroscience,
