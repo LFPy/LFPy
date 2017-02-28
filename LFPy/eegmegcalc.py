@@ -49,7 +49,7 @@ class FourSphereVolumeConductor(object):
     """
 
     def __init__(self, radii, sigmas, r, rz):
-
+        """Initialize class FourSphereVolumeConductor"""
         self.k1 = 1E6  # from mV to nV
         self.r1 = radii[0]
         self.r2 = radii[1]
@@ -534,6 +534,7 @@ class InfiniteVolumeConductor(object):
     """
 
     def __init__(self, sigma=0.3):
+        "Initialize class InfiniteVolumeConductor"
         self.sigma = sigma
 
     def get_dipole_potential(self, P, x, y, z):
@@ -645,7 +646,7 @@ class MEG(object):
     where :math:`\mathbf{p}` is the current dipole moment, :math:`\mathbf{R}`
     the vector between dipole source location and measurement location, and
     :math:`R=|\mathbf{R}|`
- 
+
     Note that the magnetic field :math:`\mathbf{H}` is related to the magnetic
     field :math:`\mathbf{B}` as :math:`\mu_0 \mathbf{H} = \mathbf{B}-\mathbf{M}`
     where :math:`\mu_0` is the permeability of free space (very close to
@@ -663,20 +664,20 @@ class MEG(object):
     Examples
     --------
     Define cell object, create synapse, compute current dipole moment
-    
+
     >>> import LFPy, os, numpy as np, matplotlib as plt
     >>> cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'ball_and_sticks.hoc'))
     >>> cell.set_pos(0., 0., 0.)
     >>> syn = LFPy.Synapse(cell, idx=0, syntype='ExpSyn', weight=0.01, rec_isyn=True)
     >>> syn.set_spike_times_w_netstim()
     >>> cell.simulate(rec_isyn=True, rec_current_dipole_moment=True)
-    
+
     Compute the dipole location as an average of segment locations weighted by membrane area
-    
+
     >>> dipole_location = (cell.area * np.c_[cell.xmid, cell.ymid, cell.zmid].T / cell.area.sum()).sum(axis=1)
-    
+
     Instantiate the LFPy.MEG object, compute and plot the magnetic signal in a sensor location
-    
+
     >>> sensor_locations = np.array([[1E4, 0, 0]])
     >>> meg = LFPy.MEG(sensor_locations)
     >>> H = meg.calculate_H(cell.current_dipole_location, dipole_location)
@@ -686,7 +687,7 @@ class MEG(object):
     >>> plt.plot(cell.tvec, syn.i)
     >>> plt.subplot(313)
     >>> plt.plot(cell.tvec, H)
-    
+
     Raises
     ------
     AssertionError
