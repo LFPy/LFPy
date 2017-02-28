@@ -143,7 +143,7 @@ class FourSphereVolumeConductor(object):
 
         p_tot = np.linalg.norm(p_rad, axis=1)
         theta = self.calc_theta()
-        s_vector = self._sign_rad_dipole(p_rad)
+        s_vector = self.sign_rad_dipole(p_rad)
         phi_const = s_vector * p_tot / (4 * np.pi * self.sigma1 * self.rz ** 2) * self.k1
         n_terms = np.zeros((len(self.r), len(p_tot)))
         for el_point in range(len(self.r)):
@@ -249,7 +249,7 @@ class FourSphereVolumeConductor(object):
                     phi[i,j] = 2*np.pi - phi_temp[i,j]
         return phi
 
-    def _sign_rad_dipole(self, p):
+    def sign_rad_dipole(self, p):
         """Flip radial dipole pointing inwards (i.e. we only use p_tot),
         and add a -1 to the s-vector, so that the potential can be
         calculated as if the dipole were pointing outwards,

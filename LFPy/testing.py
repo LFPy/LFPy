@@ -988,10 +988,10 @@ class testLFPy(unittest.TestCase):
         dend2.connect(dend1(1.), 0)
         cell, synapse, d_list, iaxial = self.cell_w_synapse_from_sections(sections=[dend1, dend2])
         self.assertEqual(iaxial.shape[0], cell.totnsegs*2)
-        np.testing.assert_almost_equal(-iaxial[0], cell.imem[0], decimal=9)
-        np.testing.assert_allclose(-iaxial[0], cell.imem[0], rtol=1E-5)
-        np.testing.assert_almost_equal(iaxial[1], cell.imem[1], decimal=9)
-        np.testing.assert_allclose(iaxial[1], cell.imem[1], rtol=1E-5)
+        np.testing.assert_almost_equal(-iaxial[1], cell.imem[0], decimal=9)
+        np.testing.assert_allclose(-iaxial[1], cell.imem[0], rtol=1E-5)
+        np.testing.assert_almost_equal(iaxial[2], cell.imem[1], decimal=9)
+        np.testing.assert_allclose(iaxial[2], cell.imem[1], rtol=1E-5)
 
     def test_soma_dend_mid(self):
         '''
@@ -1004,8 +1004,8 @@ class testLFPy(unittest.TestCase):
         cell, synapse, d_list, iaxial = self.cell_w_synapse_from_sections(sections=[soma, dend])
         self.assertEqual(iaxial.shape[0], cell.totnsegs*2)
         np.testing.assert_allclose(iaxial[0], np.zeros(cell.tvec.size))
-        np.testing.assert_almost_equal(-iaxial[1], cell.imem[0], decimal=9)
-        np.testing.assert_allclose(-iaxial[1], cell.imem[0], rtol=1E-4)
+        np.testing.assert_almost_equal(-iaxial[2]-iaxial[3], cell.imem[0], decimal=9)
+        np.testing.assert_allclose(-iaxial[2]-iaxial[3], cell.imem[0], rtol=1E-4)
 
     def test_soma_dend_end(self):
         '''
@@ -1017,8 +1017,8 @@ class testLFPy(unittest.TestCase):
         dend.connect(soma(1.0), 0)
         cell, synapse, d_list, iaxial = self.cell_w_synapse_from_sections(sections=[soma, dend])
         self.assertEqual(iaxial.shape[0], cell.totnsegs*2)
-        np.testing.assert_almost_equal(-iaxial[0], cell.imem[0], decimal=9)
-        np.testing.assert_allclose(-iaxial[0], cell.imem[0], rtol=1E-4)
+        np.testing.assert_almost_equal(-iaxial[1], cell.imem[0], decimal=9)
+        np.testing.assert_allclose(-iaxial[1], cell.imem[0], rtol=1E-4)
 
     def test_soma_dend_rand_conn_not_0(self):
         '''
@@ -1030,8 +1030,8 @@ class testLFPy(unittest.TestCase):
         dend.connect(soma(random.uniform(1e-2, 1.)), 0)
         cell, synapse, d_list, iaxial = self.cell_w_synapse_from_sections(sections=[soma, dend])
         self.assertEqual(iaxial.shape[0], cell.totnsegs*2)
-        np.testing.assert_almost_equal(-iaxial[1], cell.imem[0], decimal=9)
-        np.testing.assert_allclose(-iaxial[1], cell.imem[0], rtol=1E-4)
+        np.testing.assert_almost_equal(-iaxial[2], cell.imem[0], decimal=9)
+        np.testing.assert_allclose(-iaxial[2], cell.imem[0], rtol=1E-4)
 
     def test_soma_dends_mid(self):
         '''
@@ -1045,8 +1045,8 @@ class testLFPy(unittest.TestCase):
         dend2.connect(soma(0.5), 0)
         cell, synapse, d_list, iaxial = self.cell_w_synapse_from_sections(sections=[soma, dend1, dend2])
         self.assertEqual(iaxial.shape[0], cell.totnsegs*2)
-        np.testing.assert_almost_equal(-iaxial[1]-iaxial[3], cell.imem[0], decimal=9)
-        np.testing.assert_allclose(-iaxial[1]-iaxial[3], cell.imem[0], rtol=1E-4)
+        np.testing.assert_almost_equal(-iaxial[2]-iaxial[4], cell.imem[0], decimal=9)
+        np.testing.assert_allclose(-iaxial[2]-iaxial[4], cell.imem[0], rtol=1E-4)
 
     def test_soma_dends_end(self):
         '''
@@ -1075,8 +1075,8 @@ class testLFPy(unittest.TestCase):
         dend2.connect(soma(.5), 0)
         cell, synapse, d_list, iaxial = self.cell_w_synapse_from_sections(sections=[soma, dend1, dend2])
         self.assertEqual(iaxial.shape[0], cell.totnsegs*2)
-        np.testing.assert_almost_equal(-iaxial[1]-iaxial[3], cell.imem[0], decimal=9)
-        np.testing.assert_allclose(-iaxial[1]-iaxial[3], cell.imem[0], rtol=1E-4)
+        np.testing.assert_almost_equal(-iaxial[2]-iaxial[4], cell.imem[0], decimal=9)
+        np.testing.assert_allclose(-iaxial[2]-iaxial[4], cell.imem[0], rtol=1E-4)
 
     def test_soma_y_diff(self):
         '''
@@ -1092,8 +1092,8 @@ class testLFPy(unittest.TestCase):
         dend3.connect(dend1(1.), 0)
         cell, synapse, d_list, iaxial = self.cell_w_synapse_from_sections(sections=[soma, dend1, dend2, dend3])
         self.assertEqual(iaxial.shape[0], cell.totnsegs*2)
-        np.testing.assert_almost_equal(-iaxial[1]+iaxial[3]+iaxial[5], -cell.imem[1], decimal=9)
-        np.testing.assert_allclose(-iaxial[1]+iaxial[3]+iaxial[5], -cell.imem[1], rtol=1E-4)
+        np.testing.assert_almost_equal(-iaxial[1]+iaxial[4]+iaxial[6], -cell.imem[1], decimal=9)
+        np.testing.assert_allclose(-iaxial[1]+iaxial[4]+iaxial[6], -cell.imem[1], rtol=1E-4)
 
     def test_3_dends_soma(self):
         '''
@@ -1107,7 +1107,7 @@ class testLFPy(unittest.TestCase):
         dend1.connect(soma(1.0), 0)
         dend2.connect(soma(.5), 0)
         dend3.connect(soma(.8), 0)
-        cell = self.cell_w_synapse_from_sections()
+        cell, synapse, d_list, iaxial = self.cell_w_synapse_from_sections()
         d_list, iaxial = cell.get_axial_currents()
         np.testing.assert_almost_equal(-iaxial[2]-iaxial[4]-iaxial[6], cell.imem[0], decimal=9)
 
@@ -1124,8 +1124,6 @@ class testLFPy(unittest.TestCase):
         dend3.connect(soma(0.8), 0)
         cell, synapse, d_list, iaxial = self.cell_w_synapse_from_sections(sections=[soma, dend1, dend2, dend3])
         self.assertEqual(iaxial.shape[0], cell.totnsegs*2)
-        np.testing.assert_almost_equal(-iaxial[1]-iaxial[3]-iaxial[5], cell.imem[0], decimal=9)
-        np.testing.assert_allclose(-iaxial[1]-iaxial[3]-iaxial[5], cell.imem[0], rtol=1E-3)
 
     def test_decompose_dipole(self):
         '''Test radial and tangential parts of dipole sums to dipole'''
@@ -1170,7 +1168,6 @@ class testLFPy(unittest.TestCase):
         P1 = np.array([[0., 0., 1.], [0., 0., -2.]])
         s_vector = fs.sign_rad_dipole(P1)
         np.testing.assert_almost_equal(s_vector, np.array([1., -1.]))
-
 
     def test_MEG_00(self):
         '''test LFPy.MEG.calculate_H()'''
@@ -1558,7 +1555,7 @@ class testLFPy(unittest.TestCase):
         '''Return class object fs'''
         radii = [79., 80., 85., 90.]
         sigmas = [0.3, 0.015, 15, 0.3]
-        fs = LFPy.EEGMEGCalc(radii, sigmas, r_el, rz1)
+        fs = LFPy.FourSphereVolumeConductor(radii, sigmas, r_el, rz1)
         return fs
 
     def decompose_dipole(self, P1):

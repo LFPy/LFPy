@@ -1998,7 +1998,7 @@ class Cell(object):
         return d_list, iaxial
 
 
-    def _get_axial_resistance(self):
+    def get_axial_resistance(self):
         """
         Return NEURON axial resistance for all cell compartments.
 
