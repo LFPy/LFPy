@@ -15,19 +15,19 @@ class FourSphereVolumeConductor(object):
 
     Parameters
     __________
-    radii : list of floats in [micro m]
+    radii : list of floats in [µm]
             List containing the outer radii of the 4 concentric shells in the
             four-sphere model: brain, csf, skull and scalp, respectively.
     sigmas : list of floats in [S/cm]
              List containing 4 floats, i.e. the electrical conductivity of the
              four media in the four-sphere model:
              brain, csf, skull and scalp, respectively
-    r : ndarray [micro m]
+    r : ndarray [µm]
         Array containing n electrode locations in cartesian coordinates.
         r.shape = (n, 3)
         All r_el in r must be smaller than the scalp radius and larger than the
         distance between dipole and sphere center: |rz| < r_el < radii[3]
-    rz : ndarray [micro m]
+    rz : ndarray [µm]
          Array containing the position of the current dipole in cartesian
          coordinates.
 
@@ -90,7 +90,7 @@ class FourSphereVolumeConductor(object):
         """
         Parameters
         __________
-        p : ndarray [1E-15 Am]
+        p : ndarray [nA*µm]
             Array containing the current dipole moment for all timesteps in
             the x-, y- and z-direction.
 
@@ -111,15 +111,15 @@ class FourSphereVolumeConductor(object):
         """Decompose current dipole moment vector in radial and tangential terms
         Parameters
         __________
-        p : ndarray [1E-15 Am]
+        p : ndarray  [nA*µm]
             Array containing the current dipole moment for all timesteps in
             the x-, y- and z-direction.
 
         Returns:
         ________
-        p_rad : ndarray [1E-15 Am]
+        p_rad : ndarray  [nA*µm]
                 Radial part of p, parallel to self.rz
-        p_tan : ndarray [1E-15 Am]
+        p_tan : ndarray  [nA*µm]
                 Tangential part of p, orthogonal to self.rz
         """
         p_rad = (np.dot(p, self.rzloc)/self.rz ** 2).reshape(len(p),1) * self.rzloc.reshape(1, len(self.rzloc))
@@ -131,7 +131,7 @@ class FourSphereVolumeConductor(object):
         """Return potential from radial dipole p_rad at location rz measured at r
         Parameters
         __________
-        P : ndarray [1E-15 Am]
+        P : ndarray  [nA*µm]
             Array containing the current dipole moment for all timesteps in
             the x-, y- and z-direction.
 
@@ -170,7 +170,7 @@ class FourSphereVolumeConductor(object):
         """Return potential from tangential dipole P at location rz measured at r
         Parameters
         __________
-        p : ndarray [1E-15 Am]
+        p : ndarray  [nA*µm]
             Array containing the current dipole moment for all timesteps in
             the x-, y- and z-direction.
 
@@ -218,7 +218,7 @@ class FourSphereVolumeConductor(object):
         """Calculate angle between tangential dipole and measurement location
            Parameters
            __________
-           p : ndarray [1E-15 Am]
+           p : ndarray  [nA*µm]
                Array containing tangential component of current dipole moment
            Returns
            _______
@@ -265,7 +265,7 @@ class FourSphereVolumeConductor(object):
         """Calculate sum with constants and legendres
         Parameters
         __________
-        r : ndarray [micro m]
+        r : ndarray [µm]
             Array containing electrode location.
         theta : ndarray [radians]
                 Array of angles between electrode location and
@@ -288,7 +288,7 @@ class FourSphereVolumeConductor(object):
         """Calculate potential in CSF from radial dipole
         Parameters
         __________
-        r : ndarray [micro m]
+        r : ndarray [µm]
             Array containing electrode location.
         theta : ndarray [radians]
                 Array of angles between electrode location and
@@ -312,7 +312,7 @@ class FourSphereVolumeConductor(object):
         """Calculate potential in skull from radial dipole
         Parameters
         __________
-        r : ndarray [micro m]
+        r : ndarray [µm]
             Array containing electrode location.
         theta : ndarray [radians]
                 Array of angles between electrode location and
@@ -336,7 +336,7 @@ class FourSphereVolumeConductor(object):
         """Calculate potential in scalp from radial dipole
         Parameters
         __________
-        r : ndarray [micro m]
+        r : ndarray [µm]
             Array containing electrode location.
         theta : ndarray [radians]
                 Array of angles between electrode location and
@@ -360,7 +360,7 @@ class FourSphereVolumeConductor(object):
         """Calculate sum with constants and legendres
         Parameters
         __________
-        r : ndarray [micro m]
+        r : ndarray [µm]
             Array containing electrode location.
         theta : ndarray [radians]
                 Array of angles between electrode location and
@@ -384,7 +384,7 @@ class FourSphereVolumeConductor(object):
         """Calculate sum with constants and legendres
         Parameters
         __________
-        r : ndarray [micro m]
+        r : ndarray [µm]
             Array containing electrode location.
         theta : ndarray [radians]
                 Array of angles between electrode location and
@@ -409,7 +409,7 @@ class FourSphereVolumeConductor(object):
         """Calculate sum with constants and legendres
         Parameters
         __________
-        r : ndarray [micro m]
+        r : ndarray [µm]
             Array containing electrode location.
         theta : ndarray [radians]
                 Array of angles between electrode location and
@@ -434,7 +434,7 @@ class FourSphereVolumeConductor(object):
         """Calculate sum with constants and legendres
         Parameters
         __________
-        r : ndarray [micro m]
+        r : ndarray [µm]
             Array containing electrode location.
         theta : ndarray [radians]
                 Array of angles between electrode location and
@@ -544,7 +544,7 @@ class InfiniteVolumeConductor(object):
 
         Parameters
         ----------
-        P : ndarray [1E-15 mA]
+        P : ndarray  [nA*µm]
             Array containing the current dipole moment for
             all timesteps in the x-, y- and z-direction.
         x, y, z : ndarray,
@@ -585,7 +585,7 @@ def get_current_dipole_moment(dist, current):
         Either an array containing all transmembrane currents
         from all compartments of the cell. Or an array of all
         axial currents between compartments in cell.
-    dist : ndarray [microm]
+    dist : ndarray [µm]
         When input current is an array of axial currents,
         the dist is the length of each axial current.
         When current is the an array of transmembrane

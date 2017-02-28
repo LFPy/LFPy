@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #!/usr/bin/env python
 """
 Copyright (C) 2012 Computational Neuroscience Group, NMBU.
@@ -1923,7 +1924,7 @@ class Cell(object):
 
         Returns
         -------
-        d_list : ndarray [microm]
+        d_list : ndarray [µm]
             Array of distance vectors traveled by each axial
             current in i_axial. d_list uses same indexing order as
             segments in cell, the only difference being that d_list has two
