@@ -510,7 +510,6 @@ class FourSphereVolumeConductor(object):
         return d4
 
 
-
 class InfiniteVolumeConductor(object):
     """
     Main class for computing potentials with current dipole approximation.
@@ -633,3 +632,133 @@ def get_current_dipole_moment(dist, current):
     P = np.dot(current.T, dist)
     P_tot = np.sqrt(np.sum(P**2, axis=1))
     return P, P_tot
+
+class MEG(object):
+    """
+    Basic class for computing magnetic field from current dipole moment.
+    For this purpose we use the Biot-Savart law derived from Maxwell's equations
+    under the assumption of negligible magnetic induction effects (Nunez and
+    Srinivasan, Oxford University Press, 2006):
+
+    .. math:: \mathbf{H} = \\frac{\\mathbf{p} \\times \\mathbf{R}}{4 \pi R^3}
+
+    where :math:`\mathbf{p}` is the current dipole moment, :math:`\mathbf{R}`
+    the vector between dipole source location and measurement location, and
+    :math:`R=|\mathbf{R}|`
+ 
+    Note that the magnetic field :math:`\mathbf{H}` is related to the magnetic
+    field :math:`\mathbf{B}` as :math:`\mu_0 \mathbf{H} = \mathbf{B}-\mathbf{M}`
+    where :math:`\mu_0` is the permeability of free space (very close to
+    permebility of biological tissues). :math:`\mathbf{M}` denotes material
+    magnetization (also ignored)
+
+
+    Parameters
+    ----------
+    sensor_locations : np.ndarray
+        shape (n_locations x 3) array with x,y,z-locations of measurement
+        devices where magnetic field of current dipole moments is calculated
+
+
+    Examples
+    --------
+    Define cell object, create synapse, compute current dipole moment
+    
+    >>> import LFPy, os, numpy as np, matplotlib as plt
+    >>> cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'ball_and_sticks.hoc'))
+    >>> cell.set_pos(0., 0., 0.)
+    >>> syn = LFPy.Synapse(cell, idx=0, syntype='ExpSyn', weight=0.01, rec_isyn=True)
+    >>> syn.set_spike_times_w_netstim()
+    >>> cell.simulate(rec_isyn=True, rec_current_dipole_moment=True)
+    
+    Compute the dipole location as an average of segment locations weighted by membrane area
+    
+    >>> dipole_location = (cell.area * np.c_[cell.xmid, cell.ymid, cell.zmid].T / cell.area.sum()).sum(axis=1)
+    
+    Instantiate the LFPy.MEG object, compute and plot the magnetic signal in a sensor location
+    
+    >>> sensor_locations = np.array([[1E4, 0, 0]])
+    >>> meg = LFPy.MEG(sensor_locations)
+    >>> H = meg.calculate_H(cell.current_dipole_location, dipole_location)
+    >>> plt.subplot(311)
+    >>> plt.plot(cell.tvec, cell.somav)
+    >>> plt.subplot(312)
+    >>> plt.plot(cell.tvec, syn.i)
+    >>> plt.subplot(313)
+    >>> plt.plot(cell.tvec, H)
+    
+    Raises
+    ------
+    AssertionError
+        If dimensionality of sensor_locations is wrong
+
+
+    """
+    def __init__(self, sensor_locations):
+        """
+        Initialize class MEG
+        """
+        try:
+            assert(sensor_locations.ndim == 2)
+        except AssertionError:
+            raise AssertionError('sensor_locations.ndim != 2')
+        try:
+            assert(sensor_locations.shape[1] == 3)
+        except AssertionError:
+            raise AssertionError('sensor_locations.shape[1] != 3')
+
+        # set attributes
+        self.sensor_locations = sensor_locations
+
+
+    def calculate_H(self, current_dipole_moment, dipole_location):
+        """
+        Parameters
+        ----------
+        current_dipole_moment : np.ndarray
+            shape (n_timesteps x 3) array with x,y,z-components of current-
+            dipole moment time series data in units of [nA µm]
+        dipole_location : np.ndarray
+            shape (3, ) array with x,y,z-location of dipole in units of [µm]
+
+        Returns
+        -------
+        np.ndarray
+            shape (n_locations x n_timesteps x 3) array with x,y,z-components of the magnetic
+            field :math:`\mathbf{H}` in units of [nA/µm]
+
+        Raises
+        ------
+        AssertionError
+            If dimensionality of current_dipole_moment and/or dipole_location is wrong
+        """
+        try:
+            assert(current_dipole_moment.ndim == 2)
+        except AssertionError:
+            raise AssertionError('current_dipole_moment.ndim != 2')
+        try:
+            assert(current_dipole_moment.shape[1] == 3)
+        except AssertionError:
+            raise AssertionError('current_dipole_moment.shape[1] != 3')
+        try:
+            assert(dipole_location.shape == (3, ))
+        except AssertionError:
+            raise AssertionError('dipole_location.shape != (3, )')
+
+
+        # container
+        H = np.empty((self.sensor_locations.shape[0],
+                      current_dipole_moment.shape[0],
+                      3))
+        # iterate over sensor locations
+        for i, r in enumerate(self.sensor_locations):
+            R = r - dipole_location
+            assert(R.ndim==1 and R.size == 3)
+            try:
+                assert(np.allclose(R, np.zeros(3)) == False)
+            except AssertionError:
+                raise AssertionError('Identical dipole and sensor location.')
+            H[i, ] = np.cross(current_dipole_moment,
+                              R) / (4 * np.pi * np.sqrt((R**2).sum())**3)
+
+        return H
