@@ -53,6 +53,20 @@ Module :mod:`LFPy`
         :show-inheritance:
         :undoc-members:
 
+    class :class:`EEGMEGCalc`
+    =========================
+    .. autoclass:: EEGMEGCalc
+        :members:
+        :show-inheritance:
+        :undoc-members:
+
+    class :class:`MEG`
+    ==================
+    .. autoclass:: MEG
+        :members:
+        :show-inheritance:
+        :undoc-members:
+
 
     submodule :mod:`lfpcalc`
     ========================

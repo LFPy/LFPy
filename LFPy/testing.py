@@ -982,108 +982,128 @@ class testLFPy(unittest.TestCase):
         '''
         Check Kirchhoff in single dend.
         '''
-        dend1 = neuron.h.Section(name='dend1[0]')
-        dend2 = neuron.h.Section(name='dend2[0]')
+        neuron.h('forall delete_section()')
+        dend1 = neuron.h.Section(name='dend1')
+        dend2 = neuron.h.Section(name='dend2')
         dend2.connect(dend1(1.), 0)
-        cell = self.cell_w_synapse_from_sections()
-        d_list, iaxial = cell.get_axial_currents()
-        np.testing.assert_almost_equal(-iaxial[1], cell.imem[0], decimal=9)
+        cell, synapse, d_list, iaxial = self.cell_w_synapse_from_sections(sections=[dend1, dend2])
+        self.assertEqual(iaxial.shape[0], cell.totnsegs*2)
+        np.testing.assert_almost_equal(-iaxial[0], cell.imem[0], decimal=9)
+        np.testing.assert_allclose(-iaxial[0], cell.imem[0], rtol=1E-5)
+        np.testing.assert_almost_equal(iaxial[1], cell.imem[1], decimal=9)
+        np.testing.assert_allclose(iaxial[1], cell.imem[1], rtol=1E-5)
 
     def test_soma_dend_mid(self):
         '''
         Check Kirchhoff in soma when single dend connected to soma mid.
         '''
-        soma = neuron.h.Section(name='soma[0]')
-        dend = neuron.h.Section(name='dend[0]')
+        neuron.h('forall delete_section()')
+        soma = neuron.h.Section(name='soma')
+        dend = neuron.h.Section(name='dend')
         dend.connect(soma(0.5), 0)
-        cell = self.cell_w_synapse_from_sections()
-        d_list, iaxial = cell.get_axial_currents()
-        np.testing.assert_almost_equal(-iaxial[2], cell.imem[0], decimal=9)
+        cell, synapse, d_list, iaxial = self.cell_w_synapse_from_sections(sections=[soma, dend])
+        self.assertEqual(iaxial.shape[0], cell.totnsegs*2)
+        np.testing.assert_allclose(iaxial[0], np.zeros(cell.tvec.size))
+        np.testing.assert_almost_equal(-iaxial[1], cell.imem[0], decimal=9)
+        np.testing.assert_allclose(-iaxial[1], cell.imem[0], rtol=1E-4)
 
     def test_soma_dend_end(self):
         '''
         Check Kirchhoff in soma when single dend connected to soma end.
         '''
-        soma = neuron.h.Section(name='soma[0]')
-        dend = neuron.h.Section(name='dend[0]')
+        neuron.h('forall delete_section()')
+        soma = neuron.h.Section(name='soma')
+        dend = neuron.h.Section(name='dend')
         dend.connect(soma(1.0), 0)
-        cell = self.cell_w_synapse_from_sections()
-        d_list, iaxial = cell.get_axial_currents()
-        np.testing.assert_almost_equal(-iaxial[1], cell.imem[0], decimal=9)
+        cell, synapse, d_list, iaxial = self.cell_w_synapse_from_sections(sections=[soma, dend])
+        self.assertEqual(iaxial.shape[0], cell.totnsegs*2)
+        np.testing.assert_almost_equal(-iaxial[0], cell.imem[0], decimal=9)
+        np.testing.assert_allclose(-iaxial[0], cell.imem[0], rtol=1E-4)
 
     def test_soma_dend_rand_conn_not_0(self):
         '''
         Check Kirchhoff in soma when single dend connected to random soma point.
         '''
-        soma = neuron.h.Section(name='soma[0]')
-        dend = neuron.h.Section(name='dend[0]')
+        neuron.h('forall delete_section()')
+        soma = neuron.h.Section(name='soma')
+        dend = neuron.h.Section(name='dend')
         dend.connect(soma(random.uniform(1e-2, 1.)), 0)
-        cell = self.cell_w_synapse_from_sections()
-        d_list, iaxial = cell.get_axial_currents()
-        np.testing.assert_almost_equal(-iaxial[2], cell.imem[0], decimal=9)
+        cell, synapse, d_list, iaxial = self.cell_w_synapse_from_sections(sections=[soma, dend])
+        self.assertEqual(iaxial.shape[0], cell.totnsegs*2)
+        np.testing.assert_almost_equal(-iaxial[1], cell.imem[0], decimal=9)
+        np.testing.assert_allclose(-iaxial[1], cell.imem[0], rtol=1E-4)
 
     def test_soma_dends_mid(self):
         '''
         Check Kirchhoff in soma when two dends connected to soma mid.
         '''
-        soma = neuron.h.Section(name='soma[0]')
-        dend1 = neuron.h.Section(name='dend1[0]')
-        dend2 = neuron.h.Section(name='dend2[0]')
+        neuron.h('forall delete_section()')
+        soma = neuron.h.Section(name='soma')
+        dend1 = neuron.h.Section(name='dend1')
+        dend2 = neuron.h.Section(name='dend2')
         dend1.connect(soma(0.5), 0)
         dend2.connect(soma(0.5), 0)
-        cell = self.cell_w_synapse_from_sections()
-        d_list, iaxial = cell.get_axial_currents()
-        np.testing.assert_almost_equal(-iaxial[2]-iaxial[4], cell.imem[0], decimal=9)
+        cell, synapse, d_list, iaxial = self.cell_w_synapse_from_sections(sections=[soma, dend1, dend2])
+        self.assertEqual(iaxial.shape[0], cell.totnsegs*2)
+        np.testing.assert_almost_equal(-iaxial[1]-iaxial[3], cell.imem[0], decimal=9)
+        np.testing.assert_allclose(-iaxial[1]-iaxial[3], cell.imem[0], rtol=1E-4)
 
     def test_soma_dends_end(self):
         '''
         Check Kirchhoff in soma when two dends connected to soma end.
         '''
-        soma = neuron.h.Section(name='soma[0]')
-        dend1 = neuron.h.Section(name='dend1[0]')
-        dend2 = neuron.h.Section(name='dend2[0]')
+        neuron.h('forall delete_section()')
+        soma = neuron.h.Section(name='soma')
+        dend1 = neuron.h.Section(name='dend1')
+        dend2 = neuron.h.Section(name='dend2')
         dend1.connect(soma(1.), 0)
         dend2.connect(soma(1.), 0)
-        cell = self.cell_w_synapse_from_sections()
-        d_list, iaxial = cell.get_axial_currents()
-        np.testing.assert_almost_equal(-iaxial[2]-iaxial[4], cell.imem[0], decimal=9)
+        cell, synapse, d_list, iaxial = self.cell_w_synapse_from_sections(sections=[soma, dend1, dend2])
+        self.assertEqual(iaxial.shape[0], cell.totnsegs*2)
+        np.testing.assert_almost_equal(-iaxial[1]-iaxial[3], cell.imem[0], decimal=9)
+        np.testing.assert_allclose(-iaxial[1]-iaxial[3], cell.imem[0], rtol=1E-4)
 
     def test_soma_dends_diff(self):
         '''
         Check Kirchhoff in soma when two dends connected to diff soma points.
         '''
-        soma = neuron.h.Section(name='soma[0]')
-        dend1 = neuron.h.Section(name='dend1[0]')
-        dend2 = neuron.h.Section(name='dend2[0]')
+        neuron.h('forall delete_section()')
+        soma = neuron.h.Section(name='soma')
+        dend1 = neuron.h.Section(name='dend1')
+        dend2 = neuron.h.Section(name='dend2')
         dend1.connect(soma(1.0), 0)
         dend2.connect(soma(.5), 0)
-        cell = self.cell_w_synapse_from_sections()
-        d_list, iaxial = cell.get_axial_currents()
-        np.testing.assert_almost_equal(-iaxial[2]-iaxial[4], cell.imem[0], decimal=9)
+        cell, synapse, d_list, iaxial = self.cell_w_synapse_from_sections(sections=[soma, dend1, dend2])
+        self.assertEqual(iaxial.shape[0], cell.totnsegs*2)
+        np.testing.assert_almost_equal(-iaxial[1]-iaxial[3], cell.imem[0], decimal=9)
+        np.testing.assert_allclose(-iaxial[1]-iaxial[3], cell.imem[0], rtol=1E-4)
 
     def test_soma_y_diff(self):
         '''
         Check Kirchhoff in mid dend when two dends connected to dend.
         '''
-        soma = neuron.h.Section(name='soma[0]')
-        dend1 = neuron.h.Section(name='dend1[0]')
-        dend2 = neuron.h.Section(name='dend2[0]')
-        dend3 = neuron.h.Section(name='dend3[0]')
+        neuron.h('forall delete_section()')
+        soma = neuron.h.Section(name='soma')
+        dend1 = neuron.h.Section(name='dend1')
+        dend2 = neuron.h.Section(name='dend2')
+        dend3 = neuron.h.Section(name='dend3')
         dend1.connect(soma(1.0), 0)
         dend2.connect(dend1(.5), 0)
         dend3.connect(dend1(1.), 0)
-        cell = self.cell_w_synapse_from_sections()
-        d_list, iaxial = cell.get_axial_currents()
-        np.testing.assert_almost_equal(-iaxial[2]+iaxial[4]+iaxial[6], -cell.imem[1], decimal=9)
+        cell, synapse, d_list, iaxial = self.cell_w_synapse_from_sections(sections=[soma, dend1, dend2, dend3])
+        self.assertEqual(iaxial.shape[0], cell.totnsegs*2)
+        np.testing.assert_almost_equal(-iaxial[1]+iaxial[3]+iaxial[5], -cell.imem[1], decimal=9)
+        np.testing.assert_allclose(-iaxial[1]+iaxial[3]+iaxial[5], -cell.imem[1], rtol=1E-4)
 
     def test_3_dends_soma(self):
         '''
         Check Kirchhoff in soma when three dends connected to soma.
         '''
-        soma = neuron.h.Section(name='soma[0]')
-        dend1 = neuron.h.Section(name='dend1[0]')
-        dend2 = neuron.h.Section(name='dend2[0]')
-        dend3 = neuron.h.Section(name='dend3[0]')
+        neuron.h('forall delete_section()')
+        soma = neuron.h.Section(name='soma')
+        dend1 = neuron.h.Section(name='dend1')
+        dend2 = neuron.h.Section(name='dend2')
+        dend3 = neuron.h.Section(name='dend3')
         dend1.connect(soma(1.0), 0)
         dend2.connect(soma(.5), 0)
         dend3.connect(soma(.8), 0)
@@ -1101,10 +1121,11 @@ class testLFPy(unittest.TestCase):
         dend3 = neuron.h.Section(name='dend3[0]')
         dend1.connect(soma(1.0), 0)
         dend2.connect(soma(.5), 0)
-        dend3.connect(soma(.8), 0)
-        cell = self.cell_w_synapse_from_sections()
-        d_list, iaxial = cell.get_axial_currents()
-        np.testing.assert_equal(len(iaxial)*0.5, cell.totnsegs)
+        dend3.connect(soma(0.8), 0)
+        cell, synapse, d_list, iaxial = self.cell_w_synapse_from_sections(sections=[soma, dend1, dend2, dend3])
+        self.assertEqual(iaxial.shape[0], cell.totnsegs*2)
+        np.testing.assert_almost_equal(-iaxial[1]-iaxial[3]-iaxial[5], cell.imem[0], decimal=9)
+        np.testing.assert_allclose(-iaxial[1]-iaxial[3]-iaxial[5], cell.imem[0], rtol=1E-3)
 
     def test_decompose_dipole(self):
         '''Test radial and tangential parts of dipole sums to dipole'''
@@ -1149,6 +1170,116 @@ class testLFPy(unittest.TestCase):
         P1 = np.array([[0., 0., 1.], [0., 0., -2.]])
         s_vector = fs.sign_rad_dipole(P1)
         np.testing.assert_almost_equal(s_vector, np.array([1., -1.]))
+
+
+    def test_MEG_00(self):
+        '''test LFPy.MEG.calculate_H()'''
+        current_dipole_moment = np.zeros((11, 3))
+        current_dipole_moment[:, 0] += 1.
+        dipole_location = np.zeros(3)
+        sensor_locations = np.r_[np.eye(3), -np.eye(3)]
+
+        gt = np.zeros((sensor_locations.shape[0],
+                       current_dipole_moment.shape[0], 3))
+        gt[1, :, 2] = 1./4/np.pi
+        gt[2, :, 1] = -1./4/np.pi
+        gt[4, :, 2] = -1./4/np.pi
+        gt[5, :, 1] = 1./4/np.pi
+
+        meg = LFPy.MEG(sensor_locations)
+        np.testing.assert_equal(gt, meg.calculate_H(current_dipole_moment,
+                                                    dipole_location))
+
+    def test_MEG_01(self):
+        '''test LFPy.MEG.calculate_H()'''
+        current_dipole_moment = np.zeros((11, 3))
+        current_dipole_moment[:, 1] += 1.
+        dipole_location = np.zeros(3)
+        sensor_locations = np.r_[np.eye(3), -np.eye(3)]
+
+        gt = np.zeros((sensor_locations.shape[0],
+                       current_dipole_moment.shape[0], 3))
+        gt[0, :, 2] = -1./4/np.pi
+        gt[2, :, 0] = 1./4/np.pi
+        gt[3, :, 2] = 1./4/np.pi
+        gt[5, :, 0] = -1./4/np.pi
+
+        meg = LFPy.MEG(sensor_locations)
+        np.testing.assert_equal(gt, meg.calculate_H(current_dipole_moment,
+                                                    dipole_location))
+
+    def test_MEG_02(self):
+        '''test LFPy.MEG.calculate_H()'''
+        current_dipole_moment = np.zeros((11, 3))
+        current_dipole_moment[:, 2] += 1.
+        dipole_location = np.zeros(3)
+        sensor_locations = np.r_[np.eye(3), -np.eye(3)]
+
+        # ground truth
+        gt = np.zeros((sensor_locations.shape[0],
+                       current_dipole_moment.shape[0], 3))
+        gt[0, :, 1] = 1./4/np.pi
+        gt[1, :, 0] = -1./4/np.pi
+        gt[3, :, 1] = -1./4/np.pi
+        gt[4, :, 0] = 1./4/np.pi
+
+        meg = LFPy.MEG(sensor_locations)
+        np.testing.assert_equal(gt, meg.calculate_H(current_dipole_moment,
+                                                    dipole_location))
+
+    def test_MEG_03(self):
+        '''test LFPy.MEG.calculate_H()'''
+        current_dipole_moment = np.zeros((1, 3))
+        current_dipole_moment[:, 0] += 1.
+        dipole_location = np.zeros(3)
+        sensor_locations = np.r_[np.eye(3), -np.eye(3)]
+
+        gt = np.zeros((sensor_locations.shape[0],
+                       current_dipole_moment.shape[0], 3))
+        gt[1, :, 2] = 1./4/np.pi
+        gt[2, :, 1] = -1./4/np.pi
+        gt[4, :, 2] = -1./4/np.pi
+        gt[5, :, 1] = 1./4/np.pi
+
+        meg = LFPy.MEG(sensor_locations)
+        np.testing.assert_equal(gt, meg.calculate_H(current_dipole_moment,
+                                                    dipole_location))
+
+    def test_MEG_04(self):
+        '''test LFPy.MEG.calculate_H()'''
+        current_dipole_moment = np.zeros((1, 3))
+        current_dipole_moment[:, 1] += 1.
+        dipole_location = np.zeros(3)
+        sensor_locations = np.r_[np.eye(3), -np.eye(3)]
+
+        gt = np.zeros((sensor_locations.shape[0],
+                       current_dipole_moment.shape[0], 3))
+        gt[0, :, 2] = -1./4/np.pi
+        gt[2, :, 0] = 1./4/np.pi
+        gt[3, :, 2] = 1./4/np.pi
+        gt[5, :, 0] = -1./4/np.pi
+
+        meg = LFPy.MEG(sensor_locations)
+        np.testing.assert_equal(gt, meg.calculate_H(current_dipole_moment,
+                                                    dipole_location))
+
+    def test_MEG_05(self):
+        '''test LFPy.MEG.calculate_H()'''
+        current_dipole_moment = np.zeros((1, 3))
+        current_dipole_moment[:, 2] += 1.
+        dipole_location = np.zeros(3)
+        sensor_locations = np.r_[np.eye(3), -np.eye(3)]
+
+        gt = np.zeros((sensor_locations.shape[0],
+                       current_dipole_moment.shape[0], 3))
+        gt[0, :, 1] = 1./4/np.pi
+        gt[1, :, 0] = -1./4/np.pi
+        gt[3, :, 1] = -1./4/np.pi
+        gt[4, :, 0] = 1./4/np.pi
+
+        meg = LFPy.MEG(sensor_locations)
+        np.testing.assert_equal(gt, meg.calculate_H(current_dipole_moment,
+                                                    dipole_location))
 
 
     ######## Functions used by tests: ##########################################
@@ -1394,7 +1525,7 @@ class testLFPy(unittest.TestCase):
         return real_integral[0] + 1j*imag_integral[0]
 
 
-    def cell_w_synapse_from_sections(self):
+    def cell_w_synapse_from_sections(self, sections=None):
         '''
         Make cell and synapse objects, set spike, simulate and return cell
         '''
@@ -1406,6 +1537,7 @@ class testLFPy(unittest.TestCase):
             'dt' : 0.1,
             'tstartms' : -50,
             'tstopms' : 50,
+            'delete_sections' : False
         }
 
         synapse_parameters = {'e': 0.,
@@ -1419,7 +1551,8 @@ class testLFPy(unittest.TestCase):
         synapse = LFPy.Synapse(cell, **synapse_parameters)
         synapse.set_spike_times(np.array([1.]))
         cell.simulate(rec_imem = True, rec_isyn = True, rec_vmem = True)
-        return cell
+        d_list, iaxial = cell.get_axial_currents()
+        return cell, synapse, d_list, iaxial
 
     def make_class_object(self, rz1, r_el):
         '''Return class object fs'''

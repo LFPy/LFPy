@@ -1939,8 +1939,10 @@ class Cell(object):
         if not hasattr(self, 'vmem'):
             raise AttributeError('no vmem, run cell.simulate(rec_vmem=True)')
 
+
         iaxial = np.zeros((self.totnsegs*2, len(self.tvec)))
         d_list = np.zeros((self.totnsegs*2, 3))
+
         dseg = np.c_[self.xmid - self.xstart,
                      self.ymid - self.ystart,
                      self.zmid - self.zstart]
