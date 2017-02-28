@@ -9,9 +9,43 @@ from __future__ import division
 from scipy.special import eval_legendre, lpmv
 import numpy as np
 
-class EEGMEGCalc:
-    """ Import all data needed for calculating the extracellular potential Phi at location r
-    from a current dipole moment p at location rz. Also decompose p into a radial and a tangential part.
+class FourSphereVolumeConductor(object):
+    """
+    Main class for computing extracellular potentials with four-sphere model.
+
+    Parameters
+    __________
+    radii : list of floats in [micro m]
+            List containing the outer radii of the 4 concentric shells in the
+            four-sphere model: brain, csf, skull and scalp, respectively.
+    sigmas : list of floats in [S/cm]
+             List containing 4 floats, i.e. the electrical conductivity of the
+             four media in the four-sphere model:
+             brain, csf, skull and scalp, respectively
+    r : ndarray [micro m]
+        Array containing n electrode locations in cartesian coordinates.
+        r.shape = (n, 3)
+        All r_el in r must be smaller than the scalp radius and larger than the
+        distance between dipole and sphere center: |rz| < r_el < radii[3]
+    rz : ndarray [micro m]
+         Array containing the position of the current dipole in cartesian
+         coordinates.
+
+    Examples
+    ________
+    Here's an example on how to use the FourSphereVolumeConductor class.
+
+    >>> import LFPy
+    >>> import numpy as np
+    >>> radii = [79000., 80000., 85000., 90000.]
+    >>> sigmas = [0.3, 1.5, 0.015, 0.3]
+    >>> r = np.array([[0., 0., 90000.], [0., 85000., 0.]])
+    >>> rz = np.array([0., 0., 78000.])
+    >>> sphere_model = LFPy.FourSphereVolumeConductor(radii, sigmas, r, rz)
+    >>> # current dipole moment
+    >>> P = np.array([[10., 10., 10.]])
+    >>> potential = sphere_model.calc_potential(P)
+
     """
 
     def __init__(self, radii, sigmas, r, rz):
@@ -109,7 +143,7 @@ class EEGMEGCalc:
 
         p_tot = np.linalg.norm(p_rad, axis=1)
         theta = self.calc_theta()
-        s_vector = self.sign_rad_dipole(p_rad)
+        s_vector = self._sign_rad_dipole(p_rad)
         phi_const = s_vector * p_tot / (4 * np.pi * self.sigma1 * self.rz ** 2) * self.k1
         n_terms = np.zeros((len(self.r), len(p_tot)))
         for el_point in range(len(self.r)):
@@ -215,7 +249,7 @@ class EEGMEGCalc:
                     phi[i,j] = 2*np.pi - phi_temp[i,j]
         return phi
 
-    def sign_rad_dipole(self, p):
+    def _sign_rad_dipole(self, p):
         """Flip radial dipole pointing inwards (i.e. we only use p_tot),
         and add a -1 to the s-vector, so that the potential can be
         calculated as if the dipole were pointing outwards,
@@ -243,7 +277,7 @@ class EEGMEGCalc:
                 electrode locations and legendre polynomials.
         """
         n = np.arange(1, 100)
-        c1n = self.calc_c1n(n)
+        c1n = self._calc_c1n(n)
         consts = n*(c1n * (r / self.r1) ** n + (self.rz / r) ** (n + 1))
         consts = np.insert(consts, 0, 0)
         leg_consts = np.polynomial.legendre.Legendre(consts)
@@ -266,8 +300,8 @@ class EEGMEGCalc:
                 electrode locations and legendre polynomials.
         """
         n = np.arange(1,100)
-        c2n = self.calc_c2n(n)
-        d2n = self.calc_d2n(n, c2n)
+        c2n = self._calc_c2n(n)
+        d2n = self._calc_d2n(n, c2n)
         consts = n*(c2n * (r / self.r2) ** n + d2n * (self.r2 / r) ** (n + 1))
         consts = np.insert(consts, 0, 0)
         leg_consts = np.polynomial.legendre.Legendre(consts)
@@ -290,8 +324,8 @@ class EEGMEGCalc:
                 electrode locations and legendre polynomials.
         """
         n = np.arange(1,100)
-        c3n = self.calc_c3n(n)
-        d3n = self.calc_d3n(n, c3n)
+        c3n = self._calc_c3n(n)
+        d3n = self._calc_d3n(n, c3n)
         consts = n*(c3n * (r / self.r3) ** n + d3n * (self.r3 / r) ** (n + 1))
         consts = np.insert(consts, 0, 0)
         leg_consts = np.polynomial.legendre.Legendre(consts)
@@ -314,8 +348,8 @@ class EEGMEGCalc:
                 electrode locations and legendre polynomials.
         """
         n = np.arange(1,100)
-        c4n = self.calc_c4n(n)
-        d4n = self.calc_d4n(n, c4n)
+        c4n = self._calc_c4n(n)
+        d4n = self._calc_d4n(n, c4n)
         consts = n*(c4n * (r / self.r4) ** n + d4n * (self.r4 / r) ** (n + 1))
         consts = np.insert(consts, 0, 0)
         leg_consts = np.polynomial.legendre.Legendre(consts)
@@ -341,7 +375,7 @@ class EEGMEGCalc:
                 electrode locations and legendre polynomials.
         """
         n = np.arange(1,100)
-        c1n = self.calc_c1n(n)
+        c1n = self._calc_c1n(n)
         consts = (c1n * (r / self.r1) ** n + (self.rz / r) ** (n + 1))
         pot_sum = np.sum([c*lpmv(1, i, np.cos(theta)) for c,i in zip(consts,n)])
         return pot_sum
@@ -365,8 +399,8 @@ class EEGMEGCalc:
                 electrode locations and legendre polynomials.
         """
         n = np.arange(1,100)
-        c2n = self.calc_c2n(n)
-        d2n = self.calc_d2n(n, c2n)
+        c2n = self._calc_c2n(n)
+        d2n = self._calc_d2n(n, c2n)
         consts = c2n*(r/self.r2)**n + d2n*(self.r2/r)**(n+1)
         pot_sum = np.sum([c*lpmv(1, i, np.cos(theta)) for c,i in zip(consts,n)])
         return pot_sum
@@ -390,8 +424,8 @@ class EEGMEGCalc:
                 electrode locations and legendre polynomials.
         """
         n = np.arange(1,100)
-        c3n = self.calc_c3n(n)
-        d3n = self.calc_d3n(n, c3n)
+        c3n = self._calc_c3n(n)
+        d3n = self._calc_d3n(n, c3n)
         consts = c3n*(r/self.r3)**n + d3n*(self.r3/r)**(n+1)
         pot_sum = np.sum([c*lpmv(1, i, np.cos(theta)) for c,i in zip(consts,n)])
         return pot_sum
@@ -415,62 +449,187 @@ class EEGMEGCalc:
                 electrode locations and legendre polynomials.
         """
         n = np.arange(1,100)
-        c4n = self.calc_c4n(n)
-        d4n = self.calc_d4n(n, c4n)
+        c4n = self._calc_c4n(n)
+        d4n = self._calc_d4n(n, c4n)
         consts = c4n*(r/self.r4)**n + d4n*(self.r4/r)**(n+1)
         pot_sum = np.sum([c*lpmv(1, i, np.cos(theta)) for c,i in zip(consts,n)])
         return pot_sum
 
-    def calc_vn(self, n):
+    def _calc_vn(self, n):
         r_const = (self.r34 ** n - self.r43 ** (n + 1)) / ((n + 1) / n * self.r34 ** n + self.r43 ** (n + 1))
         v = (n / (n + 1) * self.sigma34 - r_const) / (self.sigma34 + r_const)
         return v
 
-    def calc_yn(self, n):
-        vn = self.calc_vn(n)
+    def _calc_yn(self, n):
+        vn = self._calc_vn(n)
         r_const = (n / (n + 1) * self.r23 ** n - vn * self.r32 ** (n + 1)) / (self.r23 ** n + vn * self.r32 ** (n + 1))
         y = (n / (n + 1) * self.sigma23 - r_const) / (self.sigma23 + r_const)
         return y
 
-    def calc_zn(self, n):
-        yn = self.calc_yn(n)
+    def _calc_zn(self, n):
+        yn = self._calc_yn(n)
         z = (self.r12 ** n - (n + 1) / n * yn * self.r21 ** (n + 1)) / (self.r12 ** n + yn * self.r21 ** (n + 1))
         return z
 
-    def calc_c1n(self, n):
-        zn = self.calc_zn(n)
+    def _calc_c1n(self, n):
+        zn = self._calc_zn(n)
         c = ((n + 1) / n * self.sigma12 + zn) / (self.sigma12 - zn) * self.rz1**(n+1)
         return c
 
-    def calc_c2n(self, n):
-        yn = self.calc_yn(n)
-        c1 = self.calc_c1n(n)
+    def _calc_c2n(self, n):
+        yn = self._calc_yn(n)
+        c1 = self._calc_c1n(n)
         c2 = (c1 + self.rz1**(n+1)) / (self.r12 ** n + yn * self.r21 ** (n + 1))
         return c2
 
-    def calc_d2n(self, n, c2):
-        yn = self.calc_yn(n)
+    def _calc_d2n(self, n, c2):
+        yn = self._calc_yn(n)
         d2 = yn * c2
         return d2
 
-    def calc_c3n(self, n):
-        vn = self.calc_vn(n)
-        c2 = self.calc_c2n(n)
-        d2 = self.calc_d2n(n, c2)
+    def _calc_c3n(self, n):
+        vn = self._calc_vn(n)
+        c2 = self._calc_c2n(n)
+        d2 = self._calc_d2n(n, c2)
         c3 = (c2 + d2) / (self.r23 ** n + vn * self.r32 ** (n + 1))
         return c3
 
-    def calc_d3n(self, n, c3):
-        vn = self.calc_vn(n)
+    def _calc_d3n(self, n, c3):
+        vn = self._calc_vn(n)
         d3 = vn * c3
         return d3
 
-    def calc_c4n(self, n):
-        c3 = self.calc_c3n(n)
-        d3 = self.calc_d3n(n, c3)
+    def _calc_c4n(self, n):
+        c3 = self._calc_c3n(n)
+        d3 = self._calc_d3n(n, c3)
         c4 = (n + 1) / n * (c3 + d3) / ((n + 1) / n * self.r34 ** n + self.r43 ** (n + 1))
         return c4
 
-    def calc_d4n(self, n, c4):
+    def _calc_d4n(self, n, c4):
         d4 = n / (n + 1) * c4
         return d4
+
+
+
+class InfiniteVolumeConductor(object):
+    """
+    Main class for computing potentials with current dipole approximation.
+
+    Parameters
+    __________
+    sigma : float [S/cm]
+            Electrical conductivity in extracellular space.
+    Examples
+    ________
+    Computing the potential from dipole moment valid in the far field limit.
+    Theta correspond to the dipole alignment angle from the vertical z-axis.
+    >>> import LFPy
+    >>> import numpy as np
+    >>> inf_model = LFPy.InfiniteVolumeConductor(sigma=0.3)
+    >>> P = np.array([[10., 10., 10.]])
+    >>> Phi_P, theta = inf_model.get_dipole_potential(P,
+    >>>                                               x=np.array([1000]),
+    >>>                                               y=np.array([0]),
+    >>>                                               z=np.array([5000]))
+
+    """
+
+    def __init__(self, sigma=0.3):
+        self.sigma = sigma
+
+    def get_dipole_potential(self, P, x, y, z):
+        '''
+        Compute the electric potential in infinite homogeneous linear conductive
+        media from a current dipole moment at a distance [x, y, z]
+
+        Parameters
+        ----------
+        P : ndarray [1E-15 mA]
+            Array containing the current dipole moment for
+            all timesteps in the x-, y- and z-direction.
+        x, y, z : ndarray,
+            arrays of coordinates relative to soma midpoint where potential is
+            computed
+        sigma : float [ohm/m]
+            Extracellular Conductivity.
+
+        Returns
+        -------
+        theta : ndarray [radians]
+            Angle between phi(t) and distance vector from
+            electrode to current dipole location,
+            calculated for all timesteps.
+        phi : ndarray [nV]
+            Array containing the current dipole moment at all
+            points in x-, y-, z-grid for all timesteps.
+
+        '''
+        phi = np.zeros((x.size, P.shape[-1]))
+        for j, dist in enumerate(np.c_[x, y, z]):
+            cos_theta = np.dot(P, dist) / (np.linalg.norm(dist) *
+                                           np.linalg.norm(P, axis=1))
+            cos_theta = np.nan_to_num(cos_theta)
+            theta = np.arccos(cos_theta)
+            phi[j, :] = 1. / (4*np.pi*self.sigma) *\
+                             np.linalg.norm(P, axis=1)*cos_theta/(dist**2).sum()
+
+        return phi, theta
+
+def get_current_dipole_moment(dist, current):
+    """
+    Return current dipole moment vector P and P_tot of cell.
+
+    Parameters
+    ----------
+    current : ndarray [nA]
+        Either an array containing all transmembrane currents
+        from all compartments of the cell. Or an array of all
+        axial currents between compartments in cell.
+    dist : ndarray [microm]
+        When input current is an array of axial currents,
+        the dist is the length of each axial current.
+        When current is the an array of transmembrane
+        currents, dist is the position vector of each
+        compartment middle.
+
+    Returns
+    -------
+    P : ndarray [10^-15 mA]
+        Array containing the current dipole moment for all
+        timesteps in the x-, y- and z-direction.
+    P_tot : ndarray [10^-15 mA]
+        Array containing the magnitude of the
+        current dipole moment vector for all timesteps.
+
+    Examples
+    --------
+    Get current dipole moment vector and scalar moment from axial currents
+    computed from membrane potentials
+    >>> import LFPy
+    >>> import numpy as np
+    >>> cell = LFPy.Cell('PATH/TO/MORPHOLOGY', extracellular=False)
+    >>> syn = LFPy.Synapse(cell, idx=cell.get_closest_idx(0,0,1000),
+    >>>                   syntype='ExpSyn', e=0., tau=1., weight=0.001)
+    >>> syn.set_spike_times(np.mgrid[20:100:20])
+    >>> cell.simulate(rec_vmem=True, rec_imem=False)
+    >>> d_list, i_axial = cell.get_axial_currents()
+    >>> P_ax, P_ax_tot = LFPy.get_current_dipole_moment(d_list, i_axial)
+
+    Get current dipole moment vector and scalar moment from transmembrane
+    currents using the extracellular mechanism in NEURON
+    >>> import LFPy
+    >>> import numpy as np
+    >>> cell = LFPy.Cell('PATH/TO/MORPHOLOGY', extracellular=True)
+    >>> syn = LFPy.Synapse(cell, idx=cell.get_closest_idx(0,0,1000),
+    >>>                   syntype='ExpSyn', e=0., tau=1., weight=0.001)
+    >>> syn.set_spike_times(np.mgrid[20:100:20])
+    >>> cell.simulate(rec_vmem=False, rec_imem=True)
+    >>> P_imem, P_imem_tot = LFPy.get_current_dipole_moment(np.c_[cell.xmid,
+    >>>                                                          cell.ymid,
+    >>>                                                          cell.zmid],
+    >>>                                                    cell.imem)
+
+    """
+    P = np.dot(current.T, dist)
+    P_tot = np.sqrt(np.sum(P**2, axis=1))
+    return P, P_tot

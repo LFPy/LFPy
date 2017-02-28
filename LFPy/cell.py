@@ -1925,11 +1925,16 @@ class Cell(object):
         -------
         d_list : ndarray [microm]
             Array of distance vectors traveled by each axial
-            current in i_axial.
+            current in i_axial. d_list uses same indexing order as
+            segments in cell, the only difference being that d_list has two
+            vectors per segments. len(d_list) = 2*cell.totnsegs
         i_axial : ndarray [nA]
-            Array of axial currents, I(t) going from compartment
-            end to mid/ compartment mid to start for all
-            compartment halves in cell.
+            Array of axial current magnitude I for all segments in cell at all
+            timepoints in tvec.
+            Each segment is divided in two, giving 2 current vectors
+            per segment. Same indexing as for d_list.
+            len(iaxial) = 2*cell.totnsegs.
+
         """
         if not hasattr(self, 'vmem'):
             raise AttributeError('no vmem, run cell.simulate(rec_vmem=True)')
@@ -1991,7 +1996,7 @@ class Cell(object):
         return d_list, iaxial
 
 
-    def get_axial_resistance(self):
+    def _get_axial_resistance(self):
         """
         Return NEURON axial resistance for all cell compartments.
 
@@ -2001,9 +2006,10 @@ class Cell(object):
             Array containing neuron.h.ri(seg.x) for all segments in
             cell. neuron.h.ri(seg.x) is the axial resistance from
             the middle of the segment to the middle of its parent
-            segment. If seg is the first/ bottom segment in a
-            section, neuron.h.ri(seg.x) is the axial resistance from
-            the middle to the start of the segment, seg, only.
+            segment. NB: If seg is the first segment in a section,
+            i.e. the parent segment belongs to a different section,
+            neuron.h.ri(seg.x) is the axial resistance from
+            the middle of the segment to the end of the parent segment only.
         """
 
         ri_list = np.zeros(self.totnsegs)
@@ -2123,116 +2129,3 @@ class Cell(object):
                     iseg = (v_branch - vseg)/seg_ri
                     ipar = iseg
         return iseg, ipar
-
-
-    def get_current_dipole_moment(self, dist, current):
-        """
-        Return current dipole moment vector P and P_tot of cell.
-
-        Parameters
-        ----------
-        current : ndarray [nA]
-            Either an array containing all transmembrane currents
-            from all compartments of the cell. Or an array of all
-            axial currents between compartments in cell.
-        dist : ndarray [microm]
-            When input current is an array of axial currents,
-            the dist is the length of each axial current.
-            When current is the an array of transmembrane
-            currents, dist is the position vector of each
-            compartment middle.
-
-        Returns
-        -------
-        P : ndarray [10^-15 mA]
-            Array containing the current dipole moment for all
-            timesteps in the x-, y- and z-direction.
-        P_tot : ndarray [10^-15 mA]
-            Array containing the magnitude of the
-            current dipole moment vector for all timesteps.
-
-        Examples
-        --------
-        Get current dipole moment vector and scalar moment from axial currents
-        computed from membrane potentials
-        >>>import LFPy
-        >>>cell = LFPy.Cell('PATH/TO/MORPHOLOGY', extracellular=False)
-        >>>syn = LFPy.Synapse(cell, idx=cell.get_closet_idx(0,0,1000),
-        >>>                   syntype='ExpSyn', e=0., tau=1., weight=0.001)
-        >>>syn.set_spike_times(np.mgrid[20:100:20])
-        >>>cell.simulate(rec_vmem=True, rec_imem=False)
-        >>>d_list, i_axial = cell.get_axial_currents()
-        >>>P_ax, P_ax_tot = cell.get_current_dipole_moment(d_list, i_axial)
-
-        Get current dipole moment vector and scalar moment from transmembrane
-        currents using the extracellular mechanism in NEURON
-        >>>import LFPy
-        >>>cell = LFPy.Cell('PATH/TO/MORPHOLOGY', extracellular=True)
-        >>>syn = LFPy.Synapse(cell, idx=cell.get_closet_idx(0,0,1000),
-        >>>                   syntype='ExpSyn', e=0., tau=1., weight=0.001)
-        >>>syn.set_spike_times(np.mgrid[20:100:20])
-        >>>cell.simulate(rec_vmem=False, rec_imem=True)
-        >>>P_imem, P_imem_tot = cell.get_current_dipole_moment(np.c_[cell.xmid,
-        >>>                                                          cell.ymid,
-        >>>                                                          cell.zmid],
-        >>>                                                    cell.imem)
-
-        """
-        P = np.dot(current.T, dist)
-        P_tot = np.sqrt(np.sum(P**2, axis=1))
-        return P, P_tot
-
-
-    def get_dipole_potential(self, P, x, y, z, sigma=0.3):
-        '''
-        Compute the electric potential in infinite homogeneous linear conductive
-        media from a current dipole moment at a distance [x, y, z]
-
-        Parameters
-        ----------
-        P : ndarray [1E-15 mA]
-            Array containing the current dipole moment for
-            all timesteps in the x-, y- and z-direction.
-        x, y, z : ndarray,
-            arrays of coordinates relative to soma midpoint where potential is
-            computed
-        sigma : float [ohm/m]
-            Extracellular Conductivity.
-
-        Returns
-        -------
-        theta : ndarray [radians]
-            Angle between phi(t) and distance vector from
-            electrode to current dipole location,
-            calculated for all timesteps.
-        phi : ndarray [nV]
-            Array containing the current dipole moment at all
-            points in x-, y-, z-grid for all timesteps.
-
-        Examples
-        --------
-        Computing the potential from dipole moment valid in the far field limit.
-        Theta correspond to the dipole alignment angle from the vertical z-axis
-        >>>import LFPy
-        >>>cell = LFPy.Cell('PATH/TO/MORPHOLOGY', extracellular=False)
-        >>>stim = LFPy.Synapse(cell, idx=cell.get_closet_idx(0,0,1000),
-        >>>                    syntype='ExpSyn', e=0., tau=1., weight=0.001)
-        >>>syn.set_spike_times(np.mgrid[20:100:20])
-        >>>cell.simulate(rec_vmem=True, rec_imem=False)
-        >>>d_list, i_axial = cell.get_axial_currents()
-        >>>P_ax, P_ax_tot = cell.get_current_dipole_moment(d_list, i_axial)
-        >>>Phi_P, theta = cell.get_dipole_potential(P_ax,
-        >>>                                         x=[1000], y=[0], z=[5000],
-        >>>                                         sigma=0.3)
-
-        '''
-        phi = np.zeros((x.size, self.tvec.size))
-        for j, dist in enumerate(np.c_[x, y, z]):
-            cos_theta = np.dot(P, dist) / (np.linalg.norm(dist) *
-                                           np.linalg.norm(P, axis=1))
-            cos_theta = np.nan_to_num(cos_theta)
-            theta = np.arccos(cos_theta)
-            phi[j, :] = 1. / (4*np.pi*sigma) *\
-                             np.linalg.norm(P, axis=1)*cos_theta/(dist**2).sum()
-
-        return phi, theta
