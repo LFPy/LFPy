@@ -81,11 +81,6 @@ class FourSphereVolumeConductor(object):
         self.rz1 = self.rz / self.r1
         self.r = np.sqrt(np.sum(r ** 2, axis=1))
 
-        # if self.r < self.rz:
-        #     raise ValueError('Electrode must be farther away from brain center than dipole. r = %s, rz = %s', self.r, self.rz)
-        # elif self.r > self.r4:
-        #     raise ValueError('Electrode located outside head model. Your r = %s µm. Maximum r = %s µm.', self.r, self.r4)
-
     def calc_potential(self, p):
         """
         Parameters
@@ -149,7 +144,10 @@ class FourSphereVolumeConductor(object):
         for el_point in range(len(self.r)):
             el_rad = self.r[el_point]
             theta_point = theta[el_point]
-            if el_rad <= self.r1:
+            if el_rad <= self.rz:
+                n_terms[el_point] = np.nan
+                raise ValueError('Electrode must be farther away from brain center than dipole. r = %s, rz = %s', self.r, self.rz)
+            elif el_rad <= self.r1:
                 n_terms[el_point] = self.potential_brain_rad(el_rad, theta_point)
             elif el_rad <= self.r2:
                 n_terms[el_point] = self.potential_csf_rad(el_rad, theta_point)
