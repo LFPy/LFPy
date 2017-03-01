@@ -113,14 +113,14 @@ class FourSphereVolumeConductor(object):
             of (nV) at all timesteps of current-dipole moment p 
 
         """
-        p_rad, p_tan = self.decompose_dipole(p)
-        pot_rad = self.calc_rad_potential(p_rad)
-        pot_tan = self.calc_tan_potential(p_tan)
+        p_rad, p_tan = self._decompose_dipole(p)
+        pot_rad = self._calc_rad_potential(p_rad)
+        pot_tan = self._calc_tan_potential(p_tan)
 
         pot_tot = pot_rad + pot_tan
         return pot_tot
 
-    def decompose_dipole(self, p):
+    def _decompose_dipole(self, p):
         """
         Decompose current dipole moment vector in radial and tangential terms
         
@@ -143,7 +143,7 @@ class FourSphereVolumeConductor(object):
 
         return p_rad, p_tan
 
-    def calc_rad_potential(self, p_rad):
+    def _calc_rad_potential(self, p_rad):
         """
         Return potential from radial dipole p_rad at location rz measured at r
         
@@ -161,7 +161,7 @@ class FourSphereVolumeConductor(object):
 
         p_tot = np.linalg.norm(p_rad, axis=1)
         theta = self.calc_theta()
-        s_vector = self.sign_rad_dipole(p_rad)
+        s_vector = self._sign_rad_dipole(p_rad)
         phi_const = s_vector * p_tot / (4 * np.pi * self.sigma1 * self.rz ** 2
                                         ) * self.k1
         n_terms = np.zeros((len(self.r), len(p_tot)))
@@ -169,20 +169,20 @@ class FourSphereVolumeConductor(object):
             el_rad = self.r[el_point]
             theta_point = theta[el_point]
             if el_rad <= self.r1:
-                n_terms[el_point] = self.potential_brain_rad(el_rad,
+                n_terms[el_point] = self._potential_brain_rad(el_rad,
                                                              theta_point)
             elif el_rad <= self.r2:
-                n_terms[el_point] = self.potential_csf_rad(el_rad,
+                n_terms[el_point] = self._potential_csf_rad(el_rad,
                                                            theta_point)
             elif el_rad <= self.r3:
-                n_terms[el_point] = self.potential_skull_rad(el_rad,
+                n_terms[el_point] = self._potential_skull_rad(el_rad,
                                                              theta_point)
             elif el_rad <= (self.r4):
-                n_terms[el_point] = self.potential_scalp_rad(el_rad,
+                n_terms[el_point] = self._potential_scalp_rad(el_rad,
                                                              theta_point)
             elif el_rad <= (self.r4+1E-6):
                 el_rad = self.r4
-                n_terms[el_point] = self.potential_scalp_rad(el_rad,
+                n_terms[el_point] = self._potential_scalp_rad(el_rad,
                                                              theta_point)
             else:
                 n_terms[el_point] = np.nan
@@ -191,14 +191,14 @@ class FourSphereVolumeConductor(object):
         potential = phi_const * n_terms
         return potential
 
-    def calc_tan_potential(self, p_tan):
+    def _calc_tan_potential(self, p_tan):
         """
         Return potential from tangential dipole P at location rz measured at r
         
         Parameters
         __________
-        p_tan : ndarray, dtype=float  [nA*µm]
-            Tangential part of p, orthogonal to self.rz
+        p_tan : ndarray, dtype=float
+            Tangential part of p in units of (nA*µm), orthogonal to self.rz
 
         Returns
         _______
@@ -215,13 +215,13 @@ class FourSphereVolumeConductor(object):
             el_rad = self.r[el_point]
             theta_point = theta[el_point]
             if el_rad <= self.r1:
-                n_terms[el_point] = self.potential_brain_tan(el_rad, theta_point)
+                n_terms[el_point] = self._potential_brain_tan(el_rad, theta_point)
             elif el_rad <= self.r2:
-                n_terms[el_point] = self.potential_csf_tan(el_rad, theta_point)
+                n_terms[el_point] = self._potential_csf_tan(el_rad, theta_point)
             elif el_rad <= self.r3:
-                n_terms[el_point] = self.potential_skull_tan(el_rad, theta_point)
+                n_terms[el_point] = self._potential_skull_tan(el_rad, theta_point)
             elif el_rad <= self.r4:
-                n_terms[el_point] = self.potential_scalp_tan(el_rad, theta_point)
+                n_terms[el_point] = self._potential_scalp_tan(el_rad, theta_point)
             else:
                 n_terms[el_point] = np.nan
         potential = phi_hom * n_terms
@@ -282,7 +282,7 @@ class FourSphereVolumeConductor(object):
                     phi[i,j] = 2*np.pi - phi_temp[i,j]
         return phi
 
-    def sign_rad_dipole(self, p):
+    def _sign_rad_dipole(self, p):
         """
         Flip radial dipole pointing inwards (i.e. we only use p_tot),
         and add a -1 to the s-vector, so that the potential can be
@@ -307,7 +307,7 @@ class FourSphereVolumeConductor(object):
                 sign_vector[i] = -1.
         return sign_vector
 
-    def potential_brain_rad(self, r, theta):
+    def _potential_brain_rad(self, r, theta):
         """
         Calculate sum with constants and legendre polynomials
         
@@ -333,7 +333,7 @@ class FourSphereVolumeConductor(object):
         pot_sum = leg_consts(np.cos(theta))
         return pot_sum
 
-    def potential_csf_rad(self, r, theta):
+    def _potential_brain_rad(self, r, theta):
         """
         Calculate potential in CSF layer from radial dipole
         
@@ -360,7 +360,7 @@ class FourSphereVolumeConductor(object):
         pot_sum = leg_consts(np.cos(theta))
         return pot_sum
 
-    def potential_skull_rad(self, r, theta):
+    def _potential_skull_rad(self, r, theta):
         """
         Calculate potential in skull layer from radial dipole
         
@@ -387,7 +387,7 @@ class FourSphereVolumeConductor(object):
         pot_sum = leg_consts(np.cos(theta))
         return pot_sum
 
-    def potential_scalp_rad(self, r, theta):
+    def _potential_scalp_rad(self, r, theta):
         """
         Calculate potential in scalp from radial dipole
         
@@ -414,7 +414,7 @@ class FourSphereVolumeConductor(object):
         pot_sum = leg_consts(np.cos(theta))
         return pot_sum
 
-    def potential_brain_tan(self, r, theta):
+    def _potential_brain_tan(self, r, theta):
         """
         Calculate sum with constants and legendres
         
@@ -441,7 +441,7 @@ class FourSphereVolumeConductor(object):
         pot_sum = np.sum([c*lpmv(1, i, np.cos(theta)) for c,i in zip(consts,n)])
         return pot_sum
 
-    def potential_csf_tan(self, r, theta):
+    def _potential_csf_tan(self, r, theta):
         """
         Calculate sum with constants and legendres
         
@@ -469,7 +469,7 @@ class FourSphereVolumeConductor(object):
         pot_sum = np.sum([c*lpmv(1, i, np.cos(theta)) for c,i in zip(consts,n)])
         return pot_sum
 
-    def potential_skull_tan(self, r, theta):
+    def _potential_skull_tan(self, r, theta):
         """
         Calculate sum with constants and legendres
         
@@ -497,7 +497,7 @@ class FourSphereVolumeConductor(object):
         pot_sum = np.sum([c*lpmv(1, i, np.cos(theta)) for c,i in zip(consts,n)])
         return pot_sum
 
-    def potential_scalp_tan(self, r, theta):
+    def _potential_scalp_tan(self, r, theta):
         """
         Calculate sum with constants and legendres
         

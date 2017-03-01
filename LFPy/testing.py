@@ -1166,7 +1166,7 @@ class testLFPy(unittest.TestCase):
         r_el = np.array([[0., 0., 90.]])
         fs = self.make_class_object(rz1, r_el)
         P1 = np.array([[0., 0., 1.], [0., 0., -2.]])
-        s_vector = fs.sign_rad_dipole(P1)
+        s_vector = fs._sign_rad_dipole(P1)
         np.testing.assert_almost_equal(s_vector, np.array([1., -1.]))
 
     def test_MEG_00(self):
@@ -1563,7 +1563,7 @@ class testLFPy(unittest.TestCase):
         rz1 = np.array([0., 0., 70.])
         r_el = np.array([[0., 0., 90.]])
         fs = self.make_class_object(rz1, r_el)
-        p_rad, p_tan = fs.decompose_dipole(P1)
+        p_rad, p_tan = fs._decompose_dipole(P1)
         return p_rad, p_tan
 
 
