@@ -1108,7 +1108,7 @@ class testLFPy(unittest.TestCase):
         dend2.connect(soma(.5), 0)
         dend3.connect(soma(.8), 0)
         cell, synapse, d_list, iaxial = self.cell_w_synapse_from_sections()
-        d_list, iaxial = cell.get_axial_currents()
+        d_list, iaxial = cell.get_axial_currents_from_vmem()
         np.testing.assert_almost_equal(-iaxial[2]-iaxial[4]-iaxial[6], cell.imem[0], decimal=9)
 
     def test_len_iaxial(self):
@@ -1166,7 +1166,7 @@ class testLFPy(unittest.TestCase):
         r_el = np.array([[0., 0., 90.]])
         fs = self.make_class_object(rz1, r_el)
         P1 = np.array([[0., 0., 1.], [0., 0., -2.]])
-        s_vector = fs.sign_rad_dipole(P1)
+        s_vector = fs._sign_rad_dipole(P1)
         np.testing.assert_almost_equal(s_vector, np.array([1., -1.]))
 
     def test_MEG_00(self):
@@ -1548,7 +1548,7 @@ class testLFPy(unittest.TestCase):
         synapse = LFPy.Synapse(cell, **synapse_parameters)
         synapse.set_spike_times(np.array([1.]))
         cell.simulate(rec_imem = True, rec_isyn = True, rec_vmem = True)
-        d_list, iaxial = cell.get_axial_currents()
+        d_list, iaxial = cell.get_axial_currents_from_vmem()
         return cell, synapse, d_list, iaxial
 
     def make_class_object(self, rz1, r_el):
@@ -1563,7 +1563,7 @@ class testLFPy(unittest.TestCase):
         rz1 = np.array([0., 0., 70.])
         r_el = np.array([[0., 0., 90.]])
         fs = self.make_class_object(rz1, r_el)
-        p_rad, p_tan = fs.decompose_dipole(P1)
+        p_rad, p_tan = fs._decompose_dipole(P1)
         return p_rad, p_tan
 
 

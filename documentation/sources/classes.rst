@@ -24,6 +24,7 @@ Module :mod:`LFPy`
     ===========================
     .. autoclass:: PointProcess
         :members:
+        :show-inheritance:
         :undoc-members:
 
     class :class:`Synapse`
@@ -44,6 +45,7 @@ Module :mod:`LFPy`
     ===================================
     .. autoclass:: RecExtElectrodeSetup
         :members:
+        :show-inheritance:
         :undoc-members:
 
     class :class:`RecExtElectrode`
@@ -53,12 +55,20 @@ Module :mod:`LFPy`
         :show-inheritance:
         :undoc-members:
 
-    class :class:`EEGMEGCalc`
-    =========================
-    .. autoclass:: EEGMEGCalc
+    class :class:`FourSphereVolumeConductor`
+    ========================================
+    .. autoclass:: FourSphereVolumeConductor
         :members:
         :show-inheritance:
         :undoc-members:
+
+    class :class:`InfiniteVolumeConductor`
+    ======================================
+    .. autoclass:: InfiniteVolumeConductor
+        :members:
+        :show-inheritance:
+        :undoc-members:
+
 
     class :class:`MEG`
     ==================
@@ -66,6 +76,11 @@ Module :mod:`LFPy`
         :members:
         :show-inheritance:
         :undoc-members:
+
+    submodule :mod:`eegmegcalc`
+    =====================
+    .. autofunction:: get_current_dipole_moment
+
 
 
     submodule :mod:`lfpcalc`
@@ -91,3 +106,4 @@ Module :mod:`LFPy`
     .. automodule:: LFPy.run_simulation
         :members:
         :undoc-members:
+

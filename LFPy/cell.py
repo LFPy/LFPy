@@ -800,7 +800,7 @@ class Cell(object):
         file_name : str
             Name of hdf5 file, '.h5' is appended if it doesnt exist
         dotprodcoeffs : list
-            List of N x Nseg np.ndarray. These arrays will at
+            List of N x Nseg npdarray. These arrays will at
             every timestep be multiplied by the membrane currents.
             Presumably useful for memory efficient csd or lfp calcs
 
@@ -1338,7 +1338,7 @@ class Cell(object):
 
         Parameters
         ----------
-        idx : np.ndarray, dtype=int.
+        idx : npdarray, dtype=int.
             array of segment indices
 
         """
@@ -1450,7 +1450,7 @@ class Cell(object):
         kwargs:
         ::
 
-            idx : np.ndarray, dtype int
+            idx : npdarray, dtype int
                 segment indices, must be between 0 and cell.totnsegs
         '''
         #ensure idx is array-like, or convert
@@ -1791,7 +1791,7 @@ class Cell(object):
         Returns
         -------
         polygons : list
-            list of (np.ndarray, np.ndarray) tuples
+            list of (npdarray, npdarray) tuples
             giving the trajectory of each section
 
         Examples
@@ -1847,9 +1847,9 @@ class Cell(object):
 
         Parameters
         ----------
-        v_ext : numpy array
+        v_ext : npdarray
             Numpy array of size cell.totnsegs x t_ext.size, unit mV
-        t_ext : np.array
+        t_ext : npdarray
             Time vector of v_ext
 
         Examples
@@ -1917,25 +1917,29 @@ class Cell(object):
 
         return
 
-    def get_axial_currents(self):
+    def get_axial_currents_from_vmem(self):
         """
-        Return magnitude and distance traveled by axial currents from
-        membrane potentials.
+        Compute the magnitude and distance vectors of axial currents from
+        membrane potentials and axial resistances in each segment of the cell.
 
         Returns
         -------
-        d_list : ndarray [µm]
-            Array of distance vectors traveled by each axial
-            current in i_axial. d_list uses same indexing order as
-            segments in cell, the only difference being that d_list has two
-            vectors per segments. len(d_list) = 2*cell.totnsegs
-        i_axial : ndarray [nA]
-            Array of axial current magnitude I for all segments in cell at all
-            timepoints in tvec.
-            Each segment is divided in two, giving 2 current vectors
-            per segment. Same indexing as for d_list.
-            len(iaxial) = 2*cell.totnsegs.
+        d_list : npdarray
+            Shape (cell.totnsegs*2, 3) array of distance vectors of each axial
+            current i_axial in units of (µm). The entries along the first axis
+            of d_list is ordered such that entry # // 2 correspond to the
+            segment index of the cell. Each segment thus have two corresponding
+            axial currents from its midpoint to each of its end nodes.
+        i_axial : npdarray [nA]
+            Shape (cell.totnsegs*2, cell.tvec.size) array of axial current
+            magnitudes I in units of (nA) for each segment of the cell at all
+            timesteps of the simulation (i.e., for cell.tvec). The indices of
+            the first axis correspond to the first axis of d_list.
 
+        Raises
+        ------
+        AttributeError
+            Raises an exeption if the cell.vmem attribute cannot be found
         """
         if not hasattr(self, 'vmem'):
             raise AttributeError('no vmem, run cell.simulate(rec_vmem=True)')
@@ -1969,7 +1973,7 @@ class Cell(object):
             seg_idx = self.get_idx(section=sec.name())[0]
 
             for _ in sec:
-                iseg, ipar = self._parent_and_segment_i(seg_idx, parent_idx,
+                iseg, ipar = self._parent_and_segment_current(seg_idx, parent_idx,
                                                         bottom_seg, branch,
                                                         parentsec)
 
@@ -2005,14 +2009,17 @@ class Cell(object):
 
         Returns
         -------
-        ri_list : ndarray [MOhm]
-            Array containing neuron.h.ri(seg.x) for all segments in
-            cell. neuron.h.ri(seg.x) is the axial resistance from
-            the middle of the segment to the middle of its parent
-            segment. NB: If seg is the first segment in a section,
-            i.e. the parent segment belongs to a different section,
-            neuron.h.ri(seg.x) is the axial resistance from
-            the middle of the segment to the end of the parent segment only.
+        ri_list : npdarray
+            Shape (cell.totnsegs, ) array containing neuron.h.ri(seg.x) in units
+            of (MOhm) for all segments in cell calculated using the
+            neuron.h.ri(seg.x) method. neuron.h.ri(seg.x) returns the
+            axial resistance from the middle of the segment to the middle of
+            the parent segment. Note: If seg is the first segment in a section,
+            i.e. the parent segment belongs to a different section or there is
+            no parent section, then neuron.h.ri(seg.x) returns the axial
+            resistance from the middle of the segment to the node connecting the
+            segment to the parent section (or a ghost node if there is no
+            parent)
         """
 
         ri_list = np.zeros(self.totnsegs)
@@ -2027,7 +2034,7 @@ class Cell(object):
 
     def get_dict_of_children_idx(self):
         """
-        Return dictionary with children seg indices for all secs.
+        Return dictionary with children segment indices for all sections.
 
         Returns
         -------
@@ -2065,14 +2072,17 @@ class Cell(object):
         return connection_dict
 
 
-    def _parent_and_segment_i(self, seg_idx, parent_idx, bottom_seg,
+    def _parent_and_segment_current(self, seg_idx, parent_idx, bottom_seg,
                               branch, parentsec):
         """
-        Return current from segment midpoint to start and parent end to mid.
+        Return current from segment midpoints to start points from all segments
+        in the section, and current from parent segment midpoint
+        end to mid.
 
         Parameters
         ----------
         seg_idx : int
+            segment index
         parent_idx : int
         parent_ri : float [MOhm]
         bottom_seg : boolean
@@ -2081,14 +2091,13 @@ class Cell(object):
 
         Returns
         -------
-        iseg : ndarray [nA]
-            ndarray containing axial currents from segment middle
-            to segment start for all segments in sec.
-        ipar : ndarray [nA]
-            ndarray containing axial currents from
-            parent segment end to parent segment middle
-            forall parent segments in cell.
-
+        iseg : npdarray
+            ndarray containing axial currents in units of (nA) from segment
+            mid point to segment start point for all segments in section.
+        ipar : npdarray
+            ndarray containing axial currents in units of (nA) from
+            parent segment end point to parent segment mid point
+            for all parent segments in the cell.
         """
         ri_list = self.get_axial_resistance()
         seg_ri = ri_list[seg_idx]
@@ -2115,7 +2124,7 @@ class Cell(object):
                     [sib_idcs] = np.take(children_dict[parentsec.name()],
                                       np.where(children_dict[parentsec.name()]
                                                != seg_idx))
-                    sib_idcs = list(sib_idcs)  #, type(sib_idcs)
+                    sib_idcs = list(sib_idcs)
 
                     if type(sib_idcs) == int or np.int64:
                         sib_idcs = [sib_idcs]

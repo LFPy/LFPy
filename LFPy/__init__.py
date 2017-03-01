@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 '''Initialization of LFPy, a module for simulating extracellular potentials.
 
 Group of Computational Neuroscience,
@@ -36,11 +37,8 @@ from .recextelectrode import RecExtElectrode, RecExtElectrodeSetup
 from .cell import Cell
 from .templatecell import TemplateCell
 from .testing import _test as test
-
 from .eegmegcalc import FourSphereVolumeConductor, InfiniteVolumeConductor, get_current_dipole_moment, MEG
-
 from . import lfpcalc
 from . import tools
 from . import inputgenerators
 from . import run_simulation
-
