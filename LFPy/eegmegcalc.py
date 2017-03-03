@@ -23,31 +23,33 @@ class FourSphereVolumeConductor(object):
     """
     Main class for computing extracellular potentials in a four-sphere
     volume conductor model that assumes homogeneous, isotropic, linear
-    (frequency independent) conductance within the inner sphere and outer
+    (frequency independent) conductivity within the inner sphere and outer
     shells. The conductance outside the outer shell is 0 (air).
 
     Parameters
-    __________
-    radii : list of floats
-        List containing the outer radii in units of (µm) for the 4
+    ----------
+    radii : list, dtype=float
+        Len 4 list with the outer radii in units of (µm) for the 4
         concentric shells in the four-sphere model: brain, csf, skull and
         scalp, respectively.
-    sigmas : list of floats
-        len 4 list with the electrical conductivity in units of (S/cm) of
+    sigmas : list, dtype=float
+        Len 4 list with the electrical conductivity in units of (S/m) of
         the four shells in the four-sphere model: brain, csf, skull and
         scalp, respectively.
-    r : npdarray, dtype=float
-        Shape = (n, 3) array containing n electrode locations in cartesian
-        coordinates in units of (µm). All r_el in r must be less than or equal
-        scalp radius and larger than the distance between dipole and sphere
+    r : ndarray, dtype=float
+        Shape (n_contacts, 3) array containing n_contacts electrode locations
+        in cartesian coordinates in units of (µm).
+        All r_el in r must be less than or equal to scalp radius
+        and larger than the distance between dipole and sphere
         center: |rz| < r_el <= radii[3].
-    rz : npdarray, dtype=float
+    rz : ndarray, dtype=float
         Shape (3, ) array containing the position of the current dipole in
         cartesian coordinates. Units of (µm).
 
     Examples
-    ________
-    Here's an example on how to use the FourSphereVolumeConductor class.
+    --------
+    Compute extracellular potential from current dipole moment in four-sphere
+    head model
 
     >>> import LFPy
     >>> import numpy as np
@@ -65,7 +67,6 @@ class FourSphereVolumeConductor(object):
 
     def __init__(self, radii, sigmas, r, rz):
         """Initialize class FourSphereVolumeConductor"""
-        self.k1 = 1E6  # from mV to nV
         self.r1 = radii[0]
         self.r2 = radii[1]
         self.r3 = radii[2]
@@ -96,21 +97,22 @@ class FourSphereVolumeConductor(object):
         self.rz1 = self.rz / self.r1
         self.r = np.sqrt(np.sum(r ** 2, axis=1))
 
-
     def calc_potential(self, p):
         """
+        Return electric potential from current dipole moment p
+
         Parameters
-        __________
+        ----------
         p : ndarray, dtype=float
             Shape (n_timesteps, 3) array containing the x,y,z components of the
-            current dipole moment for all timesteps in units of (nA*µm)
+            current dipole moment in units of (nA*µm) for all timesteps
 
         Returns
-        _______
+        -------
         potential : ndarray, dtype=float
             Shape (n_contacts, n_timesteps) array containing the electric
             potential at contact point(s) FourSphereVolumeConductor.r in units
-            of (nV) at all timesteps of current-dipole moment p 
+            of (mV) for all timesteps of current dipole moment p
 
         """
         p_rad, p_tan = self._decompose_dipole(p)
@@ -118,24 +120,26 @@ class FourSphereVolumeConductor(object):
         pot_tan = self._calc_tan_potential(p_tan)
 
         pot_tot = pot_rad + pot_tan
-        return pot_tot
+        mask = np.isnan(pot_tot)
+        return np.ma.masked_array(pot_tot, mask=mask)
 
     def _decompose_dipole(self, p):
         """
         Decompose current dipole moment vector in radial and tangential terms
-        
+
         Parameters
-        __________
+        ----------
         p : ndarray, dtype=float
             Shape (n_timesteps, 3) array containing the x,y,z-components of the
-            current dipole moment for all timesteps in units of (nA*µm).
-            
+            current dipole moment in units of (nA*µm) for all timesteps
+
         Returns:
-        ________
+        -------
         p_rad : ndarray, dtype=float
-            Radial part of p, parallel to self.rz
+            Shape (n_timesteps, 3) array, radial part of p, parallel to self.rz
         p_tan : ndarray, dtype=float
-            Tangential part of p, orthogonal to self.rz
+            Shape (n_timesteps, 3) array, tangential part of p,
+            orthogonal to self.rz
         """
         p_rad = (np.dot(p, self.rzloc)/self.rz ** 2
                  ).reshape(len(p), 1) * self.rzloc.reshape(1, len(self.rzloc))
@@ -146,24 +150,25 @@ class FourSphereVolumeConductor(object):
     def _calc_rad_potential(self, p_rad):
         """
         Return potential from radial dipole p_rad at location rz measured at r
-        
+
         Parameters
-        __________
+        ----------
         p_rad : ndarray, dtype=float
-            Radial part of p, parallel to self.rz
+            Shape (n_timesteps, 3) array, radial part of p
+            in units of (nA*µm), parallel to self.rz
 
         Returns
-        _______
+        -------
         potential : ndarray, dtype=float
-            Shape (n_contacts, n_timesteps) array containing the current dipole
-            moment at point r in units of (nV).
+            Shape (n_contacts, n_timesteps) array containing the extracecllular
+            potential at n_contacts contact point(s) FourSphereVolumeConductor.r
+            in units of (mV) for all timesteps of p_rad
         """
 
         p_tot = np.linalg.norm(p_rad, axis=1)
         theta = self.calc_theta()
         s_vector = self._sign_rad_dipole(p_rad)
-        phi_const = s_vector * p_tot / (4 * np.pi * self.sigma1 * self.rz ** 2
-                                        ) * self.k1
+        phi_const = s_vector * p_tot / (4 * np.pi * self.sigma1 * self.rz ** 2)
         n_terms = np.zeros((len(self.r), len(p_tot)))
         for el_point in range(len(self.r)):
             el_rad = self.r[el_point]
@@ -171,8 +176,7 @@ class FourSphereVolumeConductor(object):
 
             if el_rad <= self.rz:
                 n_terms[el_point] = np.nan
-                raise ValueError('Electrode must be farther away from brain center than dipole. r = %s, rz = %s', self.r, self.rz)
-
+                UserWarning('Electrode must be farther away from brain center than dipole. r = %s, rz = %s', self.r, self.rz)
             elif el_rad <= self.r1:
                 n_terms[el_point] = self._potential_brain_rad(el_rad,
                                                              theta_point)
@@ -185,13 +189,9 @@ class FourSphereVolumeConductor(object):
             elif el_rad <= (self.r4):
                 n_terms[el_point] = self._potential_scalp_rad(el_rad,
                                                              theta_point)
-            elif el_rad <= (self.r4+1E-6):
-                el_rad = self.r4
-                n_terms[el_point] = self._potential_scalp_rad(el_rad,
-                                                             theta_point)
             else:
-                n_terms[el_point] = np.nan
-                raise ValueError('Electrode located outside head model. Maximum r = %s µm.',
+                n_terms[el_point] = 0.
+                UserWarning('Electrode located outside head model. Maximum r = %s µm.',
                                  self.r4, '\n your r = ', self.r)
         potential = phi_const * n_terms
         return potential
@@ -199,27 +199,32 @@ class FourSphereVolumeConductor(object):
     def _calc_tan_potential(self, p_tan):
         """
         Return potential from tangential dipole P at location rz measured at r
-        
+
         Parameters
-        __________
+        ----------
         p_tan : ndarray, dtype=float
-            Tangential part of p in units of (nA*µm), orthogonal to self.rz
+            Shape (n_timesteps, 3) array, tangential part of p
+            in units of (nA*µm), orthogonal to self.rz
 
         Returns
         _______
-        potential : ndarray [nV]
-            Shape (n_contacts, n_timesteps) array containing the current dipole
-            moment at point r in units of (nV).
+        potential : ndarray, dtype=float
+            Shape (n_contacts, n_timesteps) array containing the extracecllular
+            potential at n_contacts contact point(s) FourSphereVolumeConductor.r
+            in units of (mV) for all timesteps of p_tan
         """
         theta = self.calc_theta()
         phi = self.calc_phi(p_tan)
         p_tot = np.linalg.norm(p_tan, axis=1)
-        phi_hom = - p_tot / (4 * np.pi * self.sigma1 * self.rz ** 2) * np.sin(phi) * self.k1
+        phi_hom = - p_tot / (4 * np.pi * self.sigma1 * self.rz ** 2) * np.sin(phi)
         n_terms = np.zeros((len(self.r), len(p_tot)))
         for el_point in range(len(self.r)):
             el_rad = self.r[el_point]
             theta_point = theta[el_point]
-            if el_rad <= self.r1:
+            if el_rad <= self.rz:
+                n_terms[el_point] = np.nan
+                UserWarning('Electrode must be farther away from brain center than dipole. r = %s, rz = %s', self.r, self.rz)
+            elif el_rad <= self.r1:
                 n_terms[el_point] = self._potential_brain_tan(el_rad, theta_point)
             elif el_rad <= self.r2:
                 n_terms[el_point] = self._potential_csf_tan(el_rad, theta_point)
@@ -228,20 +233,23 @@ class FourSphereVolumeConductor(object):
             elif el_rad <= self.r4:
                 n_terms[el_point] = self._potential_scalp_tan(el_rad, theta_point)
             else:
-                n_terms[el_point] = np.nan
+                n_terms[el_point] = 0.
+                UserWarning('Electrode located outside head model. Maximum r = %s µm.',
+                                 self.r4, '\n your r = ', self.r)
         potential = phi_hom * n_terms
         return potential
 
     def calc_theta(self):
         """
-        Calculate angle between radial dipole and measurement location
-        
+        Return polar angle(s) between rzloc and contact point location(s)
+
         Returns
-        _______
-        phi : ndarray [radians]
-            Array containing polar angle between z-axis and
-            electrode location vector rxyz.
-            Z-axis is defined in the direction of rzloc and the radial dipole.
+        -------
+        theta : ndarray, dtype=float
+            Shape (n_contacts, ) array containing polar angle
+            in units of (radians) between z-axis and n_contacts contact
+            point location vector(s) in FourSphereVolumeConductor.rxyz
+            z-axis is defined in the direction of rzloc and the radial dipole.
         """
         cos_theta = np.dot(self.rxyz, self.rzloc) / (np.linalg.norm(self.rxyz, axis=1) * np.linalg.norm(self.rzloc))
         cos_theta = np.nan_to_num(cos_theta)
@@ -250,23 +258,23 @@ class FourSphereVolumeConductor(object):
 
     def calc_phi(self, p_tan):
         """
-        Calculate angle between tangential dipole and measurement location
-        
+        Return azimuthal angle between x-axis and contact point locations(s)
+
         Parameters
-        __________
+        ----------
         p_tan : ndarray, dtype=float
-            Array containing tangential component of current dipole moment
-            in units of (nA*µm)
-        
+            Shape (n_contacts, n_timesteps) array containing
+            tangential component of current dipole moment in units of (nA*µm)
+
         Returns
-        _______
+        -------
         phi : ndarray, dtype=float
-            Array containing azimuthal angle in radians between x-axis and
-            projection of electrode location vector rxyz into xy-plane,
-            rxy.
-            Z-axis is defined in the direction of rzloc.
-            Y-axis is defined in the direction of p (orthogonal to rzloc).
-            X-axis is defined as cross product between p and rzloc (x).
+            Shape (n_contacts, n_timesteps) array containing azimuthal angle
+            in units of (radians) between x-axis vector(s) and projection of
+            contact point location vector(s) rxyz into xy-plane.
+            z-axis is defined in the direction of rzloc.
+            y-axis is defined in the direction of p (orthogonal to rzloc).
+            x-axis is defined as cross product between p and rzloc (x).
         """
         proj_rxyz_rz = (np.dot(self.rxyz,
                         self.rzloc) / np.sum(self.rzloc **
@@ -289,21 +297,22 @@ class FourSphereVolumeConductor(object):
 
     def _sign_rad_dipole(self, p):
         """
-        Flip radial dipole pointing inwards (i.e. we only use p_tot),
-        and add a -1 to the s-vector, so that the potential can be
-        calculated as if the dipole were pointing outwards,
-        and later be multiplied by -1 to get the right potential.
-        
+        Determine whether radial dipoles are pointing inwards or outwards
+
         Parameters
         ----------
         p : ndarray, dtype=float
-            Shape (n_timesteps, 3) array containing the x,y,z-components of the
-            current dipole moment for all timesteps in units of (nA*µm).
-        
+            Shape (n_timesteps, 3) array containing the current dipole moment
+             in cartesian coordinates for all n_timesteps in units of (nA*µm)
+
         Returns
         -------
         sign_vector : ndarray
-        
+            Shape (n_timesteps, ) array containing +/-1 for all
+            current dipole moments in p.
+            If radial part of p[i] points outwards, sign_vector[i] = 1.
+            If radial part of p[i] points inwards, sign_vector[i] = -1.
+
         """
         sign_vector = np.ones(len(p))
         radial_test = np.dot(p, self.rzloc) / (np.linalg.norm(p, axis=1) * self.rz)
@@ -314,21 +323,21 @@ class FourSphereVolumeConductor(object):
 
     def _potential_brain_rad(self, r, theta):
         """
-        Calculate sum with constants and legendre polynomials
-        
+        Return factor for calculation of potential in brain from rad. dipole
+
         Parameters
-        __________
-        r : ndarray, dtype=float
-            Array containing electrode location in units of (µm).
-        theta : ndarray, dtype=float
-            Array of angles in radians between electrode location and
-            dipole location vectors.
-        
+        ----------
+        r : float
+            Distance from origin to brain electrode location in units of (µm)
+        theta : float
+            Polar angle between brain electrode location and
+            dipole location vector rzloc in units of (radians)
+
         Returns
-        _______
+        -------
         pot_sum : float
-            Sum factor containing brain constants, dipole and
-            electrode locations and legendre polynomials.
+            Summationfactor for calculation of electrical potential in brain
+            from radial current dipole moment. (unitless)
         """
         n = np.arange(1, 100)
         c1n = self._calc_c1n(n)
@@ -338,23 +347,23 @@ class FourSphereVolumeConductor(object):
         pot_sum = leg_consts(np.cos(theta))
         return pot_sum
 
-    def _potential_brain_rad(self, r, theta):
+    def _potential_csf_rad(self, r, theta):
         """
-        Calculate potential in CSF layer from radial dipole
-        
+        Return factor for calculation of potential in CSF from rad. dipole
+
         Parameters
-        __________
-        r : ndarray, dtype=float
-            Array containing electrode locations in units of (µm)
-        theta : ndarray, dtype=float
-            Array of angles in radians between electrode location and
-            dipole location vectors.
+        ----------
+        r : float
+            Distance from origin to CSF electrode location in units of (µm)
+        theta : float
+            Polar angle between CSF electrode location and
+            dipole location vector rzloc in units of (radians)
 
         Returns
-        _______
+        -------
         pot_sum : float
-            Sum factor containing brain constants, dipole and
-            electrode locations and legendre polynomials.
+            Summation factor for calculation of electrical potential in CSF
+            from radial current dipole moment. (unitless)
         """
         n = np.arange(1,100)
         c2n = self._calc_c2n(n)
@@ -367,21 +376,21 @@ class FourSphereVolumeConductor(object):
 
     def _potential_skull_rad(self, r, theta):
         """
-        Calculate potential in skull layer from radial dipole
-        
+        Return factor for calculation of potential in skull from rad. dipole
+
         Parameters
-        __________
-        r : ndarray, dtype=float
-            Array containing electrode location in units of (µm).
-        theta : ndarray, dtype=float
-            Array of angles in radians between electrode location and
-            dipole location vectors.
-        
+        ----------
+        r : float
+            Distance from origin to skull electrode location in units of (µm)
+        theta : float
+            Polar angle between skull electrode location and
+            dipole location vector rzloc in units of (radians)
+
         Returns
-        _______
+        -------
         pot_sum : float
-            Sum factor containing brain constants, dipole and
-            electrode locations and legendre polynomials.
+            Summation factor for calculation of electrical potential in skull
+            from radial current dipole moment. (unitless)
         """
         n = np.arange(1,100)
         c3n = self._calc_c3n(n)
@@ -394,21 +403,21 @@ class FourSphereVolumeConductor(object):
 
     def _potential_scalp_rad(self, r, theta):
         """
-        Calculate potential in scalp from radial dipole
-        
+        Return factor for calculation of potential in scalp from radial dipole
+
         Parameters
-        __________
-        r : ndarray, dtype=float
-            Array containing electrode location in units of (µm).
-        theta : ndarray, dtype=float
-            Array of angles in radians between electrode location and
-            dipole location vectors.
-        
+        ----------
+        r : float
+            Distance from origin to scalp electrode location in units of (µm)
+        theta : float
+            Polar angle between scalp electrode location and
+            dipole location vector rzloc in units of (radians)
+
         Returns
-        _______
+        -------
         pot_sum : float
-            Sum factor containing brain constants, dipole and
-            electrode locations and legendre polynomials.
+            Summation factor for calculation of electrical potential in scalp
+            from radial current dipole moment. (unitless)
         """
         n = np.arange(1,100)
         c4n = self._calc_c4n(n)
@@ -421,24 +430,21 @@ class FourSphereVolumeConductor(object):
 
     def _potential_brain_tan(self, r, theta):
         """
-        Calculate sum with constants and legendres
-        
+        Return factor for calculation of potential in brain from tan. dipole
+
         Parameters
-        __________
-        r : ndarray, dtype=float
-            Array containing electrode location in units of (µm).
-        theta : ndarray, dtype=float
-            Array of angles in radians between electrode location and
-            dipole location vectors.
-        p : ndarray, dtype=float
-            Array containing the current dipole moment for all timesteps in
-            the x-, y- and z-direction in units of (nA*µm)
-        
+        ----------
+        r : float
+            Distance from origin to brain electrode location in units of (µm)
+        theta : float
+            Polar angle between brain electrode location and
+            dipole location vector rzloc in units of (radians)
+
         Returns
-        _______
+        -------
         pot_sum : float
-            Sum factor containing brain constants, dipole and
-            electrode locations and legendre polynomials.
+            Summation factor for calculation of electrical potential in brain
+            from tangential current dipole moment. (unitless)
         """
         n = np.arange(1,100)
         c1n = self._calc_c1n(n)
@@ -448,24 +454,21 @@ class FourSphereVolumeConductor(object):
 
     def _potential_csf_tan(self, r, theta):
         """
-        Calculate sum with constants and legendres
-        
+        Return factor for calculation of potential in CSF from tan. dipole
+
         Parameters
-        __________
-        r : ndarray, dtype=float
-            Array containing electrode location in units of (µm).
-        theta : ndarray, dtype=float
-            Array of angles in radians between electrode location and
-            dipole location vectors.
-        p : ndarray, dtype=float
-            Array containing the current dipole moment for all timesteps in
-            the x-, y- and z-direction in units of (nA*µm)
-        
+        ----------
+        r : float
+            Distance from origin to CSF electrode location in units of (µm)
+        theta : float
+            Polar angle between CSF electrode location and
+            dipole location vector rzloc in units of (radians)
+
         Returns
-        _______
+        -------
         pot_sum : float
-            Sum factor containing brain constants, dipole and
-            electrode locations and legendre polynomials.
+            Summation factor for calculation of electrical potential in CSF
+            from tangential current dipole moment. (unitless)
         """
         n = np.arange(1,100)
         c2n = self._calc_c2n(n)
@@ -476,24 +479,21 @@ class FourSphereVolumeConductor(object):
 
     def _potential_skull_tan(self, r, theta):
         """
-        Calculate sum with constants and legendres
-        
+        Return factor for calculation of potential in skull from tan. dipole
+
         Parameters
-        __________
-        r : ndarray, dtype=float
-            Array containing electrode location in units of (µm).
-        theta : ndarray, dtype=float
-            Array of angles in radians between electrode location and
-            dipole location vectors.
-        p : ndarray, dtype=float
-            Array containing the current dipole moment for all timesteps in
-            the x-, y- and z-direction in units of (nA*µm).
-        
+        ----------
+        r : float
+            Distance from origin to skull electrode location in units of (µm)
+        theta : float
+            Polar angle between skull electrode location and
+            dipole location vector rzloc in units of (radians)
+
         Returns
-        _______
+        -------
         pot_sum : float
-            Sum factor containing brain constants, dipole and
-            electrode locations and legendre polynomials.
+            Summation factor for calculation of electrical potential in skull
+            from tangential current dipole moment. (unitless)
         """
         n = np.arange(1,100)
         c3n = self._calc_c3n(n)
@@ -504,24 +504,21 @@ class FourSphereVolumeConductor(object):
 
     def _potential_scalp_tan(self, r, theta):
         """
-        Calculate sum with constants and legendres
-        
+        Return factor for calculation of potential in scalp from tan. dipole
+
         Parameters
-        __________
-        r : ndarray, dtype=float
-            Array containing electrode location in units of (µm).
-        theta : ndarray, dtype=float
-            Array of angles in radians between electrode location and
-            dipole location vectors.
-        p : ndarray, dtype=float
-            Array containing the current dipole moment for all timesteps in
-            the x-, y- and z-direction in units of (nA*µm)
-        
+        ----------
+        r : float
+            Distance from origin to scalp electrode location in units of (µm)
+        theta : float
+            Polar angle between scalp electrode location and
+            dipole location vector rzloc in units of (radians)
+
         Returns
-        _______
+        -------
         pot_sum : float
-                Sum factor containing brain constants, dipole and
-                electrode locations and legendre polynomials.
+            Summation factor for calculation of electrical potential in scalp
+            from tangential current dipole moment. (unitless)
         """
         n = np.arange(1,100)
         c4n = self._calc_c4n(n)
@@ -587,21 +584,24 @@ class FourSphereVolumeConductor(object):
 
 class InfiniteVolumeConductor(object):
     """
-    Main class for computing potentials with current dipole approximation.
+    Main class for computing extracellular potentials with current dipole
+    approximation in an infinite 3D volume conductor model that assumes
+    homogeneous, isotropic, linear (frequency independent) conductivity
 
     Parameters
-    __________
+    ----------
     sigma : float
         Electrical conductivity in extracellular space in units of (S/cm)
-    
+
     Examples
-    ________
+    --------
     Computing the potential from dipole moment valid in the far field limit.
     Theta correspond to the dipole alignment angle from the vertical z-axis.
     >>> import LFPy
     >>> import numpy as np
     >>> inf_model = LFPy.InfiniteVolumeConductor(sigma=0.3)
     >>> p = np.array([[10., 10., 10.]])
+    >>> r = np.array([[1000., 0., 5000.]])
     >>> phi_p, theta = inf_model.get_dipole_potential(p,
     >>>                                               x=np.array([1000]),
     >>>                                               y=np.array([0]),
@@ -613,41 +613,72 @@ class InfiniteVolumeConductor(object):
         "Initialize class InfiniteVolumeConductor"
         self.sigma = sigma
 
-    def get_dipole_potential(self, p, x, y, z):
-        """
-        Compute the electric potential in infinite homogeneous linear conductive
-        media from a current dipole moment at a distance [x, y, z]
+    # def get_dipole_potential(self, p, x, y, z):
+    #     """
+    #     Return electric potential from current dipole with current dipole approx
+    #
+    #     p : ndarray, dtype=float
+    #         Shape (n_timesteps, 3) array containing the x,y,z components of the
+    #         current dipole moment in units of (nA*µm) for all timesteps
+    #
+    #     Returns
+    #     -------
+    #     potential : ndarray, dtype=float
+    #         Shape (n_contacts, n_timesteps) array containing the electric
+    #         potential at contact point(s) FourSphereVolumeConductor.r in units
+    #         of (mV) for all timesteps of current dipole moment p
+    #
+    #     Parameters
+    #     ----------
+    #     p : ndarray, dtype=float
+    #         Array containing the current dipole moment for
+    #         all timesteps in the x-, y- and z-direction in units of (nA*µm)
+    #     x, y, z : ndarray, dtype=float
+    #         arrays of coordinates relative to soma midpoint where potential is
+    #         computed in units of (µm)
+    #
+    #     Returns
+    #     -------
+    #     theta : ndarray
+    #         Angle in radians between phi(t) and distance vector from
+    #         electrode to current dipole location,
+    #         calculated for all timesteps.
+    #     phi : ndarray
+    #         Array containing the current dipole moment at all
+    #         points in x-, y-, z-grid for all timesteps in units of mV.
+    #
+    #     """
+    #     phi = np.zeros((x.size, p.shape[-1]))
+    #     for j, dist in enumerate(np.c_[x, y, z]):
+    #         cos_theta = np.dot(p, dist) / (np.linalg.norm(dist) *
+    #                                        np.linalg.norm(p, axis=1))
+    #         cos_theta = np.nan_to_num(cos_theta)
+    #         theta = np.arccos(cos_theta)
+    #         phi[j, :] = 1. / (4*np.pi*self.sigma) *\
+    #                          np.linalg.norm(p, axis=1)*cos_theta/(dist**2).sum()
+    #     return phi, theta
 
-        Parameters
-        ----------
+    def get_dipole_potential(self, p, r):
+        """
+        Return electric potential from current dipole with current dipole approx
+
         p : ndarray, dtype=float
-            Array containing the current dipole moment for
-            all timesteps in the x-, y- and z-direction in units of (nA*µm)
-        x, y, z : ndarray, dtype=float
-            arrays of coordinates relative to soma midpoint where potential is
-            computed in units of (µm)
+            Shape (n_timesteps, 3) array containing the x,y,z components of the
+            current dipole moment in units of (nA*µm) for all timesteps
 
         Returns
         -------
-        theta : ndarray
-            Angle in radians between phi(t) and distance vector from
-            electrode to current dipole location,
-            calculated for all timesteps.
-        phi : ndarray
-            Array containing the current dipole moment at all
-            points in x-, y-, z-grid for all timesteps in units of nV.
+        potential : ndarray, dtype=float
+            Shape (n_contacts, n_timesteps) array containing the electric
+            potential at contact point(s) FourSphereVolumeConductor.r in units
+            of (mV) for all timesteps of current dipole moment p
 
         """
-        phi = np.zeros((x.size, p.shape[-1]))
-        for j, dist in enumerate(np.c_[x, y, z]):
-            cos_theta = np.dot(p, dist) / (np.linalg.norm(dist) *
-                                           np.linalg.norm(p, axis=1))
-            cos_theta = np.nan_to_num(cos_theta)
-            theta = np.arccos(cos_theta)
-            phi[j, :] = 1. / (4*np.pi*self.sigma) *\
-                             np.linalg.norm(p, axis=1)*cos_theta/(dist**2).sum()
+        dotprod = np.dot(r, p.T)
+        r_factor = np.linalg.norm(r, axis=1)**3
+        phi = 1./(4*np.pi*self.sigma)*(dotprod.T/ r_factor).T
+        return phi
 
-        return phi, theta
 
 def get_current_dipole_moment(dist, current):
     """
@@ -731,7 +762,7 @@ class MEG(object):
 
     Parameters
     ----------
-    sensor_locations : npdarray, dtype=float
+    sensor_locations : ndarray, dtype=float
         shape (n_locations x 3) array with x,y,z-locations of measurement
         devices where magnetic field of current dipole moments is calculated
 
@@ -755,7 +786,7 @@ class MEG(object):
 
     >>> sensor_locations = np.array([[1E4, 0, 0]])
     >>> meg = LFPy.MEG(sensor_locations)
-    >>> H = meg.calculate_H(cell.current_dipole_location, dipole_location)
+    >>> H = meg.calculate_H(cell.current_dipole_moment, dipole_location)
     >>> plt.subplot(311)
     >>> plt.plot(cell.tvec, cell.somav)
     >>> plt.subplot(312)
@@ -791,15 +822,15 @@ class MEG(object):
         """
         Parameters
         ----------
-        current_dipole_moment : npdarray, dtype=float
+        current_dipole_moment : ndarray, dtype=float
             shape (n_timesteps x 3) array with x,y,z-components of current-
             dipole moment time series data in units of (nA µm)
-        dipole_location : npdarray, dtype=float
+        dipole_location : ndarray, dtype=float
             shape (3, ) array with x,y,z-location of dipole in units of (µm)
 
         Returns
         -------
-        npdarray, dtype=float
+        ndarray, dtype=float
             shape (n_locations x n_timesteps x 3) array with x,y,z-components of the magnetic
             field :math:`\mathbf{H}` in units of (nA/µm)
 
