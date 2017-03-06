@@ -2004,17 +2004,6 @@ class Cell(object):
                                                         bottom_seg, branch,
                                                         parentsec)
 
-                if bottom_seg and 'soma' in parentsec.name():
-                    # if a seg is connented to soma, it is
-                    # connected to the middle of soma,
-                    # and dpar needs to be altered.
-                    dpar[parent_idx] = np.array([self.xstart[seg_idx] -
-                                         self.xmid[parent_idx],
-                                        self.ystart[seg_idx] -
-                                         self.ymid[parent_idx],
-                                        self.zstart[seg_idx] -
-                                         self.zmid[parent_idx]])
-
                 tot_parent_idx = int(parent_idx*2 + 1)
                 tot_seg_idx = seg_idx*2
                 d_list[tot_parent_idx] = dpar[parent_idx]
