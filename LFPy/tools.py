@@ -42,7 +42,7 @@ def noise_brown(ncols, nrows=1, weight=1, filter=None, filterargs=None):
     if filter is not None:
         coeff_b, coeff_a = list(filter(**filterargs))
     
-    noise = np.empty((nrows, ncols))    
+    noise = np.zeros((nrows, ncols))    
     for i in range(nrows):
         signal = np.random.normal(size=ncols+10000).cumsum()
         if filter is not None:

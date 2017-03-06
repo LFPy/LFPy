@@ -172,13 +172,20 @@ class Cell(object):
                 raise Exception("Could not load existent top-level cell")
 
         #Some parameters and lists initialised
-        if dt not in 2.**np.arange(-16, -1):
-            if self.verbose:
-                print('dt not a power of 2,')
-                print('cell.tvec errors may occur.')
-                print('Initialization will continue.')
-            else:
-                pass
+        try:
+            assert(tstartms <= 0)
+        except AssertionError:
+            raise AssertionError('tstartms must be <= 0.')
+
+        try:
+            assert(dt in 2.**np.arange(-16, -1))
+        except AssertionError:
+            if tstartms == 0.:
+                print('int(1./dt) not factorizable in base 2.' 
+                      'cell.tvec errors may occur, continuing initialization.')
+            elif tstartms < 0:
+                raise AssertionError('int(1./dt) must be factorizable in base 2 if tstartms < 0.')
+
         self.dt = dt
 
         self.tstartms = tstartms
@@ -756,6 +763,7 @@ class Cell(object):
     def simulate(self, electrode=None, rec_imem=False, rec_vmem=False,
                  rec_ipas=False, rec_icap=False,
                  rec_isyn=False, rec_vmemsyn=False, rec_istim=False,
+                 rec_current_dipole_moment=False,
                  rec_variables=[], variable_dt=False, atol=0.001,
                  to_memory=True, to_file=False, file_name=None,
                  dotprodcoeffs=None):
@@ -787,6 +795,12 @@ class Cell(object):
             Record membrane voltage of segments with Synapse(mV)
         rec_istim :  bool
             Record currents of StimIntraElectrode (nA)
+        rec_current_dipole_moment : bool
+            If True, compute and record current-dipole moment from
+            transmembrane currents as in Linden et al. (2010) J Comput Neurosci,
+            DOI: 10.1007/s10827-010-0245-4. Will set the `LFPy.Cell` attribute
+            `current_dipole_moment` as n_timesteps x 3 `np.ndarray` where the
+            last dimension contains the x,y,z components of the dipole moment. 
         rec_variables : list
             List of variables to record, i.e arg=['cai', ]
         variable_dt : bool
@@ -824,12 +838,14 @@ class Cell(object):
             self._set_ipas_recorders()
         if rec_icap:
             self._set_icap_recorders()
+        if rec_current_dipole_moment:
+            self._set_current_dipole_moment_array()
         if len(rec_variables) > 0:
             self._set_variable_recorders(rec_variables)
 
 
         #run fadvance until t >= tstopms, and calculate LFP if asked for
-        if electrode is None and dotprodcoeffs is None:
+        if electrode is None and dotprodcoeffs is None and not rec_current_dipole_moment:
             if not rec_imem:
                 print("rec_imem = %s, membrane currents will not be recorded!"
                                   % str(rec_imem))
@@ -839,7 +855,8 @@ class Cell(object):
             #allow using both electrode and additional coefficients:
             _run_simulation_with_electrode(self, cvode, electrode, variable_dt, atol,
                                                to_memory, to_file, file_name,
-                                               dotprodcoeffs)
+                                               dotprodcoeffs,
+                                               rec_current_dipole_moment)
         # somatic trace
         self.somav = np.array(self.somav)
 
@@ -997,7 +1014,7 @@ class Cell(object):
         Record membrane currents for all segments
         """
         neuron.h.finitialize(self.v_init) # need to set voltage, otherwise the
-                                          # returned currents will be wrong
+                                          # returned currents may be wrong
 
         self.memireclist = neuron.h.List()
         for sec in self.allseclist:
@@ -1039,6 +1056,14 @@ class Cell(object):
                 memvrec.record(seg._ref_v, self.dt)
                 self.memvreclist.append(memvrec)
 
+    def _set_current_dipole_moment_array(self):
+        """
+        Creates container for current dipole moment, an empty
+        n_timesteps x 3 `numpy.ndarray` that will be filled with values during
+        the course of each simulation
+        """
+        self.current_dipole_moment = np.zeros((self.tvec.size, 3))
+
     def _set_variable_recorders(self, rec_variables):
         """
         Create a recorder for each variable name in list
@@ -1061,6 +1086,7 @@ class Cell(object):
                         print('non-existing variable %s, section %s.%f' %
                                 (variable, sec.name(), seg.x))
                     variablereclist.append(recvector)
+
 
     def set_pos(self, xpos=0., ypos=0., zpos=0.):
         """Set the cell position.
