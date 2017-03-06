@@ -15,6 +15,7 @@ GNU General Public License for more details.
 
 """
 
+from __future__ import division
 import os
 import sys
 from warnings import warn
@@ -181,7 +182,7 @@ class Cell(object):
             assert(dt in 2.**np.arange(-16, -1))
         except AssertionError:
             if tstartms == 0.:
-                print('int(1./dt) not factorizable in base 2.' 
+                print('int(1./dt) not factorizable in base 2.'
                       'cell.tvec errors may occur, continuing initialization.')
             elif tstartms < 0:
                 raise AssertionError('int(1./dt) must be factorizable in base 2 if tstartms < 0.')
@@ -800,7 +801,7 @@ class Cell(object):
             transmembrane currents as in Linden et al. (2010) J Comput Neurosci,
             DOI: 10.1007/s10827-010-0245-4. Will set the `LFPy.Cell` attribute
             `current_dipole_moment` as n_timesteps x 3 `np.ndarray` where the
-            last dimension contains the x,y,z components of the dipole moment. 
+            last dimension contains the x,y,z components of the dipole moment.
         rec_variables : list
             List of variables to record, i.e arg=['cai', ]
         variable_dt : bool
