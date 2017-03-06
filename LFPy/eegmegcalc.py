@@ -602,7 +602,7 @@ class InfiniteVolumeConductor(object):
     >>> inf_model = LFPy.InfiniteVolumeConductor(sigma=0.3)
     >>> p = np.array([[10., 10., 10.]])
     >>> r = np.array([[1000., 0., 5000.]])
-    >>> phi = inf_model.get_dipole_potential(p, r)
+    >>> phi_p = inf_model.get_dipole_potential(p, r)
 
     """
 
