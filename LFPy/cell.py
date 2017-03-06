@@ -2083,15 +2083,16 @@ class Cell(object):
 
     def get_dict_parent_connections(self):
         """
-        Return dictionary with children seg indices for all secs.
+        Return dictionary with parent connection point for all sections.
 
         Returns
         -------
-        children_dict : dictionary
-            Dictionary containing a list for each section,
-            with the segment index of all the section's children.
-            The dictionary is needed to find the
-            sibling of a segment.
+        connection_dict : dictionary
+            Dictionary containing a float in range [0, 1] for each section
+            in cell. The float gives the location on the parent segment
+            to which the section is connected to.
+            .
+            The dictionary is needed for computing axial currents.
         """
         connection_dict = {}
         for sec in neuron.h.allsec():
