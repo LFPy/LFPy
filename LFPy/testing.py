@@ -4,6 +4,7 @@ extracellular field potentials
 
 """
 
+from __future__ import division
 import os
 from warnings import warn
 import unittest
@@ -1236,14 +1237,6 @@ class testLFPy(unittest.TestCase):
         np.testing.assert_equal(gt, meg.calculate_H(current_dipole_moment,
                                                     dipole_location))
 
-    def test_get_dipole_potential(self):
-        #measurement point
-        r = np.array([[0., 0., 10000.]])
-        cell, d_list, iaxial, LFP_LFPy = self.stickSimulationCurrentDipole('pointsource')
-        inf_model = LFPy.InfiniteVolumeConductor(sigma=0.3)
-        p, p_tot = LFPy.get_current_dipole_moment(d_list, iaxial)
-        LFP_cda = inf_model.get_dipole_potential(p, r)
-        # print
 
     def test_cell_simulate_current_dipole_moment_00(self):
         stickParams = {
@@ -1647,53 +1640,10 @@ class testLFPy(unittest.TestCase):
 
         np.testing.assert_equal(i_membrane_control, i_membrane_fadvance)
 
+    # def test_get_dipole_potential(self):
+
 
     ######## Functions used by tests: ##########################################
-    def stickSimulationCurrentDipole(self, method):
-        stickParams = {
-            'morphology' : os.path.join(LFPy.__path__[0], 'stick.hoc'),
-            'rm' : 30000,
-            'cm' : 1,
-            'Ra' : 150,
-            'tstartms' : -100,
-            'tstopms' : 100,
-            'dt' : 0.01,
-            'nsegs_method' : 'lambda_f',
-            'lambda_f' : 100,
-
-        }
-
-        electrodeParams = {
-            'sigma' : 0.3,
-            'x' : np.ones(11) * 100.,
-            'y' : np.zeros(11),
-            'z' : np.linspace(1000, 0, 11),
-            'method' : method
-        }
-
-        stimParams = {
-            'pptype' : 'SinSyn',
-            'delay' : -100.,
-            'dur' : 1000.,
-            'pkamp' : 1.,
-            'freq' : 100.,
-            'phase' : -np.pi/2,
-            'bias' : 0.,
-            'record_current' : True
-        }
-
-
-        electrode = LFPy.RecExtElectrode(**electrodeParams)
-
-        stick = LFPy.Cell(**stickParams)
-
-        synapse = LFPy.StimIntElectrode(stick, stick.get_closest_idx(0, 0, 1000),
-                               **stimParams)
-        stick.simulate(electrode, rec_imem=True, rec_istim=True,
-                       rec_vmem=True, current_dipole_moment=True)
-        d_list, iaxial = cell.get_axial_currents_from_vmem()
-        return cell, d_list, iaxial, electrode.LFP
-
 
     def stickSimulationTesttvec(self, **kwargs):
         stick = LFPy.Cell(morphology = os.path.join(LFPy.__path__[0],
@@ -1946,7 +1896,7 @@ class testLFPy(unittest.TestCase):
             'rm' : 30000,
             'cm' : 1.0,
             'Ra' : 150,
-            'dt' : 0.1,
+            'dt' : 2**-6,
             'tstartms' : -50,
             'tstopms' : 50,
             'delete_sections' : False
