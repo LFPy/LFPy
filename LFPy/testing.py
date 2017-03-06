@@ -1640,8 +1640,13 @@ class testLFPy(unittest.TestCase):
 
         np.testing.assert_equal(i_membrane_control, i_membrane_fadvance)
 
-    # def test_get_dipole_potential(self):
-
+    def test_get_dipole_potential(self):
+        sigma = 0.3
+        r = np.array([[0., 0., 1.], [0., 1., 0.]])
+        p = np.array([[0., 0., 4*np.pi*0.3], [0., 4*np.pi*0.3, 0.]])
+        inf_model = LFPy.InfiniteVolumeConductor(sigma)
+        phi = inf_model.get_dipole_potential(p, r)
+        np.testing.assert_allclose(phi, np.array([[1., 0.], [0., 1.]]))
 
     ######## Functions used by tests: ##########################################
 

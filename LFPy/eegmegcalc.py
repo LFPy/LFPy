@@ -602,61 +602,13 @@ class InfiniteVolumeConductor(object):
     >>> inf_model = LFPy.InfiniteVolumeConductor(sigma=0.3)
     >>> p = np.array([[10., 10., 10.]])
     >>> r = np.array([[1000., 0., 5000.]])
-    >>> phi_p, theta = inf_model.get_dipole_potential(p,
-    >>>                                               x=np.array([1000]),
-    >>>                                               y=np.array([0]),
-    >>>                                               z=np.array([5000]))
+    >>> phi = inf_model.get_dipole_potential(p, r)
 
     """
 
     def __init__(self, sigma=0.3):
         "Initialize class InfiniteVolumeConductor"
         self.sigma = sigma
-
-    # def get_dipole_potential(self, p, x, y, z):
-    #     """
-    #     Return electric potential from current dipole with current dipole approx
-    #
-    #     p : ndarray, dtype=float
-    #         Shape (n_timesteps, 3) array containing the x,y,z components of the
-    #         current dipole moment in units of (nA*µm) for all timesteps
-    #
-    #     Returns
-    #     -------
-    #     potential : ndarray, dtype=float
-    #         Shape (n_contacts, n_timesteps) array containing the electric
-    #         potential at contact point(s) FourSphereVolumeConductor.r in units
-    #         of (mV) for all timesteps of current dipole moment p
-    #
-    #     Parameters
-    #     ----------
-    #     p : ndarray, dtype=float
-    #         Array containing the current dipole moment for
-    #         all timesteps in the x-, y- and z-direction in units of (nA*µm)
-    #     x, y, z : ndarray, dtype=float
-    #         arrays of coordinates relative to soma midpoint where potential is
-    #         computed in units of (µm)
-    #
-    #     Returns
-    #     -------
-    #     theta : ndarray
-    #         Angle in radians between phi(t) and distance vector from
-    #         electrode to current dipole location,
-    #         calculated for all timesteps.
-    #     phi : ndarray
-    #         Array containing the current dipole moment at all
-    #         points in x-, y-, z-grid for all timesteps in units of mV.
-    #
-    #     """
-    #     phi = np.zeros((x.size, p.shape[-1]))
-    #     for j, dist in enumerate(np.c_[x, y, z]):
-    #         cos_theta = np.dot(p, dist) / (np.linalg.norm(dist) *
-    #                                        np.linalg.norm(p, axis=1))
-    #         cos_theta = np.nan_to_num(cos_theta)
-    #         theta = np.arccos(cos_theta)
-    #         phi[j, :] = 1. / (4*np.pi*self.sigma) *\
-    #                          np.linalg.norm(p, axis=1)*cos_theta/(dist**2).sum()
-    #     return phi, theta
 
     def get_dipole_potential(self, p, r):
         """
