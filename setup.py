@@ -1,5 +1,8 @@
 #!/usr/bin/env python
-'''LFPy setup.py file'''
+# -*- coding: utf-8 -*-
+"""LFPy setuptools file
+
+"""
 
 import os
 import shutil
@@ -13,13 +16,13 @@ try:
     cmdclass = { 'build_ext' : build_ext}
     ext_modules = [
         Extension('LFPy.lfpcalc',
-        ['LFPy/lfpcalc.pyx'],
+        [os.path.join('LFPy', 'lfpcalc.pyx')],
         include_dirs=[numpy.get_include()]),
         Extension('LFPy.run_simulation',
-        ['LFPy/run_simulation.pyx'],
+        [os.path.join('LFPy', 'run_simulation.pyx')],
         include_dirs=[numpy.get_include()]),
         Extension('LFPy.alias_method',
-        ['LFPy/alias_method.pyx'],
+        [os.path.join('LFPy', 'alias_method.pyx')],
         include_dirs=[numpy.get_include()]),
         ]
 except ImportError as ie:
@@ -49,7 +52,7 @@ with open('README.md') as file:
 
 setup(
     name = "LFPy",
-    version = "1.1.3",
+    version = "2.0",
     maintainer = "Espen Hagen",
     maintainer_email = 'espen.hagen@fys.uio.no',
     packages = ['LFPy'],
@@ -64,9 +67,9 @@ setup(
     cmdclass = cmdclass,
     ext_modules = ext_modules,
     url='http://LFPy.github.io',
-    download_url = 'https://github.com/LFPy/LFPy/tarball/v1.1.3',
+    download_url = 'https://github.com/LFPy/LFPy/tarball/v2.0',
     license='LICENSE',
-    description='A module for modeling Local Field Potentials built on NEURON',
+    description='A module for modeling extracellular potentials from multi compartment neuron models',
     long_description=long_description,
     classifiers=[
         'License :: OSI Approved :: GNU General Public License (GPL)',
@@ -84,7 +87,8 @@ setup(
         'Development Status :: 5 - Production/Stable',
         ],
     install_requires = [
-        'setuptools', 'numpy', 'scipy', 'matplotlib', 'Cython'
+        'setuptools', 'numpy', 'scipy', 'matplotlib', 'Cython', 'h5py',
+        'mpi4py'
         ],
     provides = ['LFPy'],
     )

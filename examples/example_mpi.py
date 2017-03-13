@@ -1,13 +1,13 @@
 #!/usr/bin/env python
-'''
-################################################################################
-# An LFPy example file showing how cells can be run in parallel using MPI.
-# To run using MPI with 4 cpu cores, issue in terminal
-# openmpirun -np 4 python example_mpi.py
-#
-# The example uses mpi4py with openmpi, and do not rely on NEURON's MPI.
-################################################################################
-'''
+# -*- coding: utf-8 -*-
+"""
+An LFPy example file showing how cells can be run in parallel using MPI.
+To run using MPI with 4 cpu cores, issue in terminal
+openmpirun -np 4 python example_mpi.py
+
+The example uses mpi4py with openmpi, and do not rely on NEURON's MPI.
+
+"""
 
 import os
 from os.path import join

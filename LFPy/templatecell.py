@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 """
 Copyright (C) 2012 Computational Neuroscience Group, NMBU.
 
@@ -14,6 +15,7 @@ GNU General Public License for more details.
 
 """
 
+from __future__ import division
 import os
 import sys
 import pickle
@@ -40,7 +42,7 @@ class TemplateCell(Cell):
     templatename : str
         Cell template-name used for this cell object
     templateargs : str
-        Arguments provided to template-definition
+        Parameters provided to template-definition
     v_init : float
         Initial membrane potential. Default to -65.
     passive : bool
@@ -126,9 +128,7 @@ class TemplateCell(Cell):
                 
         #load the cell template specification
         #check if templatename exist in neuron.h namespace:
-        if hasattr(neuron.h, self.templatename):
-            print('template %s exist already' % self.templatename)
-        else:
+        if not hasattr(neuron.h, self.templatename):
             if type(self.templatefile) == str:
                 neuron.h.load_file(self.templatefile)
             elif type(self.templatefile) == list:
@@ -147,12 +147,12 @@ class TemplateCell(Cell):
                 
         #the python cell object we are loading the morphology into:
         celltemplate = getattr(neuron.h, self.templatename)
-        self.cell = celltemplate(self.templateargs)
-        #self.cell = getattr(neuron.h, self.templatename)(self.templateargs)
+        self.template = celltemplate(self.templateargs)
+        #self.template = getattr(neuron.h, self.templatename)(self.templateargs)
         
         #perform a test if the morphology is already loaded:
         seccount = 0
-        for sec in self.cell.all:
+        for sec in self.template.all:
             seccount += 1
         if seccount == 0:
             #import the morphology, try and determine format
@@ -191,16 +191,15 @@ class TemplateCell(Cell):
                 if fileEnding == 'xml' or fileEnding ==  'XML':
                     #can not currently assign xml to cell template
                     try:
-                        imprt.instantiate(self.cell)
+                        imprt.instantiate(self.template)
                     except:
                         raise Exception("this xml file is not supported")
                 else:
-                    imprt.instantiate(self.cell)
+                    imprt.instantiate(self.template)
                 
             else:
-                neuron.h.execute("xopen(\"%s\")" % self.morphology, self.cell)
-                #neuron.h.load_file(1, self.morphology)
-        
+                neuron.h.execute("xopen(\"%s\")" % self.morphology, self.template)
+
         #set shapes and create sectionlists
         neuron.h.define_shape()
         self._create_sectionlists()
@@ -209,41 +208,41 @@ class TemplateCell(Cell):
         """Create section lists for different kinds of sections"""
         #list with all sections
         
-        #test if list self.cell.all is not empty
+        #test if list self.template.all is not empty
         numsec = 0
-        for sec in self.cell.all:
+        for sec in self.template.all:
             numsec += 1
         
         if numsec > 0:
             self.allsecnames = []
-            for sec in self.cell.all:
+            for sec in self.template.all:
                 self.allsecnames.append(sec.name())
             
             #hotpatching the allseclist!!!
-            self.allseclist = self.cell.all
+            self.allseclist = self.template.all
             
             #list of soma sections, assuming it is named on the format "soma*"
             self.nsomasec = 0
             self.somalist = neuron.h.SectionList()
-            for sec in self.cell.all:
-                if sec.name().find('soma') >= 0:
+            for sec in self.template.all:
+                if 'soma' in sec.name():
                     self.somalist.append(sec=sec)
                     self.nsomasec += 1
         else:
             self.allsecnames = []
-            for sec in self.cell.allsec():
+            for sec in self.template.allsec():
                 self.allsecnames.append(sec.name())
             
             self.allseclist = neuron.h.SectionList()
-            for sec in self.cell.allsec():
+            for sec in self.template.all:
                 self.allseclist.append(sec=sec)
             
             
             #list of soma sections, assuming it is named on the format "soma*"
             self.nsomasec = 0
             self.somalist = neuron.h.SectionList()
-            for sec in self.cell.allsec():
-                if sec.name().find('soma') >= 0:
+            for sec in self.template.allsec():
+                if 'soma' in sec.name():
                     self.somalist.append(sec=sec)
                     self.nsomasec += 1
 

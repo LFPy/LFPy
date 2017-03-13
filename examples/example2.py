@@ -1,5 +1,9 @@
 #!/usr/bin/env python
-'''Run Hay et al. (2011), generating and plotting a single action potential'''
+# -*- coding: utf-8 -*-
+"""
+Run Hay et al. (2011), generating and plotting a single action potential
+
+"""
 import numpy as np
 import sys
 if sys.version < '3':

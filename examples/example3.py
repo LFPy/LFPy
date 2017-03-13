@@ -1,7 +1,9 @@
 #!/usr/bin/env python
-'''
+# -*- coding: utf-8 -*-
+"""
 LFPs from a population of cells relying on MPI
-'''
+
+"""
 
 import numpy as np
 import matplotlib.pyplot as plt

@@ -1,9 +1,11 @@
 #!/usr/bin/env python
-'''
+# -*- coding: utf-8 -*-
+"""
 A very generic case where the same morphology on different file formats
 is loaded in LFPy using a generic template specification, defined by
 file LFPyCellTemplate.hoc
-'''
+
+"""
 import LFPy
 import neuron
 import numpy as np

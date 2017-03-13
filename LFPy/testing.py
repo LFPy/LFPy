@@ -1,6 +1,29 @@
 #!/usr/bin/env python
-"""A few tests for LFPy, most importantly the calculations of
-extracellular field potentials
+# -*- coding: utf-8 -*-
+"""LFPy unittest suite.
+
+To run all tests, one can do this from within python by issuing:
+>>> import LFPy
+>>> LFPy.test()
+
+or using nosetests on the command line (here shown with coverage):
+$ cd /PATH/TO/LFPy
+$ python setup.py build_ext -i
+$ pip install nose --user
+$ pip install coverage --user
+$ nosetests --with-coverage --cover-package=LFPy
+
+Copyright (C) 2012 Computational Neuroscience Group, NMBU.
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
 """
 
@@ -1819,22 +1842,33 @@ class testLFPy(unittest.TestCase):
         Will calculate the analytical LFP from a dendrite stick aligned with z-axis.
         The synaptic current is always assumed to be at the end of the stick, i.e.
         Zin = stickLength.
+        
+        Parameters
+        ----------            
+        time : float
+            The LFP is calculated for values in this np.array (ms)
+        stickLength : float
+            length of stick (mum)
+        stickDiam : float
+            diameter of stick (mum)
+        Rm : float
+            Membrane resistivity (Ohm * cm2)
+        Cm : float
+            Membrane capacitance (muF/cm2)
+        Ri : float
+            Intracellular resistivity (Ohm*cm)
+        stimFrequency : float
+            Frequency of cosine synapse current (Hz)
+        stimAmplitude : float
+            Amplitude of cosine synapse current (nA)
+        sigma : float
+            Extracellular conductivity (muS/mum)
+        electrodeR : float
+            Radial distance from stick (mum)
+        electrodeZ : float
+            Longitudal distance along stick(mum)
+        """    
 
-        Arguments:
-        ::
-
-            time : The LFP is calculated for values in this np.array (ms)
-            stickLength : length of stick (mum)
-            stickDiam : diameter of stick (mum)
-            Rm : Membrane resistivity (Ohm * cm2)
-            Cm : Membrane capacitance (muF/cm2)
-            Ri : Intracellular resistivity (Ohm*cm)
-            stimFrequency : Frequency of cosine synapse current (Hz)
-            stimAmplitude : Amplitude of cosine synapse current (nA)
-            sigma : Extracellular conductivity (muS/mum)
-            electrodeR : Radial distance from stick (mum)
-            electrodeZ : Longitudal distance along stick(mum)
-        """
         Gm = 1. / Rm            # specific membrane conductivity (S/cm2)
         gm = 1E2 * np.pi * stickDiam / Rm     # absolute membrane conductance (muS / mum)
         ri = 1E-2 * 4. * Ri / (np.pi * stickDiam**2) # intracellular resistance  (Mohm/mum)

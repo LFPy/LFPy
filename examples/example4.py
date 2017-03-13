@@ -1,7 +1,9 @@
 #!/usr/bin/env python
-'''
+# -*- coding: utf-8 -*-
+"""
 Example plot for LFPy: Single-synapse contribution to the LFP
-'''
+
+"""
 import LFPy
 import numpy as np
 import matplotlib.pyplot as plt

@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 """Copyright (C) 2012 Computational Neuroscience Group, NMBU.
 
 This program is free software: you can redistribute it and/or modify
@@ -13,6 +14,7 @@ GNU General Public License for more details.
 
 """
 
+from __future__ import division
 import numpy as np
 import neuron
 
@@ -280,7 +282,7 @@ class StimIntElectrode(PointProcess):
 
 
 class PointProcessPlayInSoma:
-    """Class implementation of Eivind's playback alghorithm"""
+    """Class implementation of playback alghorithm"""
     def __init__(self, soma_trace):
         """
         Class for playing back somatic trace at specific time points

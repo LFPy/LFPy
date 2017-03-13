@@ -1,18 +1,17 @@
 #!/usr/bin/env python
-'''
-################################################################################
-#
-# This is an example scripts using LFPy with a passive cell model adapted from
-# Mainen and Sejnowski, Nature 1996, for the original files, see
-# http://senselab.med.yale.edu/modeldb/ShowModel.asp?model=2488
-#
-# Here, excitatory and inhibitory neurons are distributed on different parts of
-# the morphology, with stochastic spike times produced by the
-# LFPy.inputgenerators.stationary_gamma() function.
-#
-# Same as "example6.py", just without the active conductances
-################################################################################
-'''
+# -*- coding: utf-8 -*-
+"""
+This is an example scripts using LFPy with a passive cell model adapted from
+Mainen and Sejnowski, Nature 1996, for the original files, see
+http://senselab.med.yale.edu/modeldb/ShowModel.asp?model=2488
+
+Here, excitatory and inhibitory neurons are distributed on different parts of
+the morphology, with stochastic spike times produced by the
+LFPy.inputgenerators.stationary_gamma() function.
+
+Same as "example6.py", just without the active conductances
+
+"""
 
 # importing some modules, setting some matplotlib values for pl.plot.
 import LFPy

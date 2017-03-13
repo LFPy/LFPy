@@ -1,23 +1,21 @@
 #!/usr/bin/env python
-'''
-################################################################################
-#
-# This is an example scripts using LFPy with an active cell model adapted from
-# Mainen and Sejnowski, Nature 1996, for the original files, see
-# http://senselab.med.yale.edu/modeldb/ShowModel.asp?model=2488
-#
-# This scripts is set up to use the model, where the active conductances are set
-# in the file "active_declarations_example2.hoc", and uses the mechanisms from
-# the .mod-files provided here. For this example to work, run "nrnivmodl" in
-# this folder to compile these mechanisms
-# (i.e. /$PATHTONEURON/nrn/x86_64/bin/nrnivmodl).
-#
-# A single excitatory synapse drive the neuron into producing a single action-
-# potential, and the local field potential are calculated on a dense 2D-grid
-# on around the soma.
-#
-################################################################################
-'''
+# -*- coding: utf-8 -*-
+"""
+This is an example scripts using LFPy with an active cell model adapted from
+Mainen and Sejnowski, Nature 1996, for the original files, see
+http://senselab.med.yale.edu/modeldb/ShowModel.asp?model=2488
+
+This scripts is set up to use the model, where the active conductances are set
+in the file "active_declarations_example2.hoc", and uses the mechanisms from
+the .mod-files provided here. For this example to work, run "nrnivmodl" in
+this folder to compile these mechanisms
+(i.e. /$PATHTONEURON/nrn/x86_64/bin/nrnivmodl).
+
+A single excitatory synapse drive the neuron into producing a single action-
+potential, and the local field potential are calculated on a dense 2D-grid
+on around the soma.
+
+"""
 
 
 #import some plotting stuff and the LFPy-module

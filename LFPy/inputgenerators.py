@@ -13,6 +13,7 @@ GNU General Public License for more details.
 
 """
 
+from __future__ import division
 import numpy as np
 
 def get_rand_spike_times(synpos, nspikes, tstart, tstop):

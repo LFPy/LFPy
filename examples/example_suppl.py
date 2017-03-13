@@ -1,5 +1,10 @@
 #!/usr/bin/env python
-'''some plottin' functions used by the example scripts'''
+# -*- coding: utf-8 -*-
+"""some plottin' functions used by the example scripts
+
+"""
+
+from __future__ import division
 import numpy as np
 import matplotlib.pyplot as plt
 import neuron

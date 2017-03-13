@@ -209,6 +209,10 @@ latex_documents = [
 # If false, no module index is generated.
 #latex_domain_indices = True
 
+# Suppress warnings of the type
+# WARNING: toctree contains reference to nonexisting document u'LFPy.xxx.xxx'
+numpydoc_show_class_members = False
+
 
 # -- Options for manual page output --------------------------------------------
 

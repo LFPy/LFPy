@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 '''Copyright (C) 2012 Computational Neuroscience Group, NMBU.
 
 This program is free software: you can redistribute it and/or modify
@@ -13,6 +14,7 @@ GNU General Public License for more details.
 
 '''
 
+from __future__ import division
 import numpy as np
 cimport numpy as np
 
