@@ -103,10 +103,10 @@ class NetworkCell(TemplateCell):
                 exec("cell.netconsynapses[-1].{} = {}".format(key, value))
                 try:
                     np.testing.assert_almost_equal(getattr(cell.netconsynapses[-1], key), value)
-                except AssertionError as ae:
-                    raise ae, '{} = {} != {}'.format(key,
-                                                    getattr(cell.netconsynapses[-1], key),
-                                                    value)
+                except AssertionError:
+                    raise AssertionError('{} = {} != {}'.format(key,
+                                                                getattr(cell.netconsynapses[-1], key),
+                                                                value))
 
 
     def create_spike_detector(self, target=None, threshold=-10.,
@@ -600,7 +600,7 @@ class Network(object):
                         nidx = int(multapsefun(**multapseargs))
                         j += 1
                     if j == 1000:
-                        raise Exception, 'change multapseargs as no positive synapse count was found in 1000 trials'
+                        raise Exception('change multapseargs as no positive synapse count was found in 1000 trials')
 
                 # print('connecting cell {} to cell {} with {} synapses on RANK {}'.format(pre_gid, post_gid, nidx, RANK))
 
@@ -754,7 +754,7 @@ class Network(object):
         try:
             cvode.use_fast_imem(1)
         except AttributeError as ae:
-            raise Exception, 'neuron.h.CVode().use_fast_imem() not found. Please update NEURON to v.7.5 or newer'
+            raise Exception('neuron.h.CVode().use_fast_imem() not found. Please update NEURON to v.7.5 or newer')
 
 
         for name in self.population_names:
