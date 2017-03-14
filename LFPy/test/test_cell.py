@@ -1,26 +1,32 @@
 #!/usr/bin/env python
-"""A few tests for LFPy, most importantly the calculations of
-extracellular field potentials
+# -*- coding: utf-8 -*-
+"""Copyright (C) 2012 Computational Neuroscience Group, NMBU.
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
 """
 
 from __future__ import division
 import os
-from warnings import warn
 import unittest
 import numpy as np
-from scipy.integrate import quad
-from scipy import real, imag
 import LFPy
 import neuron
 import pickle
-from warnings import warn
 import random
 
 # for nosetests to run load the SinSyn sinusoid synapse currrent mechanism
 neuron.load_mechanisms(os.path.join(LFPy.__path__[0], 'test'))
 
-class testLFPy(unittest.TestCase):
+class testCell(unittest.TestCase):
     """
     A set of test functions for each method of calculating the LFP, where the
     model outcome from LFPy is compared with analytically obtained results for
@@ -1072,7 +1078,7 @@ class testLFPy(unittest.TestCase):
 
 def stickSimulationTesttvec(**kwargs):
     stick = LFPy.Cell(morphology = os.path.join(LFPy.__path__[0], 'test',
-                                                'stick.hoc'), verbose=True,
+                                                'stick.hoc'), verbose=False,
                       **kwargs)
     stick.simulate(rec_imem=False)
     return stick.tvec

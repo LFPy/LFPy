@@ -1,74 +1,29 @@
 #!/usr/bin/env python
-"""A few tests for LFPy, most importantly the calculations of
-extracellular field potentials
+# -*- coding: utf-8 -*-
+"""Copyright (C) 2012 Computational Neuroscience Group, NMBU.
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
 """
 
 from __future__ import division
-import os
-from warnings import warn
 import unittest
 import numpy as np
-from scipy.integrate import quad
-from scipy import real, imag
 import LFPy
-import neuron
-import pickle
-from warnings import warn
-import random
 
-# for nosetests to run load the SinSyn sinusoid synapse currrent mechanism
-neuron.load_mechanisms(os.path.join(LFPy.__path__[0], 'test'))
 
-class testLFPy(unittest.TestCase):
+class testMEG(unittest.TestCase):
     """
-
+    
     """
-
-
-    def test_decompose_dipole(self):
-        '''Test radial and tangential parts of dipole sums to dipole'''
-        P1 = np.array([[1., 1., 1.]])
-        p_rad, p_tan = decompose_dipole(P1)
-        np.testing.assert_equal(p_rad + p_tan, P1)
-
-    def test_rad_dipole(self):
-        '''Test that radial part of decomposed dipole is correct'''
-        P1 = np.array([[1., 1., 1.]])
-        p_rad, p_tan = decompose_dipole(P1)
-        np.testing.assert_equal(p_rad, np.array([[0., 0., 1.]]))
-
-    def test_tan_dipole(self):
-        '''Test that tangential part of decomposed dipole is correct'''
-        P1 = np.array([[1., 1., 1.]])
-        p_rad, p_tan = decompose_dipole(P1)
-        np.testing.assert_equal(p_tan, np.array([[1., 1., 0.]]))
-
-    def test_calc_theta(self):
-        '''Test theta: angle between rz and r'''
-        rz1 = np.array([0., 0., 70.])
-        r_el = np.array([[0., 0., 90.], [0., 0., -90.],[0., 70., 0.], [0., -70., 0.], [0., 10., 10.]])
-        fs = make_class_object(rz1, r_el)
-        theta = fs.calc_theta()
-        np.testing.assert_almost_equal(theta, np.array([0., np.pi, np.pi/2, np.pi/2, np.pi/4]))
-
-    def test_calc_phi(self):
-        '''Test phi: azimuthal angle between rx and rxy'''
-        rz1 = np.array([0., 0., 70.])
-        r_el = np.array([[0., 1., 0], [-1., -1., 1.],[1., 1., 4.]])
-        fs = make_class_object(rz1, r_el)
-        P1 = np.array([[0., 1., 0.], [1., 0., 1.]])
-        phi = fs.calc_phi(P1)
-        np.testing.assert_almost_equal(phi, np.array([[np.pi/2, np.pi], [5*np.pi/4, 7*np.pi/4], [np.pi/4, 3*np.pi/4]]))
-
-    def test_rad_sign(self):
-        '''Test if radial dipole points inwards or outwards'''
-        rz1 = np.array([0., 0., 70.])
-        r_el = np.array([[0., 0., 90.]])
-        fs = make_class_object(rz1, r_el)
-        P1 = np.array([[0., 0., 1.], [0., 0., -2.]])
-        s_vector = fs._sign_rad_dipole(P1)
-        np.testing.assert_almost_equal(s_vector, np.array([1., -1.]))
 
     def test_MEG_00(self):
         '''test LFPy.MEG.calculate_H()'''
@@ -178,8 +133,62 @@ class testLFPy(unittest.TestCase):
         meg = LFPy.MEG(sensor_locations)
         np.testing.assert_equal(gt, meg.calculate_H(current_dipole_moment,
                                                     dipole_location))
+        
+        
+class testFourSphereVolumeConductor(unittest.TestCase):
+    """
+
+    """
+
+    def test_decompose_dipole(self):
+        '''Test radial and tangential parts of dipole sums to dipole'''
+        P1 = np.array([[1., 1., 1.]])
+        p_rad, p_tan = decompose_dipole(P1)
+        np.testing.assert_equal(p_rad + p_tan, P1)
+
+    def test_rad_dipole(self):
+        '''Test that radial part of decomposed dipole is correct'''
+        P1 = np.array([[1., 1., 1.]])
+        p_rad, p_tan = decompose_dipole(P1)
+        np.testing.assert_equal(p_rad, np.array([[0., 0., 1.]]))
+
+    def test_tan_dipole(self):
+        '''Test that tangential part of decomposed dipole is correct'''
+        P1 = np.array([[1., 1., 1.]])
+        p_rad, p_tan = decompose_dipole(P1)
+        np.testing.assert_equal(p_tan, np.array([[1., 1., 0.]]))
+
+    def test_calc_theta(self):
+        '''Test theta: angle between rz and r'''
+        rz1 = np.array([0., 0., 70.])
+        r_el = np.array([[0., 0., 90.], [0., 0., -90.],[0., 70., 0.], [0., -70., 0.], [0., 10., 10.]])
+        fs = make_class_object(rz1, r_el)
+        theta = fs.calc_theta()
+        np.testing.assert_almost_equal(theta, np.array([0., np.pi, np.pi/2, np.pi/2, np.pi/4]))
+
+    def test_calc_phi(self):
+        '''Test phi: azimuthal angle between rx and rxy'''
+        rz1 = np.array([0., 0., 70.])
+        r_el = np.array([[0., 1., 0], [-1., -1., 1.],[1., 1., 4.]])
+        fs = make_class_object(rz1, r_el)
+        P1 = np.array([[0., 1., 0.], [1., 0., 1.]])
+        phi = fs.calc_phi(P1)
+        np.testing.assert_almost_equal(phi, np.array([[np.pi/2, np.pi], [5*np.pi/4, 7*np.pi/4], [np.pi/4, 3*np.pi/4]]))
+
+    def test_rad_sign(self):
+        '''Test if radial dipole points inwards or outwards'''
+        rz1 = np.array([0., 0., 70.])
+        r_el = np.array([[0., 0., 90.]])
+        fs = make_class_object(rz1, r_el)
+        P1 = np.array([[0., 0., 1.], [0., 0., -2.]])
+        s_vector = fs._sign_rad_dipole(P1)
+        np.testing.assert_almost_equal(s_vector, np.array([1., -1.]))
 
 
+class testInfiniteVolumeConductor(unittest.TestCase):
+    """
+    
+    """
     def test_get_dipole_potential(self):
         sigma = 0.3
         r = np.array([[0., 0., 1.], [0., 1., 0.]])
@@ -188,35 +197,8 @@ class testLFPy(unittest.TestCase):
         phi = inf_model.get_dipole_potential(p, r)
         np.testing.assert_allclose(phi, np.array([[1., 0.], [0., 1.]]))
 
+
 ######## Functions used by tests: ##############################################
-def cell_w_synapse_from_sections(sections=None):
-    '''
-    Make cell and synapse objects, set spike, simulate and return cell
-    '''
-    cellParams = {
-        'morphology': None,
-        'rm' : 30000,
-        'cm' : 1.0,
-        'Ra' : 150,
-        'dt' : 2**-6,
-        'tstartms' : -50,
-        'tstopms' : 50,
-        'delete_sections' : False
-    }
-
-    synapse_parameters = {'e': 0.,
-                      'syntype': 'ExpSyn',
-                      'tau': 5.,
-                      'weight': .001,
-                      'record_current': True,
-                      'idx': 1}
-
-    cell = LFPy.Cell(**cellParams)
-    synapse = LFPy.Synapse(cell, **synapse_parameters)
-    synapse.set_spike_times(np.array([1.]))
-    cell.simulate(rec_imem = True, rec_isyn = True, rec_vmem = True)
-    d_list, iaxial = cell.get_axial_currents_from_vmem()
-    return cell, synapse, d_list, iaxial
 
 def make_class_object(rz1, r_el):
     '''Return class object fs'''

@@ -1,5 +1,5 @@
-# -*- coding: utf-8 -*-
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 """
 Copyright (C) 2012 Computational Neuroscience Group, NMBU.
 
@@ -182,8 +182,9 @@ class Cell(object):
             assert(dt in 2.**np.arange(-16, -1))
         except AssertionError:
             if tstartms == 0.:
-                print('int(1./dt) not factorizable in base 2.'
-                      'cell.tvec errors may occur, continuing initialization.')
+                if self.verbose:
+                    print('int(1./dt) not factorizable in base 2. '
+                          'cell.tvec errors may occur, continuing initialization.')
             elif tstartms < 0:
                 raise AssertionError('int(1./dt) must be factorizable in base 2 if tstartms < 0.')
 
@@ -847,7 +848,7 @@ class Cell(object):
 
         #run fadvance until t >= tstopms, and calculate LFP if asked for
         if electrode is None and dotprodcoeffs is None and not rec_current_dipole_moment:
-            if not rec_imem:
+            if not rec_imem and self.verbose:
                 print("rec_imem = %s, membrane currents will not be recorded!"
                                   % str(rec_imem))
             _run_simulation(self, cvode, variable_dt, atol)
