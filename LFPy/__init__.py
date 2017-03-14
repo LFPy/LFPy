@@ -39,7 +39,7 @@ from .pointprocess import Synapse, PointProcess, StimIntElectrode
 from .recextelectrode import RecExtElectrode, RecExtElectrodeSetup
 from .cell import Cell
 from .templatecell import TemplateCell
-from test import _test as run_tests
+from .test import _test as run_tests
 from .eegmegcalc import FourSphereVolumeConductor, InfiniteVolumeConductor, get_current_dipole_moment, MEG
 from . import lfpcalc
 from . import tools
