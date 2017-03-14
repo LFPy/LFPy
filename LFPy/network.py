@@ -427,8 +427,8 @@ class Network(object):
         """
         try:
             assert name not in self.populations.keys()
-        except AssertionError as ae:
-            raise ae('population name {} already taken'.format(name))
+        except AssertionError:
+            raise AssertionError('population name {} already taken'.format(name))
 
         # compute the first global id of this new population, based
         # on population sizes of existing populations
@@ -1120,7 +1120,7 @@ def _run_simulation_with_electrode(network, cvode,
 
     #LFPs for each electrode will be put here during simulations
     if to_file:
-        raise NotImplementedError, 'to_file arg implementation not yet tested'
+        raise NotImplementedError('to_file arg implementation not yet tested')
         #ensure right ending:
         if file_name.split('.')[-1] != 'h5':
             file_name += '.h5'
