@@ -646,7 +646,7 @@ class Network(object):
         syncount = COMM.reduce(syncount, op=MPI.SUM, root=0)
 
         if RANK == 0:
-            print 'Connected population {} to {} by {} connections and {} synapses'.format(pre, post, conncount, syncount)
+            print('Connected population {} to {} by {} connections and {} synapses'.format(pre, post, conncount, syncount))
 
         else:
             conncount = None
@@ -776,8 +776,7 @@ class Network(object):
         #run fadvance until t >= tstopms, and calculate LFP if asked for
         if electrode is None and dotprodcoeffs is None and not rec_current_dipole_moment and not rec_pop_contributions:
             if not rec_imem:
-                print(("rec_imem = %s, not recording membrane currents!" \
-                                  % str(rec_imem)))
+                print("rec_imem = {}, not recording membrane currents!".format(rec_imem))
             _run_simulation(self, cvode, variable_dt, atol)
         else:
             if dotprodcoeffs is not None:
