@@ -192,6 +192,7 @@ class DummyCell(object):
 class NetworkPopulation(object):
     def __init__(self, CWD=None, CELLPATH=None, first_gid=0, Cell=NetworkCell, POP_SIZE=4, name='L5PC',
                  cell_args=dict(), pop_args=dict(),
+                 rotation_args=dict(),
                  OUTPUTPATH='example_parallel_network'):
         """
         NetworkPopulation class representing a group of Cell objects distributed
@@ -217,6 +218,13 @@ class NetworkPopulation(object):
             keys and values for Cell object
         pop_args : dict
             keys and values for Network.draw_rand_pos assigning cell positions
+        rotation_arg : dict
+            default cell rotations around x and y axis on the form
+            { 'x' : np.pi/2, 'y' : 0 }. Can only have the keys 'x' and 'y'.
+            Cells are randomly rotated around z-axis using the Cell.set_rotation
+            method.
+        OUTPUTPATH : str
+            path to output file destination
         """
         # set class attributes
         self.CWD = CWD
@@ -227,6 +235,7 @@ class NetworkPopulation(object):
         self.name = name
         self.cell_args = cell_args
         self.pop_args = pop_args
+        self.rotation_args = rotation_args
         self.OUTPUTPATH = OUTPUTPATH
 
         # container of Vector objects used to record times of action potentials
@@ -250,8 +259,9 @@ class NetworkPopulation(object):
 
         # assign a random rotation around the y-axis of each cell
         self.rotations = np.random.uniform(0, np.pi*2, len(self.gids))
+        assert('z' not in self.rotation_args.keys())
         for i, cell in enumerate(self.cells):
-            cell.set_rotation(z=self.rotations[i])
+            cell.set_rotation(z=self.rotations[i], **self.rotation_args)
             # cell.set_rotation(x=np.pi/2, z=self.rotations[i])
 
         # assign gid to each cell
@@ -396,7 +406,8 @@ class Network(object):
 
     def create_population(self, CWD='', CELLPATH='', Cell=NetworkCell,
                           POP_SIZE=4, name='L5PC',
-                          cell_args=dict(), pop_args=dict()):
+                          cell_args=dict(), pop_args=dict(),
+                          rotation_args=dict()):
         """
         Create and append a distributed POP_SIZE-sized population of cells of
         type Cell with the corresponding name. Cell-object references, gids on
@@ -420,9 +431,11 @@ class Network(object):
             keys and values for Cell object
         pop_args : dict
             keys and values for Network.draw_rand_pos assigning cell positions
-        
-        Attributes
-        ----------
+        rotation_arg : dict
+            default cell rotations around x and y axis on the form
+            { 'x' : np.pi/2, 'y' : 0 }. Can only have the keys 'x' and 'y'.
+            Cells are randomly rotated around z-axis using the Cell.set_rotation
+            method.
         
         """
         try:
@@ -441,6 +454,7 @@ class Network(object):
                                 Cell=Cell,
                                 POP_SIZE=POP_SIZE, name=name,
                                 cell_args=cell_args, pop_args=pop_args,
+                                rotation_args=rotation_args,
                                 OUTPUTPATH=self.OUTPUTPATH)
 
         # associate gids of cells on this RANK such that NEURON can look up

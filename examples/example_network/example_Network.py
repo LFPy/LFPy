@@ -240,7 +240,8 @@ populationParameters = dict(
     pop_args = dict(
         radius=100,
         loc=0.,
-        scale=20.)
+        scale=20.),
+    rotation_args = dict(x=0, y=0),
 )
 
 networkParameters = dict(
@@ -252,10 +253,12 @@ networkParameters = dict(
 )
 
 electrodeParameters = dict(
-    x = np.zeros(15),
-    y = np.zeros(15),
-    z = np.linspace(1000, 0, 15),
-    N = np.array([[0, 1, 0]]*15),
+    x = np.zeros(13),
+    y = np.zeros(13),
+    z = np.linspace(1000, -200, 13),
+    N = np.array([[0, 1, 0]]*13),
+    r = 5,
+    n = 50,
     sigma = 0.3,
 )
 
@@ -516,6 +519,7 @@ if __name__ == '__main__':
     # population illustration (per RANK)
     fig = plt.figure(figsize=(6.4, 4.8*2))
     ax = fig.add_subplot(111, projection='3d')
+    ax.view_init(elev=5)
     ax.plot(electrode.x, electrode.y, electrode.z, 'ko', zorder=0)
     for i, (name, pop) in enumerate(network.populations.items()):
         for cell in pop.cells:
