@@ -170,7 +170,7 @@ class Cell(object):
                 neuron.h.define_shape()
                 self._create_sectionlists()
             except:
-                raise Exception("Could not load existent top-level cell")
+                raise Exception("Could not load existing top-level cell. Consider use of LFPy.Cell vs. LFPy.TemplateCell.")
 
         #Some parameters and lists initialised
         try:
