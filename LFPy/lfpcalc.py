@@ -21,9 +21,6 @@ def calc_lfp_choose(cell, x=0., y=0., z=0., sigma=0.3,
     """
     Determine which method to use. line-source for soma default
 
-    TODO: Remove timestep argument, or fix implementation. It will not work
-    in the current implementation, since currmem is overwritten.
-
     TODO: Set som_as_point as default?
 
     TODO: x, y, z, sigma, r_limit, timestep, t_indices are given default values
