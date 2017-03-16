@@ -59,15 +59,6 @@ def stationary_gamma(tstart, tstop, k=2, theta=10, tmin = -1E3, tmax=1E6):
     return spiketimes
 
 
-def test_spiketimes(spiketime):
-    """Test and sort spike times"""
-    spiketimes = []
-    spikecount = 1
-    spikevec = np.zeros(spikecount)
-    spikevec = spiketime
-    spiketimes.append(np.sort(spikevec))
-    return spiketimes
-
 def get_normal_spike_times(nsyn, mu, sigma, tstart, tstop):
     """Generate nsyn normal-distributed processes with mean mu and 
     deviation sigma"""
