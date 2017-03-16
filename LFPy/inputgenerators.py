@@ -17,7 +17,15 @@ import numpy as np
 
 def get_rand_spike_times(synpos, nspikes, tstart, tstop):
     """Return synpos times nspikes random spike times on the 
-    interval [tstart, tstop]"""
+    interval [tstart, tstop]
+    
+    Parameters
+    ----------
+    synpos : ndarray
+    nspikes : int
+    tstart : float
+    tstop : float
+    """
     spiketimes = np.zeros([np.size(synpos), nspikes])
     for i in range(np.size(synpos)):
         spiketimes[i, :] = np.random.random_integers(tstart, tstop, nspikes)

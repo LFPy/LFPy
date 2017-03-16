@@ -17,12 +17,21 @@ GNU General Public License for more details.
 from __future__ import division
 import unittest
 import numpy as np
+import scipy.stats as st
 import LFPy
-import neuron
 
 
 class testInputGenerators(unittest.TestCase):
     """
 
     """
-    pass
+    def test_inputgenerators_get_rand_spike_times(self):
+        """test LFPy.inputgenerators.get_rand_spike_times"""
+        synpos = np.arange(10)
+        nspikes = 100
+        tstart = 0.
+        tstop=1000.        
+        spt = LFPy.inputgenerators.get_rand_spike_times(synpos=synpos, nspikes=nspikes, tstart=tstart, tstop=tstop)
+        
+        self.assertEqual(spt.shape, (synpos.size, nspikes))
+        self.assertTrue((spt.max() <= tstop) & (spt.min() >= tstart))
