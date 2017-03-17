@@ -58,7 +58,7 @@ class NetworkCell(TemplateCell):
         self.somav = neuron.h.Vector()
         for sec in self.somalist:
             self.somav.record(sec(0.5)._ref_v)
-            continue # break out of loop
+            break # break out of loop
 
 
     def create_synapse(self, cell, sec, x=0.5, syntype=neuron.h.ExpSyn,
@@ -138,7 +138,7 @@ class NetworkCell(TemplateCell):
             self.netconlist[-1].threshold = threshold
             self.netconlist[-1].weight[0] = weight
             self.netconlist[-1].delay = delay
-            continue # break out of loop (in case soma is a list of sections)
+            break # break out of loop (in case soma is a list of sections)
 
 
 class DummyCell(object):
@@ -257,7 +257,7 @@ class NetworkPopulation(object):
         for i, cell in enumerate(self.cells):
             cell.set_pos(**self.soma_pos[i])
 
-        # assign a random rotation around the y-axis of each cell
+        # assign a random rotation around the z-axis of each cell
         self.rotations = np.random.uniform(0, np.pi*2, len(self.gids))
         assert('z' not in self.rotation_args.keys())
         for i, cell in enumerate(self.cells):

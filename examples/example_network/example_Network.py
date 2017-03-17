@@ -523,13 +523,14 @@ if __name__ == '__main__':
     ax.plot(electrode.x, electrode.y, electrode.z, 'ko', zorder=0)
     for i, (name, pop) in enumerate(network.populations.items()):
         for cell in pop.cells:
+            c = 'C0' if name == 'E' else 'C1'
             ax.plot([cell.xstart[0], cell.xend[0]],
                     [cell.ystart[0], cell.yend[0]],
-                    [cell.zstart[0], cell.zend[0]], 'C{}'.format(i),
+                    [cell.zstart[0], cell.zend[0]], c,
                     lw=5, zorder=-cell.xmid[0]-cell.ymid[0])
             ax.plot([cell.xstart[1], cell.xend[-1]],
                     [cell.ystart[1], cell.yend[-1]],
-                    [cell.zstart[1], cell.zend[-1]], 'C{}'.format(i),
+                    [cell.zstart[1], cell.zend[-1]], c,
                     lw=0.5, zorder=-cell.xmid[0]-cell.ymid[0])
     ax.set_xlabel('$x$ ($\mu$m)')
     ax.set_ylabel('$y$ ($\mu$m)')
