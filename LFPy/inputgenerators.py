@@ -14,30 +14,51 @@ GNU General Public License for more details.
 """
 
 import numpy as np
+import warnings
 
-def get_rand_spike_times(synpos, nspikes, tstart, tstop):
+def get_rand_spike_times(nsyn, nspikes, tstart, tstop):
     """Return synpos times nspikes random spike times on the 
     interval [tstart, tstop]
     
     Parameters
     ----------
-    synpos : ndarray
+    nsyn : int
     nspikes : int
     tstart : float
     tstop : float
+    
+    Returns
+    -------
+    ndarray
+        shape (nsyn, nspikes) array with random spike times
     """
-    spiketimes = np.zeros([np.size(synpos), nspikes])
-    for i in range(np.size(synpos)):
-        spiketimes[i, :] = np.random.random_integers(tstart, tstop, nspikes)
+    warnings.warn("LFPy.inputgenerators.get_rand_spike_times will be removed shortly", DeprecationWarning)
+    spiketimes = np.random.rand(nsyn*nspikes).reshape((nsyn, nspikes))
+    spiketimes *= (tstop - tstart)
+    spiketimes += tstart
     return spiketimes
 
-def stationary_poisson(nsyn, lambd, tstart, tstop):
-    """Generate nsyn stationary possion processes with rate lambda 
-    between tstart and tstop"""
+def stationary_poisson(nsyn, rate, tstart, tstop):
+    """Generate nsyn stationary possion processes with rate expectation rate 
+    between tstart and tstop
+    
+    Parameters
+    ----------
+    nsyn : int
+    rate : float
+    tstart : float
+    tstop : float
+    
+    Returns
+    -------
+    list of ndarrays
+        list where each element is an ndarray with times as from a Poisson process
+    """
+    warnings.warn("LFPy.inputgenerators.stationary_poisson will be removed shortly", DeprecationWarning)
     interval_s = (tstop-tstart)*.001
     spiketimes = []
     for i in range(nsyn):
-        spikecount = np.random.poisson(interval_s*lambd)
+        spikecount = np.random.poisson(interval_s*rate)
         spikevec = np.zeros(spikecount)
         if spikecount == 0:
             spiketimes.append(spikevec)
@@ -51,7 +72,23 @@ def stationary_gamma(tstart, tstop, k=2, theta=10, tmin = -1E3, tmax=1E6):
     """Generate spiketimes with interspike interval statistics according
     to gamma-distribution with 'shape' k and 'scale' theta between tstart and
     tstop. Spiketimes from tmin up to tmax is calculated,
-    times between 0 and tstop are returned"""
+    times between 0 and tstop are returned
+    
+    Parameters
+    ----------
+    tstart : float
+    tstop : float
+    k : float
+    theta : float
+    tmin : float
+    tmax : float
+    
+    Returns
+    -------
+    ndarray
+
+    """
+    warnings.warn("LFPy.inputgenerators.stationary_gamma will be removed shortly", DeprecationWarning)
     
     if tstop > tmax:
         tmax = tstop
@@ -70,6 +107,7 @@ def stationary_gamma(tstart, tstop, k=2, theta=10, tmin = -1E3, tmax=1E6):
 def get_normal_spike_times(nsyn, mu, sigma, tstart, tstop):
     """Generate nsyn normal-distributed processes with mean mu and 
     deviation sigma"""
+    warnings.warn("LFPy.inputgenerators.get_normal_spike_times will be removed shortly", DeprecationWarning)
     spiketimes = []
     spikecount = nsyn
     spikevec = np.zeros(spikecount)
@@ -84,6 +122,7 @@ def get_normal_spike_times(nsyn, mu, sigma, tstart, tstop):
 def get_normal_input_times(n, mu, sigma, tstart, tstop):
     """Generates n normal-distributed prosesses with mean mu and 
     deviation sigma"""
+    warnings.warn("LFPy.inputgenerators.get_normal_input_times will be removed shortly", DeprecationWarning)
     times = np.random.normal(mu, sigma, n)
     for i in range(n):
         while times[i] <= tstart or times[i] >= tstop:

@@ -27,11 +27,36 @@ class testInputGenerators(unittest.TestCase):
     """
     def test_inputgenerators_get_rand_spike_times(self):
         """test LFPy.inputgenerators.get_rand_spike_times"""
-        synpos = np.arange(10)
+        nsyn = 10
         nspikes = 100
         tstart = 0.
         tstop=1000.        
-        spt = LFPy.inputgenerators.get_rand_spike_times(synpos=synpos, nspikes=nspikes, tstart=tstart, tstop=tstop)
+        spt = LFPy.inputgenerators.get_rand_spike_times(nsyn=nsyn, nspikes=nspikes, tstart=tstart, tstop=tstop)
         
-        self.assertEqual(spt.shape, (synpos.size, nspikes))
+        self.assertEqual(spt.shape, (nsyn, nspikes))
         self.assertTrue((spt.max() <= tstop) & (spt.min() >= tstart))
+
+    def test_inputgenerators_stationary_poisson(self):
+        """test LFPy.inputgenerators.stationary_poisson"""
+        nsyn = 10
+        rate = 10.
+        tstart = 0.
+        tstop = 10000.
+        
+        spt = LFPy.inputgenerators.stationary_poisson(nsyn=nsyn, rate=rate, tstart=tstart, tstop=tstop)
+        
+        self.assertEqual(len(spt), nsyn)
+        for x in spt:
+            if x.size > 0:
+                self.assertTrue((x.min() >= tstart) & (x.max() <= tstop))
+
+    def test_inputgenerators_stationary_gamma(self):
+        """test LFPy.inputgenerators.stationary_gamma"""
+        tstart = 0.
+        tstop = 10000.
+        
+        spt = LFPy.inputgenerators.stationary_gamma(tstart=tstart, tstop=tstop)
+        
+        for x in spt:
+            if x.size > 0:
+                self.assertTrue((x.min() >= tstart) & (x.max() <= tstop))
