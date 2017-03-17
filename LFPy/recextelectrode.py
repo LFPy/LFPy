@@ -319,7 +319,6 @@ class RecExtElectrode(RecExtElectrodeSetup):
 
     def _loop_over_contacts(self,
                     r_limit=None,
-                    timestep=None,
                     t_indices=None):
         """Loop over electrode contacts, and return LFPs across channels"""
         if t_indices is not None:
@@ -335,7 +334,6 @@ class RecExtElectrode(RecExtElectrodeSetup):
                                             z = self.z[i],
                                             sigma = self.sigma,
                                             r_limit = r_limit,
-                                            timestep = timestep,
                                             t_indices = t_indices,
                                             method = self.method,
                                             **self.kwargs)

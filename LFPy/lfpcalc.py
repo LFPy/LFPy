@@ -21,8 +21,6 @@ def calc_lfp_choose(cell, x=0., y=0., z=0., sigma=0.3,
     """
     Determine which method to use. line-source for soma default
 
-    TODO: Set som_as_point as default?
-
     TODO: x, y, z, sigma, r_limit, timestep, t_indices are given default values
     both in this function and in the calc_lfp_* funcions. Cleaner to
     only give default values at one level? From looking at functions here,
@@ -59,9 +57,15 @@ def calc_lfp_choose(cell, x=0., y=0., z=0., sigma=0.3,
                                    r_limit=r_limit,
                                     t_indices=t_indices)
     elif method == 'pointsource':
-        return calc_lfp_pointsource(cell, x=x, y=y, z=z, sigma=sigma,
+        if type(sigma) in [list, np.ndarray]:
+            # print("Given tensor conductivity. Using anisotropic formalism.")
+            return calc_lfp_pointsource_anisotropic(cell, x=x, y=y, z=z, sigma=sigma,
                                     r_limit=r_limit,
                                     t_indices=t_indices)
+        else:
+            return calc_lfp_pointsource(cell, x=x, y=y, z=z, sigma=sigma,
+                                        r_limit=r_limit,
+                                        t_indices=t_indices)
 
 def calc_lfp_linesource(cell, x=0., y=0., z=0., sigma=0.3,
                         r_limit=None,
@@ -373,6 +377,72 @@ def calc_lfp_pointsource(cell, x=0, y=0, z=0, sigma=0.3,
     Emem = 1 / (4 * np.pi * sigma) * np.dot(currmem.T, 1/r)
     
     return Emem.transpose()
+
+def calc_lfp_pointsource_anisotropic(cell, x=0, y=0, z=0, sigma=[0.3, 0.3, 0.3],
+                        r_limit=None,
+                        t_indices=None):
+    """Calculate extracellular potentials using the anisotropic point-source
+    equation on all compartments
+
+    Parameters
+    ----------
+    cell: obj
+        LFPy.Cell or LFPy.TemplateCell instance
+    x : float
+        extracellular position, x-axis
+    y : float
+        extracellular position, y-axis
+    z : float
+        extracellular position, z-axis
+    sigma : array
+        extracellular conductivity in [x,y,z]-direction
+    r_limit : [None]/float/np.ndarray
+        minimum distance to source current
+    t_indices : [None]/np.ndarray
+        calculate LFP at specific timesteps
+    """
+    # Handling the r_limits. If a r_limit is a single value, an array r_limit
+    # of shape cell.diam is returned.
+    if type(r_limit) == int or type(r_limit) == float:
+        r_limit = np.ones(np.shape(cell.diam))*abs(r_limit)
+    elif np.shape(r_limit) != np.shape(cell.diam):
+        raise Exception('r_limit is neither a float- or int- value, nor is \
+            r_limit.shape() equal to cell.diam.shape()')
+
+    if t_indices is not None:
+        currmem = cell.imem[:, t_indices]
+    else:
+        currmem = cell.imem
+
+    dx2 = (cell.xmid - x)**2
+    dy2 = (cell.ymid - y)**2
+    dz2 = (cell.zmid - z)**2
+
+    r2 = dx2 + dy2 + dz2
+    if (r2 == 0).any():
+        dx2[r2 == 0] += 0.001
+        r2[r2 == 0] += 0.001
+
+    close_idxs = r2 < r_limit**2
+
+    # For anisotropic media, the direction in which to move points matter.
+    # Radial distance between point source and electrode is scaled to r_limit
+    r2_scale_factor = r_limit[close_idxs]**2 / r2[close_idxs]
+    dx2[close_idxs] *= r2_scale_factor
+    dy2[close_idxs] *= r2_scale_factor
+    dz2[close_idxs] *= r2_scale_factor
+
+    # r2 = _check_rlimit_point(r2, r_limit)
+    # r = np.sqrt(r2)
+    sigma_r = np.sqrt(sigma[1] * sigma[2] * dx2
+                    + sigma[0] * sigma[2] * dy2
+                    + sigma[0] * sigma[1] * dz2)
+
+    Emem = 1 / (4 * np.pi) * np.dot(currmem.T, 1./sigma_r)
+
+    return Emem.transpose()
+
+
 
 def _check_rlimit_point(r2, r_limit):
     """Correct r2 so that r2 >= r_limit**2 for all values"""
