@@ -15,6 +15,7 @@ GNU General Public License for more details.
 """
 
 from __future__ import division
+import os
 import unittest
 import numpy as np
 import LFPy
@@ -25,17 +26,74 @@ class testPointProcess(unittest.TestCase):
     """
 
     """
-    pass
+    def test_PointProcess_00(self):
+        cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
+                                                 'ball_and_sticks.hoc'))
+        pp = LFPy.PointProcess(cell=cell, idx=0)
+        self.assertTrue(np.alltrue(np.array([pp.x, pp.y, pp.z])==cell.somapos))
+        self.assertEqual(pp.idx, 0)
+    
 
 class testSynapse(unittest.TestCase):
     """
 
     """
     pass
-
+    # def test_Synapse_00(self):
+    #     cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
+    #                                              'ball_and_sticks.hoc'))
+    #     syn = LFPy.Synapse(cell=cell, idx=0, syntype='ExpSyn')
+        
+        
+        
 
 class testStimIntElectrode(unittest.TestCase):
     """
 
     """
-    pass
+    def test_StimIntElectrode_00(self):
+        cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
+                                                 'ball_and_sticks.hoc'))
+        stim = LFPy.StimIntElectrode(cell=cell, idx=0, pptype='IClamp',
+                            amp=1., dur=20., delay=10.,
+                            record_current=True)
+        cell.simulate(rec_istim=True)
+        gt = np.zeros(cell.tvec.size)
+        gt[(cell.tvec > 10.) & (cell.tvec <= 30.)] = 1.
+        np.testing.assert_equal(gt, stim.i)
+
+    def test_StimIntElectrode_01(self):
+        cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
+                                                 'ball_and_sticks.hoc'), dt=1.)
+        stim = LFPy.StimIntElectrode(cell=cell,
+                                     **{'idx' : 0,
+                                        'pptype' : 'VClamp',
+                                        'amp[0]' : -65,
+                                        'dur[0]' : 10,
+                                        'amp[1]' : -55.,
+                                        'dur[1]' : 20,
+                                        'amp[2]' : -65,
+                                        'dur[2]' : 10,
+                                   })
+        cell.simulate()
+        gt = np.zeros(cell.tvec.size)-65.
+        gt[(cell.tvec > 10.) & (cell.tvec <= 30.)] = -55.
+        np.testing.assert_allclose(gt, cell.somav, rtol=1E-3)
+
+    def test_StimIntElectrode_02(self):
+        cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
+                                                 'ball_and_sticks.hoc'), dt=1.)
+        stim = LFPy.StimIntElectrode(cell=cell,
+                                     **{'idx' : 0,
+                                        'pptype' : 'SEClamp',
+                                        'amp1' : -65,
+                                        'dur1' : 10,
+                                        'amp2' : -55.,
+                                        'dur2' : 20,
+                                        'amp3' : -65,
+                                        'dur3' : 10,
+                                   })
+        cell.simulate()
+        gt = np.zeros(cell.tvec.size)-65.
+        gt[(cell.tvec > 10.) & (cell.tvec <= 30.)] = -55.
+        np.testing.assert_allclose(gt, cell.somav, rtol=1E-2)
