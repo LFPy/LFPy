@@ -56,16 +56,20 @@ class testStimIntElectrode(unittest.TestCase):
                                                  'ball_and_sticks.hoc'))
         stim = LFPy.StimIntElectrode(cell=cell, idx=0, pptype='IClamp',
                             amp=1., dur=20., delay=10.,
+                            record_potential=True,
                             record_current=True)
-        cell.simulate(rec_istim=True)
+        cell.simulate(rec_istim=True, rec_vmemstim=True)
+        # stim.collect_potential(cell) 
         gt = np.zeros(cell.tvec.size)
         gt[(cell.tvec > 10.) & (cell.tvec <= 30.)] = 1.
         np.testing.assert_equal(gt, stim.i)
+        np.testing.assert_equal(cell.somav, stim.v)
 
     def test_StimIntElectrode_01(self):
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
                                                  'ball_and_sticks.hoc'), dt=1.)
         stim = LFPy.StimIntElectrode(cell=cell,
+                                     record_potential=True,
                                      **{'idx' : 0,
                                         'pptype' : 'VClamp',
                                         'amp[0]' : -65,
@@ -75,15 +79,18 @@ class testStimIntElectrode(unittest.TestCase):
                                         'amp[2]' : -65,
                                         'dur[2]' : 10,
                                    })
-        cell.simulate()
+        cell.simulate(rec_vmemstim=True)
+        # stim.collect_potential(cell) 
         gt = np.zeros(cell.tvec.size)-65.
         gt[(cell.tvec > 10.) & (cell.tvec <= 30.)] = -55.
         np.testing.assert_allclose(gt, cell.somav, rtol=1E-3)
+        np.testing.assert_equal(cell.somav, stim.v)
 
     def test_StimIntElectrode_02(self):
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
                                                  'ball_and_sticks.hoc'), dt=1.)
         stim = LFPy.StimIntElectrode(cell=cell,
+                                     record_potential=True,
                                      **{'idx' : 0,
                                         'pptype' : 'SEClamp',
                                         'amp1' : -65,
@@ -93,7 +100,9 @@ class testStimIntElectrode(unittest.TestCase):
                                         'amp3' : -65,
                                         'dur3' : 10,
                                    })
-        cell.simulate()
+        cell.simulate(rec_vmemstim=True)
+        # stim.collect_potential(cell) 
         gt = np.zeros(cell.tvec.size)-65.
         gt[(cell.tvec > 10.) & (cell.tvec <= 30.)] = -55.
         np.testing.assert_allclose(gt, cell.somav, rtol=1E-2)
+        np.testing.assert_equal(cell.somav, stim.v)

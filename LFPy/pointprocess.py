@@ -16,7 +16,7 @@ GNU General Public License for more details.
 import numpy as np
 import neuron
 
-class PointProcess:
+class PointProcess(object):
     """
     Superclass on top of Synapse, StimIntElectrode, just to import and set
     some shared variables and extracts Cartesian coordinates of a segment
@@ -193,12 +193,14 @@ class StimIntElectrode(PointProcess):
         `LFPy.Cell` or `LFPy.TemplateCell` instance to receive Stimulation
          electrode input
     idx : int
-        Cell index where the stimulation electrode is placed
+        Cell segment index where the stimulation electrode is placed
     pptype : str
         Type of point process. Built-in examples: VClamp, SEClamp and ICLamp.
         Defaults to 'SEClamp'.
     record_current : bool
-            Decides if current is recorded
+        Decides if current is recorded
+    record_potential : bool
+        switch for recording the potential on postsynaptic segment index
     color : str
         Color of stimulation electrode for plotting purposes. Defaults to 'p'
     marker : str
@@ -261,12 +263,15 @@ class StimIntElectrode(PointProcess):
 
     """    
     def __init__(self, cell, idx, pptype='SEClamp',
-                 color='p', marker='*', record_current=False, **kwargs):
+                 color='p', marker='*', record_current=False,
+                 record_potential=False, **kwargs):
         """Initialize StimIntElectrode class"""
         PointProcess.__init__(self, cell, idx, color, marker, record_current)
         self.pptype = pptype
         self.hocidx = int(cell.set_point_process(idx, pptype,
-                                                 record_current, **kwargs))
+                                                 record_current=record_current,
+                                                 record_potential=record_potential,
+                                                 **kwargs))
         cell.pointprocesses.append(self)
         cell.pointprocess_idx.append(idx)
 
@@ -276,7 +281,7 @@ class StimIntElectrode(PointProcess):
     
     def collect_potential(self, cell):
         """Collect membrane potential of segment with PointProcess"""
-        self.v = np.array(cell.synvreclist.o(self.hocidx))
+        self.v = np.array(cell.stimvreclist.o(self.hocidx))
 
 
 class PointProcessPlayInSoma:

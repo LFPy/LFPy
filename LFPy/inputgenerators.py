@@ -128,3 +128,4 @@ def get_normal_input_times(n, mu, sigma, tstart, tstop):
         while times[i] <= tstart or times[i] >= tstop:
             times[i] = np.random.normal(mu, sigma)
     return times
+
