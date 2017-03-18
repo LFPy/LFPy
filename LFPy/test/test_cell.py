@@ -23,7 +23,7 @@ import neuron
 import pickle
 import random
 
-# for nosetests to run load the SinSyn sinusoid synapse currrent mechanism
+# for nosetests to run load mechanisms
 neuron.load_mechanisms(os.path.join(LFPy.__path__[0], 'test'))
 
 class testCell(unittest.TestCase):

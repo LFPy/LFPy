@@ -21,6 +21,8 @@ import numpy as np
 import LFPy
 import neuron
 
+# for nosetests to run load mechanisms
+neuron.load_mechanisms(os.path.join(LFPy.__path__[0], 'test'))
 
 class testPointProcess(unittest.TestCase):
     """
@@ -38,12 +40,20 @@ class testSynapse(unittest.TestCase):
     """
 
     """
-    pass
-    # def test_Synapse_00(self):
-    #     cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
-    #                                              'ball_and_sticks.hoc'))
-    #     syn = LFPy.Synapse(cell=cell, idx=0, syntype='ExpSyn')
+    def test_Synapse_00(self):
+        cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
+                                                 'ball_and_sticks.hoc'))
+        syn = LFPy.Synapse(cell=cell, idx=0, syntype='ExpSynI',
+                           weight=1., tau=5., record_current=True,
+                           record_potential=True)
+        syn.set_spike_times(np.array([10.]))
+        cell.simulate(rec_isyn=True, rec_vmemsyn=True)
         
+        i = np.zeros(cell.tvec.size)
+        i[cell.tvec > 10.] = -np.exp(-np.arange((cell.tvec > 10.).sum())*cell.dt / 5.)
+
+        np.testing.assert_allclose(i, syn.i, rtol=1E-1)
+        np.testing.assert_equal(cell.somav, syn.v)
         
         
 
