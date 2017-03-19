@@ -111,8 +111,12 @@ class testStimIntElectrode(unittest.TestCase):
                                         'dur3' : 10,
                                    })
         cell.simulate(rec_vmemstim=True)
-        # stim.collect_potential(cell) 
+        # stim.collect_potential(cell)
         gt = np.zeros(cell.tvec.size)-65.
         gt[(cell.tvec > 10.) & (cell.tvec <= 30.)] = -55.
         np.testing.assert_allclose(gt, cell.somav, rtol=1E-2)
         np.testing.assert_equal(cell.somav, stim.v)
+
+
+    
+    

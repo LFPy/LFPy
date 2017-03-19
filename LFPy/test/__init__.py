@@ -42,7 +42,7 @@ def _test(verbosity=1):
     from .test_alias_method import testAliasMethod
     from .test_recextelectrode import testRecExtElectrode
     from .test_misc import testMisc
-    from .test_pointprocess import testPointProcess, testSynapse, testStimIntElectrode
+    from .test_pointprocess import testPointProcess, testSynapse, testStimIntElectrode 
     from .test_inputgenerators import testInputGenerators
     from .test_templatecell import testTemplateCell
     from .test_network import testNetworkCell, testNetworkPopulation, testNetwork
