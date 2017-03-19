@@ -19,7 +19,7 @@ import os
 import unittest
 import numpy as np
 import LFPy
-import cPickle
+import pickle
 
 class testTools(unittest.TestCase):
     """
@@ -29,7 +29,7 @@ class testTools(unittest.TestCase):
         filename = 'test.cpickle'
         x = object()
         f = open(filename, 'wb')
-        cPickle.dump(x, f)
+        pickle.dump(x, f)
         f.close()
         self.assertTrue(isinstance(LFPy.tools.load(filename), object))
         os.remove(filename)

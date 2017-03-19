@@ -26,7 +26,7 @@ neuron.load_mechanisms(os.path.join(LFPy.__path__[0], 'test'))
 
 class testPointProcess(unittest.TestCase):
     """
-
+    test class LFPy.PointProcess
     """
     def test_PointProcess_00(self):
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
@@ -38,7 +38,7 @@ class testPointProcess(unittest.TestCase):
 
 class testSynapse(unittest.TestCase):
     """
-
+    test class LFPy.Synapse
     """
     def test_Synapse_00(self):
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
@@ -59,7 +59,7 @@ class testSynapse(unittest.TestCase):
 
 class testStimIntElectrode(unittest.TestCase):
     """
-
+    test class LFPy.StimIntElectrode
     """
     def test_StimIntElectrode_00(self):
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',

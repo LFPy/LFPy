@@ -28,15 +28,7 @@ neuron.load_mechanisms(os.path.join(LFPy.__path__[0], 'test'))
 
 class testCell(unittest.TestCase):
     """
-    A set of test functions for each method of calculating the LFP, where the
-    model outcome from LFPy is compared with analytically obtained results for
-    a stick neuron with sinusoid synaptic current input at the end, and LFP
-    calculated alongside the neuron.
-
-    The tests should pass with 3 significant numbers in the LFP, as effects
-    of compartmentalising the stick is prominent.
-
-    Some tests of cell.tvec is also executed
+    test class LFPy.Cell
     """
 
     def test_cell_tvec_00(self):

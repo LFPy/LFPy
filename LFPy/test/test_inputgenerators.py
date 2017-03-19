@@ -23,7 +23,7 @@ import LFPy
 
 class testInputGenerators(unittest.TestCase):
     """
-
+    test LFPy.inputgenerators module
     """
     def test_inputgenerators_get_rand_spike_times(self):
         """test LFPy.inputgenerators.get_rand_spike_times"""

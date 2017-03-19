@@ -22,7 +22,7 @@ import LFPy
 
 class testMEG(unittest.TestCase):
     """
-    
+    test class LFPy.MEG
     """
 
     def test_MEG_00(self):
@@ -137,7 +137,7 @@ class testMEG(unittest.TestCase):
         
 class testFourSphereVolumeConductor(unittest.TestCase):
     """
-
+    test class LFPy.FourSphereVolumeConductor
     """
 
     def test_decompose_dipole(self):
@@ -187,7 +187,7 @@ class testFourSphereVolumeConductor(unittest.TestCase):
 
 class testInfiniteVolumeConductor(unittest.TestCase):
     """
-    
+    test class InfiniteVolumeConductor
     """
     def test_get_dipole_potential(self):
         sigma = 0.3

@@ -28,7 +28,7 @@ neuron.load_mechanisms(os.path.join(LFPy.__path__[0], 'test'))
 
 class testTemplateCell(unittest.TestCase):
     """
-
+    test class LFPy.TemplateCell
     """
     def test_cell_tvec_00(self):
         stickParams = {

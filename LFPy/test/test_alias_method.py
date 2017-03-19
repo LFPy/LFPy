@@ -23,7 +23,7 @@ import LFPy
 
 class testAliasMethod(unittest.TestCase):
     """
-    
+    test LFPy.alias_method methods
     """
 
 

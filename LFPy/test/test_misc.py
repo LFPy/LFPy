@@ -22,7 +22,7 @@ import neuron
 
 class testMisc(unittest.TestCase):
     """
-
+    test misc. code
     """
 
     def test_neuron_record_i_membrane_methods_00(self):
