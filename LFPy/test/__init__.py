@@ -37,6 +37,7 @@ def _test(verbosity=1):
     $ nosetests-2.7 LFPy/test/test_cell.py
     
     """
+    # import methods here to avoid polluting LFPy.test namespace
     from .test_cell import testCell
     from .test_eegmegcalc import testMEG, testFourSphereVolumeConductor, testInfiniteVolumeConductor
     from .test_alias_method import testAliasMethod

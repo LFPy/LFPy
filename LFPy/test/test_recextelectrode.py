@@ -44,11 +44,7 @@ class testRecExtElectrode(unittest.TestCase):
         for i in range(R.size):
             LFP_analytic[i, ] = analytical_LFP(time, electrodeR=R[i],
                                                     electrodeZ=Z[i])
-        (a, b) = LFP_LFPy.shape
-        for i in range(a):
-            for j in range(b):
-                self.assertAlmostEqual(LFP_LFPy[i, j], LFP_analytic[i, j],
-                                           places=3)
+        np.testing.assert_allclose(LFP_analytic, LFP_LFPy, atol=1E-4)
     
     def test_method_linesource(self):
         #create LFPs using LFPy-model
@@ -63,11 +59,8 @@ class testRecExtElectrode(unittest.TestCase):
         for i in range(R.size):
             LFP_analytic[i, ] = analytical_LFP(time, electrodeR=R[i],
                                                     electrodeZ=Z[i])
-        (a, b) = LFP_LFPy.shape
-        for i in range(a):
-            for j in range(b):
-                self.assertAlmostEqual(LFP_LFPy[i, j], LFP_analytic[i, j],
-                                           places=3)
+        np.testing.assert_allclose(LFP_analytic, LFP_LFPy, atol=1E-4)
+
     
     def test_method_som_as_point(self):
         #create LFPs using LFPy-model
@@ -82,11 +75,8 @@ class testRecExtElectrode(unittest.TestCase):
         for i in range(R.size):
             LFP_analytic[i, ] = analytical_LFP(time, electrodeR=R[i],
                                                     electrodeZ=Z[i])
-        (a, b) = LFP_LFPy.shape
-        for i in range(a):
-            for j in range(b):
-                self.assertAlmostEqual(LFP_LFPy[i, j], LFP_analytic[i, j],
-                                           places=3)
+        np.testing.assert_allclose(LFP_analytic, LFP_LFPy, atol=1E-4)
+
     
     
     def test_method_pointsource_dotprodcoeffs(self):
@@ -102,11 +92,8 @@ class testRecExtElectrode(unittest.TestCase):
         for i in range(R.size):
             LFP_analytic[i, ] = analytical_LFP(time, electrodeR=R[i],
                                                     electrodeZ=Z[i])
-        (a, b) = LFP_LFPy.shape
-        for i in range(a):
-            for j in range(b):
-                self.assertAlmostEqual(LFP_LFPy[i, j], LFP_analytic[i, j],
-                                           places=3)
+        np.testing.assert_allclose(LFP_analytic, LFP_LFPy, atol=1E-4)
+
     
     def test_method_linesource_dotprodcoeffs(self):
         #create LFPs using LFPy-model
@@ -121,11 +108,8 @@ class testRecExtElectrode(unittest.TestCase):
         for i in range(R.size):
             LFP_analytic[i, ] = analytical_LFP(time, electrodeR=R[i],
                                                     electrodeZ=Z[i])
-        (a, b) = LFP_LFPy.shape
-        for i in range(a):
-            for j in range(b):
-                self.assertAlmostEqual(LFP_LFPy[i, j], LFP_analytic[i, j],
-                                           places=3)
+        np.testing.assert_allclose(LFP_analytic, LFP_LFPy, atol=1E-4)
+
     
     def test_method_som_as_point_dotprodcoeffs(self):
         #create LFPs using LFPy-model
@@ -140,11 +124,8 @@ class testRecExtElectrode(unittest.TestCase):
         for i in range(R.size):
             LFP_analytic[i, ] = analytical_LFP(time, electrodeR=R[i],
                                                     electrodeZ=Z[i])
-        (a, b) = LFP_LFPy.shape
-        for i in range(a):
-            for j in range(b):
-                self.assertAlmostEqual(LFP_LFPy[i, j], LFP_analytic[i, j],
-                                           places=3)
+        np.testing.assert_allclose(LFP_analytic, LFP_LFPy, atol=1E-4)
+
     
     
     def test_method_pointsource_contact_average_r10n100(self):
@@ -161,11 +142,8 @@ class testRecExtElectrode(unittest.TestCase):
         for i in range(R.size):
             LFP_analytic[i, ] = analytical_LFP(time, electrodeR=R[i],
                                                     electrodeZ=Z[i])
-        (a, b) = LFP_LFPy.shape
-        for i in range(a):
-            for j in range(b):
-                self.assertAlmostEqual(LFP_LFPy[i, j], LFP_analytic[i, j],
-                                           places=3)
+        np.testing.assert_allclose(LFP_analytic, LFP_LFPy, atol=1E-4)
+
     
     def test_method_linesource_contact_average_r10n100(self):
         #create LFPs using LFPy-model
@@ -181,11 +159,8 @@ class testRecExtElectrode(unittest.TestCase):
         for i in range(R.size):
             LFP_analytic[i, ] = analytical_LFP(time, electrodeR=R[i],
                                                     electrodeZ=Z[i])
-        (a, b) = LFP_LFPy.shape
-        for i in range(a):
-            for j in range(b):
-                self.assertAlmostEqual(LFP_LFPy[i, j], LFP_analytic[i, j],
-                                           places=3)
+        np.testing.assert_allclose(LFP_analytic, LFP_LFPy, atol=1E-4)
+
     
     def test_method_som_as_point_contact_average_r10n100(self):
         #create LFPs using LFPy-model
@@ -201,11 +176,8 @@ class testRecExtElectrode(unittest.TestCase):
         for i in range(R.size):
             LFP_analytic[i, ] = analytical_LFP(time, electrodeR=R[i],
                                                     electrodeZ=Z[i])
-        (a, b) = LFP_LFPy.shape
-        for i in range(a):
-            for j in range(b):
-                self.assertAlmostEqual(LFP_LFPy[i, j], LFP_analytic[i, j],
-                                           places=3)
+        np.testing.assert_allclose(LFP_analytic, LFP_LFPy, atol=1E-4)
+
 
 
 
@@ -222,7 +194,7 @@ def stickSimulation(method):
         'tstopms' : 100,
         'dt' : 2**-6,
         'nsegs_method' : 'lambda_f',
-        'lambda_f' : 100,
+        'lambda_f' : 1000,
 
     }
 
@@ -249,6 +221,7 @@ def stickSimulation(method):
     electrode = LFPy.RecExtElectrode(**electrodeParams)
 
     stick = LFPy.Cell(**stickParams)
+    stick.set_pos(zpos=-stick.zstart[0])
 
     synapse = LFPy.StimIntElectrode(stick, stick.get_closest_idx(0, 0, 1000),
                            **stimParams)
@@ -266,7 +239,7 @@ def stickSimulationAveragingElectrode(contactRadius, contactNPoints, method):
         'tstopms' : 100,
         'dt' : 2**-6,
         'nsegs_method' : 'lambda_f',
-        'lambda_f' : 100,
+        'lambda_f' : 1000,
 
     }
 
@@ -298,6 +271,7 @@ def stickSimulationAveragingElectrode(contactRadius, contactNPoints, method):
     electrode = LFPy.RecExtElectrode(**electrodeParams)
 
     stick = LFPy.Cell(**stickParams)
+    stick.set_pos(zpos=-stick.zstart[0])
 
     synapse = LFPy.StimIntElectrode(stick, stick.get_closest_idx(0, 0, 1000),
                            **stimParams)
@@ -315,7 +289,7 @@ def stickSimulationDotprodcoeffs(method):
         'tstopms' : 100,
         'dt' : 2**-6,
         'nsegs_method' : 'lambda_f',
-        'lambda_f' : 100,
+        'lambda_f' : 1000,
 
     }
 
@@ -341,6 +315,8 @@ def stickSimulationDotprodcoeffs(method):
 
 
     stick = LFPy.Cell(**stickParams)
+    stick.set_pos(zpos=-stick.zstart[0])
+    
     #dummy variables for mapping
     stick.imem = np.eye(stick.totnsegs)
     stick.tvec = np.arange(stick.totnsegs)*stick.dt
@@ -366,9 +342,11 @@ def analytical_LFP(time=np.linspace(0, 100, 1001),
                    Ri=150.,
                    stimFrequency=100.,
                    stimAmplitude=1.,
+                   # stimPos=1.,
                    sigma=0.3,
                    electrodeR=100.,
-                   electrodeZ=0.):
+                   electrodeZ=0.,
+                   ):
     """
     Will calculate the analytical LFP from a dendrite stick aligned with z-axis.
     The synaptic current is always assumed to be at the end of the stick, i.e.
@@ -392,6 +370,8 @@ def analytical_LFP(time=np.linspace(0, 100, 1001),
         Frequency of cosine synapse current (Hz)
     stimAmplitude : float
         Amplitude of cosine synapse current (nA)
+    # stimPos : float in [0, 1]
+    #     Relative stimulus current position from start (0) to end (1) of stick
     sigma : float
         Extracellular conductivity (muS/mum)
     electrodeR : float
@@ -404,7 +384,7 @@ def analytical_LFP(time=np.linspace(0, 100, 1001),
     ri = 1E-2 * 4. * Ri / (np.pi * stickDiam**2) # intracellular resistance  (Mohm/mum)
 
     Lambda = 1E2 / np.sqrt(gm * ri) # Electrotonic length constant of stick (mum)
-    Ginf = 10 / (ri * Lambda)   # iinfinite stick input cond (muS)?
+    Ginf = 10 / (ri * Lambda)   # infinite stick input cond (10*muS)?
 
     tau_m = Rm * Cm / 1000        # membrane time constant (ms)
     Omega = 2 * np.pi * stimFrequency * tau_m / 1000 #impedance
@@ -412,8 +392,9 @@ def analytical_LFP(time=np.linspace(0, 100, 1001),
     L = stickLength / Lambda      # Length of stick in units of Lambda
     Rel = electrodeR / Lambda    # extracellular, location along x-axis, or radius, in units of Lambda
     q = np.sqrt(1 + 1j*Omega)	    # Note: j is sqrt(-1)
-    Yin = q * Ginf * np.tanh(q * L)	    # Admittance, Zin is input position?
-    Zin = stickLength / Lambda  # unitless location of synapse
+    Yin = q * Ginf * np.tanh(q * L)	    # Admittance
+    Zin = stickLength / Lambda  # unitless location of input current
+    # Zin = stickLength / Lambda * stimPos  # unitless location of input current
 
     PhiExImem = np.empty(time.size)
     PhiExInput = np.empty(time.size)
