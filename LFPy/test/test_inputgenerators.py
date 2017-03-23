@@ -60,3 +60,20 @@ class testInputGenerators(unittest.TestCase):
         for x in spt:
             if x.size > 0:
                 self.assertTrue((x.min() >= tstart) & (x.max() <= tstop))
+
+    def test_get_activation_times_from_scipy_stats(self):
+        """test LFPy.inputgenerators.test_get_activation_times_from_scipy_stats
+        """
+        n = 10
+        tstart = 0.
+        tstop = 1E4
+        distribution = st.expon
+        rvs_args = dict(loc=0, scale=100.)
+        times = LFPy.inputgenerators.get_activation_times_from_scipy_stats(
+            n=n, tstart=tstart, tstop=tstop, rvs_args=rvs_args, maxiter=1E6
+        )
+        self.assertTrue(len(times) == n)
+        for t in times:
+            self.assertTrue((t.min() >= tstart) & (t.max() <= tstop))
+        
+        
