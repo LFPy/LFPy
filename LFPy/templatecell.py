@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 """
 Copyright (C) 2012 Computational Neuroscience Group, NMBU.
 
@@ -15,7 +14,6 @@ GNU General Public License for more details.
 
 """
 
-from __future__ import division
 import os
 import sys
 import pickle
@@ -151,9 +149,9 @@ class TemplateCell(Cell):
             neuron.h('sec_counted = 0')
                 
         #the python cell object we are loading the morphology into:
-        celltemplate = getattr(neuron.h, self.templatename)
-        self.template = celltemplate(self.templateargs)
-        #self.template = getattr(neuron.h, self.templatename)(self.templateargs)
+        # celltemplate = getattr(neuron.h, self.templatename)
+        # self.template = celltemplate(self.templateargs)
+        self.template = getattr(neuron.h, self.templatename)(self.templateargs)
         
         #perform a test if the morphology is already loaded:
         seccount = 0
@@ -204,7 +202,8 @@ class TemplateCell(Cell):
                 
             else:
                 neuron.h.execute("xopen(\"%s\")" % self.morphology, self.template)
-
+                #neuron.h.load_file(1, self.morphology)
+        
         #set shapes and create sectionlists
         neuron.h.define_shape()
         self._create_sectionlists()
@@ -239,7 +238,7 @@ class TemplateCell(Cell):
                 self.allsecnames.append(sec.name())
             
             self.allseclist = neuron.h.SectionList()
-            for sec in self.template.all:
+            for sec in self.template.allsec():
                 self.allseclist.append(sec=sec)
             
             

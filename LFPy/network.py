@@ -45,7 +45,7 @@ class NetworkCell(TemplateCell):
         TemplateCell.__init__(self, **args)
 
         # create list netconlist for spike detecting NetCon object(s)
-        self.netconlist = []
+        self.netconlist = neuron.h.List()
         # create list of recording device for action potentials
         self.spikes = []
         # create list of random number generators used with synapse model

@@ -21,7 +21,6 @@ import numpy as np
 import LFPy
 import neuron
 import pickle
-import random
 
 # for nosetests to run load the SinSyn sinusoid synapse currrent mechanism
 neuron.load_mechanisms(os.path.join(LFPy.__path__[0], 'test'))
@@ -211,7 +210,7 @@ class testTemplateCell(unittest.TestCase):
     def test_cell_set_pos_00(self):
         '''test LFPy.TemplateCell.set_pos'''
         cell = LFPy.TemplateCell(morphology=os.path.join(LFPy.__path__[0], 'test',
-                                                  'ball_and_sticks.hoc' ),
+                                                  'ball_and_sticks_w_lists.hoc' ),
                         templatefile=os.path.join(LFPy.__path__[0], 'test', 'ball_and_stick_template.hoc'),
                         templatename='ball_and_stick_template',
                         templateargs=None,
@@ -221,7 +220,7 @@ class testTemplateCell(unittest.TestCase):
     def test_cell_set_pos_01(self):
         '''test LFPy.TemplateCell.set_pos'''
         cell = LFPy.TemplateCell(morphology=os.path.join(LFPy.__path__[0], 'test',
-                                                  'ball_and_sticks.hoc' ),
+                                                  'ball_and_sticks_w_lists.hoc' ),
                         templatefile=os.path.join(LFPy.__path__[0], 'test', 'ball_and_stick_template.hoc'),
                         templatename='ball_and_stick_template',
                         templateargs=None,
@@ -232,7 +231,7 @@ class testTemplateCell(unittest.TestCase):
     def test_cell_set_pos_02(self):
         '''test LFPy.TemplateCell.set_pos'''
         cell = LFPy.TemplateCell(morphology=os.path.join(LFPy.__path__[0], 'test',
-                                                  'ball_and_sticks.hoc' ),
+                                                  'ball_and_sticks_w_lists.hoc' ),
                         templatefile=os.path.join(LFPy.__path__[0], 'test', 'ball_and_stick_template.hoc'),
                         templatename='ball_and_stick_template',
                         templateargs=None,
@@ -243,7 +242,7 @@ class testTemplateCell(unittest.TestCase):
     def test_cell_set_pos_03(self):
         '''test LFPy.TemplateCell.set_pos'''
         cell = LFPy.TemplateCell(morphology=os.path.join(LFPy.__path__[0], 'test',
-                                                  'ball_and_sticks.hoc' ),
+                                                  'ball_and_sticks_w_lists.hoc' ),
                         templatefile=os.path.join(LFPy.__path__[0], 'test', 'ball_and_stick_template.hoc'),
                         templatename='ball_and_stick_template',
                         templateargs=None,
@@ -256,7 +255,7 @@ class testTemplateCell(unittest.TestCase):
     def test_cell_set_pos_04(self):
         '''test LFPy.TemplateCell.set_pos'''
         cell = LFPy.TemplateCell(morphology=os.path.join(LFPy.__path__[0], 'test',
-                                                  'ball_and_sticks.hoc'),
+                                                  'ball_and_sticks_w_lists.hoc'),
                         templatefile=os.path.join(LFPy.__path__[0], 'test', 'ball_and_stick_template.hoc'),
                         templatename='ball_and_stick_template',
                         templateargs=None,
@@ -270,7 +269,7 @@ class testTemplateCell(unittest.TestCase):
     def test_cell_set_pos_05(self):
         '''test LFPy.TemplateCell.set_pos'''
         cell = LFPy.TemplateCell(morphology=os.path.join(LFPy.__path__[0], 'test',
-                                                  'ball_and_sticks.hoc' ),
+                                                  'ball_and_sticks_w_lists.hoc' ),
                         templatefile=os.path.join(LFPy.__path__[0], 'test', 'ball_and_stick_template.hoc'),
                         templatename='ball_and_stick_template',
                         templateargs=None,
@@ -282,7 +281,7 @@ class testTemplateCell(unittest.TestCase):
     def test_cell_set_pos_06(self):
         '''test LFPy.TemplateCell.set_pos'''
         cell = LFPy.TemplateCell(morphology=os.path.join(LFPy.__path__[0], 'test',
-                                                  'ball_and_sticks.hoc' ),
+                                                  'ball_and_sticks_w_lists.hoc' ),
                         templatefile=os.path.join(LFPy.__path__[0], 'test', 'ball_and_stick_template.hoc'),
                         templatename='ball_and_stick_template',
                         templateargs=None,
@@ -294,7 +293,7 @@ class testTemplateCell(unittest.TestCase):
     def test_cell_set_rotation_00(self):
         '''test LFPy.TemplateCell.set_rotation()'''
         cell = LFPy.TemplateCell(morphology=os.path.join(LFPy.__path__[0], 'test',
-                                                  'ball_and_sticks.hoc' ),
+                                                  'ball_and_sticks_w_lists.hoc' ),
                         templatefile=os.path.join(LFPy.__path__[0], 'test', 'ball_and_stick_template.hoc'),
                         templatename='ball_and_stick_template',
                         templateargs=None,
@@ -321,7 +320,7 @@ class testTemplateCell(unittest.TestCase):
     def test_cell_set_rotation_01(self):
         '''test LFPy.TemplateCell.set_rotation()'''
         cell = LFPy.TemplateCell(morphology=os.path.join(LFPy.__path__[0], 'test',
-                                                  'ball_and_sticks.hoc' ),
+                                                  'ball_and_sticks_w_lists.hoc' ),
                         templatefile=os.path.join(LFPy.__path__[0], 'test', 'ball_and_stick_template.hoc'),
                         templatename='ball_and_stick_template',
                         templateargs=None,
@@ -348,7 +347,7 @@ class testTemplateCell(unittest.TestCase):
     def test_cell_set_rotation_02(self):
         '''test LFPy.TemplateCell.set_rotation()'''
         cell = LFPy.TemplateCell(morphology=os.path.join(LFPy.__path__[0], 'test',
-                                                  'ball_and_sticks.hoc' ),
+                                                  'ball_and_sticks_w_lists.hoc' ),
                         templatefile=os.path.join(LFPy.__path__[0], 'test', 'ball_and_stick_template.hoc'),
                         templatename='ball_and_stick_template',
                         templateargs=None,
@@ -373,7 +372,7 @@ class testTemplateCell(unittest.TestCase):
     def test_cell_set_rotation_03(self):
         '''test LFPy.TemplateCell.set_rotation()'''
         cell = LFPy.TemplateCell(morphology=os.path.join(LFPy.__path__[0], 'test',
-                                                  'ball_and_sticks.hoc' ),
+                                                  'ball_and_sticks_w_lists.hoc' ),
                         templatefile=os.path.join(LFPy.__path__[0], 'test', 'ball_and_stick_template.hoc'),
                         templatename='ball_and_stick_template',
                         templateargs=None,
@@ -400,7 +399,7 @@ class testTemplateCell(unittest.TestCase):
     def test_cell_set_rotation_04(self):
         '''test LFPy.TemplateCell.set_rotation()'''
         cell = LFPy.TemplateCell(morphology=os.path.join(LFPy.__path__[0], 'test',
-                                                  'ball_and_sticks.hoc' ),
+                                                  'ball_and_sticks_w_lists.hoc' ),
                         templatefile=os.path.join(LFPy.__path__[0], 'test', 'ball_and_stick_template.hoc'),
                         templatename='ball_and_stick_template',
                         templateargs=None,
@@ -427,7 +426,7 @@ class testTemplateCell(unittest.TestCase):
     def test_cell_set_rotation_05(self):
         '''test LFPy.TemplateCell.set_rotation()'''
         cell = LFPy.TemplateCell(morphology=os.path.join(LFPy.__path__[0], 'test',
-                                                  'ball_and_sticks.hoc' ),
+                                                  'ball_and_sticks_w_lists.hoc' ),
                         templatefile=os.path.join(LFPy.__path__[0], 'test', 'ball_and_stick_template.hoc'),
                         templatename='ball_and_stick_template',
                         templateargs=None,
@@ -486,7 +485,7 @@ class testTemplateCell(unittest.TestCase):
     def test_cell_chiral_morphology_00(self):
         '''test LFPy.TemplateCell.chiral_morphology()'''
         cell = LFPy.TemplateCell(morphology=os.path.join(LFPy.__path__[0], 'test',
-                                                  'ball_and_sticks.hoc' ),
+                                                  'ball_and_sticks_w_lists.hoc' ),
                         templatefile=os.path.join(LFPy.__path__[0], 'test', 'ball_and_stick_template.hoc'),
                         templatename='ball_and_stick_template',
                         templateargs=None,
@@ -516,10 +515,10 @@ class testTemplateCell(unittest.TestCase):
         np.testing.assert_allclose(cell.zend, zends, atol=1e-07)
 
 
-    def test_cell_chiral_morphology_00(self):
+    def test_cell_chiral_morphology_01(self):
         '''test LFPy.TemplateCell.chiral_morphology()'''
         cell = LFPy.TemplateCell(morphology=os.path.join(LFPy.__path__[0], 'test',
-                                                  'ball_and_sticks.hoc' ),
+                                                  'ball_and_sticks_w_lists.hoc' ),
                         templatefile=os.path.join(LFPy.__path__[0], 'test', 'ball_and_stick_template.hoc'),
                         templatename='ball_and_stick_template',
                         templateargs=None,
@@ -534,7 +533,7 @@ class testTemplateCell(unittest.TestCase):
         zstarts = cell.zstart.copy()
         zmids = cell.zmid.copy()
         zends = cell.zend.copy()
-        # test rotation 180 deg around x-axis
+        # test rotation 180 deg around y-axis
         cell.chiral_morphology(axis='y')
         # assert that y- and z-coordinates are inverted, using absolute
         # tolerances
@@ -548,10 +547,10 @@ class testTemplateCell(unittest.TestCase):
         np.testing.assert_allclose(cell.zmid, zmids, atol=1e-07)
         np.testing.assert_allclose(cell.zend, zends, atol=1e-07)
 
-    def test_cell_chiral_morphology_00(self):
+    def test_cell_chiral_morphology_02(self):
         '''test LFPy.TemplateCell.chiral_morphology()'''
         cell = LFPy.TemplateCell(morphology=os.path.join(LFPy.__path__[0], 'test',
-                                                  'ball_and_sticks.hoc' ),
+                                                  'ball_and_sticks_w_lists.hoc' ),
                         templatefile=os.path.join(LFPy.__path__[0], 'test', 'ball_and_stick_template.hoc'),
                         templatename='ball_and_stick_template',
                         templateargs=None,
@@ -566,7 +565,7 @@ class testTemplateCell(unittest.TestCase):
         zstarts = cell.zstart.copy()
         zmids = cell.zmid.copy()
         zends = cell.zend.copy()
-        # test rotation 180 deg around x-axis
+        # test rotation 180 deg around z-axis
         cell.chiral_morphology(axis='z')
         # assert that y- and z-coordinates are inverted, using absolute
 
@@ -585,7 +584,7 @@ class testTemplateCell(unittest.TestCase):
     def test_cell_get_rand_prob_area_norm_00(self):
         '''test LFPy.TemplateCell.get_rand_prob_area_norm()'''
         cell = LFPy.TemplateCell(morphology=os.path.join(LFPy.__path__[0], 'test',
-                                                 'ball_and_sticks.hoc' ),
+                                                 'ball_and_sticks_w_lists.hoc' ),
                         templatefile=os.path.join(LFPy.__path__[0], 'test', 'ball_and_stick_template.hoc'),
                         templatename='ball_and_stick_template',
                         templateargs=None,
@@ -598,7 +597,7 @@ class testTemplateCell(unittest.TestCase):
 
     def test_cell_get_rand_prob_area_norm_from_idx(self):
         cell = LFPy.TemplateCell(morphology=os.path.join(LFPy.__path__[0], 'test',
-                                                 'ball_and_sticks.hoc' ),
+                                                 'ball_and_sticks_w_lists.hoc' ),
                         templatefile=os.path.join(LFPy.__path__[0], 'test', 'ball_and_stick_template.hoc'),
                         templatename='ball_and_stick_template',
                         templateargs=None,
@@ -610,7 +609,7 @@ class testTemplateCell(unittest.TestCase):
     def test_cell_get_rand_prob_area_norm_from_idx_00(self):
         '''test LFPy.TemplateCell.get_rand_prob_area_norm()'''
         cell = LFPy.TemplateCell(morphology=os.path.join(LFPy.__path__[0], 'test',
-                                                  'ball_and_sticks.hoc' ),
+                                                  'ball_and_sticks_w_lists.hoc' ),
                         templatefile=os.path.join(LFPy.__path__[0], 'test', 'ball_and_stick_template.hoc'),
                         templatename='ball_and_stick_template',
                         templateargs=None,
@@ -621,7 +620,7 @@ class testTemplateCell(unittest.TestCase):
 
     def test_cell_get_intersegment_vector_00(self):
         cell = LFPy.TemplateCell(morphology=os.path.join(LFPy.__path__[0], 'test',
-                                                  'ball_and_sticks.hoc' ),
+                                                  'ball_and_sticks_w_lists.hoc' ),
                         templatefile=os.path.join(LFPy.__path__[0], 'test', 'ball_and_stick_template.hoc'),
                         templatename='ball_and_stick_template',
                         templateargs=None,
@@ -638,7 +637,7 @@ class testTemplateCell(unittest.TestCase):
 
     def test_cell_get_intersegment_distance_00(self):
         cell = LFPy.TemplateCell(morphology=os.path.join(LFPy.__path__[0], 'test',
-                                                  'ball_and_sticks.hoc' ),
+                                                  'ball_and_sticks_w_lists.hoc' ),
                         templatefile=os.path.join(LFPy.__path__[0], 'test', 'ball_and_stick_template.hoc'),
                         templatename='ball_and_stick_template',
                         templateargs=None,
@@ -653,7 +652,7 @@ class testTemplateCell(unittest.TestCase):
 
     def test_cell_get_idx_00(self):
         cell = LFPy.TemplateCell(morphology=os.path.join(LFPy.__path__[0], 'test',
-                                                  'ball_and_sticks.hoc' ),
+                                                  'ball_and_sticks_w_lists.hoc' ),
                         templatefile=os.path.join(LFPy.__path__[0], 'test', 'ball_and_stick_template.hoc'),
                         templatename='ball_and_stick_template',
                         templateargs=None,
@@ -673,7 +672,7 @@ class testTemplateCell(unittest.TestCase):
 
     def test_cell_get_closest_idx_00(self):
         cell = LFPy.TemplateCell(morphology=os.path.join(LFPy.__path__[0], 'test',
-                                                  'ball_and_sticks.hoc' ),
+                                                  'ball_and_sticks_w_lists.hoc' ),
                         templatefile=os.path.join(LFPy.__path__[0], 'test', 'ball_and_stick_template.hoc'),
                         templatename='ball_and_stick_template',
                         templateargs=None,
@@ -687,7 +686,7 @@ class testTemplateCell(unittest.TestCase):
 
     def test_cell_get_idx_children_00(self):
         cell = LFPy.TemplateCell(morphology=os.path.join(LFPy.__path__[0], 'test',
-                                                  'ball_and_sticks.hoc' ),
+                                                  'ball_and_sticks_w_lists.hoc' ),
                         templatefile=os.path.join(LFPy.__path__[0], 'test', 'ball_and_stick_template.hoc'),
                         templatename='ball_and_stick_template',
                         templateargs=None,
@@ -699,7 +698,7 @@ class testTemplateCell(unittest.TestCase):
 
     def test_cell_get_idx_parent_children_00(self):
         cell = LFPy.TemplateCell(morphology=os.path.join(LFPy.__path__[0], 'test',
-                                                  'ball_and_sticks.hoc' ),
+                                                  'ball_and_sticks_w_lists.hoc' ),
                         templatefile=os.path.join(LFPy.__path__[0], 'test', 'ball_and_stick_template.hoc'),
                         templatename='ball_and_stick_template',
                         templateargs=None,
@@ -711,7 +710,7 @@ class testTemplateCell(unittest.TestCase):
 
     def test_cell_get_idx_name_00(self):
         cell = LFPy.TemplateCell(morphology=os.path.join(LFPy.__path__[0], 'test',
-                                                  'ball_and_sticks.hoc' ),
+                                                  'ball_and_sticks_w_lists.hoc' ),
                         templatefile=os.path.join(LFPy.__path__[0], 'test', 'ball_and_stick_template.hoc'),
                         templatename='ball_and_stick_template',
                         templateargs=None,
@@ -723,7 +722,7 @@ class testTemplateCell(unittest.TestCase):
 
     def test_cell_get_rand_idx_area_norm_00(self):
         cell = LFPy.TemplateCell(morphology=os.path.join(LFPy.__path__[0], 'test',
-                                                  'ball_and_sticks.hoc' ),
+                                                  'ball_and_sticks_w_lists.hoc' ),
                         templatefile=os.path.join(LFPy.__path__[0], 'test', 'ball_and_stick_template.hoc'),
                         templatename='ball_and_stick_template',
                         templateargs=None,
@@ -746,7 +745,7 @@ class testTemplateCell(unittest.TestCase):
 
     def test_cell_set_synapse_00(self):
         cell = LFPy.TemplateCell(morphology=os.path.join(LFPy.__path__[0], 'test',
-                                                  'ball_and_sticks.hoc' ),
+                                                  'ball_and_sticks_w_lists.hoc' ),
                         templatefile=os.path.join(LFPy.__path__[0], 'test', 'ball_and_stick_template.hoc'),
                         templatename='ball_and_stick_template',
                         templateargs=None,
@@ -766,7 +765,7 @@ class testTemplateCell(unittest.TestCase):
 
     def test_cell_set_point_process_00(self):
         cell = LFPy.TemplateCell(morphology=os.path.join(LFPy.__path__[0], 'test',
-                                                  'ball_and_sticks.hoc' ),
+                                                  'ball_and_sticks_w_lists.hoc' ),
                         templatefile=os.path.join(LFPy.__path__[0], 'test', 'ball_and_stick_template.hoc'),
                         templatename='ball_and_stick_template',
                         templateargs=None,
@@ -781,7 +780,7 @@ class testTemplateCell(unittest.TestCase):
 
     def test_cell_strip_hoc_objects_00(self):
         cell = LFPy.TemplateCell(morphology=os.path.join(LFPy.__path__[0], 'test',
-                                                  'ball_and_sticks.hoc' ),
+                                                  'ball_and_sticks_w_lists.hoc' ),
                         templatefile=os.path.join(LFPy.__path__[0], 'test', 'ball_and_stick_template.hoc'),
                         templatename='ball_and_stick_template',
                         templateargs=None,
@@ -793,7 +792,7 @@ class testTemplateCell(unittest.TestCase):
 
     def test_cell_cellpickler_00(self):
         cell = LFPy.TemplateCell(morphology=os.path.join(LFPy.__path__[0], 'test',
-                                                  'ball_and_sticks.hoc' ),
+                                                  'ball_and_sticks_w_lists.hoc' ),
                         templatefile=os.path.join(LFPy.__path__[0], 'test', 'ball_and_stick_template.hoc'),
                         templatename='ball_and_stick_template',
                         templateargs=None,
