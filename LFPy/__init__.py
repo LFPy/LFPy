@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""Initialization of LFPy, a module for simulating extracellular potentials.
+"""Initialization of LFPy, a Python module for simulating extracellular potentials.
 
 Group of Computational Neuroscience,
 Department of Mathematical Sciences and Technology,
@@ -19,10 +19,13 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 :Classes:
-  * Cell - The pythonic neuron object itself laying on top of NEURON
+  * Cell - The pythonic neuron object itself laying on top of NEURON representing cells
+  * TemplateCell - similar to Cell, but for models using cell templates
   * Synapse - Convenience class for inserting synapses onto Cell objects
-  * StimIntraElectrode - Convenience class for inserting electrodes onto Cell objects
+  * StimIntElectrode - Convenience class for inserting electrodes onto Cell objects
+  * PointProcess - parent class of Synapse and StimIntElectrode
   * RecExtElectrode - Class for performing simulations of extracellular potentials
+  * RecExtElectrodeSetup - parent class of RexExtElectrode
 
 :Modules:
   * lfpcalc - functions used by RecExtElectrode class
@@ -37,7 +40,7 @@ from .recextelectrode import RecExtElectrode, RecExtElectrodeSetup
 from .cell import Cell
 from .templatecell import TemplateCell
 from .network import NetworkCell, NetworkPopulation, Network
-from .testing import _test as test
+from .test import _test as run_tests
 from .eegmegcalc import FourSphereVolumeConductor, InfiniteVolumeConductor, get_current_dipole_moment, MEG
 from . import lfpcalc
 from . import tools

@@ -37,12 +37,12 @@ except ImportError as ie:
 #as part of the package_data, allowing unit tests to run
 from distutils.spawn import find_executable, spawn
 if find_executable('nrnivmodl') is not None:
-    os.chdir('LFPy')
+    os.chdir(os.path.join('LFPy', 'test'))
     for path in ['x86_64', 'i686', 'powerpc']:
         if os.path.isdir(path):
             shutil.rmtree(path)
     spawn([find_executable('nrnivmodl')])
-    os.chdir('..')
+    os.chdir(os.path.join('..', '..'))
 else:
     print("nrnivmodl script not found in PATH, thus NEURON .mod files could" +
           "not be compiled, and LFPy.test() functions will fail")
@@ -56,7 +56,9 @@ setup(
     maintainer = "Espen Hagen",
     maintainer_email = 'espen.hagen@fys.uio.no',
     packages = ['LFPy'],
-    package_data = {'LFPy' : ['stick.hoc', 'ball_and_sticks.hoc', 'sinsyn.mod',
+    package_data = {'LFPy' : [os.path.join('test', '*.hoc'),
+                              os.path.join('test', '*.py'),
+                              os.path.join('test', 'sinsyn.mod'),
                               os.path.join('i686', '*'),
                               os.path.join('i686', '.libs', '*'),
                               os.path.join('x86_64', '*'),
@@ -69,7 +71,7 @@ setup(
     url='http://LFPy.github.io',
     download_url = 'https://github.com/LFPy/LFPy/tarball/v2.0',
     license='LICENSE',
-    description='A module for modeling extracellular potentials from multi compartment neuron models',
+    description='A module for modeling extracellular potentials of multicompartment neuron models built on NEURON',
     long_description=long_description,
     classifiers=[
         'License :: OSI Approved :: GNU General Public License (GPL)',
