@@ -1055,21 +1055,6 @@ class testNetworkCell(unittest.TestCase):
         np.testing.assert_allclose(electrode.LFP, electrode1.LFP)
 
 
-
-class testNetworkPopulation(unittest.TestCase):
-    """
-
-    """
-    pass
-
-
-class testNetwork(unittest.TestCase):
-    """
-
-    """
-    pass
-
-
 def stickSimulationTesttvec(**kwargs):
     stick = LFPy.NetworkCell(morphology = os.path.join(LFPy.__path__[0], 'test',
                                                 'stick.hoc'), verbose=False,
