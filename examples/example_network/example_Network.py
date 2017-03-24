@@ -322,7 +322,6 @@ if __name__ == '__main__':
                 syn.set_spike_times_w_netstim(interval=1000. / 5.)
 
 
-
     # create connectivity and connect populations
     for i, pre in enumerate(population_names):
         for j, post in enumerate(population_names):
@@ -548,11 +547,14 @@ if __name__ == '__main__':
     # to be run in successive fashion.
     ############################################################################
     network.pc.gid_clear() # allows assigning new gids to threads
+    electrode = None
     syn = None
+    synapseModel = None
     for population in network.populations.values():
         for cell in population.cells:
             cell = None
         population.cells = None
         population = None
+    pop = None
     network = None
     neuron.h('forall delete_section()')

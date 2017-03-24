@@ -149,8 +149,6 @@ class TemplateCell(Cell):
             neuron.h('sec_counted = 0')
                 
         #the python cell object we are loading the morphology into:
-        # celltemplate = getattr(neuron.h, self.templatename)
-        # self.template = celltemplate(self.templateargs)
         self.template = getattr(neuron.h, self.templatename)(self.templateargs)
         
         #perform a test if the morphology is already loaded:
@@ -202,7 +200,6 @@ class TemplateCell(Cell):
                 
             else:
                 neuron.h.execute("xopen(\"%s\")" % self.morphology, self.template)
-                #neuron.h.load_file(1, self.morphology)
         
         #set shapes and create sectionlists
         neuron.h.define_shape()
@@ -210,61 +207,19 @@ class TemplateCell(Cell):
 
     def _create_sectionlists(self):
         """Create section lists for different kinds of sections"""
-        #list with all sections
         
-        #test if list self.template.all is not empty
-        numsec = 0
+        self.allsecnames = []
         for sec in self.template.all:
-            numsec += 1
+            self.allsecnames.append(sec.name())
         
-        if numsec > 0:
-            self.allsecnames = []
-            for sec in self.template.all:
-                self.allsecnames.append(sec.name())
-            
-            #hotpatching the allseclist!!!
-            self.allseclist = self.template.all
-            
-            #list of soma sections, assuming it is named on the format "soma*"
-            self.nsomasec = 0
-            self.somalist = neuron.h.SectionList()
-            for sec in self.template.all:
-                if 'soma' in sec.name():
-                    self.somalist.append(sec=sec)
-                    self.nsomasec += 1
-        else:
-            self.allsecnames = []
-            for sec in self.template.allsec():
-                self.allsecnames.append(sec.name())
-            
-            self.allseclist = neuron.h.SectionList()
-            for sec in self.template.allsec():
-                self.allseclist.append(sec=sec)
-            
-            
-            #list of soma sections, assuming it is named on the format "soma*"
-            self.nsomasec = 0
-            self.somalist = neuron.h.SectionList()
-            for sec in self.template.allsec():
-                if 'soma' in sec.name():
-                    self.somalist.append(sec=sec)
-                    self.nsomasec += 1
-
-    def _update_pt3d(self):
-        """
-        update the locations in neuron.hoc.space using neuron.h.pt3dchange()
-        """
-        for i, sec in enumerate(self.allseclist):
-            n3d = int(neuron.h.n3d())
-            for n in range(n3d):
-                neuron.h.pt3dchange(n,
-                                self.x3d[i][n],
-                                self.y3d[i][n],
-                                self.z3d[i][n],
-                                self.diam3d[i][n])
-            #let NEURON know about the changes we just did:
-            neuron.h.define_shape()
-        #must recollect the geometry, otherwise we get roundoff errors!
-        self._collect_geometry()
+        self.allseclist = self.template.all
+        
+        #list of soma sections, assuming it is named on the format "soma*"
+        self.nsomasec = 0
+        self.somalist = neuron.h.SectionList()
+        for sec in self.allseclist:
+            if 'soma' in sec.name():
+                self.somalist.append(sec=sec)
+                self.nsomasec += 1
 
 

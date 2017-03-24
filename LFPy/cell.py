@@ -1646,8 +1646,7 @@ class Cell(object):
         """
         update the locations in neuron.hoc.space using neuron.h.pt3dchange()
         """
-        i = 0
-        for sec in self.allseclist:
+        for i, sec in enumerate(self.allseclist):
             n3d = int(neuron.h.n3d())
             for n in range(n3d):
                 neuron.h.pt3dchange(n,
@@ -1655,7 +1654,6 @@ class Cell(object):
                                 self.y3d[i][n],
                                 self.z3d[i][n],
                                 self.diam3d[i][n])
-            i += 1
             #let NEURON know about the changes we just did:
             neuron.h.define_shape()
         #must recollect the geometry, otherwise we get roundoff errors!

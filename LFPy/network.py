@@ -392,7 +392,7 @@ class Network(object):
 
         # create empty list for connections between cells (not to be confused
         # with each cell's list of netcons)
-        self.netconlist = []
+        self.netconlist = neuron.h.List()
 
 
         # The different populations in the Network will be collected in
