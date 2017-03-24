@@ -414,7 +414,7 @@ class NetworkPopulation(object):
         x = np.empty(POP_SIZE)
         y = np.empty(POP_SIZE)
         z = np.empty(POP_SIZE)
-        for i in xrange(POP_SIZE):
+        for i in range(POP_SIZE):
             x[i] = (np.random.rand()-0.5) * radius*2
             y[i] = (np.random.rand()-0.5) * radius*2
             while np.sqrt(x[i]**2 + y[i]**2) >= radius:
