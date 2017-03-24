@@ -1191,8 +1191,8 @@ def _run_simulation_with_electrode(network, cvode,
     if use_ipas: dtype += [('ipas', np.float)]
     if use_icap: dtype += [('icap', np.float)]
     if use_isyn: dtype += [('isyn_e', np.float), ('isyn_i', np.float)]
-    if rec_pop_contributions: dtype += zip(network.population_names,
-                                           [np.float]*len(network.population_names))
+    if rec_pop_contributions: dtype += list(zip(network.population_names,
+                                                [np.float]*len(network.population_names)))
 
     # setup list of structured arrays for all extracellular potentials
     # at each contact from different source terms and subpopulations
@@ -1205,8 +1205,7 @@ def _run_simulation_with_electrode(network, cvode,
     # populations captured inside the DummyCell instance
     if rec_current_dipole_moment:
         DIPOLE_MOMENT = np.zeros((int(network.tstop / network.dt) + 1, 3),
-            dtype=zip(network.population_names,
-                      [np.float]*len(network.population_names)))
+            dtype=list(zip(network.population_names, [np.float]*len(network.population_names))))
     else:
         DIPOLE_MOMENT = None
 
