@@ -339,7 +339,6 @@ class NetworkPopulation(object):
         assert('z' not in self.rotation_args.keys())
         for i, cell in enumerate(self.cells):
             cell.set_rotation(z=self.rotations[i], **self.rotation_args)
-            # cell.set_rotation(x=np.pi/2, z=self.rotations[i])
 
         # assign gid to each cell
         for gid, cell in zip(self.gids, self.cells):
