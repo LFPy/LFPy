@@ -20,13 +20,13 @@ create soma[1]
 create dend[1]
 
 soma[0] {
-    pt3dadd(0, 0, 0, 15)
-    pt3dadd(0, 0, 20, 15)
+    pt3dadd(-40, -10, -10, 20)
+    pt3dadd(0, 0, 10, 20)
 }
 
 dend[0] {
-    pt3dadd(0, 0, 20, 5)
-    pt3dadd(0, 0, 100, 5)
+    pt3dadd(0, 0, 10, 20)
+    pt3dadd(25, 10, 0, 20)
 }
 
 connect dend[0](0), soma[0](1)

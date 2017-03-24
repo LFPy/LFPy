@@ -21,13 +21,13 @@ cell_parameters = {          # various cell parameters,
     'lambda_f' : 1000.,
     'dt' : 2.**-2,      # simulation time step size
     'tstartms' : 0.,    # start time of simulation, recorders start at t=0
-    'tstopms' : 10.,   # stop simulation at 200 ms. These can be overridden
+    'tstopms' : 2.,   # stop simulation at 200 ms. These can be overridden
                         # by setting these arguments i cell.simulation()
 }
 
 # Create cell
 cell = LFPy.Cell(**cell_parameters)
-cell.set_pos(zpos=-10)
+cell.set_pos(ypos=0, xpos=0)
 
 print cell.totnsegs
 
@@ -36,22 +36,24 @@ synapse_parameters = {
     'e' : 0.,                   # reversal potential
     'syntype' : 'ExpSyn',       # synapse type
     'tau' : 5.,                 # synaptic time constant
-    'weight' : .001,            # synaptic weight
+    'weight' : 1,            # synaptic weight
     'record_current' : False,    # record synapse current
 }
 
 # Create synapse and set time of synaptic input
 synapse = LFPy.Synapse(cell, **synapse_parameters)
-synapse.set_spike_times(np.array([5.]))
-
+synapse.set_spike_times(np.array([1.]))
 
 # Create a grid of measurement locations, in (um)
-X, Z = np.mgrid[-100:101:1, -100:200:1]
+X, Z = np.mgrid[-50:50:1, -50:50:1]
+
+# X = np.array([0])
+# Z = np.array([12])
+
 Y = np.zeros(X.shape)
 
-
 sigma = 0.3
-sigma_tensor = [0.3, 0.3, 0.45]
+sigma_tensor = [0.3, 0.3, 0.3]
 
 # Define electrode parameters
 grid_electrode_parameters = {
@@ -59,7 +61,7 @@ grid_electrode_parameters = {
     'x' : X.flatten(),  # electrode requires 1d vector of positions
     'y' : Y.flatten(),
     'z' : Z.flatten(),
-    'method': 'pointsource'
+    'method': 'linesource'
 }
 
 grid_electrode_parameters_tensor = {
@@ -67,85 +69,80 @@ grid_electrode_parameters_tensor = {
     'x' : X.flatten(),  # electrode requires 1d vector of positions
     'y' : Y.flatten(),
     'z' : Z.flatten(),
-    'method': 'pointsource'
+    'method': 'linesource'
 }
-
 
 # Run simulation, electrode object argument in cell.simulate
 print("running simulation...")
 cell.simulate(rec_imem=True, rec_isyn=False)
 
+# cell.imem = np.ones((cell.imem.shape[0], 1))
+# cell.imem[0, :] = -1
+# cell.imem[1, :] = 1
 # Create electrode objects
 
-from LFPy import lfpcalc
 import time
-t0 = time.time()
-grid_electrode = LFPy.RecExtElectrode(cell, **grid_electrode_parameters)
-grid_electrode.calc_lfp()
-print("Original: %f" %(time.time() - t0))
 
 t0 = time.time()
 grid_electrode_tensor = LFPy.RecExtElectrode(cell, **grid_electrode_parameters_tensor)
 grid_electrode_tensor.calc_lfp()
 print("Tensor: %f" % (time.time() - t0))
 
+t0 = time.time()
+grid_electrode = LFPy.RecExtElectrode(cell, **grid_electrode_parameters)
+grid_electrode.calc_lfp()
+print("Original: %f" % (time.time() - t0))
+
+
 print np.max(np.abs((grid_electrode.LFP - grid_electrode_tensor.LFP) / np.max(np.abs(grid_electrode.LFP))))
-
-fig = plt.figure(figsize=[10, 5])
-
-ax = fig.add_subplot(121, aspect='equal', xlabel='x', ylabel='z', title="Sigma: %s S/m" % str(sigma),
-                     ylim=[np.min(grid_electrode.z), np.max(grid_electrode.z)],
-                     xlim=[np.min(grid_electrode.x), np.max(grid_electrode.x)])
 
 max_idx = np.argmax(np.abs(cell.imem[0,:]))
 
-LFP = grid_electrode.LFP[:,max_idx].reshape(X.shape)
-im = ax.contourf(X, Z, LFP, 51, vmin=-np.max(np.abs(LFP)) / 1, vmax=np.max(np.abs(LFP)) / 1,
-           cmap='bwr',
-           zorder=-2)
+LFP = grid_electrode.LFP[:, max_idx].reshape(X.shape)
+LFP_tensor = grid_electrode_tensor.LFP[:, max_idx].reshape(X.shape)
+difference = LFP - LFP_tensor
+
+fig = plt.figure(figsize=[5, 8])
+fig.subplots_adjust(top=0.97, hspace=0.4)
+ax = fig.add_subplot(311, aspect='equal', xlabel='x', ylabel='z', title="Sigma: %s S/m" % str(sigma),
+                     ylim=[np.min(grid_electrode.z), np.max(grid_electrode.z)],
+                     xlim=[np.min(grid_electrode.x), np.max(grid_electrode.x)])
+
+im = ax.contourf(X, Z, LFP, 11, vmin=-np.max(np.abs(LFP)) / 1, vmax=np.max(np.abs(LFP)) / 1,
+                 cmap='bwr',
+                 zorder=-2)
 cbar = plt.colorbar(im)
 
-#plot morphology
-zips = []
-for x, z in cell.get_idx_polygons():
-    zips.append(list(zip(x, z)))
-polycol = PolyCollection(zips, alpha=0.2,
-                         edgecolors='none',
-                         facecolors='k')
-ax.add_collection(polycol)
-
+[plt.plot([cell.xstart[idx], cell.xend[idx]], [cell.zstart[idx], cell.zend[idx]]) for idx in range(cell.totnsegs)]
 
 ax.plot(cell.xmid[cell.synidx],cell.zmid[cell.synidx], 'o', ms=5,
         markeredgecolor='k',
         markerfacecolor='r')
 
-ax2 = fig.add_subplot(122, aspect='equal', xlabel='x', ylabel='z', title="Sigma: %s S/m" % str(sigma_tensor),
+ax2 = fig.add_subplot(312, aspect='equal', xlabel='x', ylabel='z', title="Sigma: %s S/m" % str(sigma_tensor),
                      ylim=[np.min(grid_electrode.z), np.max(grid_electrode.z)],
                      xlim=[np.min(grid_electrode.x), np.max(grid_electrode.x)])
-
-LFP = grid_electrode_tensor.LFP[:,max_idx].reshape(X.shape)
-im = ax2.contourf(X, Z, LFP, 51, vmin=-np.max(np.abs(LFP)) / 1, vmax=np.max(np.abs(LFP)) / 1,
-           cmap='bwr',
-           zorder=-2)
-cbar = plt.colorbar(im)
-
-#plot morphology
-zips = []
-for x, z in cell.get_idx_polygons():
-    zips.append(list(zip(x, z)))
-polycol = PolyCollection(zips,
-                         edgecolors='none', alpha=0.2,
-                         facecolors='k')
-ax2.add_collection(polycol)
-
-
+[ax2.plot([cell.xstart[idx], cell.xend[idx]], [cell.zstart[idx], cell.zend[idx]]) for idx in range(cell.totnsegs)]
 ax2.plot(cell.xmid[cell.synidx],cell.zmid[cell.synidx], 'o', ms=5,
         markeredgecolor='k',
         markerfacecolor='r')
+im = ax2.contourf(X, Z, LFP_tensor, 11, vmin=-np.max(np.abs(LFP_tensor)) / 1, vmax=np.max(np.abs(LFP_tensor)) / 1,
+                  cmap='bwr',
+                  zorder=-2)
+cbar = plt.colorbar(im)
 
+ax3 = fig.add_subplot(313, aspect='equal', xlabel='x', ylabel='z', title="Sigma: %s S/m" % str(sigma_tensor),
+                     ylim=[np.min(grid_electrode.z), np.max(grid_electrode.z)],
+                     xlim=[np.min(grid_electrode.x), np.max(grid_electrode.x)])
+# [ax3.plot([cell.xstart[idx], cell.xend[idx]], [cell.zstart[idx], cell.zend[idx]]) for idx in range(cell.totnsegs)]
 
+im = ax3.contourf(X, Z, difference, 11, vmin=-np.max(np.abs(LFP_tensor)) / 10, vmax=np.max(np.abs(LFP_tensor)) / 10,
+                  cmap='bwr',
+                  zorder=-2)
+cbar = plt.colorbar(im)
 
+# ax3.plot(cell.xmid[cell.synidx],cell.zmid[cell.synidx], 'o', ms=5,
+#         markeredgecolor='k',
+#         markerfacecolor='r')
 
-
-plt.savefig('example_anisotropy_%s.png' % str(sigma), dpi=150)
-# plt.show()
+plt.savefig('example_anisotropy_ls_%s.png' % str(sigma), dpi=150)

@@ -53,9 +53,14 @@ def calc_lfp_choose(cell, x=0., y=0., z=0., sigma=0.3,
                                      r_limit=r_limit,
                                      t_indices=t_indices)
     elif method == 'linesource':
-        return calc_lfp_linesource(cell, x=x, y=y, z=z, sigma=sigma,
-                                   r_limit=r_limit,
-                                    t_indices=t_indices)
+        if type(sigma) in [list, np.ndarray]:
+            return calc_lfp_linesource_anisotropic(cell, x=x, y=y, z=z, sigma=sigma,
+                                       r_limit=r_limit,
+                                        t_indices=t_indices)
+        else:
+            return calc_lfp_linesource(cell, x=x, y=y, z=z, sigma=sigma,
+                                       r_limit=r_limit,
+                                        t_indices=t_indices)
     elif method == 'pointsource':
         if type(sigma) in [list, np.ndarray]:
             # print("Given tensor conductivity. Using anisotropic formalism.")
@@ -66,6 +71,251 @@ def calc_lfp_choose(cell, x=0., y=0., z=0., sigma=0.3,
             return calc_lfp_pointsource(cell, x=x, y=y, z=z, sigma=sigma,
                                         r_limit=r_limit,
                                         t_indices=t_indices)
+
+def dist(x1, x2, p):
+    """
+    Returns distance and closest point on line between x1 and x2 from point p
+    """
+    px = x2[0]-x1[0]
+    py = x2[1]-x1[1]
+    pz = x2[2]-x1[2]
+
+    delta = px*px + py*py + pz*pz
+
+    u = ((p[0] - x1[0]) * px + (p[1] - x1[1]) * py + (p[2] - x1[2]) * pz) / float(delta)
+
+    if u > 1:
+        u = 1
+    elif u < 0:
+        u = 0
+
+    x = x1[0] + u * px
+    y = x1[1] + u * py
+    z = x1[2] + u * pz
+
+    closest_point = [x, y, z]
+    dx = x - p[0]
+    dy = y - p[1]
+    dz = z - p[2]
+    dist = np.sqrt(dx*dx + dy*dy + dz*dz)
+
+    return dist, closest_point
+
+
+def calc_lfp_linesource_anisotropic(cell, x=0., y=0., z=0., sigma=0.3,
+                        r_limit=None,
+                        t_indices=None):
+    """Calculate electric field potential using the line-source method, all
+    compartments treated as line sources, even soma.
+
+    Parameters
+    ----------
+    cell: obj
+        LFPy.Cell or LFPy.TemplateCell instance
+    x : float
+        extracellular position, x-axis
+    y : float
+        extracellular position, y-axis
+    z : float
+        extracellular position, z-axis
+    sigma : array
+        extracellular conductivity
+    r_limit : [None]/float/np.ndarray
+        minimum distance to source current. Can be scalar or numpy array with
+        a limit for each cell compartment. Defaults to [None]
+    t_indices : [None]/np.ndarray
+        calculate LFP at specific timesteps
+    """
+    # Handling the r_limits. If a r_limit is a single value, an array r_limit
+    # of shape cell.diam is returned.
+    if type(r_limit) == int or type(r_limit) == float:
+        r_limit = np.ones(np.shape(cell.diam))*abs(r_limit)
+    elif np.shape(r_limit) != np.shape(cell.diam):
+        raise Exception('r_limit is neither a float- or int- value, nor is \
+            r_limit.shape() equal to cell.diam.shape()')
+
+    if t_indices is not None:
+        currmem = cell.imem[:, t_indices]
+    else:
+        currmem = cell.imem
+
+    #some variables for h, r2, r_soma calculations
+    xstart = cell.xstart.copy()
+    xend = cell.xend.copy()
+    ystart = cell.ystart.copy()
+    yend = cell.yend.copy()
+    zstart = cell.zstart.copy()
+    zend = cell.zend.copy()
+
+    phi = np.zeros(currmem.shape[1])
+
+    dx2 = (xend - xstart)**2
+    dy2 = (yend - ystart)**2
+    dz2 = (zend - zstart)**2
+    a = (dx2 + dy2 + dz2)
+    pos = np.array([x, y, z])
+
+    b = -2 * ((x - xstart) * (xend - xstart) +
+              (y - ystart) * (yend - ystart) +
+              (z - zstart) * (zend - zstart))
+    c = ((x - xstart)**2 +
+         (y - ystart)**2 +
+         (z - zstart)**2)
+
+    for idx in range(cell.totnsegs):
+
+        a_ = a[idx]
+        b_ = b[idx]
+        c_ = c[idx]
+        p1 = np.array([xstart[idx], ystart[idx], zstart[idx]])
+        p2 = np.array([xend[idx], yend[idx], zend[idx]])
+
+        r, closest_point = dist(p1, p2, pos)
+        if r <= r_limit[idx]:
+            # print "too close", closest_point, pos
+            if np.abs(r) < 1e-12:
+                p_ = closest_point
+                p_[0] += r_limit[idx] * np.sign(xstart[idx]-xend[idx])
+            else:
+                p_ = closest_point + (pos - closest_point) * r_limit[idx] / r
+
+            # p_ = closest_point + (pos - closest_point) * r_limit[idx] / r
+
+            b_ = -2 * ((p_[0] - xstart[idx]) * (xend[idx] - xstart[idx]) +
+                       (p_[1] - ystart[idx]) * (yend[idx] - ystart[idx]) +
+                       (p_[2] - zstart[idx]) * (zend[idx] - zstart[idx]))
+            c_ = ((p_[0] - xstart[idx])**2 +
+                 (p_[1] - ystart[idx])**2 +
+                 (p_[2] - zstart[idx])**2)
+            # print pos, p_, np.sqrt(np.sum((pos - p_)**2)), r_limit[idx]
+            # b_ *= distance_scale
+            # c_ *= distance_scale**2
+            # print b_, c_
+        #     raise RuntimeError
+
+        # c = (sigma[1] * sigma[2] * (x - xstart)**2 +
+        #      sigma[0] * sigma[2] * (y - ystart)**2 +
+        #      sigma[0] * sigma[1] * (z - zstart)**2)
+        if c_ == 0:
+            print pos, p_, xstart[idx], ystart[idx], zstart[idx]
+            print dist(p1, p2, pos)
+            raise RuntimeError
+        if np.abs(b_) <= 1e-12:
+            # print("Case 0"), a_, b_, c_
+            # one_over_r_part = 1. / np.sqrt(a_) * np.log(np.sqrt(a_ / c_) + np.sqrt(a_ / c_) * np.sqrt(1 + c_ / a_))
+            one_over_r_part = 1. / np.sqrt(a_) * np.log(np.sqrt(a_ / c_) + np.sqrt(a_ / c_ + 1))
+            if np.isnan(one_over_r_part).any():
+                print "NaN ", idx, pos
+                print "Case 1", one_over_r_part, a_, b_, c_, 4 * a_ * c_ - b_**2
+
+            phi += currmem[idx] * one_over_r_part
+        elif 4 * a_ * c_ > b_**2:
+            # print("Case 2")
+            numerator = np.abs(2 * a_ + b_ + 2 * np.sqrt(a_*a_ + a_ * b_ + a_ * c_))
+            denumerator = np.abs(b_ + 2 * np.sqrt(a_ * c_))
+            one_over_r_part = 1. / np.sqrt(a_) * np.log(numerator / denumerator)
+            if np.isnan(one_over_r_part).any():
+                print "NaN ", idx, pos
+                print "Case 2", one_over_r_part, a_, b_, c_, 4 * a_ * c_ - b_**2
+
+            phi += currmem[idx] * one_over_r_part
+
+
+        elif np.abs(4 * a_ * c_ - b_**2) < 1e-9:
+
+            # print "Case 3", a_, c_, (np.abs(1 - np.sqrt(a_ / c_)))
+            # print pos, a_, b_, c_, xstart[idx], ystart[idx], zstart[idx], xend[idx], yend[idx], zend[idx]
+            # one_over_r_part = 1. / np.sqrt(a_) * (np.log(np.abs((2 * a_ + b_)/b_)))
+            # one_over_r_part = 1. / np.sqrt(a_) * np.log(np.sqrt(a_ / c_) + 1.)
+
+            # if 1 - np.sqrt(a_ / c_) > 0:
+            # if np.abs(a_ - c_) < 1e-12:
+            #     one_over_r_part = 0#-1. / np.sqrt(a_) * np.log(np.abs(1 - np.sqrt(a_ / c_)))
+            #     print "Happsendd"
+            # else:
+                # one_over_r_part = -1. / np.sqrt(a_) * np.log(np.abs(1 - np.sqrt(a_ / c_)))
+            one_over_r_part = 1. / np.sqrt(a_) * np.log(np.sqrt(a_ / c_) + 1)
+            if np.isnan(one_over_r_part).any():
+                print "NaN ", idx, pos
+                print "Case 3", one_over_r_part, a_, b_, c_, 4 * a_ * c_ - b_**2
+
+
+            # else:
+            #     one_over_r_part = 1. / np.sqrt(a_) * np.log(np.sqrt(a_ / c_) - 1)
+
+            phi += currmem[idx] * one_over_r_part
+            # print one_over_r_part
+        elif 4 * a_ * c_ < b_**2:
+
+            one_over_r_part = 1. / np.sqrt(a_) * (np.arcsinh((2 * a_ + b_) / np.sqrt(4 * a_ * c_ - b_**2))-
+                                                  np.arcsinh((b_) / np.sqrt(4 * a_ * c_ - b_**2)))
+            # print("This happend")
+            if np.isnan(one_over_r_part).any():
+                print "NaN ", idx, pos
+                print "Case 4", one_over_r_part, a_, b_, c_, 4 * a_ * c_ - b_**2
+
+
+            phi += currmem[idx] * one_over_r_part
+
+            # one_over_r_part = 1. / np.sqrt(a[idx]) * (np.arcsinh((2 * a[idx] + b[idx]) / np.sqrt(4 * a[idx] * c[idx] - b[idx]**2)) - np.arcsinh(b[idx] / np.sqrt(4 * a[idx] * c[idx] - b[idx]**2)))
+            # phi += currmem[idx] * one_over_r_part
+        else:
+            raise RuntimeError
+        if np.isnan(phi).any():
+            print "NaN", idx, a_, b_, c_, pos
+
+            # print a[idx]#, b[idx], c[idx]
+            # raise RuntimeError("Nan in phi")
+
+    phi *= 1 / (4 * np.pi * sigma[0])
+    # case_0_idxs = np.where(np.abs(b) < 1e-6)
+    # case_1_idxs = np.where(4 * a * c < b**2)[0]
+    # case_2_idxs = np.where(4 * a * c > b**2)[0]
+    # case_3_idxs = np.where(4 * a * c - b**2 < 1e-4)[0]
+
+    # print case_1_idxs, case_2_idxs, case_3_idxs
+
+    #
+    #
+    # if len(case_1_idxs) > 0:
+    #     one_over_r_part = 1. / np.sqrt(a) * np.log(numerator / denumerator)
+    #     phi += np.dot(currmem[case_1_idxs].T, one_over_r_part[case_1_idxs])
+    #
+    # if len(case_2_idxs) > 0:
+    #     one_over_r_part = 1. / np.sqrt(a) * (np.arcsinh((2 * a + b) / np.sqrt(4 * a * c - b**2)) - np.arcsinh(b / np.sqrt(4 * a * c - b**2)))
+    #
+    #     phi += np.dot(currmem[case_2_idxs].T, one_over_r_part[case_2_idxs])
+    # if len(case_3_idxs) > 0:
+    #     one_over_r_part = 1. / np.sqrt(a) * (np.log(np.abs((2 * a + b) / b)))
+    #     phi += np.dot(currmem[case_3_idxs].T, one_over_r_part[case_3_idxs])
+
+    # phi = 1 / (4 * np.pi * sigma[0]) * np.dot(currmem.T, one_over_r_part)
+
+    # h = _h_calc(xstart, xend, ystart, yend, zstart, zend, deltaS, x, y, z)
+    # r2 = _r2_calc(xend, yend, zend, x, y, z, h)
+    # r2 = _check_rlimit(r2, r_limit, h, deltaS)
+    # l = h + deltaS
+
+    # hnegi = h < 0
+    # hposi = h >= 0
+    # lnegi = l < 0
+    # lposi = l >= 0
+
+    #case i, h < 0, l < 0
+    # [i] = np.where(hnegi & lnegi)
+    #case ii, h < 0, l >= 0
+    # [ii] = np.where(hnegi & lposi)
+    #case iii, h >= 0, l >= 0
+    # [iii] = np.where(hposi & lposi)
+
+    # Ememi = _Ememi_calc(i, currmem, sigma[0], deltaS, l, r2, h)
+    # Ememii = _Ememii_calc(ii, currmem, sigma[0], deltaS, l, r2, h)
+    # Ememiii = _Ememiii_calc(iii, currmem, sigma[0], deltaS, l, r2, h)
+
+    # Emem = Ememi + Ememii + Ememiii
+    # print Emem
+    # print phi - Emem
+    return phi.T#Emem.transpose()
 
 def calc_lfp_linesource(cell, x=0., y=0., z=0., sigma=0.3,
                         r_limit=None,
@@ -419,9 +669,9 @@ def calc_lfp_pointsource_anisotropic(cell, x=0, y=0, z=0, sigma=[0.3, 0.3, 0.3],
     dz2 = (cell.zmid - z)**2
 
     r2 = dx2 + dy2 + dz2
-    if (r2 == 0).any():
-        dx2[r2 == 0] += 0.001
-        r2[r2 == 0] += 0.001
+    # if (r2 == 0).any():
+    #     dx2[r2 == 0] += 0.001
+    #     r2[r2 == 0] += 0.001
 
     close_idxs = r2 < r_limit**2
 
