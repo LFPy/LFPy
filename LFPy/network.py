@@ -430,7 +430,7 @@ class NetworkPopulation(object):
 
 
 class Network(object):
-    def __init__(self, dt=0.1, tstart=0, tstop=1000., v_init=-65., celsius=6.3,
+    def __init__(self, dt=0.1, tstart=0., tstop=1000., v_init=-65., celsius=6.3,
                  OUTPUTPATH='example_parallel_network'):
         """
         Network class, creating distributed populations of cells of
@@ -498,7 +498,7 @@ class Network(object):
         CELLPATH: path
             Relative path from CWD to source files for cell model (morphology, hoc routines etc.)
         Cell : class
-            class defining a Cell object, see class NetworkCell above
+            class defining a Cell-like object, see class NetworkCell
         POP_SIZE : int
             number of cells in population
         name : str
@@ -1142,6 +1142,8 @@ def _run_simulation_with_electrode(network, cvode,
 
     elif electrode is None:
         electrodes = None
+        if rec_current_dipole_moment:
+            population_nsegs, network_dummycell = network.create_network_dummycell()
 
     # set maximum integration step, it is necessary for communication of
     # spikes across RANKs to occur.
