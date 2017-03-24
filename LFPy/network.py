@@ -41,7 +41,73 @@ flattenlist = lambda lst: sum(lst, [])
 # attributes are inherited from the standard LFPy.TemplateCell class
 ################################################################################
 class NetworkCell(TemplateCell):
+    """
+    class NetworkCell
+    
+    Similar to `LFPy.TemplateCell` with the addition of some attributes and
+    methods allowing for spike communication between parallel RANKs. 
+    
+    Parameters
+    ----------
+    morphology : str
+        path to morphology file
+    templatefile : str
+        File with cell template definition(s)
+    templatename : str
+        Cell template-name used for this cell object
+    templateargs : str
+        Parameters provided to template-definition
+    v_init : float
+        Initial membrane potential. Default to -65.
+    passive : bool
+        Passive mechanisms are initialized if True. Defaults to True
+    Ra : float
+        axial resistance. Defaults to 150.
+    rm : float
+        membrane resistivity. Defaults to 30000.
+    cm : float
+        membrane capacitance. Defaults to 1.0
+    e_pas : float
+        passive mechanism reversal potential. Defaults to -65.
+    extracellular : bool
+        switch for NEURON's extracellular mechanism. Defaults to False
+    dt: float
+        Simulation time step. Defaults to 0.1
+    tstartms : float
+        initialization time for simulation <= 0 ms. Defaults to 0.
+    tstopms : float
+        stop time for simulation > 0 ms. Defaults to 100.
+    nsegs_method : 'lambda100' or 'lambda_f' or 'fixed_length' or None
+        nseg rule, used by NEURON to determine number of compartments.
+        Defaults to 'lambda100'
+    max_nsegs_length : float or None
+        max segment length for method 'fixed_length'. Defaults to None
+    lambda_f : int
+        AC frequency for method 'lambda_f'. Defaults to 100
+    d_lambda : float
+        parameter for d_lambda rule. Defaults to 0.1
+    delete_sections : bool
+        delete pre-existing section-references. Defaults to True
+    custom_code : list or None
+        list of model-specific code files ([.py/.hoc]). Defaults to None
+    custom_fun : list or None
+        list of model-specific functions with args. Defaults to None
+    custom_fun_args : list or None
+        list of args passed to custom_fun functions. Defaults to None
+    pt3d : bool
+        use pt3d-info of the cell geometries switch. Defaults to False
+    celsius : float or None
+        Temperature in celsius. If nothing is specified here
+        or in custom code it is 6.3 celcius
+    verbose : bool
+        verbose output switch. Defaults to False
+
+    """
     def __init__(self, **args):
+        """
+        Initialization of class LFPy.NetworkCell.
+
+        """
         TemplateCell.__init__(self, **args)
 
         # create list netconlist for spike detecting NetCon object(s)
@@ -67,13 +133,16 @@ class NetworkCell(TemplateCell):
         Create synapse object of type syntype on sec(x) of cell and
         append to list cell.netconsynapses
 
-        TODO: Not using LFPy.Synapse class
+        TODO: Use LFPy.Synapse class if possible.
 
         Parameters
         ----------
-        cell : NetworkCell like object
-        sec : neuron.h.Section object, section reference on cell
-        x : float in [0, 1], relative position along section
+        cell : object
+            instantiation of class NetworkCell or similar
+        sec : neuron.h.Section object,
+            section reference on cell
+        x : float in [0, 1],
+            relative position along section
         syntype : hoc.HocObject
             NEURON synapse model reference, e.g., neuron.h.ExpSyn
         synparams : dict
@@ -83,6 +152,10 @@ class NetworkCell(TemplateCell):
         assert_syn_values : bool
             if True, raise AssertionError if synapse attribute values do not
             match the values in the synparams dictionary
+        
+        Raises
+        ------
+        AssertionError
         """
         # create a synapse object on the target cell
         syn = syntype(x, sec=sec)
@@ -235,6 +308,12 @@ class NetworkPopulation(object):
         self.pop_args = pop_args
         self.rotation_args = rotation_args
         self.OUTPUTPATH = OUTPUTPATH
+
+        # create folder for output if it does not exist
+        if RANK == 0:
+            if not os.path.isdir(OUTPUTPATH):
+                os.mkdir(OUTPUTPATH)
+        COMM.Barrier()
 
         # container of Vector objects used to record times of action potentials
         self.spike_vectors = []

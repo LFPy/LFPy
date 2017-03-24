@@ -25,6 +25,8 @@ from LFPy.run_simulation import _run_simulation, _run_simulation_with_electrode
 class TemplateCell(Cell):
 
     """
+    class LFPy.TemplateCell
+    
     This class allow using cell templates with some limitations.
     TODO: Specify which limitations
 

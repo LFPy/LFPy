@@ -24,12 +24,10 @@ forall {
 
 soma {
     insert hh
-    somatic.append()
 }
 
 apic {
     insert pas
     g_pas = 0.0002
     e_pas = -65.
-    apical.append()
 }

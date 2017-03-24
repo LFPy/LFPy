@@ -4,12 +4,10 @@ BallAndStickTemplate.hoc
 
 begintemplate BallAndStickTemplate
 public init, soma, apic         
-public all, somatic, apical
-objref all, somatic, apical
+public all
+objref all
 proc init() {
     all = new SectionList()
-    somatic = new SectionList()
-    apical = new SectionList()
 }
 
 create soma[1], apic[1]

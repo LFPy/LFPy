@@ -50,11 +50,3 @@ connect dend[2](0), dend[0](1)
 forall {
     all.append()
 }
-
-soma {
-    somatic.append()
-}
-
-dend {
-    basal.append() 
-}
