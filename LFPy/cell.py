@@ -1,5 +1,5 @@
-# -*- coding: utf-8 -*-
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 """
 Copyright (C) 2012 Computational Neuroscience Group, NMBU.
 
@@ -170,7 +170,7 @@ class Cell(object):
                 neuron.h.define_shape()
                 self._create_sectionlists()
             except:
-                raise Exception("Could not load existent top-level cell")
+                raise Exception("Could not load existing top-level cell. Consider use of LFPy.Cell vs. LFPy.TemplateCell.")
 
         #Some parameters and lists initialised
         try:
@@ -182,8 +182,9 @@ class Cell(object):
             assert(dt in 2.**np.arange(-16, -1))
         except AssertionError:
             if tstartms == 0.:
-                print('int(1./dt) not factorizable in base 2.'
-                      'cell.tvec errors may occur, continuing initialization.')
+                if self.verbose:
+                    print('int(1./dt) not factorizable in base 2. '
+                          'cell.tvec errors may occur, continuing initialization.')
             elif tstartms < 0:
                 raise AssertionError('int(1./dt) must be factorizable in base 2 if tstartms < 0.')
 
@@ -550,7 +551,8 @@ class Cell(object):
 
         return self.synlist.count() - 1
 
-    def set_point_process(self, idx, pptype, record_current=False, **kwargs):
+    def set_point_process(self, idx, pptype, record_current=False,
+                          record_potential=False, **kwargs):
         """Insert pptype-electrode type pointprocess on segment numbered
         idx on cell object
 
@@ -572,6 +574,8 @@ class Cell(object):
             self.stimlist = neuron.h.List()
         if not hasattr(self, 'stimireclist'):
             self.stimireclist = neuron.h.List()
+        if not hasattr(self, 'stimvreclist'):
+            self.stimvreclist = neuron.h.List()
 
         i = 0
         cmd1 = 'stim = neuron.h.'
@@ -606,7 +610,14 @@ class Cell(object):
                                                        self.dt+1))
                         stimirec.record(stim._ref_i, self.dt)
                         self.stimireclist.append(stimirec)
-
+                    
+                    # record potential
+                    if record_potential:
+                        stimvrec = neuron.h.Vector(int(self.tstopms /
+                                                      self.dt+1))
+                        stimvrec.record(seg._ref_v, self.dt)
+                        self.stimvreclist.append(stimvrec)
+                    
                 i += 1
 
         return self.stimlist.count() - 1
@@ -763,7 +774,8 @@ class Cell(object):
 
     def simulate(self, electrode=None, rec_imem=False, rec_vmem=False,
                  rec_ipas=False, rec_icap=False,
-                 rec_isyn=False, rec_vmemsyn=False, rec_istim=False,
+                 rec_isyn=False, rec_vmemsyn=False,
+                 rec_istim=False, rec_vmemstim=False,
                  rec_current_dipole_moment=False,
                  rec_variables=[], variable_dt=False, atol=0.001,
                  to_memory=True, to_file=False, file_name=None,
@@ -795,7 +807,9 @@ class Cell(object):
         rec_vmemsyn : bool
             Record membrane voltage of segments with Synapse(mV)
         rec_istim :  bool
-            Record currents of StimIntraElectrode (nA)
+            Record currents of StimIntElectrode (nA)
+        rec_vmemstim : bool
+            Record membrane voltage of segments with StimIntElectrode (mV)
         rec_current_dipole_moment : bool
             If True, compute and record current-dipole moment from
             transmembrane currents as in Linden et al. (2010) J Comput Neurosci,
@@ -847,7 +861,7 @@ class Cell(object):
 
         #run fadvance until t >= tstopms, and calculate LFP if asked for
         if electrode is None and dotprodcoeffs is None and not rec_current_dipole_moment:
-            if not rec_imem:
+            if not rec_imem and self.verbose:
                 print("rec_imem = %s, membrane currents will not be recorded!"
                                   % str(rec_imem))
             _run_simulation(self, cvode, variable_dt, atol)
@@ -875,6 +889,8 @@ class Cell(object):
             self._collect_vsyn()
         if rec_istim:
             self._collect_istim()
+        if rec_vmemstim:
+            self._collect_vstim()
         if len(rec_variables) > 0:
             self._collect_rec_variables(rec_variables)
         if hasattr(self, 'netstimlist'):
@@ -956,6 +972,15 @@ class Cell(object):
         self.stimireclist = None
         del self.stimireclist
 
+    def _collect_vstim(self):
+        """
+        Collect the membrane voltage of segments with stimulus
+        """
+        for i in range(len(self.pointprocesses)):
+            self.pointprocesses[i].collect_potential(self)
+        self.stimvreclist = None
+        del self.stimvreclist
+        
     def _collect_rec_variables(self, rec_variables):
         """
         Create dict of np.arrays from recorded variables, each dictionary
