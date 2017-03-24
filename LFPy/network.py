@@ -31,7 +31,7 @@ SIZE = COMM.Get_size()
 RANK = COMM.Get_rank()
 
 
-flattenlist = lambda lst: sum(lst, [])
+flattenlist = lambda lst: [item for sublist in lst for item in sublist]
 
 
 ################################################################################
@@ -43,10 +43,10 @@ flattenlist = lambda lst: sum(lst, [])
 class NetworkCell(TemplateCell):
     """
     class NetworkCell
-    
+
     Similar to `LFPy.TemplateCell` with the addition of some attributes and
-    methods allowing for spike communication between parallel RANKs. 
-    
+    methods allowing for spike communication between parallel RANKs.
+
     Parameters
     ----------
     morphology : str
@@ -116,7 +116,7 @@ class NetworkCell(TemplateCell):
         self.spikes = []
         # create list of random number generators used with synapse model
         self.rng_list = []
-        
+
         # create separate list for networked synapses
         self.netconsynapses = []
 
@@ -152,7 +152,7 @@ class NetworkCell(TemplateCell):
         assert_syn_values : bool
             if True, raise AssertionError if synapse attribute values do not
             match the values in the synparams dictionary
-        
+
         Raises
         ------
         AssertionError
@@ -512,7 +512,7 @@ class Network(object):
             { 'x' : np.pi/2, 'y' : 0 }. Can only have the keys 'x' and 'y'.
             Cells are randomly rotated around z-axis using the Cell.set_rotation
             method.
-        
+
         """
         try:
             assert name not in self.populations.keys()
@@ -828,7 +828,7 @@ class Network(object):
         Returns
         -------
         LFP : ndarray
-            if parameters electrode is not None, the 
+            if parameters electrode is not None, the
         P : ndarray
             if rec_current_dipole_moment==True, contains the x,y,z-components of
             current-dipole moment from transmembrane currents summed up over
@@ -925,7 +925,7 @@ class Network(object):
                 nsegs[i] = [0]
         for i, y in enumerate(nsegs): nsegs[i] = np.sum(y)
         nsegs = np.array(nsegs, dtype=int)
-        
+
         totnsegs = nsegs.sum()
         imem = np.eye(totnsegs)
         xstart = np.array([])
@@ -939,7 +939,7 @@ class Network(object):
         zend = np.array([])
         diam = np.array([])
         area = np.array([])
-    
+
         for name in self.population_names:
             for cell in self.populations[name].cells:
                 xstart = np.r_[xstart, cell.xstart]
@@ -953,7 +953,7 @@ class Network(object):
                 zend = np.r_[zend, cell.zend]
                 diam = np.r_[diam, cell.diam]
                 area = np.r_[area, cell.area]
-    
+
         # return number of segments per population and DummyCell object
         return nsegs, DummyCell(totnsegs,
                          imem,

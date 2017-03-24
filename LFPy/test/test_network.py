@@ -36,7 +36,7 @@ class testNetworkPopulation(unittest.TestCase):
             tstopms=100,
             delete_sections=False,
         )
-        
+
         populationParameters = dict(
             CWD=None,
             CELLPATH=None,
@@ -51,9 +51,9 @@ class testNetworkPopulation(unittest.TestCase):
             name = 'ball_and_sticks',
             OUTPUTPATH='tmp_testNetworkPopulation'
         )
-        
+
         population = LFPy.NetworkPopulation(**populationParameters)
-    
+
         self.assertTrue(len(population.cells) == population.POP_SIZE)
         for cell, soma_pos, gid in zip(population.cells, population.soma_pos, population.gids):
             self.assertTrue(type(cell) is LFPy.NetworkCell)
@@ -63,8 +63,8 @@ class testNetworkPopulation(unittest.TestCase):
             self.assertEqual(cell.gid, gid)
             self.assertTrue(np.sqrt(soma_pos['xpos']**2 + soma_pos['ypos']**2) <= 100.)
         np.testing.assert_equal(population.gids, np.arange(4))
-        
-        
+
+
         os.system('rm -r tmp_testNetworkPopulation')
         neuron.h('forall delete_section()')
 
@@ -85,7 +85,7 @@ class testNetwork(unittest.TestCase):
             tstopms=100,
             delete_sections=False,
         )
-        
+
         populationParameters = dict(
             CWD=None,
             CELLPATH=None,
@@ -111,7 +111,7 @@ class testNetwork(unittest.TestCase):
         network = LFPy.Network(**networkParameters)
         network.create_population(**populationParameters)
         connectivity = network.get_connectivity_rand(pre='test', post='test', connprob=0.5)
-        
+
         # test set up
         for population in network.populations.values():
             self.assertTrue(len(population.cells) == population.POP_SIZE)
@@ -122,20 +122,20 @@ class testNetwork(unittest.TestCase):
                                 (cell.somapos[2] == soma_pos['zpos']))
                 self.assertEqual(cell.gid, gid)
                 self.assertTrue(np.sqrt(soma_pos['xpos']**2 + soma_pos['ypos']**2) <= 100.)
-            np.testing.assert_equal(population.gids, np.arange(4)) 
-        
+            np.testing.assert_equal(population.gids, np.arange(4))
+
         np.testing.assert_equal(connectivity.shape, (population.POP_SIZE, population.POP_SIZE))
         np.testing.assert_equal(connectivity.diagonal(), np.zeros(population.POP_SIZE))
-        
+
         # connect and run sim
         network.connect(pre='test', post='test', connectivity=connectivity)
         network.simulate()
-        
+
         # test output
         for population in network.populations.values():
             for cell in population.cells:
                 self.assertTrue(np.all(cell.somav == network.v_init))
-        
+
         network.pc.gid_clear()
         os.system('rm -r tmp_testNetworkPopulation')
         neuron.h('forall delete_section()')
@@ -152,7 +152,7 @@ class testNetwork(unittest.TestCase):
             tstopms=100,
             delete_sections=False,
         )
-        
+
         populationParameters = dict(
             CWD=None,
             CELLPATH=None,
@@ -178,19 +178,19 @@ class testNetwork(unittest.TestCase):
         network = LFPy.Network(**networkParameters)
         network.create_population(**populationParameters)
         connectivity = network.get_connectivity_rand(pre='test', post='test', connprob=0.5)
-        
+
         # connect and run sim
         network.connect(pre='test', post='test', connectivity=connectivity)
         LFP, P = network.simulate(rec_current_dipole_moment=True)
-        
+
         # test output
         for population in network.populations.values():
             for cell in population.cells:
                 self.assertTrue(np.all(cell.somav == network.v_init))
-        
+
         self.assertTrue(np.all(P['test'] == 0.))
         self.assertTrue(len(LFP) == 0)
-        
+
         network.pc.gid_clear()
         os.system('rm -r tmp_testNetworkPopulation')
         neuron.h('forall delete_section()')
