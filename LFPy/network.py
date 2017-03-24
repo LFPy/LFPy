@@ -58,7 +58,6 @@ class NetworkCell(TemplateCell):
         self.somav = neuron.h.Vector()
         for sec in self.somalist:
             self.somav.record(sec(0.5)._ref_v)
-            break # break out of loop
 
 
     def create_synapse(self, cell, sec, x=0.5, syntype=neuron.h.ExpSyn,
@@ -138,7 +137,6 @@ class NetworkCell(TemplateCell):
             self.netconlist[-1].threshold = threshold
             self.netconlist[-1].weight[0] = weight
             self.netconlist[-1].delay = delay
-            break # break out of loop (in case soma is a list of sections)
 
 
 class DummyCell(object):
