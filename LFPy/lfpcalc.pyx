@@ -21,41 +21,6 @@ ctypedef np.float64_t DTYPE_t
 ctypedef Py_ssize_t   LTYPE_t
 
 
-cpdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] calc_lfp_choose(cell,
-                    double x=0, double y=0, double z=0, double sigma=0.3,
-                    r_limit=None,
-                    timestep=None, t_indices=None, method='linesource'):
-    '''
-    Determine which method to use, line-source for soma default
-    
-    kwargs:
-    ::
-        
-        cell: LFPy.Cell or LFPy.TemplateCell instance
-        x : double, extracellular position, x-axis
-        y : double, extracellular position, y-axis
-        z : double, extracellular position, z-axis
-        sigma : double, extracellular conductivity
-        r_limit : [None]/float/np.ndarray: minimum distance to source current
-        timestep : [None]/int, calculate LFP at this timestep
-        t_indices : [None]/np.ndarray, calculate LFP at specific timesteps
-        method=['linesource']/'pointsource'/'som_as_point'
-            switch for choosing underlying methods
-    '''
-    if method == 'som_as_point':
-        return calc_lfp_som_as_point(cell, x=x, y=y, z=z, sigma=sigma,
-                                     r_limit=r_limit,
-                                     timestep=timestep, t_indices=t_indices)
-    elif method == 'linesource':
-        return calc_lfp_linesource(cell, x=x, y=y, z=z, sigma=sigma,
-                                   r_limit=r_limit,
-                                   timestep=timestep, t_indices=t_indices)
-    elif method == 'pointsource':
-        return calc_lfp_pointsource(cell, x=x, y=y, z=z, sigma=sigma,
-                                    r_limit=r_limit,
-                                    timestep=timestep, t_indices=t_indices)
-
-
 cpdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] calc_lfp_linesource(
                         cell,
                         double x=0,
@@ -63,7 +28,7 @@ cpdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] calc_lfp_linesource(
                         double z=0,
                         double sigma=0.3,
                         r_limit=None,
-                        timestep=None, t_indices=None):
+                        t_indices=None):
     '''
     Calculate electric field potential using the line-source method, all
     compartments treated as line sources, even soma.
@@ -77,7 +42,6 @@ cpdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] calc_lfp_linesource(
         z : double, extracellular position, z-axis
         sigma : double, extracellular conductivity
         r_limit : [None]/float/np.ndarray: minimum distance to source current
-        timestep : [None]/int, calculate LFP at this timestep
         t_indices : [None]/np.ndarray, calculate LFP at specific timesteps
     '''
     # Handling the r_limits. If a r_limit is a single value, an array r_limit
@@ -94,8 +58,6 @@ cpdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] calc_lfp_linesource(
         Ememi, Ememii, Ememiii, Emem, r_lims
     cdef np.ndarray[LTYPE_t, ndim=1, negative_indices=False] i, ii, iii
 
-    if timestep is not None:
-        currmem = cell.imem[:, timestep]
     if t_indices is not None:
         currmem = cell.imem[:, t_indices]
     else:
@@ -147,7 +109,7 @@ cpdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] calc_lfp_linesource(
 cpdef np.ndarray[DTYPE_t, ndim=1] calc_lfp_som_as_point(cell,
                           double x=0, double y=0, double z=0, double sigma=0.3,
                           r_limit=None,
-                          timestep=None, t_indices=None):
+                          t_indices=None):
     '''
     Calculate electric field potential using the line-source method,
     soma is treated as point/sphere source
@@ -161,7 +123,6 @@ cpdef np.ndarray[DTYPE_t, ndim=1] calc_lfp_som_as_point(cell,
         z : double, extracellular position, z-axis
         sigma : double, extracellular conductivity
         r_limit : [None]/float/np.ndarray: minimum distance to source current
-        timestep : [None]/int, calculate LFP at this timestep
         t_indices : [None]/np.ndarray, calculate LFP at specific timesteps
     '''
     #Handling the r_limits. If a r_limit is a single value,
@@ -190,8 +151,6 @@ cpdef np.ndarray[DTYPE_t, ndim=1] calc_lfp_som_as_point(cell,
     cdef double xmid, ymid, zmid
 
 
-    if timestep is not None:
-        currmem = cell.imem[:, timestep]
     if t_indices is not None:
         currmem = cell.imem[:, t_indices]
     else:
@@ -430,7 +389,7 @@ cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] _r2_calc(
 cpdef calc_lfp_pointsource(cell, double x=0, double y=0, double z=0,
                            double sigma=0.3,
                            r_limit=None, 
-                           timestep=None, t_indices=None):
+                           t_indices=None):
     '''
     Calculate local field potentials using the point-source equation on all
     compartments
@@ -444,8 +403,7 @@ cpdef calc_lfp_pointsource(cell, double x=0, double y=0, double z=0,
         z : double, extracellular position, z-axis
         sigma : double, extracellular conductivity
         r_limit : [None]/float/np.ndarray: minimum distance to source current
-        timestep : [None]/int, calculate LFP at this timestep
-        t_indices : [None]/np.ndarray, calculate LFP at specific timesteps    
+        t_indices : [None]/np.ndarray, calculate LFP at specific timesteps
     '''
     # Handling the r_limits. If a r_limit is a single value, an array r_limit
     # of shape cell.diam is returned.
@@ -455,8 +413,6 @@ cpdef calc_lfp_pointsource(cell, double x=0, double y=0, double z=0,
         raise Exception('r_limit is neither a float- or int- value, nor is \
             r_limit.shape() equal to cell.diam.shape()')
 
-    if timestep is not None:
-        currmem = cell.imem[:, timestep]
     if t_indices is not None:
         currmem = cell.imem[:, t_indices]
     else:
