@@ -82,9 +82,9 @@ def calc_lfp_linesource(cell, x=0., y=0., z=0., sigma=0.3,
     #case iii, h >= 0, l >= 0
     [iii] = np.where(hposi & lposi)
 
-    mapping[i] = _Ememi_calc(l[i], r2[i], h[i])
-    mapping[ii] = _Ememii_calc(l[ii], r2[ii], h[ii])
-    mapping[iii] = _Ememiii_calc(l[iii], r2[iii], h[iii])
+    mapping[i] = _linesource_calc_case1(l[i], r2[i], h[i])
+    mapping[ii] = _linesource_calc_case2(l[ii], r2[ii], h[ii])
+    mapping[iii] = _linesource_calc_case3(l[iii], r2[iii], h[iii])
 
     Emem = np.dot(currmem.T, 1 / (4 * np.pi * sigma * deltaS) * mapping)
     
@@ -186,30 +186,30 @@ def calc_lfp_som_as_point(cell, x=0., y=0., z=0., sigma=0.3,
 
     mapping = np.zeros(cell.totnsegs)
     mapping[0] = 1 / r_soma
-    mapping[i] = _Ememi_calc(l[i], r2[i], h[i])
-    mapping[ii] = _Ememii_calc(l[ii], r2[ii], h[ii])
-    mapping[iii] = _Ememiii_calc(l[iii], r2[iii], h[iii])
+    mapping[i] = _linesource_calc_case1(l[i], r2[i], h[i])
+    mapping[ii] = _linesource_calc_case2(l[ii], r2[ii], h[ii])
+    mapping[iii] = _linesource_calc_case3(l[iii], r2[iii], h[iii])
 
     deltaS[0] = 1.
-    Emem = np.dot(currmem.T[:], 1 / (4 * np.pi * sigma * deltaS[:]) * mapping[:])
+    Emem = np.dot(currmem.T, 1 / (4 * np.pi * sigma * deltaS) * mapping)
 
     return Emem.T
 
-def _Ememi_calc(l_i, r2_i, h_i):
+def _linesource_calc_case1(l_i, r2_i, h_i):
     """Subroutine used by calc_lfp_*()"""
     bb = np.sqrt(h_i**2 + r2_i) - h_i
     cc = np.sqrt(l_i**2 + r2_i) - l_i
     dd = np.log(bb / cc)
     return dd
 
-def _Ememii_calc(l_ii, r2_ii, h_ii):
+def _linesource_calc_case2(l_ii, r2_ii, h_ii):
     """Subroutine used by calc_lfp_*()"""
     bb = np.sqrt(h_ii**2 + r2_ii) - h_ii
     cc = (l_ii + np.sqrt(l_ii**2 + r2_ii)) / r2_ii
     dd = np.log(bb * cc)
     return dd
     
-def _Ememiii_calc(l_iii, r2_iii, h_iii):
+def _linesource_calc_case3(l_iii, r2_iii, h_iii):
     """Subroutine used by calc_lfp_*()"""
     bb = np.sqrt(l_iii**2 + r2_iii) + l_iii
     cc = np.sqrt(h_iii**2 + r2_iii) + h_iii
@@ -292,7 +292,7 @@ def calc_lfp_pointsource(cell, x=0, y=0, z=0, sigma=0.3,
     
     Emem = 1 / (4 * np.pi * sigma) * np.dot(currmem.T, 1/r)
     
-    return Emem.transpose()
+    return Emem.T
 
 def _check_rlimit_point(r2, r_limit):
     """Correct r2 so that r2 >= r_limit**2 for all values"""
