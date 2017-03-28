@@ -158,9 +158,9 @@ def calc_lfp_linesource_anisotropic(cell, x=0., y=0., z=0., sigma=0.3,
     b = -2 * ((x - xstart) * (xend - xstart) +
               (y - ystart) * (yend - ystart) +
               (z - zstart) * (zend - zstart))
-    c = ((x - xstart)**2 +
-         (y - ystart)**2 +
-         (z - zstart)**2)
+    c = (sigma[1] * sigma[2] * (x - xstart)**2 +
+         sigma[0] * sigma[2] * (y - ystart)**2 +
+         sigma[0] * sigma[1] * (z - zstart)**2)
 
     for idx in range(cell.totnsegs):
 
@@ -186,9 +186,9 @@ def calc_lfp_linesource_anisotropic(cell, x=0., y=0., z=0., sigma=0.3,
         # print "abc:", a_, b_, c_, p1, pos
         if r < r_limit[idx]:
 
-            print "too close", closest_point, pos
-            if np.abs(r) < 1e-12:
-                print "r is zero"
+            # print "too close", closest_point, pos
+            if np.abs(r) < 1e-6:
+                # print "r is zero"
                 # raise
                 # p_ = pos
                 # p_[0] += +r_limit[idx] * np.sign(xstart[idx]-xend[idx])
@@ -211,22 +211,13 @@ def calc_lfp_linesource_anisotropic(cell, x=0., y=0., z=0., sigma=0.3,
             else:
 
                 p_[:] = pos + (pos - closest_point) * (r_limit[idx] - r) / r
-                # print "Scale: "
-                # print pos, closest_point, r, r_limit[idx]
-                # print p1, p2
-                # print p_
-                # print np.sqrt(np.sum((p_ - closest_point)**2))
-
-                # print "scale", pos, p_, r, closest_point, p1, p2,
-
-            # p_ = closest_point + (pos - closest_point) * r_limit[idx] / r
 
             b_ = -2 * ((p_[0] - xstart[idx]) * (xend[idx] - xstart[idx]) +
                        (p_[1] - ystart[idx]) * (yend[idx] - ystart[idx]) +
                        (p_[2] - zstart[idx]) * (zend[idx] - zstart[idx]))
-            c_ = ((p_[0] - xstart[idx])**2 +
-                 (p_[1] - ystart[idx])**2 +
-                 (p_[2] - zstart[idx])**2)
+            c_ = (sigma[1] * sigma[2] * (p_[0] - xstart[idx])**2 +
+                 sigma[0] * sigma[2] * (p_[1] - ystart[idx])**2 +
+                 sigma[0] * sigma[1] * (p_[2] - zstart[idx])**2)
 
         # c = (sigma[1] * sigma[2] * (x - xstart)**2 +
         #      sigma[0] * sigma[2] * (y - ystart)**2 +
@@ -240,20 +231,10 @@ def calc_lfp_linesource_anisotropic(cell, x=0., y=0., z=0., sigma=0.3,
             if np.isnan(one_over_r_part).any():
                 print "NaN ", idx, pos
                 print "Case 1", one_over_r_part, a_, b_, c_, 4 * a_ * c_ - b_**2
-
-            phi += currmem[idx] * one_over_r_part
-        elif 4 * a_ * c_ < b_**2:
-            # print("Case 2")
-            numerator = np.abs(2 * a_ + b_ + 2 * np.sqrt(a_*a_ + a_ * b_ + a_ * c_))
-            denumerator = np.abs(b_ + 2 * np.sqrt(a_ * c_))
-            one_over_r_part = 1. / np.sqrt(a_) * np.log(numerator / denumerator)
-            if np.isnan(one_over_r_part).any():
-                print "NaN ", idx, pos
-                print "Case 2", one_over_r_part, a_, b_, c_, 4 * a_ * c_ - b_**2
-
+                raise RuntimeError("NaN")
             phi += currmem[idx] * one_over_r_part
 
-        elif np.abs(4 * a_ * c_ - b_**2) < 1e-12:
+        elif np.abs(4 * a_ * c_ - b_**2) < 1e-6:
 
             # print "Case 3", a_, b_, c_,  -1. / np.sqrt(a_) * np.log(np.abs(2 * a_ / b_ + 1))
             # print pos, a_, b_, c_, xstart[idx], ystart[idx], zstart[idx], xend[idx], yend[idx], zend[idx]
@@ -261,25 +242,36 @@ def calc_lfp_linesource_anisotropic(cell, x=0., y=0., z=0., sigma=0.3,
             # one_over_r_part = 1. / np.sqrt(a_) * np.log(np.sqrt(a_ / c_) + 1.)
 
             # if 1 - np.sqrt(a_ / c_) > 0:
-            if np.abs(a_ - c_) < 1e-12:
-                # one_over_r_part = 0#-1. / np.sqrt(a_) * np.log(np.abs(1 - np.sqrt(a_ / c_)))
-                print "Happend"
-            # else:
+            if np.abs(a_ - c_) < 1e-6:
+                one_over_r_part = 1. / np.sqrt(a_) * np.log(np.abs(1 + np.sqrt(a_ / c_)))
+            else:
                 # one_over_r_part = -1. / np.sqrt(a_) * np.log(np.abs(1 - np.sqrt(a_ / c_)))
-            # if b_ < 0:
-            one_over_r_part = 1. / np.sqrt(a_) * np.abs(np.log(np.abs(np.sign(b_) * np.sqrt(a_/c_) + 1)))
+                # if b_ < 0:
+                one_over_r_part = 1. / np.sqrt(a_) * np.abs(np.log(np.abs(np.sign(b_) * np.sqrt(a_/c_) + 1)))
             # else:
             #     one_over_r_part = 1. / np.sqrt(a_) * np.log(np.abs(np.sqrt(a_ / c_) + 1))
 
             if np.isnan(one_over_r_part).any():
                 print "NaN ", idx, pos
                 print "Case 3", one_over_r_part, a_, b_, c_, 4 * a_ * c_ - b_**2
+                raise RuntimeError("NaN")
 
             # else:
             #     one_over_r_part = 1. / np.sqrt(a_) * np.log(np.sqrt(a_ / c_) - 1)
 
             phi += currmem[idx] * one_over_r_part
             # print one_over_r_part
+        elif 4 * a_ * c_ < b_**2:
+            # print("Case 2")
+            numerator = np.abs(2 * a_ + b_ + 2 * np.sqrt(a_ * (a_ + b_ + c_)))
+            denumerator = np.abs(b_ + 2 * np.sqrt(a_ * c_))
+            one_over_r_part = 1. / np.sqrt(a_) * np.log(numerator / denumerator)
+            if np.isnan(one_over_r_part).any():
+                print "NaN ", idx, pos
+                print "Case 2", a_, b_, c_, numerator, denumerator
+                raise RuntimeError("NaN")
+            phi += currmem[idx] * one_over_r_part
+
         elif 4 * a_ * c_ > b_**2:
             # print "arcsinh"
             one_over_r_part = 1. / np.sqrt(a_) * (np.arcsinh((2 * a_ + b_) / np.sqrt(4 * a_ * c_ - b_**2))-
@@ -288,6 +280,7 @@ def calc_lfp_linesource_anisotropic(cell, x=0., y=0., z=0., sigma=0.3,
             if np.isnan(one_over_r_part).any():
                 print "NaN ", idx, pos
                 print "Case 4", one_over_r_part, a_, b_, c_, 4 * a_ * c_ - b_**2
+                raise RuntimeError("NaN")
 
             phi += currmem[idx] * one_over_r_part
 
@@ -296,7 +289,8 @@ def calc_lfp_linesource_anisotropic(cell, x=0., y=0., z=0., sigma=0.3,
         else:
             raise RuntimeError
         if np.isnan(phi).any():
-            print "NaN", idx, a_, b_, c_, pos
+            print "NaN", idx, a_, b_, c_, pos, p1, p2
+            raise RuntimeError("NaN")
 
             # print a[idx]#, b[idx], c[idx]
             # raise RuntimeError("Nan in phi")
@@ -416,7 +410,7 @@ def calc_lfp_linesource(cell, x=0., y=0., z=0., sigma=0.3,
     #case iii, h >= 0, l >= 0
     [iii] = np.where(hposi & lposi)
 
-    print r2
+    # print r2
     Ememi = _Ememi_calc(i, currmem, sigma, deltaS, l, r2, h)
     Ememii = _Ememii_calc(ii, currmem, sigma, deltaS, l, r2, h)
     Ememiii = _Ememiii_calc(iii, currmem, sigma, deltaS, l, r2, h)
@@ -608,9 +602,9 @@ def _check_rlimit(r2, r_limit, h, deltaS):
                 print('Adjusting distance to segment %s from %.2f to %.2f.'
                       % (idx, r2[idx]**0.5, r_limit[idx]))
                 r2[idx] = r_limit[idx]**2
-            if r2[idx] == 0:
-                print r2
-                raise RuntimeError(r2)
+            # if r2[idx] == 0:
+            #     print r2
+            #     raise RuntimeError(r2)
     return r2
 
 def _r_soma_calc(xmid, ymid, zmid, x, y, z):

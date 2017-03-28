@@ -18,7 +18,7 @@ cell_parameters = {          # various cell parameters,
     'e_pas' : -65.,     # reversal potential passive mechs
     'passive' : True,   # switch on passive mechs
     'nsegs_method' : 'lambda_f',
-    'lambda_f' : 10.,
+    'lambda_f' : 100.,
     'dt' : 2.**-2,      # simulation time step size
     'tstartms' : 0.,    # start time of simulation, recorders start at t=0
     'tstopms' : 2.,   # stop simulation at 200 ms. These can be overridden
@@ -45,7 +45,7 @@ synapse = LFPy.Synapse(cell, **synapse_parameters)
 synapse.set_spike_times(np.array([1.]))
 
 # Create a grid of measurement locations, in (um)
-dx = 10
+dx = 1
 
 X, Z = np.mgrid[-50:50 + dx:dx, -50:50 + dx:dx]
 
@@ -78,9 +78,9 @@ grid_electrode_parameters_tensor = {
 print("running simulation...")
 cell.simulate(rec_imem=True, rec_isyn=False)
 
-cell.imem = np.ones((cell.imem.shape[0], 1))
-cell.imem[0, :] = -1
-cell.imem[1, :] = 1
+# cell.imem = np.ones((cell.imem.shape[0], 1))
+# cell.imem[0, :] = -1
+# cell.imem[1, :] = 1
 # Create electrode objects
 
 import time
