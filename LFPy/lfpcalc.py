@@ -230,10 +230,10 @@ def _Ememii_calc(ii, currmem, sigma, deltaS, l, r2, h):
 def _Ememiii_calc(iii, currmem, sigma, deltaS, l, r2, h):
     """Subroutine used by calc_lfp_*()"""
     currmem_iiiT = currmem[iii].transpose()
+    deltaS_iii = deltaS[iii]
     l_iii = l[iii]
     r2_iii = r2[iii]
     h_iii = h[iii]
-    deltaS_iii = deltaS[iii]
 
     aa = 4 * np.pi * sigma * deltaS_iii
     bb = np.sqrt(l_iii**2 + r2_iii) + l_iii
@@ -276,9 +276,7 @@ def _check_rlimit(r2, r_limit, h, deltaS):
 
 def _r_soma_calc(xmid, ymid, zmid, x, y, z):
     """calculate the distance to soma midpoint"""
-    r_soma = np.sqrt((x - xmid)**2 + (y - ymid)**2 +
-        (z - zmid)**2)
-
+    r_soma = np.sqrt((x - xmid)**2 + (y - ymid)**2 + (z - zmid)**2)
     return r_soma
 
 def calc_lfp_pointsource(cell, x=0, y=0, z=0, sigma=0.3,
