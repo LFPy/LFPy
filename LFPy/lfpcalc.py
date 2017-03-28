@@ -73,21 +73,22 @@ def calc_lfp_linesource(cell, x=0., y=0., z=0., sigma=0.3,
     lnegi = l < 0
     lposi = l >= 0
 
+    mapping = np.zeros(cell.totnsegs)
+
     #case i, h < 0, l < 0
     [i] = np.where(hnegi & lnegi)
     #case ii, h < 0, l >= 0
     [ii] = np.where(hnegi & lposi)
     #case iii, h >= 0, l >= 0
     [iii] = np.where(hposi & lposi)
+
+    mapping[i] = _Ememi_calc(l[i], r2[i], h[i])
+    mapping[ii] = _Ememii_calc(l[ii], r2[ii], h[ii])
+    mapping[iii] = _Ememiii_calc(l[iii], r2[iii], h[iii])
+
+    Emem = np.dot(currmem.T, 1 / (4 * np.pi * sigma * deltaS) * mapping)
     
-    Ememi = _Ememi_calc(i, currmem, sigma, deltaS, l, r2, h)
-    Ememii = _Ememii_calc(ii, currmem, sigma, deltaS, l, r2, h)
-    Ememiii = _Ememiii_calc(iii, currmem, sigma, deltaS, l, r2, h)
-    
-    
-    Emem = Ememi + Ememii + Ememiii
-    
-    return Emem.transpose()
+    return Emem.T
 
 def calc_lfp_som_as_point(cell, x=0., y=0., z=0., sigma=0.3,
                           r_limit=None, t_indices=None):
@@ -180,69 +181,40 @@ def calc_lfp_som_as_point(cell, x=0., y=0., z=0., sigma=0.3,
     ii = np.where(hnegi & lposi)
     #case iii,  h >= 0,  l >= 0
     iii = np.where(hposi & lposi)
-    
-    Ememi = _Ememi_calc(i, currmem, sigma, deltaS, l, r2, h)
-    Ememii = _Ememii_calc(ii, currmem, sigma, deltaS, l, r2, h)
-    Ememiii = _Ememiii_calc(iii, currmem, sigma, deltaS, l, r2, h)
-
-    #Potential contribution from soma
-    Emem0 = currmem[0]/(4 * np.pi * sigma * r_soma)
 
     #Summarizing all potential contributions
-    Emem = Emem0 + Ememi + Ememiii + Ememii
 
-    return Emem.transpose()
+    mapping = np.zeros(cell.totnsegs)
+    mapping[0] = 1 / r_soma
+    mapping[i] = _Ememi_calc(l[i], r2[i], h[i])
+    mapping[ii] = _Ememii_calc(l[ii], r2[ii], h[ii])
+    mapping[iii] = _Ememiii_calc(l[iii], r2[iii], h[iii])
 
-def _Ememi_calc(i, currmem, sigma, deltaS, l, r2, h):
+    deltaS[0] = 1.
+    Emem = np.dot(currmem.T[:], 1 / (4 * np.pi * sigma * deltaS[:]) * mapping[:])
+
+    return Emem.T
+
+def _Ememi_calc(l_i, r2_i, h_i):
     """Subroutine used by calc_lfp_*()"""
-    currmem_iT = currmem[i].transpose()
-    deltaS_i = deltaS[i]
-    l_i = l[i]
-    r2_i = r2[i]
-    h_i = h[i]
-    
-    aa = 4 * np.pi * sigma * deltaS_i
     bb = np.sqrt(h_i**2 + r2_i) - h_i
     cc = np.sqrt(l_i**2 + r2_i) - l_i
-    dd = np.log(bb / cc) / aa
-    
-    Emem_i = np.dot(currmem_iT, dd)
-    
-    return Emem_i
+    dd = np.log(bb / cc)
+    return dd
 
-def _Ememii_calc(ii, currmem, sigma, deltaS, l, r2, h):
+def _Ememii_calc(l_ii, r2_ii, h_ii):
     """Subroutine used by calc_lfp_*()"""
-    currmem_iiT = currmem[ii].transpose()
-    deltaS_ii = deltaS[ii]
-    l_ii = l[ii]
-    r2_ii = r2[ii]
-    h_ii = h[ii]
-
-    aa = 4 * np.pi * sigma * deltaS_ii
     bb = np.sqrt(h_ii**2 + r2_ii) - h_ii
     cc = (l_ii + np.sqrt(l_ii**2 + r2_ii)) / r2_ii
-    dd = np.log(bb * cc) / aa
+    dd = np.log(bb * cc)
+    return dd
     
-    Emem_ii = np.dot(currmem_iiT, dd)
-    
-    return Emem_ii
-    
-def _Ememiii_calc(iii, currmem, sigma, deltaS, l, r2, h):
+def _Ememiii_calc(l_iii, r2_iii, h_iii):
     """Subroutine used by calc_lfp_*()"""
-    currmem_iiiT = currmem[iii].transpose()
-    deltaS_iii = deltaS[iii]
-    l_iii = l[iii]
-    r2_iii = r2[iii]
-    h_iii = h[iii]
-
-    aa = 4 * np.pi * sigma * deltaS_iii
     bb = np.sqrt(l_iii**2 + r2_iii) + l_iii
     cc = np.sqrt(h_iii**2 + r2_iii) + h_iii
-    dd = np.log(bb / cc) / aa
-
-    Emem_iii = np.dot(currmem_iiiT, dd)
-    
-    return Emem_iii
+    dd = np.log(bb / cc)
+    return dd
 
 def _deltaS_calc(xstart, xend, ystart, yend, zstart, zend):
     """Subroutine used by calc_lfp_*()"""
