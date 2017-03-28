@@ -268,8 +268,15 @@ class RecExtElectrode(RecExtElectrodeSetup):
                                 N, r, n, shape, r_z, perCellLFP,
                                 method, color, marker, from_file,
                                 cellfile, verbose, seedvalue, **kwargs)
-        
-        
+
+        if method == 'som_as_point':
+            self.lfp_method = lfpcalc.calc_lfp_som_as_point
+        elif method == 'linesource':
+            self.lfp_method = lfpcalc.calc_lfp_linesource
+        elif method == 'pointsource':
+            self.lfp_method = lfpcalc.calc_lfp_pointsource
+
+
     def calc_lfp(self, t_indices=None, cell=None):
         """Calculate LFP on electrode geometry from all cell instances.
         Will chose distributed calculated if electrode contain 'n', 'N', and 'r'
@@ -319,7 +326,6 @@ class RecExtElectrode(RecExtElectrodeSetup):
 
     def _loop_over_contacts(self,
                     r_limit=None,
-                    timestep=None,
                     t_indices=None):
         """Loop over electrode contacts, and return LFPs across channels"""
         if t_indices is not None:
@@ -329,15 +335,13 @@ class RecExtElectrode(RecExtElectrodeSetup):
             
         for i in range(self.x.size):
             LFP_temp[i, :] = LFP_temp[i, :] + \
-                    lfpcalc.calc_lfp_choose(self.cell,
+                    self.lfp_method(self.cell,
                                             x = self.x[i],
                                             y = self.y[i],
                                             z = self.z[i],
                                             sigma = self.sigma,
                                             r_limit = r_limit,
-                                            timestep = timestep,
                                             t_indices = t_indices,
-                                            method = self.method,
                                             **self.kwargs)
             
         return LFP_temp
@@ -431,14 +435,13 @@ class RecExtElectrode(RecExtElectrodeSetup):
 
             #loop over points on contact
             for j in range(self.n):
-                tmp = lfpcalc.calc_lfp_choose(self.cell,
+                tmp = self.lfp_method(self.cell,
                                               x = x_n[j],
                                               y = y_n[j],
                                               z = z_n[j],
                                               r_limit = r_limit,
                                               sigma = self.sigma,
                                               t_indices = t_indices,
-                                              method = self.method,
                                               **self.kwargs)
 
                 
@@ -466,7 +469,7 @@ class RecExtElectrode(RecExtElectrodeSetup):
                 #del lfp_e
                 
             else:
-                lfp_el_pos[i] = lfpcalc.calc_lfp_choose(self.cell, 
+                lfp_el_pos[i] = self.lfp_method(self.cell,
                                                         x=self.x[i],
                                                         y=self.y[i],
                                                         z=self.z[i],
