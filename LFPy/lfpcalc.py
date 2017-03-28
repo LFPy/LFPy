@@ -89,14 +89,14 @@ def dist(x1, x2, p):
     elif u < 0:
         u = 0
 
-    x = x1[0] + u * px
-    y = x1[1] + u * py
-    z = x1[2] + u * pz
+    x_ = x1[0] + u * px
+    y_ = x1[1] + u * py
+    z_ = x1[2] + u * pz
 
-    closest_point = [x, y, z]
-    dx = x - p[0]
-    dy = y - p[1]
-    dz = z - p[2]
+    closest_point = np.array([x_, y_, z_])
+    dx = x_ - p[0]
+    dy = y_ - p[1]
+    dz = z_ - p[2]
     dist = np.sqrt(dx*dx + dy*dy + dz*dz)
 
     return dist, closest_point
@@ -164,20 +164,60 @@ def calc_lfp_linesource_anisotropic(cell, x=0., y=0., z=0., sigma=0.3,
 
     for idx in range(cell.totnsegs):
 
+        # pos = np.array([x, y, z])
+        # print "start pos: ", pos
         a_ = a[idx]
         b_ = b[idx]
         c_ = c[idx]
+
         p1 = np.array([xstart[idx], ystart[idx], zstart[idx]])
         p2 = np.array([xend[idx], yend[idx], zend[idx]])
+        l_vec = p2 - p1
 
         r, closest_point = dist(p1, p2, pos)
-        if r <= r_limit[idx]:
-            # print "too close", closest_point, pos
+        p_ = pos.copy()
+        # print "pos1: ", pos
+
+        if not pos[1] == y:
+            print pos, y
+            raise RuntimeError
+
+        # print x, y, z
+        # print "abc:", a_, b_, c_, p1, pos
+        if r < r_limit[idx]:
+
+            print "too close", closest_point, pos
             if np.abs(r) < 1e-12:
-                p_ = closest_point
-                p_[0] += r_limit[idx] * np.sign(xstart[idx]-xend[idx])
+                print "r is zero"
+                # raise
+                # p_ = pos
+                # p_[0] += +r_limit[idx] * np.sign(xstart[idx]-xend[idx])
+                if np.abs(l_vec[0]) < 1e-12:
+                    p_[0] += r_limit[idx]
+                    # print "here x"
+                elif np.abs(l_vec[1]) < 1e-12:
+                    p_[1] = p_[1] + r_limit[idx]
+
+                    # print "here y", p_
+                elif np.abs(l_vec[2]) < 1e-12:
+                    p_[2] += r_limit[idx]
+                    # print pos, p_, "here z"
+                else:
+                    # print "Displacing like "
+                    displace_vec = np.array([-l_vec[1], l_vec[0], 0])
+                    displace_vec = displace_vec / np.sqrt(np.sum(displace_vec**2)) * r_limit[idx]
+                    # print pos, p1, p2, displace_vec
+                    p_[:] += displace_vec
             else:
-                p_ = closest_point + (pos - closest_point) * r_limit[idx] / r
+
+                p_[:] = pos + (pos - closest_point) * (r_limit[idx] - r) / r
+                # print "Scale: "
+                # print pos, closest_point, r, r_limit[idx]
+                # print p1, p2
+                # print p_
+                # print np.sqrt(np.sum((p_ - closest_point)**2))
+
+                # print "scale", pos, p_, r, closest_point, p1, p2,
 
             # p_ = closest_point + (pos - closest_point) * r_limit[idx] / r
 
@@ -187,19 +227,12 @@ def calc_lfp_linesource_anisotropic(cell, x=0., y=0., z=0., sigma=0.3,
             c_ = ((p_[0] - xstart[idx])**2 +
                  (p_[1] - ystart[idx])**2 +
                  (p_[2] - zstart[idx])**2)
-            # print pos, p_, np.sqrt(np.sum((pos - p_)**2)), r_limit[idx]
-            # b_ *= distance_scale
-            # c_ *= distance_scale**2
-            # print b_, c_
-        #     raise RuntimeError
 
         # c = (sigma[1] * sigma[2] * (x - xstart)**2 +
         #      sigma[0] * sigma[2] * (y - ystart)**2 +
         #      sigma[0] * sigma[1] * (z - zstart)**2)
         if c_ == 0:
-            print pos, p_, xstart[idx], ystart[idx], zstart[idx]
-            print dist(p1, p2, pos)
-            raise RuntimeError
+            raise RuntimeError("C should not be zero!")
         if np.abs(b_) <= 1e-12:
             # print("Case 0"), a_, b_, c_
             # one_over_r_part = 1. / np.sqrt(a_) * np.log(np.sqrt(a_ / c_) + np.sqrt(a_ / c_) * np.sqrt(1 + c_ / a_))
@@ -209,7 +242,7 @@ def calc_lfp_linesource_anisotropic(cell, x=0., y=0., z=0., sigma=0.3,
                 print "Case 1", one_over_r_part, a_, b_, c_, 4 * a_ * c_ - b_**2
 
             phi += currmem[idx] * one_over_r_part
-        elif 4 * a_ * c_ > b_**2:
+        elif 4 * a_ * c_ < b_**2:
             # print("Case 2")
             numerator = np.abs(2 * a_ + b_ + 2 * np.sqrt(a_*a_ + a_ * b_ + a_ * c_))
             denumerator = np.abs(b_ + 2 * np.sqrt(a_ * c_))
@@ -220,40 +253,41 @@ def calc_lfp_linesource_anisotropic(cell, x=0., y=0., z=0., sigma=0.3,
 
             phi += currmem[idx] * one_over_r_part
 
+        elif np.abs(4 * a_ * c_ - b_**2) < 1e-12:
 
-        elif np.abs(4 * a_ * c_ - b_**2) < 1e-9:
-
-            # print "Case 3", a_, c_, (np.abs(1 - np.sqrt(a_ / c_)))
+            # print "Case 3", a_, b_, c_,  -1. / np.sqrt(a_) * np.log(np.abs(2 * a_ / b_ + 1))
             # print pos, a_, b_, c_, xstart[idx], ystart[idx], zstart[idx], xend[idx], yend[idx], zend[idx]
             # one_over_r_part = 1. / np.sqrt(a_) * (np.log(np.abs((2 * a_ + b_)/b_)))
             # one_over_r_part = 1. / np.sqrt(a_) * np.log(np.sqrt(a_ / c_) + 1.)
 
             # if 1 - np.sqrt(a_ / c_) > 0:
-            # if np.abs(a_ - c_) < 1e-12:
-            #     one_over_r_part = 0#-1. / np.sqrt(a_) * np.log(np.abs(1 - np.sqrt(a_ / c_)))
-            #     print "Happsendd"
+            if np.abs(a_ - c_) < 1e-12:
+                # one_over_r_part = 0#-1. / np.sqrt(a_) * np.log(np.abs(1 - np.sqrt(a_ / c_)))
+                print "Happend"
             # else:
                 # one_over_r_part = -1. / np.sqrt(a_) * np.log(np.abs(1 - np.sqrt(a_ / c_)))
-            one_over_r_part = 1. / np.sqrt(a_) * np.log(np.sqrt(a_ / c_) + 1)
+            # if b_ < 0:
+            one_over_r_part = 1. / np.sqrt(a_) * np.abs(np.log(np.abs(np.sign(b_) * np.sqrt(a_/c_) + 1)))
+            # else:
+            #     one_over_r_part = 1. / np.sqrt(a_) * np.log(np.abs(np.sqrt(a_ / c_) + 1))
+
             if np.isnan(one_over_r_part).any():
                 print "NaN ", idx, pos
                 print "Case 3", one_over_r_part, a_, b_, c_, 4 * a_ * c_ - b_**2
-
 
             # else:
             #     one_over_r_part = 1. / np.sqrt(a_) * np.log(np.sqrt(a_ / c_) - 1)
 
             phi += currmem[idx] * one_over_r_part
             # print one_over_r_part
-        elif 4 * a_ * c_ < b_**2:
-
+        elif 4 * a_ * c_ > b_**2:
+            # print "arcsinh"
             one_over_r_part = 1. / np.sqrt(a_) * (np.arcsinh((2 * a_ + b_) / np.sqrt(4 * a_ * c_ - b_**2))-
                                                   np.arcsinh((b_) / np.sqrt(4 * a_ * c_ - b_**2)))
             # print("This happend")
             if np.isnan(one_over_r_part).any():
                 print "NaN ", idx, pos
                 print "Case 4", one_over_r_part, a_, b_, c_, 4 * a_ * c_ - b_**2
-
 
             phi += currmem[idx] * one_over_r_part
 
@@ -381,12 +415,12 @@ def calc_lfp_linesource(cell, x=0., y=0., z=0., sigma=0.3,
     [ii] = np.where(hnegi & lposi)
     #case iii, h >= 0, l >= 0
     [iii] = np.where(hposi & lposi)
-    
+
+    print r2
     Ememi = _Ememi_calc(i, currmem, sigma, deltaS, l, r2, h)
     Ememii = _Ememii_calc(ii, currmem, sigma, deltaS, l, r2, h)
     Ememiii = _Ememiii_calc(iii, currmem, sigma, deltaS, l, r2, h)
-    
-    
+
     Emem = Ememi + Ememii + Ememiii
     
     return Emem.transpose()
@@ -570,11 +604,13 @@ def _check_rlimit(r2, r_limit, h, deltaS):
     """Check that no segment is close the electrode than r_limit"""
     if np.sum(np.nonzero(r2 < r_limit*r_limit)) > 0:
         for idx in np.nonzero( r2 < r_limit*r_limit )[0]:
-            if (h[idx] < r_limit[idx]) and ((deltaS[idx]+h[idx]) >
-                                             -r_limit[idx]):
+            if (h[idx] < r_limit[idx]) and ((deltaS[idx]+h[idx]) > -r_limit[idx]):
                 print('Adjusting distance to segment %s from %.2f to %.2f.'
                       % (idx, r2[idx]**0.5, r_limit[idx]))
                 r2[idx] = r_limit[idx]**2
+            if r2[idx] == 0:
+                print r2
+                raise RuntimeError(r2)
     return r2
 
 def _r_soma_calc(xmid, ymid, zmid, x, y, z):
