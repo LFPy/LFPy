@@ -90,8 +90,8 @@ def calc_lfp_linesource(cell, x=0., y=0., z=0., sigma=0.3,
     
     return Emem.T
 
-def calc_lfp_som_as_point(cell, x=0., y=0., z=0., sigma=0.3,
-                          r_limit=None, t_indices=None):
+def calc_lfp_soma_as_point(cell, x=0., y=0., z=0., sigma=0.3,
+                           r_limit=None, t_indices=None):
     """Calculate electric field potential using the line-source method,
     soma is treated as point/sphere source
     
@@ -186,38 +186,39 @@ def calc_lfp_som_as_point(cell, x=0., y=0., z=0., sigma=0.3,
 
     mapping = np.zeros(cell.totnsegs)
     mapping[0] = 1 / r_soma
+    deltaS[0] = 1.
+
     mapping[i] = _linesource_calc_case1(l[i], r2[i], h[i])
     mapping[ii] = _linesource_calc_case2(l[ii], r2[ii], h[ii])
     mapping[iii] = _linesource_calc_case3(l[iii], r2[iii], h[iii])
 
-    deltaS[0] = 1.
     Emem = np.dot(currmem.T, 1 / (4 * np.pi * sigma * deltaS) * mapping)
 
     return Emem.T
 
 def _linesource_calc_case1(l_i, r2_i, h_i):
-    """Subroutine used by calc_lfp_*()"""
+    """Calculates linesource contribution for case i"""
     bb = np.sqrt(h_i**2 + r2_i) - h_i
     cc = np.sqrt(l_i**2 + r2_i) - l_i
     dd = np.log(bb / cc)
     return dd
 
 def _linesource_calc_case2(l_ii, r2_ii, h_ii):
-    """Subroutine used by calc_lfp_*()"""
+    """Calculates linesource contribution for case ii"""
     bb = np.sqrt(h_ii**2 + r2_ii) - h_ii
     cc = (l_ii + np.sqrt(l_ii**2 + r2_ii)) / r2_ii
     dd = np.log(bb * cc)
     return dd
     
 def _linesource_calc_case3(l_iii, r2_iii, h_iii):
-    """Subroutine used by calc_lfp_*()"""
+    """Calculates linesource contribution for case iii"""
     bb = np.sqrt(l_iii**2 + r2_iii) + l_iii
     cc = np.sqrt(h_iii**2 + r2_iii) + h_iii
     dd = np.log(bb / cc)
     return dd
 
 def _deltaS_calc(xstart, xend, ystart, yend, zstart, zend):
-    """Subroutine used by calc_lfp_*()"""
+    """Returns length of each segment"""
     deltaS = np.sqrt((xstart - xend)**2 + (ystart - yend)**2 +
                      (zstart-zend)**2)
     return deltaS

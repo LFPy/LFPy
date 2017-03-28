@@ -112,7 +112,7 @@ cpdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] calc_lfp_linesource(
     return Emem.T
 
 
-cpdef np.ndarray[DTYPE_t, ndim=1] calc_lfp_som_as_point(cell,
+cpdef np.ndarray[DTYPE_t, ndim=1] calc_lfp_soma_as_point(cell,
                           double x=0, double y=0, double z=0, double sigma=0.3,
                           r_limit=None,
                           t_indices=None):
@@ -158,8 +158,7 @@ cpdef np.ndarray[DTYPE_t, ndim=1] calc_lfp_som_as_point(cell,
     cdef np.ndarray[DTYPE_t, ndim=2] currmem
     cdef np.ndarray[DTYPE_t, ndim=1] mapping
     cdef np.ndarray[DTYPE_t, ndim=1] xstart, xend, \
-        ystart, yend, zstart, zend, deltaS, h, r2, l, \
-        Ememi, Ememii, Ememiii, Emem
+        ystart, yend, zstart, zend, deltaS, h, r2, l, Emem
     cdef np.ndarray[LTYPE_t, ndim=1] i, ii, iii
     cdef double xmid, ymid, zmid
 
@@ -218,11 +217,12 @@ cpdef np.ndarray[DTYPE_t, ndim=1] calc_lfp_som_as_point(cell,
 
     mapping = np.zeros(cell.totnsegs)
     mapping[0] = 1 / r_soma
+    deltaS[0] = 1.
+
     mapping[i] = _linesource_calc_case1(l[i], r2[i], h[i])
     mapping[ii] = _linesource_calc_case2(l[ii], r2[ii], h[ii])
     mapping[iii] = _linesource_calc_case3(l[iii], r2[iii], h[iii])
 
-    deltaS[0] = 1.
     Emem = np.dot(currmem.T, 1 / (4 * np.pi * sigma * deltaS) * mapping)
 
     return Emem.T
@@ -257,7 +257,7 @@ cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] _linesource_calc_case1(
                np.ndarray[DTYPE_t, ndim=1, negative_indices=False] l_i,
                np.ndarray[DTYPE_t, ndim=1, negative_indices=False] r2_i,
                np.ndarray[DTYPE_t, ndim=1, negative_indices=False] h_i):
-    '''Subroutine used by calc_lfp_som_as_point()'''
+    """Calculates linesource contribution for case i"""
     cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] bb = (h_i *
                                                     h_i + r2_i)**0.5 - h_i
     cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] cc = (l_i *
@@ -270,7 +270,7 @@ cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] _linesource_calc_case2(
                 np.ndarray[DTYPE_t, ndim=1, negative_indices=False] l_ii,
                 np.ndarray[DTYPE_t, ndim=1, negative_indices=False] r2_ii,
                 np.ndarray[DTYPE_t, ndim=1, negative_indices=False] h_ii):
-    '''Subroutine used by calc_lfp_som_as_point()'''
+    """Calculates linesource contribution for case ii"""
 
     cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] bb = (
                                                 h_ii*h_ii + r2_ii)**0.5 - h_ii
@@ -284,7 +284,7 @@ cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] _linesource_calc_case3(
                  np.ndarray[DTYPE_t, ndim=1, negative_indices=False] l_iii,
                  np.ndarray[DTYPE_t, ndim=1, negative_indices=False] r2_iii,
                  np.ndarray[DTYPE_t, ndim=1, negative_indices=False] h_iii):
-    '''Subroutine used by calc_lfp_som_as_point()'''
+    """Calculates linesource contribution for case iii"""
 
     cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] bb = (l_iii*l_iii +
                                                             r2_iii)**0.5 + l_iii
@@ -301,7 +301,7 @@ cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] _deltaS_calc(
                 np.ndarray[DTYPE_t, ndim=1, negative_indices=False] yend,
                 np.ndarray[DTYPE_t, ndim=1, negative_indices=False] zstart,
                 np.ndarray[DTYPE_t, ndim=1, negative_indices=False] zend):
-    '''Subroutine used by calc_lfp_som_as_point()'''
+    """Returns length of each segment"""
     cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] deltaS = (
         (xstart - xend)*(xstart - xend) + (ystart - yend)*(ystart - yend) +
         (zstart-zend)*(zstart-zend))**0.5
@@ -318,7 +318,7 @@ cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] _h_calc(
                 np.ndarray[DTYPE_t, ndim=1, negative_indices=False] zend,
                 np.ndarray[DTYPE_t, ndim=1, negative_indices=False] deltaS,
                 double x, double y, double z):
-    '''Subroutine used by calc_lfp_som_as_point()'''
+    '''Subroutine used by calc_lfp_soma_as_point()'''
     cdef np.ndarray[DTYPE_t, ndim=2, negative_indices=False] aa, aaT, bb
     cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] cc, hh
 
@@ -393,7 +393,7 @@ cpdef calc_lfp_pointsource(cell, double x=0, double y=0, double z=0,
 cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] _check_rlimit_point(
                 np.ndarray[DTYPE_t, ndim=1, negative_indices=False] r2,
                 np.ndarray[DTYPE_t, ndim=1, negative_indices=False] r_limit):
-    '''Correct r2 so that r2 >= r_limit for all values'''
+    """Correct r2 so that r2 >= r_limit for all values"""
     inds = r2 < (r_limit*r_limit)
     r2[inds] = r_limit[inds]*r_limit[inds]
     return r2

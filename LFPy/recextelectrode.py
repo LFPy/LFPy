@@ -45,7 +45,7 @@ class RecExtElectrodeSetup(object):
         'circle'/'square' (default 'circle') defines the contact point shape
         If 'circle' r is the radius, if 'square' r is the side length
     method : str
-        ['linesource']/'pointsource'/'som_as_point' switch
+        'linesource'/'pointsource'/['soma_as_point'] switch
     color : str
         color of electrode contact points in plots
     marker : str
@@ -62,7 +62,7 @@ class RecExtElectrodeSetup(object):
     def __init__(self, cell=None, sigma=0.3,
                  x=np.array([0]), y=np.array([0]), z=np.array([0]),
                  N=None, r=None, n=None, shape=None, r_z=None,
-                 perCellLFP=False, method='linesource', 
+                 perCellLFP=False, method='soma_as_point',
                  color='g', marker='o',
                  from_file=False, cellfile=None, verbose=False,
                  seedvalue=None,
@@ -195,7 +195,7 @@ class RecExtElectrode(RecExtElectrodeSetup):
         'circle'/'square' (default 'circle') defines the contact point shape
         If 'circle' r is the radius, if 'square' r is the side length
     method : str
-        ['linesource']/'pointsource'/'som_as_point' switch
+        'linesource'/'pointsource'/['soma_as_point'] switch
     color : str
         color of electrode contact points in plots
     marker : str
@@ -259,7 +259,7 @@ class RecExtElectrode(RecExtElectrodeSetup):
     def __init__(self, cell=None, sigma=0.3,
                  x=np.array([0]), y=np.array([0]), z=np.array([0]),
                  N=None, r=None, n=0, shape=None, r_z=None,
-                 perCellLFP=False, method='linesource', 
+                 perCellLFP=False, method='soma_as_point',
                  color='g', marker='o',
                  from_file=False, cellfile=None, verbose=False,
                  seedvalue=None, **kwargs):
@@ -269,12 +269,20 @@ class RecExtElectrode(RecExtElectrodeSetup):
                                 method, color, marker, from_file,
                                 cellfile, verbose, seedvalue, **kwargs)
 
-        if method == 'som_as_point':
-            self.lfp_method = lfpcalc.calc_lfp_som_as_point
+        if method == 'soma_as_point':
+            self.lfp_method = lfpcalc.calc_lfp_soma_as_point
+        elif method == 'som_as_point':
+            self.lfp_method = lfpcalc.calc_lfp_soma_as_point
+            raise DeprecationWarning('The method "som_as_point" is deprecated.'
+                                     'Use "soma_as_point" instead')
         elif method == 'linesource':
             self.lfp_method = lfpcalc.calc_lfp_linesource
         elif method == 'pointsource':
             self.lfp_method = lfpcalc.calc_lfp_pointsource
+        else:
+            raise ValueError("LFP method not recognized. "
+                             "Should be 'soma_as_point', 'linesource' "
+                             "or 'pointsource'")
 
 
     def calc_lfp(self, t_indices=None, cell=None):
