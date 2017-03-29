@@ -127,7 +127,6 @@ class testRecExtElectrode(unittest.TestCase):
         np.testing.assert_allclose(LFP_analytic, LFP_LFPy, atol=1E-4)
 
     
-    
     def test_method_pointsource_contact_average_r10n100(self):
         #create LFPs using LFPy-model
         LFP_LFPy = stickSimulationAveragingElectrode(

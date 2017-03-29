@@ -36,7 +36,7 @@ GNU General Public License for more details.
 __version__ = "2.0"
 
 from .pointprocess import Synapse, PointProcess, StimIntElectrode
-from .recextelectrode import RecExtElectrode, RecExtElectrodeSetup
+from .recextelectrode import RecExtElectrode
 from .cell import Cell
 from .templatecell import TemplateCell
 from .test import _test as run_tests
