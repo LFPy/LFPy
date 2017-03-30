@@ -431,7 +431,8 @@ class NetworkPopulation(object):
 
 class Network(object):
     def __init__(self, dt=0.1, tstart=0., tstop=1000., v_init=-65., celsius=6.3,
-                 OUTPUTPATH='example_parallel_network'):
+                 OUTPUTPATH='example_parallel_network',
+                 verbose=False):
         """
         Network class, creating distributed populations of cells of
         type Cell and handling connections between cells in the respective
@@ -452,6 +453,8 @@ class Network(object):
             It will also be forced when creating the different Cell objects, as
             LFPy.Cell and LFPy.TemplateCell also accept the same keyword
             argument.
+        verbose : bool
+            if True, print out misc. messages
 
 
         """
@@ -462,6 +465,7 @@ class Network(object):
         self.v_init = v_init
         self.celsius = celsius
         self.OUTPUTPATH = OUTPUTPATH
+        self.verbose = verbose
 
         # we need NEURON's ParallelContext for communicating NetCon events
         self.pc = neuron.h.ParallelContext()
@@ -707,7 +711,7 @@ class Network(object):
 
                 # draw delays
                 delays = delayfun(size=nidx, **delayargs)
-                # redraw delays shorter than dt
+                # redraw delays shorter than mindelay
                 while np.any(delays < mindelay):
                     j = delays < mindelay
                     delays[j] = delayfun(size=j.sum(), **delayargs)
@@ -866,7 +870,8 @@ class Network(object):
         #run fadvance until t >= tstopms, and calculate LFP if asked for
         if electrode is None and dotprodcoeffs is None and not rec_current_dipole_moment and not rec_pop_contributions:
             if not rec_imem:
-                print("rec_imem = {}, not recording membrane currents!".format(rec_imem))
+                if self.verbose:
+                    print("rec_imem = {}, not recording membrane currents!".format(rec_imem))
             _run_simulation(self, cvode, variable_dt, atol)
         else:
             if dotprodcoeffs is not None:
