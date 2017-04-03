@@ -167,12 +167,6 @@ def calc_lfp_linesource_anisotropic(cell, x=0., y=0., z=0., sigma=0.3,
 
     for idx in range(cell.totnsegs):
 
-        # pos = np.array([x, y, z])
-        # print "start pos: ", pos
-        a_ = a[idx]
-        b_ = b[idx]
-        c_ = c[idx]
-
         p1 = np.array([xstart[idx], ystart[idx], zstart[idx]])
         p2 = np.array([xend[idx], yend[idx], zend[idx]])
         l_vec = p2 - p1
@@ -181,23 +175,18 @@ def calc_lfp_linesource_anisotropic(cell, x=0., y=0., z=0., sigma=0.3,
         p_ = pos.copy()
 
         if r < r_limit[idx]:
-
             # print "too close", closest_point, pos
             if np.abs(r) < 1e-6:
                 # print "r is zero"
-
                 if np.abs(l_vec[0]) < 1e-12:
                     p_[0] += r_limit[idx]
-                    # print "here x"x
                 elif np.abs(l_vec[1]) < 1e-12:
                     p_[1] = p_[1] + r_limit[idx]
                 elif np.abs(l_vec[2]) < 1e-12:
                     p_[2] += r_limit[idx]
                 else:
-                    # print "Displacing like "
                     displace_vec = np.array([-l_vec[1], l_vec[0], 0])
                     displace_vec = displace_vec / np.sqrt(np.sum(displace_vec**2)) * r_limit[idx]
-                    # print pos, p1, p2, displace_vec
                     p_[:] += displace_vec
             else:
 
@@ -207,84 +196,62 @@ def calc_lfp_linesource_anisotropic(cell, x=0., y=0., z=0., sigma=0.3,
                 print p_, closest_point
                 raise RuntimeError("Segment adjustment not working")
 
-            b_ = -2 * (sigma[1] * sigma[2] * (p_[0] - xstart[idx]) * (xend[idx] - xstart[idx]) +
+            b[idx] = -2 * (sigma[1] * sigma[2] * (p_[0] - xstart[idx]) * (xend[idx] - xstart[idx]) +
                        sigma[0] * sigma[2] * (p_[1] - ystart[idx]) * (yend[idx] - ystart[idx]) +
                        sigma[0] * sigma[1] * (p_[2] - zstart[idx]) * (zend[idx] - zstart[idx]))
-            c_ = (sigma[1] * sigma[2] * (p_[0] - xstart[idx])**2 +
+            c[idx] = (sigma[1] * sigma[2] * (p_[0] - xstart[idx])**2 +
                   sigma[0] * sigma[2] * (p_[1] - ystart[idx])**2 +
                   sigma[0] * sigma[1] * (p_[2] - zstart[idx])**2)
 
-        if c_ == 0:
-            raise RuntimeError("C should not be zero!")
-        if np.abs(b_) <= 1e-12:
-            # print("Case 0"), a_, b_, c_
-            # one_over_r_part = 1. / np.sqrt(a_) * np.log(np.sqrt(a_ / c_) + np.sqrt(a_ / c_) * np.sqrt(1 + c_ / a_))
-            one_over_r_part = 1. / np.sqrt(a_) * np.log(np.sqrt(a_ / c_) + np.sqrt(a_ / c_ + 1))
-            # if np.isnan(one_over_r_part).any():
-            #     print "NaN ", idx, pos
-            #     print "Case 1", one_over_r_part, a_, b_, c_, 4 * a_ * c_ - b_**2
-            #     raise RuntimeError("NaN")
-            mapping[idx] = one_over_r_part
+    [i] = np.where(np.abs(b) <= 1e-6)
+    [iia] = np.where(np.bitwise_and(np.abs(4 * a * c - b**2) < 1e-6, np.abs(a - c) < 1e-6))
+    [iib] = np.where(np.bitwise_and(np.abs(4 * a * c - b**2) < 1e-6, np.abs(a - c) >= 1e-6))
+    [iii] = np.where(np.bitwise_and(4 * a * c - b**2 < -1e-6, np.abs(b) > 1e-6))
+    [iiii] = np.where(np.bitwise_and(4 * a * c - b**2 > 1e-6, np.abs(b) > 1e-6))
 
-        elif np.abs(4 * a_ * c_ - b_**2) < 1e-6:
+    if len(i) + len(iia) + len(iib) + len(iii) + len(iiii) != cell.totnsegs:
+        print a, b, c
+        print i, iia, iib, iii, iiii
+        raise RuntimeError
 
-            # print "Case 3", a_, b_, c_,  -1. / np.sqrt(a_) * np.log(np.abs(2 * a_ / b_ + 1))
-            # print pos, a_, b_, c_, xstart[idx], ystart[idx], zstart[idx], xend[idx], yend[idx], zend[idx]
-            # one_over_r_part = 1. / np.sqrt(a_) * (np.log(np.abs((2 * a_ + b_)/b_)))
-            # one_over_r_part = 1. / np.sqrt(a_) * np.log(np.sqrt(a_ / c_) + 1.)
+    # if len(iiii) != cell.totnsegs:
+    #     print len(i), len(iia), len(iib), len(iii), len(iiii)
 
-            # if 1 - np.sqrt(a_ / c_) > 0:
-            if np.abs(a_ - c_) < 1e-6:
-                one_over_r_part = 1. / np.sqrt(a_) * np.log(np.abs(1 + np.sqrt(a_ / c_)))
-            else:
-                # one_over_r_part = -1. / np.sqrt(a_) * np.log(np.abs(1 - np.sqrt(a_ / c_)))
-                # if b_ < 0:
-                one_over_r_part = 1. / np.sqrt(a_) * np.abs(np.log(np.abs(np.sign(b_) * np.sqrt(a_/c_) + 1)))
-            # else:
-            #     one_over_r_part = 1. / np.sqrt(a_) * np.log(np.abs(np.sqrt(a_ / c_) + 1))
+    mapping[i] = _anisotropic_line_source_case_i(a[i], c[i])
+    mapping[iia] = _anisotropic_line_source_case_iia(a[iia], c[iia])
+    mapping[iib] = _anisotropic_line_source_case_iib(a[iib], b[iib], c[iib])
+    mapping[iii] = _anisotropic_line_source_case_iii(a[iii], b[iii], c[iii])
+    mapping[iiii] = _anisotropic_line_source_case_iiii(a[iiii], b[iiii], c[iiii])
 
-            # if np.isnan(one_over_r_part).any():
-            #     print "NaN ", idx, pos
-            #     print "Case 3", one_over_r_part, a_, b_, c_, 4 * a_ * c_ - b_**2
-            #     raise RuntimeError("NaN")
-
-            mapping[idx] = one_over_r_part
-
-            # print one_over_r_part
-        elif 4 * a_ * c_ < b_**2:
-            # print("Case 2")
-            numerator = np.abs(2 * a_ + b_ + 2 * np.sqrt(a_ * (a_ + b_ + c_)))
-            denumerator = np.abs(b_ + 2 * np.sqrt(a_ * c_))
-            one_over_r_part = 1. / np.sqrt(a_) * np.log(numerator / denumerator)
-            # if np.isnan(one_over_r_part).any():
-            #     print "NaN ", idx, pos
-            #     print "Case 2", a_, b_, c_, numerator, denumerator
-            #     raise RuntimeError("NaN")
-            mapping[idx] = one_over_r_part
-
-
-        elif 4 * a_ * c_ > b_**2:
-            # print "arcsinh"
-            one_over_r_part = 1. / np.sqrt(a_) * (np.arcsinh((2 * a_ + b_) / np.sqrt(4 * a_ * c_ - b_**2))-
-                                                  np.arcsinh((b_) / np.sqrt(4 * a_ * c_ - b_**2)))
-            # print("This happend")
-            # if np.isnan(one_over_r_part).any():
-            #     print "NaN ", idx, pos
-            #     print "Case 4", one_over_r_part, a_, b_, c_, 4 * a_ * c_ - b_**2
-            #     raise RuntimeError("NaN")
-
-            mapping[idx] = one_over_r_part
-
-            # one_over_r_part = 1. / np.sqrt(a[idx]) * (np.arcsinh((2 * a[idx] + b[idx]) / np.sqrt(4 * a[idx] * c[idx] - b[idx]**2)) - np.arcsinh(b[idx] / np.sqrt(4 * a[idx] * c[idx] - b[idx]**2)))
-            # phi += currmem[idx] * one_over_r_part
-        else:
-            raise RuntimeError
     if np.isnan(mapping).any():
         raise RuntimeError("NaN")
 
-    phi = 1 / (4 * np.pi) * np.dot(currmem.T, mapping)
+    phi = 1 / (4 * np.pi) * np.dot(currmem.T, mapping / np.sqrt(a))
 
     return phi.T
+
+
+def _anisotropic_line_source_case_i(a, c):
+    return np.log(np.sqrt(a / c) + np.sqrt(a / c + 1))
+
+
+def _anisotropic_line_source_case_iia(a, c):
+    return np.log(np.abs(1 + np.sqrt(a / c)))
+
+
+def _anisotropic_line_source_case_iib(a, b, c):
+    return np.abs(np.log(np.abs(np.sign(b) * np.sqrt(a/c) + 1)))
+
+
+def _anisotropic_line_source_case_iii(a, b, c):
+    return np.log(np.abs((2 * a + b + 2 * np.sqrt(a * (a + b + c)))
+                        / (b + 2 * np.sqrt(a * c))))
+
+
+def _anisotropic_line_source_case_iiii(a, b, c):
+    return (np.arcsinh((2 * a + b) / np.sqrt(4 * a * c - b**2)) -
+                        np.arcsinh(b / np.sqrt(4 * a * c - b**2)))
+
 
 def calc_lfp_linesource(cell, x=0., y=0., z=0., sigma=0.3,
                         r_limit=None,
