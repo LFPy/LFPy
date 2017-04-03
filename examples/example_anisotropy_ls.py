@@ -18,7 +18,7 @@ cell_parameters = {          # various cell parameters,
     'e_pas' : -65.,     # reversal potential passive mechs
     'passive' : True,   # switch on passive mechs
     'nsegs_method' : 'lambda_f',
-    'lambda_f' : 1000.,
+    'lambda_f' : 50.,
     'dt' : 2.**-2,      # simulation time step size
     'tstartms' : 0.,    # start time of simulation, recorders start at t=0
     'tstopms' : 2.,   # stop simulation at 200 ms. These can be overridden
@@ -27,12 +27,12 @@ cell_parameters = {          # various cell parameters,
 
 # Create cell
 cell = LFPy.Cell(**cell_parameters)
-cell.set_pos(ypos=0., xpos=np.min(cell.xstart))
+cell.set_pos(ypos=1, xpos=np.min(cell.xstart))
 
 print cell.totnsegs
 
 synapse_parameters = {
-    'idx' : 3,
+    'idx' : 0,
     'e' : 0.,                   # reversal potential
     'syntype' : 'ExpSyn',       # synapse type
     'tau' : 5.,                 # synaptic time constant
@@ -45,7 +45,7 @@ synapse = LFPy.Synapse(cell, **synapse_parameters)
 synapse.set_spike_times(np.array([1.]))
 
 # Create a grid of measurement locations, in (um)
-dx = 1.
+dx = 2.
 
 X, Z = np.mgrid[-50:50 + dx:dx, -15:15 + dx:dx]
 
@@ -154,4 +154,4 @@ cbar = plt.colorbar(im)
 #         markeredgecolor='k',
 #         markerfacecolor='r')
 
-plt.savefig('example_anisotropy_ls_%s.png' % str(sigma), dpi=150)
+plt.savefig('example_anisotropy_soma_as_point_%s.png' % str(sigma), dpi=150)
