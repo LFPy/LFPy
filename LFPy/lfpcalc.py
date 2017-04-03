@@ -102,6 +102,7 @@ def dist(x1, x2, p):
     return dist, closest_point
 
 
+
 def calc_lfp_linesource_anisotropic(cell, x=0., y=0., z=0., sigma=0.3,
                         r_limit=None,
                         t_indices=None):
@@ -152,12 +153,14 @@ def calc_lfp_linesource_anisotropic(cell, x=0., y=0., z=0., sigma=0.3,
     dx2 = (xend - xstart)**2
     dy2 = (yend - ystart)**2
     dz2 = (zend - zstart)**2
-    a = (dx2 + dy2 + dz2)
+    a = (sigma[1] * sigma[2] * dx2 +
+         sigma[0] * sigma[2] * dy2 +
+         sigma[0] * sigma[1] * dz2)
     pos = np.array([x, y, z])
 
-    b = -2 * ((x - xstart) * (xend - xstart) +
-              (y - ystart) * (yend - ystart) +
-              (z - zstart) * (zend - zstart))
+    b = -2 * (sigma[1] * sigma[2] * (x - xstart) * (xend - xstart) +
+              sigma[0] * sigma[2] * (y - ystart) * (yend - ystart) +
+              sigma[0] * sigma[1] * (z - zstart) * (zend - zstart))
     c = (sigma[1] * sigma[2] * (x - xstart)**2 +
          sigma[0] * sigma[2] * (y - ystart)**2 +
          sigma[0] * sigma[1] * (z - zstart)**2)
@@ -212,12 +215,16 @@ def calc_lfp_linesource_anisotropic(cell, x=0., y=0., z=0., sigma=0.3,
 
                 p_[:] = pos + (pos - closest_point) * (r_limit[idx] - r) / r
 
-            b_ = -2 * ((p_[0] - xstart[idx]) * (xend[idx] - xstart[idx]) +
-                       (p_[1] - ystart[idx]) * (yend[idx] - ystart[idx]) +
-                       (p_[2] - zstart[idx]) * (zend[idx] - zstart[idx]))
+            if np.sqrt(np.sum((p_ - closest_point)**2)) - r_limit[idx] > 1e-9:
+                print p_, closest_point
+                raise RuntimeError("Segment adjustment not working")
+
+            b_ = -2 * (sigma[1] * sigma[2] * (p_[0] - xstart[idx]) * (xend[idx] - xstart[idx]) +
+                       sigma[0] * sigma[2] * (p_[1] - ystart[idx]) * (yend[idx] - ystart[idx]) +
+                       sigma[0] * sigma[1] * (p_[2] - zstart[idx]) * (zend[idx] - zstart[idx]))
             c_ = (sigma[1] * sigma[2] * (p_[0] - xstart[idx])**2 +
-                 sigma[0] * sigma[2] * (p_[1] - ystart[idx])**2 +
-                 sigma[0] * sigma[1] * (p_[2] - zstart[idx])**2)
+                  sigma[0] * sigma[2] * (p_[1] - ystart[idx])**2 +
+                  sigma[0] * sigma[1] * (p_[2] - zstart[idx])**2)
 
         # c = (sigma[1] * sigma[2] * (x - xstart)**2 +
         #      sigma[0] * sigma[2] * (y - ystart)**2 +
@@ -295,7 +302,7 @@ def calc_lfp_linesource_anisotropic(cell, x=0., y=0., z=0., sigma=0.3,
             # print a[idx]#, b[idx], c[idx]
             # raise RuntimeError("Nan in phi")
 
-    phi *= 1 / (4 * np.pi * sigma[0])
+    phi *= 1 / (4 * np.pi)
     # case_0_idxs = np.where(np.abs(b) < 1e-6)
     # case_1_idxs = np.where(4 * a * c < b**2)[0]
     # case_2_idxs = np.where(4 * a * c > b**2)[0]
