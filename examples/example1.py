@@ -77,22 +77,22 @@ Y = np.zeros(X.shape)
 
 # Define electrode parameters
 grid_electrode_parameters = {
-    'sigma' : 0.3,      # extracellular conductivity
+    'sigma' : [0.3, 0.3, 0.3],      # extracellular conductivity
     'x' : X.flatten(),  # electrode requires 1d vector of positions
     'y' : Y.flatten(),
-    'z' : Z.flatten()
+    'z' : Z.flatten(),
+    'method': 'linesource'
 }
 
 
 # Define electrode parameters
 point_electrode_parameters = {
-    'sigma' : 0.3,  # extracellular conductivity
+    'sigma' : [0.3, 0.3, 0.3],  # extracellular conductivity
     'x' : np.array([-130., -220.]),
     'y' : np.array([   0.,    0.]),
     'z' : np.array([   0.,  700.]),
+    'method': 'linesource'
 }
-
-
 
 # Run simulation, electrode object argument in cell.simulate
 print("running simulation...")
@@ -196,5 +196,5 @@ ax.set_xticklabels([])
 
 # fig = plot_ex1(cell, electrode, X, Y, Z)
 # Optionally save figure (uncomment the line below)
-plt.savefig('example1.pdf', dpi=300)
+plt.savefig('example1_anis_1_ls.png', dpi=300)
 plt.show()

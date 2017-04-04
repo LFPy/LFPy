@@ -16,38 +16,28 @@ GNU General Public License for more details.
 import numpy as np
 
 
-def dist_vec(xstart, ystart, zstart, xend, yend, zend, p):
+def return_dist_from_segments(xstart, ystart, zstart, xend, yend, zend, p):
     """
-    Returns distance and closest point on line between x1 and x2 from point p
+    Returns distance and closest point on line segments from point p
     """
     px = xend-xstart
     py = yend-ystart
     pz = zend-zstart
 
     delta = px*px + py*py + pz*pz
-
-    u = np.zeros(len(xend))
-    u[:] = ((p[0] - xstart) * px + (p[1] - ystart) * py + (p[2] - zstart) * pz) / delta
-
+    u = ((p[0] - xstart) * px + (p[1] - ystart) * py + (p[2] - zstart) * pz) / delta
     u[u > 1] = 1
     u[u < 0] = 0
 
-    x_ = xstart + u * px
-    y_ = ystart + u * py
-    z_ = zstart + u * pz
-
-    closest_point = np.array([x_, y_, z_])
-    dx = x_ - p[0]
-    dy = y_ - p[1]
-    dz = z_ - p[2]
-    dist = np.sqrt(dx*dx + dy*dy + dz*dz)
-
+    closest_point = np.array([xstart + u * px,
+                              ystart + u * py,
+                              zstart + u * pz])
+    dist = np.sqrt(np.sum((closest_point.T - p)**2, axis=1))
     return dist, closest_point
 
 
-def calc_lfp_linesource_anisotropic(cell, x=0., y=0., z=0., sigma=[0.3, 0.3, 0.3],
-                        r_limit=None,
-                        t_indices=None):
+def calc_lfp_linesource_anisotropic(cell, x, y, z, sigma,
+                        r_limit, t_indices=None):
     """Calculate electric field potential using the line-source method, all
     compartments treated as line sources, even soma.
 
@@ -63,19 +53,11 @@ def calc_lfp_linesource_anisotropic(cell, x=0., y=0., z=0., sigma=[0.3, 0.3, 0.3
         extracellular position, z-axis
     sigma : array
         extracellular conductivity [sigma_x, sigma_y, sigma_z]
-    r_limit : [None]/float/np.ndarray
-        minimum distance to source current. Can be scalar or numpy array with
-        a limit for each cell compartment. Defaults to [None]
+    r_limit : np.ndarray
+        minimum distance to source current for each compartment
     t_indices : [None]/np.ndarray
         calculate LFP at specific timesteps
     """
-    # Handling the r_limits. If a r_limit is a single value, an array r_limit
-    # of shape cell.diam is returned.
-    if type(r_limit) == int or type(r_limit) == float:
-        r_limit = np.ones(np.shape(cell.diam))*abs(r_limit)
-    elif np.shape(r_limit) != np.shape(cell.diam):
-        raise Exception('r_limit is neither a float- or int- value, nor is \
-            r_limit.shape() equal to cell.diam.shape()')
 
     if t_indices is not None:
         currmem = cell.imem[:, t_indices]
@@ -95,7 +77,7 @@ def calc_lfp_linesource_anisotropic(cell, x=0., y=0., z=0., sigma=[0.3, 0.3, 0.3
 
     pos = np.array([x, y, z])
 
-    rs, closest_points = dist_vec(xstart, ystart, zstart, xend, yend, zend, pos)
+    rs, closest_points = return_dist_from_segments(xstart, ystart, zstart, xend, yend, zend, pos)
 
     dx2 = (xend - xstart)**2
     dy2 = (yend - ystart)**2
@@ -169,10 +151,8 @@ def calc_lfp_linesource_anisotropic(cell, x=0., y=0., z=0., sigma=[0.3, 0.3, 0.3
     return phi.T
 
 
-def calc_lfp_soma_as_point_anisotropic(cell, x=0., y=0., z=0.,
-                                       sigma=[0.3, 0.3, 0.3],
-                        r_limit=None,
-                        t_indices=None):
+def calc_lfp_soma_as_point_anisotropic(cell, x, y, z, sigma,
+                                       r_limit, t_indices=None):
     """Calculate electric field potential, soma is treated as point source, all
     compartments except soma are treated as line sources.
 
@@ -188,19 +168,11 @@ def calc_lfp_soma_as_point_anisotropic(cell, x=0., y=0., z=0.,
         extracellular position, z-axis
     sigma : array
         extracellular conductivity [sigma_x, sigma_y, sigma_z]
-    r_limit : [None]/float/np.ndarray
-        minimum distance to source current. Can be scalar or numpy array with
-        a limit for each cell compartment. Defaults to [None]
+    r_limit : np.ndarray
+        minimum distance to source current for each compartment
     t_indices : [None]/np.ndarray
         calculate LFP at specific timesteps
     """
-    # Handling the r_limits. If a r_limit is a single value, an array r_limit
-    # of shape cell.diam is returned.
-    if type(r_limit) == int or type(r_limit) == float:
-        r_limit = np.ones(np.shape(cell.diam))*abs(r_limit)
-    elif np.shape(r_limit) != np.shape(cell.diam):
-        raise Exception('r_limit is neither a float- or int- value, nor is \
-            r_limit.shape() equal to cell.diam.shape()')
 
     if t_indices is not None:
         currmem = cell.imem[:, t_indices]
@@ -219,7 +191,7 @@ def calc_lfp_soma_as_point_anisotropic(cell, x=0., y=0., z=0.,
 
     pos = np.array([x, y, z])
 
-    rs, closest_points = dist_vec(xstart, ystart, zstart, xend, yend, zend, pos)
+    rs, closest_points = return_dist_from_segments(xstart, ystart, zstart, xend, yend, zend, pos)
 
     dx2 = (xend - xstart)**2
     dy2 = (yend - ystart)**2
@@ -341,10 +313,7 @@ def _anisotropic_line_source_case_iiii(a, b, c):
                         np.arcsinh(b / np.sqrt(4 * a * c - b**2)))
 
 
-
-def calc_lfp_linesource(cell, x=0., y=0., z=0., sigma=0.3,
-                        r_limit=None, t_indices=None):
-
+def calc_lfp_linesource(cell, x, y, z, sigma, r_limit, t_indices=None):
     """Calculate electric field potential using the line-source method, all
     compartments treated as line sources, even soma.
     
@@ -360,20 +329,12 @@ def calc_lfp_linesource(cell, x=0., y=0., z=0., sigma=0.3,
         extracellular position, z-axis
     sigma : float
         extracellular conductivity
-    r_limit : [None]/float/np.ndarray
-        minimum distance to source current. Can be scalar or numpy array with
-        a limit for each cell compartment. Defaults to [None]
+    r_limit : np.ndarray
+        minimum distance to source current for each compartment
     t_indices : [None]/np.ndarray
         calculate LFP at specific timesteps
     """
-    # Handling the r_limits. If a r_limit is a single value, an array r_limit
-    # of shape cell.diam is returned.
-    if type(r_limit) == int or type(r_limit) == float:
-        r_limit = np.ones(np.shape(cell.diam))*abs(r_limit)
-    elif np.shape(r_limit) != np.shape(cell.diam):
-        raise Exception('r_limit is neither a float- or int- value, nor is \
-            r_limit.shape() equal to cell.diam.shape()')
-    
+
     if t_indices is not None:
         currmem = cell.imem[:, t_indices]
     else:
@@ -417,8 +378,7 @@ def calc_lfp_linesource(cell, x=0., y=0., z=0., sigma=0.3,
     
     return Emem.T
 
-def calc_lfp_soma_as_point(cell, x=0., y=0., z=0., sigma=0.3,
-                           r_limit=None, t_indices=None):
+def calc_lfp_soma_as_point(cell, x, y, z, sigma, r_limit, t_indices=None):
     """Calculate electric field potential using the line-source method,
     soma is treated as point/sphere source
     
@@ -434,28 +394,13 @@ def calc_lfp_soma_as_point(cell, x=0., y=0., z=0., sigma=0.3,
         extracellular position, z-axis
     sigma : float
         extracellular conductivity in S/m
-    r_limit : float or np.ndarray or None
-        [None]/float/np.ndarray: minimum distance to source current.
+    r_limit : np.ndarray
+         minimum distance to source current for each compartment.
     t_indices : [None]/np.ndarray
         calculate LFP at specific timesteps
     """
-    #Handling the r_limits. If a r_limit is a single value,
-    #an array r_limit of shape cell.diam is returned.
-    if type(r_limit) != type(np.array([])):
-        r_limit = np.array(r_limit)
-    if r_limit.shape == ():
-        s_limit = r_limit
-        r_limit = np.ones(cell.diam.size) * abs(r_limit)
-    elif r_limit.shape == (2, ):
-        s_limit = abs(r_limit[0])
-        r_limit = np.ones(cell.diam.size) * abs(r_limit[1])
-    elif r_limit.shape == cell.diam.shape:
-        s_limit = r_limit[0]
-        r_limit = r_limit
-    else:
-        raise Exception('r_limit is neither a float- or int- value, \
-            on the form r_limit=[s_limit, r_limit],  \
-            nor is shape(r_limit) equal to shape(cell.diam)!')
+
+    s_limit = r_limit[0]
 
     if t_indices is not None:
         currmem = cell.imem[:, t_indices]
@@ -571,9 +516,6 @@ def _check_rlimit(r2, r_limit, h, deltaS):
                 print('Adjusting distance to segment %s from %.2f to %.2f.'
                       % (idx, r2[idx]**0.5, r_limit[idx]))
                 r2[idx] = r_limit[idx]**2
-            # if r2[idx] == 0:
-            #     print r2
-            #     raise RuntimeError(r2)
     return r2
 
 def _r_soma_calc(xmid, ymid, zmid, x, y, z):
@@ -581,8 +523,7 @@ def _r_soma_calc(xmid, ymid, zmid, x, y, z):
     r_soma = np.sqrt((x - xmid)**2 + (y - ymid)**2 + (z - zmid)**2)
     return r_soma
 
-def calc_lfp_pointsource(cell, x=0, y=0, z=0, sigma=0.3,
-                        r_limit=None, t_indices=None):
+def calc_lfp_pointsource(cell, x, y, z, sigma, r_limit, t_indices=None):
     """Calculate extracellular potentials using the point-source
     equation on all compartments
 
@@ -598,18 +539,11 @@ def calc_lfp_pointsource(cell, x=0, y=0, z=0, sigma=0.3,
         extracellular position, z-axis
     sigma : float
         extracellular conductivity
-    r_limit : [None]/float/np.ndarray
-        minimum distance to source current
+    r_limit : np.ndarray
+        minimum distance to source current for each compartment
     t_indices : [None]/np.ndarray
         calculate LFP at specific timesteps
     """
-    # Handling the r_limits. If a r_limit is a single value, an array r_limit
-    # of shape cell.diam is returned.
-    if type(r_limit) == int or type(r_limit) == float:
-        r_limit = np.ones(np.shape(cell.diam))*abs(r_limit)
-    elif np.shape(r_limit) != np.shape(cell.diam):
-        raise Exception('r_limit is neither a float- or int- value, nor is \
-            r_limit.shape() equal to cell.diam.shape()')
 
     if t_indices is not None:
         currmem = cell.imem[:, t_indices]
@@ -624,8 +558,7 @@ def calc_lfp_pointsource(cell, x=0, y=0, z=0, sigma=0.3,
     
     return Emem.T
 
-def calc_lfp_pointsource_anisotropic(cell, x=0, y=0, z=0, sigma=[0.3, 0.3, 0.3],
-                        r_limit=None,
+def calc_lfp_pointsource_anisotropic(cell, x, y, z, sigma, r_limit,
                         t_indices=None):
     """Calculate extracellular potentials using the anisotropic point-source
     equation on all compartments
@@ -642,18 +575,11 @@ def calc_lfp_pointsource_anisotropic(cell, x=0, y=0, z=0, sigma=[0.3, 0.3, 0.3],
         extracellular position, z-axis
     sigma : array
         extracellular conductivity in [x,y,z]-direction
-    r_limit : [None]/float/np.ndarray
-        minimum distance to source current
+    r_limit : np.ndarray
+        minimum distance to source current for each compartment
     t_indices : [None]/np.ndarray
         calculate LFP at specific timesteps
     """
-    # Handling the r_limits. If a r_limit is a single value, an array r_limit
-    # of shape cell.diam is returned.
-    if type(r_limit) == int or type(r_limit) == float:
-        r_limit = np.ones(np.shape(cell.diam))*abs(r_limit)
-    elif np.shape(r_limit) != np.shape(cell.diam):
-        raise Exception('r_limit is neither a float- or int- value, nor is \
-            r_limit.shape() equal to cell.diam.shape()')
 
     if t_indices is not None:
         currmem = cell.imem[:, t_indices]
@@ -685,14 +611,11 @@ def calc_lfp_pointsource_anisotropic(cell, x=0, y=0, z=0, sigma=[0.3, 0.3, 0.3],
                     + sigma[0] * sigma[1] * dz2)
 
     Emem = 1 / (4 * np.pi) * np.dot(currmem.T, 1./sigma_r)
-
     return Emem.T
-
 
 
 def _check_rlimit_point(r2, r_limit):
     """Correct r2 so that r2 >= r_limit**2 for all values"""
     inds = r2 < r_limit*r_limit
     r2[inds] = r_limit[inds]*r_limit[inds]
-    
     return r2

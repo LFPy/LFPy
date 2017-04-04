@@ -21,14 +21,204 @@ ctypedef np.float64_t DTYPE_t
 ctypedef Py_ssize_t   LTYPE_t
 
 
+cdef return_dist_from_segments(
+    np.ndarray[DTYPE_t, ndim=1, negative_indices=False] xstart,
+    np.ndarray[DTYPE_t, ndim=1, negative_indices=False] ystart,
+    np.ndarray[DTYPE_t, ndim=1, negative_indices=False] zstart,
+    np.ndarray[DTYPE_t, ndim=1, negative_indices=False] xend,
+    np.ndarray[DTYPE_t, ndim=1, negative_indices=False] yend,
+    np.ndarray[DTYPE_t, ndim=1, negative_indices=False] zend,
+    np.ndarray[DTYPE_t, ndim=1, negative_indices=False] p):
+
+    """
+    Returns distance and closest point on line segments from point p
+    """
+    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] px, py, pz, delta, u, dist
+    cdef np.ndarray[DTYPE_t, ndim=2, negative_indices=False] closest_point
+
+    px = xend-xstart
+    py = yend-ystart
+    pz = zend-zstart
+
+    delta = px*px + py*py + pz*pz
+    u = ((p[0] - xstart) * px + (p[1] - ystart) * py + (p[2] - zstart) * pz) / delta
+    u[u > 1] = 1
+    u[u < 0] = 0
+
+    closest_point = np.array([xstart + u * px,
+                              ystart + u * py,
+                              zstart + u * pz])
+    dist = np.sqrt(np.sum((closest_point.T - p)**2, axis=1))
+    return dist, closest_point
+
+
+cpdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] calc_lfp_linesource_anisotropic(cell,
+                      double x,
+                      double y,
+                      double z,
+                      np.ndarray[DTYPE_t, ndim=1, negative_indices=False] sigma,
+                      np.ndarray[DTYPE_t, ndim=1, negative_indices=False] r_limit,
+                      t_indices=None):
+    """Calculate electric field potential using the line-source method, all
+    compartments treated as line sources, even soma.
+
+    Parameters
+    ----------
+    cell: obj
+        LFPy.Cell or LFPy.TemplateCell instance
+    x : float
+        extracellular position, x-axis
+    y : float
+        extracellular position, y-axis
+    z : float
+        extracellular position, z-axis
+    sigma : array
+        extracellular conductivity [sigma_x, sigma_y, sigma_z]
+    r_limit : np.ndarray
+        minimum distance to source current for each compartment
+    t_indices : [None]/np.ndarray
+        calculate LFP at specific timesteps
+    """
+
+    cdef np.ndarray[DTYPE_t, ndim=2, negative_indices=False] currmem, l_vecs, closest_points
+    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] xstart, xend, \
+        ystart, yend, zstart, zend, mapping, pos, rs, dx2, dy2, dz2, a, b, c, p_, displace_vec, phi
+    cdef np.ndarray[LTYPE_t, ndim=1, negative_indices=False] i, iia, iib, iii, iiii
+    cdef int idx
+
+    if t_indices is not None:
+        currmem = cell.imem[:, t_indices]
+    else:
+        currmem = cell.imem
+
+    #some variables for h, r2, r_soma calculations
+    xstart = cell.xstart
+    xend = cell.xend
+    ystart = cell.ystart
+    yend = cell.yend
+    zstart = cell.zstart
+    zend = cell.zend
+    l_vecs = np.array([xend - xstart,
+                      yend - ystart,
+                      zend - zstart])
+
+    pos = np.array([x, y, z])
+
+    rs, closest_points = return_dist_from_segments(xstart, ystart, zstart, xend, yend, zend, pos)
+
+    dx2 = (xend - xstart)**2
+    dy2 = (yend - ystart)**2
+    dz2 = (zend - zstart)**2
+    a = (sigma[1] * sigma[2] * dx2 +
+         sigma[0] * sigma[2] * dy2 +
+         sigma[0] * sigma[1] * dz2)
+
+    b = -2 * (sigma[1] * sigma[2] * (x - xstart) * (xend - xstart) +
+              sigma[0] * sigma[2] * (y - ystart) * (yend - ystart) +
+              sigma[0] * sigma[1] * (z - zstart) * (zend - zstart))
+    c = (sigma[1] * sigma[2] * (x - xstart)**2 +
+         sigma[0] * sigma[2] * (y - ystart)**2 +
+         sigma[0] * sigma[1] * (z - zstart)**2)
+
+    for idx in np.where(rs <r_limit)[0]:
+        r, closest_point, l_vec = rs[idx], closest_points[:, idx], l_vecs[:, idx]
+
+        p_ = pos.copy()
+        if np.abs(r) < 1e-12:
+            # print "r is zero"
+            if np.abs(l_vec[0]) < 1e-12:
+                p_[0] += r_limit[idx]
+            elif np.abs(l_vec[1]) < 1e-12:
+                p_[1] += r_limit[idx]
+            elif np.abs(l_vec[2]) < 1e-12:
+                p_[2] += r_limit[idx]
+            else:
+                displace_vec = np.array([-l_vec[1], l_vec[0], 0])
+                displace_vec = displace_vec / np.sqrt(np.sum(displace_vec**2)) * r_limit[idx]
+                p_[:] += displace_vec
+        else:
+            p_[:] = pos + (pos - closest_point) * (r_limit[idx] - r) / r
+
+        if np.sqrt(np.sum((p_ - closest_point)**2)) - r_limit[idx] > 1e-9:
+            print p_, closest_point
+            raise RuntimeError("Segment adjustment not working")
+
+        b[idx] = -2 * (sigma[1] * sigma[2] * (p_[0] - xstart[idx]) * (xend[idx] - xstart[idx]) +
+                   sigma[0] * sigma[2] * (p_[1] - ystart[idx]) * (yend[idx] - ystart[idx]) +
+                   sigma[0] * sigma[1] * (p_[2] - zstart[idx]) * (zend[idx] - zstart[idx]))
+        c[idx] = (sigma[1] * sigma[2] * (p_[0] - xstart[idx])**2 +
+              sigma[0] * sigma[2] * (p_[1] - ystart[idx])**2 +
+              sigma[0] * sigma[1] * (p_[2] - zstart[idx])**2)
+
+    [i] = np.where(np.abs(b) <= 1e-6)
+    [iia] = np.where(np.bitwise_and(np.abs(4 * a * c - b**2) < 1e-6, np.abs(a - c) < 1e-6))
+    [iib] = np.where(np.bitwise_and(np.abs(4 * a * c - b**2) < 1e-6, np.abs(a - c) >= 1e-6))
+    [iii] = np.where(np.bitwise_and(4 * a * c - b**2 < -1e-6, np.abs(b) > 1e-6))
+    [iiii] = np.where(np.bitwise_and(4 * a * c - b**2 > 1e-6, np.abs(b) > 1e-6))
+
+    if len(i) + len(iia) + len(iib) + len(iii) + len(iiii) != cell.totnsegs:
+        print a, b, c
+        print i, iia, iib, iii, iiii
+        raise RuntimeError
+
+    # if len(iiii) != cell.totnsegs:
+    #     print len(i), len(iia), len(iib), len(iii), len(iiii)
+    mapping = np.zeros(cell.totnsegs)
+    mapping[i] = _anisotropic_line_source_case_i(a[i], c[i])
+    mapping[iia] = _anisotropic_line_source_case_iia(a[iia], c[iia])
+    mapping[iib] = _anisotropic_line_source_case_iib(a[iib], b[iib], c[iib])
+    mapping[iii] = _anisotropic_line_source_case_iii(a[iii], b[iii], c[iii])
+    mapping[iiii] = _anisotropic_line_source_case_iiii(a[iiii], b[iiii], c[iiii])
+
+    if np.isnan(mapping).any():
+        raise RuntimeError("NaN")
+
+    phi = 1 / (4 * np.pi) * np.dot(currmem.T, mapping / np.sqrt(a))
+
+    return phi.T
+
+cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] _anisotropic_line_source_case_i(
+    np.ndarray[DTYPE_t, ndim=1, negative_indices=False] a,
+    np.ndarray[DTYPE_t, ndim=1, negative_indices=False] c):
+    return np.log(np.sqrt(a / c) + np.sqrt(a / c + 1))
+
+
+cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] _anisotropic_line_source_case_iia(
+    np.ndarray[DTYPE_t, ndim=1, negative_indices=False] a,
+    np.ndarray[DTYPE_t, ndim=1, negative_indices=False] c):
+    return np.log(np.abs(1 + np.sqrt(a / c)))
+
+
+cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] _anisotropic_line_source_case_iib(
+    np.ndarray[DTYPE_t, ndim=1, negative_indices=False] a,
+    np.ndarray[DTYPE_t, ndim=1, negative_indices=False] b,
+    np.ndarray[DTYPE_t, ndim=1, negative_indices=False] c):
+    return np.abs(np.log(np.abs(np.sign(b) * np.sqrt(a/c) + 1)))
+
+
+cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] _anisotropic_line_source_case_iii(
+    np.ndarray[DTYPE_t, ndim=1, negative_indices=False] a,
+    np.ndarray[DTYPE_t, ndim=1, negative_indices=False] b,
+    np.ndarray[DTYPE_t, ndim=1, negative_indices=False] c):
+    return np.log(np.abs((2 * a + b + 2 * np.sqrt(a * (a + b + c)))
+                        / (b + 2 * np.sqrt(a * c))))
+
+
+cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] _anisotropic_line_source_case_iiii(
+    np.ndarray[DTYPE_t, ndim=1, negative_indices=False] a,
+    np.ndarray[DTYPE_t, ndim=1, negative_indices=False] b,
+    np.ndarray[DTYPE_t, ndim=1, negative_indices=False] c):
+    return (np.arcsinh((2 * a + b) / np.sqrt(4 * a * c - b**2)) -
+                        np.arcsinh(b / np.sqrt(4 * a * c - b**2)))
+
 
 cpdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] calc_lfp_linesource(
                         cell,
-                        double x=0,
-                        double y=0,
-                        double z=0,
-                        double sigma=0.3,
-                        r_limit=None,
+                        double x,
+                        double y,
+                        double z,
+                        double sigma,
+                        np.ndarray[DTYPE_t, ndim=1, negative_indices=False] r_limit,
                         t_indices=None):
     """Calculate electric field potential using the line-source method, all
     compartments treated as line sources, even soma.
@@ -45,20 +235,12 @@ cpdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] calc_lfp_linesource(
         extracellular position, z-axis
     sigma : float
         extracellular conductivity
-    r_limit : [None]/float/np.ndarray
-        minimum distance to source current. Can be scalar or numpy array with
-        a limit for each cell compartment. Defaults to [None]
+    r_limit : np.ndarray
+        minimum distance to source current for each compartment
     t_indices : [None]/np.ndarray
         calculate LFP at specific timesteps
     """
 
-    # Handling the r_limits. If a r_limit is a single value, an array r_limit
-    # of shape cell.diam is returned.
-    if type(r_limit) == int or type(r_limit) == float:
-        r_limit = np.ones(np.shape(cell.diam))*abs(r_limit)
-    elif np.shape(r_limit) != np.shape(cell.diam):
-        raise Exception('r_limit is neither a float- or int- value, nor is \
-            r_limit.shape() equal to cell.diam.shape()')
 
     cdef np.ndarray[DTYPE_t, ndim=2, negative_indices=False] currmem
     cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] mapping
@@ -71,7 +253,6 @@ cpdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] calc_lfp_linesource(
         currmem = cell.imem[:, t_indices]
     else:
         currmem = cell.imem
-
 
     #some variables for h, r2, r_soma calculations
     xstart = cell.xstart
@@ -86,8 +267,6 @@ cpdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] calc_lfp_linesource(
     h = _h_calc(xstart, xend, ystart, yend, zstart, zend, deltaS, x, y, z)
     r2 = _r2_calc(xend, yend, zend, x, y, z, h)
 
-
-    r_lims = r_limit
     r2 = _check_rlimit(r2, r_limit, h, deltaS)
 
     l = h + deltaS
@@ -113,9 +292,9 @@ cpdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] calc_lfp_linesource(
     return Emem.T
 
 
-cpdef np.ndarray[DTYPE_t, ndim=1] calc_lfp_soma_as_point(cell,
-                          double x=0, double y=0, double z=0, double sigma=0.3,
-                          r_limit=None,
+cpdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] calc_lfp_soma_as_point(cell,
+                          double x, double y, double z, double sigma,
+                          np.ndarray[DTYPE_t, ndim=1, negative_indices=False] r_limit,
                           t_indices=None):
     """Calculate electric field potential using the line-source method,
     soma is treated as point/sphere source
@@ -132,37 +311,20 @@ cpdef np.ndarray[DTYPE_t, ndim=1] calc_lfp_soma_as_point(cell,
         extracellular position, z-axis
     sigma : float
         extracellular conductivity in S/m
-    r_limit : float or np.ndarray or None
-        [None]/float/np.ndarray: minimum distance to source current.
+    r_limit : np.ndarray
+        minimum distance to source current for each compartment
     t_indices : [None]/np.ndarray
         calculate LFP at specific timesteps
     """
-
-    #Handling the r_limits. If a r_limit is a single value,
-    #an array r_limit of shape cell.diam is returned.
-    if type(r_limit) != type(np.array([])):
-        r_limit = np.array(r_limit)
-    if r_limit.shape == ():
-        s_limit = r_limit
-        r_limit = np.ones(cell.diam.size) * abs(r_limit)
-    elif r_limit.shape == (2, ):
-        s_limit = abs(r_limit[0])
-        r_limit = np.ones(cell.diam.size) * abs(r_limit[1])
-    elif r_limit.shape == cell.diam.shape:
-        s_limit = r_limit[0]
-        r_limit = r_limit
-    else:
-        raise Exception('r_limit is neither a float- or int- value, \
-            on the form r_limit=[s_limit, r_limit],  \
-            nor is shape(r_limit) equal to shape(cell.diam)!')
 
     cdef np.ndarray[DTYPE_t, ndim=2] currmem
     cdef np.ndarray[DTYPE_t, ndim=1] mapping
     cdef np.ndarray[DTYPE_t, ndim=1] xstart, xend, \
         ystart, yend, zstart, zend, deltaS, h, r2, l, Emem
     cdef np.ndarray[LTYPE_t, ndim=1] i, ii, iii
-    cdef double xmid, ymid, zmid
+    cdef double xmid, ymid, zmid, s_limit
 
+    s_limit = r_limit[0]
 
     if t_indices is not None:
         currmem = cell.imem[:, t_indices]
@@ -232,7 +394,7 @@ cpdef np.ndarray[DTYPE_t, ndim=1] calc_lfp_soma_as_point(cell,
 cdef double _r_soma_calc(double xmid, double ymid, double zmid,
                         double x, double y, double z):
     '''Calculate the distance to the soma midpoint'''
-    r_soma = ((x - xmid)*(x - xmid) + (y - ymid)*(y - ymid) + \
+    r_soma = ((x - xmid)*(x - xmid) + (y - ymid)*(y - ymid) +
         (z - zmid)*(z - zmid))**0.5
 
     return r_soma
@@ -344,10 +506,8 @@ cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] _r2_calc(
     return abs(r2)
 
 
-cpdef calc_lfp_pointsource(cell, double x=0, double y=0, double z=0,
-                           double sigma=0.3,
-                           r_limit=None, 
-                           t_indices=None):
+cpdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] calc_lfp_pointsource(cell, double x, double y, double z, double sigma,
+                           r_limit, t_indices=None):
     """Calculate extracellular potentials using the point-source
     equation on all compartments
 
@@ -363,18 +523,13 @@ cpdef calc_lfp_pointsource(cell, double x=0, double y=0, double z=0,
         extracellular position, z-axis
     sigma : float
         extracellular conductivity
-    r_limit : [None]/float/np.ndarray
-        minimum distance to source current
+    r_limit : np.ndarray
+        minimum distance to source current for each compartment
     t_indices : [None]/np.ndarray
         calculate LFP at specific timesteps
     """
-    # Handling the r_limits. If a r_limit is a single value, an array r_limit
-    # of shape cell.diam is returned.
-    if type(r_limit) == int or type(r_limit) == float:
-        r_limit = np.ones(np.shape(cell.diam))*abs(r_limit)
-    elif np.shape(r_limit) != np.shape(cell.diam):
-        raise Exception('r_limit is neither a float- or int- value, nor is \
-            r_limit.shape() equal to cell.diam.shape()')
+    cdef np.ndarray[DTYPE_t, ndim=2, negative_indices=False] currmem
+    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] r2, Emem
 
     if t_indices is not None:
         currmem = cell.imem[:, t_indices]
@@ -383,10 +538,7 @@ cpdef calc_lfp_pointsource(cell, double x=0, double y=0, double z=0,
 
     r2 = (cell.xmid - x)**2 + (cell.ymid - y)**2 + (cell.zmid - z)**2
     r2 = _check_rlimit_point(r2, r_limit)
-    r = r2**0.5
-
-    Emem = 1 / (4 * np.pi * sigma) * np.dot(currmem.T, 1/r)
-
+    Emem = 1 / (4 * np.pi * sigma) * np.dot(currmem.T, 1/r2**0.5)
     return Emem.T
 
 

@@ -25,8 +25,8 @@ soma[0] {
 }
 
 dend[0] {
-    pt3dadd(00, 0, 0, 1)
-    pt3dadd(100, 0, 0, 1)
+    pt3dadd(00, 0, 0, 10)
+    pt3dadd(100, 0, 0, 10)
 }
 
 connect dend[0](0), soma[0](1)

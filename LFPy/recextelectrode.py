@@ -117,8 +117,15 @@ class RecExtElectrode:
                  seedvalue=None, **kwargs):
         """Initialize RecExtElectrode class"""
 
-        self.cell = cell
-        self.sigma = sigma
+        self.set_cell(cell)
+
+        if type(sigma) in [list, np.ndarray]:
+            self.sigma = np.array(sigma)
+            self.anisotropic = True
+        else:
+            self.sigma = sigma
+            self.anisotropic = False
+
         if type(x) in [float, int]:
             self.x = np.array([x])
         else:
@@ -191,12 +198,10 @@ class RecExtElectrode:
             else:
                 raise ValueError('cell either string or list of strings')
 
-        if self.cell is not None:
-            self._test_imem_sum()
-            self.r_limit = self.cell.diam/2
+
 
         if method == 'soma_as_point':
-            if type(sigma) in [list, np.ndarray]:
+            if self.anisotropic:
                 self.lfp_method = lfpcalc.calc_lfp_soma_as_point_anisotropic
             else:
                 self.lfp_method = lfpcalc.calc_lfp_soma_as_point
@@ -204,12 +209,12 @@ class RecExtElectrode:
             raise RuntimeError('The method "som_as_point" is deprecated.'
                                      'Use "soma_as_point" instead')
         elif method == 'linesource':
-            if type(sigma) in [list, np.ndarray]:
+            if self.anisotropic:
                 self.lfp_method = lfpcalc.calc_lfp_linesource_anisotropic
             else:
                 self.lfp_method = lfpcalc.calc_lfp_linesource
         elif method == 'pointsource':
-            if type(sigma) in [list, np.ndarray]:
+            if self.anisotropic:
                 self.lfp_method = lfpcalc.calc_lfp_pointsource_anisotropic
             else:
                 self.lfp_method = lfpcalc.calc_lfp_pointsource
@@ -239,6 +244,20 @@ class RecExtElectrode:
             else:
                 pass
 
+    def set_cell(self, cell):
+        self.cell = cell
+        if self.cell is not None:
+            self._test_imem_sum()
+
+            # Handling the r_limits. If a r_limit is a single value, an array r_limit
+            # of shape cell.diam is returned.
+            # if type(r_limit) == int or type(r_limit) == float:
+            #     r_limit = np.ones(np.shape(cell.diam))*abs(r_limit)
+            # elif np.shape(r_limit) != np.shape(cell.diam):
+            #     raise Exception('r_limit is neither a float- or int- value, nor is \
+            #         r_limit.shape() equal to cell.diam.shape()')
+            self.r_limit = self.cell.diam/2
+
     def calc_lfp(self, t_indices=None, cell=None):
         """Calculate LFP on electrode geometry from all cell instances.
         Will chose distributed calculated if electrode contain 'n', 'N', and 'r'
@@ -255,9 +274,7 @@ class RecExtElectrode:
         """
 
         if cell is not None:
-            self.cell = cell
-            self._test_imem_sum()
-            self.r_limit = self.cell.diam/2
+            self.set_cell(cell)
 
         if not hasattr(self,  'LFP'):
             if t_indices is not None:
