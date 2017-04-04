@@ -111,6 +111,7 @@ class TemplateCell(Cell):
                  templatefile='LFPyCellTemplate.hoc',
                  templatename='LFPyCellTemplate',
                  templateargs=None,
+                 verbose=False,
                  **kwargs):
         """
         Initialization of the Template Cell object.
@@ -119,6 +120,7 @@ class TemplateCell(Cell):
         self.templatefile = templatefile
         self.templatename = templatename
         self.templateargs = templateargs
+        self.verbose = verbose
         
         if not hasattr(neuron.h, 'd_lambda'):
             neuron.h.load_file('stdlib.hoc', 'String')    #NEURON std. library
@@ -127,7 +129,8 @@ class TemplateCell(Cell):
         #load the cell template specification
         #check if templatename exist in neuron.h namespace:
         if hasattr(neuron.h, self.templatename):
-            print('template %s exist already' % self.templatename)
+            if self.verbose:
+                print('template %s exist already' % self.templatename)
         else:
             if type(self.templatefile) == str:
                 neuron.h.load_file(self.templatefile)

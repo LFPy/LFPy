@@ -16,7 +16,7 @@ GNU General Public License for more details.
 import numpy as np
 import neuron
 
-class PointProcess:
+class PointProcess(object):
     """
     Superclass on top of Synapse, StimIntElectrode, just to import and set
     some shared variables and extracts Cartesian coordinates of a segment
@@ -193,12 +193,14 @@ class StimIntElectrode(PointProcess):
         `LFPy.Cell` or `LFPy.TemplateCell` instance to receive Stimulation
          electrode input
     idx : int
-        Cell index where the stimulation electrode is placed
+        Cell segment index where the stimulation electrode is placed
     pptype : str
         Type of point process. Built-in examples: VClamp, SEClamp and ICLamp.
         Defaults to 'SEClamp'.
     record_current : bool
-            Decides if current is recorded
+        Decides if current is recorded
+    record_potential : bool
+        switch for recording the potential on postsynaptic segment index
     color : str
         Color of stimulation electrode for plotting purposes. Defaults to 'p'
     marker : str
@@ -261,12 +263,15 @@ class StimIntElectrode(PointProcess):
 
     """    
     def __init__(self, cell, idx, pptype='SEClamp',
-                 color='p', marker='*', record_current=False, **kwargs):
+                 color='p', marker='*', record_current=False,
+                 record_potential=False, **kwargs):
         """Initialize StimIntElectrode class"""
         PointProcess.__init__(self, cell, idx, color, marker, record_current)
         self.pptype = pptype
         self.hocidx = int(cell.set_point_process(idx, pptype,
-                                                 record_current, **kwargs))
+                                                 record_current=record_current,
+                                                 record_potential=record_potential,
+                                                 **kwargs))
         cell.pointprocesses.append(self)
         cell.pointprocess_idx.append(idx)
 
@@ -276,83 +281,5 @@ class StimIntElectrode(PointProcess):
     
     def collect_potential(self, cell):
         """Collect membrane potential of segment with PointProcess"""
-        self.v = np.array(cell.synvreclist.o(self.hocidx))
+        self.v = np.array(cell.stimvreclist.o(self.hocidx))
 
-
-class PointProcessPlayInSoma:
-    """Class implementation of Eivind's playback alghorithm"""
-    def __init__(self, soma_trace):
-        """
-        Class for playing back somatic trace at specific time points
-        into soma as boundary condition for the membrane voltage
-        """
-        self.soma_trace = soma_trace
-    
-    def set_play_in_soma(self, cell, t_on=np.array([0])):
-        """
-        Set mechanisms for playing soma trace at time(s) t_on,
-        where t_on is a numpy.array
-        """
-        if type(t_on) != np.ndarray:
-            t_on = np.array(t_on)
-        
-        f = file(self.soma_trace)
-        x = []
-        for line in f.readlines():
-            x.append(list(map(float, line.split())))
-        x = np.array(x)
-        X = x.T
-        f.close()
-        
-        #time and values for trace, shifting
-        tTrace = X[0, ]
-        tTrace -= tTrace[0]
-        
-        trace = X[1, ]
-        trace -= trace[0]
-        trace += cell.e_pas
-        
-        #creating trace
-        somaTvec0 = tTrace
-        somaTvec0 += t_on[0]
-        somaTvec = somaTvec0
-        somaTrace = trace
-        
-        for i in range(1, t_on.size):
-            np.concatenate((somaTvec, somaTvec0 + t_on[i]))
-            np.concatenate((somaTrace, trace))
-
-        somaTvec1 = np.interp(np.arange(somaTvec[0], somaTvec[-1],
-                                cell.dt),
-                                somaTvec, somaTvec)
-        somaTrace1 = np.interp(np.arange(somaTvec[0], somaTvec[-1],
-                                cell.dt),
-                                somaTvec, somaTrace)
-        
-        somaTvecVec = neuron.h.Vector(somaTvec1)
-        somaTraceVec = neuron.h.Vector(somaTrace1)
-        
-        for sec in neuron.h.somalist: #cell.somalist
-            #ensure that soma is perfect capacitor
-            sec.cm = 1E9
-            #Why the fuck doesnt this work:
-            #for seg in sec:
-            #    somaTraceVec.play(seg._ref_v, somaTvecVec)
-        
-        #call function that insert trace on soma
-        self._play_in_soma(somaTvecVec, somaTraceVec)
-            
-    def _play_in_soma(self, somaTvecVec, somaTraceVec):
-        """
-        Replacement of LFPy.hoc "proc play_in_soma()",
-        seems necessary that this function lives in hoc
-        """
-        neuron.h('objref soma_tvec, soma_trace')
-        
-        neuron.h('soma_tvec = new Vector()')
-        neuron.h('soma_trace = new Vector()')
-        
-        neuron.h.soma_tvec.from_python(somaTvecVec)
-        neuron.h.soma_trace.from_python(somaTraceVec)
-        
-        neuron.h('soma_trace.play(&soma.v(0.5), soma_tvec)')

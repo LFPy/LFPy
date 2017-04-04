@@ -25,19 +25,22 @@ def load(filename):
     filen.close()
     return obj
 
-def noise_brown(ncols, nrows=1, weight=1, filter=None, filterargs=None):
+def noise_brown(ncols, nrows=1, weight=1., filter=None, filterargs=None):
     """Return 1/f^2 noise of shape(nrows, ncols obtained by taking
     the cumulative sum of gaussian white noise, with rms weight.
     
     If filter is not None, this function will apply
     the filter coefficients obtained
     by:
-    ::
         
-        >>> b, a = filter(**filterargs)
-        >>> signal = scipy.signal.lfilter(b, a, signal)
+    >>> b, a = filter(**filterargs)
+    >>> signal = scipy.signal.lfilter(b, a, signal)
     """
-    from matplotlib.mlab import rms_flat
+    def rms_flat(a):
+        """
+        Return the root mean square of all the elements of *a*, flattened out.
+        """
+        return np.sqrt(np.mean(np.absolute(a)**2))
 
     if filter is not None:
         coeff_b, coeff_a = list(filter(**filterargs))
