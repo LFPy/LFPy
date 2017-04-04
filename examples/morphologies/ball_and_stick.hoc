@@ -1,0 +1,32 @@
+/* ----------------------------------------------------
+example_morphology.hoc
+
+This hoc file creates a neuron of the following shape:
+
+
+                |
+                |
+                |
+                O
+                
+Note the conventions:
+ - soma needs to be a list (soma[0], not soma),
+ - use soma for the soma compartment,
+ - use a name starting with dend for the dendrites.
+-----------------------------------------------------*/
+
+
+create soma[1]
+create dend[1]
+
+soma[0] {
+    pt3dadd(-10, 0, 0, 10)
+    pt3dadd(00, 0, 0, 10)
+}
+
+dend[0] {
+    pt3dadd(00, 0, 0, 1)
+    pt3dadd(100, 0, 0, 1)
+}
+
+connect dend[0](0), soma[0](1)
