@@ -145,7 +145,5 @@ ax2.plot(cell.xmid[cell.synidx],cell.zmid[cell.synidx], 'o', ms=5,
 
 
 
-
-
-plt.savefig('example_anisotropy_%s.png' % str(sigma), dpi=150)
+plt.savefig('example_anisotropy_ps_%s.png' % str(sigma), dpi=150)
 # plt.show()
