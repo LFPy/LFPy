@@ -21,39 +21,6 @@ ctypedef np.float64_t DTYPE_t
 ctypedef Py_ssize_t   LTYPE_t
 
 
-cpdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] calc_lfp_choose(cell,
-                    double x=0, double y=0, double z=0, double sigma=0.3,
-                    r_limit=None,
-                    timestep=None, t_indices=None, method='linesource'):
-    '''
-    Determine which method to use, line-source for soma default
-    
-    kwargs:
-    ::
-        
-        cell: LFPy.Cell or LFPy.TemplateCell instance
-        x : double, extracellular position, x-axis
-        y : double, extracellular position, y-axis
-        z : double, extracellular position, z-axis
-        sigma : double, extracellular conductivity
-        r_limit : [None]/float/np.ndarray: minimum distance to source current
-        t_indices : [None]/np.ndarray, calculate LFP at specific timesteps
-        method=['linesource']/'pointsource'/'som_as_point'
-            switch for choosing underlying methods
-    '''
-    if method == 'som_as_point':
-        return calc_lfp_som_as_point(cell, x=x, y=y, z=z, sigma=sigma,
-                                     r_limit=r_limit,
-                                      t_indices=t_indices)
-    elif method == 'linesource':
-        return calc_lfp_linesource(cell, x=x, y=y, z=z, sigma=sigma,
-                                   r_limit=r_limit,
-                                   t_indices=t_indices)
-    elif method == 'pointsource':
-        return calc_lfp_pointsource(cell, x=x, y=y, z=z, sigma=sigma,
-                                    r_limit=r_limit,
-                                    t_indices=t_indices)
-
 
 cpdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] calc_lfp_linesource(
                         cell,
@@ -63,21 +30,28 @@ cpdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] calc_lfp_linesource(
                         double sigma=0.3,
                         r_limit=None,
                         t_indices=None):
-    '''
-    Calculate electric field potential using the line-source method, all
+    """Calculate electric field potential using the line-source method, all
     compartments treated as line sources, even soma.
 
-    kwargs:
-    ::
-        
-        cell: LFPy.Cell or LFPy.TemplateCell instance
-        x : double, extracellular position, x-axis
-        y : double, extracellular position, y-axis
-        z : double, extracellular position, z-axis
-        sigma : double, extracellular conductivity
-        r_limit : [None]/float/np.ndarray: minimum distance to source current
-        t_indices : [None]/np.ndarray, calculate LFP at specific timesteps
-    '''
+    Parameters
+    ----------
+    cell: obj
+        LFPy.Cell or LFPy.TemplateCell instance
+    x : float
+        extracellular position, x-axis
+    y : float
+        extracellular position, y-axis
+    z : float
+        extracellular position, z-axis
+    sigma : float
+        extracellular conductivity
+    r_limit : [None]/float/np.ndarray
+        minimum distance to source current. Can be scalar or numpy array with
+        a limit for each cell compartment. Defaults to [None]
+    t_indices : [None]/np.ndarray
+        calculate LFP at specific timesteps
+    """
+
     # Handling the r_limits. If a r_limit is a single value, an array r_limit
     # of shape cell.diam is returned.
     if type(r_limit) == int or type(r_limit) == float:
@@ -87,6 +61,7 @@ cpdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] calc_lfp_linesource(
             r_limit.shape() equal to cell.diam.shape()')
 
     cdef np.ndarray[DTYPE_t, ndim=2, negative_indices=False] currmem
+    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] mapping
     cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] xstart, xend, \
         ystart, yend, zstart, zend, deltaS, h, r2, l, \
         Ememi, Ememii, Ememiii, Emem, r_lims
@@ -117,7 +92,6 @@ cpdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] calc_lfp_linesource(
 
     l = h + deltaS
 
-
     hnegi = h < 0
     hposi = h >= 0
     lnegi = l < 0
@@ -129,36 +103,41 @@ cpdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] calc_lfp_linesource(
     [ii] = np.where(hnegi & lposi)
     #case iii, h >= 0, l >= 0
     [iii] = np.where(hposi & lposi)
-    
+    mapping = np.zeros(cell.totnsegs)
+    mapping[i] = _linesource_calc_case1(l[i], r2[i], h[i])
+    mapping[ii] = _linesource_calc_case2(l[ii], r2[ii], h[ii])
+    mapping[iii] = _linesource_calc_case3(l[iii], r2[iii], h[iii])
 
-    Ememi = _Ememi_calc(i, currmem, sigma, deltaS, l, r2, h)
-    Ememii = _Ememii_calc(ii, currmem, sigma, deltaS, l, r2, h)
-    Ememiii = _Ememiii_calc(iii, currmem, sigma, deltaS, l, r2, h)
+    Emem = np.dot(currmem.T, 1 / (4 * np.pi * sigma * deltaS) * mapping)
 
-    Emem = Ememi + Ememii + Ememiii
-
-    return Emem.transpose()
+    return Emem.T
 
 
-cpdef np.ndarray[DTYPE_t, ndim=1] calc_lfp_som_as_point(cell,
+cpdef np.ndarray[DTYPE_t, ndim=1] calc_lfp_soma_as_point(cell,
                           double x=0, double y=0, double z=0, double sigma=0.3,
                           r_limit=None,
                           t_indices=None):
-    '''
-    Calculate electric field potential using the line-source method,
+    """Calculate electric field potential using the line-source method,
     soma is treated as point/sphere source
-    
-    kwargs:
-    ::
-        
-        cell: LFPy.Cell or LFPy.TemplateCell instance
-        x : double, extracellular position, x-axis
-        y : double, extracellular position, y-axis
-        z : double, extracellular position, z-axis
-        sigma : double, extracellular conductivity
-        r_limit : [None]/float/np.ndarray: minimum distance to source current
-        t_indices : [None]/np.ndarray, calculate LFP at specific timesteps
-    '''
+
+    Parameters
+    ----------
+    cell: obj
+        `LFPy.Cell` or `LFPy.TemplateCell` instance
+    x : float
+        extracellular position, x-axis
+    y : float
+        extracellular position, y-axis
+    z : float
+        extracellular position, z-axis
+    sigma : float
+        extracellular conductivity in S/m
+    r_limit : float or np.ndarray or None
+        [None]/float/np.ndarray: minimum distance to source current.
+    t_indices : [None]/np.ndarray
+        calculate LFP at specific timesteps
+    """
+
     #Handling the r_limits. If a r_limit is a single value,
     #an array r_limit of shape cell.diam is returned.
     if type(r_limit) != type(np.array([])):
@@ -178,9 +157,9 @@ cpdef np.ndarray[DTYPE_t, ndim=1] calc_lfp_som_as_point(cell,
             nor is shape(r_limit) equal to shape(cell.diam)!')
 
     cdef np.ndarray[DTYPE_t, ndim=2] currmem
+    cdef np.ndarray[DTYPE_t, ndim=1] mapping
     cdef np.ndarray[DTYPE_t, ndim=1] xstart, xend, \
-        ystart, yend, zstart, zend, deltaS, h, r2, l, \
-        Ememi, Ememii, Ememiii, Emem
+        ystart, yend, zstart, zend, deltaS, h, r2, l, Emem
     cdef np.ndarray[LTYPE_t, ndim=1] i, ii, iii
     cdef double xmid, ymid, zmid
 
@@ -200,7 +179,6 @@ cpdef np.ndarray[DTYPE_t, ndim=1] calc_lfp_som_as_point(cell,
     zstart = cell.zstart
     zmid = cell.zmid[0]
     zend = cell.zend
-
 
     deltaS = _deltaS_calc(xstart, xend, ystart, yend, zstart, zend)
     h = _h_calc(xstart, xend, ystart, yend, zstart, zend, deltaS, x, y, z)
@@ -238,17 +216,17 @@ cpdef np.ndarray[DTYPE_t, ndim=1] calc_lfp_som_as_point(cell,
     #case iii,  h >= 0,  l >= 0
     [iii] = np.where(hposi & lposi)
 
-    Ememi = _Ememi_calc(i, currmem, sigma, deltaS, l, r2, h)
-    Ememii = _Ememii_calc(ii, currmem, sigma, deltaS, l, r2, h)
-    Ememiii = _Ememiii_calc(iii, currmem, sigma, deltaS, l, r2, h)
+    mapping = np.zeros(cell.totnsegs)
+    mapping[0] = 1 / r_soma
+    deltaS[0] = 1.
 
-    #Potential contribution from soma
-    Emem0 = currmem[0] / (4 * np.pi * sigma * r_soma)
+    mapping[i] = _linesource_calc_case1(l[i], r2[i], h[i])
+    mapping[ii] = _linesource_calc_case2(l[ii], r2[ii], h[ii])
+    mapping[iii] = _linesource_calc_case3(l[iii], r2[iii], h[iii])
 
-    #Summarizing all potential contributions
-    Emem = Emem0 + Ememi + Ememiii + Ememii
-    
-    return Emem.transpose()
+    Emem = np.dot(currmem.T, 1 / (4 * np.pi * sigma * deltaS) * mapping)
+
+    return Emem.T
 
 
 cdef double _r_soma_calc(double xmid, double ymid, double zmid,
@@ -276,99 +254,45 @@ cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] _check_rlimit(
     return r2
 
 
-cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] _Ememi_calc(
-               np.ndarray[LTYPE_t, ndim=1, negative_indices=False] i,
-               np.ndarray[DTYPE_t, ndim=2, negative_indices=False] currmem,
-               double sigma,
-               np.ndarray[DTYPE_t, ndim=1, negative_indices=False] deltaS,
-               np.ndarray[DTYPE_t, ndim=1, negative_indices=False] l,
-               np.ndarray[DTYPE_t, ndim=1, negative_indices=False] r2,
-               np.ndarray[DTYPE_t, ndim=1, negative_indices=False] h):
-    '''Subroutine used by calc_lfp_som_as_point()'''
-    cdef np.ndarray[DTYPE_t, ndim=2, negative_indices=False] currmem_iT = \
-        currmem[i].T
-    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] deltaS_i = \
-        deltaS[i]
-
-    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] l_i = l[i]
-    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] r2_i = r2[i]
-    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] h_i = h[i]
-
-    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] aa = 4 * \
-                                                    np.pi * sigma * deltaS_i
+cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] _linesource_calc_case1(
+               np.ndarray[DTYPE_t, ndim=1, negative_indices=False] l_i,
+               np.ndarray[DTYPE_t, ndim=1, negative_indices=False] r2_i,
+               np.ndarray[DTYPE_t, ndim=1, negative_indices=False] h_i):
+    """Calculates linesource contribution for case i"""
     cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] bb = (h_i *
                                                     h_i + r2_i)**0.5 - h_i
     cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] cc = (l_i *
                                                     l_i + r2_i)**0.5 - l_i
-    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] dd = \
-                                                    np.log(bb / cc) / aa
-
-    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] Emem_i = \
-                                                        np.dot(currmem_iT, dd)
-
-    return Emem_i
+    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] dd = np.log(bb / cc)
+    return dd
 
 
-cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] _Ememii_calc(
-                np.ndarray[LTYPE_t, ndim=1, negative_indices=False] ii,
-                np.ndarray[DTYPE_t, ndim=2, negative_indices=False] currmem,
-                double sigma,
-                np.ndarray[DTYPE_t, ndim=1, negative_indices=False] deltaS,
-                np.ndarray[DTYPE_t, ndim=1, negative_indices=False] l,
-                np.ndarray[DTYPE_t, ndim=1, negative_indices=False] r2,
-                np.ndarray[DTYPE_t, ndim=1, negative_indices=False] h):
-    '''Subroutine used by calc_lfp_som_as_point()'''
-    cdef np.ndarray[DTYPE_t, ndim=2, negative_indices=False] currmem_iiT = \
-        currmem[ii].transpose()
-    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] deltaS_ii = \
-        deltaS[ii]
-    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] l_ii = l[ii]
-    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] r2_ii = r2[ii]
-    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] h_ii = h[ii]
+cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] _linesource_calc_case2(
+                np.ndarray[DTYPE_t, ndim=1, negative_indices=False] l_ii,
+                np.ndarray[DTYPE_t, ndim=1, negative_indices=False] r2_ii,
+                np.ndarray[DTYPE_t, ndim=1, negative_indices=False] h_ii):
+    """Calculates linesource contribution for case ii"""
 
-    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] aa = 4 * \
-                                                np.pi * sigma * deltaS_ii
     cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] bb = (
                                                 h_ii*h_ii + r2_ii)**0.5 - h_ii
     cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] cc = (l_ii +
                                         (l_ii*l_ii + r2_ii)**0.5) / r2_ii
-    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] dd = \
-                                        np.log(bb * cc) / aa
-
-    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] Emem_ii = \
-                                                        np.dot(currmem_iiT, dd)
-    return Emem_ii
+    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] dd = np.log(bb * cc)
+    return dd
 
 
-cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] _Ememiii_calc(
-                 np.ndarray[LTYPE_t, ndim=1, negative_indices=False] iii,
-                 np.ndarray[DTYPE_t, ndim=2, negative_indices=False] currmem,
-                 double sigma,
-                 np.ndarray[DTYPE_t, ndim=1, negative_indices=False] deltaS,
-                 np.ndarray[DTYPE_t, ndim=1, negative_indices=False] l,
-                 np.ndarray[DTYPE_t, ndim=1, negative_indices=False] r2,
-                 np.ndarray[DTYPE_t, ndim=1, negative_indices=False] h):
-    '''Subroutine used by calc_lfp_som_as_point()'''
-    cdef np.ndarray[DTYPE_t, ndim=2, negative_indices=False] currmem_iiiT = \
-        currmem[iii].T
-    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] l_iii = l[iii]
-    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] r2_iii = r2[iii]
-    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] h_iii = h[iii]
-    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] deltaS_iii = \
-        deltaS[iii]
+cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] _linesource_calc_case3(
+                 np.ndarray[DTYPE_t, ndim=1, negative_indices=False] l_iii,
+                 np.ndarray[DTYPE_t, ndim=1, negative_indices=False] r2_iii,
+                 np.ndarray[DTYPE_t, ndim=1, negative_indices=False] h_iii):
+    """Calculates linesource contribution for case iii"""
 
-    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] aa = 4 * \
-                                                np.pi * sigma * deltaS_iii
     cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] bb = (l_iii*l_iii +
                                                             r2_iii)**0.5 + l_iii
     cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] cc = (h_iii*h_iii +
                                                             r2_iii)**0.5 + h_iii
-    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] dd = \
-                                                np.log(bb / cc) / aa
-
-    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] Emem_iii = \
-    							np.dot(currmem_iiiT, dd)
-    return Emem_iii
+    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] dd = np.log(bb / cc)
+    return dd
 
 
 cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] _deltaS_calc(
@@ -378,7 +302,7 @@ cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] _deltaS_calc(
                 np.ndarray[DTYPE_t, ndim=1, negative_indices=False] yend,
                 np.ndarray[DTYPE_t, ndim=1, negative_indices=False] zstart,
                 np.ndarray[DTYPE_t, ndim=1, negative_indices=False] zend):
-    '''Subroutine used by calc_lfp_som_as_point()'''
+    """Returns length of each segment"""
     cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] deltaS = (
         (xstart - xend)*(xstart - xend) + (ystart - yend)*(ystart - yend) +
         (zstart-zend)*(zstart-zend))**0.5
@@ -395,7 +319,7 @@ cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] _h_calc(
                 np.ndarray[DTYPE_t, ndim=1, negative_indices=False] zend,
                 np.ndarray[DTYPE_t, ndim=1, negative_indices=False] deltaS,
                 double x, double y, double z):
-    '''Subroutine used by calc_lfp_som_as_point()'''
+    '''Subroutine used by calc_lfp_soma_as_point()'''
     cdef np.ndarray[DTYPE_t, ndim=2, negative_indices=False] aa, aaT, bb
     cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] cc, hh
 
@@ -424,21 +348,26 @@ cpdef calc_lfp_pointsource(cell, double x=0, double y=0, double z=0,
                            double sigma=0.3,
                            r_limit=None, 
                            t_indices=None):
-    '''
-    Calculate local field potentials using the point-source equation on all
-    compartments
+    """Calculate extracellular potentials using the point-source
+    equation on all compartments
 
-    kwargs:
-    ::
-        
-        cell: LFPy.Cell or LFPy.TemplateCell instance
-        x : double, extracellular position, x-axis
-        y : double, extracellular position, y-axis
-        z : double, extracellular position, z-axis
-        sigma : double, extracellular conductivity
-        r_limit : [None]/float/np.ndarray: minimum distance to source current
-        t_indices : [None]/np.ndarray, calculate LFP at specific timesteps
-    '''
+    Parameters
+    ----------
+    cell: obj
+        LFPy.Cell or LFPy.TemplateCell instance
+    x : float
+        extracellular position, x-axis
+    y : float
+        extracellular position, y-axis
+    z : float
+        extracellular position, z-axis
+    sigma : float
+        extracellular conductivity
+    r_limit : [None]/float/np.ndarray
+        minimum distance to source current
+    t_indices : [None]/np.ndarray
+        calculate LFP at specific timesteps
+    """
     # Handling the r_limits. If a r_limit is a single value, an array r_limit
     # of shape cell.diam is returned.
     if type(r_limit) == int or type(r_limit) == float:
@@ -458,15 +387,13 @@ cpdef calc_lfp_pointsource(cell, double x=0, double y=0, double z=0,
 
     Emem = 1 / (4 * np.pi * sigma) * np.dot(currmem.T, 1/r)
 
-    return Emem.transpose()
+    return Emem.T
 
 
 cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] _check_rlimit_point(
                 np.ndarray[DTYPE_t, ndim=1, negative_indices=False] r2,
                 np.ndarray[DTYPE_t, ndim=1, negative_indices=False] r_limit):
-    '''Correct r2 so that r2 >= r_limit for all values'''
-    
+    """Correct r2 so that r2 >= r_limit for all values"""
     inds = r2 < (r_limit*r_limit)
     r2[inds] = r_limit[inds]*r_limit[inds]
-
     return r2
