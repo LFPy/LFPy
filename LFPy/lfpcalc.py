@@ -124,10 +124,10 @@ def calc_lfp_linesource_anisotropic(cell, x, y, z, sigma,
               sigma[0] * sigma[1] * (p_[2] - zstart[idx])**2)
 
     [i] = np.where(np.abs(b) <= 1e-6)
-    [iia] = np.where(np.bitwise_and(np.abs(4 * a * c - b**2) < 1e-6, np.abs(a - c) < 1e-6))
-    [iib] = np.where(np.bitwise_and(np.abs(4 * a * c - b**2) < 1e-6, np.abs(a - c) >= 1e-6))
-    [iii] = np.where(np.bitwise_and(4 * a * c - b**2 < -1e-6, np.abs(b) > 1e-6))
-    [iiii] = np.where(np.bitwise_and(4 * a * c - b**2 > 1e-6, np.abs(b) > 1e-6))
+    [iia] = np.where(np.bitwise_and(np.abs(4 * a * c - b*b) < 1e-6, np.abs(a - c) < 1e-6))
+    [iib] = np.where(np.bitwise_and(np.abs(4 * a * c - b*b) < 1e-6, np.abs(a - c) >= 1e-6))
+    [iii] = np.where(np.bitwise_and(4 * a * c - b*b < -1e-6, np.abs(b) > 1e-6))
+    [iiii] = np.where(np.bitwise_and(4 * a * c - b*b > 1e-6, np.abs(b) > 1e-6))
 
     if len(i) + len(iia) + len(iib) + len(iii) + len(iiii) != cell.totnsegs:
         print a, b, c
@@ -238,10 +238,10 @@ def calc_lfp_soma_as_point_anisotropic(cell, x, y, z, sigma,
               sigma[0] * sigma[1] * (p_[2] - zstart[idx])**2)
 
     [i] = np.where(np.abs(b) <= 1e-6)
-    [iia] = np.where(np.bitwise_and(np.abs(4 * a * c - b**2) < 1e-6, np.abs(a - c) < 1e-6))
-    [iib] = np.where(np.bitwise_and(np.abs(4 * a * c - b**2) < 1e-6, np.abs(a - c) >= 1e-6))
-    [iii] = np.where(np.bitwise_and(4 * a * c - b**2 < -1e-6, np.abs(b) > 1e-6))
-    [iiii] = np.where(np.bitwise_and(4 * a * c - b**2 > 1e-6, np.abs(b) > 1e-6))
+    [iia] = np.where(np.bitwise_and(np.abs(4 * a * c - b*b) < 1e-6, np.abs(a - c) < 1e-6))
+    [iib] = np.where(np.bitwise_and(np.abs(4 * a * c - b*b) < 1e-6, np.abs(a - c) >= 1e-6))
+    [iii] = np.where(np.bitwise_and(4 * a * c - b*b < -1e-6, np.abs(b) > 1e-6))
+    [iiii] = np.where(np.bitwise_and(4 * a * c - b*b > 1e-6, np.abs(b) > 1e-6))
 
     if len(i) + len(iia) + len(iib) + len(iii) + len(iiii) != cell.totnsegs:
         print a, b, c
@@ -277,7 +277,7 @@ def calc_lfp_soma_as_point_anisotropic(cell, x, y, z, sigma,
     if r2_soma < r_limit[0]**2:
         # For anisotropic media, the direction in which to move points matter.
         # Radial distance between point source and electrode is scaled to r_limit
-        r2_scale_factor = r_limit[0]**2 / r2_soma
+        r2_scale_factor = r_limit[0]*r_limit[0] / r2_soma
         dx2_soma *= r2_scale_factor
         dy2_soma *= r2_scale_factor
         dz2_soma *= r2_scale_factor
@@ -288,7 +288,6 @@ def calc_lfp_soma_as_point_anisotropic(cell, x, y, z, sigma,
 
     phi = 1 / (4 * np.pi) * np.dot(currmem.T, mapping)
     return phi.T
-
 
 
 def _anisotropic_line_source_case_i(a, c):
@@ -309,8 +308,8 @@ def _anisotropic_line_source_case_iii(a, b, c):
 
 
 def _anisotropic_line_source_case_iiii(a, b, c):
-    return (np.arcsinh((2 * a + b) / np.sqrt(4 * a * c - b**2)) -
-                        np.arcsinh(b / np.sqrt(4 * a * c - b**2)))
+    return (np.arcsinh((2 * a + b) / np.sqrt(4 * a * c - b*b)) -
+                        np.arcsinh(b / np.sqrt(4 * a * c - b*b)))
 
 
 def calc_lfp_linesource(cell, x, y, z, sigma, r_limit, t_indices=None):
@@ -470,22 +469,22 @@ def calc_lfp_soma_as_point(cell, x, y, z, sigma, r_limit, t_indices=None):
 
 def _linesource_calc_case1(l_i, r2_i, h_i):
     """Calculates linesource contribution for case i"""
-    bb = np.sqrt(h_i**2 + r2_i) - h_i
-    cc = np.sqrt(l_i**2 + r2_i) - l_i
+    bb = np.sqrt(h_i*h_i + r2_i) - h_i
+    cc = np.sqrt(l_i*l_i + r2_i) - l_i
     dd = np.log(bb / cc)
     return dd
 
 def _linesource_calc_case2(l_ii, r2_ii, h_ii):
     """Calculates linesource contribution for case ii"""
-    bb = np.sqrt(h_ii**2 + r2_ii) - h_ii
-    cc = (l_ii + np.sqrt(l_ii**2 + r2_ii)) / r2_ii
+    bb = np.sqrt(h_ii*h_ii + r2_ii) - h_ii
+    cc = (l_ii + np.sqrt(l_ii*l_ii + r2_ii)) / r2_ii
     dd = np.log(bb * cc)
     return dd
     
 def _linesource_calc_case3(l_iii, r2_iii, h_iii):
     """Calculates linesource contribution for case iii"""
-    bb = np.sqrt(l_iii**2 + r2_iii) + l_iii
-    cc = np.sqrt(h_iii**2 + r2_iii) + h_iii
+    bb = np.sqrt(l_iii*l_iii + r2_iii) + l_iii
+    cc = np.sqrt(h_iii*h_iii + r2_iii) + h_iii
     dd = np.log(bb / cc)
     return dd
 
@@ -516,7 +515,7 @@ def _check_rlimit(r2, r_limit, h, deltaS):
             if (h[idx] < r_limit[idx]) and ((deltaS[idx]+h[idx]) > -r_limit[idx]):
                 print('Adjusting distance to segment %s from %.2f to %.2f.'
                       % (idx, r2[idx]**0.5, r_limit[idx]))
-                r2[idx] = r_limit[idx]**2
+                r2[idx] = r_limit[idx]*r_limit[idx]
     return r2
 
 def _r_soma_calc(xmid, ymid, zmid, x, y, z):
@@ -596,11 +595,11 @@ def calc_lfp_pointsource_anisotropic(cell, x, y, z, sigma, r_limit,
         dx2[np.abs(r2) < 1e-6] += 0.001
         r2[np.abs(r2) < 1e-6] += 0.001
 
-    close_idxs = r2 < r_limit**2
+    close_idxs = r2 < r_limit*r_limit
 
     # For anisotropic media, the direction in which to move points matter.
     # Radial distance between point source and electrode is scaled to r_limit
-    r2_scale_factor = r_limit[close_idxs]**2 / r2[close_idxs]
+    r2_scale_factor = r_limit[close_idxs]*r_limit[close_idxs] / r2[close_idxs]
     dx2[close_idxs] *= r2_scale_factor
     dy2[close_idxs] *= r2_scale_factor
     dz2[close_idxs] *= r2_scale_factor

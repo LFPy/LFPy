@@ -446,7 +446,7 @@ class RecExtElectrode:
                     'y' : crcl[1],
                     'z' : crcl[2],
                 }
-            elif self.shape  is 'square':
+            elif self.shape is 'square':
                 sqr = create_sqr(m, i)
                 self.circle_circ[i] = {
                     'x': sqr[0],

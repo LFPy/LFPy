@@ -177,8 +177,127 @@ class testRecExtElectrode(unittest.TestCase):
                                                     electrodeZ=Z[i])
         np.testing.assert_allclose(LFP_analytic, LFP_LFPy, atol=1E-4)
 
+    def test_isotropic_version_of_anisotropic_methods(self):
+
+        stickParams = {
+            'morphology' : os.path.join(LFPy.__path__[0], 'test', 'stick.hoc'),
+            'rm' : 30000,
+            'cm' : 1,
+            'Ra' : 150,
+            'tstartms' : 0,
+            'tstopms' : 20,
+            'dt' : 2**-4,
+            'nsegs_method' : 'lambda_f',
+            'lambda_f' : 1000,
+
+        }
+        stimParams = {
+            'pptype' : 'SinSyn',
+            'delay' : -100.,
+            'dur' : 1000.,
+            'pkamp' : 1.,
+            'freq' : 100.,
+            'phase' : -np.pi/2,
+            'bias' : 0.,
+            'record_current' : True
+        }
+
+        isotropic_electrodeParams = {
+            'sigma' : 0.3,
+            'x' : np.ones(11) * 100.,
+            'y' : np.zeros(11),
+            'z' : np.linspace(1000, 0, 11),
+        }
+        anisotropic_electrodeParams = isotropic_electrodeParams.copy()
+        anisotropic_electrodeParams["sigma"] = [isotropic_electrodeParams["sigma"]] * 3
 
 
+        methods = ["pointsource", "linesource", "soma_as_point"]
+
+        for method in methods:
+            isotropic_electrodeParams["method"] = method
+            anisotropic_electrodeParams["method"] = method
+
+            isotropic_electrode = LFPy.RecExtElectrode(**isotropic_electrodeParams)
+            anisotropic_electrode = LFPy.RecExtElectrode(**anisotropic_electrodeParams)
+
+            stick = LFPy.Cell(**stickParams)
+            stick.set_pos(zpos=-stick.zstart[0])
+
+            synapse = LFPy.StimIntElectrode(stick, stick.get_closest_idx(0, 0, 1000),
+                                   **stimParams)
+            stick.simulate([isotropic_electrode, anisotropic_electrode],
+                           rec_imem=True, rec_istim=True, rec_vmem=True)
+
+            np.testing.assert_allclose(isotropic_electrode.LFP,
+                                       anisotropic_electrode.LFP)
+
+    def test_compare_anisotropic_lfp_methods(self):
+
+        stickParams = {
+            'morphology' : os.path.join(LFPy.__path__[0], 'test', 'stick.hoc'),
+            'rm' : 30000,
+            'cm' : 1,
+            'Ra' : 150,
+            'tstartms' : 0,
+            'tstopms' : 20,
+            'dt' : 2**-4,
+            'nsegs_method' : 'lambda_f',
+            'lambda_f' : 1000,
+
+        }
+        stimParams = {
+            'pptype' : 'SinSyn',
+            'delay' : -100.,
+            'dur' : 1000.,
+            'pkamp' : 1.,
+            'freq' : 100.,
+            'phase' : -np.pi/2,
+            'bias' : 0.,
+            'record_current' : True
+        }
+
+        electrodeParams = {
+            'sigma' : [0.3, 0.3, 0.45],
+            'x' : np.array([0, 1000]),
+            'y' : np.zeros(2),
+            'z' : np.zeros(2),
+
+        }
+
+        ps_electrodeParams = electrodeParams.copy()
+        ls_electrodeParams = electrodeParams.copy()
+        sap_electrodeParams = electrodeParams.copy()
+
+        ps_electrodeParams["method"] = "pointsource"
+        ls_electrodeParams["method"] = "linesource"
+        sap_electrodeParams["method"] = "soma_as_point"
+
+        electrode_ps = LFPy.RecExtElectrode(**ps_electrodeParams)
+        electrode_ls = LFPy.RecExtElectrode(**ls_electrodeParams)
+        electrode_sap = LFPy.RecExtElectrode(**sap_electrodeParams)
+
+        stick = LFPy.Cell(**stickParams)
+        stick.set_pos(zpos=-stick.zstart[0])
+
+        synapse = LFPy.StimIntElectrode(stick, stick.get_closest_idx(0, 0, 1000),
+                               **stimParams)
+        stick.simulate([electrode_ps, electrode_ls, electrode_sap],
+                       rec_imem=True, rec_istim=True, rec_vmem=True)
+
+        # Test that distant electrode is independent of choice of method
+        np.testing.assert_almost_equal(electrode_ps.LFP[1,:],
+                                   electrode_ls.LFP[1,:])
+
+        np.testing.assert_almost_equal(electrode_ps.LFP[1,:],
+                                   electrode_sap.LFP[1,:])
+
+        # Hack to test that LFP close to stick is dependent on choice of method
+        np.testing.assert_raises(AssertionError, np.testing.assert_array_equal,
+                                 electrode_ps.LFP[0,:], electrode_ls.LFP[0,:])
+
+        np.testing.assert_raises(AssertionError, np.testing.assert_array_equal,
+                                 electrode_ps.LFP[0,:], electrode_sap.LFP[0,:])
 
 ######## Functions used by tests: ##############################################
 
