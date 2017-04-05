@@ -499,7 +499,8 @@ def _h_calc(xstart, xend, ystart, yend, zstart, zend, deltaS, x, y, z):
     """Subroutine used by calc_lfp_*()"""
     aa = np.array([x - xend, y - yend, z-zend])
     bb = np.array([xend - xstart, yend - ystart, zend - zstart])
-    cc = np.dot(aa.T, bb).diagonal()
+    # cc = np.dot(aa.T, bb).diagonal()
+    cc = np.sum(aa*bb, axis=0)
     hh = cc / deltaS
     return hh
 
