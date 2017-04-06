@@ -18,7 +18,7 @@ import numpy as np
 
 
 def calc_lfp_linesource(cell, x=0., y=0., z=0., sigma=0.3,
-                        r_limit=None, t_indices=None):
+                        r_limit=None):
     """Calculate electric field potential using the line-source method, all
     compartments treated as line sources, including soma.
     
@@ -48,10 +48,10 @@ def calc_lfp_linesource(cell, x=0., y=0., z=0., sigma=0.3,
         raise Exception('r_limit is neither a float- or int- value, nor is \
             r_limit.shape() equal to cell.diam.shape()')
     
-    if t_indices is not None:
-        currmem = cell.imem[:, t_indices]
-    else:
-        currmem = cell.imem
+    # if t_indices is not None:
+    #     currmem = cell.imem[:, t_indices]
+    # else:
+    #     currmem = cell.imem
 
     #some variables for h, r2, r_soma calculations
     xstart = cell.xstart
@@ -87,12 +87,12 @@ def calc_lfp_linesource(cell, x=0., y=0., z=0., sigma=0.3,
     mapping[ii] = _linesource_calc_case2(l[ii], r2[ii], h[ii])
     mapping[iii] = _linesource_calc_case3(l[iii], r2[iii], h[iii])
 
-    Emem = np.dot(currmem.T, 1 / (4 * np.pi * sigma * deltaS) * mapping)
+    # Emem = np.dot(currmem.T, 1 / (4 * np.pi * sigma * deltaS) * mapping)
     
-    return Emem.T
+    return 1 / (4 * np.pi * sigma * deltaS) * mapping
 
 def calc_lfp_soma_as_point(cell, x=0., y=0., z=0., sigma=0.3,
-                           r_limit=None, t_indices=None):
+                           r_limit=None):
     """Calculate electric field potential using the line-source method,
     soma is treated as point/sphere source
     
@@ -131,10 +131,10 @@ def calc_lfp_soma_as_point(cell, x=0., y=0., z=0., sigma=0.3,
             on the form r_limit=[s_limit, r_limit],  \
             nor is shape(r_limit) equal to shape(cell.diam)!')
 
-    if t_indices is not None:
-        currmem = cell.imem[:, t_indices]
-    else:
-        currmem = cell.imem
+    # if t_indices is not None:
+    #     currmem = cell.imem[:, t_indices]
+    # else:
+    #     currmem = cell.imem
 
     #some variables for h, r2, r_soma calculations
     xstart = cell.xstart
@@ -193,9 +193,9 @@ def calc_lfp_soma_as_point(cell, x=0., y=0., z=0., sigma=0.3,
     mapping[ii] = _linesource_calc_case2(l[ii], r2[ii], h[ii])
     mapping[iii] = _linesource_calc_case3(l[iii], r2[iii], h[iii])
 
-    Emem = np.dot(currmem.T, 1 / (4 * np.pi * sigma * deltaS) * mapping)
+    # Emem = np.dot(currmem.T, 1 / (4 * np.pi * sigma * deltaS) * mapping)
 
-    return Emem.T
+    return 1 / (4 * np.pi * sigma * deltaS) * mapping
 
 def _linesource_calc_case1(l_i, r2_i, h_i):
     """Calculates linesource contribution for case i"""
@@ -254,7 +254,7 @@ def _r_soma_calc(xmid, ymid, zmid, x, y, z):
     return r_soma
 
 def calc_lfp_pointsource(cell, x=0, y=0, z=0, sigma=0.3,
-                        r_limit=None, t_indices=None):
+                        r_limit=None):
     """Calculate extracellular potentials using the point-source
     equation on all compartments
 
@@ -283,18 +283,13 @@ def calc_lfp_pointsource(cell, x=0, y=0, z=0, sigma=0.3,
         raise Exception('r_limit is neither a float- or int- value, nor is \
             r_limit.shape() equal to cell.diam.shape()')
 
-    if t_indices is not None:
-        currmem = cell.imem[:, t_indices]
-    else:
-        currmem = cell.imem
-    
     r2 = (cell.xmid - x)**2 + (cell.ymid - y)**2 + (cell.zmid - z)**2
     r2 = _check_rlimit_point(r2, r_limit)
     r = np.sqrt(r2)
     
-    Emem = 1 / (4 * np.pi * sigma) * np.dot(currmem.T, 1/r)
+    mapping = 1 / (4 * np.pi * sigma * r)
     
-    return Emem.T
+    return mapping
 
 def _check_rlimit_point(r2, r_limit):
     """Correct r2 so that r2 >= r_limit**2 for all values"""

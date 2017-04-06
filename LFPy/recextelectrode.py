@@ -244,6 +244,8 @@ class RecExtElectrode:
         if self.cell is not None:
             self._test_imem_sum()
             self.r_limit = self.cell.diam/2
+            self.mapping = np.zeros((self.x.size, len(cell.xmid)))
+
 
         if method == 'soma_as_point':
             self.lfp_method = lfpcalc.calc_lfp_soma_as_point
@@ -300,12 +302,7 @@ class RecExtElectrode:
             self.cell = cell
             self._test_imem_sum()
             self.r_limit = self.cell.diam/2
-
-        if not hasattr(self,  'LFP'):
-            if t_indices is not None:
-                self.LFP = np.zeros((self.x.size, t_indices.size))
-            else:
-                self.LFP = np.zeros((self.x.size, self.cell.imem.shape[1]))
+            self.mapping = np.zeros((self.x.size, len(cell.xmid)))
 
         if self.n is not None and self.N is not None and self.r is not None:
             if self.n <= 1:
@@ -313,31 +310,37 @@ class RecExtElectrode:
             else:
                 pass
 
-            self._lfp_el_pos_calc_dist(t_indices=t_indices)
+            self._lfp_el_pos_calc_dist()
             if self.verbose:
                 print('calculations finished, %s, %s' % (str(self),
                                                          str(self.cell)))
         else:
-            self._loop_over_contacts(t_indices=t_indices)
+            self._loop_over_contacts()
             if self.verbose:
                 print('calculations finished, %s, %s' % (str(self),
                                                          str(self.cell)))
-        
+        if t_indices is not None:
+            currmem = self.cell.imem[:, t_indices]
+        else:
+            currmem = self.cell.imem
 
-    def _loop_over_contacts(self, t_indices=None):
+        self.LFP = np.dot(self.mapping, currmem)
+        # del self.mapping
+
+
+    def _loop_over_contacts(self):
         """Loop over electrode contacts, and return LFPs across channels"""
 
         for i in range(self.x.size):
-            self.LFP[i, :] = self.lfp_method(self.cell,
-                                            x = self.x[i],
-                                            y = self.y[i],
-                                            z = self.z[i],
-                                            sigma = self.sigma,
-                                            r_limit = self.r_limit,
-                                            t_indices = t_indices)
+            self.mapping[i, :] = self.lfp_method(self.cell,
+                                             x = self.x[i],
+                                             y = self.y[i],
+                                             z = self.z[i],
+                                             sigma = self.sigma,
+                                             r_limit = self.r_limit)
 
     
-    def _lfp_el_pos_calc_dist(self, m=50, t_indices=None):
+    def _lfp_el_pos_calc_dist(self, m=50):
         """
         Calc. of LFP over an n-point integral approximation over flat
         electrode surface: circle of radius r or square of side r. The
@@ -426,8 +429,7 @@ class RecExtElectrode:
                                               y = y_n[j],
                                               z = z_n[j],
                                               r_limit = self.r_limit,
-                                              sigma = self.sigma,
-                                              t_indices = t_indices)
+                                              sigma = self.sigma)
 
                 if j == 0:
                     lfp_e = tmp
@@ -447,16 +449,15 @@ class RecExtElectrode:
                 x_n, y_n, z_n = calc_xyz_n(i)
                 
                 #fill in with contact average
-                self.LFP[i] = loop_over_points(x_n, y_n, z_n) #lfp_e.mean(axis=0)
+                self.mapping[i] = loop_over_points(x_n, y_n, z_n) #lfp_e.mean(axis=0)
 
             else:
-                self.LFP[i] = self.lfp_method(self.cell,
-                                                        x=self.x[i],
-                                                        y=self.y[i],
-                                                        z=self.z[i],
-                                                        r_limit = self.r_limit,
-                                                        sigma=self.sigma,
-                                                        t_indices=t_indices)
+                self.mapping[i] = self.lfp_method(self.cell,
+                                              x=self.x[i],
+                                              y=self.y[i],
+                                              z=self.z[i],
+                                              r_limit = self.r_limit,
+                                              sigma=self.sigma)
 
             self.offsets[i] = {'x_n' : x_n,
                                'y_n' : y_n,
