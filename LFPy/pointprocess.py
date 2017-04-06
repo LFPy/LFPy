@@ -125,7 +125,11 @@ class Synapse(PointProcess):
 
     def set_spike_times(self, sptimes=np.zeros(0)):
         """Set the spike times explicitly using numpy arrays"""
-        self.sptimes = sptimes
+        try:
+            assert type(sptimes) is np.ndarray
+        except AssertionError:
+            raise AssertionError('synapse activation times must be a np.ndarray, not type({})'.format(type(sptimes)))
+        # self.sptimes = sptimes
         self.cell.sptimeslist.append(sptimes)
     
     def set_spike_times_w_netstim(self, noise=1., start=0., number=1E3,

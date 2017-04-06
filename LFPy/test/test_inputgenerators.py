@@ -25,51 +25,51 @@ class testInputGenerators(unittest.TestCase):
     """
     test LFPy.inputgenerators module
     """
-    def test_inputgenerators_get_rand_spike_times(self):
-        """test LFPy.inputgenerators.get_rand_spike_times"""
-        nsyn = 10
-        nspikes = 100
-        tstart = 0.
-        tstop=1000.        
-        spt = LFPy.inputgenerators.get_rand_spike_times(nsyn=nsyn, nspikes=nspikes, tstart=tstart, tstop=tstop)
-        
-        self.assertEqual(spt.shape, (nsyn, nspikes))
-        self.assertTrue((spt.max() <= tstop) & (spt.min() >= tstart))
+    # def test_inputgenerators_get_rand_spike_times(self):
+    #     """test LFPy.inputgenerators.get_rand_spike_times"""
+    #     nsyn = 10
+    #     nspikes = 100
+    #     tstart = 0.
+    #     tstop=1000.        
+    #     spt = LFPy.inputgenerators.get_rand_spike_times(nsyn=nsyn, nspikes=nspikes, tstart=tstart, tstop=tstop)
+    #     
+    #     self.assertEqual(spt.shape, (nsyn, nspikes))
+    #     self.assertTrue((spt.max() <= tstop) & (spt.min() >= tstart))
 
-    def test_inputgenerators_stationary_poisson(self):
-        """test LFPy.inputgenerators.stationary_poisson"""
-        nsyn = 10
-        rate = 10.
-        tstart = 0.
-        tstop = 10000.
-        
-        spt = LFPy.inputgenerators.stationary_poisson(nsyn=nsyn, rate=rate, tstart=tstart, tstop=tstop)
-        
-        self.assertEqual(len(spt), nsyn)
-        for x in spt:
-            if x.size > 0:
-                self.assertTrue((x.min() >= tstart) & (x.max() <= tstop))
+    # def test_inputgenerators_stationary_poisson(self):
+    #     """test LFPy.inputgenerators.stationary_poisson"""
+    #     nsyn = 10
+    #     rate = 10.
+    #     tstart = 0.
+    #     tstop = 10000.
+    #     
+    #     spt = LFPy.inputgenerators.stationary_poisson(nsyn=nsyn, rate=rate, tstart=tstart, tstop=tstop)
+    #     
+    #     self.assertEqual(len(spt), nsyn)
+    #     for x in spt:
+    #         if x.size > 0:
+    #             self.assertTrue((x.min() >= tstart) & (x.max() <= tstop))
 
-    def test_inputgenerators_stationary_gamma(self):
-        """test LFPy.inputgenerators.stationary_gamma"""
-        tstart = 0.
-        tstop = 10000.
-        
-        spt = LFPy.inputgenerators.stationary_gamma(tstart=tstart, tstop=tstop)
-        
-        for x in spt:
-            if x.size > 0:
-                self.assertTrue((x.min() >= tstart) & (x.max() <= tstop))
+    # def test_inputgenerators_stationary_gamma(self):
+    #     """test LFPy.inputgenerators.stationary_gamma"""
+    #     tstart = 0.
+    #     tstop = 10000.
+    #     
+    #     spt = LFPy.inputgenerators.stationary_gamma(tstart=tstart, tstop=tstop)
+    #     
+    #     for x in spt:
+    #         if x.size > 0:
+    #             self.assertTrue((x.min() >= tstart) & (x.max() <= tstop))
 
-    def test_get_activation_times_from_scipy_stats(self):
-        """test LFPy.inputgenerators.test_get_activation_times_from_scipy_stats
+    def test_get_activation_times_from_distribution(self):
+        """test LFPy.inputgenerators.get_activation_times_from_distribution
         """
         n = 10
         tstart = 0.
         tstop = 1E4
         distribution = st.expon
         rvs_args = dict(loc=0, scale=100.)
-        times = LFPy.inputgenerators.get_activation_times_from_scipy_stats(
+        times = LFPy.inputgenerators.get_activation_times_from_distribution(
             n=n, tstart=tstart, tstop=tstop, rvs_args=rvs_args, maxiter=1E6
         )
         self.assertTrue(len(times) == n)

@@ -72,8 +72,6 @@ synapseParameters_AMPA = {
     'tau1' : 1.,                #Time constant, rise
     'tau2' : 3.,                #Time constant, decay
     'weight' : 0.005,           #Synaptic weight
-    'color' : 'r',              #for plt.plot
-    'marker' : '.',             #for plt.plot
     'record_current' : True,    #record synaptic currents
 }
 # Excitatory synapse parameters
@@ -83,8 +81,6 @@ synapseParameters_NMDA = {
     'tau1' : 10.,
     'tau2' : 30.,
     'weight' : 0.005,
-    'color' : 'm',
-    'marker' : '.',
     'record_current' : True,
 }
 # Inhibitory synapse parameters
@@ -94,8 +90,6 @@ synapseParameters_GABA_A = {
     'tau1' : 1.,
     'tau2' : 12.,
     'weight' : 0.005,
-    'color' : 'b',
-    'marker' : '.',
     'record_current' : True
 }
 # where to insert, how many, and which input statistics

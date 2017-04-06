@@ -17,6 +17,7 @@
 # importing some modules, setting some matplotlib values for pl.plot.
 import LFPy
 import numpy as np
+import scipy.stats
 import matplotlib.pyplot as plt
 plt.rcParams.update({'font.size' : 12,
                      'figure.facecolor' : '1',
@@ -39,7 +40,7 @@ def insert_synapses(synparams, section, n, spTimesFun, args):
         synparams.update({'idx' : int(i)})
 
         # Some input spike train using the function call
-        spiketimes = spTimesFun(args[0], args[1], args[2], args[3], args[4])
+        [spiketimes] = spTimesFun(**args)
         
         # Create synapse(s) and setting times using the Synapse class in LFPy
         s = LFPy.Synapse(cell, **synparams)
@@ -75,8 +76,6 @@ synapseParameters_AMPA = {
     'tau1' : 1.,                #Time constant, rise
     'tau2' : 3.,                #Time constant, decay
     'weight' : 0.005,           #Synaptic weight
-    'color' : 'r',              #for plt.plot
-    'marker' : '.',             #for plt.plot
     'record_current' : True,    #record synaptic currents
 }
 # Excitatory synapse parameters
@@ -86,8 +85,6 @@ synapseParameters_NMDA = {
     'tau1' : 10.,
     'tau2' : 30.,
     'weight' : 0.005,
-    'color' : 'm',
-    'marker' : '.',
     'record_current' : True,
 }
 # Inhibitory synapse parameters
@@ -97,31 +94,35 @@ synapseParameters_GABA_A = {
     'tau1' : 1.,
     'tau2' : 12.,
     'weight' : 0.005,
-    'color' : 'b',
-    'marker' : '.',
     'record_current' : True
 }
 # where to insert, how many, and which input statistics
 insert_synapses_AMPA_args = {
     'section' : 'apic',
     'n' : 100,
-    'spTimesFun' : LFPy.inputgenerators.stationary_gamma,
-    'args' : [cellParameters['tstart'], cellParameters['tstop'], 0.5, 40,
-              cellParameters['tstart']]
+    'spTimesFun' : LFPy.inputgenerators.get_activation_times_from_distribution,
+    'args' : dict(n=1, tstart=0, tstop=cellParameters['tstop'],
+                  distribution=scipy.stats.gamma,
+                  rvs_args=dict(a=0.5, loc=0., scale=40)
+                  )
 }
 insert_synapses_NMDA_args = {
     'section' : ['dend', 'apic'],
     'n' : 15,
-    'spTimesFun' : LFPy.inputgenerators.stationary_gamma,
-    'args' : [cellParameters['tstart'], cellParameters['tstop'], 2, 50,
-              cellParameters['tstart']]
+    'spTimesFun' : LFPy.inputgenerators.get_activation_times_from_distribution,
+    'args' : dict(n=1, tstart=0, tstop=cellParameters['tstop'],
+                  distribution=scipy.stats.gamma,
+                  rvs_args=dict(a=2, loc=0, scale=50)
+                  )
 }
 insert_synapses_GABA_A_args = {
     'section' : 'dend',
     'n' : 100,
-    'spTimesFun' : LFPy.inputgenerators.stationary_gamma,
-    'args' : [cellParameters['tstart'], cellParameters['tstop'], 0.5, 40,
-              cellParameters['tstart']]
+    'spTimesFun' : LFPy.inputgenerators.get_activation_times_from_distribution,
+    'args' : dict(n=1, tstart=0, tstop=cellParameters['tstop'],
+                  distribution=scipy.stats.gamma,
+                  rvs_args=dict(a=0.5, loc=0., scale=40)
+                  )
 }
 
 # Define electrode geometry corresponding to a laminar electrode, where contact
