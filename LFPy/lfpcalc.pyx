@@ -326,7 +326,7 @@ cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] _h_calc(
     aa = np.array([x - xend, y - yend, z-zend])
     aaT = aa.T
     bb = np.array([xend - xstart, yend - ystart, zend - zstart])
-    cc = np.dot(aaT, bb).diagonal()
+    cc = np.sum(aa*bb, axis=0)
     hh = cc / deltaS
     return hh
 
