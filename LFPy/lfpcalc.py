@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 """Copyright (C) 2012 Computational Neuroscience Group, NMBU.
 
 This program is free software: you can redistribute it and/or modify
@@ -314,12 +315,12 @@ def _anisotropic_line_source_case_iiii(a, b, c):
 
 def calc_lfp_linesource(cell, x, y, z, sigma, r_limit, t_indices=None):
     """Calculate electric field potential using the line-source method, all
-    compartments treated as line sources, even soma.
+    compartments treated as line sources, including soma.
     
     Parameters
     ----------        
     cell: obj
-        LFPy.Cell or LFPy.TemplateCell instance
+        LFPy.Cell or LFPy.TemplateCell like instance
     x : float
         extracellular position, x-axis
     y : float
@@ -384,7 +385,7 @@ def calc_lfp_soma_as_point(cell, x, y, z, sigma, r_limit, t_indices=None):
     Parameters
     ----------
     cell: obj
-        `LFPy.Cell` or `LFPy.TemplateCell` instance
+        `LFPy.Cell` or `LFPy.TemplateCell` like instance
     x : float
         extracellular position, x-axis
     y : float
@@ -498,7 +499,6 @@ def _h_calc(xstart, xend, ystart, yend, zstart, zend, deltaS, x, y, z):
     """Subroutine used by calc_lfp_*()"""
     aa = np.array([x - xend, y - yend, z-zend])
     bb = np.array([xend - xstart, yend - ystart, zend - zstart])
-    # cc = np.dot(aa.T, bb).diagonal()
     cc = np.sum(aa*bb, axis=0)
     hh = cc / deltaS
     return hh
@@ -530,7 +530,7 @@ def calc_lfp_pointsource(cell, x, y, z, sigma, r_limit, t_indices=None):
     Parameters
     ----------
     cell: obj
-        LFPy.Cell or LFPy.TemplateCell instance
+        LFPy.Cell or LFPy.TemplateCell like instance
     x : float
         extracellular position, x-axis
     y : float

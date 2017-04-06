@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 '''Copyright (C) 2012 Computational Neuroscience Group, NMBU.
 
 This program is free software: you can redistribute it and/or modify
@@ -373,12 +374,12 @@ cpdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] calc_lfp_linesource(
                         np.ndarray[DTYPE_t, ndim=1, negative_indices=False] r_limit,
                         t_indices=None):
     """Calculate electric field potential using the line-source method, all
-    compartments treated as line sources, even soma.
+    compartments treated as line sources, including soma.
 
     Parameters
     ----------
     cell: obj
-        LFPy.Cell or LFPy.TemplateCell instance
+        LFPy.Cell or LFPy.TemplateCell like instance
     x : float
         extracellular position, x-axis
     y : float
@@ -457,7 +458,7 @@ cpdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] calc_lfp_soma_as_point
     Parameters
     ----------
     cell: obj
-        `LFPy.Cell` or `LFPy.TemplateCell` instance
+        `LFPy.Cell` or `LFPy.TemplateCell` like instance
     x : float
         extracellular position, x-axis
     y : float
@@ -643,7 +644,6 @@ cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] _h_calc(
     aa = np.array([x - xend, y - yend, z-zend])
     aaT = aa.T
     bb = np.array([xend - xstart, yend - ystart, zend - zstart])
-    # cc = np.dot(aaT, bb).diagonal()
     cc = np.sum(aa*bb, axis=0)
     hh = cc / deltaS
     return hh
@@ -670,7 +670,7 @@ cpdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] calc_lfp_pointsource(c
     Parameters
     ----------
     cell: obj
-        LFPy.Cell or LFPy.TemplateCell instance
+        LFPy.Cell or LFPy.TemplateCell like instance
     x : float
         extracellular position, x-axis
     y : float
