@@ -1133,32 +1133,32 @@ class Cell(object):
                     variablereclist.append(recvector)
 
 
-    def set_pos(self, xpos=0., ypos=0., zpos=0.):
+    def set_pos(self, x=0., y=0., z=0.):
         """Set the cell position.
 
         Move the cell geometry so that midpoint of soma section is
-        in (xpos, ypos, zpos). If no soma pos, use the first segment
+        in (x, y, z). If no soma pos, use the first segment
 
         Parameters
         ----------
-        xpos : float
+        x : float
             x position defaults to 0.0
-        ypos : float
+        y : float
             y position defaults to 0.0
-        zpos : float
+        z : float
             z position defaults to 0.0
         """
-        diffx = xpos-self.somapos[0]
-        diffy = ypos-self.somapos[1]
-        diffz = zpos-self.somapos[2]
+        diffx = x-self.somapos[0]
+        diffy = y-self.somapos[1]
+        diffz = z-self.somapos[2]
 
         #also update the pt3d_pos:
         if self.pt3d and hasattr(self, 'x3d'):
             self._set_pt3d_pos(diffx, diffy, diffz)
         else:
-            self.somapos[0] = xpos
-            self.somapos[1] = ypos
-            self.somapos[2] = zpos
+            self.somapos[0] = x
+            self.somapos[1] = y
+            self.somapos[2] = z
 
             self.xstart += diffx
             self.ystart += diffy

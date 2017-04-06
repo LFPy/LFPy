@@ -109,7 +109,7 @@ electrode = LFPy.RecExtElectrode(**electrodeParameters)
 #Initialize cell instance, using the LFPy.Cell class
 cell = LFPy.Cell(**cellParameters)
 #set the position of midpoint in soma to Origo (not needed, this is the default)
-cell.set_pos(xpos = 0, ypos = 0, zpos = 0)
+cell.set_pos(x = 0, y = 0, z = 0)
 #rotate the morphology 90 degrees around z-axis
 cell.set_rotation(z = np.pi/2)
 

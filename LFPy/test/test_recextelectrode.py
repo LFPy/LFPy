@@ -223,7 +223,7 @@ def stickSimulation(method):
     electrode = LFPy.RecExtElectrode(**electrodeParams)
 
     stick = LFPy.Cell(**stickParams)
-    stick.set_pos(zpos=-stick.zstart[0])
+    stick.set_pos(z=-stick.zstart[0])
 
     synapse = LFPy.StimIntElectrode(stick, stick.get_closest_idx(0, 0, 1000),
                            **stimParams)
@@ -275,7 +275,7 @@ def stickSimulationAveragingElectrode(contactRadius, contactNPoints, method):
     electrode = LFPy.RecExtElectrode(**electrodeParams)
 
     stick = LFPy.Cell(**stickParams)
-    stick.set_pos(zpos=-stick.zstart[0])
+    stick.set_pos(z=-stick.zstart[0])
 
     synapse = LFPy.StimIntElectrode(stick, stick.get_closest_idx(0, 0, 1000),
                            **stimParams)
@@ -321,7 +321,7 @@ def stickSimulationDotprodcoeffs(method):
 
 
     stick = LFPy.Cell(**stickParams)
-    stick.set_pos(zpos=-stick.zstart[0])
+    stick.set_pos(z=-stick.zstart[0])
     
     #dummy variables for mapping
     stick.imem = np.eye(stick.totnsegs)

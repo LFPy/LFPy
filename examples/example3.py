@@ -117,7 +117,7 @@ cell = LFPy.Cell(**cell_parameters)
 
 #Have to position and rotate the cells!
 cell.set_rotation(x=4.99, y=-4.33, z=z_rotation[RANK])
-cell.set_pos(xpos=x_cell_pos[RANK])
+cell.set_pos(x=x_cell_pos[RANK])
 
 #assign spike times to different units
 n_synapses = 100
@@ -165,7 +165,7 @@ if RANK==0:
                          nsegs_method='lambda_f',
                          lambda_f=5)
         cell.set_rotation(x=4.99, y=-4.33, z=z_rotation[i_cell])
-        cell.set_pos(xpos=x_cell_pos[i_cell])
+        cell.set_pos(x=x_cell_pos[i_cell])
 
         zips = []
         for x, z in cell.get_idx_polygons():

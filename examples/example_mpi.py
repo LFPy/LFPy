@@ -175,9 +175,9 @@ class Population:
         #Initialize cell instance, using the LFPy.Cell class
         cell = LFPy.Cell(**self.cellParameters)
         #set the position of midpoint in soma
-        cell.set_pos(xpos = self.cellPositions[cellindex, 0],
-                     ypos = self.cellPositions[cellindex, 1],
-                     zpos = self.cellPositions[cellindex, 2])
+        cell.set_pos(x = self.cellPositions[cellindex, 0],
+                     y = self.cellPositions[cellindex, 1],
+                     z = self.cellPositions[cellindex, 2])
         #rotate the morphology
         cell.set_rotation(z = self.cellRotations[cellindex])
         
@@ -202,9 +202,9 @@ class Population:
                         xticks=[], xticklabels=[], yticks=[], yticklabels=[])
             for cellindex in range(self.POPULATION_SIZE):
                 cell = LFPy.Cell(**self.cellParameters)
-                cell.set_pos(xpos = self.cellPositions[cellindex, 0],
-                     ypos = self.cellPositions[cellindex, 1],
-                     zpos = self.cellPositions[cellindex, 2])
+                cell.set_pos(x = self.cellPositions[cellindex, 0],
+                             y = self.cellPositions[cellindex, 1],
+                             z = self.cellPositions[cellindex, 2])
                 cell.set_rotation(z = self.cellRotations[cellindex])
 
                 zips = []
