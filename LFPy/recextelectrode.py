@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 """Copyright (C) 2012 Computational Neuroscience Group, NMBU.
 
 This program is free software: you can redistribute it and/or modify
@@ -20,38 +21,34 @@ from LFPy import lfpcalc, tools
 
 
 class RecExtElectrode:
-    """
-    If cell argument is given it is imported,
-    otherwise the cell argument has to be passed later on to calc_lfp.
-    The argument cell can be an LFPy.cell.Cell or
-    LFPy.templatecell.TemplateCell object
-    Keyword arguments determine properties of later LFP-calculations
-    Calculate extracellular potentials from LFPy.Cell objects.
-
+    """class RecExtElectrode
+    
+    Main class that represents an extracellular electric recording devices such
+    as a laminar probe.
+    
     Parameters
     ----------
-    cell : object
-        LFPy.cell.Cell or LFPy.templatecell.TemplateCell
+    cell : None or object
+        If not None, instantiation of LFPy.Cell, LFPy.TemplateCell or similar. 
     sigma : float
-        extracellular conductivity in S/m
+        extracellular conductivity in unit (S/m)
     x, y, z : np.ndarray
-        coordinates or arrays of coordinates. Must be same length
-    N : np.ndarray
-        Normal vector [x, y, z] of contact surface, default None
+        coordinates or arrays of coordinates in units of (um). Must be same length
+    N : None or list of lists
+        Normal vectors [x, y, z] of each circular electrode contact surface,
+        default None
     r : float
-        radius of contact surface, default None
+        radius of each contact surface, default None
     n : int
-        if N is not None and r > 0, the number of points to use for each
-        contact point in order to calculate average
-    shape : str
+        if N is not None and r > 0, the number of discrete points used to
+        compute the n-point average potential on each circular contact point. 
+    contact_shape : str
         'circle'/'square' (default 'circle') defines the contact point shape
         If 'circle' r is the radius, if 'square' r is the side length
     method : str
-        'linesource'/'pointsource'/['soma_as_point'] switch
-    color : str
-        color of electrode contact points in plots
-    marker : str
-        marker of electrode contact points in plots
+        switch between the assumption of 'linesource', 'pointsource',
+        'soma_as_point' to represent each compartment when computing
+        extracellular potentials
     from_file : bool
         if True, load cell object from file
     cellfile : str
@@ -63,18 +60,21 @@ class RecExtElectrode:
 
     Examples
     --------
+    
+    Compute extracellular potentials after simulating and storage of
+    transmembrane currents with the LFPy.Cell class:
     >>> import numpy as np
-    >>> import import matplotlib.pyplot as plt
+    >>> import matplotlib.pyplot as plt
     >>> import LFPy
 
     >>> cellParameters = {
-    >>>     'morphology' : 'L5_Mainen96_LFPy.hoc',  # morphology file
+    >>>     'morphology' : 'examples/morphologies/L5_Mainen96_LFPy.hoc',  # morphology file
     >>>     'rm' : 30000,                           # membrane resistivity
     >>>     'cm' : 1.0,                             # membrane capacitance
     >>>     'Ra' : 150,                             # axial resistivity
-            'dt' : 0.1,                             # simulation time res
-    >>>     'tstartms' : -50,                         # start t of simulation
-    >>>     'tstopms' : 50,                        # end t of simulation
+    >>>     'dt' : 2**-4,                           # simulation time res
+    >>>     'tstartms' : 0.,                        # start t of simulation
+    >>>     'tstopms' : 50.,                        # end t of simulation
     >>> }
     >>> cell = LFPy.Cell(**cellParameters)
 
@@ -86,10 +86,10 @@ class RecExtElectrode:
     >>>     'weight' : 0.01,                       # syn. weight
     >>>     'record_current' : True                 # syn. current record
     >>> }
-    >>> synapse = LFPy.PointProcessSynapse(cell, **synapseParameters)
-    >>> synapse.set_spike_times(cell, np.array([10, 15, 20, 25]))
+    >>> synapse = LFPy.Synapse(cell, **synapseParameters)
+    >>> synapse.set_spike_times(np.array([10., 15., 20., 25.]))
 
-    >>> cell.simulate()
+    >>> cell.simulate(rec_imem=True)
 
     >>> N = np.empty((16, 3))
     >>> for i in xrange(N.shape[0]): N[i,] = [1, 0, 0] #normal vec. of contacts
@@ -105,14 +105,66 @@ class RecExtElectrode:
     >>> electrode = LFPy.RecExtElectrode(cell, **electrodeParameters)
     >>> electrode.calc_lfp()
     >>> plt.matshow(electrode.LFP)
+    >>> plt.colorbar()
+    >>> plt.axis('tight')
+    >>> plt.show()
+
+
+    Compute extracellular potentials during simulation (recommended):
+    >>> import numpy as np
+    >>> import matplotlib.pyplot as plt
+    >>> import LFPy
+
+    >>> cellParameters = {
+    >>>     'morphology' : 'examples/morphologies/L5_Mainen96_LFPy.hoc',  # morphology file
+    >>>     'rm' : 30000,                           # membrane resistivity
+    >>>     'cm' : 1.0,                             # membrane capacitance
+    >>>     'Ra' : 150,                             # axial resistivity
+    >>>     'dt' : 2**-4,                           # simulation time res
+    >>>     'tstartms' : 0.,                        # start t of simulation
+    >>>     'tstopms' : 50.,                        # end t of simulation
+    >>> }
+    >>> cell = LFPy.Cell(**cellParameters)
+
+    >>> synapseParameters = {
+    >>>     'idx' : cell.get_closest_idx(x=0, y=0, z=800), # compartment
+    >>>     'e' : 0,                                # reversal potential
+    >>>     'syntype' : 'ExpSyn',                   # synapse type
+    >>>     'tau' : 2,                              # syn. time constant
+    >>>     'weight' : 0.01,                       # syn. weight
+    >>>     'record_current' : True                 # syn. current record
+    >>> }
+    >>> synapse = LFPy.Synapse(cell, **synapseParameters)
+    >>> synapse.set_spike_times(np.array([10., 15., 20., 25.]))
+
+    >>> N = np.empty((16, 3))
+    >>> for i in xrange(N.shape[0]): N[i,] = [1, 0, 0] #normal vec. of contacts
+    >>> electrodeParameters = {         #parameters for RecExtElectrode class
+    >>>     'sigma' : 0.3,              #Extracellular potential
+    >>>     'x' : np.zeros(16)+25,      #Coordinates of electrode contacts
+    >>>     'y' : np.zeros(16),
+    >>>     'z' : np.linspace(-500,1000,16),
+    >>>     'n' : 20,
+    >>>     'r' : 10,
+    >>>     'N' : N,
+    >>> }
+    >>> electrode = LFPy.RecExtElectrode(**electrodeParameters)
+
+    >>> cell.simulate(electrode=electrode)
+
+    >>> plt.matshow(electrode.LFP)
+    >>> plt.colorbar()
+    >>> plt.axis('tight')
+    >>> plt.show()
+
+
 
     """
 
     def __init__(self, cell=None, sigma=0.3,
                  x=np.array([0]), y=np.array([0]), z=np.array([0]),
-                 N=None, r=None, n=None, shape=None, r_z=None,
-                 perCellLFP=False, method='soma_as_point',
-                 color='g', marker='o',
+                 N=None, r=None, n=None, contact_shape='circle', r_z=None,
+                 perCellLFP=False, method='linesource',
                  from_file=False, cellfile=None, verbose=False,
                  seedvalue=None, **kwargs):
         """Initialize RecExtElectrode class"""
@@ -136,8 +188,6 @@ class RecExtElectrode:
         except AssertionError:
             raise AssertionError("The number of elements in [x, y, z] must be identical")
 
-        self.color = color
-        self.marker = marker
         if N is not None:
             if type(N) != np.array:
                 try:
@@ -159,12 +209,12 @@ class RecExtElectrode:
         self.r = r
         self.n = n
 
-        if shape is None:
-            self.shape = 'circle'
-        elif shape in ['circle', 'square']:
-            self.shape = shape
+        if contact_shape is None:
+            self.contact_shape = 'circle'
+        elif contact_shape in ['circle', 'square']:
+            self.contact_shape = contact_shape
         else:
-            raise ValueError('The shape argument must be either: '
+            raise ValueError('The contact_shape argument must be either: '
                              'None, \'circle\', \'square\'')
 
         self.r_z = r_z
@@ -340,7 +390,7 @@ class RecExtElectrode:
             if self.seedvalue is not None:
                 np.random.seed(self.seedvalue)
 
-            if self.shape is 'circle':
+            if self.contact_shape is 'circle':
                 for j in range(self.n):
                     A = [(np.random.rand()-0.5)*self.r*2,
                         (np.random.rand()-0.5)*self.r*2,
@@ -353,7 +403,7 @@ class RecExtElectrode:
                             (np.random.rand()-0.5)*self.r*2]
                         offs[j, ] = np.cross(self.N[i, ], A)
                         r2[j] = offs[j, 0]**2 + offs[j, 1]**2 + offs[j, 2]**2
-            elif self.shape is 'square':
+            elif self.contact_shape is 'square':
                 for j in range(self.n):
                     A = [(np.random.rand()-0.5),
                         (np.random.rand()-0.5),
@@ -413,14 +463,14 @@ class RecExtElectrode:
                                'z_n' : z_n}
 
             #fetch circumscribed circle around contact
-            if self.shape is 'circle':
+            if self.contact_shape is 'circle':
                 crcl = create_crcl(m, i)
                 self.circle_circ[i] = {
                     'x' : crcl[0],
                     'y' : crcl[1],
                     'z' : crcl[2],
                 }
-            elif self.shape  is 'square':
+            elif self.contact_shape  is 'square':
                 sqr = create_sqr(m, i)
                 self.circle_circ[i] = {
                     'x': sqr[0],
