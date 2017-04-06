@@ -60,8 +60,8 @@ cellParameters = {
     'nsegs_method' : 'lambda_f',# method for setting number of segments,
     'lambda_f' : 100,           # segments are isopotential at this frequency
     'dt' : 2**-4,               # dt of LFP and NEURON simulation.
-    'tstartms' : -100,          #start time, recorders start at t=0
-    'tstopms' : 200,            #stop time of simulation
+    'tstart' : -100,          #start time, recorders start at t=0
+    'tstop' : 200,            #stop time of simulation
     #'custom_code'  : ['active_declarations_example3.hoc'], # will run this file
 }
 

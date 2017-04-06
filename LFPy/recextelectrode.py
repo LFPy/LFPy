@@ -221,8 +221,8 @@ class RecExtElectrode(RecExtElectrodeSetup):
     >>>     'cm' : 1.0,                             # membrane capacitance
     >>>     'Ra' : 150,                             # axial resistivity
             'dt' : 0.1,                             # simulation time res
-    >>>     'tstartms' : -50,                         # start t of simulation
-    >>>     'tstopms' : 50,                        # end t of simulation
+    >>>     'tstart' : -50,                         # start t of simulation
+    >>>     'tstop' : 50,                        # end t of simulation
     >>> }
     >>> cell = LFPy.Cell(**cellParameters)
 

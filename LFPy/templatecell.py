@@ -57,9 +57,9 @@ class TemplateCell(Cell):
         switch for NEURON's extracellular mechanism. Defaults to False
     dt: float
         Simulation time step. Defaults to 0.1
-    tstartms : float
+    tstart : float
         initialization time for simulation <= 0 ms. Defaults to 0.
-    tstopms : float
+    tstop : float
         stop time for simulation > 0 ms. Defaults to 100.
     nsegs_method : 'lambda100' or 'lambda_f' or 'fixed_length' or None
         nseg rule, used by NEURON to determine number of compartments.
@@ -99,8 +99,8 @@ class TemplateCell(Cell):
     >>>     'cm' : 1.0,
     >>>     'Ra' : 150,
     >>>     'dt' : 0.1,
-    >>>     'tstartms' : -50,
-    >>>     'tstopms' : 50,
+    >>>     'tstart' : -50,
+    >>>     'tstop' : 50,
     >>> }
     >>> cell = LFPy.TemplateCell(**cellParameters)
     >>> cell.simulate()

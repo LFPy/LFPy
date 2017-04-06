@@ -67,8 +67,8 @@ cell_parameters = {          # various cell parameters,
     'nsegs_method' : 'lambda_f',
     'lambda_f' : 100.,
     'dt' : 2.**-3,      # simulation time step size
-    'tstartms' :  0.,   # start time of simulation, recorders start at t=0
-    'tstopms' : 300.,   # stop simulation at 200 ms. These can be overridden
+    'tstart' :  0.,   # start time of simulation, recorders start at t=0
+    'tstop' : 300.,   # stop simulation at 200 ms. These can be overridden
                         # by setting these arguments i cell.simulation()
 }
 
@@ -219,7 +219,7 @@ if RANK==0:
                     s=1, edgecolors='none', facecolors='k')
 
     plt.ylim([0,n_pre_syn])
-    plt.xlim([0,cell_parameters['tstopms']])
+    plt.xlim([0,cell_parameters['tstop']])
     plt.ylabel('train #', ha='left', labelpad=0)
     plt.title('Presynaptic spike times')
     
@@ -236,12 +236,12 @@ if RANK==0:
     plt.axes([.05,.12,.25,.2])
 
     binsize = 5
-    bins=np.arange(0, cell_parameters['tstopms']+1., binsize)
+    bins=np.arange(0, cell_parameters['tstop']+1., binsize)
     count,b = np.histogram(pop_sptimes, bins=bins)
     rate = count*(1000./binsize)*(1./n_pre_syn)
     plt.plot(b[0:-1],rate,color='black',lw=1)
 
-    plt.xlim([0,cell_parameters['tstopms']])
+    plt.xlim([0,cell_parameters['tstop']])
     plt.ylim([0,10.])
     
     tvec = np.arange(point_electrode.LFP.shape[1])*cell.dt 

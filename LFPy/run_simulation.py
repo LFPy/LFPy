@@ -44,7 +44,7 @@ def _run_simulation(cell, cvode, variable_dt=False, atol=0.001):
 
     
     ##Starting simulation at tstart
-    neuron.h.t = cell.tstartms
+    neuron.h.t = cell.tstart
     
     cell._loadspikes()
     
@@ -52,12 +52,12 @@ def _run_simulation(cell, cvode, variable_dt=False, atol=0.001):
     counter = 0.
     t0 = time()
     ti = neuron.h.t
-    if cell.tstopms >= 10000:
+    if cell.tstop >= 10000:
         interval = 1000. / cell.dt
     else:
         interval = 100. / cell.dt
     
-    while neuron.h.t < cell.tstopms:
+    while neuron.h.t < cell.tstop:
         neuron.h.fadvance()
         counter += 1.
         if counter % interval == 0:
@@ -163,11 +163,11 @@ def _run_simulation_with_electrode(cell, cvode, electrode=None,
     
     #re-initialize state
     neuron.h.finitialize(cell.v_init)
-    neuron.h.frecord_init() # wrong voltages t=0 for tstartms < 0 otherwise
+    neuron.h.frecord_init() # wrong voltages t=0 for tstart < 0 otherwise
     neuron.h.fcurrent()
     
-    #Starting simulation at tstartms (which may be < 0)
-    neuron.h.t = cell.tstartms
+    #Starting simulation at tstart (which may be < 0)
+    neuron.h.t = cell.tstart
     
     #load spike times from NetCon
     cell._loadspikes()
@@ -177,7 +177,7 @@ def _run_simulation_with_electrode(cell, cvode, electrode=None,
     tstep = 0
     t0 = time()
     ti = neuron.h.t
-    if cell.tstopms >= 10000:
+    if cell.tstop >= 10000:
         interval = 1000. / cell.dt
     else:
         interval = 100. / cell.dt
@@ -189,7 +189,7 @@ def _run_simulation_with_electrode(cell, cvode, electrode=None,
         electrodesLFP = []
         for coeffs in dotprodcoeffs:
             electrodesLFP.append(np.zeros((coeffs.shape[0],
-                                int(cell.tstopms / cell.dt) + 1)))
+                                int(cell.tstop / cell.dt) + 1)))
     #LFPs for each electrode will be put here during simulations
     if to_file:
         #ensure right ending:
@@ -199,7 +199,7 @@ def _run_simulation_with_electrode(cell, cvode, electrode=None,
         i = 0
         for coeffs in dotprodcoeffs:
             el_LFP_file['electrode{:03d}'.format(i)] = np.zeros((coeffs.shape[0],
-                                    int(cell.tstopms / cell.dt + 1)))
+                                    int(cell.tstop / cell.dt + 1)))
             i += 1
 
     # create a 2D array representation of segment midpoints for dot product
@@ -209,7 +209,7 @@ def _run_simulation_with_electrode(cell, cvode, electrode=None,
 
     
     #run fadvance until time limit, and calculate LFPs for each timestep
-    while neuron.h.t < cell.tstopms:
+    while neuron.h.t < cell.tstop:
         if neuron.h.t >= 0:
             i = 0
             for sec in cell.allseclist:

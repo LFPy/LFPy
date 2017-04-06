@@ -33,8 +33,8 @@ cell_parameters = {
     'cm' : 1.0, 
     'v_init' : -65.,
     'e_pas' : -65.,
-    'tstartms' : -50., # start time of simulation, recorders start at t=0
-    'tstopms' : 1000,   # stop simulation at 1000 ms. These can be overridden
+    'tstart' : -50., # start time of simulation, recorders start at t=0
+    'tstop' : 1000,   # stop simulation at 1000 ms. These can be overridden
    }
 
 synapse_parameters = {}

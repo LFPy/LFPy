@@ -34,26 +34,26 @@ class testCell(unittest.TestCase):
     def test_cell_tvec_00(self):
         stickParams = {
             'dt' : 2**-3,
-            'tstartms' : 0.,
-            'tstopms' : 100.,
+            'tstart' : 0.,
+            'tstop' : 100.,
         }
 
         tvec = stickSimulationTesttvec(**stickParams)
-        tvec_numpy = np.linspace(0, stickParams['tstopms'],
-                    stickParams['tstopms']/stickParams['dt'] + 1)
+        tvec_numpy = np.linspace(0, stickParams['tstop'],
+                    stickParams['tstop']/stickParams['dt'] + 1)
 
         self.assertEqual(tvec.size, tvec_numpy.size)
 
     def test_cell_tvec_01(self):
         stickParams = {
             'dt' : 2**-3,
-            'tstartms' : 0.,
-            'tstopms' : 100.,
+            'tstart' : 0.,
+            'tstop' : 100.,
         }
 
         tvec = stickSimulationTesttvec(**stickParams)
-        tvec_numpy = np.linspace(0, stickParams['tstopms'],
-                    stickParams['tstopms']/stickParams['dt'] + 1)
+        tvec_numpy = np.linspace(0, stickParams['tstop'],
+                    stickParams['tstop']/stickParams['dt'] + 1)
 
         for i in range(tvec.size):
             self.assertEqual(tvec[i], tvec_numpy[i])
@@ -61,26 +61,26 @@ class testCell(unittest.TestCase):
     def test_cell_tvec_02(self):
         stickParams = {
             'dt' : 2**-3,
-            'tstartms' : 0.,
-            'tstopms' : 10000.,
+            'tstart' : 0.,
+            'tstop' : 10000.,
         }
 
         tvec = stickSimulationTesttvec(**stickParams)
-        tvec_numpy = np.linspace(0, stickParams['tstopms'],
-                    stickParams['tstopms']/stickParams['dt'] + 1)
+        tvec_numpy = np.linspace(0, stickParams['tstop'],
+                    stickParams['tstop']/stickParams['dt'] + 1)
 
         self.assertEqual(tvec.size, tvec_numpy.size)
 
     def test_cell_tvec_03(self):
         stickParams = {
             'dt' : 2**-3,
-            'tstartms' : 0.,
-            'tstopms' : 10000.,
+            'tstart' : 0.,
+            'tstop' : 10000.,
         }
 
         tvec = stickSimulationTesttvec(**stickParams)
-        tvec_numpy = np.linspace(0, stickParams['tstopms'],
-                    stickParams['tstopms']/stickParams['dt'] + 1)
+        tvec_numpy = np.linspace(0, stickParams['tstop'],
+                    stickParams['tstop']/stickParams['dt'] + 1)
 
 
         for i in range(tvec.size):
@@ -90,26 +90,26 @@ class testCell(unittest.TestCase):
     def test_cell_tvec_04(self):
         stickParams = {
             'dt' : 0.1,
-            'tstartms' : 0,
-            'tstopms' : 100,
+            'tstart' : 0,
+            'tstop' : 100,
         }
 
         tvec = stickSimulationTesttvec(**stickParams)
-        tvec_numpy = np.linspace(0, stickParams['tstopms'],
-                    stickParams['tstopms']/stickParams['dt'] + 1)
+        tvec_numpy = np.linspace(0, stickParams['tstop'],
+                    stickParams['tstop']/stickParams['dt'] + 1)
 
         self.assertEqual(tvec.size, tvec_numpy.size)
 
     def test_cell_tvec_05(self):
         stickParams = {
             'dt' : 0.1,
-            'tstartms' : 0.,
-            'tstopms' : 100.,
+            'tstart' : 0.,
+            'tstop' : 100.,
         }
 
         tvec = stickSimulationTesttvec(**stickParams)
-        tvec_numpy = np.linspace(0, stickParams['tstopms'],
-                    stickParams['tstopms']/stickParams['dt'] + 1)
+        tvec_numpy = np.linspace(0, stickParams['tstop'],
+                    stickParams['tstop']/stickParams['dt'] + 1)
 
         for i in range(tvec.size):
             self.assertAlmostEqual(tvec[i], tvec_numpy[i])
@@ -117,26 +117,26 @@ class testCell(unittest.TestCase):
     def test_cell_tvec_06(self):
         stickParams = {
             'dt' : 0.1,
-            'tstartms' : 0,
-            'tstopms' : 10000,
+            'tstart' : 0,
+            'tstop' : 10000,
         }
 
         tvec = stickSimulationTesttvec(**stickParams)
-        tvec_numpy = np.linspace(0, stickParams['tstopms'],
-                    stickParams['tstopms']/stickParams['dt'] + 1)
+        tvec_numpy = np.linspace(0, stickParams['tstop'],
+                    stickParams['tstop']/stickParams['dt'] + 1)
 
         self.assertEqual(tvec.size, tvec_numpy.size)
 
     def test_cell_tvec_07(self):
         stickParams = {
             'dt' : 0.1,
-            'tstartms' : 0.,
-            'tstopms' : 10000.,
+            'tstart' : 0.,
+            'tstop' : 10000.,
         }
 
         tvec = stickSimulationTesttvec(**stickParams)
-        tvec_numpy = np.linspace(0, stickParams['tstopms'],
-                    stickParams['tstopms']/stickParams['dt'] + 1)
+        tvec_numpy = np.linspace(0, stickParams['tstop'],
+                    stickParams['tstop']/stickParams['dt'] + 1)
 
         for i in range(tvec.size):
             self.assertEqual(tvec[i], tvec_numpy[i])
@@ -144,13 +144,13 @@ class testCell(unittest.TestCase):
     def test_cell_tvec_08(self):
         stickParams = {
             'dt' : 2**-3,
-            'tstartms' : -100,
-            'tstopms' : 100,
+            'tstart' : -100,
+            'tstop' : 100,
         }
 
         tvec = stickSimulationTesttvec(**stickParams)
-        tvec_numpy = np.linspace(0, stickParams['tstopms'],
-                    stickParams['tstopms']/stickParams['dt'] + 1)
+        tvec_numpy = np.linspace(0, stickParams['tstop'],
+                    stickParams['tstop']/stickParams['dt'] + 1)
 
         self.assertEqual(tvec.size, tvec_numpy.size)
 
@@ -158,13 +158,13 @@ class testCell(unittest.TestCase):
     def test_cell_tvec_09(self):
         stickParams = {
             'dt' : 2**-3,
-            'tstartms' : -100,
-            'tstopms' : 100,
+            'tstart' : -100,
+            'tstop' : 100,
         }
 
         tvec = stickSimulationTesttvec(**stickParams)
-        tvec_numpy = np.linspace(0, stickParams['tstopms'],
-                    stickParams['tstopms']/stickParams['dt'] + 1)
+        tvec_numpy = np.linspace(0, stickParams['tstop'],
+                    stickParams['tstop']/stickParams['dt'] + 1)
 
         for i in range(tvec.size):
             self.assertEqual(tvec[i], tvec_numpy[i])
@@ -172,13 +172,13 @@ class testCell(unittest.TestCase):
     def test_cell_tvec_10(self):
         stickParams = {
             'dt' : 2**-3,
-            'tstartms' : -100,
-            'tstopms' : 10000,
+            'tstart' : -100,
+            'tstop' : 10000,
         }
 
         tvec = stickSimulationTesttvec(**stickParams)
-        tvec_numpy = np.linspace(0, stickParams['tstopms'],
-                    stickParams['tstopms']/stickParams['dt'] + 1)
+        tvec_numpy = np.linspace(0, stickParams['tstop'],
+                    stickParams['tstop']/stickParams['dt'] + 1)
 
         self.assertEqual(tvec.size, tvec_numpy.size)
 
@@ -186,13 +186,13 @@ class testCell(unittest.TestCase):
     def test_cell_tvec_11(self):
         stickParams = {
             'dt' : 2**-3,
-            'tstartms' : -100,
-            'tstopms' : 10000,
+            'tstart' : -100,
+            'tstop' : 10000,
         }
 
         tvec = stickSimulationTesttvec(**stickParams)
-        tvec_numpy = np.linspace(0, stickParams['tstopms'],
-                    stickParams['tstopms']/stickParams['dt'] + 1)
+        tvec_numpy = np.linspace(0, stickParams['tstop'],
+                    stickParams['tstop']/stickParams['dt'] + 1)
 
         for i in range(tvec.size):
             self.assertEqual(tvec[i], tvec_numpy[i])
@@ -200,8 +200,8 @@ class testCell(unittest.TestCase):
     def test_cell_tvec_12(self):
         stickParams = {
             'dt' : 0.1,
-            'tstartms' : -100,
-            'tstopms' : 10000,
+            'tstart' : -100,
+            'tstop' : 10000,
         }
 
         try:
@@ -843,8 +843,8 @@ class testCell(unittest.TestCase):
             'rm' : 30000,
             'cm' : 1,
             'Ra' : 150,
-            'tstartms' : 0,
-            'tstopms' : 100,
+            'tstart' : 0,
+            'tstop' : 100,
             'dt' : 0.1,
             'nsegs_method' : 'lambda_f',
             'lambda_f' : 100,
@@ -876,8 +876,8 @@ class testCell(unittest.TestCase):
             'rm' : 30000,
             'cm' : 1,
             'Ra' : 150,
-            'tstartms' : -100,
-            'tstopms' : 100,
+            'tstart' : -100,
+            'tstop' : 100,
             'dt' : 2**-4,
             'nsegs_method' : 'lambda_f',
             'lambda_f' : 100,
@@ -909,8 +909,8 @@ class testCell(unittest.TestCase):
             'rm' : 30000,
             'cm' : 1,
             'Ra' : 150,
-            'tstartms' : -100,
-            'tstopms' : 100,
+            'tstart' : -100,
+            'tstop' : 100,
             'dt' : 2**-4,
             'nsegs_method' : 'lambda_f',
             'lambda_f' : 100,
@@ -954,7 +954,7 @@ class testCell(unittest.TestCase):
             'record_current' : False
         }
 
-        stick0 = LFPy.Cell(tstartms=0, tstopms=200, **stickParams)
+        stick0 = LFPy.Cell(tstart=0, tstop=200, **stickParams)
         synapse0 = LFPy.StimIntElectrode(stick0,
                                          stick0.get_closest_idx(0, 0, 1000),
                                          delay=0, phase=0.,
@@ -962,7 +962,7 @@ class testCell(unittest.TestCase):
         stick0.simulate(rec_imem=True, rec_vmem=True, rec_current_dipole_moment=True)
 
 
-        stick1 = LFPy.Cell(tstartms=-100, tstopms=100, **stickParams)
+        stick1 = LFPy.Cell(tstart=-100, tstop=100, **stickParams)
         synapse1 = LFPy.StimIntElectrode(stick1,
                                          stick1.get_closest_idx(0, 0, 1000),
                                          delay=-100, phase=0.,
@@ -982,8 +982,8 @@ class testCell(unittest.TestCase):
             'rm' : 30000,
             'cm' : 1,
             'Ra' : 150,
-            'tstartms' : 0,
-            'tstopms' : 100,
+            'tstart' : 0,
+            'tstop' : 100,
             'dt' : 2**-4,
             'nsegs_method' : 'lambda_f',
             'lambda_f' : 100,
@@ -1027,8 +1027,8 @@ class testCell(unittest.TestCase):
             'rm' : 30000,
             'cm' : 1,
             'Ra' : 150,
-            'tstartms' : -100,
-            'tstopms' : 100,
+            'tstart' : -100,
+            'tstop' : 100,
             'dt' : 2**-4,
             'nsegs_method' : 'lambda_f',
             'lambda_f' : 100,
@@ -1086,8 +1086,8 @@ def cell_w_synapse_from_sections(sections=None):
         'cm' : 1.0,
         'Ra' : 150,
         'dt' : 2**-6,
-        'tstartms' : -50,
-        'tstopms' : 50,
+        'tstart' : -50,
+        'tstop' : 50,
         'delete_sections' : False
     }
 

@@ -22,8 +22,8 @@ cell_parameters = {          # various cell parameters,
     'nsegs_method' : 'lambda_f', # lambda_f method
     'lambda_f' : 100.,  # lambda_f critical frequency
     'dt' : 2.**-3,      # simulation time step size
-    'tstartms' : 0.,    # start time of simulation, recorders start at t=0
-    'tstopms' : 100.,   # stop simulation at 200 ms. These can be overridden
+    'tstart' : 0.,    # start time of simulation, recorders start at t=0
+    'tstop' : 100.,   # stop simulation at 200 ms. These can be overridden
                         # by setting these arguments in cell.simulation()
 }
 

@@ -92,7 +92,7 @@ class Synapse(PointProcess):
     >>> pl.interactive(1)
     >>> cellParameters = {
     >>>     'morphology' :  'morphologies/L5_Mainen96_LFPy.hoc',
-    >>>     'tstopms' :     50,
+    >>>     'tstop' :     50,
     >>> }
     >>> cell = LFPy.Cell(**cellParameters)
 
