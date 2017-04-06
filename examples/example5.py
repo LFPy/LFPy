@@ -96,7 +96,7 @@ electrodeParameters = {
     'x' : X.flatten(),        # x,y,z-coordinates of contact points
     'y' : Y.flatten(),
     'z' : Z.flatten(),
-    'method' : 'som_as_point',  #treat soma segment as sphere source
+    'method' : 'soma_as_point',  #treat soma segment as sphere source
 }
 
 ################################################################################
