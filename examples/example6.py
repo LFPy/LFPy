@@ -221,12 +221,11 @@ def insert_synapses(synparams, section, n, spTimesFun, args):
 #define cell parameters used as input to cell-class
 cellParameters = {
     'morphology' : join('morphologies', 'L5_Mainen96_wAxon_LFPy.hoc'),
-    'rm' : 30000,               # membrane resistance
     'cm' : 1.0,                 # membrane capacitance
     'Ra' : 150,                 # axial resistance
     'v_init' : -65,             # initial crossmembrane potential
-    'e_pas' : -65,              # reversal potential passive mechs
     'passive' : True,           # switch on passive mechs
+    'passive_parameters' : {'g_pas' : 1./30000, 'e_pas' : -65}, # passive params
     'nsegs_method' : 'lambda_f',# method for setting number of segments,
     'lambda_f' : 100,           # segments are isopotential at this frequency
     'dt' : 2**-4,               # dt of LFP and NEURON simulation.

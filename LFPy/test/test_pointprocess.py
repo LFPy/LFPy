@@ -77,7 +77,13 @@ class testStimIntElectrode(unittest.TestCase):
 
     def test_StimIntElectrode_01(self):
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
-                                                 'ball_and_sticks.hoc'), dt=1.)
+                                                 'ball_and_sticks.hoc'), dt=1.,
+                         v_init=-65.,
+                         Ra = 150.,
+                         cm = 1.,
+                         passive=True,
+                         passive_parameters=dict(g_pas=1./30000, e_pas=-65)
+                         )
         stim = LFPy.StimIntElectrode(cell=cell,
                                      record_potential=True,
                                      **{'idx' : 0,
@@ -98,7 +104,13 @@ class testStimIntElectrode(unittest.TestCase):
 
     def test_StimIntElectrode_02(self):
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
-                                                 'ball_and_sticks.hoc'), dt=1.)
+                                                 'ball_and_sticks.hoc'), dt=1.,
+                         v_init=-65.,
+                         Ra = 150.,
+                         cm = 1.,
+                         passive=True,
+                         passive_parameters=dict(g_pas=1./30000, e_pas=-65)
+                         )
         stim = LFPy.StimIntElectrode(cell=cell,
                                      record_potential=True,
                                      **{'idx' : 0,

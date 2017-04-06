@@ -187,9 +187,11 @@ class testRecExtElectrode(unittest.TestCase):
 def stickSimulation(method):
     stickParams = {
         'morphology' : os.path.join(LFPy.__path__[0], 'test', 'stick.hoc'),
-        'rm' : 30000,
         'cm' : 1,
         'Ra' : 150,
+        'v_init' : -65,
+        'passive' : True,
+        'passive_parameters' : {'g_pas' : 1./30000, 'e_pas' : -65},
         'tstart' : -100,
         'tstop' : 100,
         'dt' : 2**-6,
@@ -232,9 +234,11 @@ def stickSimulation(method):
 def stickSimulationAveragingElectrode(contactRadius, contactNPoints, method):
     stickParams = {
         'morphology' : os.path.join(LFPy.__path__[0], 'test', 'stick.hoc'),
-        'rm' : 30000,
         'cm' : 1,
         'Ra' : 150,
+        'v_init' : -65,
+        'passive' : True,
+        'passive_parameters' : {'g_pas' : 1./30000, 'e_pas' : -65},
         'tstart' : -100,
         'tstop' : 100,
         'dt' : 2**-6,
@@ -282,9 +286,11 @@ def stickSimulationAveragingElectrode(contactRadius, contactNPoints, method):
 def stickSimulationDotprodcoeffs(method):
     stickParams = {
         'morphology' : os.path.join(LFPy.__path__[0], 'test', 'stick.hoc'),
-        'rm' : 30000,
         'cm' : 1,
         'Ra' : 150,
+        'v_init' : -65,
+        'passive' : True,
+        'passive_parameters' : {'g_pas' : 1./30000, 'e_pas' : -65},
         'tstart' : -100,
         'tstop' : 100,
         'dt' : 2**-6,

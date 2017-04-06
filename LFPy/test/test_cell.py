@@ -840,9 +840,11 @@ class testCell(unittest.TestCase):
     def test_cell_simulate_current_dipole_moment_00(self):
         stickParams = {
             'morphology' : os.path.join(LFPy.__path__[0], 'test', 'stick.hoc'),
-            'rm' : 30000,
             'cm' : 1,
             'Ra' : 150,
+            'v_init' : -65,
+            'passive' : True,
+            'passive_parameters' : {'g_pas' : 1./30000, 'e_pas' : -65},
             'tstart' : 0,
             'tstop' : 100,
             'dt' : 0.1,
@@ -873,9 +875,11 @@ class testCell(unittest.TestCase):
     def test_cell_simulate_current_dipole_moment_01(self):
         stickParams = {
             'morphology' : os.path.join(LFPy.__path__[0], 'test', 'stick.hoc'),
-            'rm' : 30000,
             'cm' : 1,
             'Ra' : 150,
+            'v_init' : -65,
+            'passive' : True,
+            'passive_parameters' : {'g_pas' : 1./30000, 'e_pas' : -65},
             'tstart' : -100,
             'tstop' : 100,
             'dt' : 2**-4,
@@ -906,9 +910,11 @@ class testCell(unittest.TestCase):
     def test_cell_simulate_current_dipole_moment_02(self):
         stickParams = {
             'morphology' : os.path.join(LFPy.__path__[0], 'test', 'stick.hoc'),
-            'rm' : 30000,
             'cm' : 1,
             'Ra' : 150,
+            'v_init' : -65,
+            'passive' : True,
+            'passive_parameters' : {'g_pas' : 1./30000, 'e_pas' : -65},
             'tstart' : -100,
             'tstop' : 100,
             'dt' : 2**-4,
@@ -937,9 +943,11 @@ class testCell(unittest.TestCase):
     def test_cell_tstart_00(self):
         stickParams = {
             'morphology' : os.path.join(LFPy.__path__[0], 'test', 'stick.hoc'),
-            'rm' : 30000,
             'cm' : 1,
             'Ra' : 150,
+            'v_init' : -65,
+            'passive' : True,
+            'passive_parameters' : {'g_pas' : 1./30000, 'e_pas' : -65},
             'dt' : 2**-4,
             'nsegs_method' : 'lambda_f',
             'lambda_f' : 100,
@@ -979,9 +987,11 @@ class testCell(unittest.TestCase):
     def test_cell_with_recextelectrode_00(self):
         stickParams = {
             'morphology' : os.path.join(LFPy.__path__[0], 'test', 'stick.hoc'),
-            'rm' : 30000,
             'cm' : 1,
             'Ra' : 150,
+            'v_init' : -65,
+            'passive' : True,
+            'passive_parameters' : {'g_pas' : 1./30000, 'e_pas' : -65},
             'tstart' : 0,
             'tstop' : 100,
             'dt' : 2**-4,
@@ -1024,9 +1034,11 @@ class testCell(unittest.TestCase):
     def test_cell_with_recextelectrode_01(self):
         stickParams = {
             'morphology' : os.path.join(LFPy.__path__[0], 'test', 'stick.hoc'),
-            'rm' : 30000,
             'cm' : 1,
             'Ra' : 150,
+            'v_init' : -65,
+            'passive' : True,
+            'passive_parameters' : {'g_pas' : 1./30000, 'e_pas' : -65},
             'tstart' : -100,
             'tstop' : 100,
             'dt' : 2**-4,
@@ -1082,9 +1094,11 @@ def cell_w_synapse_from_sections(sections=None):
     '''
     cellParams = {
         'morphology': None,
-        'rm' : 30000,
         'cm' : 1.0,
         'Ra' : 150,
+        'v_init' : -65,
+        'passive' : True,
+        'passive_parameters' : {'g_pas' : 1./30000, 'e_pas' : -65},
         'dt' : 2**-6,
         'tstart' : -50,
         'tstop' : 50,

@@ -37,17 +37,17 @@ class Cell(object):
     morphology : str
         path/to/morphology/file
     v_init : float
-        Initial membrane potential. Default to -65 mV.
-    passive : bool
-        Passive mechanisms are initialized if True. Defaults to True
+        Initial membrane potential. Defaults to -70 mV.
     Ra : float
         Axial resistance. Defaults to 150 Ohm/cm
-    rm : float
-        Membrane resistivity. Defaults to 30000 Ohm cm^2.
     cm : float
         Membrane capacitance. Defaults to 1.0 uF/cm2.
-    e_pas : float
-        Passive mechanism reversal potential. Defaults to -65 mV.
+    passive : bool
+        Passive mechanisms are initialized if True. Defaults to False
+    passive_parameters : dict
+        parameter dictionary with values for the passive membrane mechanism in
+        NEURON ('pas'). The dictionary must contain keys 'g_pas' and 'e_pas',
+        like the default: passive_parameters=dict(g_pas=0.001, e_pas=-70)
     extracellular : bool
         Switch for NEURON's extracellular mechanism. Defaults to False
     dt : float
@@ -83,35 +83,38 @@ class Cell(object):
 
     Examples
     --------
-    Here is an example of how to use the cell class.
-
+    Simple example of how to use the Cell class with a passive-circuit
+    morphology (modify morphology path accordingly):
     >>> import os
     >>> import LFPy
     >>> cellParameters = {
-    >>>     'morphology' : os.path.join(LFPy.__path__[0], 'stick.hoc'),
-    >>>     'rm' : 30000,
+    >>>     'morphology' : os.path.join('examples', 'morphologies', 'L5_Mainen96_LFPy.hoc'),
+    >>>     'v_init' : -65.,
     >>>     'cm' : 1.0,
     >>>     'Ra' : 150,
-    >>>     'timeres_NEURON' : 0.1,
-    >>>     'timeres_python' : 0.1,
-    >>>     'tstart' : -50,
+    >>>     'passive' : True,
+    >>>     'passive_parameters' : {'g_pas' : 1./30000, 'e_pas' : -65},
+    >>>     'dt' : 2**-3,
+    >>>     'tstart' : 0,
     >>>     'tstop' : 50,
     >>> }
     >>> cell = LFPy.Cell(**cellParameters)
     >>> cell.simulate()
+    >>> print(cell.somav)
 
     """
     def __init__(self, morphology,
-                    v_init=-65.,
-                    passive=True,
-                    Ra=150.,
-                    rm=30000.,
+                    v_init=-70.,
+                    Ra=35.4,
                     cm=1.0,
-                    e_pas=-65.,
+                    passive=False,
+                    passive_parameters = dict(
+                        g_pas=0.001,
+                        e_pas=-70.),
                     extracellular=False,
                     tstart=0.,
                     tstop=100.,
-                    dt = 0.1,
+                    dt = 2**-4,
                     nsegs_method='lambda100',
                     lambda_f = 100,
                     d_lambda = 0.1,
@@ -133,11 +136,26 @@ class Cell(object):
         # raise Exceptions on deprecated input arguments
         for key in ['timeres_NEURON', 'timeres_python']:
             if key in kwargs.keys():
-                raise DeprecationWarning('cell keyword argument {} is deprecated. Use dt=float instead'.format(key))
+                raise DeprecationWarning('cell parameter {} is deprecated. Use dt=float instead'.format(key))
         if 'tstartms' in kwargs.keys():
-            raise DeprecationWarning('cell keyword argument tstartms is deprecated. Use tstartms=float instead')
+            raise DeprecationWarning('cell parameter tstartms is deprecated. Use tstartms=float instead')
         if 'tstopms' in kwargs.keys():
-            raise DeprecationWarning('cell keyword argument tstopms is deprecated. Use tstopms=float instead')
+            raise DeprecationWarning('cell parameter tstopms is deprecated. Use tstopms=float instead')
+        if 'rm' in kwargs.keys():
+            raise DeprecationWarning('Cell parameter rm is deprecated, set parameter passive_parameters=dict(g_pas=1/rm, e_pas=e_pas) instead')
+        if 'e_pas' in kwargs.keys():
+            raise DeprecationWarning('Cell parameter e_pas is deprecated, set parameter passive_parameters=dict(g_pas=1/rm, e_pas=e_pas) instead')
+        if passive:
+            try:
+                assert(type(passive_parameters) is dict)
+            except AssertionError:
+                raise AssertionError('passive_parameters must be a dictionary')
+            for key in ['g_pas', 'e_pas']:
+                try:
+                    assert(key in passive_parameters.keys())
+                except AssertionError:
+                    raise AssertionError('key {} not found in passive_parameters'.format(key))
+        
 
         if not hasattr(neuron.h, 'd_lambda'):
             neuron.h.load_file('stdlib.hoc')    #NEURON std. library
@@ -209,9 +227,10 @@ class Cell(object):
         if passive:
             #Set passive properties, insert passive on all segments
             self.Ra = Ra
-            self.rm = rm
+            # self.rm = rm
             self.cm = cm
-            self.e_pas = e_pas
+            self.passive_parameters = passive_parameters
+            # self.e_pas = e_pas
             self._set_passive()
         else:
             if self.verbose:
@@ -462,8 +481,8 @@ class Cell(object):
             sec.insert('pas')
             sec.Ra = self.Ra
             sec.cm = self.cm
-            sec.g_pas = 1. / self.rm
-            sec.e_pas = self.e_pas
+            sec.g_pas = self.passive_parameters['g_pas']
+            sec.e_pas = self.passive_parameters['e_pas']
 
     def _set_extracellular(self):
         """Insert extracellular mechanism on all sections
@@ -877,7 +896,8 @@ class Cell(object):
                                                dotprodcoeffs,
                                                rec_current_dipole_moment)
         # somatic trace
-        self.somav = np.array(self.somav)
+        if self.nsomasec >= 1:
+            self.somav = np.array(self.somav)
 
         if rec_imem:
             self._calc_imem()
@@ -1008,23 +1028,18 @@ class Cell(object):
                 for i in range(int(self.synlist.count())):
                     for ii in range(int(self.sptimeslist.o(i).size)):
                         self.netconlist.o(i).event(float(self.sptimeslist.o(i)[ii]))
-            # elif len(self.synlist) > 0 and len(self.sptimeslist) == 0:
-            #     errmsg = 'please run method "set_spike_times() for every' + \
-            #             '\n' + 'instance of LFPy.pointprocess.Synapse'
-            #     raise Exception(errmsg)
-            # else:
-            #     pass
 
     def _set_soma_volt_recorder(self):
         """Record somatic membrane potential"""
-        self.somav = neuron.h.Vector(int(self.tstop / self.dt+1))
 
         if self.nsomasec == 0:
-            pass
+            warn('Cell instance appears to have no somatic section. No somav attribute will be set.')
         elif self.nsomasec == 1:
+            self.somav = neuron.h.Vector(int(self.tstop / self.dt+1))
             for sec in self.somalist:
                 self.somav.record(sec(0.5)._ref_v, self.dt)
         elif self.nsomasec > 1:
+            self.somav = neuron.h.Vector(int(self.tstop / self.dt+1))
             nseg = self.get_idx('soma').size
             i, j = divmod(nseg, 2)
             k = 1
@@ -1916,7 +1931,8 @@ class Cell(object):
         >>> import matplotlib.pyplot as plt
 
         >>> #create cell
-        >>> cell = LFPy.Cell(morphology='morphologies/example_morphology.hoc')
+        >>> cell = LFPy.Cell(morphology='morphologies/example_morphology.hoc',
+        >>>                  passive=True)
 
         >>> #time vector and extracellular field for every segment:
         >>> t_ext = np.arange(cell.tstop / cell.dt+ 1) * cell.dt
@@ -2108,7 +2124,7 @@ class Cell(object):
             Dictionary containing a float in range [0, 1] for each section
             in cell. The float gives the location on the parent segment
             to which the section is connected to.
-            .
+            
             The dictionary is needed for computing axial currents.
         """
         connection_dict = {}

@@ -60,7 +60,6 @@ cellParams = {
                        'L5bPCmodelsEH/models/L5PCtemplate.hoc'],
     'templatename'  : 'L5PCtemplate',
     'templateargs'  : 'L5bPCmodelsEH/morphologies/cell1.asc',
-    'passive' :     False,
     'nsegs_method' : None,
     'v_init' : -80,
     'tstart' : 0,

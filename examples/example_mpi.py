@@ -129,9 +129,9 @@ class Population:
             RandSpikeTimes = []
             for cellindex in range(self.POPULATION_SIZE):
                 sptimes = LFPy.inputgenerators.stationary_gamma(
-                    self.cellParameters['tstartms'],
-                    self.cellParameters['tstopms'],
-                    tmin=self.cellParameters['tstartms'],
+                    self.cellParameters['tstart'],
+                    self.cellParameters['tstop'],
+                    tmin=self.cellParameters['tstart'],
                     **self.stationaryGammaArgs)
                 RandSpikeTimes.append(sptimes)
         else:
@@ -255,17 +255,16 @@ if __name__ == '__main__':
     #define cell parameters used as input to cell-class
     cellParameters = {
         'morphology' : join('morphologies', 'L5_Mainen96_wAxon_LFPy.hoc'),
-        'rm' : 30000,               # membrane resistance
         'cm' : 1.0,                 # membrane capacitance
         'Ra' : 150,                 # axial resistance
         'v_init' : -65,             # initial crossmembrane potential
-        'e_pas' : -65,              # reversal potential passive mechs
         'passive' : True,           # switch on passive mechs
+        'passive_parameters' : {'g_pas' : 1./30000, 'e_pas' : -65}, # passive params
         'nsegs_method' : 'lambda_f',# method for setting number of segments,
         'lambda_f' : 10,            # segments are isopotential at frequency
         'dt' : 2**-3,               # dt of LFP and NEURON simulation.
-        'tstartms' : -100,          #start time, recorders start at t=0
-        'tstopms' : 200,            #stop time of simulation
+        'tstart' : -100,          #start time, recorders start at t=0
+        'tstop' : 200,            #stop time of simulation
         'custom_code'  : ['active_declarations_example3.hoc'], #active decl.
     }
     

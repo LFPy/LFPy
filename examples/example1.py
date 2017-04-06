@@ -35,20 +35,18 @@ if not os.path.isfile(join('cells', 'cells', 'j4a.hoc')):
 ################################################################################
 
 # Define cell parameters
-cell_parameters = {          # various cell parameters,
-    'morphology' : join('cells', 'cells', 'j4a.hoc'), # Mainen&Sejnowski, 1996
-    'rm' : 30000.,      # membrane resistance
+cell_parameters = {
+    'morphology' : join('cells', 'cells', 'j4a.hoc'), # from Mainen & Sejnowski, J Comput Neurosci, 1996
     'cm' : 1.0,         # membrane capacitance
-    'Ra' : 150,        # axial resistance
+    'Ra' : 150.,        # axial resistance
     'v_init' : -65.,    # initial crossmembrane potential
-    'e_pas' : -65.,     # reversal potential passive mechs
-    'passive' : True,   # switch on passive mechs
-    'nsegs_method' : 'lambda_f',
-    'lambda_f' : 100.,
+    'passive' : True,   # turn on NEURONs passive mechanism for all sections
+    'passive_parameters' : {'g_pas' : 1./30000, 'e_pas' : -65},
+    'nsegs_method' : 'lambda_f', # spatial discretization method
+    'lambda_f' : 100.,           # frequency where length constants are computed
     'dt' : 2.**-3,      # simulation time step size
-    'tstart' : 0.,    # start time of simulation, recorders start at t=0
-    'tstop' : 100.,   # stop simulation at 200 ms. These can be overridden
-                        # by setting these arguments i cell.simulation()
+    'tstart' : 0.,      # start time of simulation, recorders start at t=0
+    'tstop' : 100.,     # stop simulation at 100 ms.
 }
 
 # Create cell
