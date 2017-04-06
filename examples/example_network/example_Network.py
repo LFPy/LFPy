@@ -179,62 +179,23 @@ def draw_lineplot(
     return vlimround
 
 
-def ReduceStructArray(sendbuf, op=MPI.SUM):
-    """
-    simplify MPI Reduce for structured ndarrays with floating point numbers
-
-    Parameters
-    ----------
-    sendbuf : structured ndarray
-        Array data to be reduced (default: summed)
-    op : mpi4py.MPI.Op object
-        MPI_Reduce function. Default is mpi4py.MPI.SUM
-    """
-    if RANK == 0:
-        shape = sendbuf.shape
-        dtype_names = sendbuf.dtype.names
-    else:
-        shape = None
-        dtype_names = None
-    shape = COMM.bcast(shape)
-    dtype_names = COMM.bcast(dtype_names)
-
-    if RANK == 0:
-        reduced = np.zeros(shape,
-                           dtype=zip(dtype_names,
-                                     ['f8' for i in range(len(dtype_names))]))
-    else:
-        reduced = None
-    for name in dtype_names:
-        if RANK == 0:
-            recvbuf = np.zeros(shape)
-        else:
-            recvbuf = None
-        COMM.Reduce(np.array(sendbuf[name]), recvbuf, op=op, root=0)
-        if RANK == 0:
-            reduced[name] = recvbuf
-    return reduced
-
-
 ################################################################################
 # Set up shared and population-specific parameters
 ################################################################################
 OUTPUTPATH='example_network_output'
 
+# class NetworkCell parameters
 cellParameters = dict(
     morphology='BallAndStick.hoc',
     templatefile='BallAndStickTemplate.hoc',
     templatename='BallAndStickTemplate',
     templateargs=None,
     passive=False,
-    dt=2**-4,
-    tstopms=1200,
     delete_sections=False,
 )
 
+# class NetworkPopulation parameters
 populationParameters = dict(
-    CWD=None,
-    CELLPATH=None,
     Cell=NetworkCell,
     cell_args = cellParameters,
     pop_args = dict(
@@ -244,6 +205,7 @@ populationParameters = dict(
     rotation_args = dict(x=0, y=0),
 )
 
+# class Network parameters
 networkParameters = dict(
     dt = 2**-4,
     tstop = 1200.,
@@ -252,6 +214,7 @@ networkParameters = dict(
     OUTPUTPATH = OUTPUTPATH
 )
 
+# class RecExtElectrode parameters
 electrodeParameters = dict(
     x = np.zeros(13),
     y = np.zeros(13),
@@ -262,26 +225,32 @@ electrodeParameters = dict(
     sigma = 0.3,
 )
 
+# method Network.simulate() parameters
 networkSimulationArguments = dict(
     rec_current_dipole_moment = True,
     rec_pop_contributions = True,
 )
 
-# population and connection specific parameters
+# populations and connection probability
 population_names = ['E', 'I']
-population_sizes = [80, 20]
-
+population_sizes = [8, 2] 
 connectionProbability = 0.05
+
+# synapse model and specification
 synapseModel = neuron.h.Exp2Syn
 synapseParameters = [[dict(tau1=0.2, tau2=1.8, e=0.)]*2,
                      [dict(tau1=0.1, tau2=9.0, e=-80.)]*2]
 weightFunction = np.random.normal
 weightArguments = [[dict(loc=0.002, scale=0.0002)]*2,
                    [dict(loc=0.01,  scale=0.001)]*2]
+minweight = 0.
 delayFunction = np.random.normal
 delayArguments = [[dict(loc=1.5, scale=0.3)]*2]*2
+mindelay = 0.3
 multapseFunction = np.random.normal
-multapseArguments = [[dict(loc=2., scale=.5)]*2, [dict(loc=5., scale=1.)]*2]
+multapseArguments = [[dict(loc=2., scale=.5)]*2,
+                     [dict(loc=5., scale=1.)]*2]
+# method NetworkCell.get_rand_idx_area_and_distribution_norm parameters
 synapsePositionArguments = [[dict(section=['soma', 'apic'],
                                   fun=[st.norm]*2,
                                   funargs=[dict(loc=500., scale=100.)]*2,
@@ -301,10 +270,10 @@ if __name__ == '__main__':
             os.mkdir(OUTPUTPATH)
     COMM.Barrier()
 
-    # instantiate network class
+    # instantiate Network class
     network = Network(**networkParameters)
 
-    # instantiate populations
+    # create populations
     for name, size in zip(population_names, population_sizes):
         network.create_population(name=name, POP_SIZE=size,
                                   **populationParameters)
@@ -313,7 +282,6 @@ if __name__ == '__main__':
         # create some background synaptic activity onto the cells with Poisson
         # activation statistics
         for cell in network.populations[name].cells:
-            # if cell.gid == 0:
             idx = cell.get_rand_idx_area_norm(section='allsec', nidx=64)
             for i in idx:
                 syn = Synapse(cell=cell, idx=i, syntype='Exp2Syn',
@@ -338,8 +306,10 @@ if __name__ == '__main__':
                             synparams=synapseParameters[i][j],
                             weightfun=np.random.normal,
                             weightargs=weightArguments[i][j],
+                            minweight=minweight,
                             delayfun=delayFunction,
                             delayargs=delayArguments[i][j],
+                            mindelay=mindelay,
                             multapsefun=multapseFunction,
                             multapseargs=multapseArguments[i][j],
                             syn_pos_args=synapsePositionArguments[i][j],
@@ -349,39 +319,11 @@ if __name__ == '__main__':
     electrode = RecExtElectrode(**electrodeParameters)
 
     # run simulation
-    OUTPUT, DIPOLEMOMENT = network.simulate(
+    SPIKES, OUTPUT, DIPOLEMOMENT = network.simulate(
         electrode=electrode,
         **networkSimulationArguments
     )
-
-    # Sum output across RANKs to RANK 0
-    OUTPUT = ReduceStructArray(OUTPUT[0])
-    DIPOLEMOMENT = ReduceStructArray(DIPOLEMOMENT)
-
-    # Collect spike trains across all RANKs to RANK 0
-    for name in population_names:
-        population = network.populations[name]
-        for i in range(len(population.spike_vectors)):
-            population.spike_vectors[i] = np.array(population.spike_vectors[i])
-    if RANK == 0:
-        spikes = []
-        neurons = []
-        for i, name in enumerate(population_names):
-            spikes.append([])
-            neurons.append([])
-            spikes[i] += [x for x in network.populations[name].spike_vectors]
-            neurons[i] += [x for x in network.populations[name].gids]
-            for j in range(1, SIZE):
-                spikes[i] += COMM.recv(source=j, tag=13)
-                neurons[i] += COMM.recv(source=j, tag=14)
-    else:
-        spikes = None
-        neurons = None
-        for name in population_names:
-            COMM.send([x for x in network.populations[name].spike_vectors],
-                dest=0, tag=13)
-            COMM.send([x for x in network.populations[name].gids],
-                dest=0, tag=14)
+    
 
     # collect somatic potentials across all RANKs to RANK 0
     if RANK == 0:
@@ -405,7 +347,7 @@ if __name__ == '__main__':
     if RANK == 0:
         # spike raster
         fig, ax = plt.subplots(1,1)
-        for name, spts, gids in zip(population_names, spikes, neurons):
+        for name, spts, gids in zip(population_names, SPIKES['times'], SPIKES['gids']):
             t = []
             g = []
             for spt, gid in zip(spts, gids):
@@ -466,7 +408,7 @@ if __name__ == '__main__':
         fig.suptitle('extracellular potentials')
         for i, (ax, name, label) in enumerate(zip(axes, ['E', 'I', 'imem'],
                                                   ['E', 'I', 'sum'])):
-            draw_lineplot(ax, decimate(OUTPUT[name], q=16), dt=network.dt*16,
+            draw_lineplot(ax, decimate(OUTPUT[0][name], q=16), dt=network.dt*16,
                         T=(200, 1200),
                         scaling_factor=1.,
                         vlimround=None,

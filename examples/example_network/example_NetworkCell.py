@@ -22,17 +22,20 @@ GNU General Public License for more details.
 import matplotlib.pyplot as plt
 from LFPy import NetworkCell, StimIntElectrode
 import neuron
-
-cell = NetworkCell(
+# class NetworkCell parameters
+cellParameters = dict(
     morphology='BallAndStick.hoc',
     templatefile='BallAndStickTemplate.hoc',
     templatename='BallAndStickTemplate',
     templateargs=None,
-    passive=False,
-    tstartms=0,
-    tstopms=100,
-)
-
+    passive=False
+    )
+# create cell instance
+cell = NetworkCell(
+    tstartms=0, tstopms=100,
+    **cellParameters
+    )
+# stimulus device
 iclamp = StimIntElectrode(
     cell=cell,
     idx=0,
@@ -42,7 +45,7 @@ iclamp = StimIntElectrode(
     delay=10,
     record_current=True
     )
-
+# run simulation
 cell.simulate(rec_istim=iclamp.record_current)
 
 plt.subplot(2,1,1)

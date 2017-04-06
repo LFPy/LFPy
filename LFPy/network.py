@@ -484,7 +484,7 @@ class Network(object):
 
 
 
-    def create_population(self, CWD='', CELLPATH='', Cell=NetworkCell,
+    def create_population(self, CWD=None, CELLPATH=None, Cell=NetworkCell,
                           POP_SIZE=4, name='L5PC',
                           cell_args=dict(), pop_args=dict(),
                           rotation_args=dict()):
@@ -831,15 +831,23 @@ class Network(object):
 
         Returns
         -------
-        LFP : ndarray
-            if parameters electrode is not None, the
+        SPIKES : dict
+            the first returned argument is a dictionary with keys 'gids' and
+            'times'. Each item is a nested list of len(Npop) times N_X where N_X
+            is the corresponding population size. Each entry is a np.ndarray
+            containing the spike times of each cell in the nested list in item
+            'gids'
+        OUTPUT : list of ndarray
+            if parameters electrode is not None and/or dotprodcoeffs is not
+            None, contains the
+            [electrode.LFP, (dotprodcoeffs[0] dot I)(t), ...]
+            The first output is a structured array, so OUTPUT[0]['imem']
+            corresponds to the total LFP and the other the per-population
+            contributions.
         P : ndarray
             if rec_current_dipole_moment==True, contains the x,y,z-components of
             current-dipole moment from transmembrane currents summed up over
             all populations
-        LFP_POP : ndarray
-            if parameter rec_pop_contributions==True, a structured array with
-            contributions from each individual population is returned.
 
         """
         # set up integrator, use the CVode().fast_imem method by default
@@ -909,13 +917,42 @@ class Network(object):
                 if len(rec_variables) > 0:
                     cell._collect_rec_variables(rec_variables)
 
-        if electrode is None and dotprodcoeffs is None and not rec_current_dipole_moment and not rec_pop_contributions:
-            return
+        # Collect spike trains across all RANKs to RANK 0
+        for name in self.population_names:
+            population = self.populations[name]
+            for i in range(len(population.spike_vectors)):
+                population.spike_vectors[i] = np.array(population.spike_vectors[i])
+        if RANK == 0:
+            times = []
+            gids = []
+            for i, name in enumerate(self.population_names):
+                times.append([])
+                gids.append([])
+                times[i] += [x for x in self.populations[name].spike_vectors]
+                gids[i] += [x for x in self.populations[name].gids]
+                for j in range(1, SIZE):
+                    times[i] += COMM.recv(source=j, tag=13)
+                    gids[i] += COMM.recv(source=j, tag=14)
         else:
-            return LFP, P
+            times = None
+            gids = None
+            for name in self.population_names:
+                COMM.send([x for x in self.populations[name].spike_vectors],
+                    dest=0, tag=13)
+                COMM.send([x for x in self.populations[name].gids],
+                    dest=0, tag=14)
+
+        if electrode is None and dotprodcoeffs is None and not rec_current_dipole_moment and not rec_pop_contributions:
+            return dict(times=times, gids=gids)
+        else:
+            # communicate and sum up LFPs and dipole moments:
+            for i in range(len(LFP)):
+                LFP[i] = ReduceStructArray(LFP[i])
+            P = ReduceStructArray(P)
+            return dict(times=times, gids=gids), LFP, P
 
 
-    def create_network_dummycell(self):
+    def _create_network_dummycell(self):
         """
         set up parameters for a DummyCell object, allowing for computing
         the sum of all single-cell LFPs at each timestep, essentially
@@ -1136,7 +1173,7 @@ def _run_simulation_with_electrode(network, cvode,
         # for calculation of extracellular potentials. The population_nsegs
         # array is used to slice indices such that single-population
         # contributions to the potential can be calculated.
-        population_nsegs, network_dummycell = network.create_network_dummycell()
+        population_nsegs, network_dummycell = network._create_network_dummycell()
 
         # We can have a number of separate electrode objects in a list, create
         # mappings for each
@@ -1148,7 +1185,7 @@ def _run_simulation_with_electrode(network, cvode,
     elif electrode is None:
         electrodes = None
         if rec_current_dipole_moment:
-            population_nsegs, network_dummycell = network.create_network_dummycell()
+            population_nsegs, network_dummycell = network._create_network_dummycell()
 
     # set maximum integration step, it is necessary for communication of
     # spikes across RANKs to occur.
@@ -1367,3 +1404,40 @@ def _run_simulation_with_electrode(network, cvode,
     if to_file:
         el_LFP_file.close()
         return
+
+
+def ReduceStructArray(sendbuf, op=MPI.SUM):
+    """
+    simplify MPI Reduce for structured ndarrays with floating point numbers
+
+    Parameters
+    ----------
+    sendbuf : structured ndarray
+        Array data to be reduced (default: summed)
+    op : mpi4py.MPI.Op object
+        MPI_Reduce function. Default is mpi4py.MPI.SUM
+    """
+    if RANK == 0:
+        shape = sendbuf.shape
+        dtype_names = sendbuf.dtype.names
+    else:
+        shape = None
+        dtype_names = None
+    shape = COMM.bcast(shape)
+    dtype_names = COMM.bcast(dtype_names)
+
+    if RANK == 0:
+        reduced = np.zeros(shape,
+                           dtype=zip(dtype_names,
+                                     ['f8' for i in range(len(dtype_names))]))
+    else:
+        reduced = None
+    for name in dtype_names:
+        if RANK == 0:
+            recvbuf = np.zeros(shape)
+        else:
+            recvbuf = None
+        COMM.Reduce(np.array(sendbuf[name]), recvbuf, op=op, root=0)
+        if RANK == 0:
+            reduced[name] = recvbuf
+    return reduced
