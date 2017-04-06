@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 """Copyright (C) 2012 Computational Neuroscience Group, NMBU.
 
 This program is free software: you can redistribute it and/or modify
@@ -19,12 +20,12 @@ import numpy as np
 def calc_lfp_linesource(cell, x=0., y=0., z=0., sigma=0.3,
                         r_limit=None, t_indices=None):
     """Calculate electric field potential using the line-source method, all
-    compartments treated as line sources, even soma.
+    compartments treated as line sources, including soma.
     
     Parameters
     ----------        
     cell: obj
-        LFPy.Cell or LFPy.TemplateCell instance
+        LFPy.Cell or LFPy.TemplateCell like instance
     x : float
         extracellular position, x-axis
     y : float
@@ -98,7 +99,7 @@ def calc_lfp_soma_as_point(cell, x=0., y=0., z=0., sigma=0.3,
     Parameters
     ----------
     cell: obj
-        `LFPy.Cell` or `LFPy.TemplateCell` instance
+        `LFPy.Cell` or `LFPy.TemplateCell` like instance
     x : float
         extracellular position, x-axis
     y : float
@@ -260,7 +261,7 @@ def calc_lfp_pointsource(cell, x=0, y=0, z=0, sigma=0.3,
     Parameters
     ----------
     cell: obj
-        LFPy.Cell or LFPy.TemplateCell instance
+        LFPy.Cell or LFPy.TemplateCell like instance
     x : float
         extracellular position, x-axis
     y : float
