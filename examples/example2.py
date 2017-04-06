@@ -64,7 +64,7 @@ electrodeParameters = {
     'x' : X.flatten(),      # x,y,z-coordinates of contacts
     'y' : Y.flatten(),
     'z' : Z.flatten(),
-    'method' : 'som_as_point',  #sphere source soma segment
+    'method' : 'soma_as_point',  #sphere source soma segment
     'N' : np.array([[0, 1, 0]]*X.size), #surface normals
     'r' : 2.5,              # contact site radius
     'n' : 20,               # datapoints for averaging

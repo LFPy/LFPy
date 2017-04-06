@@ -62,9 +62,9 @@ class testRecExtElectrode(unittest.TestCase):
         np.testing.assert_allclose(LFP_analytic, LFP_LFPy, atol=1E-4)
 
     
-    def test_method_som_as_point(self):
+    def test_method_soma_as_point(self):
         #create LFPs using LFPy-model
-        LFP_LFPy = stickSimulation(method='som_as_point')
+        LFP_LFPy = stickSimulation(method='soma_as_point')
     
         #create LFPs using the analytical approach
         time = np.linspace(0, 100, 100*2**6+1)
@@ -111,9 +111,9 @@ class testRecExtElectrode(unittest.TestCase):
         np.testing.assert_allclose(LFP_analytic, LFP_LFPy, atol=1E-4)
 
     
-    def test_method_som_as_point_dotprodcoeffs(self):
+    def test_method_soma_as_point_dotprodcoeffs(self):
         #create LFPs using LFPy-model
-        LFP_LFPy = stickSimulationDotprodcoeffs(method='som_as_point')
+        LFP_LFPy = stickSimulationDotprodcoeffs(method='soma_as_point')
     
         #create LFPs using the analytical approach
         time = np.linspace(0, 100, 100*2**6+1)
@@ -127,11 +127,10 @@ class testRecExtElectrode(unittest.TestCase):
         np.testing.assert_allclose(LFP_analytic, LFP_LFPy, atol=1E-4)
 
     
-    
     def test_method_pointsource_contact_average_r10n100(self):
         #create LFPs using LFPy-model
         LFP_LFPy = stickSimulationAveragingElectrode(
-            contactRadius=10, contactNPoints=100, method='som_as_point')
+            contactRadius=10, contactNPoints=100, method='soma_as_point')
     
         #create LFPs using the analytical approach
         time = np.linspace(0, 100, 100*2**6+1)
@@ -162,10 +161,10 @@ class testRecExtElectrode(unittest.TestCase):
         np.testing.assert_allclose(LFP_analytic, LFP_LFPy, atol=1E-4)
 
     
-    def test_method_som_as_point_contact_average_r10n100(self):
+    def test_method_soma_as_point_contact_average_r10n100(self):
         #create LFPs using LFPy-model
         LFP_LFPy = stickSimulationAveragingElectrode(
-            contactRadius=10, contactNPoints=100, method='som_as_point')
+            contactRadius=10, contactNPoints=100, method='soma_as_point')
     
         #create LFPs using the analytical approach
         time = np.linspace(0, 100, 100*2**6+1)
