@@ -181,7 +181,7 @@ class testNetwork(unittest.TestCase):
 
         # connect and run sim
         network.connect(pre='test', post='test', connectivity=connectivity)
-        LFP, P = network.simulate(rec_current_dipole_moment=True)
+        SPIKES, LFP, P = network.simulate(rec_current_dipole_moment=True)
 
         # test output
         for population in network.populations.values():
