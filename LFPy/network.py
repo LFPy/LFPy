@@ -1455,8 +1455,8 @@ def ReduceStructArray(sendbuf, op=MPI.SUM):
 
     if RANK == 0:
         reduced = np.zeros(shape,
-                           dtype=zip(dtype_names,
-                                     ['f8' for i in range(len(dtype_names))]))
+                           dtype=list(zip(dtype_names,
+                                     ['f8' for i in range(len(dtype_names))])))
     else:
         reduced = None
     for name in dtype_names:
