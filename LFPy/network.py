@@ -47,6 +47,11 @@ class NetworkCell(TemplateCell):
     Similar to `LFPy.TemplateCell` with the addition of some attributes and
     methods allowing for spike communication between parallel RANKs.
 
+    This class allow using NEURON templates with some limitations.
+
+    This takes all the same parameters as the Cell class, but requires three
+    more template related parameters
+    
     Parameters
     ----------
     morphology : str
@@ -59,23 +64,23 @@ class NetworkCell(TemplateCell):
         Parameters provided to template-definition
     v_init : float
         Initial membrane potential. Default to -65.
-    passive : bool
-        Passive mechanisms are initialized if True. Defaults to True
     Ra : float
         axial resistance. Defaults to 150.
-    rm : float
-        membrane resistivity. Defaults to 30000.
     cm : float
         membrane capacitance. Defaults to 1.0
-    e_pas : float
-        passive mechanism reversal potential. Defaults to -65.
+    passive : bool
+        Passive mechanisms are initialized if True. Defaults to True
+    passive_parameters : dict
+        parameter dictionary with values for the passive membrane mechanism in
+        NEURON ('pas'). The dictionary must contain keys 'g_pas' and 'e_pas',
+        like the default: passive_parameters=dict(g_pas=0.001, e_pas=-70)
     extracellular : bool
         switch for NEURON's extracellular mechanism. Defaults to False
     dt: float
-        Simulation time step. Defaults to 0.1
-    tstartms : float
+        Simulation time step. Defaults to 2**-4
+    tstart : float
         initialization time for simulation <= 0 ms. Defaults to 0.
-    tstopms : float
+    tstop : float
         stop time for simulation > 0 ms. Defaults to 100.
     nsegs_method : 'lambda100' or 'lambda_f' or 'fixed_length' or None
         nseg rule, used by NEURON to determine number of compartments.
@@ -101,6 +106,28 @@ class NetworkCell(TemplateCell):
         or in custom code it is 6.3 celcius
     verbose : bool
         verbose output switch. Defaults to False
+
+    Examples
+    --------
+
+    >>> import LFPy
+    >>> cellParameters = {
+    >>>     'morphology' : '<path to morphology.hoc>',
+    >>>     'templatefile' :  '<path to template_file.hoc>'
+    >>>     'templatename' :  'templatename'
+    >>>     'templateargs' :  None
+    >>>     'v_init' : -65,
+    >>>     'cm' : 1.0,
+    >>>     'Ra' : 150,
+    >>>     'passive' : True,
+    >>>     'passive_parameters' : {'g_pas' : 0.001, 'e_pas' : -65.},
+    >>>     'dt' : 2**-3,
+    >>>     'tstart' : 0,
+    >>>     'tstop' : 50,
+    >>> }
+    >>> cell = LFPy.NetworkCell(**cellParameters)
+    >>> cell.simulate()
+
 
     """
     def __init__(self, **args):
@@ -356,9 +383,9 @@ class NetworkPopulation(object):
             popDataArray = np.empty((len(populationData, )), dtype=dtype)
             for i, (gid, pos, z_rot) in enumerate(populationData):
                 popDataArray[i]['gid'] = gid
-                popDataArray[i]['x'] = pos['xpos']
-                popDataArray[i]['y'] = pos['ypos']
-                popDataArray[i]['z'] = pos['zpos']
+                popDataArray[i]['x'] = pos['x']
+                popDataArray[i]['y'] = pos['y']
+                popDataArray[i]['z'] = pos['z']
                 popDataArray[i]['x_rot'] = np.pi/2
                 popDataArray[i]['y_rot'] = 0.
                 popDataArray[i]['z_rot'] = z_rot
@@ -387,7 +414,7 @@ class NetworkPopulation(object):
         Draw some random location for POP_SIZE cells within radius radius,
         at mean depth loc and standard deviation scale.
 
-        Returned argument is a list of dicts [{'xpos', 'ypos', 'zpos'},].
+        Returned argument is a list of dicts [{'x', 'y', 'z'},].
 
 
         Parameters
@@ -405,7 +432,7 @@ class NetworkPopulation(object):
         -------
         soma_pos : list
             List of dicts of len POP_SIZE
-            where dict have keys xpos, ypos, zpos specifying
+            where dict have keys x, y, z specifying
             xyz-coordinates of cell at list entry `i`.
 
 
@@ -424,7 +451,7 @@ class NetworkPopulation(object):
 
         soma_pos = []
         for i in range(POP_SIZE):
-            soma_pos.append({'xpos' : x[i], 'ypos' : y[i], 'zpos' : z[i]})
+            soma_pos.append({'x' : x[i], 'y' : y[i], 'z' : z[i]})
 
         return soma_pos
 
@@ -875,7 +902,7 @@ class Network(object):
                 if len(rec_variables) > 0:
                     cell._set_variable_recorders(rec_variables)
 
-        #run fadvance until t >= tstopms, and calculate LFP if asked for
+        #run fadvance until t >= tstop, and calculate LFP if asked for
         if electrode is None and dotprodcoeffs is None and not rec_current_dipole_moment and not rec_pop_contributions:
             if not rec_imem:
                 if self.verbose:
@@ -1215,7 +1242,7 @@ def _run_simulation_with_electrode(network, cvode,
         neuron.h.fcurrent()
     neuron.h.frecord_init()
 
-    #Starting simulation at tstartms
+    #Starting simulation at tstart
     neuron.h.t = network.tstart
 
     # create list of cells across all populations to simplify loops
@@ -1261,7 +1288,7 @@ def _run_simulation_with_electrode(network, cvode,
         i = 0
         for coeffs in dotprodcoeffs:
             el_LFP_file['electrode{:03d}'.format(i)] = np.zeros((coeffs.shape[0],
-                                int(cell.tstopms / cell.dt + 1)))
+                                int(cell.tstop / cell.dt + 1)))
             i += 1
 
     # temp vector to store membrane currents at each timestep:

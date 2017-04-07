@@ -233,7 +233,7 @@ networkSimulationArguments = dict(
 
 # populations and connection probability
 population_names = ['E', 'I']
-population_sizes = [8, 2] 
+population_sizes = [80, 20] 
 connectionProbability = 0.05
 
 # synapse model and specification

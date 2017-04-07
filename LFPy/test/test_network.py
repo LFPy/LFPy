@@ -33,7 +33,7 @@ class testNetworkPopulation(unittest.TestCase):
             templateargs=None,
             passive=False,
             dt=2**-3,
-            tstopms=100,
+            tstop=100,
             delete_sections=False,
         )
 
@@ -57,17 +57,16 @@ class testNetworkPopulation(unittest.TestCase):
         self.assertTrue(len(population.cells) == population.POP_SIZE)
         for cell, soma_pos, gid in zip(population.cells, population.soma_pos, population.gids):
             self.assertTrue(type(cell) is LFPy.NetworkCell)
-            self.assertTrue((cell.somapos[0] == soma_pos['xpos']) &
-                            (cell.somapos[1] == soma_pos['ypos']) &
-                            (cell.somapos[2] == soma_pos['zpos']))
+            self.assertTrue((cell.somapos[0] == soma_pos['x']) &
+                            (cell.somapos[1] == soma_pos['y']) &
+                            (cell.somapos[2] == soma_pos['z']))
             self.assertEqual(cell.gid, gid)
-            self.assertTrue(np.sqrt(soma_pos['xpos']**2 + soma_pos['ypos']**2) <= 100.)
+            self.assertTrue(np.sqrt(soma_pos['x']**2 + soma_pos['y']**2) <= 100.)
         np.testing.assert_equal(population.gids, np.arange(4))
 
 
         os.system('rm -r tmp_testNetworkPopulation')
         neuron.h('forall delete_section()')
-
 
 
 class testNetwork(unittest.TestCase):
@@ -82,7 +81,7 @@ class testNetwork(unittest.TestCase):
             templateargs=None,
             passive=False,
             dt=2**-3,
-            tstopms=100,
+            tstop=100,
             delete_sections=False,
         )
 
@@ -117,11 +116,11 @@ class testNetwork(unittest.TestCase):
             self.assertTrue(len(population.cells) == population.POP_SIZE)
             for cell, soma_pos, gid in zip(population.cells, population.soma_pos, population.gids):
                 self.assertTrue(type(cell) is LFPy.NetworkCell)
-                self.assertTrue((cell.somapos[0] == soma_pos['xpos']) &
-                                (cell.somapos[1] == soma_pos['ypos']) &
-                                (cell.somapos[2] == soma_pos['zpos']))
+                self.assertTrue((cell.somapos[0] == soma_pos['x']) &
+                                (cell.somapos[1] == soma_pos['y']) &
+                                (cell.somapos[2] == soma_pos['z']))
                 self.assertEqual(cell.gid, gid)
-                self.assertTrue(np.sqrt(soma_pos['xpos']**2 + soma_pos['ypos']**2) <= 100.)
+                self.assertTrue(np.sqrt(soma_pos['x']**2 + soma_pos['y']**2) <= 100.)
             np.testing.assert_equal(population.gids, np.arange(4))
 
         np.testing.assert_equal(connectivity.shape, (population.POP_SIZE, population.POP_SIZE))
@@ -149,7 +148,7 @@ class testNetwork(unittest.TestCase):
             templateargs=None,
             passive=False,
             dt=2**-3,
-            tstopms=100,
+            tstop=100,
             delete_sections=False,
         )
 
@@ -204,7 +203,7 @@ class testNetwork(unittest.TestCase):
             templateargs=None,
             passive=False,
             dt=2**-3,
-            tstopms=100,
+            tstop=100,
             delete_sections=False,
         )
 
@@ -269,6 +268,3 @@ class testNetwork(unittest.TestCase):
         network.pc.gid_clear()
         os.system('rm -r tmp_testNetworkPopulation')
         neuron.h('forall delete_section()')
-
-
-

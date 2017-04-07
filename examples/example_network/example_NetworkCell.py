@@ -28,11 +28,12 @@ cellParameters = dict(
     templatefile='BallAndStickTemplate.hoc',
     templatename='BallAndStickTemplate',
     templateargs=None,
-    passive=False
+    passive=False,
+    v_init=-65
     )
 # create cell instance
 cell = NetworkCell(
-    tstartms=0, tstopms=100,
+    tstart=0, tstop=100,
     **cellParameters
     )
 # stimulus device

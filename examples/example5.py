@@ -60,17 +60,16 @@ LFPy.cell.neuron.load_mechanisms('cells')
 #define cell parameters used as input to cell-class
 cellParameters = {
     'morphology' : 'morphologies/L5_Mainen96_wAxon_LFPy.hoc',
-    'rm' : 30000,               # membrane resistance
     'cm' : 1.0,                 # membrane capacitance
     'Ra' : 150,                 # axial resistance
     'v_init' : -65,             # initial crossmembrane potential
-    'e_pas' : -65,              # reversal potential passive mechs
-    'passive' : True,           # switch on passive mechs
+    'passive' : True,           # turn on passive mechanism
+    'passive_parameters' : {'g_pas' : 1./30000, 'e_pas' : -65}, # passive params
     'nsegs_method' : 'lambda_f',# method for setting number of segments,
     'lambda_f' : 500,           # segments are isopotential at this frequency
     'dt' : 2**-5,               # dt of LFP and NEURON simulation.
-    'tstartms' : -10,           #start time, recorders start at t=0
-    'tstopms' : 10,             #stop time of simulation
+    'tstart' : -10,             # start time, recorders start at t=0
+    'tstop' : 10,               # stop time of simulation
     'custom_code'  : ['active_declarations_example2.hoc'], # will run this file
 }
 
@@ -95,7 +94,7 @@ electrodeParameters = {
     'x' : X.flatten(),        # x,y,z-coordinates of contact points
     'y' : Y.flatten(),
     'z' : Z.flatten(),
-    'method' : 'som_as_point',  #treat soma segment as sphere source
+    'method' : 'soma_as_point',  #treat soma segment as sphere source
 }
 
 ################################################################################
@@ -108,7 +107,7 @@ electrode = LFPy.RecExtElectrode(**electrodeParameters)
 #Initialize cell instance, using the LFPy.Cell class
 cell = LFPy.Cell(**cellParameters)
 #set the position of midpoint in soma to Origo (not needed, this is the default)
-cell.set_pos(xpos = 0, ypos = 0, zpos = 0)
+cell.set_pos(x = 0, y = 0, z = 0)
 #rotate the morphology 90 degrees around z-axis
 cell.set_rotation(z = np.pi/2)
 

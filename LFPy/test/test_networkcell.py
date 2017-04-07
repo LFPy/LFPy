@@ -32,26 +32,26 @@ class testNetworkCell(unittest.TestCase):
     def test_cell_tvec_00(self):
         stickParams = {
             'dt' : 2**-3,
-            'tstartms' : 0.,
-            'tstopms' : 100.,
+            'tstart' : 0.,
+            'tstop' : 100.,
         }
 
         tvec = stickSimulationTesttvec(**stickParams)
-        tvec_numpy = np.linspace(0, stickParams['tstopms'],
-                    stickParams['tstopms']/stickParams['dt'] + 1)
+        tvec_numpy = np.linspace(0, stickParams['tstop'],
+                    stickParams['tstop']/stickParams['dt'] + 1)
 
         self.assertEqual(tvec.size, tvec_numpy.size)
 
     def test_cell_tvec_01(self):
         stickParams = {
             'dt' : 2**-3,
-            'tstartms' : 0.,
-            'tstopms' : 100.,
+            'tstart' : 0.,
+            'tstop' : 100.,
         }
     
         tvec = stickSimulationTesttvec(**stickParams)
-        tvec_numpy = np.linspace(0, stickParams['tstopms'],
-                    stickParams['tstopms']/stickParams['dt'] + 1)
+        tvec_numpy = np.linspace(0, stickParams['tstop'],
+                    stickParams['tstop']/stickParams['dt'] + 1)
     
         for i in range(tvec.size):
             self.assertEqual(tvec[i], tvec_numpy[i])
@@ -59,26 +59,26 @@ class testNetworkCell(unittest.TestCase):
     def test_cell_tvec_02(self):
         stickParams = {
             'dt' : 2**-3,
-            'tstartms' : 0.,
-            'tstopms' : 10000.,
+            'tstart' : 0.,
+            'tstop' : 10000.,
         }
     
         tvec = stickSimulationTesttvec(**stickParams)
-        tvec_numpy = np.linspace(0, stickParams['tstopms'],
-                    stickParams['tstopms']/stickParams['dt'] + 1)
+        tvec_numpy = np.linspace(0, stickParams['tstop'],
+                    stickParams['tstop']/stickParams['dt'] + 1)
     
         self.assertEqual(tvec.size, tvec_numpy.size)
     
     def test_cell_tvec_03(self):
         stickParams = {
             'dt' : 2**-3,
-            'tstartms' : 0.,
-            'tstopms' : 10000.,
+            'tstart' : 0.,
+            'tstop' : 10000.,
         }
     
         tvec = stickSimulationTesttvec(**stickParams)
-        tvec_numpy = np.linspace(0, stickParams['tstopms'],
-                    stickParams['tstopms']/stickParams['dt'] + 1)
+        tvec_numpy = np.linspace(0, stickParams['tstop'],
+                    stickParams['tstop']/stickParams['dt'] + 1)
     
     
         for i in range(tvec.size):
@@ -88,26 +88,26 @@ class testNetworkCell(unittest.TestCase):
     def test_cell_tvec_04(self):
         stickParams = {
             'dt' : 0.1,
-            'tstartms' : 0,
-            'tstopms' : 100,
+            'tstart' : 0,
+            'tstop' : 100,
         }
     
         tvec = stickSimulationTesttvec(**stickParams)
-        tvec_numpy = np.linspace(0, stickParams['tstopms'],
-                    stickParams['tstopms']/stickParams['dt'] + 1)
+        tvec_numpy = np.linspace(0, stickParams['tstop'],
+                    stickParams['tstop']/stickParams['dt'] + 1)
     
         self.assertEqual(tvec.size, tvec_numpy.size)
     
     def test_cell_tvec_05(self):
         stickParams = {
             'dt' : 0.1,
-            'tstartms' : 0.,
-            'tstopms' : 100.,
+            'tstart' : 0.,
+            'tstop' : 100.,
         }
     
         tvec = stickSimulationTesttvec(**stickParams)
-        tvec_numpy = np.linspace(0, stickParams['tstopms'],
-                    stickParams['tstopms']/stickParams['dt'] + 1)
+        tvec_numpy = np.linspace(0, stickParams['tstop'],
+                    stickParams['tstop']/stickParams['dt'] + 1)
     
         for i in range(tvec.size):
             self.assertAlmostEqual(tvec[i], tvec_numpy[i])
@@ -115,26 +115,26 @@ class testNetworkCell(unittest.TestCase):
     def test_cell_tvec_06(self):
         stickParams = {
             'dt' : 0.1,
-            'tstartms' : 0,
-            'tstopms' : 10000,
+            'tstart' : 0,
+            'tstop' : 10000,
         }
     
         tvec = stickSimulationTesttvec(**stickParams)
-        tvec_numpy = np.linspace(0, stickParams['tstopms'],
-                    stickParams['tstopms']/stickParams['dt'] + 1)
+        tvec_numpy = np.linspace(0, stickParams['tstop'],
+                    stickParams['tstop']/stickParams['dt'] + 1)
     
         self.assertEqual(tvec.size, tvec_numpy.size)
     
     def test_cell_tvec_07(self):
         stickParams = {
             'dt' : 0.1,
-            'tstartms' : 0.,
-            'tstopms' : 10000.,
+            'tstart' : 0.,
+            'tstop' : 10000.,
         }
     
         tvec = stickSimulationTesttvec(**stickParams)
-        tvec_numpy = np.linspace(0, stickParams['tstopms'],
-                    stickParams['tstopms']/stickParams['dt'] + 1)
+        tvec_numpy = np.linspace(0, stickParams['tstop'],
+                    stickParams['tstop']/stickParams['dt'] + 1)
     
         for i in range(tvec.size):
             self.assertEqual(tvec[i], tvec_numpy[i])
@@ -142,13 +142,13 @@ class testNetworkCell(unittest.TestCase):
     def test_cell_tvec_08(self):
         stickParams = {
             'dt' : 2**-3,
-            'tstartms' : -100,
-            'tstopms' : 100,
+            'tstart' : -100,
+            'tstop' : 100,
         }
     
         tvec = stickSimulationTesttvec(**stickParams)
-        tvec_numpy = np.linspace(0, stickParams['tstopms'],
-                    stickParams['tstopms']/stickParams['dt'] + 1)
+        tvec_numpy = np.linspace(0, stickParams['tstop'],
+                    stickParams['tstop']/stickParams['dt'] + 1)
     
         self.assertEqual(tvec.size, tvec_numpy.size)
     
@@ -156,13 +156,13 @@ class testNetworkCell(unittest.TestCase):
     def test_cell_tvec_09(self):
         stickParams = {
             'dt' : 2**-3,
-            'tstartms' : -100,
-            'tstopms' : 100,
+            'tstart' : -100,
+            'tstop' : 100,
         }
     
         tvec = stickSimulationTesttvec(**stickParams)
-        tvec_numpy = np.linspace(0, stickParams['tstopms'],
-                    stickParams['tstopms']/stickParams['dt'] + 1)
+        tvec_numpy = np.linspace(0, stickParams['tstop'],
+                    stickParams['tstop']/stickParams['dt'] + 1)
     
         for i in range(tvec.size):
             self.assertEqual(tvec[i], tvec_numpy[i])
@@ -170,13 +170,13 @@ class testNetworkCell(unittest.TestCase):
     def test_cell_tvec_10(self):
         stickParams = {
             'dt' : 2**-3,
-            'tstartms' : -100,
-            'tstopms' : 10000,
+            'tstart' : -100,
+            'tstop' : 10000,
         }
     
         tvec = stickSimulationTesttvec(**stickParams)
-        tvec_numpy = np.linspace(0, stickParams['tstopms'],
-                    stickParams['tstopms']/stickParams['dt'] + 1)
+        tvec_numpy = np.linspace(0, stickParams['tstop'],
+                    stickParams['tstop']/stickParams['dt'] + 1)
     
         self.assertEqual(tvec.size, tvec_numpy.size)
     
@@ -184,13 +184,13 @@ class testNetworkCell(unittest.TestCase):
     def test_cell_tvec_11(self):
         stickParams = {
             'dt' : 2**-3,
-            'tstartms' : -100,
-            'tstopms' : 10000,
+            'tstart' : -100,
+            'tstop' : 10000,
         }
     
         tvec = stickSimulationTesttvec(**stickParams)
-        tvec_numpy = np.linspace(0, stickParams['tstopms'],
-                    stickParams['tstopms']/stickParams['dt'] + 1)
+        tvec_numpy = np.linspace(0, stickParams['tstop'],
+                    stickParams['tstop']/stickParams['dt'] + 1)
     
         for i in range(tvec.size):
             self.assertEqual(tvec[i], tvec_numpy[i])
@@ -198,8 +198,8 @@ class testNetworkCell(unittest.TestCase):
     def test_cell_tvec_12(self):
         stickParams = {
             'dt' : 0.1,
-            'tstartms' : -100,
-            'tstopms' : 10000,
+            'tstart' : -100,
+            'tstop' : 10000,
         }
     
         try:
@@ -533,7 +533,7 @@ class testNetworkCell(unittest.TestCase):
         zstarts = cell.zstart.copy()
         zmids = cell.zmid.copy()
         zends = cell.zend.copy()
-        # test rotation 180 deg around x-axis
+        # test rotation 180 deg around y-axis
         cell.chiral_morphology(axis='y')
         # assert that y- and z-coordinates are inverted, using absolute
         # tolerances
@@ -565,7 +565,7 @@ class testNetworkCell(unittest.TestCase):
         zstarts = cell.zstart.copy()
         zmids = cell.zmid.copy()
         zends = cell.zend.copy()
-        # test rotation 180 deg around x-axis
+        # test rotation 180 deg around z-axis
         cell.chiral_morphology(axis='z')
         # assert that y- and z-coordinates are inverted, using absolute
     
@@ -814,11 +814,13 @@ class testNetworkCell(unittest.TestCase):
             'templatefile' : os.path.join(LFPy.__path__[0], 'test', 'stick_template.hoc'),
             'templatename' : 'stick_template',
             'templateargs' : None,
-            'rm' : 30000,
             'cm' : 1,
             'Ra' : 150,
-            'tstartms' : 0,
-            'tstopms' : 100,
+            'v_init' : -65,
+            'passive' : True,
+            'passive_parameters' : {'g_pas' : 1./30000, 'e_pas' : -65},
+            'tstart' : 0,
+            'tstop' : 100,
             'dt' : 0.1,
             'nsegs_method' : 'lambda_f',
             'lambda_f' : 100,
@@ -850,11 +852,13 @@ class testNetworkCell(unittest.TestCase):
             'templatefile' : os.path.join(LFPy.__path__[0], 'test', 'stick_template.hoc'),
             'templatename' : 'stick_template',
             'templateargs' : None,
-            'rm' : 30000,
             'cm' : 1,
             'Ra' : 150,
-            'tstartms' : -100,
-            'tstopms' : 100,
+            'v_init' : -65,
+            'passive' : True,
+            'passive_parameters' : {'g_pas' : 1./30000, 'e_pas' : -65},
+            'tstart' : -100,
+            'tstop' : 100,
             'dt' : 2**-4,
             'nsegs_method' : 'lambda_f',
             'lambda_f' : 100,
@@ -886,11 +890,13 @@ class testNetworkCell(unittest.TestCase):
             'templatefile' : os.path.join(LFPy.__path__[0], 'test', 'stick_template.hoc'),
             'templatename' : 'stick_template',
             'templateargs' : None,
-            'rm' : 30000,
             'cm' : 1,
             'Ra' : 150,
-            'tstartms' : -100,
-            'tstopms' : 100,
+            'v_init' : -65,
+            'passive' : True,
+            'passive_parameters' : {'g_pas' : 1./30000, 'e_pas' : -65},
+            'tstart' : -100,
+            'tstop' : 100,
             'dt' : 2**-4,
             'nsegs_method' : 'lambda_f',
             'lambda_f' : 100,
@@ -920,9 +926,11 @@ class testNetworkCell(unittest.TestCase):
             'templatefile' : os.path.join(LFPy.__path__[0], 'test', 'stick_template.hoc'),
             'templatename' : 'stick_template',
             'templateargs' : None,
-            'rm' : 30000,
             'cm' : 1,
             'Ra' : 150,
+            'v_init' : -65,
+            'passive' : True,
+            'passive_parameters' : {'g_pas' : 1./30000, 'e_pas' : -65},
             'dt' : 2**-4,
             'nsegs_method' : 'lambda_f',
             'lambda_f' : 100,
@@ -937,7 +945,7 @@ class testNetworkCell(unittest.TestCase):
             'record_current' : False
         }
     
-        stick0 = LFPy.NetworkCell(tstartms=0, tstopms=200, **stickParams)
+        stick0 = LFPy.NetworkCell(tstart=0, tstop=200, **stickParams)
         synapse0 = LFPy.StimIntElectrode(stick0,
                                          stick0.get_closest_idx(0, 0, 1000),
                                          delay=0, phase=0.,
@@ -945,7 +953,7 @@ class testNetworkCell(unittest.TestCase):
         stick0.simulate(rec_imem=True, rec_vmem=True, rec_current_dipole_moment=True)
     
     
-        stick1 = LFPy.NetworkCell(tstartms=-100, tstopms=100, **stickParams)
+        stick1 = LFPy.NetworkCell(tstart=-100, tstop=100, **stickParams)
         synapse1 = LFPy.StimIntElectrode(stick1,
                                          stick1.get_closest_idx(0, 0, 1000),
                                          delay=-100, phase=0.,
@@ -965,11 +973,13 @@ class testNetworkCell(unittest.TestCase):
             'templatefile' : os.path.join(LFPy.__path__[0], 'test', 'stick_template.hoc'),
             'templatename' : 'stick_template',
             'templateargs' : None,
-            'rm' : 30000,
             'cm' : 1,
             'Ra' : 150,
-            'tstartms' : 0,
-            'tstopms' : 100,
+            'v_init' : -65,
+            'passive' : True,
+            'passive_parameters' : {'g_pas' : 1./30000, 'e_pas' : -65},
+            'tstart' : 0,
+            'tstop' : 100,
             'dt' : 2**-4,
             'nsegs_method' : 'lambda_f',
             'lambda_f' : 100,
@@ -1013,11 +1023,13 @@ class testNetworkCell(unittest.TestCase):
             'templatefile' : os.path.join(LFPy.__path__[0], 'test', 'stick_template.hoc'),
             'templatename' : 'stick_template',
             'templateargs' : None,
-            'rm' : 30000,
             'cm' : 1,
             'Ra' : 150,
-            'tstartms' : -100,
-            'tstopms' : 100,
+            'v_init' : -65,
+            'passive' : True,
+            'passive_parameters' : {'g_pas' : 1./30000, 'e_pas' : -65},
+            'tstart' : -100,
+            'tstop' : 100,
             'dt' : 2**-4,
             'nsegs_method' : 'lambda_f',
             'lambda_f' : 100,
