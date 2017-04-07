@@ -13,17 +13,16 @@ import matplotlib.pyplot as plt
 # Define cell parameters
 cell_parameters = {          # various cell parameters,
     'morphology' : 'morphologies/L5_Mainen96_LFPy.hoc', # Mainen&Sejnowski, 1996
-    'rm' : 30000.,      # membrane resistance
     'cm' : 1.0,         # membrane capacitance
     'Ra' : 150.,        # axial resistance
     'v_init' : -65.,    # initial crossmembrane potential
-    'e_pas' : -65.,     # reversal potential passive mechs
-    'passive' : True,   # switch on passive mechs
+    'passive' : True,   # turn on passive mechanism for all sections
+    'passive_parameters' : {'g_pas' : 1./30000, 'e_pas' : -65}, # passive params
     'nsegs_method' : 'lambda_f', # lambda_f method
     'lambda_f' : 100.,  # lambda_f critical frequency
     'dt' : 2.**-3,      # simulation time step size
-    'tstartms' : 0.,    # start time of simulation, recorders start at t=0
-    'tstopms' : 100.,   # stop simulation at 200 ms. These can be overridden
+    'tstart' : 0.,      # start time of simulation, recorders start at t=0
+    'tstop' : 100.,     # stop simulation at 200 ms. These can be overridden
                         # by setting these arguments in cell.simulation()
 }
 

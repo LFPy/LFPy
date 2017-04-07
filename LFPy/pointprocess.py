@@ -27,23 +27,19 @@ class PointProcess(object):
         LFPy.Cell object
     idx : int
         index of segment
-    color : str
-        color in plot (optional)
-    marker : str
-        marker in plot (optional)
     record_current : bool
         Must be set True for recording of pointprocess currents
     kwargs : pointprocess specific variables passed on to cell/neuron
 
     """
-    def __init__(self, cell, idx, color='k', marker='o', 
-                 record_current=False, **kwargs):
+    def __init__(self, cell, idx, record_current=False, **kwargs):
         """
         Initializes the PointProcess class
         """
+        for key in ['color', 'marker']:
+            if key in kwargs.keys():
+                raise DeprecationWarning('Parameter {} has been deprecated'.format(key))
         self.idx = idx
-        self.color = color
-        self.marker = marker
         self.record_current = record_current
         self.kwargs = kwargs
         self.update_pos(cell)
@@ -77,22 +73,20 @@ class Synapse(PointProcess):
         Type of synapse. Built-in examples: ExpSyn, Exp2Syn
     record_current : bool
         Decides if current is recorded
-    color : str
-        Color of synapse for plotting purposes. Defaults to 'r'
-    marker : str
-        Marker to use for synapse for plotting purposes. Defaults to 'o'
     **kwargs
         Additional arguments to be passed on to
         NEURON in `cell.set_synapse`
 
     Examples
     --------
-    >>> import LFPy
     >>> import pylab as pl
     >>> pl.interactive(1)
+    >>> import LFPy
+    >>> import os
     >>> cellParameters = {
-    >>>     'morphology' :  'morphologies/L5_Mainen96_LFPy.hoc',
-    >>>     'tstopms' :     50,
+    >>>     'morphology' :  os.path.join('examples', 'morphologies', 'L5_Mainen96_LFPy.hoc'),
+    >>>     'passive' : True,
+    >>>     'tstop' :     50,
     >>> }
     >>> cell = LFPy.Cell(**cellParameters)
 
@@ -116,24 +110,26 @@ class Synapse(PointProcess):
     >>> pl.title('Somatic potential (mV)')
 
     """
-    def __init__(self, cell, idx, syntype, color='r', marker='o',
-                 record_current=False, **kwargs):
+    def __init__(self, cell, idx, syntype, record_current=False, **kwargs):
         """
         Initialization of class Synapse
         """
-        PointProcess.__init__(self, cell, idx, color, marker, record_current, 
-                              **kwargs)
+        PointProcess.__init__(self, cell, idx, record_current, **kwargs)
             
         self.syntype = syntype
         self.cell = cell
-        self.hocidx = int(cell.set_synapse(idx, syntype,
-                                           record_current, **kwargs))
+        self.hocidx = int(cell.set_synapse(idx, syntype, record_current,
+                                           **kwargs))
         cell.synapses.append(self)
         cell.synidx.append(idx)
 
     def set_spike_times(self, sptimes=np.zeros(0)):
         """Set the spike times explicitly using numpy arrays"""
-        self.sptimes = sptimes
+        try:
+            assert type(sptimes) is np.ndarray
+        except AssertionError:
+            raise AssertionError('synapse activation times must be a np.ndarray, not type({})'.format(type(sptimes)))
+        # self.sptimes = sptimes
         self.cell.sptimeslist.append(sptimes)
     
     def set_spike_times_w_netstim(self, noise=1., start=0., number=1E3,
@@ -201,19 +197,16 @@ class StimIntElectrode(PointProcess):
         Decides if current is recorded
     record_potential : bool
         switch for recording the potential on postsynaptic segment index
-    color : str
-        Color of stimulation electrode for plotting purposes. Defaults to 'p'
-    marker : str
-        Marker to use for plotting purposes. Defaults to '*'
     **kwargs
         Additional arguments to be passed on to
         NEURON in `cell.set_point_process`
 
     Examples
     --------
-    >>> import LFPy
     >>> import pylab as pl
     >>> pl.interactive(1)
+    >>> import os
+    >>> import LFPy
     >>> #define a list of different electrode implementations from NEURON
     >>> pointprocesses = [
     >>>     {
@@ -228,11 +221,11 @@ class StimIntElectrode(PointProcess):
     >>>         'idx' : 0,
     >>>         'record_current' : True,
     >>>         'pptype' : 'VClamp',
-    >>>         'amp[0]' : -65,
+    >>>         'amp[0]' : -70,
     >>>         'dur[0]' : 10,
     >>>         'amp[1]' : 0,
     >>>         'dur[1]' : 20,
-    >>>         'amp[2]' : -65,
+    >>>         'amp[2]' : -70,
     >>>         'dur[2]' : 10,
     >>>    },
     >>>    {
@@ -240,16 +233,17 @@ class StimIntElectrode(PointProcess):
     >>>        'record_current' : True,
     >>>        'pptype' : 'SEClamp',
     >>>        'dur1' : 10,
-    >>>        'amp1' : -65,
+    >>>        'amp1' : -70,
     >>>        'dur2' : 20,
     >>>        'amp2' : 0,
     >>>        'dur3' : 10,
-    >>>        'amp3' : -65,
+    >>>        'amp3' : -70,
     >>>     },
     >>>  ]
     >>>  #create a cell instance for each electrode
     >>> for pointprocess in pointprocesses:
-    >>>     cell = LFPy.Cell(morphology='morphologies/L5_Mainen96_LFPy.hoc')
+    >>>      cell = LFPy.Cell(morphology=os.path.join('examples', 'morphologies', 'L5_Mainen96_LFPy.hoc'),
+    >>>                      passive=True)
     >>>      stimulus = LFPy.StimIntElectrode(cell, **pointprocess)
     >>>      cell.simulate(rec_istim=True)
     >>>      pl.subplot(211)
@@ -263,10 +257,10 @@ class StimIntElectrode(PointProcess):
 
     """    
     def __init__(self, cell, idx, pptype='SEClamp',
-                 color='p', marker='*', record_current=False,
+                 record_current=False,
                  record_potential=False, **kwargs):
         """Initialize StimIntElectrode class"""
-        PointProcess.__init__(self, cell, idx, color, marker, record_current)
+        PointProcess.__init__(self, cell, idx, record_current)
         self.pptype = pptype
         self.hocidx = int(cell.set_point_process(idx, pptype,
                                                  record_current=record_current,

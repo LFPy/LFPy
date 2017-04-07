@@ -43,23 +43,23 @@ class TemplateCell(Cell):
         Arguments provided to template-definition
     v_init : float
         Initial membrane potential. Default to -65.
-    passive : bool
-        Passive mechanisms are initialized if True. Defaults to True
     Ra : float
         axial resistance. Defaults to 150.
-    rm : float
-        membrane resistivity. Defaults to 30000.
     cm : float
         membrane capacitance. Defaults to 1.0
-    e_pas : float
-        passive mechanism reversal potential. Defaults to -65.
+    passive : bool
+        Passive mechanisms are initialized if True. Defaults to True
+    passive_parameters : dict
+        parameter dictionary with values for the passive membrane mechanism in
+        NEURON ('pas'). The dictionary must contain keys 'g_pas' and 'e_pas',
+        like the default: passive_parameters=dict(g_pas=0.001, e_pas=-70)
     extracellular : bool
         switch for NEURON's extracellular mechanism. Defaults to False
     dt: float
-        Simulation time step. Defaults to 0.1
-    tstartms : float
+        Simulation time step. Defaults to 2**-4
+    tstart : float
         initialization time for simulation <= 0 ms. Defaults to 0.
-    tstopms : float
+    tstop : float
         stop time for simulation > 0 ms. Defaults to 100.
     nsegs_method : 'lambda100' or 'lambda_f' or 'fixed_length' or None
         nseg rule, used by NEURON to determine number of compartments.
@@ -91,16 +91,18 @@ class TemplateCell(Cell):
 
     >>> import LFPy
     >>> cellParameters = {
-    >>>     'morphology' : 'path/to/morphology',
-    >>>     'templatefile' :  'path/to/template-file (.hoc)'
+    >>>     'morphology' : '<path to morphology.hoc>',
+    >>>     'templatefile' :  '<path to template_file.hoc>'
     >>>     'templatename' :  'templatename'
     >>>     'templateargs' :  None
-    >>>     'rm' : 30000,
+    >>>     'v_init' : -65,
     >>>     'cm' : 1.0,
     >>>     'Ra' : 150,
-    >>>     'dt' : 0.1,
-    >>>     'tstartms' : -50,
-    >>>     'tstopms' : 50,
+    >>>     'passive' : True,
+    >>>     'passive_parameters' : {'g_pas' : 0.001, 'e_pas' : -65.},
+    >>>     'dt' : 2**-3,
+    >>>     'tstart' : 0,
+    >>>     'tstop' : 50,
     >>> }
     >>> cell = LFPy.TemplateCell(**cellParameters)
     >>> cell.simulate()
