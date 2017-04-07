@@ -23,13 +23,335 @@ ctypedef np.float64_t DTYPE_t
 ctypedef Py_ssize_t   LTYPE_t
 
 
+cdef return_dist_from_segments(
+    np.ndarray[DTYPE_t, ndim=1, negative_indices=False] xstart,
+    np.ndarray[DTYPE_t, ndim=1, negative_indices=False] ystart,
+    np.ndarray[DTYPE_t, ndim=1, negative_indices=False] zstart,
+    np.ndarray[DTYPE_t, ndim=1, negative_indices=False] xend,
+    np.ndarray[DTYPE_t, ndim=1, negative_indices=False] yend,
+    np.ndarray[DTYPE_t, ndim=1, negative_indices=False] zend,
+    np.ndarray[DTYPE_t, ndim=1, negative_indices=False] p):
+
+    """
+    Returns distance and closest point on line segments from point p
+    """
+    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] px, py, pz, delta, u, dist
+    cdef np.ndarray[DTYPE_t, ndim=2, negative_indices=False] closest_point
+
+    px = xend-xstart
+    py = yend-ystart
+    pz = zend-zstart
+
+    delta = px*px + py*py + pz*pz
+    u = ((p[0] - xstart) * px + (p[1] - ystart) * py + (p[2] - zstart) * pz) / delta
+    u[u > 1] = 1
+    u[u < 0] = 0
+
+    closest_point = np.array([xstart + u * px,
+                              ystart + u * py,
+                              zstart + u * pz])
+    dist = np.sqrt(np.sum((closest_point.T - p)**2, axis=1))
+    return dist, closest_point
+
+
+cpdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] calc_lfp_linesource_anisotropic(cell,
+                  double x,
+                  double y,
+                  double z,
+                  np.ndarray[DTYPE_t, ndim=1, negative_indices=False] sigma,
+                  np.ndarray[DTYPE_t, ndim=1, negative_indices=False] r_limit):
+    """Calculate electric field potential using the line-source method, all
+    compartments treated as line sources, even soma.
+
+    Parameters
+    ----------
+    cell: obj
+        LFPy.Cell or LFPy.TemplateCell instance
+    x : float
+        extracellular position, x-axis
+    y : float
+        extracellular position, y-axis
+    z : float
+        extracellular position, z-axis
+    sigma : array
+        extracellular conductivity [sigma_x, sigma_y, sigma_z]
+    r_limit : np.ndarray
+        minimum distance to source current for each compartment
+    """
+
+    cdef np.ndarray[DTYPE_t, ndim=2, negative_indices=False] currmem, l_vecs, closest_points
+    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] xstart, xend, \
+        ystart, yend, zstart, zend, mapping, pos, rs, dx2, dy2, dz2, a, b, c, p_, displace_vec
+    cdef np.ndarray[LTYPE_t, ndim=1, negative_indices=False] i, iia, iib, iii, iiii
+    cdef int idx
+
+    #some variables for h, r2, r_soma calculations
+    xstart = cell.xstart
+    xend = cell.xend
+    ystart = cell.ystart
+    yend = cell.yend
+    zstart = cell.zstart
+    zend = cell.zend
+    l_vecs = np.array([xend - xstart,
+                      yend - ystart,
+                      zend - zstart])
+
+    pos = np.array([x, y, z])
+
+    rs, closest_points = return_dist_from_segments(xstart, ystart, zstart, xend, yend, zend, pos)
+
+    dx2 = (xend - xstart)**2
+    dy2 = (yend - ystart)**2
+    dz2 = (zend - zstart)**2
+    a = (sigma[1] * sigma[2] * dx2 +
+         sigma[0] * sigma[2] * dy2 +
+         sigma[0] * sigma[1] * dz2)
+
+    b = -2 * (sigma[1] * sigma[2] * (x - xstart) * (xend - xstart) +
+              sigma[0] * sigma[2] * (y - ystart) * (yend - ystart) +
+              sigma[0] * sigma[1] * (z - zstart) * (zend - zstart))
+    c = (sigma[1] * sigma[2] * (x - xstart)**2 +
+         sigma[0] * sigma[2] * (y - ystart)**2 +
+         sigma[0] * sigma[1] * (z - zstart)**2)
+
+    for idx in np.where(rs <r_limit)[0]:
+        r, closest_point, l_vec = rs[idx], closest_points[:, idx], l_vecs[:, idx]
+
+        p_ = pos.copy()
+        if np.abs(r) < 1e-12:
+            # print "r is zero"
+            if np.abs(l_vec[0]) < 1e-12:
+                p_[0] += r_limit[idx]
+            elif np.abs(l_vec[1]) < 1e-12:
+                p_[1] += r_limit[idx]
+            elif np.abs(l_vec[2]) < 1e-12:
+                p_[2] += r_limit[idx]
+            else:
+                displace_vec = np.array([-l_vec[1], l_vec[0], 0])
+                displace_vec = displace_vec / np.sqrt(np.sum(displace_vec**2)) * r_limit[idx]
+                p_[:] += displace_vec
+        else:
+            p_[:] = pos + (pos - closest_point) * (r_limit[idx] - r) / r
+
+        if np.sqrt(np.sum((p_ - closest_point)**2)) - r_limit[idx] > 1e-9:
+            print p_, closest_point
+            raise RuntimeError("Segment adjustment not working")
+
+        b[idx] = -2 * (sigma[1] * sigma[2] * (p_[0] - xstart[idx]) * (xend[idx] - xstart[idx]) +
+                   sigma[0] * sigma[2] * (p_[1] - ystart[idx]) * (yend[idx] - ystart[idx]) +
+                   sigma[0] * sigma[1] * (p_[2] - zstart[idx]) * (zend[idx] - zstart[idx]))
+        c[idx] = (sigma[1] * sigma[2] * (p_[0] - xstart[idx])**2 +
+              sigma[0] * sigma[2] * (p_[1] - ystart[idx])**2 +
+              sigma[0] * sigma[1] * (p_[2] - zstart[idx])**2)
+
+    [i] = np.where(np.abs(b) <= 1e-6)
+    [iia] = np.where(np.bitwise_and(np.abs(4 * a * c - b*b) < 1e-6, np.abs(a - c) < 1e-6))
+    [iib] = np.where(np.bitwise_and(np.abs(4 * a * c - b*b) < 1e-6, np.abs(a - c) >= 1e-6))
+    [iii] = np.where(np.bitwise_and(4 * a * c - b*b < -1e-6, np.abs(b) > 1e-6))
+    [iiii] = np.where(np.bitwise_and(4 * a * c - b*b > 1e-6, np.abs(b) > 1e-6))
+
+    if len(i) + len(iia) + len(iib) + len(iii) + len(iiii) != cell.totnsegs:
+        print a, b, c
+        print i, iia, iib, iii, iiii
+        raise RuntimeError
+
+    # if len(iiii) != cell.totnsegs:
+    #     print len(i), len(iia), len(iib), len(iii), len(iiii)
+    mapping = np.zeros(cell.totnsegs)
+    mapping[i] = _anisotropic_line_source_case_i(a[i], c[i])
+    mapping[iia] = _anisotropic_line_source_case_iia(a[iia], c[iia])
+    mapping[iib] = _anisotropic_line_source_case_iib(a[iib], b[iib], c[iib])
+    mapping[iii] = _anisotropic_line_source_case_iii(a[iii], b[iii], c[iii])
+    mapping[iiii] = _anisotropic_line_source_case_iiii(a[iiii], b[iiii], c[iiii])
+
+    if np.isnan(mapping).any():
+        raise RuntimeError("NaN")
+
+    return  1 / (4 * np.pi) * mapping / np.sqrt(a)
+
+cpdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] calc_lfp_soma_as_point_anisotropic(cell,
+                  double x,
+                  double y,
+                  double z,
+                  np.ndarray[DTYPE_t, ndim=1, negative_indices=False] sigma,
+                  np.ndarray[DTYPE_t, ndim=1, negative_indices=False] r_limit):
+    """Calculate electric field potential, soma is treated as point source, all
+    compartments except soma are treated as line sources.
+
+    Parameters
+    ----------
+    cell: obj
+        LFPy.Cell or LFPy.TemplateCell instance
+    x : float
+        extracellular position, x-axis
+    y : float
+        extracellular position, y-axis
+    z : float
+        extracellular position, z-axis
+    sigma : array
+        extracellular conductivity [sigma_x, sigma_y, sigma_z]
+    r_limit : np.ndarray
+        minimum distance to source current for each compartment
+    """
+    cdef np.ndarray[DTYPE_t, ndim=2, negative_indices=False]  l_vecs, closest_points
+    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] xstart, xend, \
+        ystart, yend, zstart, zend, mapping, pos, rs, dx2, dy2, dz2, a, b, c, p_, displace_vec
+    cdef np.ndarray[LTYPE_t, ndim=1, negative_indices=False] i, iia, iib, iii, iiii
+    cdef int idx
+    cdef double dx2_soma, dy2_soma, dz2_soma, r2_soma, r2_scale_factor
+
+    xstart = cell.xstart
+    xend = cell.xend
+    ystart = cell.ystart
+    yend = cell.yend
+    zstart = cell.zstart
+    zend = cell.zend
+    l_vecs = np.array([xend - xstart, yend - ystart, zend - zstart])
+
+    pos = np.array([x, y, z])
+
+    rs, closest_points = return_dist_from_segments(xstart, ystart, zstart,
+                                                   xend, yend, zend, pos)
+
+    dx2 = (xend - xstart)**2
+    dy2 = (yend - ystart)**2
+    dz2 = (zend - zstart)**2
+    a = (sigma[1] * sigma[2] * dx2 +
+         sigma[0] * sigma[2] * dy2 +
+         sigma[0] * sigma[1] * dz2)
+
+    b = -2 * (sigma[1] * sigma[2] * (x - xstart) * (xend - xstart) +
+              sigma[0] * sigma[2] * (y - ystart) * (yend - ystart) +
+              sigma[0] * sigma[1] * (z - zstart) * (zend - zstart))
+    c = (sigma[1] * sigma[2] * (x - xstart)**2 +
+         sigma[0] * sigma[2] * (y - ystart)**2 +
+         sigma[0] * sigma[1] * (z - zstart)**2)
+
+    for idx in np.where(rs <r_limit)[0]:
+        r, closest_point, l_vec = rs[idx], closest_points[:, idx], l_vecs[:, idx]
+
+        p_ = pos.copy()
+        if np.abs(r) < 1e-12:
+            # print "r is zero"
+            if np.abs(l_vec[0]) < 1e-12:
+                p_[0] += r_limit[idx]
+            elif np.abs(l_vec[1]) < 1e-12:
+                p_[1] += r_limit[idx]
+            elif np.abs(l_vec[2]) < 1e-12:
+                p_[2] += r_limit[idx]
+            else:
+                displace_vec = np.array([-l_vec[1], l_vec[0], 0])
+                displace_vec = displace_vec / np.sqrt(np.sum(displace_vec**2)) * r_limit[idx]
+                p_[:] += displace_vec
+        else:
+            p_[:] = pos + (pos - closest_point) * (r_limit[idx] - r) / r
+
+        if np.sqrt(np.sum((p_ - closest_point)**2)) - r_limit[idx] > 1e-9:
+            print p_, closest_point
+            raise RuntimeError("Segment adjustment not working")
+
+        b[idx] = -2 * (sigma[1] * sigma[2] * (p_[0] - xstart[idx]) * (xend[idx] - xstart[idx]) +
+                   sigma[0] * sigma[2] * (p_[1] - ystart[idx]) * (yend[idx] - ystart[idx]) +
+                   sigma[0] * sigma[1] * (p_[2] - zstart[idx]) * (zend[idx] - zstart[idx]))
+        c[idx] = (sigma[1] * sigma[2] * (p_[0] - xstart[idx])**2 +
+              sigma[0] * sigma[2] * (p_[1] - ystart[idx])**2 +
+              sigma[0] * sigma[1] * (p_[2] - zstart[idx])**2)
+
+    [i] = np.where(np.abs(b) <= 1e-6)
+    [iia] = np.where(np.bitwise_and(np.abs(4 * a * c - b*b) < 1e-6, np.abs(a - c) < 1e-6))
+    [iib] = np.where(np.bitwise_and(np.abs(4 * a * c - b*b) < 1e-6, np.abs(a - c) >= 1e-6))
+    [iii] = np.where(np.bitwise_and(4 * a * c - b*b < -1e-6, np.abs(b) > 1e-6))
+    [iiii] = np.where(np.bitwise_and(4 * a * c - b*b > 1e-6, np.abs(b) > 1e-6))
+
+    if len(i) + len(iia) + len(iib) + len(iii) + len(iiii) != cell.totnsegs:
+        print a, b, c
+        print i, iia, iib, iii, iiii
+        raise RuntimeError
+
+    # if len(iiii) != cell.totnsegs:
+    #     print len(i), len(iia), len(iib), len(iii), len(iiii)
+    mapping = np.zeros(cell.totnsegs)
+    mapping[i] = _anisotropic_line_source_case_i(a[i], c[i])
+    mapping[iia] = _anisotropic_line_source_case_iia(a[iia], c[iia])
+    mapping[iib] = _anisotropic_line_source_case_iib(a[iib], b[iib], c[iib])
+    mapping[iii] = _anisotropic_line_source_case_iii(a[iii], b[iii], c[iii])
+    mapping[iiii] = _anisotropic_line_source_case_iiii(a[iiii], b[iiii], c[iiii])
+
+    if np.isnan(mapping).any():
+        raise RuntimeError("NaN")
+
+    mapping /= np.sqrt(a)
+
+    # Treat soma as point source
+    dx2_soma = (cell.xmid[0] - x)**2
+    dy2_soma = (cell.ymid[0] - y)**2
+    dz2_soma = (cell.zmid[0] - z)**2
+
+    r2_soma = dx2_soma + dy2_soma + dz2_soma
+
+    if np.abs(r2_soma) < 1e-6:
+        dx2_soma += 0.001
+        r2_soma += 0.001
+
+
+    if r2_soma < r_limit[0]**2:
+        # For anisotropic media, the direction in which to move points matter.
+        # Radial distance between point source and electrode is scaled to r_limit
+        r2_scale_factor = r_limit[0]*r_limit[0] / r2_soma
+        dx2_soma *= r2_scale_factor
+        dy2_soma *= r2_scale_factor
+        dz2_soma *= r2_scale_factor
+
+    mapping[0] = 1/np.sqrt(sigma[1] * sigma[2] * dx2_soma
+                    + sigma[0] * sigma[2] * dy2_soma
+                    + sigma[0] * sigma[1] * dz2_soma)
+
+    return 1 / (4 * np.pi) * mapping
+
+
+cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] _anisotropic_line_source_case_i(
+    np.ndarray[DTYPE_t, ndim=1, negative_indices=False] a,
+    np.ndarray[DTYPE_t, ndim=1, negative_indices=False] c):
+    return np.log(np.sqrt(a / c) + np.sqrt(a / c + 1))
+
+
+cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] _anisotropic_line_source_case_iia(
+    np.ndarray[DTYPE_t, ndim=1, negative_indices=False] a,
+    np.ndarray[DTYPE_t, ndim=1, negative_indices=False] c):
+    return np.log(np.abs(1 + np.sqrt(a / c)))
+
+
+cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] _anisotropic_line_source_case_iib(
+    np.ndarray[DTYPE_t, ndim=1, negative_indices=False] a,
+    np.ndarray[DTYPE_t, ndim=1, negative_indices=False] b,
+    np.ndarray[DTYPE_t, ndim=1, negative_indices=False] c):
+    return np.abs(np.log(np.abs(np.sign(b) * np.sqrt(a/c) + 1)))
+
+
+cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] _anisotropic_line_source_case_iii(
+    np.ndarray[DTYPE_t, ndim=1, negative_indices=False] a,
+    np.ndarray[DTYPE_t, ndim=1, negative_indices=False] b,
+    np.ndarray[DTYPE_t, ndim=1, negative_indices=False] c):
+    return np.log(np.abs((2 * a + b + 2 * np.sqrt(a * (a + b + c)))
+                        / (b + 2 * np.sqrt(a * c))))
+
+
+cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] _anisotropic_line_source_case_iiii(
+    np.ndarray[DTYPE_t, ndim=1, negative_indices=False] a,
+    np.ndarray[DTYPE_t, ndim=1, negative_indices=False] b,
+    np.ndarray[DTYPE_t, ndim=1, negative_indices=False] c):
+    return (np.arcsinh((2 * a + b) / np.sqrt(4 * a * c - b*b)) -
+                        np.arcsinh(b / np.sqrt(4 * a * c - b*b)))
+
+
 cpdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] calc_lfp_linesource(
-                        cell,
-                        double x,
-                        double y,
-                        double z,
-                        double sigma,
-                        np.ndarray[DTYPE_t, ndim=1, negative_indices=False] r_limit):
+                cell,
+                double x,
+                double y,
+                double z,
+                double sigma,
+                np.ndarray[DTYPE_t, ndim=1, negative_indices=False] r_limit):
+
     """Calculate electric field potential using the line-source method, all
     compartments treated as line sources, including soma.
 
@@ -49,11 +371,9 @@ cpdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] calc_lfp_linesource(
         minimum distance to source current for each compartment
     """
 
-    cdef np.ndarray[DTYPE_t, ndim=2, negative_indices=False] currmem
     cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] mapping
     cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] xstart, xend, \
-        ystart, yend, zstart, zend, deltaS, h, r2, l, \
-        Ememi, Ememii, Ememiii, Emem, r_lims
+        ystart, yend, zstart, zend, deltaS, h, r2, l
     cdef np.ndarray[LTYPE_t, ndim=1, negative_indices=False] i, ii, iii
 
 
@@ -69,9 +389,6 @@ cpdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] calc_lfp_linesource(
     deltaS = _deltaS_calc(xstart, xend, ystart, yend, zstart, zend)
     h = _h_calc(xstart, xend, ystart, yend, zstart, zend, deltaS, x, y, z)
     r2 = _r2_calc(xend, yend, zend, x, y, z, h)
-
-
-    r_lims = r_limit
     r2 = _check_rlimit(r2, r_limit, h, deltaS)
 
     l = h + deltaS
@@ -98,6 +415,7 @@ cpdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] calc_lfp_linesource(
 cpdef np.ndarray[DTYPE_t, ndim=1] calc_lfp_soma_as_point(cell,
                   double x, double y, double z, double sigma,
                   np.ndarray[DTYPE_t, ndim=1, negative_indices=False] r_limit):
+
     """Calculate electric field potential using the line-source method,
     soma is treated as point/sphere source
 
@@ -117,13 +435,13 @@ cpdef np.ndarray[DTYPE_t, ndim=1] calc_lfp_soma_as_point(cell,
         minimum distance to source current for each compartment
     """
 
-    cdef np.ndarray[DTYPE_t, ndim=2] currmem
     cdef np.ndarray[DTYPE_t, ndim=1] mapping
     cdef np.ndarray[DTYPE_t, ndim=1] xstart, xend, \
         ystart, yend, zstart, zend, deltaS, h, r2, l
     cdef np.ndarray[LTYPE_t, ndim=1] i, ii, iii
-    cdef double xmid, ymid, zmid
+    cdef double xmid, ymid, zmid, s_limit
 
+    s_limit = r_limit[0]
 
     #some variables for h, r2, r_soma calculations
     xstart = cell.xstart
@@ -318,17 +636,72 @@ cpdef calc_lfp_pointsource(cell, double x, double y, double z,
         extracellular conductivity
     r_limit : np.ndarray
         minimum distance to source current for each compartment
+
     """
+    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] r2
 
     r2 = (cell.xmid - x)**2 + (cell.ymid - y)**2 + (cell.zmid - z)**2
     r2 = _check_rlimit_point(r2, r_limit)
     return 1 / (4 * np.pi * sigma * r2**0.5)
 
 
+cpdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] calc_lfp_pointsource_anisotropic(
+    cell, double x, double y, double z, np.ndarray[DTYPE_t, ndim=1, negative_indices=False] sigma,
+    np.ndarray[DTYPE_t, ndim=1, negative_indices=False] r_limit):
+    """Calculate extracellular potentials using the anisotropic point-source
+    equation on all compartments
+
+    Parameters
+    ----------
+    cell: obj
+        LFPy.Cell or LFPy.TemplateCell instance
+    x : float
+        extracellular position, x-axis
+    y : float
+        extracellular position, y-axis
+    z : float
+        extracellular position, z-axis
+    sigma : array
+        extracellular conductivity in [x,y,z]-direction
+    r_limit : np.ndarray
+        minimum distance to source current for each compartment
+    """
+
+    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] r2, dx2, dy2, dz2, r2_scale_factor, sigma_r
+    cdef np.ndarray[np.uint8_t, cast=True, ndim=1] close_idxs
+
+    dx2 = (cell.xmid - x)**2
+    dy2 = (cell.ymid - y)**2
+    dz2 = (cell.zmid - z)**2
+
+    r2 = dx2 + dy2 + dz2
+    if (np.abs(r2) < 1e-6).any():
+        dx2[np.abs(r2) < 1e-6] += 0.001
+        r2[np.abs(r2) < 1e-6] += 0.001
+
+    close_idxs = r2 < r_limit**2
+
+    # For anisotropic media, the direction in which to move points matter.
+    # Radial distance between point source and electrode is scaled to r_limit
+    r2_scale_factor = r_limit[close_idxs]**2 / r2[close_idxs]
+    dx2[close_idxs] *= r2_scale_factor
+    dy2[close_idxs] *= r2_scale_factor
+    dz2[close_idxs] *= r2_scale_factor
+
+    sigma_r = np.sqrt(sigma[1] * sigma[2] * dx2
+                    + sigma[0] * sigma[2] * dy2
+                    + sigma[0] * sigma[1] * dz2)
+
+    return  1 / (4 * np.pi * sigma_r)
+
+
+
 cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] _check_rlimit_point(
                 np.ndarray[DTYPE_t, ndim=1, negative_indices=False] r2,
                 np.ndarray[DTYPE_t, ndim=1, negative_indices=False] r_limit):
     """Correct r2 so that r2 >= r_limit for all values"""
+    # cdef np.ndarray[LTYPE_t, ndim=1] inds
+    cdef np.ndarray[np.uint8_t, cast=True, ndim=1] inds
     inds = r2 < (r_limit*r_limit)
     r2[inds] = r_limit[inds]*r_limit[inds]
     return r2

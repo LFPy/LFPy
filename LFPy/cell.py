@@ -138,9 +138,9 @@ class Cell(object):
             if key in kwargs.keys():
                 raise DeprecationWarning('cell parameter {} is deprecated. Use dt=float instead'.format(key))
         if 'tstartms' in kwargs.keys():
-            raise DeprecationWarning('cell parameter tstartms is deprecated. Use tstartms=float instead')
+            raise DeprecationWarning('cell parameter tstartms is deprecated. Use tstart=float instead')
         if 'tstopms' in kwargs.keys():
-            raise DeprecationWarning('cell parameter tstopms is deprecated. Use tstopms=float instead')
+            raise DeprecationWarning('cell parameter tstopms is deprecated. Use tstop=float instead')
         if 'rm' in kwargs.keys():
             raise DeprecationWarning('Cell parameter rm is deprecated, set parameter passive_parameters=dict(g_pas=1/rm, e_pas=e_pas) instead')
         if 'e_pas' in kwargs.keys():
