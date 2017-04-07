@@ -12,6 +12,7 @@ The example uses mpi4py with openmpi, and do not rely on NEURON's MPI.
 import os
 from os.path import join
 import numpy as np
+import scipy.stats as st
 import matplotlib.pyplot as plt
 from matplotlib.collections import PolyCollection
 import LFPy
@@ -128,12 +129,12 @@ class Population:
         if RANK == 0:
             RandSpikeTimes = []
             for cellindex in range(self.POPULATION_SIZE):
-                sptimes = LFPy.inputgenerators.stationary_gamma(
-                    self.cellParameters['tstart'],
-                    self.cellParameters['tstop'],
-                    tmin=self.cellParameters['tstart'],
-                    **self.stationaryGammaArgs)
-                RandSpikeTimes.append(sptimes)
+                sptimes = LFPy.inputgenerators.get_activation_times_from_distribution(
+                    n=1, tstart=0, tstop=cellParameters['tstop'],
+                    distribution=st.gamma,
+                    rvs_args = self.stationaryGammaArgs
+                )
+                RandSpikeTimes.append(sptimes[0])
         else:
             RandSpikeTimes = None
         return COMM.bcast(RandSpikeTimes, root=0)
@@ -281,8 +282,8 @@ if __name__ == '__main__':
     
     #parameter args for LFPy.inputgenerators.stationary_gamma()
     stationaryGammaArgs = {
-        'k' : 0.25,               #shape parameter
-        'theta' : 12,             #"rate" parameter
+        'a' : 0.25,               #shape parameter
+        'scale' : 12,             #"rate" parameter
     }
     
     # Define electrode geometry corresponding to a laminar electrode, where
