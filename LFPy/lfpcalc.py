@@ -35,18 +35,9 @@ def calc_lfp_linesource(cell, x, y, z, sigma, r_limit):
         extracellular position, z-axis
     sigma : float
         extracellular conductivity
-    r_limit : [None]/float/np.ndarray
-        minimum distance to source current. Can be scalar or numpy array with
-        a limit for each cell compartment. Defaults to [None]
-
+    r_limit : np.ndarray
+        minimum distance to source current for each compartment
     """
-    # Handling the r_limits. If a r_limit is a single value, an array r_limit
-    # of shape cell.diam is returned.
-    if type(r_limit) == int or type(r_limit) == float:
-        r_limit = np.ones(np.shape(cell.diam))*abs(r_limit)
-    elif np.shape(r_limit) != np.shape(cell.diam):
-        raise Exception('r_limit is neither a float- or int- value, nor is \
-            r_limit.shape() equal to cell.diam.shape()')
 
     #some variables for h, r2, r_soma calculations
     xstart = cell.xstart
@@ -87,7 +78,6 @@ def calc_lfp_linesource(cell, x, y, z, sigma, r_limit):
 
 def calc_lfp_soma_as_point(cell, x, y, z, sigma, r_limit):
 
-
     """Calculate electric field potential using the line-source method,
     soma is treated as point/sphere source
     
@@ -103,28 +93,10 @@ def calc_lfp_soma_as_point(cell, x, y, z, sigma, r_limit):
         extracellular position, z-axis
     sigma : float
         extracellular conductivity in S/m
-    r_limit : float or np.ndarray or None
-        [None]/float/np.ndarray: minimum distance to source current.
+    r_limit : np.ndarray
+        minimum distance to source current for each compartment.
 
     """
-    #Handling the r_limits. If a r_limit is a single value,
-    #an array r_limit of shape cell.diam is returned.
-    if type(r_limit) != type(np.array([])):
-        r_limit = np.array(r_limit)
-    if r_limit.shape == ():
-        s_limit = r_limit
-        r_limit = np.ones(cell.diam.size) * abs(r_limit)
-    elif r_limit.shape == (2, ):
-        s_limit = abs(r_limit[0])
-        r_limit = np.ones(cell.diam.size) * abs(r_limit[1])
-    elif r_limit.shape == cell.diam.shape:
-        s_limit = r_limit[0]
-        r_limit = r_limit
-    else:
-        raise Exception('r_limit is neither a float- or int- value, \
-            on the form r_limit=[s_limit, r_limit],  \
-            nor is shape(r_limit) equal to shape(cell.diam)!')
-
 
     #some variables for h, r2, r_soma calculations
     xstart = cell.xstart
@@ -141,10 +113,10 @@ def calc_lfp_soma_as_point(cell, x, y, z, sigma, r_limit):
     h = _h_calc(xstart, xend, ystart, yend, zstart, zend, deltaS, x, y, z)
     r2 = _r2_calc(xend, yend, zend, x, y, z, h)
     r_soma = _r_soma_calc(xmid, ymid, zmid, x, y, z)
-    if r_soma < s_limit:
+    if r_soma < r_limit[0]:
         print('Adjusting r-distance to soma segment from %g to %g'
-                % (r_soma, s_limit))
-        r_soma = s_limit
+                % (r_soma, r_limit[0]))
+        r_soma = r_limit[0]
 
     # Check that no segment is closer to the electrode than r_limit
     if np.sum(np.nonzero( r2 < r_limit*r_limit )) > 0:
@@ -267,17 +239,10 @@ def calc_lfp_pointsource(cell, x, y, z, sigma, r_limit):
         extracellular position, z-axis
     sigma : float
         extracellular conductivity
-    r_limit : [None]/float/np.ndarray
-        minimum distance to source current
+    r_limit : np.ndarray
+        minimum distance to source current for each compartment
 
     """
-    # Handling the r_limits. If a r_limit is a single value, an array r_limit
-    # of shape cell.diam is returned.
-    if type(r_limit) == int or type(r_limit) == float:
-        r_limit = np.ones(np.shape(cell.diam))*abs(r_limit)
-    elif np.shape(r_limit) != np.shape(cell.diam):
-        raise Exception('r_limit is neither a float- or int- value, nor is \
-            r_limit.shape() equal to cell.diam.shape()')
 
     r2 = (cell.xmid - x)**2 + (cell.ymid - y)**2 + (cell.zmid - z)**2
     r2 = _check_rlimit_point(r2, r_limit)

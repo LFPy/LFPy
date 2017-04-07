@@ -23,9 +23,6 @@ import scipy
 import sys
 from warnings import warn
 import pickle
-import numpy as np
-import neuron
-from .recextelectrode import RecExtElectrode
 from .run_simulation import _run_simulation, _run_simulation_with_electrode
 from .run_simulation import _collect_geometry_neuron
 from .alias_method import alias_method
@@ -1112,7 +1109,9 @@ class Cell(object):
         """Record somatic membrane potential"""
 
         if self.nsomasec == 0:
-            warn('Cell instance appears to have no somatic section. No somav attribute will be set.')
+            if self.verbose:
+                warn('Cell instance appears to have no somatic section. '
+                     'No somav attribute will be set.')
         elif self.nsomasec == 1:
             self.somav = neuron.h.Vector(int(self.tstop / self.dt+1))
             for sec in self.somalist:

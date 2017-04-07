@@ -173,7 +173,7 @@ class RecExtElectrode:
                  seedvalue=None, **kwargs):
         """Initialize RecExtElectrode class"""
 
-        self.cell = cell
+        # self.cell = cell
         self.sigma = sigma
         if type(x) in [float, int]:
             self.x = np.array([x])
@@ -245,11 +245,8 @@ class RecExtElectrode:
             else:
                 raise ValueError('cell either string or list of strings')
 
-        if self.cell is not None:
-            self._test_imem_sum()
-            self.r_limit = self.cell.diam/2
-            self.mapping = np.zeros((self.x.size, len(cell.xmid)))
-
+        if cell is not None:
+            self.set_cell(cell)
 
         if method == 'soma_as_point':
             self.lfp_method = lfpcalc.calc_lfp_soma_as_point
@@ -265,6 +262,20 @@ class RecExtElectrode:
             raise ValueError("LFP method not recognized. "
                              "Should be 'soma_as_point', 'linesource' "
                              "or 'pointsource'")
+
+    def set_cell(self, cell):
+        self.cell = cell
+        self._test_imem_sum()
+        # Handling the r_limits. If a r_limit is a single value, an array r_limit
+        # of shape cell.diam is returned.
+        # if type(r_limit) == int or type(r_limit) == float:
+        #     r_limit = np.ones(np.shape(cell.diam))*abs(r_limit)
+        # elif np.shape(r_limit) != np.shape(cell.diam):
+        #     raise Exception('r_limit is neither a float- or int- value, nor is \
+        #         r_limit.shape() equal to cell.diam.shape()')
+
+        self.r_limit = self.cell.diam/2
+        self.mapping = np.zeros((self.x.size, len(cell.xmid)))
 
 
     def _test_imem_sum(self, tolerance=1E-8):
@@ -303,10 +314,7 @@ class RecExtElectrode:
         """
 
         if cell is not None:
-            self.cell = cell
-            self._test_imem_sum()
-            self.r_limit = self.cell.diam/2
-            self.mapping = np.zeros((self.x.size, len(cell.xmid)))
+            self.set_cell(cell)
 
         if self.n is not None and self.N is not None and self.r is not None:
             if self.n <= 1:
@@ -477,7 +485,7 @@ class RecExtElectrode:
                     'y' : crcl[1],
                     'z' : crcl[2],
                 }
-            elif self.contact_shape  is 'square':
+            elif self.contact_shape is 'square':
                 sqr = create_sqr(m, i)
                 self.circle_circ[i] = {
                     'x': sqr[0],
