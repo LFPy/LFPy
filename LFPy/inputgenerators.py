@@ -13,10 +13,10 @@ GNU General Public License for more details.
 
 """
 
+from __future__ import division
 import numpy as np
 import scipy.stats
 import warnings
-
 
 def get_activation_times_from_distribution(n, tstart=0., tstop=1.E6,
                                           distribution=scipy.stats.expon,
@@ -30,7 +30,6 @@ def get_activation_times_from_distribution(n, tstart=0., tstop=1.E6,
     
     The most likely initial first entry is
     tstart + method.rvs(size=inf, **rvs_args).mean()
-    
     
     Parameters
     ----------
@@ -100,9 +99,9 @@ def get_activation_times_from_distribution(n, tstart=0., tstop=1.E6,
                 iter += 1
             
             if iter == maxiter:
-                raise StopIteration('maximum number of iterations reach. Con')
-            
+                raise StopIteration('maximum number of iterations reach. Con')            
             
             times += [values[values < tstop]]
     
     return times
+

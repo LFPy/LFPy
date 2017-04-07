@@ -46,7 +46,8 @@ def _test(verbosity=1):
     from .test_pointprocess import testPointProcess, testSynapse, testStimIntElectrode 
     from .test_inputgenerators import testInputGenerators
     from .test_templatecell import testTemplateCell
-    from .test_network import testNetworkCell, testNetworkPopulation, testNetwork
+    from .test_networkcell import testNetworkCell
+    from .test_network import testNetworkPopulation, testNetwork
     import unittest
        
     print('\ntest LFPy.Cell class and methods:')

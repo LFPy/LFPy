@@ -1,5 +1,8 @@
 #!/usr/bin/env python
-'''LFPy setup.py file'''
+# -*- coding: utf-8 -*-
+"""LFPy setuptools file
+
+"""
 
 import os
 import shutil
@@ -13,13 +16,13 @@ try:
     cmdclass = { 'build_ext' : build_ext}
     ext_modules = [
         Extension('LFPy.lfpcalc',
-        ['LFPy/lfpcalc.pyx'],
+        [os.path.join('LFPy', 'lfpcalc.pyx')],
         include_dirs=[numpy.get_include()]),
         Extension('LFPy.run_simulation',
-        ['LFPy/run_simulation.pyx'],
+        [os.path.join('LFPy', 'run_simulation.pyx')],
         include_dirs=[numpy.get_include()]),
         Extension('LFPy.alias_method',
-        ['LFPy/alias_method.pyx'],
+        [os.path.join('LFPy', 'alias_method.pyx')],
         include_dirs=[numpy.get_include()]),
         ]
 except ImportError as ie:
@@ -86,7 +89,8 @@ setup(
         'Development Status :: 5 - Production/Stable',
         ],
     install_requires = [
-        'setuptools', 'numpy', 'scipy', 'matplotlib', 'Cython'
+        'setuptools', 'numpy', 'scipy', 'matplotlib', 'Cython', 'h5py',
+        'mpi4py'
         ],
     provides = ['LFPy'],
     )

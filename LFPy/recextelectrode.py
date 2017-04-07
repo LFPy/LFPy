@@ -14,10 +14,11 @@ GNU General Public License for more details.
 
 """
 
+from __future__ import division
 import sys
 import warnings
 import numpy as np
-from LFPy import lfpcalc, tools
+from . import lfpcalc, tools
 
 
 class RecExtElectrode:
@@ -69,12 +70,15 @@ class RecExtElectrode:
 
     >>> cellParameters = {
     >>>     'morphology' : 'examples/morphologies/L5_Mainen96_LFPy.hoc',  # morphology file
+    >>>     'v_init' : -65                          # initial voltage
     >>>     'rm' : 30000,                           # membrane resistivity
     >>>     'cm' : 1.0,                             # membrane capacitance
     >>>     'Ra' : 150,                             # axial resistivity
+    >>>     'passive' : True                        # insert passive channels
+    >>>     'passive_parameters' : {g_pas=1./3E4, e_pas=-65} # passive params
     >>>     'dt' : 2**-4,                           # simulation time res
-    >>>     'tstartms' : 0.,                        # start t of simulation
-    >>>     'tstopms' : 50.,                        # end t of simulation
+    >>>     'tstart' : 0.,                        # start t of simulation
+    >>>     'tstop' : 50.,                        # end t of simulation
     >>> }
     >>> cell = LFPy.Cell(**cellParameters)
 
@@ -117,12 +121,15 @@ class RecExtElectrode:
 
     >>> cellParameters = {
     >>>     'morphology' : 'examples/morphologies/L5_Mainen96_LFPy.hoc',  # morphology file
+    >>>     'v_init' : -65                          # initial voltage
     >>>     'rm' : 30000,                           # membrane resistivity
     >>>     'cm' : 1.0,                             # membrane capacitance
     >>>     'Ra' : 150,                             # axial resistivity
+    >>>     'passive' : True                        # insert passive channels
+    >>>     'passive_parameters' : {g_pas=1./3E4, e_pas=-65} # passive params
     >>>     'dt' : 2**-4,                           # simulation time res
-    >>>     'tstartms' : 0.,                        # start t of simulation
-    >>>     'tstopms' : 50.,                        # end t of simulation
+    >>>     'tstart' : 0.,                        # start t of simulation
+    >>>     'tstop' : 50.,                        # end t of simulation
     >>> }
     >>> cell = LFPy.Cell(**cellParameters)
 

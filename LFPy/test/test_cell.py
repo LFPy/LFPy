@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+
 """Copyright (C) 2012 Computational Neuroscience Group, NMBU.
 
 This program is free software: you can redistribute it and/or modify
@@ -463,7 +464,7 @@ class testCell(unittest.TestCase):
         np.testing.assert_allclose(cell.zend, zends, atol=1e-07)
 
 
-    def test_cell_chiral_morphology_00(self):
+    def test_cell_chiral_morphology_01(self):
         '''test LFPy.Cell.chiral_morphology()'''
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
                                                   'ball_and_sticks.hoc' ))
@@ -477,7 +478,7 @@ class testCell(unittest.TestCase):
         zstarts = cell.zstart.copy()
         zmids = cell.zmid.copy()
         zends = cell.zend.copy()
-        # test rotation 180 deg around x-axis
+        # test rotation 180 deg around y-axis
         cell.chiral_morphology(axis='y')
         # assert that y- and z-coordinates are inverted, using absolute
         # tolerances
@@ -491,7 +492,7 @@ class testCell(unittest.TestCase):
         np.testing.assert_allclose(cell.zmid, zmids, atol=1e-07)
         np.testing.assert_allclose(cell.zend, zends, atol=1e-07)
 
-    def test_cell_chiral_morphology_00(self):
+    def test_cell_chiral_morphology_02(self):
         '''test LFPy.Cell.chiral_morphology()'''
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
                                                   'ball_and_sticks.hoc' ))
@@ -505,10 +506,9 @@ class testCell(unittest.TestCase):
         zstarts = cell.zstart.copy()
         zmids = cell.zmid.copy()
         zends = cell.zend.copy()
-        # test rotation 180 deg around x-axis
+        # test rotation 180 deg around z-axis
         cell.chiral_morphology(axis='z')
         # assert that y- and z-coordinates are inverted, using absolute
-
         # tolerances
         np.testing.assert_allclose(cell.xstart, xstarts, atol=1e-07)
         np.testing.assert_allclose(cell.xmid, xmids, atol=1e-07)
@@ -1079,7 +1079,6 @@ class testCell(unittest.TestCase):
 
 
     ######## Functions used by tests: ##########################################
-
 def stickSimulationTesttvec(**kwargs):
     stick = LFPy.Cell(morphology = os.path.join(LFPy.__path__[0], 'test',
                                                 'stick.hoc'), verbose=False,
@@ -1094,7 +1093,7 @@ def cell_w_synapse_from_sections(sections=None):
     '''
     cellParams = {
         'morphology': None,
-        'cm' : 1.0,
+        'cm' : 1,
         'Ra' : 150,
         'v_init' : -65,
         'passive' : True,

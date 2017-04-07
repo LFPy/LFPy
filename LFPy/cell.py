@@ -17,15 +17,18 @@ GNU General Public License for more details.
 
 from __future__ import division
 import os
+import neuron
+import numpy as np
+import scipy
 import sys
 from warnings import warn
 import pickle
 import numpy as np
 import neuron
-from LFPy import RecExtElectrode
-from LFPy.run_simulation import _run_simulation, _run_simulation_with_electrode
-from LFPy.run_simulation import _collect_geometry_neuron
-from LFPy.alias_method import alias_method
+from .recextelectrode import RecExtElectrode
+from .run_simulation import _run_simulation, _run_simulation_with_electrode
+from .run_simulation import _collect_geometry_neuron
+from .alias_method import alias_method
 
 
 class Cell(object):
@@ -589,7 +592,7 @@ class Cell(object):
         record_current : bool
             Decides if current is stored
         kwargs
-            Arguments passed on from class StimIntElectrode
+            Parameters passed on from class StimIntElectrode
 
         """
 
@@ -791,9 +794,85 @@ class Cell(object):
         else:
             area = self.area[poss_idx]
             area /= area.sum()
-            idx = alias_method(poss_idx, area, nidx)
+            return alias_method(poss_idx, area, nidx)
 
-            return idx
+    
+    def get_rand_idx_area_and_distribution_norm(self, section='allsec', nidx=1,
+                                                z_min=-1E6, z_max=1E6,
+                                                fun=scipy.stats.norm,
+                                                funargs=dict(loc=0, scale=100),
+                                                funweights=None):
+        """
+        Return nidx segment indices in section with random probability
+        normalized to the membrane area of each segment multiplied by
+        the value of the probability density function of "fun", a function
+        in the scipy.stats module with corresponding function arguments
+        in "funargs" on the interval [z_min, z_max]
+        
+        Parameters
+        ----------  
+        section: str
+            string matching a section-name
+        nidx: int
+            number of random indices
+        z_min: float
+            depth filter
+        z_max: float
+            depth filter
+        fun : function or iterable
+            iterable (list, tuple, numpy.array) of function, probability
+            distribution in scipy.stats module
+        funargs : dict or iterable
+            iterable (list, tuple, numpy.array) of dict, arguments to fun.pdf
+            method (e.g., w. keys 'loc' and 'scale')
+        funweights : None or iterable
+            iterable (list, tuple, numpy.array) of floats, scaling of each
+            individual fun (i.e., introduces layer specificity)
+        
+        Examples
+        --------
+        >>> import LFPy
+        >>> import numpy as np
+        >>> import scipy.stats as ss
+        >>> import matplotlib.pyplot as plt
+        >>> from os.path import join
+        
+        >>> cell = LFPy.Cell(morphology=join('cells', 'cells', 'j4a.hoc'))
+        >>> cell.set_rotation(x=4.99, y=-4.33, z=3.14)
+        
+        >>> idx = cell.get_rand_idx_area_and_distribution_norm(nidx=10000,
+                                                           fun=ss.norm,
+                                                           funargs=dict(loc=0, scale=200))
+        >>> bins = np.arange(-30, 120)*10
+        >>> plt.hist(cell.zmid[idx], bins=bins, alpha=0.5)
+        >>> plt.show()        
+        """
+        poss_idx = self.get_idx(section=section, z_min=z_min, z_max=z_max)
+        if nidx < 1:
+            print('nidx < 1, returning empty array')
+            return np.array([])
+        elif poss_idx.size == 0:
+            print('No possible segment idx match enquire! returning empty array')
+            return np.array([])
+        else:
+            p = self.area[poss_idx]
+            # scale with density function
+            if type(fun) in [list, tuple, np.ndarray]:
+                assert(type(funargs) in [list, tuple, np.ndarray])
+                assert(type(funweights) in [list, tuple, np.ndarray])
+                assert((len(fun) == len(funargs)) & (len(fun) == len(funweights)))
+                mod = np.zeros(poss_idx.shape)
+                for f, args, scl in zip(fun, funargs, funweights):
+                    df = f(**args)
+                    mod += df.pdf(x=self.zmid[poss_idx])*scl
+                p *= mod
+            else:
+                df = fun(**funargs)
+                p *= df.pdf(x=self.zmid[poss_idx])
+            # normalize
+            p /= p.sum()
+            return alias_method(poss_idx, p, nidx)
+
 
     def simulate(self, electrode=None, rec_imem=False, rec_vmem=False,
                  rec_ipas=False, rec_icap=False,
@@ -1586,8 +1665,7 @@ class Cell(object):
         """
         update the locations in neuron.hoc.space using neuron.h.pt3dchange()
         """
-        i = 0
-        for sec in self.allseclist:
+        for i, sec in enumerate(self.allseclist):
             n3d = int(neuron.h.n3d())
             for n in range(n3d):
                 neuron.h.pt3dchange(n,
@@ -1595,7 +1673,6 @@ class Cell(object):
                                 self.y3d[i][n],
                                 self.z3d[i][n],
                                 self.diam3d[i][n])
-            i += 1
             #let NEURON know about the changes we just did:
             neuron.h.define_shape()
         #must recollect the geometry, otherwise we get roundoff errors!

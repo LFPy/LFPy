@@ -1,11 +1,9 @@
 begintemplate ball_and_stick_template
 public soma, dend         
-public all, somatic, basal
-objref all, somatic, basal
+public all
+objref all
 proc init() {
     all = new SectionList()
-    somatic = new SectionList()
-    basal = new SectionList()
 }
 
 create soma[1], dend[1]

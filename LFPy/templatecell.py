@@ -25,11 +25,12 @@ from LFPy.run_simulation import _run_simulation, _run_simulation_with_electrode
 class TemplateCell(Cell):
 
     """
-    This class allow using cell templates with some limitations.
-    TODO: Specify which limitations
+    class LFPy.TemplateCell
+    
+    This class allow using NEURON templates with some limitations.
 
     This takes all the same parameters as the Cell class, but requires three
-    more template related arguments
+    more template related parameters
     
     Parameters
     ----------
@@ -40,7 +41,7 @@ class TemplateCell(Cell):
     templatename : str
         Cell template-name used for this cell object
     templateargs : str
-        Arguments provided to template-definition
+        Parameters provided to template-definition
     v_init : float
         Initial membrane potential. Default to -65.
     Ra : float
@@ -151,13 +152,11 @@ class TemplateCell(Cell):
             neuron.h('sec_counted = 0')
                 
         #the python cell object we are loading the morphology into:
-        celltemplate = getattr(neuron.h, self.templatename)
-        self.cell = celltemplate(self.templateargs)
-        #self.cell = getattr(neuron.h, self.templatename)(self.templateargs)
+        self.template = getattr(neuron.h, self.templatename)(self.templateargs)
         
         #perform a test if the morphology is already loaded:
         seccount = 0
-        for sec in self.cell.all:
+        for sec in self.template.all:
             seccount += 1
         if seccount == 0:
             #import the morphology, try and determine format
@@ -196,15 +195,14 @@ class TemplateCell(Cell):
                 if fileEnding == 'xml' or fileEnding ==  'XML':
                     #can not currently assign xml to cell template
                     try:
-                        imprt.instantiate(self.cell)
+                        imprt.instantiate(self.template)
                     except:
                         raise Exception("this xml file is not supported")
                 else:
-                    imprt.instantiate(self.cell)
+                    imprt.instantiate(self.template)
                 
             else:
-                neuron.h.execute("xopen(\"%s\")" % self.morphology, self.cell)
-                #neuron.h.load_file(1, self.morphology)
+                neuron.h.execute("xopen(\"%s\")" % self.morphology, self.template)
         
         #set shapes and create sectionlists
         neuron.h.define_shape()
@@ -212,61 +210,19 @@ class TemplateCell(Cell):
 
     def _create_sectionlists(self):
         """Create section lists for different kinds of sections"""
-        #list with all sections
         
-        #test if list self.cell.all is not empty
-        numsec = 0
-        for sec in self.cell.all:
-            numsec += 1
+        self.allsecnames = []
+        for sec in self.template.all:
+            self.allsecnames.append(sec.name())
         
-        if numsec > 0:
-            self.allsecnames = []
-            for sec in self.cell.all:
-                self.allsecnames.append(sec.name())
-            
-            #hotpatching the allseclist!!!
-            self.allseclist = self.cell.all
-            
-            #list of soma sections, assuming it is named on the format "soma*"
-            self.nsomasec = 0
-            self.somalist = neuron.h.SectionList()
-            for sec in self.cell.all:
-                if sec.name().find('soma') >= 0:
-                    self.somalist.append(sec=sec)
-                    self.nsomasec += 1
-        else:
-            self.allsecnames = []
-            for sec in self.cell.allsec():
-                self.allsecnames.append(sec.name())
-            
-            self.allseclist = neuron.h.SectionList()
-            for sec in self.cell.allsec():
-                self.allseclist.append(sec=sec)
-            
-            
-            #list of soma sections, assuming it is named on the format "soma*"
-            self.nsomasec = 0
-            self.somalist = neuron.h.SectionList()
-            for sec in self.cell.allsec():
-                if sec.name().find('soma') >= 0:
-                    self.somalist.append(sec=sec)
-                    self.nsomasec += 1
-
-    def _update_pt3d(self):
-        """
-        update the locations in neuron.hoc.space using neuron.h.pt3dchange()
-        """
-        for i, sec in enumerate(self.allseclist):
-            n3d = int(neuron.h.n3d())
-            for n in range(n3d):
-                neuron.h.pt3dchange(n,
-                                self.x3d[i][n],
-                                self.y3d[i][n],
-                                self.z3d[i][n],
-                                self.diam3d[i][n])
-            #let NEURON know about the changes we just did:
-            neuron.h.define_shape()
-        #must recollect the geometry, otherwise we get roundoff errors!
-        self._collect_geometry()
+        self.allseclist = self.template.all
+        
+        #list of soma sections, assuming it is named on the format "soma*"
+        self.nsomasec = 0
+        self.somalist = neuron.h.SectionList()
+        for sec in self.allseclist:
+            if 'soma' in sec.name():
+                self.somalist.append(sec=sec)
+                self.nsomasec += 1
 
 

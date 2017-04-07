@@ -1,0 +1,17 @@
+/* -----------------------------------------------------------------------------
+BallAndStickTemplate.hoc
+----------------------------------------------------------------------------- */
+
+begintemplate BallAndStickTemplate
+public init, soma, apic         
+public all
+objref all
+proc init() {
+    all = new SectionList()
+}
+
+create soma[1], apic[1]
+
+endtemplate BallAndStickTemplate
+
+

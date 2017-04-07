@@ -1,25 +1,23 @@
 #!/usr/bin/env python
-'''
-################################################################################
-#
-# This is an example scripts using LFPy with an active cell model adapted from
-# Mainen and Sejnowski, Nature 1996, for the original files, see
-# http://senselab.med.yale.edu/modeldb/ShowModel.asp?model=2488
-#
-# This scripts is set up to use the model, where the active conductances and
-# spine corrections are set in the function "active_declarations()", and uses
-# the mechanisms from the .mod-files provided here.
-# For this example to work, run "nrnivmodl" in this folder to compile these
-# mechanisms (i.e. /$PATHTONEURON/nrn/x86_64/bin/nrnivmodl).
-#
-# The active parameters are similar to the file active_declarations_example3.py
-#
-# Here, excitatory and inhibitory neurons are distributed on different parts of
-# the morphology, with stochastic spike times produced by the
-# LFPy.inputgenerators.stationary_gamma() function.
-#
-################################################################################
-'''
+# -*- coding: utf-8 -*-
+"""
+This is an example scripts using LFPy with an active cell model adapted from
+Mainen and Sejnowski, Nature 1996, for the original files, see
+http://senselab.med.yale.edu/modeldb/ShowModel.asp?model=2488
+
+This scripts is set up to use the model, where the active conductances and
+spine corrections are set in the function "active_declarations()", and uses
+the mechanisms from the .mod-files provided here.
+For this example to work, run "nrnivmodl" in this folder to compile these
+mechanisms (i.e. /$PATHTONEURON/nrn/x86_64/bin/nrnivmodl).
+
+The active parameters are similar to the file active_declarations_example3.py
+
+Here, excitatory and inhibitory neurons are distributed on different parts of
+the morphology, with stochastic spike times produced by the
+LFPy.inputgenerators.stationary_gamma() function.
+
+"""
 # importing some modules, including LFPy
 import LFPy
 import os
