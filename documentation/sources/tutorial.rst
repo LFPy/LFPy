@@ -15,8 +15,8 @@ Then we define a dictionary which describes the properties of the cell we want t
 
     cell_parameters = {         
         'morphology' : 'morphologies/L5_Mainen96_LFPy.hoc',     # Mainen&Sejnowski, Nature, 1996
-        'tstartms' : -100.,                 # start time of simulation, recorders start at t=0
-        'tstopms' : 200.,                   # stop simulation at 200 ms. 
+        'tstart' : -100.,                 # start time of simulation, recorders start at t=0
+        'tstop' : 200.,                   # stop simulation at 200 ms. 
     }
 
 The only mandatory entry is ``morphology``, which should point to a ``hoc`` file specifying the neuron's morphology. Here we also set the start and end times (in milliseconds). Much more options are available (such as specifying

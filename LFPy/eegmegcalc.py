@@ -723,12 +723,13 @@ class MEG(object):
     --------
     Define cell object, create synapse, compute current dipole moment
 
-    >>> import LFPy, os, numpy as np, matplotlib as plt
-    >>> cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'ball_and_sticks.hoc'))
+    >>> import LFPy, os, numpy as np, matplotlib.pyplot as plt
+    >>> cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test', 'ball_and_sticks.hoc'),
+    >>>                  passive=True)
     >>> cell.set_pos(0., 0., 0.)
-    >>> syn = LFPy.Synapse(cell, idx=0, syntype='ExpSyn', weight=0.01, rec_isyn=True)
+    >>> syn = LFPy.Synapse(cell, idx=0, syntype='ExpSyn', weight=0.01, record_current=True)
     >>> syn.set_spike_times_w_netstim()
-    >>> cell.simulate(rec_isyn=True, rec_current_dipole_moment=True)
+    >>> cell.simulate(rec_isyn=syn.record_current, rec_current_dipole_moment=True)
 
     Compute the dipole location as an average of segment locations weighted by membrane area
 
@@ -744,7 +745,7 @@ class MEG(object):
     >>> plt.subplot(312)
     >>> plt.plot(cell.tvec, syn.i)
     >>> plt.subplot(313)
-    >>> plt.plot(cell.tvec, H)
+    >>> plt.plot(cell.tvec, H[0])
 
     Raises
     ------

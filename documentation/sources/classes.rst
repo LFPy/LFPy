@@ -20,6 +20,13 @@ Module :mod:`LFPy`
         :show-inheritance:
         :undoc-members:
     
+    class :class:`NetworkCell`
+    ===========================
+    .. autoclass:: NetworkCell
+        :members:
+        :show-inheritance:
+        :undoc-members:
+
     class :class:`PointProcess`
     ===========================
     .. autoclass:: PointProcess
@@ -55,9 +62,16 @@ Module :mod:`LFPy`
         :show-inheritance:
         :undoc-members:
 
-    class :class:`FourSphereVolumeConductor`
-    ========================================
-    .. autoclass:: FourSphereVolumeConductor
+    class :class:`Network`
+    ======================
+    .. autoclass:: Network
+        :members:
+        :show-inheritance:
+        :undoc-members:
+
+    class :class:`NetworkPopulation`
+    ================================
+    .. autoclass:: NetworkPopulation
         :members:
         :show-inheritance:
         :undoc-members:
@@ -69,6 +83,12 @@ Module :mod:`LFPy`
         :show-inheritance:
         :undoc-members:
 
+    class :class:`FourSphereVolumeConductor`
+    ========================================
+    .. autoclass:: FourSphereVolumeConductor
+        :members:
+        :show-inheritance:
+        :undoc-members:
 
     class :class:`MEG`
     ==================
@@ -80,8 +100,6 @@ Module :mod:`LFPy`
     submodule :mod:`eegmegcalc`
     =====================
     .. autofunction:: get_current_dipole_moment
-
-
 
     submodule :mod:`lfpcalc`
     ========================

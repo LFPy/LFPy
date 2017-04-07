@@ -14,10 +14,12 @@ GNU General Public License for more details.
 
 """
 
+from __future__ import division
 import numpy as np
 
 
 def calc_lfp_linesource(cell, x, y, z, sigma, r_limit):
+
     """Calculate electric field potential using the line-source method, all
     compartments treated as line sources, including soma.
     
@@ -36,6 +38,7 @@ def calc_lfp_linesource(cell, x, y, z, sigma, r_limit):
     r_limit : [None]/float/np.ndarray
         minimum distance to source current. Can be scalar or numpy array with
         a limit for each cell compartment. Defaults to [None]
+
     """
     # Handling the r_limits. If a r_limit is a single value, an array r_limit
     # of shape cell.diam is returned.
@@ -75,6 +78,7 @@ def calc_lfp_linesource(cell, x, y, z, sigma, r_limit):
     #case iii, h >= 0, l >= 0
     [iii] = np.where(hposi & lposi)
 
+
     mapping[i] = _linesource_calc_case1(l[i], r2[i], h[i])
     mapping[ii] = _linesource_calc_case2(l[ii], r2[ii], h[ii])
     mapping[iii] = _linesource_calc_case3(l[iii], r2[iii], h[iii])
@@ -82,6 +86,8 @@ def calc_lfp_linesource(cell, x, y, z, sigma, r_limit):
 
 
 def calc_lfp_soma_as_point(cell, x, y, z, sigma, r_limit):
+
+
     """Calculate electric field potential using the line-source method,
     soma is treated as point/sphere source
     
@@ -99,6 +105,7 @@ def calc_lfp_soma_as_point(cell, x, y, z, sigma, r_limit):
         extracellular conductivity in S/m
     r_limit : float or np.ndarray or None
         [None]/float/np.ndarray: minimum distance to source current.
+
     """
     #Handling the r_limits. If a r_limit is a single value,
     #an array r_limit of shape cell.diam is returned.
@@ -117,6 +124,7 @@ def calc_lfp_soma_as_point(cell, x, y, z, sigma, r_limit):
         raise Exception('r_limit is neither a float- or int- value, \
             on the form r_limit=[s_limit, r_limit],  \
             nor is shape(r_limit) equal to shape(cell.diam)!')
+
 
     #some variables for h, r2, r_soma calculations
     xstart = cell.xstart
@@ -174,6 +182,7 @@ def calc_lfp_soma_as_point(cell, x, y, z, sigma, r_limit):
     mapping[i] = _linesource_calc_case1(l[i], r2[i], h[i])
     mapping[ii] = _linesource_calc_case2(l[ii], r2[ii], h[ii])
     mapping[iii] = _linesource_calc_case3(l[iii], r2[iii], h[iii])
+
     return 1 / (4 * np.pi * sigma * deltaS) * mapping
 
 
@@ -242,6 +251,7 @@ def _r_soma_calc(xmid, ymid, zmid, x, y, z):
 
 
 def calc_lfp_pointsource(cell, x, y, z, sigma, r_limit):
+
     """Calculate extracellular potentials using the point-source
     equation on all compartments
 
@@ -259,6 +269,7 @@ def calc_lfp_pointsource(cell, x, y, z, sigma, r_limit):
         extracellular conductivity
     r_limit : [None]/float/np.ndarray
         minimum distance to source current
+
     """
     # Handling the r_limits. If a r_limit is a single value, an array r_limit
     # of shape cell.diam is returned.

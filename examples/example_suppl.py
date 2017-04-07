@@ -1,5 +1,10 @@
 #!/usr/bin/env python
-'''some plottin' functions used by the example scripts'''
+# -*- coding: utf-8 -*-
+"""some plottin' functions used by the example scripts
+
+"""
+
+from __future__ import division
 import numpy as np
 import matplotlib.pyplot as plt
 import neuron
@@ -34,8 +39,8 @@ def plot_ex1(cell, electrode, X, Y, Z):
                 np.r_[cell.zstart[idx], cell.zend[idx][-1]],
                 color='k')
     for i in range(len(cell.synapses)):
-        ax1.plot([cell.synapses[i].x], [cell.synapses[i].z],
-            color=cell.synapses[i].color, marker=cell.synapses[i].marker, 
+        ax1.plot([cell.synapses[i].x], [cell.synapses[i].z], '.',
+            #color=cell.synapses[i].color, marker=cell.synapses[i].marker, 
             markersize=10)
     
     #contour lines
@@ -173,7 +178,8 @@ def plot_ex3(cell, electrode):
     #plot the synaptic current
     ax = fig.add_axes([0.1, 0.4, 0.5, 0.2])
     for i in range(len(cell.synapses)):
-        ax.plot(cell.tvec, cell.synapses[i].i, color=cell.synapses[i].color)
+        ax.plot(cell.tvec, cell.synapses[i].i, #color=cell.synapses[i].color
+                )
     ax.set_xlabel('Time (ms)')
     ax.set_ylabel('Syn. i (nA)')
     
@@ -202,8 +208,8 @@ def plot_ex3(cell, electrode):
                 np.r_[cell.zstart[idx], cell.zend[idx][-1]],
                 color='k')
     for i in range(len(cell.synapses)):
-        ax.plot([cell.synapses[i].x], [cell.synapses[i].z], \
-            color=cell.synapses[i].color, marker=cell.synapses[i].marker)
+        ax.plot([cell.synapses[i].x], [cell.synapses[i].z], marker='.'
+        )
     for i in range(electrode.x.size):
         ax.plot(electrode.x[i], electrode.z[i], color='g', marker='o')
     plt.axis('equal')

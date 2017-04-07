@@ -1,0 +1,52 @@
+/* ----------------------------------------------------
+ball_and_Y.hoc
+
+This hoc file creates a neuron of the following shape:
+
+            \       
+             \     
+              \   /
+               \ /
+                V
+                |
+                |
+                |
+                O
+                
+Note the conventions:
+ - soma needs to be a list (soma[0], not soma),
+ - use soma for the soma compartment,
+ - use a name starting with dend for the dendrites.
+-----------------------------------------------------*/
+
+
+create soma[1]
+create dend[3]
+
+soma[0] {
+    pt3dadd(0, 0, 0, 25)
+    pt3dadd(0, 0, 35, 25)
+}
+
+dend[0] {
+    pt3dadd(0, 0, 35, 5)
+    pt3dadd(0, 0, 150, 5)
+}
+
+dend[1] {
+    pt3dadd(0, 0, 150, 2)
+    pt3dadd(-50, 20, 200, 1)
+}
+
+dend[2] {
+    pt3dadd(0, 0, 150, 2)
+    pt3dadd(30, 0, 160, 2)
+}
+
+connect dend[0](0), soma[0](0.5)
+connect dend[1](0), dend[0](1)
+connect dend[2](0), dend[0](1)
+
+forall {
+    all.append()
+}

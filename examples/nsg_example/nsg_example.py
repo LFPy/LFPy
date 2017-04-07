@@ -120,8 +120,8 @@ cellParameters = {
     'nsegs_method' : 'lambda_f',# method for setting number of segments,
     'lambda_f' : 100,           # segments are isopotential at this frequency
     'dt' : 2**-4,               # dt of LFP and NEURON simulation.
-    'tstartms' : -100,          #start time, recorders start at t=0
-    'tstopms' : 200,            #stop time of simulation
+    'tstart' : -100,          #start time, recorders start at t=0
+    'tstop' : 200,            #stop time of simulation
     #'custom_code'  : ['active_declarations_example3.hoc'], # will run this file
 }
 
@@ -164,22 +164,22 @@ insert_synapses_AMPA_args = {
     'section' : 'apic',
     'n' : 100,
     'spTimesFun' : LFPy.inputgenerators.stationary_gamma,
-    'args' : [cellParameters['tstartms'], cellParameters['tstopms'], 0.5, 40,
-              cellParameters['tstartms']]
+    'args' : [cellParameters['tstart'], cellParameters['tstop'], 0.5, 40,
+              cellParameters['tstart']]
 }
 insert_synapses_NMDA_args = {
     'section' : ['dend', 'apic'],
     'n' : 15,
     'spTimesFun' : LFPy.inputgenerators.stationary_gamma,
-    'args' : [cellParameters['tstartms'], cellParameters['tstopms'], 2, 50,
-              cellParameters['tstartms']]
+    'args' : [cellParameters['tstart'], cellParameters['tstop'], 2, 50,
+              cellParameters['tstart']]
 }
 insert_synapses_GABA_A_args = {
     'section' : 'dend',
     'n' : 100,
     'spTimesFun' : LFPy.inputgenerators.stationary_gamma,
-    'args' : [cellParameters['tstartms'], cellParameters['tstopms'], 0.5, 40,
-              cellParameters['tstartms']]
+    'args' : [cellParameters['tstart'], cellParameters['tstop'], 0.5, 40,
+              cellParameters['tstart']]
 }
 
 # Define electrode geometry corresponding to a laminar electrode, where contact

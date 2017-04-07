@@ -1,5 +1,9 @@
 #!/usr/bin/env python
-'''Run Hay et al. (2011), generating and plotting a single action potential'''
+# -*- coding: utf-8 -*-
+"""
+Run Hay et al. (2011), generating and plotting a single action potential
+
+"""
 import numpy as np
 import sys
 if sys.version < '3':
@@ -49,8 +53,8 @@ cellParameters = {
     'passive' : False,
     'nsegs_method' : None,
     'dt' : 2**-6,
-    'tstartms' : -159,
-    'tstopms' : 10,
+    'tstart' : -159,
+    'tstop' : 10,
     'v_init' : -60,
     'celsius': 34,
     'pt3d' : True,

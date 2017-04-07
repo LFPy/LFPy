@@ -1,17 +1,18 @@
 #!/usr/bin/env python
-'''
-################################################################################
-# An LFPy example file showing how cells can be run in parallel using MPI.
-# To run using MPI with 4 cpu cores, issue in terminal
-# openmpirun -np 4 python example_mpi.py
-#
-# The example uses mpi4py with openmpi, and do not rely on NEURON's MPI.
-################################################################################
-'''
+# -*- coding: utf-8 -*-
+"""
+An LFPy example file showing how cells can be run in parallel using MPI.
+To run using MPI with 4 cpu cores, issue in terminal
+openmpirun -np 4 python example_mpi.py
+
+The example uses mpi4py with openmpi, and do not rely on NEURON's MPI.
+
+"""
 
 import os
 from os.path import join
 import numpy as np
+import scipy.stats as st
 import matplotlib.pyplot as plt
 from matplotlib.collections import PolyCollection
 import LFPy
@@ -128,12 +129,12 @@ class Population:
         if RANK == 0:
             RandSpikeTimes = []
             for cellindex in range(self.POPULATION_SIZE):
-                sptimes = LFPy.inputgenerators.stationary_gamma(
-                    self.cellParameters['tstartms'],
-                    self.cellParameters['tstopms'],
-                    tmin=self.cellParameters['tstartms'],
-                    **self.stationaryGammaArgs)
-                RandSpikeTimes.append(sptimes)
+                sptimes = LFPy.inputgenerators.get_activation_times_from_distribution(
+                    n=1, tstart=0, tstop=cellParameters['tstop'],
+                    distribution=st.gamma,
+                    rvs_args = self.stationaryGammaArgs
+                )
+                RandSpikeTimes.append(sptimes[0])
         else:
             RandSpikeTimes = None
         return COMM.bcast(RandSpikeTimes, root=0)
@@ -175,9 +176,9 @@ class Population:
         #Initialize cell instance, using the LFPy.Cell class
         cell = LFPy.Cell(**self.cellParameters)
         #set the position of midpoint in soma
-        cell.set_pos(xpos = self.cellPositions[cellindex, 0],
-                     ypos = self.cellPositions[cellindex, 1],
-                     zpos = self.cellPositions[cellindex, 2])
+        cell.set_pos(x = self.cellPositions[cellindex, 0],
+                     y = self.cellPositions[cellindex, 1],
+                     z = self.cellPositions[cellindex, 2])
         #rotate the morphology
         cell.set_rotation(z = self.cellRotations[cellindex])
         
@@ -202,9 +203,9 @@ class Population:
                         xticks=[], xticklabels=[], yticks=[], yticklabels=[])
             for cellindex in range(self.POPULATION_SIZE):
                 cell = LFPy.Cell(**self.cellParameters)
-                cell.set_pos(xpos = self.cellPositions[cellindex, 0],
-                     ypos = self.cellPositions[cellindex, 1],
-                     zpos = self.cellPositions[cellindex, 2])
+                cell.set_pos(x = self.cellPositions[cellindex, 0],
+                             y = self.cellPositions[cellindex, 1],
+                             z = self.cellPositions[cellindex, 2])
                 cell.set_rotation(z = self.cellRotations[cellindex])
 
                 zips = []
@@ -255,17 +256,16 @@ if __name__ == '__main__':
     #define cell parameters used as input to cell-class
     cellParameters = {
         'morphology' : join('morphologies', 'L5_Mainen96_wAxon_LFPy.hoc'),
-        'rm' : 30000,               # membrane resistance
         'cm' : 1.0,                 # membrane capacitance
         'Ra' : 150,                 # axial resistance
         'v_init' : -65,             # initial crossmembrane potential
-        'e_pas' : -65,              # reversal potential passive mechs
         'passive' : True,           # switch on passive mechs
+        'passive_parameters' : {'g_pas' : 1./30000, 'e_pas' : -65}, # passive params
         'nsegs_method' : 'lambda_f',# method for setting number of segments,
         'lambda_f' : 10,            # segments are isopotential at frequency
         'dt' : 2**-3,               # dt of LFP and NEURON simulation.
-        'tstartms' : -100,          #start time, recorders start at t=0
-        'tstopms' : 200,            #stop time of simulation
+        'tstart' : -100,          #start time, recorders start at t=0
+        'tstop' : 200,            #stop time of simulation
         'custom_code'  : ['active_declarations_example3.hoc'], #active decl.
     }
     
@@ -282,8 +282,8 @@ if __name__ == '__main__':
     
     #parameter args for LFPy.inputgenerators.stationary_gamma()
     stationaryGammaArgs = {
-        'k' : 0.25,               #shape parameter
-        'theta' : 12,             #"rate" parameter
+        'a' : 0.25,               #shape parameter
+        'scale' : 12,             #"rate" parameter
     }
     
     # Define electrode geometry corresponding to a laminar electrode, where

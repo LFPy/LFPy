@@ -1,7 +1,9 @@
 #!/usr/bin/env python
-'''
+# -*- coding: utf-8 -*-
+"""
 LFPs from a population of cells relying on MPI
-'''
+
+"""
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -58,17 +60,16 @@ COMM.Barrier()
 # Define cell parameters
 cell_parameters = {          # various cell parameters,
     'morphology' : join('cells', 'cells', 'j4a.hoc'), # Mainen&Sejnowski, 1996
-    'rm' : 30000.,      # membrane resistance
     'cm' : 1.0,         # membrane capacitance
     'Ra' : 150,         # axial resistance
     'v_init' : -65.,    # initial crossmembrane potential
-    'e_pas' : -65.,     # reversal potential passive mechs
-    'passive' : True,   # switch on passive mechs
+    'passive' : True,   # turn on passive mechanism for all sections
+    'passive_parameters' : {'g_pas' : 1./30000, 'e_pas' : -65}, # passive parameters
     'nsegs_method' : 'lambda_f',
     'lambda_f' : 100.,
     'dt' : 2.**-3,      # simulation time step size
-    'tstartms' :  0.,   # start time of simulation, recorders start at t=0
-    'tstopms' : 300.,   # stop simulation at 200 ms. These can be overridden
+    'tstart' :  0.,     # start time of simulation, recorders start at t=0
+    'tstop' : 300.,     # stop simulation at 200 ms. These can be overridden
                         # by setting these arguments i cell.simulation()
 }
 
@@ -118,7 +119,7 @@ cell = LFPy.Cell(**cell_parameters)
 
 #Have to position and rotate the cells!
 cell.set_rotation(x=4.99, y=-4.33, z=z_rotation[RANK])
-cell.set_pos(xpos=x_cell_pos[RANK])
+cell.set_pos(x=x_cell_pos[RANK])
 
 #assign spike times to different units
 n_synapses = 100
@@ -166,7 +167,7 @@ if RANK==0:
                          nsegs_method='lambda_f',
                          lambda_f=5)
         cell.set_rotation(x=4.99, y=-4.33, z=z_rotation[i_cell])
-        cell.set_pos(xpos=x_cell_pos[i_cell])
+        cell.set_pos(x=x_cell_pos[i_cell])
 
         zips = []
         for x, z in cell.get_idx_polygons():
@@ -219,7 +220,7 @@ if RANK==0:
                     s=1, edgecolors='none', facecolors='k')
 
     plt.ylim([0,n_pre_syn])
-    plt.xlim([0,cell_parameters['tstopms']])
+    plt.xlim([0,cell_parameters['tstop']])
     plt.ylabel('train #', ha='left', labelpad=0)
     plt.title('Presynaptic spike times')
     
@@ -236,12 +237,12 @@ if RANK==0:
     plt.axes([.05,.12,.25,.2])
 
     binsize = 5
-    bins=np.arange(0, cell_parameters['tstopms']+1., binsize)
+    bins=np.arange(0, cell_parameters['tstop']+1., binsize)
     count,b = np.histogram(pop_sptimes, bins=bins)
     rate = count*(1000./binsize)*(1./n_pre_syn)
     plt.plot(b[0:-1],rate,color='black',lw=1)
 
-    plt.xlim([0,cell_parameters['tstopms']])
+    plt.xlim([0,cell_parameters['tstop']])
     plt.ylim([0,10.])
     
     tvec = np.arange(point_electrode.LFP.shape[1])*cell.dt 

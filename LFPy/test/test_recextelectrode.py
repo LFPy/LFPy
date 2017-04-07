@@ -186,11 +186,13 @@ class testRecExtElectrode(unittest.TestCase):
 def stickSimulation(method):
     stickParams = {
         'morphology' : os.path.join(LFPy.__path__[0], 'test', 'stick.hoc'),
-        'rm' : 30000,
         'cm' : 1,
         'Ra' : 150,
-        'tstartms' : -100,
-        'tstopms' : 100,
+        'v_init' : -65,
+        'passive' : True,
+        'passive_parameters' : {'g_pas' : 1./30000, 'e_pas' : -65},
+        'tstart' : -100,
+        'tstop' : 100,
         'dt' : 2**-6,
         'nsegs_method' : 'lambda_f',
         'lambda_f' : 1000,
@@ -220,7 +222,7 @@ def stickSimulation(method):
     electrode = LFPy.RecExtElectrode(**electrodeParams)
 
     stick = LFPy.Cell(**stickParams)
-    stick.set_pos(zpos=-stick.zstart[0])
+    stick.set_pos(z=-stick.zstart[0])
 
     synapse = LFPy.StimIntElectrode(stick, stick.get_closest_idx(0, 0, 1000),
                            **stimParams)
@@ -231,11 +233,13 @@ def stickSimulation(method):
 def stickSimulationAveragingElectrode(contactRadius, contactNPoints, method):
     stickParams = {
         'morphology' : os.path.join(LFPy.__path__[0], 'test', 'stick.hoc'),
-        'rm' : 30000,
         'cm' : 1,
         'Ra' : 150,
-        'tstartms' : -100,
-        'tstopms' : 100,
+        'v_init' : -65,
+        'passive' : True,
+        'passive_parameters' : {'g_pas' : 1./30000, 'e_pas' : -65},
+        'tstart' : -100,
+        'tstop' : 100,
         'dt' : 2**-6,
         'nsegs_method' : 'lambda_f',
         'lambda_f' : 1000,
@@ -270,7 +274,7 @@ def stickSimulationAveragingElectrode(contactRadius, contactNPoints, method):
     electrode = LFPy.RecExtElectrode(**electrodeParams)
 
     stick = LFPy.Cell(**stickParams)
-    stick.set_pos(zpos=-stick.zstart[0])
+    stick.set_pos(z=-stick.zstart[0])
 
     synapse = LFPy.StimIntElectrode(stick, stick.get_closest_idx(0, 0, 1000),
                            **stimParams)
@@ -281,11 +285,13 @@ def stickSimulationAveragingElectrode(contactRadius, contactNPoints, method):
 def stickSimulationDotprodcoeffs(method):
     stickParams = {
         'morphology' : os.path.join(LFPy.__path__[0], 'test', 'stick.hoc'),
-        'rm' : 30000,
         'cm' : 1,
         'Ra' : 150,
-        'tstartms' : -100,
-        'tstopms' : 100,
+        'v_init' : -65,
+        'passive' : True,
+        'passive_parameters' : {'g_pas' : 1./30000, 'e_pas' : -65},
+        'tstart' : -100,
+        'tstop' : 100,
         'dt' : 2**-6,
         'nsegs_method' : 'lambda_f',
         'lambda_f' : 1000,
@@ -314,7 +320,7 @@ def stickSimulationDotprodcoeffs(method):
 
 
     stick = LFPy.Cell(**stickParams)
-    stick.set_pos(zpos=-stick.zstart[0])
+    stick.set_pos(z=-stick.zstart[0])
     
     #dummy variables for mapping
     stick.imem = np.eye(stick.totnsegs)

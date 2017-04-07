@@ -14,6 +14,7 @@ GNU General Public License for more details.
 
 '''
 
+from __future__ import division
 import numpy as np
 cimport numpy as np
 
@@ -47,7 +48,6 @@ cpdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] calc_lfp_linesource(
     r_limit : [None]/float/np.ndarray
         minimum distance to source current. Can be scalar or numpy array with
         a limit for each cell compartment. Defaults to [None]
-
     """
 
     # Handling the r_limits. If a r_limit is a single value, an array r_limit
@@ -124,8 +124,6 @@ cpdef np.ndarray[DTYPE_t, ndim=1] calc_lfp_soma_as_point(cell,
         extracellular conductivity in S/m
     r_limit : float or np.ndarray or None
         [None]/float/np.ndarray: minimum distance to source current.
-    t_indices : [None]/np.ndarray
-        calculate LFP at specific timesteps
     """
 
     #Handling the r_limits. If a r_limit is a single value,
@@ -152,6 +150,7 @@ cpdef np.ndarray[DTYPE_t, ndim=1] calc_lfp_soma_as_point(cell,
         ystart, yend, zstart, zend, deltaS, h, r2, l, Emem
     cdef np.ndarray[LTYPE_t, ndim=1] i, ii, iii
     cdef double xmid, ymid, zmid
+
 
     #some variables for h, r2, r_soma calculations
     xstart = cell.xstart
@@ -346,6 +345,7 @@ cpdef calc_lfp_pointsource(cell, double x, double y, double z,
         extracellular conductivity
     r_limit : [None]/float/np.ndarray
         minimum distance to source current
+
     """
     # Handling the r_limits. If a r_limit is a single value, an array r_limit
     # of shape cell.diam is returned.

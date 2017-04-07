@@ -9,7 +9,7 @@ echo "installing NEURON:"
 echo "running sh build.sh"
 sh build.sh > /dev/null
 echo "running ./configure"
-./configure --prefix=$HOME/.local/nrn --without-iv --with-nrnpython > /dev/null
+./configure --prefix=$HOME/.local/nrn --without-iv --with-nrnpython --with-mpi > /dev/null
 echo "running make"
 make > /dev/null
 echo "running make install"

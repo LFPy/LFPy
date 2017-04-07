@@ -1,5 +1,7 @@
 #!/usr/bin/env python
-'''Example script loading and execiting a simulation with the
+# -*- coding: utf-8 -*-
+"""
+Example script loading and execiting a simulation with the
 Hay et al. 2011 L5b-pyramidal cell model, which is implemented by default
 using templates.
 
@@ -12,7 +14,8 @@ The mod-files inside /L5bPCmodelsEH/mod/ must be compiled using nrnivmodl.
 Note that LFPy can only deal with one cell at the time, creating several
 cell objects will slow everything down, but each cell *should* get the correct
 cell responses.
-'''
+
+"""
 
 import LFPy
 import neuron
@@ -60,11 +63,10 @@ cellParams = {
                        'L5bPCmodelsEH/models/L5PCtemplate.hoc'],
     'templatename'  : 'L5PCtemplate',
     'templateargs'  : 'L5bPCmodelsEH/morphologies/cell1.asc',
-    'passive' :     False,
     'nsegs_method' : None,
     'v_init' : -80,
-    'tstartms' : 0,
-    'tstopms' : 3000,
+    'tstart' : 0,
+    'tstop' : 3000,
     'dt' : 2**-3,
     'verbose' : True,
     'extracellular' : False,
