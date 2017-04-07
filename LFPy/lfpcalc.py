@@ -17,8 +17,7 @@ GNU General Public License for more details.
 import numpy as np
 
 
-def calc_lfp_linesource(cell, x=0., y=0., z=0., sigma=0.3,
-                        r_limit=None):
+def calc_lfp_linesource(cell, x, y, z, sigma, r_limit):
     """Calculate electric field potential using the line-source method, all
     compartments treated as line sources, including soma.
     
@@ -37,8 +36,6 @@ def calc_lfp_linesource(cell, x=0., y=0., z=0., sigma=0.3,
     r_limit : [None]/float/np.ndarray
         minimum distance to source current. Can be scalar or numpy array with
         a limit for each cell compartment. Defaults to [None]
-    t_indices : [None]/np.ndarray
-        calculate LFP at specific timesteps
     """
     # Handling the r_limits. If a r_limit is a single value, an array r_limit
     # of shape cell.diam is returned.
@@ -47,11 +44,6 @@ def calc_lfp_linesource(cell, x=0., y=0., z=0., sigma=0.3,
     elif np.shape(r_limit) != np.shape(cell.diam):
         raise Exception('r_limit is neither a float- or int- value, nor is \
             r_limit.shape() equal to cell.diam.shape()')
-    
-    # if t_indices is not None:
-    #     currmem = cell.imem[:, t_indices]
-    # else:
-    #     currmem = cell.imem
 
     #some variables for h, r2, r_soma calculations
     xstart = cell.xstart
@@ -86,13 +78,10 @@ def calc_lfp_linesource(cell, x=0., y=0., z=0., sigma=0.3,
     mapping[i] = _linesource_calc_case1(l[i], r2[i], h[i])
     mapping[ii] = _linesource_calc_case2(l[ii], r2[ii], h[ii])
     mapping[iii] = _linesource_calc_case3(l[iii], r2[iii], h[iii])
-
-    # Emem = np.dot(currmem.T, 1 / (4 * np.pi * sigma * deltaS) * mapping)
-    
     return 1 / (4 * np.pi * sigma * deltaS) * mapping
 
-def calc_lfp_soma_as_point(cell, x=0., y=0., z=0., sigma=0.3,
-                           r_limit=None):
+
+def calc_lfp_soma_as_point(cell, x, y, z, sigma, r_limit):
     """Calculate electric field potential using the line-source method,
     soma is treated as point/sphere source
     
@@ -110,8 +99,6 @@ def calc_lfp_soma_as_point(cell, x=0., y=0., z=0., sigma=0.3,
         extracellular conductivity in S/m
     r_limit : float or np.ndarray or None
         [None]/float/np.ndarray: minimum distance to source current.
-    t_indices : [None]/np.ndarray
-        calculate LFP at specific timesteps
     """
     #Handling the r_limits. If a r_limit is a single value,
     #an array r_limit of shape cell.diam is returned.
@@ -130,11 +117,6 @@ def calc_lfp_soma_as_point(cell, x=0., y=0., z=0., sigma=0.3,
         raise Exception('r_limit is neither a float- or int- value, \
             on the form r_limit=[s_limit, r_limit],  \
             nor is shape(r_limit) equal to shape(cell.diam)!')
-
-    # if t_indices is not None:
-    #     currmem = cell.imem[:, t_indices]
-    # else:
-    #     currmem = cell.imem
 
     #some variables for h, r2, r_soma calculations
     xstart = cell.xstart
@@ -192,10 +174,8 @@ def calc_lfp_soma_as_point(cell, x=0., y=0., z=0., sigma=0.3,
     mapping[i] = _linesource_calc_case1(l[i], r2[i], h[i])
     mapping[ii] = _linesource_calc_case2(l[ii], r2[ii], h[ii])
     mapping[iii] = _linesource_calc_case3(l[iii], r2[iii], h[iii])
-
-    # Emem = np.dot(currmem.T, 1 / (4 * np.pi * sigma * deltaS) * mapping)
-
     return 1 / (4 * np.pi * sigma * deltaS) * mapping
+
 
 def _linesource_calc_case1(l_i, r2_i, h_i):
     """Calculates linesource contribution for case i"""
@@ -204,13 +184,15 @@ def _linesource_calc_case1(l_i, r2_i, h_i):
     dd = np.log(bb / cc)
     return dd
 
+
 def _linesource_calc_case2(l_ii, r2_ii, h_ii):
     """Calculates linesource contribution for case ii"""
     bb = np.sqrt(h_ii**2 + r2_ii) - h_ii
     cc = (l_ii + np.sqrt(l_ii**2 + r2_ii)) / r2_ii
     dd = np.log(bb * cc)
     return dd
-    
+
+
 def _linesource_calc_case3(l_iii, r2_iii, h_iii):
     """Calculates linesource contribution for case iii"""
     bb = np.sqrt(l_iii**2 + r2_iii) + l_iii
@@ -218,11 +200,13 @@ def _linesource_calc_case3(l_iii, r2_iii, h_iii):
     dd = np.log(bb / cc)
     return dd
 
+
 def _deltaS_calc(xstart, xend, ystart, yend, zstart, zend):
     """Returns length of each segment"""
     deltaS = np.sqrt((xstart - xend)**2 + (ystart - yend)**2 +
                      (zstart-zend)**2)
     return deltaS
+
 
 def _h_calc(xstart, xend, ystart, yend, zstart, zend, deltaS, x, y, z):
     """Subroutine used by calc_lfp_*()"""
@@ -232,10 +216,12 @@ def _h_calc(xstart, xend, ystart, yend, zstart, zend, deltaS, x, y, z):
     hh = cc / deltaS
     return hh
 
+
 def _r2_calc(xend, yend, zend, x, y, z, h):
     """Subroutine used by calc_lfp_*()"""
     r2 = (x-xend)**2 + (y-yend)**2 + (z-zend)**2 - h**2
     return abs(r2)
+
 
 def _check_rlimit(r2, r_limit, h, deltaS):
     """Check that no segment is close the electrode than r_limit"""
@@ -248,13 +234,14 @@ def _check_rlimit(r2, r_limit, h, deltaS):
                 r2[idx] = r_limit[idx]**2
     return r2
 
+
 def _r_soma_calc(xmid, ymid, zmid, x, y, z):
     """calculate the distance to soma midpoint"""
     r_soma = np.sqrt((x - xmid)**2 + (y - ymid)**2 + (z - zmid)**2)
     return r_soma
 
-def calc_lfp_pointsource(cell, x=0, y=0, z=0, sigma=0.3,
-                        r_limit=None):
+
+def calc_lfp_pointsource(cell, x, y, z, sigma, r_limit):
     """Calculate extracellular potentials using the point-source
     equation on all compartments
 
@@ -272,8 +259,6 @@ def calc_lfp_pointsource(cell, x=0, y=0, z=0, sigma=0.3,
         extracellular conductivity
     r_limit : [None]/float/np.ndarray
         minimum distance to source current
-    t_indices : [None]/np.ndarray
-        calculate LFP at specific timesteps
     """
     # Handling the r_limits. If a r_limit is a single value, an array r_limit
     # of shape cell.diam is returned.
@@ -285,15 +270,12 @@ def calc_lfp_pointsource(cell, x=0, y=0, z=0, sigma=0.3,
 
     r2 = (cell.xmid - x)**2 + (cell.ymid - y)**2 + (cell.zmid - z)**2
     r2 = _check_rlimit_point(r2, r_limit)
-    r = np.sqrt(r2)
-    
-    mapping = 1 / (4 * np.pi * sigma * r)
-    
+    mapping = 1 / (4 * np.pi * sigma * np.sqrt(r2))
     return mapping
+
 
 def _check_rlimit_point(r2, r_limit):
     """Correct r2 so that r2 >= r_limit**2 for all values"""
     inds = r2 < r_limit*r_limit
     r2[inds] = r_limit[inds]*r_limit[inds]
-    
     return r2
