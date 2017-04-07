@@ -72,7 +72,8 @@ def calc_lfp_linesource_anisotropic(cell, x, y, z, sigma, r_limit):
 
     pos = np.array([x, y, z])
 
-    rs, closest_points = return_dist_from_segments(xstart, ystart, zstart, xend, yend, zend, pos)
+    rs, closest_points = return_dist_from_segments(xstart, ystart, zstart,
+                                                   xend, yend, zend, pos)
 
     dx2 = (xend - xstart)**2
     dy2 = (yend - ystart)**2
@@ -88,7 +89,7 @@ def calc_lfp_linesource_anisotropic(cell, x, y, z, sigma, r_limit):
          sigma[0] * sigma[2] * (y - ystart)**2 +
          sigma[0] * sigma[1] * (z - zstart)**2)
 
-    for idx in np.where(rs <r_limit)[0]:
+    for idx in np.where(rs < r_limit)[0]:
         r, closest_point, l_vec = rs[idx], closest_points[:, idx], l_vecs[:, idx]
 
         p_ = pos.copy()
