@@ -11,25 +11,22 @@ from os.path import join
 
 cell_parameters = {          # various cell parameters,
     'morphology' : join('morphologies', 'ball_and_stick.hoc'), # Mainen&Sejnowski, 1996
-    'rm' : 30000.,      # membrane resistance
+    'passive_parameters': {"g_pas": 1/30000., "e_pas": -70},
     'cm' : 1.0,         # membrane capacitance
     'Ra' : 150,        # axial resistance
     'v_init' : -65.,    # initial crossmembrane potential
-    'e_pas' : -65.,     # reversal potential passive mechs
     'passive' : True,   # switch on passive mechs
     'nsegs_method' : 'lambda_f',
     'lambda_f' : 1000.,
     'dt' : 2.**-2,      # simulation time step size
-    'tstartms' : 0.,    # start time of simulation, recorders start at t=0
-    'tstopms' : 10.,   # stop simulation at 200 ms. These can be overridden
+    'tstart' : -10.,    # start time of simulation, recorders start at t=0
+    'tstop' : 10.,   # stop simulation at 200 ms. These can be overridden
                         # by setting these arguments i cell.simulation()
 }
 
 # Create cell
 cell = LFPy.Cell(**cell_parameters)
-cell.set_pos(zpos=-10)
-
-print cell.totnsegs
+cell.set_pos(z=-10)
 
 synapse_parameters = {
     'idx' : 0,
@@ -46,7 +43,7 @@ synapse.set_spike_times(np.array([5.]))
 
 
 # Create a grid of measurement locations, in (um)
-X, Z = np.mgrid[-100:101:1, -100:200:1]
+X, Z = np.mgrid[-100:101:2, -100:200:2]
 Y = np.zeros(X.shape)
 
 
@@ -59,7 +56,7 @@ grid_electrode_parameters = {
     'x' : X.flatten(),  # electrode requires 1d vector of positions
     'y' : Y.flatten(),
     'z' : Z.flatten(),
-    'method': 'pointsource'
+    'method': 'soma_as_point'
 }
 
 grid_electrode_parameters_tensor = {
@@ -67,7 +64,7 @@ grid_electrode_parameters_tensor = {
     'x' : X.flatten(),  # electrode requires 1d vector of positions
     'y' : Y.flatten(),
     'z' : Z.flatten(),
-    'method': 'pointsource'
+    'method': 'soma_as_point'
 }
 
 
@@ -77,19 +74,11 @@ cell.simulate(rec_imem=True, rec_isyn=False)
 
 # Create electrode objects
 
-from LFPy import lfpcalc
-import time
-t0 = time.time()
 grid_electrode = LFPy.RecExtElectrode(cell, **grid_electrode_parameters)
 grid_electrode.calc_lfp()
-print("Original: %f" %(time.time() - t0))
 
-t0 = time.time()
 grid_electrode_tensor = LFPy.RecExtElectrode(cell, **grid_electrode_parameters_tensor)
 grid_electrode_tensor.calc_lfp()
-print("Tensor: %f" % (time.time() - t0))
-
-print np.max(np.abs((grid_electrode.LFP - grid_electrode_tensor.LFP) / np.max(np.abs(grid_electrode.LFP))))
 
 fig = plt.figure(figsize=[10, 5])
 
@@ -143,7 +132,5 @@ ax2.plot(cell.xmid[cell.synidx],cell.zmid[cell.synidx], 'o', ms=5,
         markeredgecolor='k',
         markerfacecolor='r')
 
-
-
-plt.savefig('example_anisotropy_ps_%s.png' % str(sigma), dpi=150)
+plt.savefig('example_anisotropy_%s.pdf' % str(sigma), dpi=150)
 # plt.show()
