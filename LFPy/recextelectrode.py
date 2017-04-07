@@ -512,3 +512,54 @@ class RecExtElectrode:
                     'z': sqr[2],
                 }
 
+class RecMEAElectrode(RecExtElectrode):
+
+    def __init__(self, cell=None, sigma_T=0.3, sigma_S=1.5, sigma_G=0.0, h=300., steps=20,
+                 x=np.array([0]), y=np.array([0]), z=np.array([0]),
+                 N=None, r=None, n=None, r_z=None,
+                 perCellLFP=False, method='linesource',
+                 from_file=False, cellfile=None, verbose=False,
+                 seedvalue=None, **kwargs):
+
+        RecExtElectrode.__init__(cell=cell,
+                     x=x, y=y, z=z,
+                     N=N, r=r, n=n, r_z=r_z,
+                     perCellLFP=perCellLFP, method=method,
+                     from_file=from_file, cellfile=cellfile, verbose=verbose,
+                     seedvalue=seedvalue, **kwargs)
+
+
+        self.sigma_G = sigma_G
+        self.sigma_T = sigma_T
+        self.sigma_S = sigma_S
+        # self._check_for_anisotropy()
+        self.h = h
+        self.steps = steps
+
+
+    def calc_lfp(self, t_indices=None, cell=None):
+
+    def isotropic_moi(self, charge_pos, elec_pos, imem=1):
+        """ This function calculates the potential at the position elec_pos = [x, y, z]
+        set up by the charge at position charge_pos = [x0, y0, z0]. To get get the potential
+        from multiple charges, the contributions must be summed up.
+        """
+        def _omega(dz):
+            return 1/np.sqrt((y - y0)**2 + (x - x0)**2 + dz**2)
+        x0, y0, z0 = charge_pos[:]
+        x, y, z = elec_pos[:]
+        phi = _omega(z - z0)
+        n = 0
+        WTS = (self.sigma_T - self.sigma_S)/(self.sigma_T + self.sigma_S)
+        WTG = (self.sigma_T - self.sigma_G)/(self.sigma_T + self.sigma_G)
+        while n < self.steps:
+            if n == 0:
+                phi += (WTS * _omega(z + z0 - 2*(n + 1)*self.h) +
+                        WTG * _omega(z + z0 + 2*n*self.h))
+            else:
+                phi += (WTS*WTG)**n * (WTS * _omega(z + z0 - 2*(n + 1)*self.h) +
+                                       WTG * _omega(z + z0 + 2*n*self.h) +
+                                       _omega(z - z0 + 2*n*self.h) + _omega(z - z0 - 2*n*self.h))
+            n += 1
+        phi *= imem/(4*np.pi*self.sigma_T)
+        return phi
