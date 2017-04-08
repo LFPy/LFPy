@@ -63,7 +63,7 @@ electrode = LFPy.RecExtElectrode(**electrode_parameters)
 
 # Run simulation, electrode object argument in cell.simulate
 print("running simulation...")
-cell.simulate(electrode=electrode, rec_isyn=True)
+cell.simulate(electrode=electrode)
 print("done")
 
 #create a plot

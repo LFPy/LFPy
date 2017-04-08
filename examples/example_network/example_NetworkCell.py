@@ -47,7 +47,7 @@ iclamp = StimIntElectrode(
     record_current=True
     )
 # run simulation
-cell.simulate(rec_istim=iclamp.record_current)
+cell.simulate()
 
 plt.subplot(2,1,1)
 plt.plot(cell.tvec, iclamp.i)

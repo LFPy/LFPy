@@ -47,7 +47,7 @@ class testSynapse(unittest.TestCase):
                            weight=1., tau=5., record_current=True,
                            record_potential=True)
         syn.set_spike_times(np.array([10.]))
-        cell.simulate(rec_isyn=True, rec_vmemsyn=True)
+        cell.simulate()
         
         i = np.zeros(cell.tvec.size)
         i[cell.tvec > 10.] = -np.exp(-np.arange((cell.tvec > 10.).sum())*cell.dt / 5.)
@@ -68,7 +68,7 @@ class testStimIntElectrode(unittest.TestCase):
                             amp=1., dur=20., delay=10.,
                             record_potential=True,
                             record_current=True)
-        cell.simulate(rec_istim=True, rec_vmemstim=True)
+        cell.simulate()
         # stim.collect_potential(cell) 
         gt = np.zeros(cell.tvec.size)
         gt[(cell.tvec > 10.) & (cell.tvec <= 30.)] = 1.
@@ -95,7 +95,7 @@ class testStimIntElectrode(unittest.TestCase):
                                         'amp[2]' : -65,
                                         'dur[2]' : 10,
                                    })
-        cell.simulate(rec_vmemstim=True)
+        cell.simulate()
         # stim.collect_potential(cell) 
         gt = np.zeros(cell.tvec.size)-65.
         gt[(cell.tvec > 10.) & (cell.tvec <= 30.)] = -55.
@@ -122,7 +122,7 @@ class testStimIntElectrode(unittest.TestCase):
                                         'amp3' : -65,
                                         'dur3' : 10,
                                    })
-        cell.simulate(rec_vmemstim=True)
+        cell.simulate()
         # stim.collect_potential(cell)
         gt = np.zeros(cell.tvec.size)-65.
         gt[(cell.tvec > 10.) & (cell.tvec <= 30.)] = -55.
