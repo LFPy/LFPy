@@ -574,3 +574,32 @@ def _check_rlimit_point(r2, r_limit):
     inds = r2 < r_limit*r_limit
     r2[inds] = r_limit[inds]*r_limit[inds]
     return r2
+
+
+def isotropic_moi(charge_pos, elec_pos, sigma_T, sigma_S, sigma_G, steps, h):
+    """ This function calculates the potential at the position elec_pos = [x, y, z]
+    set up by the charge at position charge_pos = [x0, y0, z0]. To get get the potential
+    from multiple charges, the contributions must be summed up.
+    """
+    def _omega(dz):
+        return 1/np.sqrt((y - y0)**2 + (x - x0)**2 + dz**2)
+
+
+
+    x0, y0, z0 = charge_pos[:]
+    x, y, z = elec_pos[:]
+    mapping = _omega(z - z0)
+    n = 0
+    WTS = (sigma_T - sigma_S)/(sigma_T + sigma_S)
+    WTG = (sigma_T - sigma_G)/(sigma_T + sigma_G)
+    while n < steps:
+        if n == 0:
+            mapping += (WTS * _omega(z + z0 - 2*(n + 1)*h) +
+                    WTG * _omega(z + z0 + 2*n*h))
+        else:
+            mapping += (WTS*WTG)**n * (WTS * _omega(z + z0 - 2*(n + 1)*h) +
+                                   WTG * _omega(z + z0 + 2*n*h) +
+                                   _omega(z - z0 + 2*n*h) + _omega(z - z0 - 2*n*h))
+        n += 1
+    mapping *= 1/(4*np.pi*sigma_T)
+    return mapping

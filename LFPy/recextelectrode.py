@@ -528,7 +528,6 @@ class RecMEAElectrode(RecExtElectrode):
                      from_file=from_file, cellfile=cellfile, verbose=verbose,
                      seedvalue=seedvalue, **kwargs)
 
-
         self.sigma_G = sigma_G
         self.sigma_T = sigma_T
         self.sigma_S = sigma_S
@@ -537,29 +536,47 @@ class RecMEAElectrode(RecExtElectrode):
         self.steps = steps
 
 
-    def calc_lfp(self, t_indices=None, cell=None):
 
-    def isotropic_moi(self, charge_pos, elec_pos, imem=1):
-        """ This function calculates the potential at the position elec_pos = [x, y, z]
-        set up by the charge at position charge_pos = [x0, y0, z0]. To get get the potential
-        from multiple charges, the contributions must be summed up.
+    def calc_lfp(self, t_indices=None, cell=None):
+        """Calculate LFP on electrode geometry from all cell instances.
+        Will chose distributed calculated if electrode contain 'n', 'N', and 'r'
+
+        Parameters
+        ----------
+        cell : obj, optional
+            `LFPy.Cell` or `LFPy.TemplateCell` instance. Must be specified here
+            if it was not specified at the initiation of the `RecExtElectrode`
+            class
+        t_indices : np.ndarray
+            Array of timestep indexes where extracellular potential should
+            be calculated.
         """
-        def _omega(dz):
-            return 1/np.sqrt((y - y0)**2 + (x - x0)**2 + dz**2)
-        x0, y0, z0 = charge_pos[:]
-        x, y, z = elec_pos[:]
-        phi = _omega(z - z0)
-        n = 0
-        WTS = (self.sigma_T - self.sigma_S)/(self.sigma_T + self.sigma_S)
-        WTG = (self.sigma_T - self.sigma_G)/(self.sigma_T + self.sigma_G)
-        while n < self.steps:
-            if n == 0:
-                phi += (WTS * _omega(z + z0 - 2*(n + 1)*self.h) +
-                        WTG * _omega(z + z0 + 2*n*self.h))
+
+        if cell is not None:
+            self.set_cell(cell)
+
+        if self.n is not None and self.N is not None and self.r is not None:
+            if self.n <= 1:
+                raise ValueError("n = %i must be larger that 1" % self.n)
             else:
-                phi += (WTS*WTG)**n * (WTS * _omega(z + z0 - 2*(n + 1)*self.h) +
-                                       WTG * _omega(z + z0 + 2*n*self.h) +
-                                       _omega(z - z0 + 2*n*self.h) + _omega(z - z0 - 2*n*self.h))
-            n += 1
-        phi *= imem/(4*np.pi*self.sigma_T)
-        return phi
+                pass
+
+            self._lfp_el_pos_calc_dist()
+
+            if self.verbose:
+                print('calculations finished, %s, %s' % (str(self),
+                                                         str(self.cell)))
+        else:
+            self._loop_over_contacts()
+            if self.verbose:
+                print('calculations finished, %s, %s' % (str(self),
+                                                         str(self.cell)))
+        if t_indices is not None:
+            currmem = self.cell.imem[:, t_indices]
+        else:
+            currmem = self.cell.imem
+
+        self.LFP = np.dot(self.mapping, currmem)
+        # del self.mapping
+
+
