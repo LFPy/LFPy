@@ -55,7 +55,49 @@ class testSynapse(unittest.TestCase):
         np.testing.assert_allclose(i, syn.i, rtol=1E-1)
         np.testing.assert_equal(cell.somav, syn.v)
         
+
+    def test_Synapse_01(self):
+        cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
+                                                 'ball_and_sticks.hoc'))
+        syn0 = LFPy.Synapse(cell=cell, idx=0, syntype='ExpSynI',
+                           weight=1., tau=5., record_current=True,
+                           record_potential=True)
+        syn0.set_spike_times(np.array([10.]))
+
+        syn1 = LFPy.Synapse(cell=cell, idx=1, syntype='ExpSynI',
+                           weight=1., tau=5., record_current=True,
+                           record_potential=False)
+        syn1.set_spike_times(np.array([20.]))
+
+        syn2 = LFPy.Synapse(cell=cell, idx=2, syntype='ExpSynI',
+                           weight=1., tau=5., record_current=False,
+                           record_potential=True)
+        syn2.set_spike_times(np.array([30.]))
+
+        syn3 = LFPy.Synapse(cell=cell, idx=3, syntype='ExpSynI',
+                           weight=1., tau=5., record_current=False,
+                           record_potential=False)
+        syn3.set_spike_times(np.array([40.]))
+
+        cell.simulate()
         
+        i = np.zeros(cell.tvec.size)
+        i[cell.tvec > 10.] = -np.exp(-np.arange((cell.tvec > 10.).sum())*cell.dt / 5.)
+
+        np.testing.assert_allclose(i, syn0.i, rtol=1E-1)
+        np.testing.assert_equal(cell.somav, syn0.v)
+
+        self.assertTrue(hasattr(syn1, 'i'))
+        i = np.zeros(cell.tvec.size)
+        i[cell.tvec > 20.] = -np.exp(-np.arange((cell.tvec > 20.).sum())*cell.dt / 5.)
+        self.assertFalse(hasattr(syn1, 'v'))
+        np.testing.assert_allclose(i, syn1.i, rtol=1E-1)
+        
+        self.assertFalse(hasattr(syn2, 'i'))
+        self.assertTrue(hasattr(syn2, 'v'))
+        
+        self.assertFalse(hasattr(syn3, 'i'))
+        self.assertFalse(hasattr(syn3, 'v'))
 
 class testStimIntElectrode(unittest.TestCase):
     """
@@ -69,7 +111,6 @@ class testStimIntElectrode(unittest.TestCase):
                             record_potential=True,
                             record_current=True)
         cell.simulate()
-        # stim.collect_potential(cell) 
         gt = np.zeros(cell.tvec.size)
         gt[(cell.tvec > 10.) & (cell.tvec <= 30.)] = 1.
         np.testing.assert_equal(gt, stim.i)
@@ -96,7 +137,6 @@ class testStimIntElectrode(unittest.TestCase):
                                         'dur[2]' : 10,
                                    })
         cell.simulate()
-        # stim.collect_potential(cell) 
         gt = np.zeros(cell.tvec.size)-65.
         gt[(cell.tvec > 10.) & (cell.tvec <= 30.)] = -55.
         np.testing.assert_allclose(gt, cell.somav, rtol=1E-3)
@@ -123,12 +163,50 @@ class testStimIntElectrode(unittest.TestCase):
                                         'dur3' : 10,
                                    })
         cell.simulate()
-        # stim.collect_potential(cell)
         gt = np.zeros(cell.tvec.size)-65.
         gt[(cell.tvec > 10.) & (cell.tvec <= 30.)] = -55.
         np.testing.assert_allclose(gt, cell.somav, rtol=1E-2)
         np.testing.assert_equal(cell.somav, stim.v)
 
 
-    
+    def test_StimIntElectrode_03(self):
+        cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
+                                                 'ball_and_sticks.hoc'))
+        stim0 = LFPy.StimIntElectrode(cell=cell, idx=0, pptype='IClamp',
+                            amp=1., dur=20., delay=10.,
+                            record_potential=True,
+                            record_current=True)
+
+        stim1 = LFPy.StimIntElectrode(cell=cell, idx=1, pptype='IClamp',
+                            amp=1., dur=20., delay=30.,
+                            record_potential=True,
+                            record_current=False)
+
+        stim2 = LFPy.StimIntElectrode(cell=cell, idx=2, pptype='IClamp',
+                            amp=1., dur=20., delay=50.,
+                            record_potential=False,
+                            record_current=True)
+
+        stim3 = LFPy.StimIntElectrode(cell=cell, idx=3, pptype='IClamp',
+                            amp=1., dur=20., delay=70.,
+                            record_potential=False,
+                            record_current=False)
+
+
+        cell.simulate()
+        gt = np.zeros(cell.tvec.size)
+        gt[(cell.tvec > 10.) & (cell.tvec <= 30.)] = 1.
+        np.testing.assert_equal(gt, stim0.i)
+        np.testing.assert_equal(cell.somav, stim0.v)
+        
+        self.assertTrue(hasattr(stim1, 'v'))
+        self.assertTrue(cell.tvec.shape == stim1.v.shape)
+        self.assertFalse(hasattr(stim2, 'v'))
+        self.assertFalse(hasattr(stim3, 'v'))
+        self.assertFalse(hasattr(stim1, 'i'))
+        self.assertTrue(hasattr(stim2, 'i'))
+        self.assertTrue(cell.tvec.shape == stim2.i.shape)        
+        self.assertFalse(hasattr(stim3, 'i'))
+        
+  
     

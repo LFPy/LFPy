@@ -566,12 +566,18 @@ class Cell(object):
                                                       self.dt+1))
                         synirec.record(syn._ref_i, self.dt)
                         self.synireclist.append(synirec)
+                    else:
+                        synirec = neuron.h.Vector(0)
+                        self.synireclist.append(synirec)
 
                     #record potential
                     if record_potential:
                         synvrec = neuron.h.Vector(int(self.tstop /
                                                       self.dt+1))
                         synvrec.record(seg._ref_v, self.dt)
+                        self.synvreclist.append(synvrec)
+                    else:
+                        synvrec = neuron.h.Vector(0)
                         self.synvreclist.append(synvrec)
 
                 i += 1
@@ -637,6 +643,10 @@ class Cell(object):
                                                        self.dt+1))
                         stimirec.record(stim._ref_i, self.dt)
                         self.stimireclist.append(stimirec)
+                    else:
+                        stimirec = neuron.h.Vector(0)
+                        self.stimireclist.append(stimirec)
+                        
                     
                     # record potential
                     if record_potential:
@@ -644,6 +654,10 @@ class Cell(object):
                                                       self.dt+1))
                         stimvrec.record(seg._ref_v, self.dt)
                         self.stimvreclist.append(stimvrec)
+                    else:
+                        stimvrec = neuron.h.Vector(0)
+                        self.stimvreclist.append(stimvrec)
+
                     
                 i += 1
 
