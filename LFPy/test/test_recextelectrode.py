@@ -369,7 +369,7 @@ def stickSimulation(method):
 
     synapse = LFPy.StimIntElectrode(stick, stick.get_closest_idx(0, 0, 1000),
                            **stimParams)
-    stick.simulate(electrode, rec_imem=True, rec_istim=True, rec_vmem=True)
+    stick.simulate(electrode, rec_imem=True, rec_vmem=True)
 
     return electrode.LFP
 
@@ -421,7 +421,7 @@ def stickSimulationAveragingElectrode(contactRadius, contactNPoints, method):
 
     synapse = LFPy.StimIntElectrode(stick, stick.get_closest_idx(0, 0, 1000),
                            **stimParams)
-    stick.simulate(electrode, rec_imem=True, rec_istim=True, rec_vmem=True)
+    stick.simulate(electrode, rec_imem=True, rec_vmem=True)
 
     return electrode.LFP
 
@@ -477,7 +477,7 @@ def stickSimulationDotprodcoeffs(method):
     synapse = LFPy.StimIntElectrode(stick, stick.get_closest_idx(0, 0, 1000),
                            **stimParams)
     stick.simulate(dotprodcoeffs=electrode.LFP,
-                   rec_imem=True, rec_istim=True, rec_vmem=True)
+                   rec_imem=True, rec_vmem=True)
 
     return stick.dotprodresults[0]
 

@@ -134,7 +134,7 @@ for i_syn in range(n_synapses):
     synapse.set_spike_times(pre_syn_sptimes[pre_syn_pick[i_syn]])
 
 #run the cell simulation
-cell.simulate(rec_imem=True,rec_isyn=True)
+cell.simulate(rec_imem=True)
 
 #set up the extracellular device
 point_electrode = LFPy.RecExtElectrode(cell, **point_electrode_parameters)

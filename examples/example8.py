@@ -142,7 +142,6 @@ electrodeParameters = {
 # Parameters for the cell.simulate() call, recording membrane- and syn.-currents
 simulationParameters = {
     'rec_imem' : True,  # Record Membrane currents during simulation
-    'rec_isyn' : True,  # Record synaptic currents
 }
 
 ################################################################################
