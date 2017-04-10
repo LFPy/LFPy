@@ -252,7 +252,7 @@ class testRecExtElectrode(unittest.TestCase):
             synapse = LFPy.StimIntElectrode(stick, stick.get_closest_idx(0, 0, 1000),
                                    **stimParams)
             stick.simulate([isotropic_electrode, anisotropic_electrode],
-                           rec_imem=True, rec_istim=True, rec_vmem=True)
+                           rec_imem=True, rec_vmem=True)
 
             np.testing.assert_allclose(isotropic_electrode.LFP,
                                        anisotropic_electrode.LFP)
@@ -307,7 +307,7 @@ class testRecExtElectrode(unittest.TestCase):
         synapse = LFPy.StimIntElectrode(stick, stick.get_closest_idx(0, 0, 1000),
                                **stimParams)
         stick.simulate([electrode_ps, electrode_ls, electrode_sap],
-                       rec_imem=True, rec_istim=True, rec_vmem=True)
+                       rec_imem=True, rec_vmem=True)
 
         # Test that distant electrode is independent of choice of method
         np.testing.assert_almost_equal(electrode_ps.LFP[1,:],

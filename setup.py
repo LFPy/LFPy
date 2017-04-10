@@ -15,9 +15,6 @@ try:
     from Cython.Distutils import build_ext
     cmdclass = { 'build_ext' : build_ext}
     ext_modules = [
-        Extension('LFPy.lfpcalc',
-        [os.path.join('LFPy', 'lfpcalc.pyx')],
-        include_dirs=[numpy.get_include()]),
         Extension('LFPy.run_simulation',
         [os.path.join('LFPy', 'run_simulation.pyx')],
         include_dirs=[numpy.get_include()]),
