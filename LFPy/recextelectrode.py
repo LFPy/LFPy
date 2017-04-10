@@ -176,6 +176,11 @@ class RecExtElectrode:
         self.sigma = sigma
         if type(sigma) in [list, np.ndarray]:
             self.sigma = np.array(sigma)
+            if not self.sigma.shape == (3,):
+                raise ValueError("Conductivity, sigma, should be float "
+                                 "or array of length 3: "
+                                 "[sigma_x, sigma_y, sigma_z]")
+
             self.anisotropic = True
         else:
             self.sigma = sigma
