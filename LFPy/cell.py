@@ -493,7 +493,8 @@ class Cell(object):
             sec.insert('extracellular')
 
     def set_synapse(self, idx, syntype,
-                    record_current=False, record_potential=False,
+                    record_current=False,
+                    record_potential=False,
                     weight=None, **kwargs):
         """Insert synapse on cell segment
 
@@ -502,11 +503,11 @@ class Cell(object):
         idx : int
             Index of compartment where synapse is inserted
         syntype : str
-            Type of synapse. Built-in examples: ExpSyn, Exp2Syn
+            Type of synapse. Built-in types in NEURON: ExpSyn, Exp2Syn
         record_current : bool
-            Decides if potential is recorded
+            If True, record synapse current
         record_potential : bool
-            Decides if potential is recorded
+            If True, record postsynaptic potential seen by the synapse
         weight : float
             Strength of synapse
         kwargs
@@ -562,12 +563,18 @@ class Cell(object):
                                                       self.dt+1))
                         synirec.record(syn._ref_i, self.dt)
                         self.synireclist.append(synirec)
+                    else:
+                        synirec = neuron.h.Vector(0)
+                        self.synireclist.append(synirec)
 
                     #record potential
                     if record_potential:
                         synvrec = neuron.h.Vector(int(self.tstop /
                                                       self.dt+1))
                         synvrec.record(seg._ref_v, self.dt)
+                        self.synvreclist.append(synvrec)
+                    else:
+                        synvrec = neuron.h.Vector(0)
                         self.synvreclist.append(synvrec)
 
                 i += 1
@@ -633,6 +640,10 @@ class Cell(object):
                                                        self.dt+1))
                         stimirec.record(stim._ref_i, self.dt)
                         self.stimireclist.append(stimirec)
+                    else:
+                        stimirec = neuron.h.Vector(0)
+                        self.stimireclist.append(stimirec)
+                        
                     
                     # record potential
                     if record_potential:
@@ -640,6 +651,10 @@ class Cell(object):
                                                       self.dt+1))
                         stimvrec.record(seg._ref_v, self.dt)
                         self.stimvreclist.append(stimvrec)
+                    else:
+                        stimvrec = neuron.h.Vector(0)
+                        self.stimvreclist.append(stimvrec)
+
                     
                 i += 1
 
@@ -873,12 +888,10 @@ class Cell(object):
 
     def simulate(self, electrode=None, rec_imem=False, rec_vmem=False,
                  rec_ipas=False, rec_icap=False,
-                 rec_isyn=False, rec_vmemsyn=False,
-                 rec_istim=False, rec_vmemstim=False,
                  rec_current_dipole_moment=False,
                  rec_variables=[], variable_dt=False, atol=0.001,
                  to_memory=True, to_file=False, file_name=None,
-                 dotprodcoeffs=None):
+                 dotprodcoeffs=None, **kwargs):
         """
         This is the main function running the simulation of the NEURON model.
         Start NEURON simulation and record variables specified by arguments.
@@ -901,14 +914,6 @@ class Cell(object):
             Record passive segment membrane currents (nA)
         rec_icap : bool
             Record capacitive segment membrane currents (nA)
-        rec_isyn : bool
-            Record synaptic currents of from Synapse class (nA)
-        rec_vmemsyn : bool
-            Record membrane voltage of segments with Synapse(mV)
-        rec_istim :  bool
-            Record currents of StimIntElectrode (nA)
-        rec_vmemstim : bool
-            Record membrane voltage of segments with StimIntElectrode (mV)
         rec_current_dipole_moment : bool
             If True, compute and record current-dipole moment from
             transmembrane currents as in Linden et al. (2010) J Comput Neurosci,
@@ -933,6 +938,11 @@ class Cell(object):
             Presumably useful for memory efficient csd or lfp calcs
 
         """
+        for key in kwargs.keys():
+            if key in ['rec_isyn', 'rec_vmemsyn', 'rec_istim', 'rec_vmemstim']:
+                raise DeprecationWarning('Cell.simulate parameter {} is deprecated.'.format(key))
+        
+        
         self._set_soma_volt_recorder()
         self._collect_tvec()
 
@@ -983,14 +993,10 @@ class Cell(object):
             self._calc_icap()
         if rec_vmem:
             self._collect_vmem()
-        if rec_isyn:
-            self._collect_isyn()
-        if rec_vmemsyn:
-            self._collect_vsyn()
-        if rec_istim:
-            self._collect_istim()
-        if rec_vmemstim:
-            self._collect_vstim()
+        self._collect_isyn()
+        self._collect_vsyn()
+        self._collect_istim()
+        self._collect_vstim()
         if len(rec_variables) > 0:
             self._collect_rec_variables(rec_variables)
         if hasattr(self, 'netstimlist'):
@@ -1046,8 +1052,6 @@ class Cell(object):
         for syn in self.synapses:
             if syn.record_current:
                 syn.collect_current(self)
-            else:
-                raise Exception('must set record_current=True in Synapse class')
         self.synireclist = None
         del self.synireclist
 
@@ -1055,8 +1059,9 @@ class Cell(object):
         """
         Collect the membrane voltage of segments with synapses
         """
-        for i in range(len(self.synapses)):
-            self.synapses[i].collect_potential(self)
+        for syn in self.synapses:
+            if syn.record_potential:
+                syn.collect_potential(self)
         self.synvreclist = None
         del self.synvreclist
 
@@ -1064,11 +1069,9 @@ class Cell(object):
         """
         Get the pointprocess currents
         """
-        for i in range(len(self.pointprocesses)):
-            if self.pointprocesses[i].record_current:
-                self.pointprocesses[i].collect_current(self)
-            else:
-                raise Exception('must set record_current=True for pointp.')
+        for pp in self.pointprocesses:
+            if pp.record_current:
+                pp.collect_current(self)
         self.stimireclist = None
         del self.stimireclist
 
@@ -1076,8 +1079,9 @@ class Cell(object):
         """
         Collect the membrane voltage of segments with stimulus
         """
-        for i in range(len(self.pointprocesses)):
-            self.pointprocesses[i].collect_potential(self)
+        for pp in self.pointprocesses:
+            if pp.record_potential:
+                pp.collect_potential(self)
         self.stimvreclist = None
         del self.stimvreclist
         

@@ -1114,6 +1114,6 @@ def cell_w_synapse_from_sections(sections=None):
     cell = LFPy.Cell(**cellParams)
     synapse = LFPy.Synapse(cell, **synapse_parameters)
     synapse.set_spike_times(np.array([1.]))
-    cell.simulate(rec_imem = True, rec_isyn = True, rec_vmem = True)
+    cell.simulate(rec_imem=True, rec_vmem=True)
     d_list, iaxial = cell.get_axial_currents_from_vmem()
     return cell, synapse, d_list, iaxial

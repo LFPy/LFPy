@@ -95,7 +95,7 @@ point_electrode_parameters = {
 
 # Run simulation, electrode object argument in cell.simulate
 print("running simulation...")
-cell.simulate(rec_imem=True,rec_isyn=True)
+cell.simulate(rec_imem=True)
 
 # Create electrode objects
 grid_electrode = LFPy.RecExtElectrode(cell,**grid_electrode_parameters)

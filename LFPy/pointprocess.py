@@ -30,11 +30,13 @@ class PointProcess(object):
     idx : int
         index of segment
     record_current : bool
-        Must be set True for recording of pointprocess currents
+        Must be set to True for recording of pointprocess currents
+    record_potential : bool
+        Must be set to True for recording potential of pointprocess target idx
     kwargs : pointprocess specific variables passed on to cell/neuron
 
     """
-    def __init__(self, cell, idx, record_current=False, **kwargs):
+    def __init__(self, cell, idx, record_current=False, record_potential=False, **kwargs):
         """
         Initializes the PointProcess class
         """
@@ -43,6 +45,7 @@ class PointProcess(object):
                 raise DeprecationWarning('Parameter {} has been deprecated'.format(key))
         self.idx = idx
         self.record_current = record_current
+        self.record_potential = record_potential
         self.kwargs = kwargs
         self.update_pos(cell)
 
@@ -102,7 +105,7 @@ class Synapse(PointProcess):
     >>> }
     >>> synapse = LFPy.Synapse(cell, **synapseParameters)
     >>> synapse.set_spike_times(pl.array([10, 15, 20, 25]))
-    >>> cell.simulate(rec_isyn=True)
+    >>> cell.simulate()
 
     >>> pl.subplot(211)
     >>> pl.plot(cell.tvec, synapse.i)
@@ -112,15 +115,17 @@ class Synapse(PointProcess):
     >>> pl.title('Somatic potential (mV)')
 
     """
-    def __init__(self, cell, idx, syntype, record_current=False, **kwargs):
+    def __init__(self, cell, idx, syntype, record_current=False, record_potential=False, **kwargs):
         """
         Initialization of class Synapse
         """
-        PointProcess.__init__(self, cell, idx, record_current, **kwargs)
+        PointProcess.__init__(self, cell, idx, record_current, record_potential, **kwargs)
             
         self.syntype = syntype
         self.cell = cell
-        self.hocidx = int(cell.set_synapse(idx, syntype, record_current,
+        self.hocidx = int(cell.set_synapse(idx=idx, syntype=syntype,
+                                           record_current=record_current,
+                                           record_potential=record_potential,
                                            **kwargs))
         cell.synapses.append(self)
         cell.synidx.append(idx)
@@ -178,8 +183,12 @@ class Synapse(PointProcess):
 class StimIntElectrode(PointProcess):
     """Class for NEURON point processes, ie VClamp, SEClamp and ICLamp,
     SinIClamp, ChirpIClamp with arguments.
+    
     Electrode currents go here.
-    Membrane currents will no longer sum to zero if these mechanisms are used.
+    Membrane currents will no longer sum to zero if these mechanisms are used,
+    as the equivalent circuit is akin to a current input to the compartment
+    from a far away extracellular location ("ground"), not immediately from
+    the surface to the inside of the compartment as for transmembrane currents.
     
     Refer to NEURON documentation @ neuron.yale.edu for kwargs
     Will insert pptype on cell-instance, pass the corresponding kwargs onto
@@ -247,7 +256,7 @@ class StimIntElectrode(PointProcess):
     >>>      cell = LFPy.Cell(morphology=os.path.join('examples', 'morphologies', 'L5_Mainen96_LFPy.hoc'),
     >>>                      passive=True)
     >>>      stimulus = LFPy.StimIntElectrode(cell, **pointprocess)
-    >>>      cell.simulate(rec_istim=True)
+    >>>      cell.simulate()
     >>>      pl.subplot(211)
     >>>      pl.plot(cell.tvec, stimulus.i, label=pointprocess['pptype'])
     >>>      pl.legend(loc='best')
@@ -262,7 +271,9 @@ class StimIntElectrode(PointProcess):
                  record_current=False,
                  record_potential=False, **kwargs):
         """Initialize StimIntElectrode class"""
-        PointProcess.__init__(self, cell, idx, record_current)
+        PointProcess.__init__(self, cell=cell, idx=idx,
+                              record_current=record_current,
+                              record_potential=record_potential)
         self.pptype = pptype
         self.hocidx = int(cell.set_point_process(idx, pptype,
                                                  record_current=record_current,
