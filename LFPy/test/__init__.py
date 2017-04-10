@@ -51,21 +51,20 @@ def _test(verbosity=1):
     from .test_network import testNetworkPopulation, testNetwork
     import unittest
 
-    print('\ntest LFPy.RecExtElectrode class and methods:')
-    suite = unittest.TestLoader().loadTestsFromTestCase(testRecExtElectrode)
-    unittest.TextTestRunner(verbosity=verbosity).run(suite)
-
-    print('\ntest LFPy.lfpcalc methods:')
-    suite = unittest.TestLoader().loadTestsFromTestCase(testLfpCalc)
-    unittest.TextTestRunner(verbosity=verbosity).run(suite)
-
-
     print('\ntest LFPy.Cell class and methods:')
     suite = unittest.TestLoader().loadTestsFromTestCase(testCell)
     unittest.TextTestRunner(verbosity=verbosity).run(suite)
 
     print('\ntest LFPy.TemplateCell class and methods:')
     suite = unittest.TestLoader().loadTestsFromTestCase(testTemplateCell)
+    unittest.TextTestRunner(verbosity=verbosity).run(suite)
+
+    print('\ntest LFPy.lfpcalc methods:')
+    suite = unittest.TestLoader().loadTestsFromTestCase(testLfpCalc)
+    unittest.TextTestRunner(verbosity=verbosity).run(suite)
+
+    print('\ntest LFPy.RecExtElectrode class and methods:')
+    suite = unittest.TestLoader().loadTestsFromTestCase(testRecExtElectrode)
     unittest.TextTestRunner(verbosity=verbosity).run(suite)
 
     print('\ntest LFPy.NetworkCell class and methods:')
