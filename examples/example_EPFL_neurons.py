@@ -43,10 +43,10 @@ neuron.h.load_file("stdrun.hoc")
 neuron.h.load_file("import3d.hoc")
 
 #load only some layer 5 pyramidal cell types
-neurons = glob(os.path.join('hoc_combos_syn.1_0_10.allzips', 'L5_TTPC*'))
-neurons += glob(os.path.join('hoc_combos_syn.1_0_10.allzips', 'L5_MC*'))[:8]
-neurons += glob(os.path.join('hoc_combos_syn.1_0_10.allzips', 'L5_LBC*'))[:8]
-neurons += glob(os.path.join('hoc_combos_syn.1_0_10.allzips', 'L5_NBC*'))[:8]
+neurons = glob(os.path.join('hoc_combos_syn.1_0_10.allzips', 'L5_TTPC*'))[:1]
+neurons += glob(os.path.join('hoc_combos_syn.1_0_10.allzips', 'L5_MC*'))[:1]
+neurons += glob(os.path.join('hoc_combos_syn.1_0_10.allzips', 'L5_LBC*'))[:1]
+neurons += glob(os.path.join('hoc_combos_syn.1_0_10.allzips', 'L5_NBC*'))[:1]
 
 #flag for cell template file to switch on (inactive) synapses
 add_synapses = False
@@ -104,14 +104,14 @@ def get_templatename(f):
 # PARAMETERS
 
 #sim duration
-tstopms = 1000.
+tstop = 1000.
 dt = 2**-6
 
 PointProcParams = {
     'idx' : 0,
     'pptype' : 'SinSyn',
     'delay' : 200.,
-    'dur' : tstopms - 300.,
+    'dur' : tstop - 300.,
     'pkamp' : 0.5,
     'freq' : 0.,
     'phase' : np.pi/2,
@@ -181,9 +181,8 @@ for i, NRN in enumerate(neurons):
                              templatefile=os.path.join(NRN, 'template.hoc'),
                              templatename=templatename,
                              templateargs=1 if add_synapses else 0,
-                             tstopms=tstopms,
-                             timeres_NEURON=dt,
-                             timeres_python=dt,
+                             tstop=tstop,
+                             dt=dt,
                              nsegs_method=None)
         
             #set view as in most other examples
@@ -198,7 +197,7 @@ for i, NRN in enumerate(neurons):
                                              z=np.zeros(4),
                                              sigma=0.3, r=5, n=50,
                                              N=np.array([[1, 0, 0], [1, 0, 0], [1, 0, 0], [1, 0, 0]]),
-                                             method='som_as_point')
+                                             method='soma_as_point')
             
             #run simulation
             cell.simulate(electrode=electrode)
