@@ -42,6 +42,7 @@ def _test(verbosity=1):
     from .test_eegmegcalc import testMEG, testFourSphereVolumeConductor, testInfiniteVolumeConductor
     from .test_alias_method import testAliasMethod
     from .test_recextelectrode import testRecExtElectrode
+    from .test_lfpcalc import testLfpCalc
     from .test_misc import testMisc
     from .test_pointprocess import testPointProcess, testSynapse, testStimIntElectrode 
     from .test_inputgenerators import testInputGenerators
@@ -49,13 +50,21 @@ def _test(verbosity=1):
     from .test_networkcell import testNetworkCell
     from .test_network import testNetworkPopulation, testNetwork
     import unittest
-       
+
     print('\ntest LFPy.Cell class and methods:')
     suite = unittest.TestLoader().loadTestsFromTestCase(testCell)
     unittest.TextTestRunner(verbosity=verbosity).run(suite)
 
     print('\ntest LFPy.TemplateCell class and methods:')
     suite = unittest.TestLoader().loadTestsFromTestCase(testTemplateCell)
+    unittest.TextTestRunner(verbosity=verbosity).run(suite)
+
+    print('\ntest LFPy.lfpcalc methods:')
+    suite = unittest.TestLoader().loadTestsFromTestCase(testLfpCalc)
+    unittest.TextTestRunner(verbosity=verbosity).run(suite)
+
+    print('\ntest LFPy.RecExtElectrode class and methods:')
+    suite = unittest.TestLoader().loadTestsFromTestCase(testRecExtElectrode)
     unittest.TextTestRunner(verbosity=verbosity).run(suite)
 
     print('\ntest LFPy.NetworkCell class and methods:')
@@ -84,10 +93,6 @@ def _test(verbosity=1):
 
     print('\ntest LFPy.alias_method methods:')
     suite = unittest.TestLoader().loadTestsFromTestCase(testAliasMethod)
-    unittest.TextTestRunner(verbosity=verbosity).run(suite)
-
-    print('\ntest LFPy.RecExtElectrode class and methods:')
-    suite = unittest.TestLoader().loadTestsFromTestCase(testRecExtElectrode)
     unittest.TextTestRunner(verbosity=verbosity).run(suite)
 
     print('\ntest LFPy.PointProcess class and methods:')

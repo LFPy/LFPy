@@ -177,6 +177,32 @@ class testRecExtElectrode(unittest.TestCase):
                                                     electrodeZ=Z[i])
         np.testing.assert_allclose(LFP_analytic, LFP_LFPy, atol=1E-4)
 
+    def test_sigma_inputs(self):
+
+        stickParams = {
+            'morphology' : os.path.join(LFPy.__path__[0], 'test', 'stick.hoc'),
+            'passive_parameters' : {'g_pas' : 1./30000, 'e_pas' : -65},
+            'passive': True,
+            'tstart' : 0,
+            'tstop' : 20,
+            'dt' : 2**-4,
+            'nsegs_method' : 'lambda_f',
+            'lambda_f' : 1000,
+
+        }
+        stick = LFPy.Cell(**stickParams)
+
+        electrodeParams = {
+            'sigma' : [0.3, 0.3, 0.3, 0.3],
+            'x' : np.ones(11) * 100.,
+            'y' : np.zeros(11),
+            'z' : np.linspace(1000, 0, 11),
+        }
+
+        np.testing.assert_raises(ValueError, LFPy.RecExtElectrode, **electrodeParams)
+
+
+
     def test_isotropic_version_of_anisotropic_methods(self):
 
         stickParams = {
@@ -226,7 +252,7 @@ class testRecExtElectrode(unittest.TestCase):
             synapse = LFPy.StimIntElectrode(stick, stick.get_closest_idx(0, 0, 1000),
                                    **stimParams)
             stick.simulate([isotropic_electrode, anisotropic_electrode],
-                           rec_imem=True, rec_istim=True, rec_vmem=True)
+                           rec_imem=True, rec_vmem=True)
 
             np.testing.assert_allclose(isotropic_electrode.LFP,
                                        anisotropic_electrode.LFP)
@@ -281,7 +307,7 @@ class testRecExtElectrode(unittest.TestCase):
         synapse = LFPy.StimIntElectrode(stick, stick.get_closest_idx(0, 0, 1000),
                                **stimParams)
         stick.simulate([electrode_ps, electrode_ls, electrode_sap],
-                       rec_imem=True, rec_istim=True, rec_vmem=True)
+                       rec_imem=True, rec_vmem=True)
 
         # Test that distant electrode is independent of choice of method
         np.testing.assert_almost_equal(electrode_ps.LFP[1,:],

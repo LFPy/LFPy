@@ -90,8 +90,8 @@ def _run_simulation_with_electrode(cell, cvode, electrode=None,
     """
     
     #c-declare some variables
-    cdef int i, j, tstep, ncoeffs
-    cdef int totnsegs = cell.totnsegs
+    cdef int i, j, tstep#, ncoeffs
+    #cdef int totnsegs = cell.totnsegs
     cdef double tstop = cell.tstop
     cdef int counter
     cdef int lendotprodcoeffs0
@@ -101,10 +101,6 @@ def _run_simulation_with_electrode(cell, cvode, electrode=None,
     cdef double rtfactor
     cdef double dt = cell.dt
     cdef np.ndarray[DTYPE_t, ndim=2, negative_indices=False] coeffs
-    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] imem = \
-        np.zeros(totnsegs)
-    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] area = \
-        cell.area.copy()
     cdef np.ndarray[DTYPE_t, ndim=2, negative_indices=False] current_dipole_moment
     cdef np.ndarray[DTYPE_t, ndim=2, negative_indices=False] midpoints
     
@@ -144,46 +140,47 @@ def _run_simulation_with_electrode(cell, cvode, electrode=None,
         
         #calculate list of dotprodcoeffs, will try temp storage of
         #imem, tvec, LFP
-        cellTvec = cell.tvec
-        try:
-            cellImem = cell.imem.copy()
-        except:
-            pass
+        # cellTvec = cell.tvec
+        # try:
+        #     cellImem = cell.imem.copy()
+        # except:
+        #     pass
         
-        cell.imem = np.eye(totnsegs)
-        cell.tvec = np.arange(totnsegs) * dt
-        electrodeLFP = []   #list of electrode.LFP objects if they exist
-        restoreLFP = False
-        restoreCellLFP = False
-        ncoeffs = 0
+        # cell.imem = np.eye(totnsegs)
+        # cell.tvec = np.arange(totnsegs) * dt
+        # electrodeLFP = []   #list of electrode.LFP objects if they exist
+        # restoreLFP = False
+        # restoreCellLFP = False
+        # ncoeffs = 0
         for el in electrodes:
-            if hasattr(el, 'LFP'):
-                LFPcopy = el.LFP
-                del el.LFP
-                restoreLFP = True
-            if hasattr(el, 'CellLFP'):
-                CellLFP = el.CellLFP
-                restoreCellLFP = True
-            el.calc_lfp(cell=cell)
-            dotprodcoeffs.append(el.LFP.copy())
-            if restoreLFP:
-                del el.LFP
-                el.LFP = LFPcopy
-            else:
-                del el.LFP
-            if restoreCellLFP:
-                el.CellLFP = CellLFP
-            else:
-                if hasattr(el, 'CellLFP'):
-                    del el.CellLFP
-            ncoeffs += 1
+            # if hasattr(el, 'LFP'):
+            #     LFPcopy = el.LFP
+            #     del el.LFP
+            #     restoreLFP = True
+            # if hasattr(el, 'CellLFP'):
+            #     CellLFP = el.CellLFP
+            #     restoreCellLFP = True
+            # el.calc_lfp(cell=cell)
+            el.calc_mapping(cell)
+            dotprodcoeffs.append(el.mapping)
+            # if restoreLFP:
+            #     del el.LFP
+            #     el.LFP = LFPcopy
+            # else:
+            #     del el.LFP
+            # if restoreCellLFP:
+            #     el.CellLFP = CellLFP
+            # else:
+            #     if hasattr(el, 'CellLFP'):
+            #         del el.CellLFP
+            # ncoeffs += 1
         
-        #putting back variables
-        cell.tvec = cellTvec        
-        try:
-            cell.imem = cellImem
-        except:
-            del cell.imem
+        # #putting back variables
+        # cell.tvec = cellTvec
+        # try:
+        #     cell.imem = cellImem
+        # except:
+        #     del cell.imem
     elif electrode is None:
         electrodes = None
 
@@ -264,8 +261,7 @@ def _run_simulation_with_electrode(cell, cvode, electrode=None,
                 for j, coeffs in enumerate(dotprodcoeffs):
                     el_LFP_file['electrode{:03d}'.format(j)
                                 ][:, tstep] = np.dot(coeffs, imem)
-            
-                
+
             tstep += 1
         neuron.h.fadvance()
         counter += 1

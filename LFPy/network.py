@@ -1205,9 +1205,11 @@ def _run_simulation_with_electrode(network, cvode,
         # We can have a number of separate electrode objects in a list, create
         # mappings for each
         for el in electrodes:
-            el.calc_lfp(cell=network_dummycell)
-            dotprodcoeffs = [el.LFP] + dotprodcoeffs
-            del el.LFP
+            # el.calc_lfp(cell=network_dummycell)
+            el.calc_mapping(cell=network_dummycell)
+            dotprodcoeffs = [el.mapping] + dotprodcoeffs
+            # del el.LFP
+            del el.mapping
 
     elif electrode is None:
         electrodes = None

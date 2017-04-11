@@ -29,8 +29,8 @@ def return_dist_from_segments(xstart, ystart, zstart, xend, yend, zend, p):
 
     delta = px*px + py*py + pz*pz
     u = ((p[0] - xstart) * px + (p[1] - ystart) * py + (p[2] - zstart) * pz) / delta
-    u[u > 1] = 1
-    u[u < 0] = 0
+    u[u > 1] = 1.0
+    u[u < 0] = 0.0
 
     closest_point = np.array([xstart + u * px,
                               ystart + u * py,

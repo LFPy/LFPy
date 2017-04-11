@@ -176,11 +176,15 @@ class RecExtElectrode:
         self.sigma = sigma
         if type(sigma) in [list, np.ndarray]:
             self.sigma = np.array(sigma)
+            if not self.sigma.shape == (3,):
+                raise ValueError("Conductivity, sigma, should be float "
+                                 "or array of length 3: "
+                                 "[sigma_x, sigma_y, sigma_z]")
+
             self.anisotropic = True
         else:
             self.sigma = sigma
             self.anisotropic = False
-
 
         if type(x) in [float, int]:
             self.x = np.array([x])
@@ -282,7 +286,7 @@ class RecExtElectrode:
     def set_cell(self, cell):
         self.cell = cell
         if self.cell is not None:
-            self._test_imem_sum()
+
             # Handling the r_limits. If a r_limit is a single value, an array r_limit
             # of shape cell.diam is returned.
             # if type(r_limit) == int or type(r_limit) == float:
@@ -316,22 +320,7 @@ class RecExtElectrode:
                 pass
 
 
-
-    def calc_lfp(self, t_indices=None, cell=None):
-        """Calculate LFP on electrode geometry from all cell instances.
-        Will chose distributed calculated if electrode contain 'n', 'N', and 'r'
-
-        Parameters
-        ----------
-        cell : obj, optional
-            `LFPy.Cell` or `LFPy.TemplateCell` instance. Must be specified here
-            if it was not specified at the initiation of the `RecExtElectrode`
-            class
-        t_indices : np.ndarray
-            Array of timestep indexes where extracellular potential should
-            be calculated.
-        """
-
+    def calc_mapping(self, cell):
         if cell is not None:
             self.set_cell(cell)
 
@@ -351,11 +340,31 @@ class RecExtElectrode:
             if self.verbose:
                 print('calculations finished, %s, %s' % (str(self),
                                                          str(self.cell)))
+
+
+    def calc_lfp(self, t_indices=None, cell=None):
+        """Calculate LFP on electrode geometry from all cell instances.
+        Will chose distributed calculated if electrode contain 'n', 'N', and 'r'
+
+        Parameters
+        ----------
+        cell : obj, optional
+            `LFPy.Cell` or `LFPy.TemplateCell` instance. Must be specified here
+            if it was not specified at the initiation of the `RecExtElectrode`
+            class
+        t_indices : np.ndarray
+            Array of timestep indexes where extracellular potential should
+            be calculated.
+        """
+
+        self.calc_mapping(cell)
+
         if t_indices is not None:
             currmem = self.cell.imem[:, t_indices]
         else:
             currmem = self.cell.imem
 
+        self._test_imem_sum()
         self.LFP = np.dot(self.mapping, currmem)
         # del self.mapping
 
