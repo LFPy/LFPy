@@ -109,7 +109,7 @@ def calc_lfp_linesource_anisotropic(cell, x, y, z, sigma, r_limit):
             p_[:] = pos + (pos - closest_point) * (r_limit[idx] - r) / r
 
         if np.sqrt(np.sum((p_ - closest_point)**2)) - r_limit[idx] > 1e-9:
-            print p_, closest_point
+            print(p_, closest_point)
             raise RuntimeError("Segment adjustment not working")
 
         b[idx] = -2 * (sigma[1] * sigma[2] * (p_[0] - xstart[idx]) * (xend[idx] - xstart[idx]) +
@@ -126,8 +126,8 @@ def calc_lfp_linesource_anisotropic(cell, x, y, z, sigma, r_limit):
     [iiii] = np.where(np.bitwise_and(4 * a * c - b*b > 1e-6, np.abs(b) > 1e-6))
 
     if len(i) + len(iia) + len(iib) + len(iii) + len(iiii) != cell.totnsegs:
-        print a, b, c
-        print i, iia, iib, iii, iiii
+        print(a, b, c)
+        print(i, iia, iib, iii, iiii)
         raise RuntimeError
 
     # if len(iiii) != cell.totnsegs:
@@ -211,7 +211,7 @@ def calc_lfp_soma_as_point_anisotropic(cell, x, y, z, sigma, r_limit):
             p_[:] = pos + (pos - closest_point) * (r_limit[idx] - r) / r
 
         if np.sqrt(np.sum((p_ - closest_point)**2)) - r_limit[idx] > 1e-9:
-            print p_, closest_point
+            print(p_, closest_point)
             raise RuntimeError("Segment adjustment not working")
 
         b[idx] = -2 * (sigma[1] * sigma[2] * (p_[0] - xstart[idx]) * (xend[idx] - xstart[idx]) +
@@ -228,8 +228,8 @@ def calc_lfp_soma_as_point_anisotropic(cell, x, y, z, sigma, r_limit):
     [iiii] = np.where(np.bitwise_and(4 * a * c - b*b > 1e-6, np.abs(b) > 1e-6))
 
     if len(i) + len(iia) + len(iib) + len(iii) + len(iiii) != cell.totnsegs:
-        print a, b, c
-        print i, iia, iib, iii, iiii
+        print(a, b, c)
+        print(i, iia, iib, iii, iiii)
         raise RuntimeError
 
     # if len(iiii) != cell.totnsegs:
