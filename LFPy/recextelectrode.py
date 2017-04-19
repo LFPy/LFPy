@@ -284,7 +284,6 @@ class RecExtElectrode:
                              "or 'pointsource'")
 
     def set_cell(self, cell):
-
         """Set the supplied cell object as attribute "cell" of the
         RecExtElectrode object
         
