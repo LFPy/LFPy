@@ -389,7 +389,7 @@ class RecExtElectrode:
         # del self.mapping
 
 
-    def _loop_over_contacts(self):
+    def _loop_over_contacts(self, **kwargs):
         """Loop over electrode contacts, and return LFPs across channels"""
 
         for i in range(self.x.size):
@@ -398,10 +398,11 @@ class RecExtElectrode:
                                              y = self.y[i],
                                              z = self.z[i],
                                              sigma = self.sigma,
-                                             r_limit = self.r_limit)
+                                             r_limit = self.r_limit,
+                                             **kwargs)
 
     
-    def _lfp_el_pos_calc_dist(self, m=50):
+    def _lfp_el_pos_calc_dist(self, m=50, **kwargs):
 
         """
         Calc. of LFP over an n-point integral approximation over flat
@@ -491,7 +492,8 @@ class RecExtElectrode:
                                               y = y_n[j],
                                               z = z_n[j],
                                               r_limit = self.r_limit,
-                                              sigma = self.sigma)
+                                              sigma = self.sigma,
+                                              **kwargs)
 
                 if j == 0:
                     lfp_e = tmp
@@ -519,7 +521,8 @@ class RecExtElectrode:
                                               y=self.y[i],
                                               z=self.z[i],
                                               r_limit = self.r_limit,
-                                              sigma=self.sigma)
+                                              sigma=self.sigma,
+                                              **kwargs)
 
             self.offsets[i] = {'x_n' : x_n,
                                'y_n' : y_n,
@@ -551,7 +554,7 @@ class RecMEAElectrode(RecExtElectrode):
                  from_file=False, cellfile=None, verbose=False,
                  seedvalue=None, **kwargs):
 
-        RecExtElectrode.__init__(cell=cell,
+        RecExtElectrode.__init__(self, cell=cell,
                      x=x, y=y, z=z,
                      N=N, r=r, n=n, r_z=r_z,
                      perCellLFP=perCellLFP, method=method,
@@ -561,9 +564,16 @@ class RecMEAElectrode(RecExtElectrode):
         self.sigma_G = sigma_G
         self.sigma_T = sigma_T
         self.sigma_S = sigma_S
+        self.sigma = None
         # self._check_for_anisotropy()
         self.h = h
         self.steps = steps
+        self.moi_param_kwargs = {"h": self.h,
+                                 "steps": self.steps,
+                                 "sigma_G": self.sigma_G,
+                                 "sigma_T": self.sigma_T,
+                                 "sigma_S": self.sigma_S,
+                                 }
 
         if cell is not None:
             self.set_cell(cell)
@@ -602,13 +612,13 @@ class RecMEAElectrode(RecExtElectrode):
             else:
                 pass
 
-            self._lfp_el_pos_calc_dist()
+            self._lfp_el_pos_calc_dist(**self.moi_param_kwargs)
 
             if self.verbose:
                 print('calculations finished, %s, %s' % (str(self),
                                                          str(self.cell)))
         else:
-            self._loop_over_contacts()
+            self._loop_over_contacts(**self.moi_param_kwargs)
             if self.verbose:
                 print('calculations finished, %s, %s' % (str(self),
                                                          str(self.cell)))
@@ -638,5 +648,3 @@ class RecMEAElectrode(RecExtElectrode):
         self._test_imem_sum()
         self.LFP = np.dot(self.mapping, currmem)
         # del self.mapping
-
-

@@ -579,28 +579,31 @@ def _check_rlimit_point(r2, r_limit):
     return r2
 
 
-def isotropic_moi(charge_pos, elec_pos, sigma_T, sigma_S, sigma_G, steps, h):
+def isotropic_moi(cell, x, y, z, sigma_T, sigma_S, sigma_G, steps, h, **kwargs):
     """ This function calculates the potential at the position elec_pos = [x, y, z]
     set up by the charge at position charge_pos = [x0, y0, z0]. To get get the potential
     from multiple charges, the contributions must be summed up.
     """
-    def _omega(dz):
-        return 1/np.sqrt((y - y0)**2 + (x - x0)**2 + dz**2)
 
-    x0, y0, z0 = charge_pos[:]
-    x, y, z = elec_pos[:]
-    mapping = _omega(z - z0)
-    n = 0
+    dx2 = (x - cell.xmid)**2
+    dy2 = (y - cell.ymid)**2
+
+    def _omega(dz):
+        return 1/np.sqrt(dx2 + dy2 + dz*dz)
+
+    mapping = _omega(z - cell.zmid)
     WTS = (sigma_T - sigma_S)/(sigma_T + sigma_S)
     WTG = (sigma_T - sigma_G)/(sigma_T + sigma_G)
+    n = 0
     while n < steps:
         if n == 0:
-            mapping += (WTS * _omega(z + z0 - 2*(n + 1)*h) +
-                    WTG * _omega(z + z0 + 2*n*h))
+            mapping += (WTS * _omega(z + cell.zmid - 2*(n + 1)*h) +
+                    WTG * _omega(z + cell.zmid + 2*n*h))
         else:
-            mapping += (WTS*WTG)**n * (WTS * _omega(z + z0 - 2*(n + 1)*h) +
-                                   WTG * _omega(z + z0 + 2*n*h) +
-                                   _omega(z - z0 + 2*n*h) + _omega(z - z0 - 2*n*h))
+            mapping += (WTS*WTG)**n * (WTS * _omega(z + cell.zmid - 2*(n + 1)*h) +
+                                   WTG * _omega(z + cell.zmid + 2*n*h) +
+                                   _omega(z - cell.zmid + 2*n*h) + _omega(z - cell.zmid - 2*n*h))
         n += 1
     mapping *= 1/(4*np.pi*sigma_T)
+
     return mapping
