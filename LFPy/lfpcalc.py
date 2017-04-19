@@ -500,7 +500,6 @@ def _r_soma_calc(xmid, ymid, zmid, x, y, z):
 
 
 def calc_lfp_pointsource(cell, x, y, z, sigma, r_limit):
-
     """Calculate extracellular potentials using the point-source
     equation on all compartments
 
@@ -579,10 +578,34 @@ def _check_rlimit_point(r2, r_limit):
     return r2
 
 
-def isotropic_moi(cell, x, y, z, sigma_T, sigma_S, sigma_G, steps, h, **kwargs):
-    """ This function calculates the potential at the position elec_pos = [x, y, z]
-    set up by the charge at position charge_pos = [x0, y0, z0]. To get get the potential
-    from multiple charges, the contributions must be summed up.
+def calc_lfp_pointsource_moi(cell, x, y, z, sigma_T, sigma_S, sigma_G,
+                             steps, h, **kwargs):
+    """Calculate extracellular potentials using the point-source
+    equation on all compartments for in vitro Microelectrode Array (MEA) slices
+
+    Parameters
+    ----------
+    cell: obj
+        LFPy.Cell or LFPy.TemplateCell like instance
+    x : float
+        extracellular position, x-axis
+    y : float
+        extracellular position, y-axis
+    z : float
+        extracellular position, z-axis
+    sigma_T : float
+        extracellular conductivity in tissue slice
+    sigma_G : float
+        Conductivity of MEA glass electrode plane.
+        Should normally be zero for MEA set up.
+    sigma_S : float
+        Conductivity of saline bath that tissue slice is immersed in
+    steps : int
+        Number of steps to average over the in technically infinite sum
+    h : float
+        Slice thickness in um.
+    r_limit : np.ndarray
+        minimum distance to source current for each compartment
     """
 
     dx2 = (x - cell.xmid)**2
@@ -591,19 +614,20 @@ def isotropic_moi(cell, x, y, z, sigma_T, sigma_S, sigma_G, steps, h, **kwargs):
     def _omega(dz):
         return 1/np.sqrt(dx2 + dy2 + dz*dz)
 
-    mapping = _omega(z - cell.zmid)
     WTS = (sigma_T - sigma_S)/(sigma_T + sigma_S)
     WTG = (sigma_T - sigma_G)/(sigma_T + sigma_G)
-    n = 0
+
+    mapping = _omega(z - cell.zmid)
+    mapping += (WTS * _omega(z + cell.zmid - 2*h) +
+                WTG * _omega(z + cell.zmid))
+    n = 1
     while n < steps:
-        if n == 0:
-            mapping += (WTS * _omega(z + cell.zmid - 2*(n + 1)*h) +
-                    WTG * _omega(z + cell.zmid + 2*n*h))
-        else:
-            mapping += (WTS*WTG)**n * (WTS * _omega(z + cell.zmid - 2*(n + 1)*h) +
+        mapping += (WTS*WTG)**n * (WTS * _omega(z + cell.zmid - 2*(n + 1)*h) +
                                    WTG * _omega(z + cell.zmid + 2*n*h) +
-                                   _omega(z - cell.zmid + 2*n*h) + _omega(z - cell.zmid - 2*n*h))
+                                   _omega(z - cell.zmid + 2*n*h) +
+                                   _omega(z - cell.zmid - 2*n*h))
         n += 1
+
     mapping *= 1/(4*np.pi*sigma_T)
 
     return mapping

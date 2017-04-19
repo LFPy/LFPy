@@ -42,12 +42,98 @@ class testLfpCalc(unittest.TestCase):
 
 
     def test_calc_lfp_pointsource(self):
+        """Test that function calc_lfp_pointsource
+        reproduces analytic formula"""
         sigma = 0.3
         cell = TestCell()
         np.testing.assert_equal(1./(4*np.pi*sigma),
                                 lfpcalc.calc_lfp_pointsource(cell,
                                 x=0.5, y=0, z=1, sigma=sigma,
                                 r_limit=cell.diam/2))
+
+    def test_calc_lfp_pointsource_moi_homogeneous(self):
+        """
+        Test that slice where all layers have same conductivity reproduces
+        in vivo results.
+        """
+        sigma_T = 0.3
+        sigma_G = 0.3
+        sigma_S = 0.3
+        h = 300
+        steps = 20
+        cell = TestCell()
+        cell.zmid[0] = h/2
+        cell.zstart[0] = h/2
+        cell.zend[0] = h/2
+
+        in_vivo = lfpcalc.calc_lfp_pointsource(cell,
+                                x=0.5, y=0, z=1, sigma=sigma_T,
+                                r_limit=cell.diam/2)
+        in_vitro = lfpcalc.calc_lfp_pointsource_moi(cell,
+                                x=0.5, y=0, z=1, sigma_T=sigma_T,
+                                sigma_G=sigma_G, sigma_S=sigma_S,
+                                r_limit=cell.diam/2, h=h, steps=steps)
+
+        np.testing.assert_equal(in_vivo, in_vitro)
+
+
+    def test_calc_lfp_pointsource_moi_doubling(self):
+        """
+        Test that slice with zero-conductivity MEA region (z<0) has twice
+        the potential as in vivo case at MEA electrode plane
+        """
+        sigma_T = 0.3
+        sigma_G = 0.0
+        sigma_S = 0.3
+        h = 200
+        steps = 3
+
+        cell = TestCell()
+        cell.zstart[0] = 50
+        cell.zmid[0] = 50
+        cell.zend[0] = 50
+
+        in_vivo = lfpcalc.calc_lfp_pointsource(cell,
+                                x=50., y=0, z=0, sigma=sigma_T,
+                                r_limit=cell.diam/2)
+        in_vitro = lfpcalc.calc_lfp_pointsource_moi(cell,
+                                x=50, y=0, z=0, sigma_T=sigma_T,
+                                sigma_G=sigma_G, sigma_S=sigma_S,
+                                r_limit=cell.diam/2, h=h, steps=steps)
+
+        np.testing.assert_almost_equal(2 * in_vivo, in_vitro, decimal=9)
+
+
+    def test_calc_lfp_pointsource_moi_saline_effect(self):
+        """
+        Test that the saline bath decreases signal as expected
+        """
+        sigma_T = 0.3
+        sigma_G = 0.0
+        sigma_S = 1.5
+        h = 200
+        steps = 20
+
+        cell = TestCell()
+        cell.zstart[0] = 100
+        cell.zmid[0] = 100
+        cell.zend[0] = 100
+
+
+        with_saline = lfpcalc.calc_lfp_pointsource_moi(cell,
+                                x=0, y=0, z=0, sigma_T=sigma_T,
+                                sigma_G=sigma_G, sigma_S=sigma_S,
+                                r_limit=cell.diam/2, h=h, steps=steps)
+
+        without_saline = lfpcalc.calc_lfp_pointsource_moi(cell,
+                                x=0, y=0, z=0, sigma_T=sigma_T,
+                                sigma_G=sigma_G, sigma_S=sigma_T,
+                                r_limit=cell.diam/2, h=h, steps=steps)
+
+
+        np.testing.assert_array_less(with_saline, without_saline)
+
+
 
     def test_calc_lfp_pointsource_anisotropic(self):
 
@@ -79,7 +165,7 @@ class TestCell(object):
     """Cell like object with attributes for predicting extracellular potentials,
     but with:
         - 1 compartment
-        - position in (0,0,0)
+        - position in (0.5,0,0)
         - length 1
         - diam 1
         - current amplitude 1

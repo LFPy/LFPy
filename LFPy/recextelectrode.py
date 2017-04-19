@@ -579,7 +579,7 @@ class RecMEAElectrode(RecExtElectrode):
             self.set_cell(cell)
 
         if method == 'pointsource':
-            self.lfp_method = lfpcalc.isotropic_moi
+            self.lfp_method = lfpcalc.calc_lfp_pointsource_moi
         else:
             raise NotImplementedError("Must be implemented")
 
