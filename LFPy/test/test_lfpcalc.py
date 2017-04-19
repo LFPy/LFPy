@@ -159,6 +159,35 @@ class testLfpCalc(unittest.TestCase):
         np.testing.assert_array_less(with_saline, without_saline)
 
 
+
+    def test_calc_lfp_pointsource_moi_20steps(self):
+        """
+        Test that the calc_lfp_pointsource_moi reproduces previously known
+        nummerical value
+        """
+        sigma_T = 0.3
+        sigma_G = 0.0
+        sigma_S = 1.5
+        h = 200
+        steps = 20
+
+        correct = 0.00108189
+
+
+        cell = TestCell()
+        cell.zmid[0] = 110
+        cell.xmid[0] = -100
+
+        calculated = lfpcalc.calc_lfp_pointsource_moi(cell,
+                                x=100, y=0, z=0, sigma_T=sigma_T,
+                                sigma_G=sigma_G, sigma_S=sigma_S,
+                                r_limit=cell.diam/2, h=h, steps=steps)
+
+
+        np.testing.assert_almost_equal(correct, calculated, 5)
+
+
+
     def test_calc_lfp_pointsource_moi_infinite_slice(self):
         """
         Test that infinitely thick slice does not affect potential.

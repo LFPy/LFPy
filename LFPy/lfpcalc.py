@@ -625,14 +625,13 @@ def calc_lfp_pointsource_moi(cell, x, y, z, sigma_T, sigma_S, sigma_G,
     mapping = _omega(z - cell.zmid)
     mapping += (WTS * _omega(z + cell.zmid - 2*h) +
                 WTG * _omega(z + cell.zmid))
-    n = 1
-    while n < steps:
-        mapping += (WTS*WTG)**n * (WTS * _omega(z + cell.zmid - 2*(n + 1)*h) +
-                                   WTG * _omega(z + cell.zmid + 2*n*h) +
-                                   _omega(z - cell.zmid + 2*n*h) +
-                                   _omega(z - cell.zmid - 2*n*h))
-        n += 1
 
+    n = np.arange(1, steps)
+    a = (WTS*WTG)**n[:, None] * (WTS * _omega(z + cell.zmid - 2*(n[:, None] + 1)*h) +
+                                 WTG * _omega(z + cell.zmid + 2*n[:, None]*h) +
+                                 _omega(z - cell.zmid + 2*n[:, None]*h) +
+                                 _omega(z - cell.zmid - 2*n[:, None]*h))
+    mapping += np.sum(a, axis=0)
     mapping *= 1/(4*np.pi*sigma_T)
 
     return mapping
