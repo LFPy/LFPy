@@ -71,7 +71,8 @@ def _run_simulation(cell, cvode, variable_dt=False, atol=0.001):
             ti = neuron.h.t
 
 def _run_simulation_with_electrode(cell, cvode, electrode=None,
-                                   variable_dt=False, atol=0.001,
+                                   variable_dt=False,
+                                   atol=0.001,
                                    to_memory=True, to_file=False,
                                    file_name=None, dotprodcoeffs=None,
                                    rec_current_dipole_moment=False):
@@ -113,44 +114,46 @@ def _run_simulation_with_electrode(cell, cvode, electrode=None,
             electrodes = [electrode]
         
         #calculate list of dotprodcoeffs, will try temp store of imem, tvec, LFP
-        cellTvec = cell.tvec
-        try:
-            cellImem = cell.imem.copy()
-        except:
-            pass
-        
-        cell.imem = np.eye(cell.totnsegs)
-        cell.tvec = np.arange(cell.totnsegs) * cell.dt
-        electrodeLFP = []   #list of electrode.LFP objects if they exist
-        restoreLFP = False
-        restoreCellLFP = False
+        # cellTvec = cell.tvec
+        # try:
+        #     cellImem = cell.imem.copy()
+        # except:
+        #     pass
+
+        # cell.imem = np.eye(cell.totnsegs)
+        # cell.tvec = np.arange(cell.totnsegs) * cell.dt
+        # electrodeLFP = []   #list of electrode.LFP objects if they exist
+        # restoreLFP = False
+        # restoreCellLFP = False
         for el in electrodes:
-            if hasattr(el, 'LFP'):
-                LFPcopy = el.LFP
-                del el.LFP
-                restoreLFP = True
-            if hasattr(el, 'CellLFP'):
-                CellLFP = el.CellLFP
-                restoreCellLFP = True
-            el.calc_lfp(cell=cell)
-            dotprodcoeffs.append(el.LFP.copy())
-            if restoreLFP:
-                del el.LFP
-                el.LFP = LFPcopy
-            else:
-                del el.LFP
-            if restoreCellLFP:
-                el.CellLFP = CellLFP
-            else:
-                if hasattr(el, 'CellLFP'):
-                    del el.CellLFP
+            # if hasattr(el, 'LFP'):
+            #     LFPcopy = el.LFP
+            #     del el.LFP
+            #     restoreLFP = True
+            # if hasattr(el, 'CellLFP'):
+            #     CellLFP = el.CellLFP
+            #     restoreCellLFP = True
+            # el.calc_lfp(cell=cell)
+            el.calc_mapping(cell)
+            # dotprodcoeffs.append(el.LFP.copy())
+            dotprodcoeffs.append(el.mapping)
+            # if restoreLFP:
+            #     del el.LFP
+            #     el.LFP = LFPcopy
+            # else:
+            #     del el.LFP
+            # if restoreCellLFP:
+            #     el.CellLFP = CellLFP
+            # else:
+            #     if hasattr(el, 'CellLFP'):
+            #         del el.CellLFP
             
         #putting back variables
-        cell.tvec = cellTvec        
-        try:
-            cell.imem = cellImem
-        except:
-            del cell.imem
+        # cell.tvec = cellTvec
+        # try:
+        #     cell.imem = cellImem
+        # except:
+        #     del cell.imem
     elif electrode is None:
         electrodes = None
    

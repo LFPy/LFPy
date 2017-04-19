@@ -20,7 +20,6 @@ import warnings
 import numpy as np
 from . import lfpcalc, tools
 
-
 class RecExtElectrode:
     """class RecExtElectrode
     
@@ -164,8 +163,6 @@ class RecExtElectrode:
     >>> plt.axis('tight')
     >>> plt.show()
 
-
-
     """
 
     def __init__(self, cell=None, sigma=0.3,
@@ -176,8 +173,19 @@ class RecExtElectrode:
                  seedvalue=None, **kwargs):
         """Initialize RecExtElectrode class"""
 
-        self.cell = cell
         self.sigma = sigma
+        if type(sigma) in [list, np.ndarray]:
+            self.sigma = np.array(sigma)
+            if not self.sigma.shape == (3,):
+                raise ValueError("Conductivity, sigma, should be float "
+                                 "or array of length 3: "
+                                 "[sigma_x, sigma_y, sigma_z]")
+
+            self.anisotropic = True
+        else:
+            self.sigma = sigma
+            self.anisotropic = False
+
         if type(x) in [float, int]:
             self.x = np.array([x])
         else:
@@ -248,24 +256,50 @@ class RecExtElectrode:
             else:
                 raise ValueError('cell either string or list of strings')
 
-        if self.cell is not None:
-            self._test_imem_sum()
-            self.r_limit = self.cell.diam/2
+        if cell is not None:
+            self.set_cell(cell)
+
 
         if method == 'soma_as_point':
-            self.lfp_method = lfpcalc.calc_lfp_soma_as_point
+            if self.anisotropic:
+                self.lfp_method = lfpcalc.calc_lfp_soma_as_point_anisotropic
+            else:
+                self.lfp_method = lfpcalc.calc_lfp_soma_as_point
         elif method == 'som_as_point':
-            self.lfp_method = lfpcalc.calc_lfp_soma_as_point
-            raise DeprecationWarning('The method "som_as_point" is deprecated.'
+            raise RuntimeError('The method "som_as_point" is deprecated.'
                                      'Use "soma_as_point" instead')
         elif method == 'linesource':
-            self.lfp_method = lfpcalc.calc_lfp_linesource
+            if self.anisotropic:
+                self.lfp_method = lfpcalc.calc_lfp_linesource_anisotropic
+            else:
+                self.lfp_method = lfpcalc.calc_lfp_linesource
         elif method == 'pointsource':
-            self.lfp_method = lfpcalc.calc_lfp_pointsource
+            if self.anisotropic:
+                self.lfp_method = lfpcalc.calc_lfp_pointsource_anisotropic
+            else:
+                self.lfp_method = lfpcalc.calc_lfp_pointsource
         else:
             raise ValueError("LFP method not recognized. "
                              "Should be 'soma_as_point', 'linesource' "
                              "or 'pointsource'")
+
+    def set_cell(self, cell):
+        """Set the supplied cell object as attribute "cell" of the
+        RecExtElectrode object
+        
+        Parameters
+        ----------
+        cell : obj
+            `LFPy.Cell` or `LFPy.TemplateCell` instance.
+        
+        Returns
+        -------
+        None
+        """
+        self.cell = cell
+        if self.cell is not None:
+            self.r_limit = self.cell.diam/2
+            self.mapping = np.zeros((self.x.size, len(cell.xmid)))
 
 
     def _test_imem_sum(self, tolerance=1E-8):
@@ -288,13 +322,54 @@ class RecExtElectrode:
             else:
                 pass
 
+
+    def calc_mapping(self, cell):
+        """Creates a linear mapping of transmembrane currents of each segment
+        of the supplied cell object to contribution to extracellular potential
+        at each electrode contact point of the RexExtElectrode object. Sets
+        the class attribute "mapping", which is a shape (n_contact, n_segs)
+        ndarray, such that the extracellular potential at the contacts
+        phi = np.dot(mapping, I_mem)
+        where I_mem is a shape (n_segs, n_tsteps) ndarray with transmembrane
+        currents for each time step of the simulation. 
+        
+        Parameters
+        ----------
+        cell : obj
+            `LFPy.Cell` or `LFPy.TemplateCell` instance.
+        
+        Returns
+        -------
+        None
+        """
+        if cell is not None:
+            self.set_cell(cell)
+
+        if self.n is not None and self.N is not None and self.r is not None:
+            if self.n <= 1:
+                raise ValueError("n = %i must be larger that 1" % self.n)
+            else:
+                pass
+
+            self._lfp_el_pos_calc_dist()
+
+            if self.verbose:
+                print('calculations finished, %s, %s' % (str(self),
+                                                         str(self.cell)))
+        else:
+            self._loop_over_contacts()
+            if self.verbose:
+                print('calculations finished, %s, %s' % (str(self),
+                                                         str(self.cell)))
+
+
     def calc_lfp(self, t_indices=None, cell=None):
         """Calculate LFP on electrode geometry from all cell instances.
         Will chose distributed calculated if electrode contain 'n', 'N', and 'r'
 
         Parameters
         ----------
-        cell : obj, optinal
+        cell : obj, optional
             `LFPy.Cell` or `LFPy.TemplateCell` instance. Must be specified here
             if it was not specified at the initiation of the `RecExtElectrode`
             class
@@ -303,48 +378,32 @@ class RecExtElectrode:
             be calculated.
         """
 
-        if cell is not None:
-            self.cell = cell
-            self._test_imem_sum()
-            self.r_limit = self.cell.diam/2
+        self.calc_mapping(cell)
 
-        if not hasattr(self,  'LFP'):
-            if t_indices is not None:
-                self.LFP = np.zeros((self.x.size, t_indices.size))
-            else:
-                self.LFP = np.zeros((self.x.size, self.cell.imem.shape[1]))
-
-        if self.n is not None and self.N is not None and self.r is not None:
-            if self.n <= 1:
-                raise ValueError("n = %i must be larger that 1" % self.n)
-            else:
-                pass
-
-            self._lfp_el_pos_calc_dist(t_indices=t_indices)
-            if self.verbose:
-                print('calculations finished, %s, %s' % (str(self),
-                                                         str(self.cell)))
+        if t_indices is not None:
+            currmem = self.cell.imem[:, t_indices]
         else:
-            self._loop_over_contacts(t_indices=t_indices)
-            if self.verbose:
-                print('calculations finished, %s, %s' % (str(self),
-                                                         str(self.cell)))
-        
+            currmem = self.cell.imem
 
-    def _loop_over_contacts(self, t_indices=None):
+        self._test_imem_sum()
+        self.LFP = np.dot(self.mapping, currmem)
+        # del self.mapping
+
+
+    def _loop_over_contacts(self):
         """Loop over electrode contacts, and return LFPs across channels"""
 
         for i in range(self.x.size):
-            self.LFP[i, :] = self.lfp_method(self.cell,
-                                            x = self.x[i],
-                                            y = self.y[i],
-                                            z = self.z[i],
-                                            sigma = self.sigma,
-                                            r_limit = self.r_limit,
-                                            t_indices = t_indices)
+            self.mapping[i, :] = self.lfp_method(self.cell,
+                                             x = self.x[i],
+                                             y = self.y[i],
+                                             z = self.z[i],
+                                             sigma = self.sigma,
+                                             r_limit = self.r_limit)
 
     
-    def _lfp_el_pos_calc_dist(self, m=50, t_indices=None):
+    def _lfp_el_pos_calc_dist(self, m=50):
+
         """
         Calc. of LFP over an n-point integral approximation over flat
         electrode surface: circle of radius r or square of side r. The
@@ -433,8 +492,7 @@ class RecExtElectrode:
                                               y = y_n[j],
                                               z = z_n[j],
                                               r_limit = self.r_limit,
-                                              sigma = self.sigma,
-                                              t_indices = t_indices)
+                                              sigma = self.sigma)
 
                 if j == 0:
                     lfp_e = tmp
@@ -454,16 +512,15 @@ class RecExtElectrode:
                 x_n, y_n, z_n = calc_xyz_n(i)
                 
                 #fill in with contact average
-                self.LFP[i] = loop_over_points(x_n, y_n, z_n) #lfp_e.mean(axis=0)
+                self.mapping[i] = loop_over_points(x_n, y_n, z_n) #lfp_e.mean(axis=0)
 
             else:
-                self.LFP[i] = self.lfp_method(self.cell,
-                                                        x=self.x[i],
-                                                        y=self.y[i],
-                                                        z=self.z[i],
-                                                        r_limit = self.r_limit,
-                                                        sigma=self.sigma,
-                                                        t_indices=t_indices)
+                self.mapping[i] = self.lfp_method(self.cell,
+                                              x=self.x[i],
+                                              y=self.y[i],
+                                              z=self.z[i],
+                                              r_limit = self.r_limit,
+                                              sigma=self.sigma)
 
             self.offsets[i] = {'x_n' : x_n,
                                'y_n' : y_n,
@@ -477,11 +534,79 @@ class RecExtElectrode:
                     'y' : crcl[1],
                     'z' : crcl[2],
                 }
-            elif self.contact_shape  is 'square':
+            elif self.contact_shape is 'square':
                 sqr = create_sqr(m, i)
                 self.circle_circ[i] = {
                     'x': sqr[0],
                     'y': sqr[1],
                     'z': sqr[2],
                 }
+
+class RecMEAElectrode(RecExtElectrode):
+
+    def __init__(self, cell=None, sigma_T=0.3, sigma_S=1.5, sigma_G=0.0, h=300., steps=20,
+                 x=np.array([0]), y=np.array([0]), z=np.array([0]),
+                 N=None, r=None, n=None, r_z=None,
+                 perCellLFP=False, method='linesource',
+                 from_file=False, cellfile=None, verbose=False,
+                 seedvalue=None, **kwargs):
+
+        RecExtElectrode.__init__(cell=cell,
+                     x=x, y=y, z=z,
+                     N=N, r=r, n=n, r_z=r_z,
+                     perCellLFP=perCellLFP, method=method,
+                     from_file=from_file, cellfile=cellfile, verbose=verbose,
+                     seedvalue=seedvalue, **kwargs)
+
+        self.sigma_G = sigma_G
+        self.sigma_T = sigma_T
+        self.sigma_S = sigma_S
+        # self._check_for_anisotropy()
+        self.h = h
+        self.steps = steps
+
+
+
+    def calc_lfp(self, t_indices=None, cell=None):
+        """Calculate LFP on electrode geometry from all cell instances.
+        Will chose distributed calculated if electrode contain 'n', 'N', and 'r'
+
+        Parameters
+        ----------
+        cell : obj, optional
+            `LFPy.Cell` or `LFPy.TemplateCell` instance. Must be specified here
+            if it was not specified at the initiation of the `RecExtElectrode`
+            class
+        t_indices : np.ndarray
+            Array of timestep indexes where extracellular potential should
+            be calculated.
+        """
+
+        if cell is not None:
+            self.set_cell(cell)
+
+        if self.n is not None and self.N is not None and self.r is not None:
+            if self.n <= 1:
+                raise ValueError("n = %i must be larger that 1" % self.n)
+            else:
+                pass
+
+            self._lfp_el_pos_calc_dist()
+
+            if self.verbose:
+                print('calculations finished, %s, %s' % (str(self),
+                                                         str(self.cell)))
+        else:
+            self._loop_over_contacts()
+            if self.verbose:
+                print('calculations finished, %s, %s' % (str(self),
+                                                         str(self.cell)))
+        if t_indices is not None:
+            currmem = self.cell.imem[:, t_indices]
+        else:
+            currmem = self.cell.imem
+
+        self.LFP = np.dot(self.mapping, currmem)
+        # del self.mapping
+
 
