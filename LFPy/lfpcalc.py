@@ -18,7 +18,6 @@ from __future__ import division
 import numpy as np
 
 
-
 def return_dist_from_segments(xstart, ystart, zstart, xend, yend, zend, p):
     """
     Returns distance and closest point on line segments from point p
@@ -296,6 +295,7 @@ def _anisotropic_line_source_case_iiii(a, b, c):
     return (np.arcsinh((2 * a + b) / np.sqrt(4 * a * c - b*b)) -
                         np.arcsinh(b / np.sqrt(4 * a * c - b*b)))
 
+
 def calc_lfp_linesource(cell, x, y, z, sigma, r_limit):
 
     """Calculate electric field potential using the line-source method, all
@@ -498,6 +498,7 @@ def _r_soma_calc(xmid, ymid, zmid, x, y, z):
     r_soma = np.sqrt((x - xmid)**2 + (y - ymid)**2 + (z - zmid)**2)
     return r_soma
 
+
 def calc_lfp_pointsource(cell, x, y, z, sigma, r_limit):
 
     """Calculate extracellular potentials using the point-source
@@ -585,8 +586,6 @@ def isotropic_moi(charge_pos, elec_pos, sigma_T, sigma_S, sigma_G, steps, h):
     """
     def _omega(dz):
         return 1/np.sqrt((y - y0)**2 + (x - x0)**2 + dz**2)
-
-
 
     x0, y0, z0 = charge_pos[:]
     x, y, z = elec_pos[:]
