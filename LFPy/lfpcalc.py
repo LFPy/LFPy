@@ -579,7 +579,7 @@ def _check_rlimit_point(r2, r_limit):
 
 
 def calc_lfp_pointsource_moi(cell, x, y, z, sigma_T, sigma_S, sigma_G,
-                             steps, h, **kwargs):
+                             steps, h, r_limit, **kwargs):
     """Calculate extracellular potentials using the point-source
     equation on all compartments for in vitro Microelectrode Array (MEA) slices
 
@@ -610,9 +610,14 @@ def calc_lfp_pointsource_moi(cell, x, y, z, sigma_T, sigma_S, sigma_G,
 
     dx2 = (x - cell.xmid)**2
     dy2 = (y - cell.ymid)**2
+    dz2 = (z - cell.zmid)**2
+
+    dL2 = dx2 + dy2
+    inds = dL2 + dz2 < r_limit*r_limit
+    dL2[inds] = r_limit[inds]*r_limit[inds] - dz2[inds]
 
     def _omega(dz):
-        return 1/np.sqrt(dx2 + dy2 + dz*dz)
+        return 1/np.sqrt(dL2 + dz*dz)
 
     WTS = (sigma_T - sigma_S)/(sigma_T + sigma_S)
     WTG = (sigma_T - sigma_G)/(sigma_T + sigma_G)

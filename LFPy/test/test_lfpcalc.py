@@ -76,6 +76,32 @@ class testLfpCalc(unittest.TestCase):
 
         np.testing.assert_equal(in_vivo, in_vitro)
 
+    def test_calc_lfp_pointsource_moi_too_close(self):
+        """
+        Very close to point source, in vivo and in vitro have similar results,
+        e.g., the positions should be adjusted similarly.
+        """
+        sigma_T = 0.3
+        sigma_G = 0.0
+        sigma_S = 1.5
+        h = 2000
+        steps = 20
+        cell = TestCell()
+        cell.zmid[0] = h/2
+        cell.zstart[0] = h/2
+        cell.zend[0] = h/2
+
+        in_vivo = lfpcalc.calc_lfp_pointsource(cell,
+                                x=0.5, y=0, z=h/2, sigma=sigma_T,
+                                r_limit=cell.diam/2)
+        in_vitro = lfpcalc.calc_lfp_pointsource_moi(cell,
+                                x=0.5, y=0, z=h/2, sigma_T=sigma_T,
+                                sigma_G=sigma_G, sigma_S=sigma_S,
+                                r_limit=cell.diam/2, h=h, steps=steps)
+
+        np.testing.assert_almost_equal(in_vivo, in_vitro, 4)
+
+
 
     def test_calc_lfp_pointsource_moi_doubling(self):
         """
@@ -130,9 +156,35 @@ class testLfpCalc(unittest.TestCase):
                                 sigma_G=sigma_G, sigma_S=sigma_T,
                                 r_limit=cell.diam/2, h=h, steps=steps)
 
-
         np.testing.assert_array_less(with_saline, without_saline)
 
+
+    def test_calc_lfp_pointsource_moi_infinite_slice(self):
+        """
+        Test that infinitely thick slice does not affect potential.
+        """
+        sigma_T = 0.3
+        sigma_G = 0.0
+        sigma_S = 1.5
+        h = 1e10
+        steps = 20
+
+        cell = TestCell()
+        cell.zstart[0] = 100
+        cell.zmid[0] = 100
+        cell.zend[0] = 100
+
+        with_saline = lfpcalc.calc_lfp_pointsource_moi(cell,
+                                x=0, y=0, z=50, sigma_T=sigma_T,
+                                sigma_G=sigma_G, sigma_S=sigma_S,
+                                r_limit=cell.diam/2, h=h, steps=steps)
+
+        without_saline = lfpcalc.calc_lfp_pointsource_moi(cell,
+                                x=0, y=0, z=50, sigma_T=sigma_T,
+                                sigma_G=sigma_G, sigma_S=sigma_T,
+                                r_limit=cell.diam/2, h=h, steps=steps)
+
+        np.testing.assert_almost_equal(with_saline, without_saline)
 
 
     def test_calc_lfp_pointsource_anisotropic(self):
