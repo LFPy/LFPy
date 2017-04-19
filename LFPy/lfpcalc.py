@@ -109,7 +109,8 @@ def calc_lfp_linesource_anisotropic(cell, x, y, z, sigma, r_limit):
             p_[:] = pos + (pos - closest_point) * (r_limit[idx] - r) / r
 
         if np.sqrt(np.sum((p_ - closest_point)**2)) - r_limit[idx] > 1e-9:
-            print p_, closest_point
+            print(p_, closest_point)
+
             raise RuntimeError("Segment adjustment not working")
 
         b[idx] = -2 * (sigma[1] * sigma[2] * (p_[0] - xstart[idx]) * (xend[idx] - xstart[idx]) +
@@ -126,8 +127,8 @@ def calc_lfp_linesource_anisotropic(cell, x, y, z, sigma, r_limit):
     [iiii] = np.where(np.bitwise_and(4 * a * c - b*b > 1e-6, np.abs(b) > 1e-6))
 
     if len(i) + len(iia) + len(iib) + len(iii) + len(iiii) != cell.totnsegs:
-        print a, b, c
-        print i, iia, iib, iii, iiii
+        print(a, b, c)
+        print(i, iia, iib, iii, iiii)
         raise RuntimeError
 
     # if len(iiii) != cell.totnsegs:
@@ -211,7 +212,8 @@ def calc_lfp_soma_as_point_anisotropic(cell, x, y, z, sigma, r_limit):
             p_[:] = pos + (pos - closest_point) * (r_limit[idx] - r) / r
 
         if np.sqrt(np.sum((p_ - closest_point)**2)) - r_limit[idx] > 1e-9:
-            print p_, closest_point
+            print(p_, closest_point)
+
             raise RuntimeError("Segment adjustment not working")
 
         b[idx] = -2 * (sigma[1] * sigma[2] * (p_[0] - xstart[idx]) * (xend[idx] - xstart[idx]) +
@@ -228,8 +230,8 @@ def calc_lfp_soma_as_point_anisotropic(cell, x, y, z, sigma, r_limit):
     [iiii] = np.where(np.bitwise_and(4 * a * c - b*b > 1e-6, np.abs(b) > 1e-6))
 
     if len(i) + len(iia) + len(iib) + len(iii) + len(iiii) != cell.totnsegs:
-        print a, b, c
-        print i, iia, iib, iii, iiii
+        print(a, b, c)
+        print(i, iia, iib, iii, iiii)
         raise RuntimeError
 
     # if len(iiii) != cell.totnsegs:
@@ -574,3 +576,32 @@ def _check_rlimit_point(r2, r_limit):
     inds = r2 < r_limit*r_limit
     r2[inds] = r_limit[inds]*r_limit[inds]
     return r2
+
+
+def isotropic_moi(charge_pos, elec_pos, sigma_T, sigma_S, sigma_G, steps, h):
+    """ This function calculates the potential at the position elec_pos = [x, y, z]
+    set up by the charge at position charge_pos = [x0, y0, z0]. To get get the potential
+    from multiple charges, the contributions must be summed up.
+    """
+    def _omega(dz):
+        return 1/np.sqrt((y - y0)**2 + (x - x0)**2 + dz**2)
+
+
+
+    x0, y0, z0 = charge_pos[:]
+    x, y, z = elec_pos[:]
+    mapping = _omega(z - z0)
+    n = 0
+    WTS = (sigma_T - sigma_S)/(sigma_T + sigma_S)
+    WTG = (sigma_T - sigma_G)/(sigma_T + sigma_G)
+    while n < steps:
+        if n == 0:
+            mapping += (WTS * _omega(z + z0 - 2*(n + 1)*h) +
+                    WTG * _omega(z + z0 + 2*n*h))
+        else:
+            mapping += (WTS*WTG)**n * (WTS * _omega(z + z0 - 2*(n + 1)*h) +
+                                   WTG * _omega(z + z0 + 2*n*h) +
+                                   _omega(z - z0 + 2*n*h) + _omega(z - z0 - 2*n*h))
+        n += 1
+    mapping *= 1/(4*np.pi*sigma_T)
+    return mapping

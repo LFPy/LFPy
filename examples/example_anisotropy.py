@@ -70,7 +70,8 @@ grid_electrode_parameters_tensor = {
 
 # Run simulation, electrode object argument in cell.simulate
 print("running simulation...")
-cell.simulate(rec_imem=True, rec_isyn=False)
+
+cell.simulate(rec_imem=True)
 
 # Create electrode objects
 
@@ -134,4 +135,5 @@ ax2.plot(cell.xmid[cell.synidx],cell.zmid[cell.synidx], 'o', ms=5,
         markerfacecolor='r')
 
 plt.savefig('example_anisotropy_%s.pdf' % str(sigma), dpi=150)
-# plt.show()
+
+plt.show()
