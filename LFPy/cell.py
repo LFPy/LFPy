@@ -770,13 +770,12 @@ class Cell(object):
 
         """
         idx = self.get_idx(section)
-        dist = np.sqrt((self.xmid[idx] - x)**2 +
-                       (self.ymid[idx] - y)**2 +
-                       (self.zmid[idx] - z)**2)
-
-        mindist = np.where(dist == np.min(dist))
-
-        return int(idx[mindist])
+        dist = ((self.xmid[idx] - x)**2 +
+                (self.ymid[idx] - y)**2 +
+                (self.zmid[idx] - z)**2)
+        # mindist = np.where(dist == np.min(dist))
+        # return int(idx[mindist])
+        return np.argmin(dist)
 
     def get_rand_idx_area_norm(self, section='allsec', nidx=1,
                                z_min=-10000, z_max=10000):

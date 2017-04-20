@@ -694,12 +694,27 @@ class RecMEAElectrode(RecExtElectrode):
 
         if method == 'pointsource':
             self.lfp_method = lfpcalc.calc_lfp_pointsource_moi
+        elif method == "linesource":
+            if (np.abs(z) > 1e-9).any():
+                raise NotImplementedError("The method 'linesource' is only "
+                                          "supported for electrodes at the "
+                                          "z=0 plane.")
+            if np.abs(self.sigma_G) > 1e-9:
+                raise NotImplementedError("The method 'linesource' is only "
+                                          "supported for sigma_G=0")
+            self.lfp_method = lfpcalc.calc_lfp_linesource_moi
+        elif method == "soma_as_point":
+            raise NotImplementedError("")
         else:
-            raise NotImplementedError("Must be implemented")
+            raise ValueError("LFP method not recognized. "
+                             "Should be 'soma_as_point', 'linesource' "
+                             "or 'pointsource'")
 
 
     def _squeeze_cell_in_depth_direction(self):
-        """Will squeeze a cell by linear so that it fits inside the slice"""
+        """Will squeeze self.cell centered around the soma by a scaling factor,
+        so that it fits inside the slice. If scaling factor is not big enough,
+        a RuntimeError is raised. """
 
         zpos = self.cell.zmid[0]
         self.cell.zmid = (self.cell.zmid - zpos) * self.squeeze_cell_factor + zpos

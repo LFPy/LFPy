@@ -48,7 +48,7 @@ def plot_results(cell, synapse, MEA, electrode):
     for elec in range(len(MEA.x)):
         ax_ec.plot(cell.tvec, 1000 * (MEA.LFP[elec]),
                    lw=1, c=elec_clr(elec))
-        ax_ec.plot(cell.tvec, 1000 * (electrode.LFP[elec]),
+        ax_ec.plot(cell.tvec, 1000 * (2 * electrode.LFP[elec]),
                    lw=2, c=elec_clr(elec), ls=":")
 
     l_MEA, = ax_ec.plot(0, 0, lw=1, c="k")
@@ -187,7 +187,7 @@ cell_parameters = {
     'passive' : True,   # turn on NEURONs passive mechanism for all sections
     'passive_parameters' : {'g_pas' : 1./30000, 'e_pas' : -65},
     'nsegs_method' : 'lambda_f', # spatial discretization method
-    'lambda_f' : 100.,           # frequency where length constants are computed
+    'lambda_f' : 10.,           # frequency where length constants are computed
     'dt' : 2.**-4,      # simulation time step size
     'tstart' : 0.,      # start time of simulation, recorders start at t=0
     'tstop' : 30.,     # stop simulation at 100 ms.
@@ -197,7 +197,7 @@ cell_parameters = {
 cell = LFPy.Cell(**cell_parameters)
 # Align cell
 cell.set_rotation(y=np.pi/2)
-cell.set_pos(z=150)
+cell.set_pos(z=2)
 
 # Define synapse parameters
 synapse_parameters = {
@@ -234,7 +234,7 @@ grid_electrode_parameters = {
 MEA_electrode_parameters = {
     'sigma_T' : 0.3,      # extracellular conductivity
     'sigma_G' : 0.0,      # MEA glass electrode plate conductivity
-    'sigma_S' : 1.5,      # Saline bath conductivity
+    'sigma_S' : 0.3,      # Saline bath conductivity
     'x' : X.flatten(),  # electrode requires 1d vector of positions
     'y' : Y.flatten(),
     'z' : Z.flatten(),

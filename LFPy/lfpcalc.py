@@ -635,3 +635,95 @@ def calc_lfp_pointsource_moi(cell, x, y, z, sigma_T, sigma_S, sigma_G,
     mapping *= 1/(4*np.pi*sigma_T)
 
     return mapping
+
+
+def calc_lfp_linesource_moi(cell, x, y, z, sigma_T, sigma_S, sigma_G,
+                             steps, h, r_limit, **kwargs):
+    """Calculate extracellular potentials using the point-source
+    equation on all compartments for in vitro Microelectrode Array (MEA) slices
+
+    Parameters
+    ----------
+    cell: obj
+        LFPy.Cell or LFPy.TemplateCell like instance
+    x : float
+        extracellular position, x-axis
+    y : float
+        extracellular position, y-axis
+    z : float
+        extracellular position, z-axis
+    sigma_T : float
+        extracellular conductivity in tissue slice
+    sigma_G : float
+        Conductivity of MEA glass electrode plane.
+        Should normally be zero for MEA set up.
+    sigma_S : float
+        Conductivity of saline bath that tissue slice is immersed in
+    steps : int
+        Number of steps to average over the in technically infinite sum
+    h : float
+        Slice thickness in um.
+    r_limit : np.ndarray
+        minimum distance to source current for each compartment
+    """
+
+    xstart = cell.xstart
+    xend = cell.xend
+    ystart = cell.ystart
+    yend = cell.yend
+    zstart = cell.zstart
+    zend = cell.zend
+    x0, y0, z0 = cell.xstart, cell.ystart, cell.zstart
+    x1, y1, z1 = cell.xend, cell.yend, cell.zend
+
+    ds = _deltaS_calc(xstart, xend, ystart, yend, zstart, zend)
+
+    dx = x1 - x0
+    dy = y1 - y0
+    dz = z1 - z0
+    a_x = x - x0
+    a_y = y - y0
+    W = (sigma_T - sigma_S)/(sigma_T + sigma_S)
+
+    def _omega(a_z):
+        #See Rottman integration formula 46) page 137 for explanation
+        factor_a = ds*ds
+        factor_b = - a_x*dx - a_y*dy - a_z*dz
+        factor_c = a_x*a_x + a_y*a_y + a_z*a_z
+        b_2_ac = factor_b*factor_b - factor_a * factor_c
+        num = np.zeros(factor_c.shape)
+        den = np.zeros(factor_c.shape)
+
+        case1_idxs = np.where(np.abs(b_2_ac) <= 1e-12)
+        case2_idxs = np.where(np.abs(b_2_ac) > 1e-12)
+
+        if not len(case1_idxs) == 0:
+            num[case1_idxs] = factor_a[case1_idxs] + factor_b[case1_idxs]
+            den[case1_idxs] = factor_b[case1_idxs]
+        if not len(case2_idxs) == 0:
+            num[case2_idxs] = (factor_a[case2_idxs] + factor_b[case2_idxs] +
+                               ds[case2_idxs]*np.sqrt(factor_a[case2_idxs] +
+                               2*factor_b[case2_idxs] + factor_c[case2_idxs]))
+            den[case2_idxs] = (factor_b[case2_idxs] +
+                               ds[case2_idxs]*np.sqrt(factor_c[case2_idxs]))
+
+        return np.log(num/den)
+        # if np.abs(b_2_ac) <= 1e-12:
+        #     num = factor_a + factor_b
+        #     den = factor_b
+        # else:
+        #     num = factor_a + factor_b + \
+        #           ds*np.sqrt(factor_a + 2*factor_b + factor_c)
+        #     den = factor_b + ds*np.sqrt(factor_c)
+        # return np.log(num/den)
+    mapping = _omega(-z0)
+
+    n = 1
+    while n < steps:
+        mapping += W**n * (_omega(2*n*h - z0) + _omega(-2*n*h - z0))
+        n += 1
+
+    mapping *= 2/(4*np.pi*sigma_T * ds)
+
+
+    return mapping

@@ -237,7 +237,7 @@ class testRecExtElectrode(unittest.TestCase):
         MEA = LFPy.RecMEAElectrode(stick, **electrodeParams)
         np.testing.assert_raises(RuntimeError, MEA.calc_lfp)
 
-    def test_no_sqeeze_cell_at_bad_position(self):
+    def test_sqeeze_cell_and_bad_position(self):
 
         electrodeParams = {
             'sigma_T' : 0.3,
@@ -248,7 +248,7 @@ class testRecExtElectrode(unittest.TestCase):
             'y' : np.zeros(11),
             'z' : np.zeros(11),
             'method': "pointsource",
-            'squeeze_cell': False,
+            'squeeze_cell_factor': None,
         }
 
         stickParams = {
@@ -268,8 +268,33 @@ class testRecExtElectrode(unittest.TestCase):
 
         stick.set_pos(z=1)
         MEA = LFPy.RecMEAElectrode(stick, **electrodeParams)
-        MEA.calc_lfp()
-        np.testing.assert_raises(RuntimeError, MEA.calc_lfp)
+        np.testing.assert_raises(RuntimeError, MEA.test_cell_extent)
+
+        stick.set_pos(z=199)
+        MEA = LFPy.RecMEAElectrode(stick, **electrodeParams)
+        np.testing.assert_raises(RuntimeError, MEA.test_cell_extent)
+
+        electrodeParams = {
+            'sigma_T' : 0.3,
+            'sigma_S' : 1.5,
+            'sigma_G' : 0.0,
+            'h': 200,
+            'x' : np.linspace(0, 1000, 11),
+            'y' : np.zeros(11),
+            'z' : np.zeros(11),
+            'method': "pointsource",
+            'squeeze_cell_factor': 0.1,
+        }
+
+        stick.set_pos(z=-1)
+        MEA = LFPy.RecMEAElectrode(stick, **electrodeParams)
+        np.testing.assert_raises(RuntimeError, MEA.test_cell_extent)
+
+        stick.set_pos(z=201)
+        MEA = LFPy.RecMEAElectrode(stick, **electrodeParams)
+        np.testing.assert_raises(RuntimeError, MEA.test_cell_extent)
+
+
 
     def test_isotropic_version_of_anisotropic_methods(self):
 
