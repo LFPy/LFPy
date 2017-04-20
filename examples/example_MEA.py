@@ -51,8 +51,11 @@ def plot_results(cell, synapse, MEA, electrode):
         ax_ec.plot(cell.tvec, 1000 * (electrode.LFP[elec]),
                    lw=2, c=elec_clr(elec), ls=":")
 
-    fig.legend([l_syn, l_elec], ["Synapse", "MEA electrode"],
-               frameon=False, numpoints=1, ncol=3, loc=3)
+    l_MEA, = ax_ec.plot(0, 0, lw=1, c="k")
+    l_invivo, = ax_ec.plot(0, 0, lw=2, c="k", ls=":")
+
+    fig.legend([l_syn, l_elec, l_MEA, l_invivo], ["Synapse", "Electrode", "Slice", "In vivo"],
+               frameon=False, numpoints=1, ncol=4, loc=3)
     simplify_axes([ax_v, ax_ec])
     mark_subplots([ax1, ax3, ax_ec, ax_v], ypos=1.05, xpos=-0.1)
 
@@ -127,8 +130,8 @@ def plot_recording_set_up(cell, ax_neur, ax_side, MEA, elec_clr,
 
 def simplify_axes(axes):
     """
-    :param axes: The axes object or list that is to be simplified. Right and top axis line is removed
-    :return:
+    Right and top axis line is removed from axes or list of axes
+
     """
     if not type(axes) is list:
         axes = [axes]
@@ -230,8 +233,8 @@ grid_electrode_parameters = {
 # Define electrode parameters
 MEA_electrode_parameters = {
     'sigma_T' : 0.3,      # extracellular conductivity
-    'sigma_G' : 0.0,      # extracellular conductivity
-    'sigma_S' : 0.3,      # extracellular conductivity
+    'sigma_G' : 0.0,      # MEA glass electrode plate conductivity
+    'sigma_S' : 1.5,      # Saline bath conductivity
     'x' : X.flatten(),  # electrode requires 1d vector of positions
     'y' : Y.flatten(),
     'z' : Z.flatten(),
@@ -251,109 +254,9 @@ cell.simulate(rec_imem=True, rec_vmem=True)
 # Create electrode objects
 electrode = LFPy.RecExtElectrode(cell, **grid_electrode_parameters)
 MEA = LFPy.RecMEAElectrode(cell, **MEA_electrode_parameters)
-# point_electrode = LFPy.RecExtElectrode(cell,**point_electrode_parameters)
 
 # Calculate LFPs
 MEA.calc_lfp()
 electrode.calc_lfp()
-# point_electrode.calc_lfp()
-electrode.LFP *= 2
 
 plot_results(cell, synapse, MEA, electrode)
-
-
-class SimulateMEA:
-    """ Class to investigate neural activity following synaptic input, and calculated the
-    extracellular potential at a microelectrode array (MEA) plane.
-    """
-    def __init__(self, syn_soma_pos, syn_apic_pos, slice_thickness, cell_z_pos, elec_x, elec_y):
-
-        self.syn_soma_pos = syn_soma_pos  # [x, y, z] position of synaptic input
-        self.syn_apic_pos = syn_apic_pos  # [x, y, z] position of synaptic input
-        self.syn_weight = 0.008  # Strength of synaptic input
-
-        self.input_spike_train_soma = np.array([12., 15.])  # Set time (ms) of synaptic input
-        self.input_spike_train_apic = np.array([12., 15.])  # Set time (ms) of synaptic input
-        elec_params = {'slice_thickness': slice_thickness,
-                   'elec_x': elec_x,
-                   'elec_y': elec_y,
-                   'elec_z': np.zeros(len(elec_x)),
-                   }
-
-        MEA = Electrode(**elec_params)
-        ext_sim_dict = {'use_line_source': False,
-                        'n_elecs': MEA.num_elecs,
-                        'moi_steps': 20,
-                        'elec_x': MEA.elec_x,
-                        'elec_y': MEA.elec_y,
-                        'elec_z': MEA.elec_z,
-                        'slice_thickness': MEA.slice_thickness,
-                        'include_elec': False,
-                        'neural_input': '.',
-                        }
-
-        cell, synapse_soma, synapse_apic = self.make_cell(ext_sim_dict, cell_z_pos, MEA)
-        self.plot_results(cell, synapse_soma, synapse_apic, MEA)
-
-    def make_cell(self, ext_sim_dict, cell_z_pos, MEA):
-        cell_parameters = {
-            'morphology': 'A140612.hoc',  # File with cell morphology
-            'v_init': -62,
-            'passive': False,
-            'nsegs_method': None,
-            'timeres_NEURON': 2**-3,  # [ms] Should be a power of 2
-            'timeres_python': 2**-3,
-            'tstartms': -50,  # [ms] Simulation start time
-            'tstopms': 50,  # [ms] Simulation end time
-            'custom_code': ['cell_model.hoc']  # Loads model specific code
-        }
-
-        cell = LFPy.Cell(**cell_parameters)
-
-        # Specify the position and rotation of the cell
-        cell.set_rotation(z=-np.pi/2.2, y=np.pi, x=0.03)
-        cell.set_pos(zpos=cell_z_pos)
-
-        syn_idx = cell.get_closest_idx(x=self.syn_soma_pos[0], y=self.syn_soma_pos[1], z=self.syn_soma_pos[2])
-        synapse_parameters_soma = {
-            'idx': syn_idx,
-            'e': 0., #  Change to -90 for inhibitory input, and 0 for excitatory
-            'syntype': 'Exp2Syn',
-            'tau1': 1.,
-            'tau2': 2.,
-            'weight': self.syn_weight,
-            'record_current': False,
-        }
-        synapse_soma = LFPy.Synapse(cell, **synapse_parameters_soma)
-        synapse_soma.set_spike_times(self.input_spike_train_soma)
-
-        syn_idx_apic = cell.get_closest_idx(x=self.syn_apic_pos[0], y=self.syn_apic_pos[1], z=self.syn_apic_pos[2])
-        synapse_parameters_apic = {
-            'idx': syn_idx_apic,
-            'e': 0., #  Change to -90 for inhibitory input, and 0 for excitatory
-            'syntype': 'Exp2Syn',
-            'tau1': 1.,
-            'tau2': 2.,
-            'weight': self.syn_weight * 4,
-            'record_current': False,
-        }
-        synapse_apic = LFPy.Synapse(cell, **synapse_parameters_apic)
-        synapse_apic.set_spike_times(self.input_spike_train_apic)
-        cell.simulate(rec_imem=True, rec_vmem=True, rec_isyn=False)
-        self.make_mapping(cell, MEA, ext_sim_dict)
-
-        return cell, synapse_soma, synapse_apic
-
-    def make_mapping(self, cell, MEA, ext_sim_dict):
-        moi_params = {
-            'sigma_G': 0.0,  # Below electrode
-            'sigma_T': 0.3,  # Tissue
-            'sigma_S': 1.5,  # Saline
-            'h': MEA.slice_thickness,
-            'steps': 20,
-            }
-
-        moi = MoI(**moi_params)
-        mapping_normal_saline = moi.make_mapping_cython(ext_sim_dict, xmid=cell.xmid, ymid=cell.ymid, zmid=cell.zmid)
-        MEA.phi = 1000 * np.dot(mapping_normal_saline, cell.imem)
-
