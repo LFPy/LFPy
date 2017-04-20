@@ -329,16 +329,19 @@ def calc_lfp_linesource(cell, x, y, z, sigma, r_limit):
     h = _h_calc(xstart, xend, ystart, yend, zstart, zend, deltaS, x, y, z)
     r2 = _r2_calc(xend, yend, zend, x, y, z, h)
 
-    r2 = _check_rlimit(r2, r_limit, h, deltaS)
-    
-    l = h + deltaS
+    # dists, cp = return_dist_from_segments(xstart, ystart, zstart, xend, yend, zend, p)
 
+    # r2 = _check_rlimit(r2, r_limit, h, deltaS)
+    too_close_idxs = np.where(r2 < r_limit*r_limit)[0]
+    r2[too_close_idxs] = r_limit[too_close_idxs]**2
+    l = h + deltaS
+    # print r2
     hnegi = h < 0
     hposi = h >= 0
     lnegi = l < 0
     lposi = l >= 0
 
-    mapping = np.zeros(cell.totnsegs)
+    mapping = np.zeros(len(cell.xstart))
 
     #case i, h < 0, l < 0
     [i] = np.where(hnegi & lnegi)
@@ -375,7 +378,6 @@ def calc_lfp_soma_as_point(cell, x, y, z, sigma, r_limit):
         minimum distance to source current for each compartment.
     """
 
-
     #some variables for h, r2, r_soma calculations
     xstart = cell.xstart
     xmid = cell.xmid[0]
@@ -397,14 +399,17 @@ def calc_lfp_soma_as_point(cell, x, y, z, sigma, r_limit):
         r_soma = r_limit[0]
 
     # Check that no segment is closer to the electrode than r_limit
-    if np.sum(np.nonzero( r2 < r_limit*r_limit )) > 0:
-        for idx in np.nonzero( r2[1:] < r_limit[1:] * r_limit[1:] )[0]+1:
-            if (h[idx] < r_limit[idx]) and \
-            ((deltaS[idx] + h[idx]) > -r_limit[idx]):
-                print('Adjusting distance to segment %s from %.2f to %.2f.'
-                      % (idx, r2[idx]**0.5, r_limit[idx]))
-                r2[idx] = r_limit[idx] * r_limit[idx]
+    # if np.sum(np.nonzero( r2 < r_limit*r_limit )) > 0:
+    #     for idx in np.nonzero( r2[1:] < r_limit[1:] * r_limit[1:] )[0]+1:
+    #         if (h[idx] < r_limit[idx]) and \
+    #         ((deltaS[idx] + h[idx]) > -r_limit[idx]):
+    #             print('Adjusting distance to segment %s from %.2f to %.2f.'
+    #                   % (idx, r2[idx]**0.5, r_limit[idx]))
+    #             r2[idx] = r_limit[idx] * r_limit[idx]
 
+
+    too_close_idxs = np.where(r2 < r_limit*r_limit)[0]
+    r2[too_close_idxs] = r_limit[too_close_idxs]**2
     l = h + deltaS
 
     hnegi = h < 0
@@ -482,15 +487,15 @@ def _r2_calc(xend, yend, zend, x, y, z, h):
     return abs(r2)
 
 
-def _check_rlimit(r2, r_limit, h, deltaS):
-    """Check that no segment is close the electrode than r_limit"""
-    if np.sum(np.nonzero(r2 < r_limit*r_limit)) > 0:
-        for idx in np.nonzero( r2 < r_limit*r_limit )[0]:
-            if (h[idx] < r_limit[idx]) and ((deltaS[idx]+h[idx]) > -r_limit[idx]):
-                print('Adjusting distance to segment %s from %.2f to %.2f.'
-                      % (idx, r2[idx]**0.5, r_limit[idx]))
-                r2[idx] = r_limit[idx]*r_limit[idx]
-    return r2
+# def _check_rlimit(r2, r_limit, h, deltaS):
+#     """Check that no segment is closer than the electrode than r_limit"""
+#     if np.sum(np.nonzero(r2 < r_limit*r_limit)) > 0:
+#         for idx in np.nonzero(r2 < r_limit*r_limit)[0]:
+#             if (h[idx] < r_limit[idx]) and ((deltaS[idx]+h[idx]) > -r_limit[idx]):
+#                 print('Adjusting distance to segment %s from %.2f to %.2f.'
+#                       % (idx, r2[idx]**0.5, r_limit[idx]))
+#                 r2[idx] = r_limit[idx]*r_limit[idx]
+#     return r2
 
 
 def _r_soma_calc(xmid, ymid, zmid, x, y, z):
@@ -667,6 +672,13 @@ def calc_lfp_linesource_moi(cell, x, y, z, sigma_T, sigma_S, sigma_G,
         minimum distance to source current for each compartment
     """
 
+    if np.abs(z) > 1e-9:
+        raise RuntimeError("This method can only handle electrodes "
+                           "at the MEA plane z=0")
+    if np.abs(sigma_G) > 1e-9:
+        raise RuntimeError("This method can only handle sigma_G=0, i.e.,"
+                           "a non-conducting MEA glass electrode plane.")
+
     xstart = cell.xstart
     xend = cell.xend
     ystart = cell.ystart
@@ -676,23 +688,31 @@ def calc_lfp_linesource_moi(cell, x, y, z, sigma_T, sigma_S, sigma_G,
     x0, y0, z0 = cell.xstart, cell.ystart, cell.zstart
     x1, y1, z1 = cell.xend, cell.yend, cell.zend
 
-    ds = _deltaS_calc(xstart, xend, ystart, yend, zstart, zend)
+    pos = np.array([x, y, z])
+    rs, closest_points = return_dist_from_segments(xstart, ystart, zstart,
+                                                   xend, yend, zend, pos)
+    z0_ = z0
+    # print rs
+    z0_[np.where(rs < r_limit)] = r_limit
 
+
+    ds = _deltaS_calc(xstart, xend, ystart, yend, zstart, zend)
+    factor_a = ds*ds
     dx = x1 - x0
     dy = y1 - y0
     dz = z1 - z0
     a_x = x - x0
     a_y = y - y0
     W = (sigma_T - sigma_S)/(sigma_T + sigma_S)
+    num = np.zeros(factor_a.shape)
+    den = np.zeros(factor_a.shape)
 
     def _omega(a_z):
         #See Rottman integration formula 46) page 137 for explanation
-        factor_a = ds*ds
+
         factor_b = - a_x*dx - a_y*dy - a_z*dz
         factor_c = a_x*a_x + a_y*a_y + a_z*a_z
         b_2_ac = factor_b*factor_b - factor_a * factor_c
-        num = np.zeros(factor_c.shape)
-        den = np.zeros(factor_c.shape)
 
         case1_idxs = np.where(np.abs(b_2_ac) <= 1e-12)
         case2_idxs = np.where(np.abs(b_2_ac) > 1e-12)
@@ -706,24 +726,14 @@ def calc_lfp_linesource_moi(cell, x, y, z, sigma_T, sigma_S, sigma_G,
                                2*factor_b[case2_idxs] + factor_c[case2_idxs]))
             den[case2_idxs] = (factor_b[case2_idxs] +
                                ds[case2_idxs]*np.sqrt(factor_c[case2_idxs]))
-
         return np.log(num/den)
-        # if np.abs(b_2_ac) <= 1e-12:
-        #     num = factor_a + factor_b
-        #     den = factor_b
-        # else:
-        #     num = factor_a + factor_b + \
-        #           ds*np.sqrt(factor_a + 2*factor_b + factor_c)
-        #     den = factor_b + ds*np.sqrt(factor_c)
-        # return np.log(num/den)
-    mapping = _omega(-z0)
 
+    mapping = _omega(-z0_)
     n = 1
     while n < steps:
         mapping += W**n * (_omega(2*n*h - z0) + _omega(-2*n*h - z0))
         n += 1
 
     mapping *= 2/(4*np.pi*sigma_T * ds)
-
 
     return mapping
