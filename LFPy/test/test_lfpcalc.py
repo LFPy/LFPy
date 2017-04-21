@@ -101,10 +101,60 @@ class testLfpCalc(unittest.TestCase):
 
         np.testing.assert_almost_equal(in_vivo, in_vitro, 4)
 
-    def test_calc_lfp_linesource_too_close(self):
+    def test_calc_lfp_linesource_moi_too_close(self):
         """
         Very close to point source, in vivo and in vitro have similar results,
         e.g., the positions should be adjusted similarly.
+        """
+        sigma_T = 0.3
+        sigma_G = 0.0
+        sigma_S = 1.5
+        h = 2000
+        steps = 20
+        cell = TestCell()
+        cell.zmid[0] = 0
+        cell.zstart[0] = 0
+        cell.zend[0] = 0
+
+        in_vivo = lfpcalc.calc_lfp_linesource(cell,
+                                x=0.5, y=0, z=0, sigma=sigma_T,
+                                r_limit=cell.diam/2)
+        in_vitro = lfpcalc.calc_lfp_linesource_moi(cell,
+                                x=0.5, y=0, z=0, sigma_T=sigma_T,
+                                sigma_G=sigma_G, sigma_S=sigma_S,
+                                r_limit=cell.diam/2, h=h, steps=steps)
+
+        np.testing.assert_almost_equal(in_vivo, in_vitro, 4)
+
+    def test_calc_lfp_soma_as_point_moi_too_close(self):
+        """
+        Very close to point source, in vivo and in vitro have similar results,
+        e.g., the positions should be adjusted similarly.
+        """
+        sigma_T = 0.3
+        sigma_G = 0.0
+        sigma_S = 1.5
+        h = 2000
+        steps = 20
+        cell = TestCell()
+        cell.zmid[0] = 0
+        cell.zstart[0] = 0
+        cell.zend[0] = 0
+
+        in_vivo = lfpcalc.calc_lfp_soma_as_point(cell,
+                                x=0.5, y=0, z=0, sigma=sigma_T,
+                                r_limit=cell.diam/2)
+        in_vitro = lfpcalc.calc_lfp_soma_as_point_moi(cell,
+                                x=0.5, y=0, z=0, sigma_T=sigma_T,
+                                sigma_G=sigma_G, sigma_S=sigma_S,
+                                r_limit=cell.diam/2, h=h, steps=steps)
+
+        np.testing.assert_almost_equal(in_vivo, in_vitro, 4)
+
+
+    def test_calc_lfp_linesource_too_close(self):
+        """
+        Test that calc_lfp_linesource method does not give infinite potential
         """
         sigma_T = 0.3
         cell = TestCell()
@@ -169,6 +219,32 @@ class testLfpCalc(unittest.TestCase):
 
         np.testing.assert_almost_equal(2*in_vivo, in_vitro, decimal=9)
 
+    def test_calc_lfp_soma_as_point_moi_doubling(self):
+        """
+        Test that slice with zero conductivity in MEA region (z<0) has twice
+        the potential as in vivo case at MEA electrode plane
+        """
+        sigma_T = 0.3
+        sigma_G = 0.0
+        sigma_S = 0.3
+        h = 200
+        steps = 3
+
+        cell = TestCell()
+        cell.zstart[0] = 50
+        cell.zmid[0] = 50
+        cell.zend[0] = 50
+
+        in_vivo = lfpcalc.calc_lfp_soma_as_point(cell,
+                                x=50., y=0, z=0, sigma=sigma_T,
+                                r_limit=cell.diam/2)
+        in_vitro = lfpcalc.calc_lfp_soma_as_point_moi(cell,
+                                x=50, y=0, z=0, sigma_T=sigma_T,
+                                sigma_G=sigma_G, sigma_S=sigma_S,
+                                r_limit=cell.diam/2, h=h, steps=steps)
+
+        np.testing.assert_almost_equal(2*in_vivo, in_vitro, decimal=9)
+
 
     def test_calc_lfp_pointsource_moi_saline_effect(self):
         """
@@ -226,6 +302,36 @@ class testLfpCalc(unittest.TestCase):
 
         np.testing.assert_array_less(with_saline, without_saline)
 
+    def test_calc_lfp_soma_as_point_moi_saline_effect(self):
+        """
+        Test that the saline bath decreases signal as expected
+        """
+        sigma_T = 0.3
+        sigma_G = 0.0
+        sigma_S = 1.5
+        h = 200
+        steps = 20
+
+        cell = TestCell()
+        cell.zstart[0] = 100
+        cell.zmid[0] = 100
+        cell.zend[0] = 100
+
+
+        with_saline = lfpcalc.calc_lfp_soma_as_point_moi(cell,
+                                x=0, y=0, z=0, sigma_T=sigma_T,
+                                sigma_G=sigma_G, sigma_S=sigma_S,
+                                r_limit=cell.diam/2, h=h, steps=steps)
+
+        without_saline = lfpcalc.calc_lfp_soma_as_point_moi(cell,
+                                x=0, y=0, z=0, sigma_T=sigma_T,
+                                sigma_G=sigma_G, sigma_S=sigma_T,
+                                r_limit=cell.diam/2, h=h, steps=steps)
+
+        np.testing.assert_array_less(with_saline, without_saline)
+
+
+
     def test_calc_lfp_pointsource_moi_20steps(self):
         """
         Test that the calc_lfp_pointsource_moi reproduces previously known
@@ -244,6 +350,55 @@ class testLfpCalc(unittest.TestCase):
         cell.xmid[0] = -100
 
         calculated = lfpcalc.calc_lfp_pointsource_moi(cell,
+                                x=100, y=0, z=0, sigma_T=sigma_T,
+                                sigma_G=sigma_G, sigma_S=sigma_S,
+                                r_limit=cell.diam/2, h=h, steps=steps)
+
+        np.testing.assert_almost_equal(correct, calculated, 5)
+
+
+    def test_calc_lfp_linesource_moi_20steps(self):
+        """
+        Test that the calc_lfp_linesource_moi reproduces previously known
+        nummerical value
+        """
+        sigma_T = 0.3
+        sigma_G = 0.0
+        sigma_S = 1.5
+        h = 200
+        steps = 20
+
+        correct = 0.00108189
+
+        cell = TestCell()
+        cell.zmid[0] = 110
+        cell.xmid[0] = -100
+
+        calculated = lfpcalc.calc_lfp_linesource_moi(cell,
+                                x=100, y=0, z=0, sigma_T=sigma_T,
+                                sigma_G=sigma_G, sigma_S=sigma_S,
+                                r_limit=cell.diam/2, h=h, steps=steps)
+
+        np.testing.assert_almost_equal(correct, calculated, 5)
+
+    def test_calc_lfp_soma_as_point_moi_20steps(self):
+        """
+        Test that the calc_lfp_soma_as_point_moi reproduces previously known
+        nummerical value
+        """
+        sigma_T = 0.3
+        sigma_G = 0.0
+        sigma_S = 1.5
+        h = 200
+        steps = 20
+
+        correct = 0.00108189
+
+        cell = TestCell()
+        cell.zmid[0] = 110
+        cell.xmid[0] = -100
+
+        calculated = lfpcalc.calc_lfp_soma_as_point_moi(cell,
                                 x=100, y=0, z=0, sigma_T=sigma_T,
                                 sigma_G=sigma_G, sigma_S=sigma_S,
                                 r_limit=cell.diam/2, h=h, steps=steps)
@@ -307,6 +462,33 @@ class testLfpCalc(unittest.TestCase):
 
         np.testing.assert_almost_equal(with_saline, without_saline)
 
+    def test_calc_lfp_soma_as_point_moi_infinite_slice(self):
+        """
+        Test that infinitely thick slice does not affect potential.
+        """
+        sigma_T = 0.3
+        sigma_G = 0.0
+        sigma_S = 1.5
+        h = 1e10
+        steps = 20
+
+        cell = TestCell()
+        cell.zstart[0] = 100
+        cell.zmid[0] = 100
+        cell.zend[0] = 100
+
+        with_saline = lfpcalc.calc_lfp_soma_as_point_moi(cell,
+                                x=0, y=0, z=0, sigma_T=sigma_T,
+                                sigma_G=sigma_G, sigma_S=sigma_S,
+                                r_limit=cell.diam/2, h=h, steps=steps)
+
+        without_saline = lfpcalc.calc_lfp_soma_as_point_moi(cell,
+                                x=0, y=0, z=0, sigma_T=sigma_T,
+                                sigma_G=sigma_G, sigma_S=sigma_T,
+                                r_limit=cell.diam/2, h=h, steps=steps)
+
+        np.testing.assert_almost_equal(with_saline, without_saline)
+
 
 
     def test_calc_lfp_pointsource_anisotropic(self):
@@ -357,3 +539,4 @@ class TestCell(object):
         self.yend = np.array([0.])
         self.zend = np.array([0.])
         self.diam = np.array([1.])
+        self.totnsegs = len(self.xmid)

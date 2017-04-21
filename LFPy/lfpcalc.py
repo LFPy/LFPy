@@ -644,7 +644,7 @@ def calc_lfp_pointsource_moi(cell, x, y, z, sigma_T, sigma_S, sigma_G,
 
 def calc_lfp_linesource_moi(cell, x, y, z, sigma_T, sigma_S, sigma_G,
                              steps, h, r_limit, **kwargs):
-    """Calculate extracellular potentials using the point-source
+    """Calculate extracellular potentials using the line-source
     equation on all compartments for in vitro Microelectrode Array (MEA) slices
 
     Parameters
@@ -735,5 +735,128 @@ def calc_lfp_linesource_moi(cell, x, y, z, sigma_T, sigma_S, sigma_G,
         n += 1
 
     mapping *= 2/(4*np.pi*sigma_T * ds)
+
+    return mapping
+
+
+def calc_lfp_soma_as_point_moi(cell, x, y, z, sigma_T, sigma_S, sigma_G,
+                             steps, h, r_limit, **kwargs):
+    """Calculate extracellular potentials for in vitro
+    Microelectrode Array (MEA) slices, where soma (compartment zero) is
+    treated as a point source, and all other compartments as line sources.
+    equation on all compartments
+
+    Parameters
+    ----------
+    cell: obj
+        LFPy.Cell or LFPy.TemplateCell like instance
+    x : float
+        extracellular position, x-axis
+    y : float
+        extracellular position, y-axis
+    z : float
+        extracellular position, z-axis
+    sigma_T : float
+        extracellular conductivity in tissue slice
+    sigma_G : float
+        Conductivity of MEA glass electrode plane.
+        Should normally be zero for MEA set up.
+    sigma_S : float
+        Conductivity of saline bath that tissue slice is immersed in
+    steps : int
+        Number of steps to average over the in technically infinite sum
+    h : float
+        Slice thickness in um.
+    r_limit : np.ndarray
+        minimum distance to source current for each compartment
+    """
+
+    if np.abs(z) > 1e-9:
+        raise RuntimeError("This method can only handle electrodes "
+                           "at the MEA plane z=0")
+    if np.abs(sigma_G) > 1e-9:
+        raise RuntimeError("This method can only handle sigma_G=0, i.e.,"
+                           "a non-conducting MEA glass electrode plane.")
+
+    xstart = cell.xstart
+    xend = cell.xend
+    ystart = cell.ystart
+    yend = cell.yend
+    zstart = cell.zstart
+    zend = cell.zend
+    x0, y0, z0 = cell.xstart, cell.ystart, cell.zstart
+    x1, y1, z1 = cell.xend, cell.yend, cell.zend
+
+    pos = np.array([x, y, z])
+    rs, closest_points = return_dist_from_segments(xstart, ystart, zstart,
+                                                   xend, yend, zend, pos)
+    z0_ = z0
+    # print rs
+    z0_[np.where(rs < r_limit)] = r_limit
+
+    ds = _deltaS_calc(xstart, xend, ystart, yend, zstart, zend)
+    factor_a = ds*ds
+    dx = x1 - x0
+    dy = y1 - y0
+    dz = z1 - z0
+    a_x = x - x0
+    a_y = y - y0
+    W = (sigma_T - sigma_S)/(sigma_T + sigma_S)
+    num = np.zeros(factor_a.shape)
+    den = np.zeros(factor_a.shape)
+
+    def _omega(a_z):
+        #See Rottman integration formula 46) page 137 for explanation
+
+        factor_b = - a_x*dx - a_y*dy - a_z*dz
+        factor_c = a_x*a_x + a_y*a_y + a_z*a_z
+        b_2_ac = factor_b*factor_b - factor_a * factor_c
+
+        case1_idxs = np.where(np.abs(b_2_ac) <= 1e-12)
+        case2_idxs = np.where(np.abs(b_2_ac) > 1e-12)
+
+        if not len(case1_idxs) == 0:
+            num[case1_idxs] = factor_a[case1_idxs] + factor_b[case1_idxs]
+            den[case1_idxs] = factor_b[case1_idxs]
+        if not len(case2_idxs) == 0:
+            num[case2_idxs] = (factor_a[case2_idxs] + factor_b[case2_idxs] +
+                               ds[case2_idxs]*np.sqrt(factor_a[case2_idxs] +
+                               2*factor_b[case2_idxs] + factor_c[case2_idxs]))
+            den[case2_idxs] = (factor_b[case2_idxs] +
+                               ds[case2_idxs]*np.sqrt(factor_c[case2_idxs]))
+        return np.log(num/den)
+
+    mapping = _omega(-z0_)
+    n = 1
+    while n < steps:
+        mapping += W**n * (_omega(2*n*h - z0) + _omega(-2*n*h - z0))
+        n += 1
+
+    mapping *= 2/(4*np.pi*sigma_T * ds)
+
+    # NOW DOING SOMA
+    dx2 = (x - cell.xmid[:1])**2
+    dy2 = (y - cell.ymid[:1])**2
+    dz2 = (z - cell.zmid[:1])**2
+
+    dL2 = dx2 + dy2
+    inds = dL2 + dz2 < r_limit[0]*r_limit[0]
+    dL2[inds] = r_limit[inds]*r_limit[inds] - dz2[inds]
+
+    def _omega(dz):
+        return 1/np.sqrt(dL2 + dz*dz)
+
+
+    mapping[0] = _omega(z - cell.zmid[:1])
+    mapping[0] += (W * _omega(cell.zmid[:1] - 2*h) +
+                       _omega(cell.zmid[:1]))
+
+    n = np.arange(1, steps)
+    a = (W)**n[:, None] * (W * _omega(+ cell.zmid[:1] - 2*(n[:, None] + 1)*h) +
+                           2 * _omega(+ cell.zmid[:1] + 2*n[:, None]*h) +
+                               _omega(+ cell.zmid[:1] - 2*n[:, None]*h))
+    mapping[0] += np.sum(a, axis=0)
+    mapping[0] *= 1/(4*np.pi*sigma_T)
+
 
     return mapping

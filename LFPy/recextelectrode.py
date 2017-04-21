@@ -704,7 +704,16 @@ class RecMEAElectrode(RecExtElectrode):
                                           "supported for sigma_G=0")
             self.lfp_method = lfpcalc.calc_lfp_linesource_moi
         elif method == "soma_as_point":
-            raise NotImplementedError("")
+            if (np.abs(z) > 1e-9).any():
+                raise NotImplementedError("The method 'soma_as_point' is only "
+                                          "supported for electrodes at the "
+                                          "z=0 plane.")
+            if np.abs(self.sigma_G) > 1e-9:
+                raise NotImplementedError("The method 'soma_as_point' is only "
+                                          "supported for sigma_G=0")
+            self.lfp_method = lfpcalc.calc_lfp_soma_as_point_moi
+
+
         else:
             raise ValueError("LFP method not recognized. "
                              "Should be 'soma_as_point', 'linesource' "

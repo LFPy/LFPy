@@ -48,7 +48,7 @@ Y = np.zeros(X.shape)
 
 
 sigma = 0.3
-sigma_tensor = [0.3, 0.3, 0.45]
+sigma_tensor = [0.3, 0.3, 0.3]
 
 # Define electrode parameters
 grid_electrode_parameters = {
@@ -93,6 +93,10 @@ LFP = 1000 * grid_electrode.LFP[:,max_idx].reshape(X.shape)
 im = ax.contourf(X, Z, LFP, 51, vmin=-np.max(np.abs(LFP)) / 1, vmax=np.max(np.abs(LFP)) / 1,
            cmap='bwr',
            zorder=-2)
+ax.contour(X, Z, LFP, 51, vmin=-np.max(np.abs(LFP)) / 1, vmax=np.max(np.abs(LFP)) / 1,
+           cmap='bwr',
+           zorder=-2)
+
 cbar = plt.colorbar(im)
 cbar.set_label('LFP ($\mu$V)')
 
@@ -118,6 +122,10 @@ LFP = 1000 * grid_electrode_tensor.LFP[:,max_idx].reshape(X.shape)
 im = ax2.contourf(X, Z, LFP, 51, vmin=-np.max(np.abs(LFP)) / 1, vmax=np.max(np.abs(LFP)) / 1,
            cmap='bwr',
            zorder=-2)
+ax2.contour(X, Z, LFP, 51, vmin=-np.max(np.abs(LFP)) / 1, vmax=np.max(np.abs(LFP)) / 1,
+           cmap='bwr',
+           zorder=-2)
+
 cbar = plt.colorbar(im)
 cbar.set_label('LFP ($\mu$V)')
 #plot morphology
