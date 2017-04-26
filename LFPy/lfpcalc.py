@@ -661,7 +661,8 @@ def calc_lfp_linesource_moi(cell, x, y, z, sigma_T, sigma_S, sigma_G,
         extracellular conductivity in tissue slice
     sigma_G : float
         Conductivity of MEA glass electrode plane.
-        Should normally be zero for MEA set up.
+        Should normally be zero for MEA set up, and for this method,
+        only zero valued sigma_G is supported.
     sigma_S : float
         Conductivity of saline bath that tissue slice is immersed in
     steps : int
@@ -691,10 +692,8 @@ def calc_lfp_linesource_moi(cell, x, y, z, sigma_T, sigma_S, sigma_G,
     pos = np.array([x, y, z])
     rs, closest_points = return_dist_from_segments(xstart, ystart, zstart,
                                                    xend, yend, zend, pos)
-    z0_ = z0
-    # print rs
-    z0_[np.where(rs < r_limit)] = r_limit
-
+    z0_ = z0.copy()
+    z0_[np.where(rs < r_limit)] = r_limit[np.where(rs < r_limit)]
 
     ds = _deltaS_calc(xstart, xend, ystart, yend, zstart, zend)
     factor_a = ds*ds
@@ -731,7 +730,7 @@ def calc_lfp_linesource_moi(cell, x, y, z, sigma_T, sigma_S, sigma_G,
     mapping = _omega(-z0_)
     n = 1
     while n < steps:
-        mapping += W**n * (_omega(2*n*h - z0) + _omega(-2*n*h - z0))
+        mapping += W**n * (_omega(2*n*h - z0_) + _omega(-2*n*h - z0_))
         n += 1
 
     mapping *= 2/(4*np.pi*sigma_T * ds)
@@ -744,7 +743,6 @@ def calc_lfp_soma_as_point_moi(cell, x, y, z, sigma_T, sigma_S, sigma_G,
     """Calculate extracellular potentials for in vitro
     Microelectrode Array (MEA) slices, where soma (compartment zero) is
     treated as a point source, and all other compartments as line sources.
-    equation on all compartments
 
     Parameters
     ----------
@@ -760,7 +758,8 @@ def calc_lfp_soma_as_point_moi(cell, x, y, z, sigma_T, sigma_S, sigma_G,
         extracellular conductivity in tissue slice
     sigma_G : float
         Conductivity of MEA glass electrode plane.
-        Should normally be zero for MEA set up.
+        Should normally be zero for MEA set up, and for this method,
+        only zero valued sigma_G is supported.
     sigma_S : float
         Conductivity of saline bath that tissue slice is immersed in
     steps : int
@@ -791,7 +790,6 @@ def calc_lfp_soma_as_point_moi(cell, x, y, z, sigma_T, sigma_S, sigma_G,
     rs, closest_points = return_dist_from_segments(xstart, ystart, zstart,
                                                    xend, yend, zend, pos)
     z0_ = z0
-    # print rs
     z0_[np.where(rs < r_limit)] = r_limit
 
     ds = _deltaS_calc(xstart, xend, ystart, yend, zstart, zend)
@@ -846,7 +844,6 @@ def calc_lfp_soma_as_point_moi(cell, x, y, z, sigma_T, sigma_S, sigma_G,
     def _omega(dz):
         return 1/np.sqrt(dL2 + dz*dz)
 
-
     mapping[0] = _omega(z - cell.zmid[:1])
     mapping[0] += (W * _omega(cell.zmid[:1] - 2*h) +
                        _omega(cell.zmid[:1]))
@@ -857,6 +854,5 @@ def calc_lfp_soma_as_point_moi(cell, x, y, z, sigma_T, sigma_S, sigma_G,
                                _omega(+ cell.zmid[:1] - 2*n[:, None]*h))
     mapping[0] += np.sum(a, axis=0)
     mapping[0] *= 1/(4*np.pi*sigma_T)
-
 
     return mapping

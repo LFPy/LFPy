@@ -108,13 +108,13 @@ class testLfpCalc(unittest.TestCase):
         """
         sigma_T = 0.3
         sigma_G = 0.0
-        sigma_S = 1.5
-        h = 2000
+        sigma_S = 0.3
+        h = 200
+
         steps = 20
         cell = TestCell()
-        cell.zmid[0] = 0
-        cell.zstart[0] = 0
-        cell.zend[0] = 0
+        cell.zstart[0] = 0.0
+        cell.zend[0] = 0.0
 
         in_vivo = lfpcalc.calc_lfp_linesource(cell,
                                 x=0.5, y=0, z=0, sigma=sigma_T,
@@ -124,7 +124,7 @@ class testLfpCalc(unittest.TestCase):
                                 sigma_G=sigma_G, sigma_S=sigma_S,
                                 r_limit=cell.diam/2, h=h, steps=steps)
 
-        np.testing.assert_almost_equal(in_vivo, in_vitro, 4)
+        np.testing.assert_almost_equal(2*in_vivo, in_vitro, 4)
 
     def test_calc_lfp_soma_as_point_moi_too_close(self):
         """
@@ -142,14 +142,14 @@ class testLfpCalc(unittest.TestCase):
         cell.zend[0] = 0
 
         in_vivo = lfpcalc.calc_lfp_soma_as_point(cell,
-                                x=0.5, y=0, z=0, sigma=sigma_T,
+                                x=0.0, y=0, z=0, sigma=sigma_T,
                                 r_limit=cell.diam/2)
         in_vitro = lfpcalc.calc_lfp_soma_as_point_moi(cell,
-                                x=0.5, y=0, z=0, sigma_T=sigma_T,
+                                x=0.0, y=0, z=0, sigma_T=sigma_T,
                                 sigma_G=sigma_G, sigma_S=sigma_S,
                                 r_limit=cell.diam/2, h=h, steps=steps)
 
-        np.testing.assert_almost_equal(in_vivo, in_vitro, 4)
+        np.testing.assert_almost_equal(2*in_vivo, in_vitro, 4)
 
 
     def test_calc_lfp_linesource_too_close(self):
@@ -261,7 +261,6 @@ class testLfpCalc(unittest.TestCase):
         cell.zmid[0] = 100
         cell.zend[0] = 100
 
-
         with_saline = lfpcalc.calc_lfp_pointsource_moi(cell,
                                 x=0, y=0, z=0, sigma_T=sigma_T,
                                 sigma_G=sigma_G, sigma_S=sigma_S,
@@ -317,7 +316,6 @@ class testLfpCalc(unittest.TestCase):
         cell.zmid[0] = 100
         cell.zend[0] = 100
 
-
         with_saline = lfpcalc.calc_lfp_soma_as_point_moi(cell,
                                 x=0, y=0, z=0, sigma_T=sigma_T,
                                 sigma_G=sigma_G, sigma_S=sigma_S,
@@ -368,11 +366,13 @@ class testLfpCalc(unittest.TestCase):
         h = 200
         steps = 20
 
-        correct = 0.00108189
+        correct = 0.00246539
 
         cell = TestCell()
-        cell.zmid[0] = 110
-        cell.xmid[0] = -100
+        cell.zstart[0] = 0
+        cell.zend[0] = 110
+        cell.xstart[0] = -100
+        cell.xend[0] = 50
 
         calculated = lfpcalc.calc_lfp_linesource_moi(cell,
                                 x=100, y=0, z=0, sigma_T=sigma_T,
