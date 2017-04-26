@@ -556,7 +556,7 @@ class RecMEAElectrode(RecExtElectrode):
 
               TISSUE -> sigma_T
 
-                   o -> charge_pos = [x',y',z']
+                   o -> source_pos = [x',y',z']
 
     <-----------*----------------------------------------> z = 0
                  \-> elec_pos = [x,y,z]
@@ -573,16 +573,17 @@ class RecMEAElectrode(RecExtElectrode):
         conductivity of saline bath that the neural slice is
         immersed in [1.5] (S/m)
     sigma_G : float
-        conductivity of MEA glass electrode plate. Will most commonly
-        be assumed non-conducting [0.0] (S/m)
+        conductivity of MEA glass electrode plate. Most commonly
+        assumed non-conducting [0.0] (S/m)
     squeeze_cell_factor : float or None
-        Factor to squeeze the cell in the depth direction. This is
+        Factor to squeeze the cell in the z-direction. This is
         needed for large cells that are thicker than the slice, since no part
         of the cell is allowed to be outside the slice. The squeeze is done
         after the neural simulation, and therefore does not affect neuronal
         simulation, only calculation of extracellular potentials.
     x, y, z : np.ndarray
-        coordinates or arrays of coordinates in units of (um). Must be same length
+        coordinates or arrays of coordinates in units of (um).
+        Must be same length
     N : None or list of lists
         Normal vectors [x, y, z] of each circular electrode contact surface,
         default None
@@ -660,7 +661,8 @@ class RecMEAElectrode(RecExtElectrode):
     >>> plt.show()
 
     """
-    def __init__(self, cell=None, sigma_T=0.3, sigma_S=1.5, sigma_G=0.0, h=300., steps=20,
+    def __init__(self, cell=None, sigma_T=0.3, sigma_S=1.5, sigma_G=0.0,
+                 h=300., steps=20,
                  x=np.array([0]), y=np.array([0]), z=np.array([0]),
                  N=None, r=None, n=None, r_z=None,
                  perCellLFP=False, method='linesource',
@@ -678,7 +680,6 @@ class RecMEAElectrode(RecExtElectrode):
         self.sigma_T = sigma_T
         self.sigma_S = sigma_S
         self.sigma = None
-        # self._check_for_anisotropy()
         self.h = h
         self.steps = steps
         self.squeeze_cell_factor = squeeze_cell_factor
@@ -698,22 +699,26 @@ class RecMEAElectrode(RecExtElectrode):
             if (np.abs(z) > 1e-9).any():
                 raise NotImplementedError("The method 'linesource' is only "
                                           "supported for electrodes at the "
-                                          "z=0 plane.")
+                                          "z=0 plane. Use z=0 or method "
+                                          "'pointsource'.")
             if np.abs(self.sigma_G) > 1e-9:
                 raise NotImplementedError("The method 'linesource' is only "
-                                          "supported for sigma_G=0")
+                                          "supported for sigma_G=0. Use "
+                                          "sigma_G=0 or method "
+                                          "'pointsource'.")
             self.lfp_method = lfpcalc.calc_lfp_linesource_moi
         elif method == "soma_as_point":
             if (np.abs(z) > 1e-9).any():
                 raise NotImplementedError("The method 'soma_as_point' is only "
                                           "supported for electrodes at the "
-                                          "z=0 plane.")
+                                          "z=0 plane. Use z=0 or method "
+                                          "'pointsource'.")
             if np.abs(self.sigma_G) > 1e-9:
                 raise NotImplementedError("The method 'soma_as_point' is only "
-                                          "supported for sigma_G=0")
+                                          "supported for sigma_G=0. Use "
+                                          "sigma_G=0 or method "
+                                          "'pointsource'.")
             self.lfp_method = lfpcalc.calc_lfp_soma_as_point_moi
-
-
         else:
             raise ValueError("LFP method not recognized. "
                              "Should be 'soma_as_point', 'linesource' "

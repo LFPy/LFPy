@@ -14,12 +14,11 @@ import zipfile
 import LFPy
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.collections import PolyCollection
 
 
 def plot_results(cell, synapse, MEA, electrode):
 
-    time_window = [0, 30]
+    time_window = [0, 50]
     syn_idx = synapse.idx
 
     cell_plot_idxs = [syn_idx]
@@ -38,18 +37,19 @@ def plot_results(cell, synapse, MEA, electrode):
                             title='Extracellular\npotential')
     ax_v = plt.subplot(1, num_cols, 4, title='Membrane potential',
                        xlabel='ms', ylabel='mV',
-                       ylim=[-80, 20], xlim=time_window)
+                       ylim=[-70, -50], xlim=time_window)
 
     elec_clr = lambda idx: plt.cm.spectral(1./(len(MEA.x) - 1) * idx)
 
     l_elec, l_syn = plot_recording_set_up(cell, ax1, ax3, MEA, elec_clr,
                                               syn_idx, cell_plot_colors)
-    [ax_v.plot(cell.tvec, cell.vmem[idx, :], c=cell_plot_colors[idx], lw=2) for idx in cell_plot_idxs]
+    [ax_v.plot(cell.tvec, cell.vmem[idx, :], c=cell_plot_colors[idx], lw=2)
+        for idx in cell_plot_idxs]
     for elec in range(len(MEA.x)):
         ax_ec.plot(cell.tvec, 1000 * (MEA.LFP[elec]),
-                   lw=1, c=elec_clr(elec))
+                   lw=2, c=elec_clr(elec))
         ax_ec.plot(cell.tvec, 1000 * (electrode.LFP[elec]),
-                   lw=2, c=elec_clr(elec), ls=":")
+                   lw=3, c=elec_clr(elec), ls=":")
 
     l_MEA, = ax_ec.plot(0, 0, lw=1, c="k")
     l_invivo, = ax_ec.plot(0, 0, lw=2, c="k", ls=":")
@@ -59,7 +59,7 @@ def plot_results(cell, synapse, MEA, electrode):
     simplify_axes([ax_v, ax_ec])
     mark_subplots([ax1, ax3, ax_ec, ax_v], ypos=1.05, xpos=-0.1)
 
-    plt.savefig('example_MEA.png', dpi=150)
+    plt.savefig('example_MEA.pdf', dpi=150)
 
 
 def plot_recording_set_up(cell, ax_neur, ax_side, MEA, elec_clr,
@@ -128,6 +128,7 @@ def plot_recording_set_up(cell, ax_neur, ax_side, MEA, elec_clr,
 
     return l_elec, l_syn
 
+
 def simplify_axes(axes):
     """
     Right and top axis line is removed from axes or list of axes
@@ -158,9 +159,6 @@ def mark_subplots(axes, letters='ABCDEFGHIJKLMNOPQRSTUVWXYZ', xpos=-0.12, ypos=1
                 transform=ax.transAxes)
 
 
-
-
-
 #Fetch Mainen&Sejnowski 1996 model files
 if not os.path.isfile(join('cells', 'cells', 'j4a.hoc')):
     #get the model files:
@@ -179,8 +177,8 @@ if not os.path.isfile(join('cells', 'cells', 'j4a.hoc')):
 
 # Define cell parameters
 cell_parameters = {
-    # 'morphology' : join('cells', 'cells', 'j4a.hoc'), # from Mainen & Sejnowski, J Comput Neurosci, 1996
-    'morphology' : join('morphologies', 'ball_and_stick.hoc'), # from Mainen & Sejnowski, J Comput Neurosci, 1996
+    'morphology' : join('cells', 'cells', 'j4a.hoc'), # from Mainen & Sejnowski, J Comput Neurosci, 1996
+    # 'morphology' : join('morphologies', 'ball_and_stick.hoc'), # from Mainen & Sejnowski, J Comput Neurosci, 1996
     'cm' : 1.0,         # membrane capacitance
     'Ra' : 150.,        # axial resistance
     'v_init' : -65.,    # initial crossmembrane potential
@@ -190,18 +188,18 @@ cell_parameters = {
     'lambda_f' : 10.,           # frequency where length constants are computed
     'dt' : 2.**-4,      # simulation time step size
     'tstart' : 0.,      # start time of simulation, recorders start at t=0
-    'tstop' : 30.,     # stop simulation at 100 ms.
+    'tstop' : 50.,     # stop simulation at 100 ms.
 }
 
 # Create cell
 cell = LFPy.Cell(**cell_parameters)
 # Align cell
-cell.set_rotation(y=np.pi/2)
-cell.set_pos(z=2)
+cell.set_rotation(z=np.pi/0.9, x=0.3)
+cell.set_pos(z=100)
 
 # Define synapse parameters
 synapse_parameters = {
-    'idx' : cell.get_closest_idx(x=-200., y=0., z=800.),
+    'idx' : cell.get_closest_idx(x=800., y=0., z=150.),
     'e' : 0.,                   # reversal potential
     'syntype' : 'ExpSyn',       # synapse type
     'tau' : 5.,                 # synaptic time constant
@@ -214,8 +212,9 @@ synapse = LFPy.Synapse(cell, **synapse_parameters)
 synapse.set_spike_times(np.array([10.]))
 
 # Create a grid of measurement locations, in (mum)
-X, Y = np.mgrid[-100:301:100, 0:20:200]
-Z = np.zeros(X.shape)
+X = np.arange(0, 1001, 500)
+Y = np.zeros(X.shape)
+Z = np.zeros(X.shape) + 0
 
 # Define electrode parameters
 grid_electrode_parameters = {
@@ -223,7 +222,7 @@ grid_electrode_parameters = {
     'x' : X.flatten(),  # electrode requires 1d vector of positions
     'y' : Y.flatten(),
     'z' : Z.flatten(),
-    "method": "pointsource",
+    "method": "soma_as_point",
     'N' : np.array([[0, 0, 1]]*X.size), #surface normals
     'r' : 50,              # contact site radius
     'n' : 100,               # datapoints for averaging
@@ -238,11 +237,12 @@ MEA_electrode_parameters = {
     'x' : X.flatten(),  # electrode requires 1d vector of positions
     'y' : Y.flatten(),
     'z' : Z.flatten(),
-    "method": "pointsource",
+    "method": "soma_as_point",
     'N' : np.array([[0, 0, 1]]*X.size), #surface normals
     'r' : 50,              # contact site radius
     'n' : 100,               # datapoints for averaging,
     "seedvalue": 12,
+    "squeeze_cell_factor": 0.4,
 }
 
 
@@ -258,5 +258,4 @@ MEA = LFPy.RecMEAElectrode(cell, **MEA_electrode_parameters)
 # Calculate LFPs
 MEA.calc_lfp()
 electrode.calc_lfp()
-
 plot_results(cell, synapse, MEA, electrode)

@@ -618,7 +618,7 @@ def calc_lfp_pointsource_moi(cell, x, y, z, sigma_T, sigma_S, sigma_G,
     dz2 = (z - cell.zmid)**2
 
     dL2 = dx2 + dy2
-    inds = dL2 + dz2 < r_limit*r_limit
+    inds = np.where(dL2 + dz2 < r_limit*r_limit)[0]
     dL2[inds] = r_limit[inds]*r_limit[inds] - dz2[inds]
 
     def _omega(dz):
@@ -838,7 +838,7 @@ def calc_lfp_soma_as_point_moi(cell, x, y, z, sigma_T, sigma_S, sigma_G,
     dz2 = (z - cell.zmid[:1])**2
 
     dL2 = dx2 + dy2
-    inds = dL2 + dz2 < r_limit[0]*r_limit[0]
+    inds = np.where(dL2 + dz2 < r_limit[0]*r_limit[0])[0]
     dL2[inds] = r_limit[inds]*r_limit[inds] - dz2[inds]
 
     def _omega(dz):
