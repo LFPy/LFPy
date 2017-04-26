@@ -39,7 +39,7 @@ def _run_simulation(cell, cvode, variable_dt=False, atol=0.001):
     else:
         cvode.active(0)
     
-    #initialize state
+    #re-initialize state
     neuron.h.finitialize(cell.v_init)
     
     #initialize current- and record
@@ -130,7 +130,7 @@ def _run_simulation_with_electrode(cell, cvode, electrode=None,
     #just for safekeeping
     lendotprodcoeffs0 = len(dotprodcoeffs)
      
-    #access electrode object and append dotprodcoeffs        
+    #access electrode object and append mapping        
     if electrode is not None:
         #put electrode argument in list if needed
         if type(electrode) == list:
@@ -138,49 +138,9 @@ def _run_simulation_with_electrode(cell, cvode, electrode=None,
         else:
             electrodes = [electrode]
         
-        #calculate list of dotprodcoeffs, will try temp storage of
-        #imem, tvec, LFP
-        # cellTvec = cell.tvec
-        # try:
-        #     cellImem = cell.imem.copy()
-        # except:
-        #     pass
-        
-        # cell.imem = np.eye(totnsegs)
-        # cell.tvec = np.arange(totnsegs) * dt
-        # electrodeLFP = []   #list of electrode.LFP objects if they exist
-        # restoreLFP = False
-        # restoreCellLFP = False
-        # ncoeffs = 0
         for el in electrodes:
-            # if hasattr(el, 'LFP'):
-            #     LFPcopy = el.LFP
-            #     del el.LFP
-            #     restoreLFP = True
-            # if hasattr(el, 'CellLFP'):
-            #     CellLFP = el.CellLFP
-            #     restoreCellLFP = True
-            # el.calc_lfp(cell=cell)
             el.calc_mapping(cell)
             dotprodcoeffs.append(el.mapping)
-            # if restoreLFP:
-            #     del el.LFP
-            #     el.LFP = LFPcopy
-            # else:
-            #     del el.LFP
-            # if restoreCellLFP:
-            #     el.CellLFP = CellLFP
-            # else:
-            #     if hasattr(el, 'CellLFP'):
-            #         del el.CellLFP
-            # ncoeffs += 1
-        
-        # #putting back variables
-        # cell.tvec = cellTvec
-        # try:
-        #     cell.imem = cellImem
-        # except:
-        #     del cell.imem
     elif electrode is None:
         electrodes = None
 
