@@ -48,7 +48,7 @@ Y = np.zeros(X.shape)
 
 
 sigma = 0.3
-sigma_tensor = [0.3, 0.3, 0.3]
+sigma_tensor = [0.3, 0.3, 0.45]
 
 # Define electrode parameters
 grid_electrode_parameters = {
@@ -142,6 +142,6 @@ ax2.plot(cell.xmid[cell.synidx],cell.zmid[cell.synidx], 'o', ms=5,
         markeredgecolor='k',
         markerfacecolor='r')
 
-plt.savefig('example_anisotropy_%s.pdf' % str(sigma), dpi=150)
+plt.savefig('example_anisotropy.pdf', dpi=150)
 
 plt.show()
