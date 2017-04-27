@@ -6,7 +6,7 @@ import shutil
 try:
     from setuptools import setup, Extension
 except ImportError as ie:
-    raise ie, 'please install setuptools'
+    raise ie('please install setuptools')
 try:
     import numpy
     from Cython.Distutils import build_ext
