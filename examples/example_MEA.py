@@ -1,7 +1,23 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-Example plot for LFPy: In vitro MEA slice set-up
+Example plot for LFPy: In vitro MEA slice set-up. It serves to demonstrate
+class LFPy.RecMEAElectrode which incorporates discontinous extracellular
+conductivity (MEA chip, slice, saline) in comparison to LFPy.RecExtElectrode
+which incorporates an infinite homogeneous isotropic/anisotropic extracellular
+conductivity. 
+
+Copyright (C) 2017 Computational Neuroscience Group, NMBU.
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 """
 import os
 from os.path import join
@@ -35,7 +51,7 @@ def plot_results(cell, synapse, MEA, electrode):
     ax_ec = fig.add_subplot(1, num_cols, 3, xlim=time_window,
                             xlabel='ms', ylabel='$\mu$V',
                             title='Extracellular\npotential')
-    ax_v = plt.subplot(1, num_cols, 4, title='Membrane potential',
+    ax_v = plt.subplot(1, num_cols, 4, title='Somatic potential',
                        xlabel='ms', ylabel='mV',
                        ylim=[-70, -50], xlim=time_window)
 
@@ -178,7 +194,6 @@ if not os.path.isfile(join('cells', 'cells', 'j4a.hoc')):
 # Define cell parameters
 cell_parameters = {
     'morphology' : join('cells', 'cells', 'j4a.hoc'), # from Mainen & Sejnowski, J Comput Neurosci, 1996
-    # 'morphology' : join('morphologies', 'ball_and_stick.hoc'), # from Mainen & Sejnowski, J Comput Neurosci, 1996
     'cm' : 1.0,         # membrane capacitance
     'Ra' : 150.,        # axial resistance
     'v_init' : -65.,    # initial crossmembrane potential
@@ -259,3 +274,4 @@ MEA = LFPy.RecMEAElectrode(cell, **MEA_electrode_parameters)
 MEA.calc_lfp()
 electrode.calc_lfp()
 plot_results(cell, synapse, MEA, electrode)
+plt.show()
