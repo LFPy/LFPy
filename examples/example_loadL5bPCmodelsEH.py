@@ -1,5 +1,7 @@
 #!/usr/bin/env python
-'''Example script loading and execiting a simulation with the
+# -*- coding: utf-8 -*-
+"""
+Example script loading and execiting a simulation with the
 Hay et al. 2011 L5b-pyramidal cell model, which is implemented by default
 using templates.
 
@@ -12,7 +14,19 @@ The mod-files inside /L5bPCmodelsEH/mod/ must be compiled using nrnivmodl.
 Note that LFPy can only deal with one cell at the time, creating several
 cell objects will slow everything down, but each cell *should* get the correct
 cell responses.
-'''
+
+Copyright (C) 2017 Computational Neuroscience Group, NMBU.
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+"""
 
 import LFPy
 import neuron
@@ -60,13 +74,11 @@ cellParams = {
                        'L5bPCmodelsEH/models/L5PCtemplate.hoc'],
     'templatename'  : 'L5PCtemplate',
     'templateargs'  : 'L5bPCmodelsEH/morphologies/cell1.asc',
-    'passive' :     False,
     'nsegs_method' : None,
     'v_init' : -80,
-    'tstartms' : 0,
-    'tstopms' : 3000,
-    'timeres_NEURON' : 2**-3,
-    'timeres_python' : 2**-3,
+    'tstart' : 0,
+    'tstop' : 3000,
+    'dt' : 2**-3,
     'verbose' : True,
     'extracellular' : False,
 }

@@ -97,24 +97,26 @@ and before optionally running the ``_set_nsegs()`` and ``_collect_geometry()`` p
 Units
 =====
 
-Units follow the NEURON conventions.
+Units follow the NEURON conventions, `see here. <https://www.neuron.yale.edu/neuron/static/docs/units/unitchart.html>`_
 The units in LFPy for given quantities are:
 
-+-------------+-----------+
-| What        | Unit      |
-+=============+===========+
-| Potential   | [mV]      |
-+-------------+-----------+
-| Current     | [nA]      |
-+-------------+-----------+
-| Conductance | [S/cm2]   |
-+-------------+-----------+
-| Capacitance | [μF/cm2]  |
-+-------------+-----------+
-| Dimension   | [μm]      |
-+-------------+-----------+
-| Syn. weight | [µS]      |
-+-------------+-----------+
++----------------------------+-----------+
+| What                       | Unit      |
++============================+===========+
+| Potential                  | [mV]      |
++----------------------------+-----------+
+| Current                    | [nA]      |
++----------------------------+-----------+
+| Conductance                | [S/cm2]   |
++----------------------------+-----------+
+| Extracellular conductivity | [S/m]     |
++----------------------------+-----------+
+| Capacitance                | [μF/cm2]  |
++----------------------------+-----------+
+| Dimension                  | [μm]      |
++----------------------------+-----------+
+| Syn. weight                | [µS]      |
++----------------------------+-----------+
 
 Note: resistance, conductance and capacitance are usually specific values, i.e per membrane area (lowercase r_m, g, c_m)
 Depending on the mechanism files, some may use different units altogether, but this should be taken care of internally by NEURON.
@@ -129,7 +131,7 @@ LFPy was developed by:
 
 *	Espen Hagen http://www.mn.uio.no/fysikk/english/?vrtx=person-view&uid=espehage
 
-*	Szymon Łęski http://www.neuroinf.pl/Members/szleski
+*	Szymon Łęski
 
 *	Eivind Norheim 
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-'''Copyright (C) 2012 Computational Neuroscience Group, NMBU.
+"""Copyright (C) 2012 Computational Neuroscience Group, NMBU.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -9,82 +9,99 @@ the Free Software Foundation, either version 3 of the License, or
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.'''
+GNU General Public License for more details.
 
+"""
+
+from __future__ import division
 import numpy as np
+import scipy.stats
+import warnings
 
-def get_rand_spike_times(synpos, nspikes, tstart, tstop):
-    '''Return synpos times nspikes random spike times on the 
-    interval [tstart, tstop]'''
-    spiketimes = np.zeros([np.size(synpos), nspikes])
-    for i in range(np.size(synpos)):
-        spiketimes[i, :] = np.random.random_integers(tstart, tstop, nspikes)
-    return spiketimes
-
-def stationary_poisson(nsyn, lambd, tstart, tstop):
-    '''Generate nsyn stationary possion processes with rate lambda 
-    between tstart and tstop'''
-    interval_s = (tstop-tstart)*.001
-    spiketimes = []
-    for i in range(nsyn):
-        spikecount = np.random.poisson(interval_s*lambd)
-        spikevec = np.empty(spikecount)
-        if spikecount == 0:
-            spiketimes.append(spikevec)
-        else:
-            spikevec = tstart + (tstop-tstart)*np.random.random(spikecount)
-            spiketimes.append(np.sort(spikevec)) #sort them too!
-
-    return spiketimes
-
-def stationary_gamma(tstart, tstop, k=2, theta=10, tmin = -1E3, tmax=1E6):
-    '''Generate spiketimes with interspike interval statistics according
-    to gamma-distribution with 'shape' k and 'scale' theta between tstart and
-    tstop. Spiketimes from tmin up to tmax is calculated,
-    times between 0 and tstop are returned'''
+def get_activation_times_from_distribution(n, tstart=0., tstop=1.E6,
+                                          distribution=scipy.stats.expon,
+                                          rvs_args=dict(loc=0, scale=1),
+                                          maxiter=1E6):
+    """
+    Construct a length n list of ndarrays containing continously increasing
+    random numbers on the interval [tstart, tstop], with intervals drawn from
+    a chosen continuous random variable distribution subclassed from
+    scipy.stats.rv_continous, e.g., scipy.stats.expon or scipy.stats.gamma.
     
-    if tstop > tmax:
-        tmax = tstop
+    The most likely initial first entry is
+    tstart + method.rvs(size=inf, **rvs_args).mean()
     
-    t = tmin
-    spiketimes = []
-    while t <= tmax:
-        t = t + np.random.gamma(shape = k, scale = theta)
-        if t >= tstart and t <= tstop:
-            spiketimes.append(t)
+    Parameters
+    ----------
+    n : int
+        number of ndarrays in list
+    tstart : float
+        minimum allowed value in ndarrays
+    tstop : float
+        maximum allowed value in ndarrays
+    distribution : object
+        subclass of scipy.stats.rv_continous. Distributions
+        producing negative values should be avoided if continously increasing
+        values should be obtained, i.e., the probability density function
+        (distribution.pdf(**rvs_args)) should be 0 for x < 0, but this is not
+        explicitly tested for.
+    rvs_args : dict
+        parameters for method.rvs method. If "size" is in dict, then tstop will
+        be ignored, and each ndarray in output list will be
+        distribution.rvs(**rvs_args).cumsum() + tstart. If size is not given in dict,
+        then values up to tstop will be included
+    maxiter : int
+        maximum number of iterations
+        
+        
+    Returns
+    -------
+    list of ndarrays
+        length n list of arrays containing data
     
-    spiketimes = np.array(spiketimes)
-    return spiketimes
-
-
-def test_spiketimes(spiketime):
-    '''Test and sort spike times'''
-    spiketimes = []
-    spikecount = 1
-    spikevec = np.empty(spikecount)
-    spikevec = spiketime
-    spiketimes.append(np.sort(spikevec))
-    return spiketimes
-
-def get_normal_spike_times(nsyn, mu, sigma, tstart, tstop):
-    '''Generate nsyn normal-distributed processes with mean mu and 
-    deviation sigma'''
-    spiketimes = []
-    spikecount = nsyn
-    spikevec = np.empty(spikecount)
-    spikevec = np.random.normal(mu, sigma)
-    while (np.squeeze(spikevec) <= tstart) and \
-            (np.squeeze(spikevec) >= tstop):
-        spikevec = np.random.normal(mu, sigma)
+    Raises
+    ------
+    AssertionError
+        if distribution does not have the 'rvs' attribute
+    StopIteration
+        if number of while-loop iterations reaches maxiter
     
-    spiketimes.append(np.sort(spikevec))
-    return spiketimes
-
-def get_normal_input_times(n, mu, sigma, tstart, tstop):
-    '''Generates n normal-distributed prosesses with mean mu and 
-    deviation sigma'''
-    times = np.random.normal(mu, sigma, n)
-    for i in range(n):
-        while times[i] <= tstart or times[i] >= tstop:
-            times[i] = np.random.normal(mu, sigma)
+    
+    Examples
+    --------
+    Create n sets of activation times with intervals drawn from the exponential
+    distribution, with rate expectation lambda 10 s^-1 (thus
+    scale=1000 / lambda). Here we assume output in units of ms
+    
+    >>> from LFPy.inputgenerators import get_activation_times_from_distribution
+    >>> import scipy.stats as st
+    >>> import matplotlib.pyplot as plt
+    >>> times = get_activation_times_from_distribution(n=10, tstart=0., tstop=1000.,
+    >>>                                             distribution=st.expon,
+    >>>                                             rvs_args=dict(loc=0.,
+    >>>                                                           scale=100.))
+    """
+    try:
+        assert hasattr(distribution, 'rvs')
+    except AssertionError:
+        raise AssertionError('distribution={} must have the attribute "rvs"'.format(distribution))
+    
+    times = []
+    if 'size' in rvs_args.keys():
+        for i in range(n):
+            times += [distribution.rvs(**rvs_args).cumsum() + tstart]
+    else:
+        for i in range(n):
+            values = distribution.rvs(size=1000, **rvs_args).cumsum() + tstart
+            iter = 0
+            while values[-1] < tstop and iter < maxiter:
+                values = np.r_[values, distribution.rvs(size=1000, **rvs_args).cumsum() + values[-1]]
+                iter += 1
+            
+            if iter == maxiter:
+                raise StopIteration('maximum number of iterations reach. Con')            
+            
+            times += [values[values < tstop]]
+    
     return times
+
