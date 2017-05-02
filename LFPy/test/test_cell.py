@@ -633,8 +633,8 @@ class testCell(unittest.TestCase):
         hist, bin_edges = np.histogram(idx, bins=bins)
 
         # compute Pearson correlation coefficients between area and histogram
-        # reporting success if within 5 decimal places
-        self.assertAlmostEqual(np.corrcoef(cell.area, hist)[0, 1], 1., places=5)
+        # reporting success if within 4 decimal places
+        self.assertAlmostEqual(np.corrcoef(cell.area, hist)[0, 1], 1., places=4)
 
         # check if min and max is in the range of segment indices
         self.assertEqual(idx.min(), 0)

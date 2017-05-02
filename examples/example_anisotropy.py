@@ -1,7 +1,20 @@
 #!/usr/bin/env python
-'''
+# -*- coding: utf-8 -*-
+"""
 Example plot for LFPy: Single-synapse contribution to the LFP
-'''
+
+Copyright (C) 2017 Computational Neuroscience Group, NMBU.
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+"""
 import LFPy
 import numpy as np
 import matplotlib.pyplot as plt
@@ -70,6 +83,7 @@ grid_electrode_parameters_tensor = {
 
 # Run simulation, electrode object argument in cell.simulate
 print("running simulation...")
+
 cell.simulate(rec_imem=True)
 
 # Create electrode objects
@@ -92,6 +106,10 @@ LFP = 1000 * grid_electrode.LFP[:,max_idx].reshape(X.shape)
 im = ax.contourf(X, Z, LFP, 51, vmin=-np.max(np.abs(LFP)) / 1, vmax=np.max(np.abs(LFP)) / 1,
            cmap='bwr',
            zorder=-2)
+ax.contour(X, Z, LFP, 51, vmin=-np.max(np.abs(LFP)) / 1, vmax=np.max(np.abs(LFP)) / 1,
+           cmap='bwr',
+           zorder=-2)
+
 cbar = plt.colorbar(im)
 cbar.set_label('LFP ($\mu$V)')
 
@@ -117,6 +135,10 @@ LFP = 1000 * grid_electrode_tensor.LFP[:,max_idx].reshape(X.shape)
 im = ax2.contourf(X, Z, LFP, 51, vmin=-np.max(np.abs(LFP)) / 1, vmax=np.max(np.abs(LFP)) / 1,
            cmap='bwr',
            zorder=-2)
+ax2.contour(X, Z, LFP, 51, vmin=-np.max(np.abs(LFP)) / 1, vmax=np.max(np.abs(LFP)) / 1,
+           cmap='bwr',
+           zorder=-2)
+
 cbar = plt.colorbar(im)
 cbar.set_label('LFP ($\mu$V)')
 #plot morphology
@@ -133,5 +155,6 @@ ax2.plot(cell.xmid[cell.synidx],cell.zmid[cell.synidx], 'o', ms=5,
         markeredgecolor='k',
         markerfacecolor='r')
 
-plt.savefig('example_anisotropy_%s.pdf' % str(sigma), dpi=150)
+plt.savefig('example_anisotropy.pdf', dpi=150)
+
 plt.show()
