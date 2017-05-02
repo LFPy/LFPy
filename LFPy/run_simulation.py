@@ -113,47 +113,10 @@ def _run_simulation_with_electrode(cell, cvode, electrode=None,
         else:
             electrodes = [electrode]
         
-        #calculate list of dotprodcoeffs, will try temp store of imem, tvec, LFP
-        # cellTvec = cell.tvec
-        # try:
-        #     cellImem = cell.imem.copy()
-        # except:
-        #     pass
-
-        # cell.imem = np.eye(cell.totnsegs)
-        # cell.tvec = np.arange(cell.totnsegs) * cell.dt
-        # electrodeLFP = []   #list of electrode.LFP objects if they exist
-        # restoreLFP = False
-        # restoreCellLFP = False
         for el in electrodes:
-            # if hasattr(el, 'LFP'):
-            #     LFPcopy = el.LFP
-            #     del el.LFP
-            #     restoreLFP = True
-            # if hasattr(el, 'CellLFP'):
-            #     CellLFP = el.CellLFP
-            #     restoreCellLFP = True
-            # el.calc_lfp(cell=cell)
             el.calc_mapping(cell)
-            # dotprodcoeffs.append(el.LFP.copy())
             dotprodcoeffs.append(el.mapping)
-            # if restoreLFP:
-            #     del el.LFP
-            #     el.LFP = LFPcopy
-            # else:
-            #     del el.LFP
-            # if restoreCellLFP:
-            #     el.CellLFP = CellLFP
-            # else:
-            #     if hasattr(el, 'CellLFP'):
-            #         del el.CellLFP
-            
-        #putting back variables
-        # cell.tvec = cellTvec
-        # try:
-        #     cell.imem = cellImem
-        # except:
-        #     del cell.imem
+
     elif electrode is None:
         electrodes = None
    
