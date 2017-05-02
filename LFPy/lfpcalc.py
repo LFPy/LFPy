@@ -93,7 +93,6 @@ def calc_lfp_linesource_anisotropic(cell, x, y, z, sigma, r_limit):
 
         p_ = pos.copy()
         if np.abs(r) < 1e-12:
-            # print "r is zero"
             if np.abs(l_vec[0]) < 1e-12:
                 p_[0] += r_limit[idx]
             elif np.abs(l_vec[1]) < 1e-12:
@@ -130,8 +129,6 @@ def calc_lfp_linesource_anisotropic(cell, x, y, z, sigma, r_limit):
         print(i, iia, iib, iii, iiii)
         raise RuntimeError
 
-    # if len(iiii) != cell.totnsegs:
-    #     print len(i), len(iia), len(iib), len(iii), len(iiii)
     mapping = np.zeros(cell.totnsegs)
     mapping[i] = _anisotropic_line_source_case_i(a[i], c[i])
     mapping[iia] = _anisotropic_line_source_case_iia(a[iia], c[iia])
@@ -196,7 +193,6 @@ def calc_lfp_soma_as_point_anisotropic(cell, x, y, z, sigma, r_limit):
 
         p_ = pos.copy()
         if np.abs(r) < 1e-12:
-            # print "r is zero"
             if np.abs(l_vec[0]) < 1e-12:
                 p_[0] += r_limit[idx]
             elif np.abs(l_vec[1]) < 1e-12:
@@ -233,8 +229,6 @@ def calc_lfp_soma_as_point_anisotropic(cell, x, y, z, sigma, r_limit):
         print(i, iia, iib, iii, iiii)
         raise RuntimeError
 
-    # if len(iiii) != cell.totnsegs:
-    #     print len(i), len(iia), len(iib), len(iii), len(iiii)
     mapping = np.zeros(cell.totnsegs)
     mapping[i] = _anisotropic_line_source_case_i(a[i], c[i])
     mapping[iia] = _anisotropic_line_source_case_iia(a[iia], c[iia])
@@ -329,13 +323,9 @@ def calc_lfp_linesource(cell, x, y, z, sigma, r_limit):
     h = _h_calc(xstart, xend, ystart, yend, zstart, zend, deltaS, x, y, z)
     r2 = _r2_calc(xend, yend, zend, x, y, z, h)
 
-    # dists, cp = return_dist_from_segments(xstart, ystart, zstart, xend, yend, zend, p)
-
-    # r2 = _check_rlimit(r2, r_limit, h, deltaS)
     too_close_idxs = np.where(r2 < r_limit*r_limit)[0]
     r2[too_close_idxs] = r_limit[too_close_idxs]**2
     l = h + deltaS
-    # print r2
     hnegi = h < 0
     hposi = h >= 0
     lnegi = l < 0
@@ -397,16 +387,6 @@ def calc_lfp_soma_as_point(cell, x, y, z, sigma, r_limit):
         print('Adjusting r-distance to soma segment from %g to %g'
                 % (r_soma, r_limit[0]))
         r_soma = r_limit[0]
-
-    # Check that no segment is closer to the electrode than r_limit
-    # if np.sum(np.nonzero( r2 < r_limit*r_limit )) > 0:
-    #     for idx in np.nonzero( r2[1:] < r_limit[1:] * r_limit[1:] )[0]+1:
-    #         if (h[idx] < r_limit[idx]) and \
-    #         ((deltaS[idx] + h[idx]) > -r_limit[idx]):
-    #             print('Adjusting distance to segment %s from %.2f to %.2f.'
-    #                   % (idx, r2[idx]**0.5, r_limit[idx]))
-    #             r2[idx] = r_limit[idx] * r_limit[idx]
-
 
     too_close_idxs = np.where(r2 < r_limit*r_limit)[0]
     r2[too_close_idxs] = r_limit[too_close_idxs]**2
@@ -485,17 +465,6 @@ def _r2_calc(xend, yend, zend, x, y, z, h):
     """Subroutine used by calc_lfp_*()"""
     r2 = (x-xend)**2 + (y-yend)**2 + (z-zend)**2 - h**2
     return abs(r2)
-
-
-# def _check_rlimit(r2, r_limit, h, deltaS):
-#     """Check that no segment is closer than the electrode than r_limit"""
-#     if np.sum(np.nonzero(r2 < r_limit*r_limit)) > 0:
-#         for idx in np.nonzero(r2 < r_limit*r_limit)[0]:
-#             if (h[idx] < r_limit[idx]) and ((deltaS[idx]+h[idx]) > -r_limit[idx]):
-#                 print('Adjusting distance to segment %s from %.2f to %.2f.'
-#                       % (idx, r2[idx]**0.5, r_limit[idx]))
-#                 r2[idx] = r_limit[idx]*r_limit[idx]
-#     return r2
 
 
 def _r_soma_calc(xmid, ymid, zmid, x, y, z):
