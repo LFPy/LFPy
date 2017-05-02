@@ -5,8 +5,20 @@ An LFPy example file showing how cells can be run in parallel using MPI.
 To run using MPI with 4 cpu cores, issue in terminal
 openmpirun -np 4 python example_mpi.py
 
-The example uses mpi4py with openmpi, and do not rely on NEURON's MPI.
+The example uses mpi4py with openmpi, and do not rely on NEURON's MPI
+implementation.
 
+Copyright (C) 2017 Computational Neuroscience Group, NMBU.
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 """
 
 import os

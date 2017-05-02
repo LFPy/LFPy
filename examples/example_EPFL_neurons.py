@@ -5,6 +5,17 @@ Test implementation using cell models of the Blue Brain Project with LFPy.
 The example assumes that the complete set of cell models available from
 https://bbpnmc.epfl.ch/nmc-portal/downloads is unzipped in this folder. 
 
+Copyright (C) 2017 Computational Neuroscience Group, NMBU.
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 """
 
 import os
