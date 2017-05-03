@@ -26,16 +26,15 @@ population_parameters = {
 
 cell_parameters = {
      'morphology' : '', # set in 'single_cell.py'
-    'timeres_NEURON' : 2**-4, # 2**-4=0.0625 ms
-    'timeres_python' : 16*2**-4, # 16*2**-4=1.0 ms
+    'dt' : 2**-4, # 2**-4=0.0625 ms
     'nsegs_method' : 'lambda100',
     'Ra' : 150., 
-    'rm' : 30000., # later modifised in 'single_cell.py'
     'cm' : 1.0, 
     'v_init' : -65.,
-    'e_pas' : -65.,
-    'tstartms' : -50., # start time of simulation, recorders start at t=0
-    'tstopms' : 1000,   # stop simulation at 1000 ms. These can be overridden
+    'passive' : True,
+    'passive_parameters' : {'g_pas' : 1./30000, 'e_pas' : -65},
+    'tstart' : -50., # start time of simulation, recorders start at t=0
+    'tstop' : 1000,   # stop simulation at 1000 ms. These can be overridden
    }
 
 synapse_parameters = {}

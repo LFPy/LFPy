@@ -55,13 +55,13 @@ def simulate_cells_serially(stimolo, \
         if cell_id in population_parameters['exc_ids']:
             print str(cell_id)
             cell_parameters.update({'morphology':'pyr1.hoc'})
-            cell_parameters.update({'rm':20000.})
+            cell_parameters['passive_parameters'].update({'g_pas':1./20000.})
 
         elif cell_id in population_parameters['inh_ids']:
             indin=int(cell_id-max(population_parameters['exc_ids']))
             print str(indin)
             cell_parameters.update({'morphology':'int1.hoc'})
-            cell_parameters.update({'rm':10000.})
+            cell_parameters['passive_parameters'].update({'g_pas':1./10000.})
 
 
         print "Setting up cell "+str(cell_id)

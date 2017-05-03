@@ -32,6 +32,13 @@ For updated information on LFPy and online documentation, see the LFPy homepage 
 
 This scientific software is released under the GNU Public License GPLv3.
 
+===========
+Code status
+===========
+[![Build Status](https://travis-ci.org/LFPy/LFPy.svg?branch=dev)](https://travis-ci.org/LFPy/LFPy)
+[![Coverage Status](https://coveralls.io/repos/github/LFPy/LFPy/badge.svg?branch=dev)](https://coveralls.io/github/LFPy/LFPy)
+
+
 ============
 Requirements
 ============
@@ -94,7 +101,7 @@ There are few options to install LFPy:
 Documentation
 =============
 
-To generate the html documentation issue from the LFPy source code directory:
+To generate the html documentation, issue from the LFPy source code directory:
 ::
     
     sphinx-build -b html /path/to/LFPy/documentation/sources path/to/dest
