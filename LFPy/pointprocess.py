@@ -136,7 +136,6 @@ class Synapse(PointProcess):
             assert type(sptimes) is np.ndarray
         except AssertionError:
             raise AssertionError('synapse activation times must be a np.ndarray, not type({})'.format(type(sptimes)))
-        # self.sptimes = sptimes
         self.cell.sptimeslist.append(sptimes)
     
     def set_spike_times_w_netstim(self, noise=1., start=0., number=1E3,
@@ -289,4 +288,3 @@ class StimIntElectrode(PointProcess):
     def collect_potential(self, cell):
         """Collect membrane potential of segment with PointProcess"""
         self.v = np.array(cell.stimvreclist.o(self.hocidx))
-

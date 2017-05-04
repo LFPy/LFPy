@@ -15,6 +15,17 @@ A single excitatory synapse drive the neuron into producing a single action-
 potential, and the local field potential are calculated on a dense 2D-grid
 on around the soma.
 
+Copyright (C) 2017 Computational Neuroscience Group, NMBU.
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 """
 
 

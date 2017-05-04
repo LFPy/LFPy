@@ -115,6 +115,7 @@ def _run_simulation_with_electrode(cell, cvode, electrode=None,
         for el in electrodes:
             el.calc_mapping(cell)
             dotprodcoeffs.append(el.mapping)
+
     elif electrode is None:
         electrodes = None
    

@@ -5,6 +5,17 @@ A very generic case where the same morphology on different file formats
 is loaded in LFPy using a generic template specification, defined by
 file LFPyCellTemplate.hoc
 
+Copyright (C) 2017 Computational Neuroscience Group, NMBU.
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 """
 import LFPy
 import neuron
@@ -13,7 +24,7 @@ import matplotlib.pyplot as plt
 
 #A plottin' function
 def plotcell(cell, color='k'):
-    for sec in cell.cell.all:
+    for sec in cell.template.all:
         idx = cell.get_idx(sec.name())
         plt.plot(np.r_[cell.xstart[idx], cell.xend[idx][-1]],
                  np.r_[cell.zstart[idx], cell.zend[idx][-1]],

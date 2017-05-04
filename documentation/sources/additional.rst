@@ -127,23 +127,23 @@ Contributors
 
 LFPy was developed by:
 
-*	Henrik Lindén
+*	Henrik Lindén https://lindenh.wordpress.com
 
-*	Espen Hagen 
+*	Espen Hagen http://www.mn.uio.no/fysikk/english/?vrtx=person-view&uid=espehage
 
 *	Szymon Łęski
 
 *	Eivind Norheim 
 
-*   Klas H. Pettersen
+*       Klas H. Pettersen http://www.med.uio.no/imb/english/?vrtx=person-view&uid=klashp
 
-*   Gaute T. Einevoll
+*       Gaute T. Einevoll https://www.nmbu.no/ans/gaute.einevoll
 
 
 Contact
 =======
 
 If you want to contact us with questions, bugs and comments,
-you can send us an email to either `Espen <mailto:espen.hagen@fys.uio.no?Subject=LFPy-Questions/Comments>`_ or `Henrik <mailto:helinden@kth.se?Subject=LFPy-Question/Comments>`_.
+you can send us an email to either `Espen <mailto:espen.hagen@fys.uio.no?Subject=LFPy-Questions/Comments>`_ or `Henrik <mailto:hlinden@sund.dk?Subject=LFPy-Question/Comments>`_.
 We are of course happy to receive feedback of any kind.
 
