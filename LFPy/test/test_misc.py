@@ -72,7 +72,7 @@ class testMisc(unittest.TestCase):
 
         # record
         i_membrane_control = []     # record currents using Vector.record method
-        i_membrane_fadvance = []    # record seg._i_membrane_ at each timestep
+        i_membrane_fadvance = []    # record seg.i_membrane_ at each timestep
         for sec in [soma, dend]:
             for seg in sec:
                 i = neuron.h.Vector()
@@ -83,7 +83,7 @@ class testMisc(unittest.TestCase):
         # Simulation control
         neuron.h.dt =  2**-4          # simulation time resolution
         tstop = 500.        # simulation duration
-        v_init = -65        # membrane voltage(s) at t = 0
+        v_init = -65.       # membrane voltage(s) at t = 0
 
         def initialize():
             neuron.h.finitialize(v_init)
@@ -158,7 +158,7 @@ class testMisc(unittest.TestCase):
 
         # record
         i_membrane_control = []     # record currents using Vector.record method
-        i_membrane_fadvance = []    # record seg._i_membrane_ at each timestep
+        i_membrane_fadvance = []    # record seg.i_membrane_ at each timestep
         for sec in [soma, dend]:
             for seg in sec:
                 i = neuron.h.Vector()
@@ -169,7 +169,7 @@ class testMisc(unittest.TestCase):
         # Simulation control
         neuron.h.dt = 2**-4          # simulation time resolution
         tstop = 500.        # simulation duration
-        v_init = -65        # membrane voltage(s) at t = 0
+        v_init = -65.       # membrane voltage(s) at t = 0
 
         def initialize():
             neuron.h.finitialize(v_init)

@@ -34,7 +34,7 @@ def _run_simulation(cell, cvode, variable_dt=False, atol=0.001):
     else:
         cvode.active(0)    
     
-    # initialize state
+    # re-initialize state
     neuron.h.finitialize(cell.v_init)
     
     # initialize current- and record
@@ -43,9 +43,8 @@ def _run_simulation(cell, cvode, variable_dt=False, atol=0.001):
     else:
         neuron.h.fcurrent()
     neuron.h.frecord_init()
-
     
-    ##Starting simulation at tstart
+    # Starting simulation at tstart
     neuron.h.t = cell.tstart
     
     cell._loadspikes()
@@ -105,7 +104,7 @@ def _run_simulation_with_electrode(cell, cvode, electrode=None,
     #just for safekeeping
     lendotprodcoeffs0 = len(dotprodcoeffs)
     
-    #access electrode object and append dotprodcoeffs
+    #access electrode object and append mapping
     if electrode is not None:
         #put electrode argument in list if needed
         if type(electrode) == list:

@@ -84,7 +84,7 @@ def simulate_cells_serially(stimolo, \
             cell_pos=np.loadtxt('INTsXYZ.txt')
             x,y,z=cell_pos[int(cell_id-int(min(population_parameters['inh_ids'])))]
 
-        cell.set_pos(xpos=x,ypos=y,zpos=z)
+        cell.set_pos(x=x,y=y,z=z)
 
         if cell_id in population_parameters['exc_ids']:
             local_synapse_types = ['exc_exc','inh_exc']
@@ -161,7 +161,7 @@ def simulate_cells_serially(stimolo, \
         
         # Run simulation
         print "Running simulation..."
-        cell.simulate(rec_imem=True,rec_isyn=False)
+        cell.simulate(rec_imem=True)
         
         # Calculate LFP
         print "Calculating LFP"

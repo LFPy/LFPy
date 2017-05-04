@@ -145,6 +145,11 @@ class Cell(object):
             raise DeprecationWarning('Cell parameter rm is deprecated, set parameter passive_parameters=dict(g_pas=1/rm, e_pas=e_pas) instead')
         if 'e_pas' in kwargs.keys():
             raise DeprecationWarning('Cell parameter e_pas is deprecated, set parameter passive_parameters=dict(g_pas=1/rm, e_pas=e_pas) instead')
+        
+        # check if there are un-used keyword arguments present in kwargs
+        for key, value in kwargs.items():
+            raise ValueError('The keyword and argument {}={} is not valid input to class LFPy.Cell'.format(key, value))
+        
         if passive:
             try:
                 assert(type(passive_parameters) is dict)
@@ -227,12 +232,13 @@ class Cell(object):
         if passive:
             #Set passive properties, insert passive on all segments
             self.Ra = Ra
-            # self.rm = rm
             self.cm = cm
             self.passive_parameters = passive_parameters
-            # self.e_pas = e_pas
             self._set_passive()
         else:
+            self.Ra = Ra
+            self.cm = cm
+            self.passive_parameters = passive_parameters
             if self.verbose:
                 print('No passive properties added')
 
@@ -277,6 +283,9 @@ class Cell(object):
                 print("Overwriting custom temperature of %1.2f. New temperature is %1.2f"
                       % (neuron.h.celsius, celsius))
             neuron.h.celsius = celsius
+
+        # initialize membrane voltage in all segments.
+        neuron.h.finitialize(self.v_init)
 
 
     def _load_geometry(self):
@@ -949,7 +958,7 @@ class Cell(object):
         try:
             cvode.use_fast_imem(1)
         except AttributeError as ae:
-            raise Exception('neuron.h.CVode().use_fast_imem() not found. Please update NEURON to v.7.4 or newer')
+            raise Exception('neuron.h.CVode().use_fast_imem() method not found. Please update NEURON to v.7.4 or newer')
 
         if rec_imem:
             self._set_imem_recorders()
@@ -975,9 +984,9 @@ class Cell(object):
         else:
             #allow using both electrode and additional coefficients:
             _run_simulation_with_electrode(self, cvode, electrode, variable_dt, atol,
-                                               to_memory, to_file, file_name,
-                                               dotprodcoeffs,
-                                               rec_current_dipole_moment)
+                                           to_memory, to_file, file_name,
+                                           dotprodcoeffs,
+                                           rec_current_dipole_moment)
         # somatic trace
         if self.nsomasec >= 1:
             self.somav = np.array(self.somav)
@@ -1137,15 +1146,13 @@ class Cell(object):
         """
         Record membrane currents for all segments
         """
-        neuron.h.finitialize(self.v_init) # need to set voltage, otherwise the
-                                          # returned currents may be wrong
-
         self.memireclist = neuron.h.List()
         for sec in self.allseclist:
             for seg in sec:
                 memirec = neuron.h.Vector(int(self.tstop / self.dt+1))
                 memirec.record(seg._ref_i_membrane_, self.dt)
                 self.memireclist.append(memirec)
+
 
     def _set_ipas_recorders(self):
         """
