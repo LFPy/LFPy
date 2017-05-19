@@ -1369,8 +1369,9 @@ def _run_simulation_with_electrode(network, cvode,
         #calculate LFP after final fadvance()
         i = 0
         totnsegs = 0
-        imem['isyn_e'] = 0. # need to reset these for every iteration because we sum over synapses
-        imem['isyn_i'] = 0.
+        if use_isyn:
+            imem['isyn_e'] = 0. # need to reset these for every iteration because we sum over synapses
+            imem['isyn_i'] = 0.
         for cell in cells:
             for sec in cell.allseclist:
                 for seg in sec:
@@ -1420,7 +1421,7 @@ def _run_simulation_with_electrode(network, cvode,
                 el_LFP_file['electrode{:03d}'.format(j)
                             ][:, tstep] = np.dot(coeffs, imem['imem'])
 
-    except:
+    except IndexError:
         pass
 
 
