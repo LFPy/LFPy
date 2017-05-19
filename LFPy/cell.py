@@ -34,8 +34,10 @@ class Cell(object):
 
     Parameters
     ----------
-    morphology : str
-        path/to/morphology/file
+    morphology : str or neuron.h.SectionList
+        File path of morphology on format that NEURON can understand (w. file
+        ending .hoc, .asc, .swc or .xml), or neuron.h.SectionList instance
+        filled with references to neuron.h.Section instances. 
     v_init : float
         Initial membrane potential. Defaults to -70 mV.
     Ra : float
@@ -184,20 +186,32 @@ class Cell(object):
             warn(mssg)
 
         #load morphology
+        try:
+            assert(morphology is not None)
+        except AssertionError:
+            raise AssertionError('deprecated keyword argument morphology==None, value must be a file path or neuron.h.SectionList instance with neuron.h.Section instances')
         self.morphology = morphology
-        if self.morphology is not None:
+        if type(self.morphology) is str:
             if os.path.isfile(self.morphology):
                 self._load_geometry()
             else:
                 raise Exception('non-existent file %s' % self.morphology)
         else:
             try:
-                #will try to import top level cell and create sectionlist,
-                #in case there were no morphology file loaded
-                neuron.h.define_shape()
-                self._create_sectionlists()
-            except:
-                raise Exception("Could not load existing top-level cell. Consider use of LFPy.Cell vs. LFPy.TemplateCell.")
+                assert(type(self.morphology) is type(neuron.h.SectionList)) 
+                # #will try to import top level cell and create sectionlist,
+                # #in case there were no morphology file loaded
+                # neuron.h.define_shape()
+                # self._create_sectionlists()
+            except AssertionError:
+                raise Exception("Could not recognize Cell keyword argument morphology as neuron.h.SectionList instance")
+
+            # instantiate 3D geometry of all sections
+            neuron.h.define_shape()
+            # set some additional attributes
+            self._create_sectionlists_from_morphology_value()
+
+
 
         #Some parameters and lists initialised
         try:
@@ -386,7 +400,7 @@ class Cell(object):
     def _get_rotation(self):
         """Check if there exists a corresponding file
         with rotation angles"""
-        if self.morphology is not None:
+        if type(self.morphology) is str:
             base = os.path.splitext(self.morphology)[0]
             if os.path.isfile(base+'.rot'):
                 rotation_file = base+'.rot'
@@ -420,6 +434,25 @@ class Cell(object):
             if sec.name().find('soma') >= 0:
                 self.somalist.append(sec=sec)
                 self.nsomasec += 1
+
+    def _create_sectionlists_from_morphology_value(self):
+        """Variant of Cell._create_sectionlists() used if keyword argument
+        morphology is a neuron.h.SectionList instance"""
+        #list with all sections
+        self.allsecnames = []
+        self.allseclist = self.morphology
+        for sec in self.allseclist:
+            self.allsecnames.append(sec.name())
+
+        #list of soma sections, assuming it is named on the format "soma*"
+        self.nsomasec = 0
+        self.somalist = neuron.h.SectionList()
+        for sec in self.allseclist:
+            if sec.name().find('soma') >= 0:
+                self.somalist.append(sec=sec)
+                self.nsomasec += 1
+
+
 
     def _get_idx(self, seclist):
         """Return boolean vector which indexes where segments in seclist
@@ -2111,12 +2144,10 @@ class Cell(object):
                      self.zend - self.zmid]
 
         children_dict = self.get_dict_of_children_idx()
-        for sec in neuron.h.allsec():
+        for sec in self.allseclist.allsec():
             if not neuron.h.SectionRef(sec.name()).has_parent():
                 # skip soma, since soma is an orphan
                 continue
-
-
             bottom_seg = True
             secref = neuron.h.SectionRef(sec.name())
             parentseg = secref.parent()
@@ -2168,7 +2199,7 @@ class Cell(object):
 
         ri_list = np.zeros(self.totnsegs)
         comp = 0
-        for sec in neuron.h.allsec():
+        for sec in self.allseclist:
             for seg in sec:
                 ri_list[comp] = neuron.h.ri(seg.x)
                 comp += 1
@@ -2189,7 +2220,7 @@ class Cell(object):
             sibling of a segment.
         """
         children_dict = {}
-        for sec in neuron.h.allsec():
+        for sec in self.allseclist.allsec():
             children_dict[sec.name()] = []
             for child in neuron.h.SectionRef(sec.name()).child:
                 # add index of first segment of each child
@@ -2212,7 +2243,7 @@ class Cell(object):
             The dictionary is needed for computing axial currents.
         """
         connection_dict = {}
-        for sec in neuron.h.allsec():
+        for sec in self.allseclist:
             connection_dict[sec.name()] = neuron.h.parent_connection()
         return connection_dict
 
