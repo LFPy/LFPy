@@ -30,8 +30,11 @@ class RecExtElectrode:
     ----------
     cell : None or object
         If not None, instantiation of LFPy.Cell, LFPy.TemplateCell or similar. 
-    sigma : float
-        extracellular conductivity in unit (S/m)
+    sigma : float or list/ndarray of floats
+        extracellular conductivity in units of (S/m). A scalar value implies an
+        isotropic extracellular conductivity. If a length 3 list or array of
+        floats is provided, these values corresponds to an anisotropic
+        conductor with conductivities [sigma_x, sigma_y, sigma_z] accordingly. 
     x, y, z : np.ndarray
         coordinates or arrays of coordinates in units of (um). Must be same length
     N : None or list of lists
