@@ -22,14 +22,14 @@ from . import lfpcalc, tools
 
 class RecExtElectrode:
     """class RecExtElectrode
-    
+
     Main class that represents an extracellular electric recording devices such
     as a laminar probe.
-    
+
     Parameters
     ----------
     cell : None or object
-        If not None, instantiation of LFPy.Cell, LFPy.TemplateCell or similar. 
+        If not None, instantiation of LFPy.Cell, LFPy.TemplateCell or similar.
     sigma : float or list/ndarray of floats
         extracellular conductivity in units of (S/m). A scalar value implies an
         isotropic extracellular conductivity. If a length 3 list or array of
@@ -44,7 +44,7 @@ class RecExtElectrode:
         radius of each contact surface, default None
     n : int
         if N is not None and r > 0, the number of discrete points used to
-        compute the n-point average potential on each circular contact point. 
+        compute the n-point average potential on each circular contact point.
     contact_shape : str
         'circle'/'square' (default 'circle') defines the contact point shape
         If 'circle' r is the radius, if 'square' r is the side length
@@ -63,7 +63,7 @@ class RecExtElectrode:
 
     Examples
     --------
-    
+
     Compute extracellular potentials after simulating and storage of
     transmembrane currents with the LFPy.Cell class:
     >>> import numpy as np
@@ -286,12 +286,12 @@ class RecExtElectrode:
     def set_cell(self, cell):
         """Set the supplied cell object as attribute "cell" of the
         RecExtElectrode object
-        
+
         Parameters
         ----------
         cell : obj
             `LFPy.Cell` or `LFPy.TemplateCell` instance.
-        
+
         Returns
         -------
         None
@@ -332,13 +332,13 @@ class RecExtElectrode:
         ndarray, such that the extracellular potential at the contacts
         phi = np.dot(mapping, I_mem)
         where I_mem is a shape (n_segs, n_tsteps) ndarray with transmembrane
-        currents for each time step of the simulation. 
-        
+        currents for each time step of the simulation.
+
         Parameters
         ----------
         cell : obj
             `LFPy.Cell` or `LFPy.TemplateCell` instance.
-        
+
         Returns
         -------
         None
@@ -402,8 +402,8 @@ class RecExtElectrode:
                                              r_limit = self.r_limit,
                                              **kwargs)
 
-    
-    def _lfp_el_pos_calc_dist(self, m=50, **kwargs):
+
+    def _lfp_el_pos_calc_dist(self, **kwargs):
 
         """
         Calc. of LFP over an n-point integral approximation over flat
@@ -414,10 +414,10 @@ class RecExtElectrode:
         self.offsets = {}
         self.circle_circ = {}
 
-        def create_crcl(m, i):
+        def create_crcl(i):
             """make circumsize of contact point"""
-            crcl = np.zeros((m, 3))
-            for j in range(m):
+            crcl = np.zeros((self.n, 3))
+            for j in range(self.n):
                 B = [(np.random.rand()-0.5),
                     (np.random.rand()-0.5),
                     (np.random.rand()-0.5)]
@@ -429,13 +429,13 @@ class RecExtElectrode:
             crclx = crcl[:, 0] + self.x[i]
             crcly = crcl[:, 1] + self.y[i]
             crclz = crcl[:, 2] + self.z[i]
-            
+
             return crclx, crcly, crclz
 
-        def create_sqr(m, i):
+        def create_sqr(i):
             """make circle in which square contact is circumscribed"""
-            sqr = np.zeros((m, 3))
-            for j in range(m):
+            sqr = np.zeros((self.n, 3))
+            for j in range(self.n):
                 B = [(np.random.rand() - 0.5),
                      (np.random.rand() - 0.5),
                      (np.random.rand() - 0.5)]
@@ -452,7 +452,7 @@ class RecExtElectrode:
             #offsets and radii init
             offs = np.zeros((self.n, 3))
             r2 = np.zeros(self.n)
-            
+
             #assert the same random numbers are drawn every time
             if self.seedvalue is not None:
                 np.random.seed(self.seedvalue)
@@ -481,7 +481,7 @@ class RecExtElectrode:
             x_n = offs[:, 0] + self.x[i]
             y_n = offs[:, 1] + self.y[i]
             z_n = offs[:, 2] + self.z[i]
-            
+
             return x_n, y_n, z_n
 
         def loop_over_points(x_n, y_n, z_n):
@@ -494,25 +494,26 @@ class RecExtElectrode:
                                               z = z_n[j],
                                               r_limit = self.r_limit,
                                               sigma = self.sigma,
-                                              **kwargs)
+                                              **kwargs
+                                              )
 
                 if j == 0:
                     lfp_e = tmp
                 else:
                     lfp_e = np.r_['0,2', lfp_e, tmp]
-                
+
                 #no longer needed
                 del tmp
-            
+
             return lfp_e.mean(axis=0)
 
         #loop over contacts
         for i in range(len(self.x)):
             if self.n > 1:
-            
+
                 #fetch offsets:
                 x_n, y_n, z_n = calc_xyz_n(i)
-                
+
                 #fill in with contact average
                 self.mapping[i] = loop_over_points(x_n, y_n, z_n) #lfp_e.mean(axis=0)
 
@@ -531,14 +532,14 @@ class RecExtElectrode:
 
             #fetch circumscribed circle around contact
             if self.contact_shape is 'circle':
-                crcl = create_crcl(m, i)
+                crcl = create_crcl(i)
                 self.circle_circ[i] = {
                     'x' : crcl[0],
                     'y' : crcl[1],
                     'z' : crcl[2],
                 }
             elif self.contact_shape is 'square':
-                sqr = create_sqr(m, i)
+                sqr = create_sqr(i)
                 self.circle_circ[i] = {
                     'x': sqr[0],
                     'y': sqr[1],
