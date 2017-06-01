@@ -349,7 +349,7 @@ class RecExtElectrode:
             else:
                 pass
 
-            self._lfp_el_pos_calc_dist(n=self.n)
+            self._lfp_el_pos_calc_dist()
 
             if self.verbose:
                 print('calculations finished, %s, %s' % (str(self),
@@ -491,6 +491,7 @@ class RecExtElectrode:
                                               z = z_n[j],
                                               r_limit = self.r_limit,
                                               sigma = self.sigma,
+                                              **kwargs
                                               )
 
                 if j == 0:
