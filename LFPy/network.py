@@ -626,21 +626,25 @@ class Network(object):
         first_gid = self.populations[post].first_gid
         gids = np.array(self.populations[post].gids).astype(int)
 
-        # define incoming connections for cells on this RANK
-        if pre == post:
-            # avoid self connections
-            c = np.array([x for x in csa.cross(range(n_pre), range(gids.size)) *
-                          (csa.random(connprob) - csa.oneToOne)])
+        # first check if there are any postsyn cells on this RANK
+        if gids.size > 0:
+            # define incoming connections for cells on this RANK
+            if pre == post:
+                # avoid self connections
+                c = np.array([x for x in csa.cross(range(n_pre), range(gids.size)) *
+                              (csa.random(connprob) - csa.oneToOne)])
+            else:
+                c = np.array([x for x in csa.cross(range(n_pre), range(gids.size)) *
+                              csa.random(connprob)])
+            if c.ndim == 2:
+                # construct sparse boolean array
+                C = ss.csr_matrix((np.ones(c.shape[0], dtype=bool), (c[:, 0], c[:, 1])),
+                                  shape=(n_pre, gids.size), dtype=bool)                
+                return C.toarray()
+            else:
+                return np.zeros((n_pre, gids.size), dtype=bool)
         else:
-            c = np.array([x for x in csa.cross(range(n_pre), range(gids.size)) *
-                          csa.random(connprob)])
-        
-        # construct sparse boolean array
-        C = ss.csr_matrix((np.ones(c.shape[0], dtype=bool), (c[:, 0], c[:, 1])),
-                          shape=(n_pre, gids.size), dtype=bool)
-
-        return C.toarray()          
-    
+            return np.zeros((n_pre, 0), dtype=bool)
 
     def connect(self, pre, post, connectivity,
                 syntype=neuron.h.ExpSyn,
