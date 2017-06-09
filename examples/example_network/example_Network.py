@@ -297,7 +297,7 @@ if __name__ == '__main__':
             # in each population (postsynaptic on this RANK)
             connectivity = network.get_connectivity_rand(pre=pre, post=post,
                                                 connprob=connectionProbability)
-
+                        
             # connect network
             (conncount, syncount) = network.connect(
                             pre=pre, post=post,

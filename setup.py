@@ -88,7 +88,7 @@ setup(
         ],
     install_requires = [
         'setuptools', 'numpy', 'scipy', 'matplotlib', 'Cython', 'h5py',
-        'mpi4py'
+        'mpi4py', 'csa',
         ],
     provides = ['LFPy'],
     )

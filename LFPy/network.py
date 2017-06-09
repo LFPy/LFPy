@@ -24,6 +24,8 @@ import h5py
 from mpi4py import MPI
 import neuron
 from .templatecell import TemplateCell
+import csa
+import scipy.sparse as ss
 
 # set up MPI environment
 COMM = MPI.COMM_WORLD
@@ -590,8 +592,13 @@ class Network(object):
 
     def get_connectivity_rand(self, pre='L5PC', post='L5PC', connprob = 0.2):
         """
-        Dummy function creating a (sparse) cell to cell connectivity matrix
-        between pre and postsynaptic populations.
+        Dummy function creating a (boolean) cell to cell connectivity matrix
+        between pre and postsynaptic populations relying on the use of the
+        'Connection Set Algebra (CSA)' implementation in Python; see
+        https://github.com/INCF/csa, Mikael Djurfeldt (2012) "The Connection-set
+        Algebra---A Novel Formalism for the Representation of Connectivity
+        Structure in Neuronal Network Models" Neuroinformatics 10(3), 1539-2791,
+        http://dx.doi.org/10.1007/s12021-012-9146-1
 
         Connections are drawn randomly between presynaptic cell gids in
         population 'pre' and postsynaptic cell gids in 'post' on this RANK with
@@ -611,9 +618,8 @@ class Network(object):
         ndarray, dtype bool
             n_pre x n_post array of connections between n_pre presynaptic
             neurons and n_post postsynaptic neurons on this RANK. Entries
-            with True denotes a connection.
-
-        """
+            with True denotes a connection.        
+        """                
         n_pre = self.populations[pre].POP_SIZE
         n_post = self.populations[post].POP_SIZE
 
@@ -622,14 +628,19 @@ class Network(object):
 
         # define incoming connections for cells on this RANK
         if pre == post:
-            c = (1-np.eye(n_pre))[:, gids-first_gid]
+            # avoid self connections
+            c = np.array([x for x in csa.cross(range(n_pre), range(gids.size)) *
+                          (csa.random(connprob) - csa.oneToOne)])
         else:
-            c = np.ones((n_pre, n_post))[:, gids-first_gid]
-        # create random connectivity matrix and multiply with matrix for all
-        # possible pairs
-        c *= (np.random.rand(c.shape[0], c.shape[1]) <= connprob)
-        return c.astype(bool)
+            c = np.array([x for x in csa.cross(range(n_pre), range(gids.size)) *
+                          csa.random(connprob)])
+        
+        # construct sparse boolean array
+        C = ss.csr_matrix((np.ones(c.shape[0], dtype=bool), (c[:, 0], c[:, 1])),
+                          shape=(n_pre, gids.size), dtype=bool)
 
+        return C.toarray()          
+    
 
     def connect(self, pre, post, connectivity,
                 syntype=neuron.h.ExpSyn,
