@@ -662,7 +662,8 @@ class Network(object):
                                   funargs=[dict(loc=0, scale=100)]*2,
                                   funweights=[0.5]*2,
                                   z_min=-1E6, z_max=1E6,
-                                  )
+                                  ),
+                save_connections=False,
                 ):
         """
         Connect presynaptic cells to postsynaptic cells. Connections are
@@ -704,6 +705,13 @@ class Network(object):
             arguments passed to inherited LFPy.Cell method
             NetworkCell.get_rand_idx_area_and_distribution_norm to find
             synapse locations.
+        save_connections : bool
+            if True (default False), save instantiated connections to HDF5 file
+            "Network.OUTPUTPATH/synapse_positions.h5" as dataset "<pre>:<post>"
+            using a structured ndarray with dtype
+            [('gid', 'i8'), ('x', float), ('y', float), ('z', float)]
+            where gid is postsynaptic cell id, and x,y,z the corresponding
+            midpoint coordinates of the target compartment.
         """
         # set up connections from all cells in presynaptic to post across RANKs
         n0 = self.populations[pre].first_gid
@@ -790,31 +798,32 @@ class Network(object):
 
 
         # gather and write syn_idx_pos data
-        if RANK == 0:
-            synData = flattenlist(COMM.gather(syn_idx_pos))
-
-            # convert to structured array
-            dtype = [('gid', 'i8'), ('x', float), ('y', float), ('z', float)]
-            synDataArray = np.empty((len(synData), ), dtype=dtype)
-            for i, (gid, x, y, z) in enumerate(synData):
-                synDataArray[i]['gid'] = gid
-                synDataArray[i]['x'] = x
-                synDataArray[i]['y'] = y
-                synDataArray[i]['z'] = z
-            # Dump to hdf5 file, append to file if entry exists
-            f = h5py.File(os.path.join(self.OUTPUTPATH,
-                                       'synapse_positions.h5'))
-            key = '{}:{}'.format(pre, post)
-            if key in f.keys():
-                del f[key]
-                try:
-                    assert key not in f.keys()
-                except AssertionError:
-                    raise AssertionError
-            f[key] = synDataArray
-            f.close()
-        else:
-            COMM.gather(syn_idx_pos)
+        if save_connections:
+            if RANK == 0:
+                synData = flattenlist(COMM.gather(syn_idx_pos))
+    
+                # convert to structured array
+                dtype = [('gid', 'i8'), ('x', float), ('y', float), ('z', float)]
+                synDataArray = np.empty((len(synData), ), dtype=dtype)
+                for i, (gid, x, y, z) in enumerate(synData):
+                    synDataArray[i]['gid'] = gid
+                    synDataArray[i]['x'] = x
+                    synDataArray[i]['y'] = y
+                    synDataArray[i]['z'] = z
+                # Dump to hdf5 file, append to file if entry exists
+                f = h5py.File(os.path.join(self.OUTPUTPATH,
+                                           'synapse_positions.h5'))
+                key = '{}:{}'.format(pre, post)
+                if key in f.keys():
+                    del f[key]
+                    try:
+                        assert key not in f.keys()
+                    except AssertionError:
+                        raise AssertionError
+                f[key] = synDataArray
+                f.close()
+            else:
+                COMM.gather(syn_idx_pos)
 
         return COMM.bcast([conncount, syncount])
 
