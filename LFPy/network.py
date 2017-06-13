@@ -909,6 +909,12 @@ class Network(object):
         except AttributeError as ae:
             raise Exception('neuron.h.CVode().use_fast_imem() not found. Please update NEURON to v.7.5 or newer')
 
+        # test some of the inputs
+        try:
+            if electrode is None:
+                assert(rec_pop_contributions is False)
+        except AssertionError:
+            raise AssertionError('rec_pop_contributions can not be True when electrode is None')
 
         for name in self.population_names:
             for cell in self.populations[name].cells:
