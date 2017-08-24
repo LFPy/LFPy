@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 """Demonstrate usage of LFPy.NetworkPopulation with a ball-and-stick type
 morphology with active HH channels inserted in the soma and passive-leak
 channels distributed throughout the apical stick. The corresponding morphology
@@ -18,33 +19,33 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 """
-
+# import modules
 from mpi4py.MPI import COMM_WORLD as COMM
 from LFPy import NetworkPopulation, NetworkCell
-# class NetworkCell parameters
+# class NetworkCell parameters:
 cellParameters = dict(
     morphology='BallAndStick.hoc',
     templatefile='BallAndStickTemplate.hoc',
     templatename='BallAndStickTemplate',
     templateargs=None,
-    passive=False,
     delete_sections=False,
 )
-# class NetworkPopulation parameters
+# class NetworkPopulation parameters:
 populationParameters = dict(
     Cell=NetworkCell,
     cell_args = cellParameters,
     pop_args = dict(
-        radius=100,
+        radius=100.,
         loc=0.,
         scale=20.),
-    rotation_args = dict(x=0, y=0),
+    rotation_args = dict(x=0., y=0.),
 )
-# create population instance
+# create population:
 population = NetworkPopulation(
     first_gid=0, name='E',
     **populationParameters
     )
+# print out some info:
 for cell in population.cells:
     print('RANK {}; pop {}; gid {}; cell {}'.format(
         COMM.Get_rank(), population.name,

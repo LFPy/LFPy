@@ -19,6 +19,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 """
+# import modules:
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
 from mpl_toolkits.mplot3d import Axes3D
@@ -30,14 +31,14 @@ from mpi4py import MPI
 from LFPy import NetworkCell, Network, Synapse, RecExtElectrode
 import neuron
 
-# MPI variables
+# set up MPI variables:
 COMM = MPI.COMM_WORLD
 SIZE = COMM.Get_size()
 RANK = COMM.Get_rank()
 
 # avoid same sequence of random numbers from numpy and neuron on each RANK,
-# e.g., in order to draw unique cell locations and random synapse activation
-# times
+# e.g., in order to draw unique cell and synapse locations and random synapse
+# activation times
 GLOBALSEED = 1234
 np.random.seed(GLOBALSEED + RANK)
 
@@ -49,7 +50,6 @@ def decimate(x, q=10, n=4, k=0.8, filterfun=ss.cheby1):
     """
     scipy.signal.decimate like downsampling using filtfilt instead of lfilter,
     and filter coeffs from butterworth or chebyshev type 1.
-
 
     Parameters
     ----------
@@ -98,7 +98,8 @@ def decimate(x, q=10, n=4, k=0.8, filterfun=ss.cheby1):
         return y[::q]
 
 def remove_axis_junk(ax, lines=['right', 'top']):
-    for loc, spine in ax.spines.iteritems():
+    """remove chosen lines from plotting axis"""
+    for loc, spine in ax.spines.items():
         if loc in lines:
             spine.set_color('none')
     ax.xaxis.set_ticks_position('bottom')
@@ -117,14 +118,12 @@ def draw_lineplot(
         ztransform=True,
         filter=False,
         filterargs=dict(N=2, Wn=0.02, btype='lowpass')):
-    ''' draw some nice lines'''
-
+    """helper function to draw line plots"""
     tvec = np.arange(data.shape[1])*dt
     try:
         tinds = (tvec >= T[0]) & (tvec <= T[1])
     except TypeError:
-        print data.shape, T
-        raise Exception
+        raise TypeError
 
     # apply temporal filter
     if filter:
@@ -182,30 +181,30 @@ def draw_lineplot(
 ################################################################################
 # Set up shared and population-specific parameters
 ################################################################################
+# relative path for simulation output:
 OUTPUTPATH='example_network_output'
 
-# class NetworkCell parameters
+# class NetworkCell parameters:
 cellParameters = dict(
     morphology='BallAndStick.hoc',
     templatefile='BallAndStickTemplate.hoc',
     templatename='BallAndStickTemplate',
     templateargs=None,
-    passive=False,
     delete_sections=False,
 )
 
-# class NetworkPopulation parameters
+# class NetworkPopulation parameters:
 populationParameters = dict(
     Cell=NetworkCell,
     cell_args = cellParameters,
     pop_args = dict(
-        radius=100,
+        radius=100.,
         loc=0.,
         scale=20.),
-    rotation_args = dict(x=0, y=0),
+    rotation_args = dict(x=0., y=0.),
 )
 
-# class Network parameters
+# class Network parameters:
 networkParameters = dict(
     dt = 2**-4,
     tstop = 1200.,
@@ -214,43 +213,52 @@ networkParameters = dict(
     OUTPUTPATH = OUTPUTPATH
 )
 
-# class RecExtElectrode parameters
+# class RecExtElectrode parameters:
 electrodeParameters = dict(
     x = np.zeros(13),
     y = np.zeros(13),
-    z = np.linspace(1000, -200, 13),
-    N = np.array([[0, 1, 0]]*13),
-    r = 5,
+    z = np.linspace(1000., -200., 13),
+    N = np.array([[0., 1., 0.]]*13),
+    r = 5.,
     n = 50,
     sigma = 0.3,
 )
 
-# method Network.simulate() parameters
+# method Network.simulate() parameters:
 networkSimulationArguments = dict(
     rec_current_dipole_moment = True,
     rec_pop_contributions = True,
 )
 
-# populations and connection probability
+# population names, sizez and connection probability:
 population_names = ['E', 'I']
 population_sizes = [80, 20] 
-connectionProbability = 0.05
+connectionProbability = [[0.05, 0.05]]*2
 
-# synapse model and specification
+# synapse model. All corresponding parameters for weights,
+# connection delays, multapses and layerwise positions are
+# set up as shape (2, 2) nested lists for each possible
+# connection on the form:
+# [["E:E", "E:I"],
+#  ["I:E", "I:I"]].
 synapseModel = neuron.h.Exp2Syn
+# synapse parameters
 synapseParameters = [[dict(tau1=0.2, tau2=1.8, e=0.)]*2,
                      [dict(tau1=0.1, tau2=9.0, e=-80.)]*2]
+# synapse max. conductance (function, mean, st.dev., min.):
 weightFunction = np.random.normal
 weightArguments = [[dict(loc=0.002, scale=0.0002)]*2,
                    [dict(loc=0.01,  scale=0.001)]*2]
 minweight = 0.
+# conduction delay (function, mean, st.dev., min.):
 delayFunction = np.random.normal
 delayArguments = [[dict(loc=1.5, scale=0.3)]*2]*2
 mindelay = 0.3
 multapseFunction = np.random.normal
 multapseArguments = [[dict(loc=2., scale=.5)]*2,
                      [dict(loc=5., scale=1.)]*2]
-# method NetworkCell.get_rand_idx_area_and_distribution_norm parameters
+# method NetworkCell.get_rand_idx_area_and_distribution_norm
+# parameters for layerwise synapse positions:
 synapsePositionArguments = [[dict(section=['soma', 'apic'],
                                   fun=[st.norm]*2,
                                   funargs=[dict(loc=500., scale=100.)]*2,
@@ -264,41 +272,41 @@ if __name__ == '__main__':
     ############################################################################
     # Main simulation
     ############################################################################
-
+    # create directory for output:
     if not os.path.isdir(OUTPUTPATH):
         if RANK == 0:
             os.mkdir(OUTPUTPATH)
     COMM.Barrier()
 
-    # instantiate Network class
+    # instantiate Network:
     network = Network(**networkParameters)
 
-    # create populations
+    # create E and I populations:
     for name, size in zip(population_names, population_sizes):
         network.create_population(name=name, POP_SIZE=size,
                                   **populationParameters)
 
 
-        # create some background synaptic activity onto the cells with Poisson
-        # activation statistics
+        # create excitatpry background synaptic activity for each cell
+        # with Poisson statistics
         for cell in network.populations[name].cells:
             idx = cell.get_rand_idx_area_norm(section='allsec', nidx=64)
             for i in idx:
                 syn = Synapse(cell=cell, idx=i, syntype='Exp2Syn',
                               weight=0.002,
                               **dict(tau1=0.2, tau2=1.8, e=0.))
-                syn.set_spike_times_w_netstim(interval=1000. / 5.)
+                syn.set_spike_times_w_netstim(interval=200.)
 
 
-    # create connectivity and connect populations
+    # create connectivity matrices and connect populations:
     for i, pre in enumerate(population_names):
         for j, post in enumerate(population_names):
             # boolean connectivity matrix between pre- and post-synaptic neurons
             # in each population (postsynaptic on this RANK)
             connectivity = network.get_connectivity_rand(pre=pre, post=post,
-                                                connprob=connectionProbability)
+                                                connprob=connectionProbability[i][j])
                         
-            # connect network
+            # connect network:
             (conncount, syncount) = network.connect(
                             pre=pre, post=post,
                             connectivity=connectivity,
@@ -315,17 +323,16 @@ if __name__ == '__main__':
                             syn_pos_args=synapsePositionArguments[i][j],
                             )
 
-    # set up extracellular recording device
+    # set up extracellular recording device:
     electrode = RecExtElectrode(**electrodeParameters)
 
-    # run simulation
+    # run simulation:
     SPIKES, OUTPUT, DIPOLEMOMENT = network.simulate(
         electrode=electrode,
         **networkSimulationArguments
     )
     
-
-    # collect somatic potentials across all RANKs to RANK 0
+    # collect somatic potentials across all RANKs to RANK 0:
     if RANK == 0:
         somavs = []
         for i, name in enumerate(population_names):
@@ -343,7 +350,6 @@ if __name__ == '__main__':
     ############################################################################
     # Plot some output on RANK 0
     ############################################################################
-
     if RANK == 0:
         # spike raster
         fig, ax = plt.subplots(1,1)

@@ -907,7 +907,7 @@ class Network(object):
         try:
             cvode.use_fast_imem(1)
         except AttributeError as ae:
-            raise Exception('neuron.h.CVode().use_fast_imem() not found. Please update NEURON to v.7.5 or newer')
+            raise Exception('neuron.h.CVode().use_fast_imem() not found. Please update NEURON to v.7.4 or newer')
 
         # test some of the inputs
         try:
