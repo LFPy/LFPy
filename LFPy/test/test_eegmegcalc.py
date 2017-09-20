@@ -198,6 +198,40 @@ class testInfiniteVolumeConductor(unittest.TestCase):
         np.testing.assert_allclose(phi, np.array([[1., 0.], [0., 1.]]))
 
 
+class testOneSphereVolumeConductor(unittest.TestCase):
+    """
+    test class OneSphereVolumeConductor
+    """
+    def test_OneSphereVolumeConductor_0(self):
+        """test case where sigma_i == sigma_o which
+        should be identical to the standard point-source potential in
+        infinite homogeneous media
+        """
+        # current magnitude
+        I = 1.
+        # conductivity
+        sigma = 0.3 
+        # sphere radius
+        R = 1000
+        # source location (along x-axis)
+        rs = 800
+        # sphere coordinates of observation points
+        radius = np.r_[np.arange(0, rs), np.arange(rs+1, rs*2)]
+        theta = np.zeros(radius.shape)
+        phi = np.zeros(radius.shape)
+        r = np.array([radius, theta, phi])
+        
+        # predict potential
+        sphere = LFPy.OneSphereVolumeConductor(r=r, rs=rs, R=R, sigma_i=sigma, sigma_o=sigma)
+        phi = sphere.calc_potential(I)
+        
+        # ground truth
+        phi_gt = I / (4*np.pi*sigma*abs(radius-rs))
+        
+        # test
+        np.testing.assert_almost_equal(phi, phi_gt)
+
+
 ######## Functions used by tests: ##############################################
 
 def make_class_object(rz1, r_el):

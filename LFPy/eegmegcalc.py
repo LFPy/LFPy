@@ -16,8 +16,131 @@ GNU General Public License for more details.
 """
 
 from __future__ import division
-from scipy.special import eval_legendre, lpmv
+from scipy.special import eval_legendre, lpmv, legendre
 import numpy as np
+
+
+class OneSphereVolumeConductor(object):
+    """
+    Computes extracellular potentials within and outside a spherical volume-
+    conductor model that assumes homogeneous, isotropic, linear (frequency
+    independent) conductivity in and outside the sphere with a radius R. The
+    conductivity in and outside the sphere must be greater than 0, and the
+    current source(s) must be located within the radius R.
+    
+    The implementation is based on the description of electric potentials of
+    point charge in an dielectric sphere embedded in dielectric media, which is
+    mathematically equivalent to a current source in conductive media, as
+    published by Deng (2008), Journal of Electrostatics 66:549-560
+    
+    Parameters
+    ----------
+    r : ndarray, dtype=float
+        shape(3, n_points) observation points in space in spherical coordinates
+        (radius, theta, phi) relative to the center of the sphere. 
+    rs : float
+        source location along the horizontal x-axis (µm)
+    R : float
+        sphere radius (µm)
+    sigma_i : float
+        electric conductivity for radius r <= R (S/m)
+    sigma_o : float
+        electric conductivity for radius r > R (S/m)
+    
+    Examples
+    --------
+    Compute the potential for a single monopole along the x-axis:
+    >>> # import modules
+    >>> from LFPy import OneSphereVolumeConductor
+    >>> import numpy as np
+    >>> import matplotlib.pyplot as plt
+    >>> # observation points in spherical coordinates (flattened)
+    >>> X, Y = np.mgrid[-15000:15100:100., -15000:15100:100.]
+    >>> r = np.array([np.sqrt(X**2 + Y**2).flatten(),
+    >>>               np.arctan2(Y, X).flatten(),
+    >>>               np.zeros(X.size)])
+    >>> # set up class object and compute electric potential in all locations
+    >>> sphere = OneSphereVolumeConductor(r, rs=8000, R=10000.,
+    >>>                                   sigma_i=0.3, sigma_o=0.03)
+    >>> Phi = sphere.calc_potential(1.).reshape(X.shape)
+    >>> # plot
+    >>> plt.contourf(X, Y, Phi,
+    >>>              levels=np.linspace(Phi.min(), np.median(Phi[np.isfinite(Phi)])*4, 30))
+    >>> plt.colorbar()
+    >>> plt.show()    
+    """
+    def __init__(self,
+                 r,
+                 rs, 
+                 R=10000.,
+                 sigma_i=0.3,
+                 sigma_o=0.03):
+        """initialize class OneSphereVolumeConductor"""
+        # check inputs
+        try:
+            assert(r.shape[0] == 3)
+            assert(r.ndim == 2)
+        except AssertionError as ae:
+            raise AssertionError('r must be a shape (3, n_points) ndarray')
+        try:
+            assert((type(R) is float) or (type(R) is int))
+        except AssertionError as ae:
+            raise AssertionError('sphere radius R must be a float value')
+        try:
+            assert((type(rs) is float) or (type(rs) is int))
+            assert(abs(rs) < R)
+        except AssertionError as ae:
+            raise AssertionError('source location rs must be a float value and |rs| must be less than sphere radius R')
+        try:
+            assert((sigma_i > 0) & (sigma_o > 0))
+        except AssertionError as ae:
+            raise AssertionError('sigma_i and sigma_o must both be positive values')
+        
+        self.r = r
+        self.rs = rs
+        self.R = R
+        self.sigma_i = sigma_i
+        self.sigma_o = sigma_o
+                
+    
+    def calc_potential(self, I, n_max = 50):
+        """
+        Return the electric potential at observation points for source current
+        with magnitude I as function of time.
+        
+        Parameters
+        ----------
+        I : ndarray, dtype float
+            Shape (n_tsteps, ) array containing source current (nA)
+        n_max : int
+            Number of elements in polynomial expansion to sum over
+            (see Deng 2008).
+        
+        Returns
+        -------
+        Phi : ndarray
+            shape Electric potential
+        """
+        r = self.r[0]
+        theta = self.r[1]
+
+        phi_i = np.zeros(r.size)
+        phi_o = np.zeros(r.size)
+
+        # potential in homogeneous media
+        phi_i[r <= self.R] = 1. / np.sqrt(r[r <= self.R]**2 + self.rs**2 - 2*r[r <= self.R]*self.rs*np.cos(theta[r <= self.R]))
+        
+        for n in range(n_max):
+            P_n = legendre(n)
+            
+            # observation points r <= R
+            phi_i[r <= self.R] += 1./self.R*((self.sigma_i - self.sigma_o)*(n+1))  / (self.sigma_i*n + self.sigma_o*(n+1)) * ((r[r <= self.R]*self.rs)/self.R**2)**n * P_n(np.cos(theta[r <= self.R]))
+        
+            # observation points r > R
+            phi_o[r > self.R] += 1/r[r > self.R]*(self.sigma_i*(2*n+1) ) / (self.sigma_i*n + self.sigma_o*(n+1)) * (self.rs / r[r > self.R])**n * P_n(np.cos(theta[r > self.R]))
+
+        return I / (4.*np.pi*self.sigma_i)*(phi_i + phi_o)
+    
 
 class FourSphereVolumeConductor(object):
     """
