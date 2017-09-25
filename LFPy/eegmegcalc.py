@@ -38,8 +38,6 @@ class OneSphereVolumeConductor(object):
     r : ndarray, dtype=float
         shape(3, n_points) observation points in space in spherical coordinates
         (radius, theta, phi) relative to the center of the sphere. 
-    rs : float
-        source location along the horizontal x-axis (µm)
     R : float
         sphere radius (µm)
     sigma_i : float
@@ -55,23 +53,25 @@ class OneSphereVolumeConductor(object):
     >>> import numpy as np
     >>> import matplotlib.pyplot as plt
     >>> # observation points in spherical coordinates (flattened)
-    >>> X, Y = np.mgrid[-15000:15100:100., -15000:15100:100.]
+    >>> X, Y = np.mgrid[-15000:15100:200., -15000:15100:200.]
     >>> r = np.array([np.sqrt(X**2 + Y**2).flatten(),
     >>>               np.arctan2(Y, X).flatten(),
     >>>               np.zeros(X.size)])
     >>> # set up class object and compute electric potential in all locations
-    >>> sphere = OneSphereVolumeConductor(r, rs=8000, R=10000.,
+    >>> sphere = OneSphereVolumeConductor(r, R=10000.,
     >>>                                   sigma_i=0.3, sigma_o=0.03)
-    >>> Phi = sphere.calc_potential(1.).reshape(X.shape)
+    >>> Phi = sphere.calc_potential(rs=8000, I=1.).reshape(X.shape)
     >>> # plot
-    >>> plt.contourf(X, Y, Phi,
+    >>> fig, ax = plt.subplots(1,1)
+    >>> im=ax.contourf(X, Y, Phi,
     >>>              levels=np.linspace(Phi.min(), np.median(Phi[np.isfinite(Phi)])*4, 30))
-    >>> plt.colorbar()
+    >>> circle = plt.Circle(xy=(0,0), radius=sphere.R, fc='none', ec='k')
+    >>> ax.add_patch(circle)
+    >>> fig.colorbar(im, ax=ax)
     >>> plt.show()    
     """
     def __init__(self,
                  r,
-                 rs, 
                  R=10000.,
                  sigma_i=0.3,
                  sigma_o=0.03):
@@ -87,31 +87,30 @@ class OneSphereVolumeConductor(object):
         except AssertionError as ae:
             raise AssertionError('sphere radius R must be a float value')
         try:
-            assert((type(rs) is float) or (type(rs) is int))
-            assert(abs(rs) < R)
-        except AssertionError as ae:
-            raise AssertionError('source location rs must be a float value and |rs| must be less than sphere radius R')
-        try:
             assert((sigma_i > 0) & (sigma_o > 0))
         except AssertionError as ae:
             raise AssertionError('sigma_i and sigma_o must both be positive values')
         
         self.r = r
-        self.rs = rs
         self.R = R
         self.sigma_i = sigma_i
         self.sigma_o = sigma_o
                 
     
-    def calc_potential(self, I, n_max = 50):
+    def calc_potential(self, rs, I, min_distance=1., n_max = 50):
         """
         Return the electric potential at observation points for source current
         with magnitude I as function of time.
         
         Parameters
         ----------
-        I : ndarray, dtype float
-            Shape (n_tsteps, ) array containing source current (nA)
+        rs : float
+            monopole source location along the horizontal x-axis (µm)
+        I : float or ndarray, dtype float
+            float or shape (n_tsteps, ) array containing source current (nA)
+        min_distance : None or float
+            minimum distance between source location and observation point (µm)
+            (in order to avoid singular values)
         n_max : int
             Number of elements in polynomial expansion to sum over
             (see Deng 2008).
@@ -119,8 +118,19 @@ class OneSphereVolumeConductor(object):
         Returns
         -------
         Phi : ndarray
-            shape Electric potential
+            shape (n-points, ) ndarray of floats if I is float like. If I is
+            an 1D ndarray, and shape (n-points, I.size) ndarray is returned
         """
+        try:
+            assert((type(rs) is float) or (type(rs) is int))
+            assert(abs(rs) < self.R)
+        except AssertionError as ae:
+            raise AssertionError('source location rs must be a float value and |rs| must be less than sphere radius R')
+        try:
+            assert((min_distance is None) or (type(min_distance) in [float, int]))
+        except AssertionError:
+            raise AssertionError('min_distance must be None or a float')
+        
         r = self.r[0]
         theta = self.r[1]
 
@@ -128,18 +138,39 @@ class OneSphereVolumeConductor(object):
         phi_o = np.zeros(r.size)
 
         # potential in homogeneous media
-        phi_i[r <= self.R] = 1. / np.sqrt(r[r <= self.R]**2 + self.rs**2 - 2*r[r <= self.R]*self.rs*np.cos(theta[r <= self.R]))
+        if min_distance is None:
+            phi_i[r <= self.R] = 1. / np.sqrt(r[r <= self.R]**2 + rs**2 - 2*r[r <= self.R]*rs*np.cos(theta[r <= self.R]))
+        else:
+            denom = np.sqrt(r[r <= self.R]**2 + rs**2 - 2*r[r <= self.R]*rs*np.cos(theta[r <= self.R]))
+            denom[denom < min_distance] = min_distance
+            phi_i[r <= self.R] = 1./denom
         
+        # add harmonical contributions due to inhomogeneous media
         for n in range(n_max):
             P_n = legendre(n)
             
             # observation points r <= R
-            phi_i[r <= self.R] += 1./self.R*((self.sigma_i - self.sigma_o)*(n+1))  / (self.sigma_i*n + self.sigma_o*(n+1)) * ((r[r <= self.R]*self.rs)/self.R**2)**n * P_n(np.cos(theta[r <= self.R]))
+            phi_i[r <= self.R] += 1./self.R*((self.sigma_i - self.sigma_o)*(n+1))  / (self.sigma_i*n + self.sigma_o*(n+1)) * ((r[r <= self.R]*rs)/self.R**2)**n * P_n(np.cos(theta[r <= self.R]))
         
             # observation points r > R
-            phi_o[r > self.R] += 1/r[r > self.R]*(self.sigma_i*(2*n+1) ) / (self.sigma_i*n + self.sigma_o*(n+1)) * (self.rs / r[r > self.R])**n * P_n(np.cos(theta[r > self.R]))
+            phi_o[r > self.R] += 1/r[r > self.R]*(self.sigma_i*(2*n+1) ) / (self.sigma_i*n + self.sigma_o*(n+1)) * (rs / r[r > self.R])**n * P_n(np.cos(theta[r > self.R]))
 
-        return I / (4.*np.pi*self.sigma_i)*(phi_i + phi_o)
+        if type(I) is np.ndarray:
+            try:
+                assert(np.all(np.isfinite(I)))
+                assert(np.all(np.isreal(I)))
+                assert(I.ndim == 1)
+            except AssertionError:
+                raise AssertionError('input argument I must be float or 1D ndarray with float values')
+            
+            return np.dot((phi_i + phi_o).reshape((1, -1)).T,
+                I.reshape((1, -1))) / (4.*np.pi*self.sigma_i)            
+        else:
+            try:
+                assert(np.isfinite(I)) and (np.shape(I) == ())           
+            except AssertionError:
+                raise AssertionError('input argument I must be float or 1D ndarray with float values') 
+            return I / (4.*np.pi*self.sigma_i)*(phi_i + phi_o)
     
 
 class FourSphereVolumeConductor(object):
