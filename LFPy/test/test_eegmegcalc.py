@@ -202,7 +202,7 @@ class testOneSphereVolumeConductor(unittest.TestCase):
     """
     test class OneSphereVolumeConductor
     """
-    def test_OneSphereVolumeConductor_0(self):
+    def test_OneSphereVolumeConductor_00(self):
         """test case where sigma_i == sigma_o which
         should be identical to the standard point-source potential in
         infinite homogeneous media
@@ -222,8 +222,8 @@ class testOneSphereVolumeConductor(unittest.TestCase):
         r = np.array([radius, theta, phi])
         
         # predict potential
-        sphere = LFPy.OneSphereVolumeConductor(r=r, rs=rs, R=R, sigma_i=sigma, sigma_o=sigma)
-        phi = sphere.calc_potential(I)
+        sphere = LFPy.OneSphereVolumeConductor(r=r, R=R, sigma_i=sigma, sigma_o=sigma)
+        phi = sphere.calc_potential(rs=rs, I=I)
         
         # ground truth
         phi_gt = I / (4*np.pi*sigma*abs(radius-rs))
@@ -231,6 +231,34 @@ class testOneSphereVolumeConductor(unittest.TestCase):
         # test
         np.testing.assert_almost_equal(phi, phi_gt)
 
+    def test_OneSphereVolumeConductor_01(self):
+        """test case where sigma_i == sigma_o which
+        should be identical to the standard point-source potential in
+        infinite homogeneous media
+        """
+        # current magnitude
+        I = np.ones(10)
+        # conductivity
+        sigma = 0.3 
+        # sphere radius
+        R = 1000
+        # source location (along x-axis)
+        rs = 800
+        # sphere coordinates of observation points
+        radius = np.r_[np.arange(0, rs), np.arange(rs+1, rs*2)]
+        theta = np.zeros(radius.shape)
+        phi = np.zeros(radius.shape)
+        r = np.array([radius, theta, phi])
+        
+        # predict potential
+        sphere = LFPy.OneSphereVolumeConductor(r=r, R=R, sigma_i=sigma, sigma_o=sigma)
+        phi = sphere.calc_potential(rs=rs, I=I)
+        
+        # ground truth
+        phi_gt = I[0] / (4*np.pi*sigma*abs(radius-rs))
+        
+        # test
+        np.testing.assert_almost_equal(phi, np.array([phi_gt]*I.size).T)
 
 ######## Functions used by tests: ##############################################
 
