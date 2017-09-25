@@ -116,8 +116,14 @@ class FourSphereVolumeConductor(object):
 
         """
         p_rad, p_tan = self._decompose_dipole(p)
-        pot_rad = self._calc_rad_potential(p_rad)
-        pot_tan = self._calc_tan_potential(p_tan)
+        if np.linalg.norm(p_rad) != 1e-15:
+            pot_rad = self._calc_rad_potential(p_rad)
+        else:
+            pot_rad = 0.
+        if np.linalg.norm(p_tan) != 1e-15:
+            pot_tan = self._calc_tan_potential(p_tan)
+        else:
+            pot_tan = 0.
 
         pot_tot = pot_rad + pot_tan
         mask = np.isnan(pot_tot)
@@ -339,12 +345,21 @@ class FourSphereVolumeConductor(object):
             Summationfactor for calculation of electrical potential in brain
             from radial current dipole moment. (unitless)
         """
+        print('potential brain rad')
         n = np.arange(1, 100)
         c1n = self._calc_c1n(n)
         consts = n*(c1n * (r / self.r1) ** n + (self.rz / r) ** (n + 1))
-        consts = np.insert(consts, 0, 0)
+        consts = np.insert(consts, 0, 0) # since the legendre function starts with P0
         leg_consts = np.polynomial.legendre.Legendre(consts)
         pot_sum = leg_consts(np.cos(theta))
+        print('consts[-1]', consts[-1])
+        n2 = np.arange(1, 1000)
+        c1n2 = self._calc_c1n(n2)
+        consts2 = n2*(c1n2 * (r / self.r1) ** n2 + (self.rz / r) ** (n2 + 1))
+        consts2 = np.insert(consts2, 0, 0) # since the legendre function starts with P0
+        leg_consts2 = np.polynomial.legendre.Legendre(consts2)
+        pot_sum2 = leg_consts2(np.cos(theta))
+        print('potsum1', pot_sum, 'potsum2', pot_sum2, 'diff', pot_sum - pot_sum2)
         return pot_sum
 
     def _potential_csf_rad(self, r, theta):
@@ -365,13 +380,23 @@ class FourSphereVolumeConductor(object):
             Summation factor for calculation of electrical potential in CSF
             from radial current dipole moment. (unitless)
         """
+        print('potential csf rad')
         n = np.arange(1,100)
         c2n = self._calc_c2n(n)
         d2n = self._calc_d2n(n, c2n)
         consts = n*(c2n * (r / self.r2) ** n + d2n * (self.r2 / r) ** (n + 1))
-        consts = np.insert(consts, 0, 0)
+        consts = np.insert(consts, 0, 0) # since the legendre function starts with P0
         leg_consts = np.polynomial.legendre.Legendre(consts)
         pot_sum = leg_consts(np.cos(theta))
+        print('consts[-1]', consts[-1])
+        n2 = np.arange(1,1000)
+        c2n2 = self._calc_c2n(n2)
+        d2n2 = self._calc_d2n(n2, c2n2)
+        consts2 = n2*(c2n2 * (r / self.r2) ** n2 + d2n2 * (self.r2 / r) ** (n2 + 1))
+        consts2 = np.insert(consts2, 0, 0) # since the legendre function starts with P0
+        leg_consts2 = np.polynomial.legendre.Legendre(consts2)
+        pot_sum2 = leg_consts2(np.cos(theta))
+        print('potsum1', pot_sum, 'potsum2', pot_sum2, 'diff', pot_sum - pot_sum2, 'RE', np.abs((pot_sum - pot_sum2)/pot_sum2))
         return pot_sum
 
     def _potential_skull_rad(self, r, theta):
@@ -392,13 +417,23 @@ class FourSphereVolumeConductor(object):
             Summation factor for calculation of electrical potential in skull
             from radial current dipole moment. (unitless)
         """
+        print('potential skull rad')
         n = np.arange(1,100)
         c3n = self._calc_c3n(n)
         d3n = self._calc_d3n(n, c3n)
         consts = n*(c3n * (r / self.r3) ** n + d3n * (self.r3 / r) ** (n + 1))
-        consts = np.insert(consts, 0, 0)
+        consts = np.insert(consts, 0, 0) # since the legendre function starts with P0
         leg_consts = np.polynomial.legendre.Legendre(consts)
         pot_sum = leg_consts(np.cos(theta))
+        print('consts[-1]', consts[-1])
+        n2 = np.arange(1,1000)
+        c3n2 = self._calc_c3n(n2)
+        d3n2 = self._calc_d3n(n2, c3n2)
+        consts2 = n2*(c3n2 * (r / self.r3) ** n2 + d3n2 * (self.r3 / r) ** (n2 + 1))
+        consts2 = np.insert(consts2, 0, 0) # since the legendre function starts with P0
+        leg_consts2 = np.polynomial.legendre.Legendre(consts2)
+        pot_sum2 = leg_consts2(np.cos(theta))
+        print('potsum1', pot_sum, 'potsum2', pot_sum2, 'diff', pot_sum - pot_sum2)
         return pot_sum
 
     def _potential_scalp_rad(self, r, theta):
@@ -419,13 +454,23 @@ class FourSphereVolumeConductor(object):
             Summation factor for calculation of electrical potential in scalp
             from radial current dipole moment. (unitless)
         """
+        print('potential scalp rad')
         n = np.arange(1,100)
         c4n = self._calc_c4n(n)
         d4n = self._calc_d4n(n, c4n)
         consts = n*(c4n * (r / self.r4) ** n + d4n * (self.r4 / r) ** (n + 1))
-        consts = np.insert(consts, 0, 0)
+        print('consts[-1]', consts[-1])
+        n2 = np.arange(1,1000)
+        c4n2 = self._calc_c4n(n2)
+        d4n2 = self._calc_d4n(n2, c4n2)
+        consts2 = n2*(c4n2 * (r / self.r4) ** n2 + d4n2 * (self.r4 / r) ** (n2 + 1))
+        consts = np.insert(consts, 0, 0) # since the legendre function starts with P0
+        consts2 = np.insert(consts2, 0, 0) # since the legendre function starts with P0
         leg_consts = np.polynomial.legendre.Legendre(consts)
         pot_sum = leg_consts(np.cos(theta))
+        leg_consts2 = np.polynomial.legendre.Legendre(consts2)
+        pot_sum2 = leg_consts2(np.cos(theta))
+        print('potsum1', pot_sum, 'potsum2', pot_sum2, 'diff', pot_sum - pot_sum2)
         return pot_sum
 
     def _potential_brain_tan(self, r, theta):
@@ -528,19 +573,19 @@ class FourSphereVolumeConductor(object):
         return pot_sum
 
     def _calc_vn(self, n):
-        r_const = (self.r34 ** n - self.r43 ** (n + 1)) / ((n + 1) / n * self.r34 ** n + self.r43 ** (n + 1))
+        r_const = (self.r34 ** (2*n + 1) - 1) / ((n + 1) / n * self.r34 ** (2*n + 1) + 1)
         v = (n / (n + 1) * self.sigma34 - r_const) / (self.sigma34 + r_const)
         return v
 
     def _calc_yn(self, n):
         vn = self._calc_vn(n)
-        r_const = (n / (n + 1) * self.r23 ** n - vn * self.r32 ** (n + 1)) / (self.r23 ** n + vn * self.r32 ** (n + 1))
+        r_const = (n / (n + 1) * self.r23 ** (2*n + 1) - vn) / (self.r23 ** (2*n + 1) + vn)
         y = (n / (n + 1) * self.sigma23 - r_const) / (self.sigma23 + r_const)
         return y
 
     def _calc_zn(self, n):
         yn = self._calc_yn(n)
-        z = (self.r12 ** n - (n + 1) / n * yn * self.r21 ** (n + 1)) / (self.r12 ** n + yn * self.r21 ** (n + 1))
+        z = (self.r12 ** (2*n+1) - (n + 1) / n * yn) / (self.r12 ** (2*n+1) + yn)
         return z
 
     def _calc_c1n(self, n):
@@ -581,6 +626,17 @@ class FourSphereVolumeConductor(object):
         d4 = n / (n + 1) * c4
         return d4
 
+    def calc_csf_term1(n, r):
+        yn = calc_yn(n)
+        c1 = calc_c1n(n)
+        term1 = (c1 + rz1 ** (n + 1)) / ((r1 / r) ** n + (r2 ** 2 / (r1 * r)) ** n * r21 * yn)
+        return term1
+
+    def calc_csf_term2(n, r):
+        yn = calc_yn(n)
+        c1 = calc_c1n(n)
+        term2 = yn*(c1 + rz1 ** (n + 1)) / (r/r2*((r1 * r) / r2**2) ** n  + (r / r1) ** (n+1)*yn)
+        return term2
 
 class InfiniteVolumeConductor(object):
     """
