@@ -120,8 +120,7 @@ class FourSphereVolumeConductor(object):
         pot_tan = self._calc_tan_potential(p_tan)
 
         pot_tot = pot_rad + pot_tan
-        mask = np.isnan(pot_tot)
-        return np.ma.masked_array(pot_tot, mask=mask)
+        return pot_tot
 
     def _decompose_dipole(self, p):
         """
