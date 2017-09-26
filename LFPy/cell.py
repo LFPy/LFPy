@@ -752,7 +752,7 @@ class Cell(object):
         self.ymid = .5*(self.ystart+self.yend).flatten()
         self.zmid = .5*(self.zstart+self.zend).flatten()
 
-    def get_idx(self, section='allsec', z_min=-10000, z_max=10000):
+    def get_idx(self, section='allsec', z_min=-1E6, z_max=1E6):
         """Returns compartment idx of segments from sections with names that match
         the pattern defined in input section on interval [z_min, z_max].
 
@@ -818,7 +818,7 @@ class Cell(object):
         return np.argmin(dist)
 
     def get_rand_idx_area_norm(self, section='allsec', nidx=1,
-                               z_min=-10000, z_max=10000):
+                               z_min=-1E6, z_max=1E6):
         """Return nidx segment indices in section with random probability
         normalized to the membrane area of segment on
         interval [z_min, z_max]

@@ -16,8 +16,273 @@ GNU General Public License for more details.
 """
 
 from __future__ import division
-from scipy.special import eval_legendre, lpmv
+from scipy.special import eval_legendre, lpmv, legendre
 import numpy as np
+
+
+class OneSphereVolumeConductor(object):
+    """
+    Computes extracellular potentials within and outside a spherical volume-
+    conductor model that assumes homogeneous, isotropic, linear (frequency
+    independent) conductivity in and outside the sphere with a radius R. The
+    conductivity in and outside the sphere must be greater than 0, and the
+    current source(s) must be located within the radius R.
+    
+    The implementation is based on the description of electric potentials of
+    point charge in an dielectric sphere embedded in dielectric media, which is
+    mathematically equivalent to a current source in conductive media, as
+    published by Deng (2008), Journal of Electrostatics 66:549-560
+    
+    Parameters
+    ----------
+    r : ndarray, dtype=float
+        shape(3, n_points) observation points in space in spherical coordinates
+        (radius, theta, phi) relative to the center of the sphere. 
+    R : float
+        sphere radius (µm)
+    sigma_i : float
+        electric conductivity for radius r <= R (S/m)
+    sigma_o : float
+        electric conductivity for radius r > R (S/m)
+    
+    Examples
+    --------
+    Compute the potential for a single monopole along the x-axis:
+    >>> # import modules
+    >>> from LFPy import OneSphereVolumeConductor
+    >>> import numpy as np
+    >>> import matplotlib.pyplot as plt
+    >>> # observation points in spherical coordinates (flattened)
+    >>> X, Y = np.mgrid[-15000:15100:200., -15000:15100:200.]
+    >>> r = np.array([np.sqrt(X**2 + Y**2).flatten(),
+    >>>               np.arctan2(Y, X).flatten(),
+    >>>               np.zeros(X.size)])
+    >>> # set up class object and compute electric potential in all locations
+    >>> sphere = OneSphereVolumeConductor(r, R=10000.,
+    >>>                                   sigma_i=0.3, sigma_o=0.03)
+    >>> Phi = sphere.calc_potential(rs=8000, I=1.).reshape(X.shape)
+    >>> # plot
+    >>> fig, ax = plt.subplots(1,1)
+    >>> im=ax.contourf(X, Y, Phi,
+    >>>              levels=np.linspace(Phi.min(), np.median(Phi[np.isfinite(Phi)])*4, 30))
+    >>> circle = plt.Circle(xy=(0,0), radius=sphere.R, fc='none', ec='k')
+    >>> ax.add_patch(circle)
+    >>> fig.colorbar(im, ax=ax)
+    >>> plt.show()
+    """
+    def __init__(self,
+                 r,
+                 R=10000.,
+                 sigma_i=0.3,
+                 sigma_o=0.03):
+        """initialize class OneSphereVolumeConductor"""
+        # check inputs
+        try:
+            assert(r.shape[0] == 3)
+            assert(r.ndim == 2)
+        except AssertionError as ae:
+            raise AssertionError('r must be a shape (3, n_points) ndarray')
+        try:
+            assert((type(R) is float) or (type(R) is int))
+        except AssertionError as ae:
+            raise AssertionError('sphere radius R must be a float value')
+        try:
+            assert((sigma_i > 0) & (sigma_o > 0))
+        except AssertionError as ae:
+            raise AssertionError('sigma_i and sigma_o must both be positive values')
+        
+        self.r = r
+        self.R = R
+        self.sigma_i = sigma_i
+        self.sigma_o = sigma_o
+                
+    
+    def calc_potential(self, rs, I, min_distance=1., n_max=100):
+        """
+        Return the electric potential at observation points for source current
+        with magnitude I as function of time.
+        
+        Parameters
+        ----------
+        rs : float
+            monopole source location along the horizontal x-axis (µm)
+        I : float or ndarray, dtype float
+            float or shape (n_tsteps, ) array containing source current (nA)
+        min_distance : None or float
+            minimum distance between source location and observation point (µm)
+            (in order to avoid singular values)
+        n_max : int
+            Number of elements in polynomial expansion to sum over
+            (see Deng 2008).
+        
+        Returns
+        -------
+        Phi : ndarray
+            shape (n-points, ) ndarray of floats if I is float like. If I is
+            an 1D ndarray, and shape (n-points, I.size) ndarray is returned
+        """
+        try:
+            assert(type(rs) in [int, float, np.float64])
+            assert(abs(rs) < self.R)
+        except AssertionError as ae:
+            raise AssertionError('source location rs must be a float value and |rs| must be less than sphere radius R')
+        try:
+            assert((min_distance is None) or (type(min_distance) in [float, int, np.float64]))
+        except AssertionError:
+            raise AssertionError('min_distance must be None or a float')
+        
+        r = self.r[0]
+        theta = self.r[1]
+
+        phi_i = np.zeros(r.size)
+        phi_o = np.zeros(r.size)
+
+        # potential in homogeneous media
+        if min_distance is None:
+            phi_i[r <= self.R] = 1. / np.sqrt(r[r <= self.R]**2 + rs**2 - 2*r[r <= self.R]*rs*np.cos(theta[r <= self.R]))
+        else:
+            denom = np.sqrt(r[r <= self.R]**2 + rs**2 - 2*r[r <= self.R]*rs*np.cos(theta[r <= self.R]))
+            denom[denom < min_distance] = min_distance
+            phi_i[r <= self.R] = 1./denom
+        
+        # add harmonical contributions due to inhomogeneous media
+        for n in range(n_max):
+            P_n = legendre(n)
+            
+            # observation points r <= R
+            phi_i[r <= self.R] += 1./self.R*((self.sigma_i - self.sigma_o)*(n+1))  / (self.sigma_i*n + self.sigma_o*(n+1)) * ((r[r <= self.R]*rs)/self.R**2)**n * P_n(np.cos(theta[r <= self.R]))
+        
+            # observation points r > R
+            phi_o[r > self.R] += 1/r[r > self.R]*(self.sigma_i*(2*n+1) ) / (self.sigma_i*n + self.sigma_o*(n+1)) * (rs / r[r > self.R])**n * P_n(np.cos(theta[r > self.R]))
+
+        if type(I) is np.ndarray:
+            try:
+                assert(np.all(np.isfinite(I)))
+                assert(np.all(np.isreal(I)))
+                assert(I.ndim == 1)
+            except AssertionError:
+                raise AssertionError('input argument I must be float or 1D ndarray with float values')
+            
+            return np.dot((phi_i + phi_o).reshape((1, -1)).T,
+                I.reshape((1, -1))) / (4.*np.pi*self.sigma_i)            
+        else:
+            try:
+                assert(np.isfinite(I)) and (np.shape(I) == ())           
+            except AssertionError:
+                raise AssertionError('input argument I must be float or 1D ndarray with float values') 
+            return I / (4.*np.pi*self.sigma_i)*(phi_i + phi_o)
+    
+    
+    def calc_mapping(self, cell, n_max=100):
+        """
+        Compute linear mapping between transmembrane currents of LFPy.Cell like
+        object instantiation and extracellular potential in and outside of
+        sphere. Cell position must be set in space, using the method
+        Cell.set_pos(**kwargs).
+        
+        Parameters
+        ----------
+        cell : LFPy.Cell like instance
+            Instantiation of class LFPy.Cell, TemplateCell or NetworkCell.
+        n_max : int
+            Number of elements in polynomial expansion to sum over
+            (see Deng 2008).
+        
+        Examples
+        --------
+        # Compute extracellular potential in one-sphere volume conductor model
+        # from LFPy.Cell object
+        >>> # import modules
+        >>> import LFPy
+        >>> import os
+        >>> import numpy as np
+        >>> import matplotlib.pyplot as plt
+        >>> from matplotlib.collections import PolyCollection
+        >>> # create cell
+        >>> cell = LFPy.Cell(morphology=os.path.join('test', 'ball_and_sticks.hoc'),
+        >>>                  tstop=10.)
+        >>> cell.set_pos(z=9800.)
+        >>> # stimulus
+        >>> syn = LFPy.Synapse(cell, idx=cell.totnsegs-1, syntype='Exp2Syn', weight=0.01)
+        >>> syn.set_spike_times(np.array([1.]))
+        >>> # simulate
+        >>> cell.simulate(rec_imem=True)
+        >>> # observation points in spherical coordinates (flattened)
+        >>> X, Z = np.mgrid[-500:501:10., 9500:10501:10.]
+        >>> Y = np.zeros(X.shape)
+        >>> r = np.array([np.sqrt(X**2 + Z**2).flatten(),
+        >>>               np.arccos(Z / np.sqrt(X**2 + Z**2)).flatten(),
+        >>>               np.arctan2(Y, X).flatten()])
+        >>> # set up class object and compute mapping between segment currents
+        >>> # and electric potential in space
+        >>> sphere = OneSphereVolumeConductor(r, R=10000.,
+        >>>                                   sigma_i=0.3, sigma_o=0.03)
+        >>> mapping = sphere.calc_mapping(cell, n_max=100)
+        >>> # pick out some time index for the potential and compute potential
+        >>> ind = cell.tvec==2.
+        >>> Phi = np.dot(mapping, cell.imem)[:, ind].reshape(X.shape)
+        >>> # plot potential
+        >>> fig, ax = plt.subplots(1,1)
+        >>> zips = []
+        >>> for x, z in cell.get_idx_polygons(projection=('x', 'z')):
+        >>>     zips.append(zip(x, z))
+        >>> polycol = PolyCollection(zips,
+        >>>                          edgecolors='none',
+        >>>                          facecolors='gray')
+        >>> vrange = 1E-3 # limits for color contour plot
+        >>> im=ax.contour(X, Z, Phi,
+        >>>              levels=np.linspace(-vrange, vrange, 41))
+        >>> circle = plt.Circle(xy=(0,0), radius=sphere.R, fc='none', ec='k')
+        >>> ax.add_collection(polycol)
+        >>> ax.add_patch(circle)
+        >>> ax.axis(ax.axis('equal'))
+        >>> ax.set_xlim(X.min(), X.max())
+        >>> ax.set_ylim(Z.min(), Z.max())
+        >>> fig.colorbar(im, ax=ax)
+        >>> plt.show()  
+
+        Returns
+        -------
+        ndarray
+            Shape (n_points, n_compartments) mapping between individual
+            segments and extracellular potential in extracellular locations
+            
+        Notes
+        -----
+        Each segment is treated as a point source in space. The minimum
+        source to measurement site distance will be set to the diameter of
+        each segment
+        """
+        # midpoint position of compartments in spherical coordinates
+        radius = np.sqrt(cell.xmid**2 + cell.ymid**2 + cell.zmid**2)
+        theta = np.arccos(cell.zmid/radius)
+        phi = np.arctan2(cell.ymid, cell.xmid)
+        diam = cell.diam
+        
+        # since the sources must be located on the x-axis, we keep a copy
+        # of the unrotated coordinate system for the contact points:
+        r_orig = np.copy(self.r)
+        
+        # unit current amplitude
+        I = 1.
+        
+        # initialize mapping array
+        mapping = np.zeros((self.r.shape[1], radius.size))
+        
+        # compute the mapping for each compartment
+        for i, (radius_i, theta_i, _, diam_i) in enumerate(zip(radius, theta, phi, diam)):
+            self.r = np.array([r_orig[0], # radius unchanged
+                               r_orig[1] - theta_i, # rotate relative to source location
+                               r_orig[2]]) # phi unchanged (don't enter equations)
+            mapping[:, i] = self.calc_potential(radius_i, I=I, min_distance=diam_i, n_max=n_max)
+
+        # reset measurement locations
+        self.r = r_orig
+        
+        # return mapping between segment currents and contrib in each
+        # measurement location
+        return mapping
+
 
 class FourSphereVolumeConductor(object):
     """
