@@ -323,7 +323,6 @@ class RecExtElectrode:
                 pass
 
 
-
     def calc_mapping(self, cell):
         """Creates a linear mapping of transmembrane currents of each segment
         of the supplied cell object to contribution to extracellular potential
@@ -341,7 +340,8 @@ class RecExtElectrode:
 
         Returns
         -------
-        None
+        mapping : ndarray
+            The attribute RecExtElectrode.mapping is returned (optional)
         """
         if cell is not None:
             self.set_cell(cell)
@@ -362,6 +362,9 @@ class RecExtElectrode:
             if self.verbose:
                 print('calculations finished, %s, %s' % (str(self),
                                                          str(self.cell)))
+        # return mapping
+        return self.mapping
+
 
     def calc_lfp(self, t_indices=None, cell=None):
         """Calculate LFP on electrode geometry from all cell instances.
