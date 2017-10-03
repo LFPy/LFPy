@@ -881,7 +881,10 @@ class InfiniteVolumeConductor(object):
         p : ndarray, dtype=float
             Shape (n_timesteps, 3) array containing the x,y,z components of the
             current dipole moment in units of (nA*µm) for all timesteps
-
+        r : ndarray, dtype=float
+            Shape (n_contacts, 3) array contaning the displacement vectors
+            from dipole location to measurement location        
+        
         Returns
         -------
         potential : ndarray, dtype=float
