@@ -66,7 +66,7 @@ class FourSphereVolumeConductor(object):
 
     """
 
-    def __init__(self, radii, sigmas, r, rz):
+    def __init__(self, radii, sigmas, r, rz, iter_factor = 2./99.*1e-6):
         """Initialize class FourSphereVolumeConductor"""
         self.r1 = radii[0]
         self.r2 = radii[1]
@@ -96,14 +96,15 @@ class FourSphereVolumeConductor(object):
         self.rzloc = rz
         self.rz = np.sqrt(np.sum(rz ** 2))
         self.rz1 = self.rz / self.r1
-        print self.rz1
-        if self.rz1 > 78999./79000.:
+        if self.rz1 > 0.99999:
             warn('Dipole should be placed minimum ~1µm away from brain surface, '
                   'to avoid extremely slow convergence.')
-        elif self.rz1 > 78980./79000.:
+        elif self.rz1 > 0.9999:
             warn('Computation time might be long due to slow convergence. '
                  'Can be avoided by placing dipole further away from brain surface.')
         self.r = np.sqrt(np.sum(r ** 2, axis=1))
+
+        self.iteration_stop_factor = iter_factor
 
     def calc_potential(self, p):
         """
@@ -356,7 +357,7 @@ class FourSphereVolumeConductor(object):
         const = 1.
         coeff_sum = 0.
         consts = []
-        while const > 2./99.*1e-6*coeff_sum:
+        while const > self.iteration_stop_factor*coeff_sum:
             c1n = self._calc_c1n(n)
             const = n*(c1n * (r / self.r1) ** n + (self.rz / r) ** (n + 1))
             coeff_sum += const
@@ -389,7 +390,7 @@ class FourSphereVolumeConductor(object):
         const = 1.
         coeff_sum = 0.
         consts = []
-        while const > 2./99.*1e-6*coeff_sum:
+        while const > self.iteration_stop_factor*coeff_sum:
             term1 = self._calc_csf_term1(n,r)
             term2 = self._calc_csf_term2(n,r)
             const = n*(term1 + term2)
@@ -423,7 +424,7 @@ class FourSphereVolumeConductor(object):
         const = 1.
         coeff_sum = 0.
         consts = []
-        while const > 2./99.*1e-6*coeff_sum:
+        while const > self.iteration_stop_factor*coeff_sum:
             c3n = self._calc_c3n(n)
             d3n = self._calc_d3n(n, c3n)
             const = n*(c3n * (r / self.r3) ** n + d3n * (self.r3 / r) ** (n + 1))
@@ -457,7 +458,7 @@ class FourSphereVolumeConductor(object):
         const = 1.
         coeff_sum = 0.
         consts = []
-        while const > 2./99.*1e-6*coeff_sum:
+        while const > self.iteration_stop_factor*coeff_sum:
             c4n = self._calc_c4n(n)
             d4n = self._calc_d4n(n, c4n)
             const = n*(c4n * (r / self.r4) ** n + d4n * (self.r4 / r) ** (n + 1))
@@ -491,7 +492,7 @@ class FourSphereVolumeConductor(object):
         const = 1.
         coeff_sum = 0.
         consts = []
-        while const > 2./99.*1e-6*coeff_sum:
+        while const > self.iteration_stop_factor*1e-6*coeff_sum:
             c1n = self._calc_c1n(n)
             const = (c1n * (r / self.r1) ** n + (self.rz / r) ** (n + 1))
             coeff_sum += const
@@ -522,7 +523,7 @@ class FourSphereVolumeConductor(object):
         const = 1.
         coeff_sum = 0.
         consts = []
-        while const > 2./99.*1e-6*coeff_sum:
+        while const > self.iteration_stop_factor*coeff_sum:
             term1 = self._calc_csf_term1(n,r)
             term2 = self._calc_csf_term2(n,r)
             const = term1 + term2
@@ -554,7 +555,7 @@ class FourSphereVolumeConductor(object):
         const = 1.
         coeff_sum = 0.
         consts = []
-        while const > 2./99.*1e-6*coeff_sum:
+        while const > self.iteration_stop_factor*coeff_sum:
             c3n = self._calc_c3n(n)
             d3n = self._calc_d3n(n, c3n)
             const = c3n * (r / self.r3) ** n + d3n * (self.r3 / r) ** (n + 1)
@@ -586,7 +587,7 @@ class FourSphereVolumeConductor(object):
         const = 1.
         coeff_sum = 0.
         consts = []
-        while const > 2./99.*1e-6*coeff_sum:
+        while const > self.iteration_stop_factor*coeff_sum:
             c4n = self._calc_c4n(n)
             d4n = self._calc_d4n(n, c4n)
             const = c4n * (r / self.r4) ** n + d4n * (self.r4 / r) ** (n + 1)
@@ -717,7 +718,6 @@ class InfiniteVolumeConductor(object):
         r_factor = np.linalg.norm(r, axis=1)**3
         phi = 1./(4*np.pi*self.sigma)*(dotprod.T/ r_factor).T
         return phi
-
 
 def get_current_dipole_moment(dist, current):
     """
