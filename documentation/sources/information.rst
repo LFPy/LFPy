@@ -2,7 +2,7 @@
 Download LFPy
 =============
 
-Downlad the latest version of LFPy from the Python Package Index: `http://pypi.python.org/pypi/LFPy <https://pypi.python.org/pypi/LFPy>`_
+Downlad the latest stable version of LFPy from the Python Package Index: `http://pypi.python.org/pypi/LFPy <https://pypi.python.org/pypi/LFPy>`_
 
 Or, download the development version of LFPy using `git <https://git-scm.com>`_ from `GitHub.com <https://github.com/LFPy/LFPy>`_ into a local folder:
 ::
@@ -20,7 +20,7 @@ The stable versions of LFPy can be accessed by listing and checking out tags, e.
     git checkout tags/<tag name>
     
 
-To browse the source codes online, see http://lfpy.github.io/classes.html.
+To browse the documentation and source codes online, see `http://lfpy.github.io/classes.html <http://lfpy.github.io/classes.html>`_ or `https://github.com/LFPy/LFPy <https://github.com/LFPy/LFPy>`_
 
 
 Developing LFPy
@@ -28,6 +28,9 @@ Developing LFPy
 
 As development of LFPy is now moved onto GitHub (https://github.com/LFPy), one can now fully benefit on working with forks of LFPy, implement new features, and share code improvements through pull requests.
 We hope that LFPy can be improved continously through such a collaborative effort.
+
+A list of various LFPy issues, bugs, feature requests etc. is found `here <https://github.com/LFPy/LFPy/issues>`_.
+If you want to contribute code fixes or new features in LFPy, send us a `pull request <https://github.com/LFPy/LFPy/pulls>`_.
 
 
 Getting started
@@ -38,12 +41,28 @@ Dependencies
 
 To install LFPy you will need the following:
 
-1.  Python, seems to work fine with recent python since 2.6.x (2.6.6 or newer recommended), 2.7.x works fine.
-    LFPy has only been thoroughly checked for code consistency with Python 3.x., and can be assumed to be untested with Python 3.x. 
+1.  Python. LFPy's unit-test suite is integrated with and continuously tested using `Travis-CI <https://travis-ci.org>`_. Tests are run using NEURON 7.4 and Python 2.7, 3.4, 3.5 and 3.6, as well as other Python dependencies listed next.
+    The code build testing status and results of the last test as well as the test coverage test using `Coveralls <https://coveralls.io>`_  can be seen here:
+.. image:: https://travis-ci.org/LFPy/LFPy.svg?branch=master
+    :target: https://travis-ci.org/LFPy/LFPy
+.. image:: https://coveralls.io/repos/github/LFPy/LFPy/badge.svg?branch=master
+    :target: https://coveralls.io/github/LFPy/LFPy?branch=master
 
-2.  Python modules numpy, scipy, matplotlib
 
-3.  `NEURON <http://www.neuron.yale.edu>`_ compiled as a Python module, so the following should execute without error in Python console:
+2.  Python modules setuptools, numpy, scipy, matplotlib, Cython, h5py, mpi4py, csa
+
+3. Some example files may rely on additional Python dependencies. If some examples should fail to run due to some ``ImportError``, identify the missing dependency name and run
+    ::
+        
+        pip install <package>
+        
+    Alternatively, use the system default package manager, for example
+    ::
+        
+        sudo apt install python-<package> # or
+        conda install package
+
+4.  `NEURON <http://www.neuron.yale.edu>`_ compiled as a Python module, so the following should execute without error in Python console:
     ::
     
         import neuron
@@ -51,10 +70,10 @@ To install LFPy you will need the following:
     
     If this step fails, see the next section.
     
-    LFPy has been tested to work with NEURON 7.2 and the 7.3 branches, we had some issues with a precompiled version of NEURON 7.1.
+    LFPy now requires NEURON 7.4 or newer, and should be compiled with MPI in order to support new parallel functionality in LFPy, i.e., execution of networks in parallel. 
 
-4.  `Cython <http://cython.org>`_ (C-extensions for python) to speed up simulations of extracellular fields. Tested with version > 0.14,
-    and known to fail with version 0.11. LFPy works without Cython, but simulations will run slower and is therefore not recommended.
+5.  `Cython <http://cython.org>`_ (C-extensions for python) to speed up simulations of extracellular fields. Tested with version > 0.14,
+    and known to fail with version 0.11. LFPy works without Cython, but simulations may run slower and is therefore not recommended.
 
 
 Installing LFPy
@@ -68,7 +87,7 @@ There are few options to install LFPy:
         pip install --user LFPy
 
 
-    as sudoer:
+    as sudoer (in general not recommended as system Python files may be overwritten):
     ::
     
         sudo pip install LFPy
@@ -77,21 +96,9 @@ There are few options to install LFPy:
     ::
         
         pip install --upgrade --no-deps LFPy
-        
-
-2.  From the Python Package Index with only local access using easy_install
-    ::
-    
-        easy_install --user LFPy
 
 
-    as sudoer:
-    ::
-    
-        sudo easy_install LFPy
-
-
-3.  From source:
+2.  From source:
     ::
     
         tar -xzf LFPy-x.x.tar.gz
@@ -99,7 +106,7 @@ There are few options to install LFPy:
         (sudo) python setup.py install (--user)
 
 
-4.  From development version in our git (https://git-scm.com) repository:
+3.  From development version in our git (https://git-scm.com) repository:
     ::
     
         git clone https://github.com/LFPy/LFPy.git
@@ -107,16 +114,28 @@ There are few options to install LFPy:
         (sudo) python setup.py install (--user)
 
     
-5.  If you only want to have LFPy in one place, you can add this working folder to your $PYTHONPATH, and just compile the Cython extensions inplace;
+4.  If you only want to have LFPy in one place, you can also build the LFPy Cython and NEURON NMODL extensions in the source directory.
+    That can be quite useful for active LFPy development.
     ::
     
-        python setup.py build_ext -i
+        python setup.py develop --user
 
     
 In a fresh terminal and python-session you should now be able to issue: 
 ::  
 
     import LFPy
+
+
+Uninstalling LFPy
+-----------------
+
+Some times it may be necessary to remove installed versions of LFPy. Depending on how LFPy was installed in the first place, it should for most circumstances suffice to execute
+::
+    
+    (sudo) pip uninstall LFPy
+    
+If several versions was installed in the past, repeat until no more LFPy files are found. 
 
 
 Installing NEURON with Python
@@ -156,9 +175,9 @@ By far the simplest solution relying on no source code compilation.
     espen@espen-VirtualBox:~$ which python
     /home/ehagen/anaconda/bin/python
     espen@espen-VirtualBox:~$ python -c "import LFPy"
-    NEURON -- VERSION 7.3 (1078:2b0c984183df) 2014-04-04
-    Duke, Yale, and the BlueBrain Project -- Copyright 1984-2014
-    See http://www.neuron.yale.edu/neuron/credits
+    NEURON -- VERSION 7.5 (1515:79f6026b82d7) 2017-02-09
+    Duke, Yale, and the BlueBrain Project -- Copyright 1984-2016
+    See http://neuron.yale.edu/neuron/credits
 
 If everything worked, one should now have a working Python/NEURON/LFPy environment.
 
