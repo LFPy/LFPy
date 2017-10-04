@@ -136,8 +136,19 @@ As well as the simulated output
 More examples
 =============
 
-More examples of LFPy usage are provided in the "trunk/examples" folder in the
-source code release, displaying different usage scenarios;
+More examples of LFPy usage are provided in the ``trunk/examples`` folder in the
+source code release, displaying different usages of LFPy.
+
+The examples rely on files present inside the `examples folder <https://github.com/LFPy/LFPy/blob/master/examples>`_,
+such as morphology files (.hoc) and NEURON NMODL (.mod) files.
+
+The easiest way of accessing all of these files is cloning the examples directory using git (https://git-scm.com):
+::
+    
+    $ git clone https://github.com/LFPy/LFPy.git
+    $ cd LFPy/examples
+
+The files provided are
 
 - `example1.py <https://github.com/LFPy/LFPy/blob/master/examples/example1.py>`_
 - `example2.py <https://github.com/LFPy/LFPy/blob/master/examples/example2.py>`_
@@ -146,14 +157,15 @@ source code release, displaying different usage scenarios;
 - `example5.py <https://github.com/LFPy/LFPy/blob/master/examples/example5.py>`_
 - `example6.py <https://github.com/LFPy/LFPy/blob/master/examples/example6.py>`_
 - `example7.py <https://github.com/LFPy/LFPy/blob/master/examples/example7.py>`_
+- `example8.py <https://github.com/LFPy/LFPy/blob/master/examples/example8.py>`_
 - `example_mpi.py <https://github.com/LFPy/LFPy/blob/master/examples/example_mpi.py>`_
+- `example_EPFL_neurons.py <https://github.com/LFPy/LFPy/blob/master/examples/example_EPFL_neurons.py>`_
+- `example_LFPyCellTemplate.py <https://github.com/LFPy/LFPy/blob/master/examples/example_LFPyCellTemplate.py>`_
+- `example_MEA.py <https://github.com/LFPy/LFPy/blob/master/examples/example_MEA.py>`_
+- `example_anisotropy.py <https://github.com/LFPy/LFPy/blob/master/examples/example_anisotropy.py>`_
+- `example_loadL5bPCmodelsEH.py <https://github.com/LFPy/LFPy/blob/master/examples/example_loadL5bPCmodelsEH.py>`_
+- `example_network/example_Network.py <https://github.com/LFPy/LFPy/blob/master/examples/example_network/example_Network.py>`_
 
-The examples rely on files present inside the `examples folder <https://github.com/LFPy/LFPy/blob/master/examples>`_,
-such as morphology files and .mod files.
 
-The easiest way of accessing all of these files is cloning the examples directory using git (https://git-scm.com):
-::
-    
-    git clone https://github.com/LFPy/LFPy.git
-    cd LFPy/examples
+
 
