@@ -818,7 +818,7 @@ class Cell(object):
         return np.argmin(dist)
 
     def get_rand_idx_area_norm(self, section='allsec', nidx=1,
-                               z_min=-10000, z_max=10000):
+                               z_min=-1E6, z_max=1E6):
         """Return nidx segment indices in section with random probability
         normalized to the membrane area of segment on
         interval [z_min, z_max]
@@ -1897,7 +1897,7 @@ class Cell(object):
         >>> import matplotlib.pyplot as plt
         >>> cell = LFPy.Cell(morphology='PATH/TO/MORPHOLOGY')
         >>> zips = []
-        >>> for x, z in cell.get_idx_polygons(projection=('x', 'z')):
+        >>> for x, z in cell.get_pt3d_polygons(projection=('x', 'z')):
         >>>     zips.append(zip(x, z))
         >>> polycol = PolyCollection(zips,
         >>>                          edgecolors='none',
@@ -1921,6 +1921,10 @@ class Cell(object):
             mssg = "projection must be a length 2 tuple of 'x', 'y' or 'z'!"
             raise ValueError(mssg)
 
+        try:
+            assert(self.pt3d is True)
+        except AssertionError:
+            raise AssertionError('Cell keyword argument pt3d != True')
         polygons = []
         for i in range(len(self.x3d)):
             polygons.append(self._create_polygon(i, projection))
