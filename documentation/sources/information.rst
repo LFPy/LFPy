@@ -227,36 +227,35 @@ If everything worked, one should now have a working Python/NEURON/LFPy environme
 Windows with Anaconda Scientific Python distribution
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Windows 10 Pro/Education (64-bit) install instructions:
 
-We have had some success on getting LFPy and NEURON to run on the Windows platform.
-
-The following procedure was tested on a 32 bit Windows 7 Ultimate virtual machine, using Anaconda Python distribution and the MinGW-built release of NEURON.
-However, the procedure may or may not be similar on other versions of Windows.
-
-1.  Download and install 32-bit Anaconda Python using the graphical installer from http://continuum.io/downloads
-2.  Download and install the 32-bit (MinGW) setup.exe file for NEURON from http://www.neuron.yale.edu/neuron/download
-3.  Some PATH variables are needed to enable Anaconda Python and NEURON to interact nicely.
-    Go through "Control Panel" --> "System and Security" --> "System" --> "Advanced System Settings" --> "Environment Variables"
-    and add the following variables and values to the list of "System variables":
+1.  Download and install Anaconda Python from https://www.anaconda.com/download.
+2.  Download and install NEURON from https://www.neuron.yale.edu/neuron/download.
+    Tick the box to "Set DOS environment" (Otherwise Anaconda Python will not find the NEURON python module)
+3.  Download and install the Visual Studio C++ Build Tools 2015 from: http://landinghub.visualstudio.com/visual-cpp-build-tools.
+    Choose the Visual C++ 2015 Build Tools option.
+4.  Download and install Git from https://git-scm.com/downloads
+5.  Download and install Microsoft MPI from the Official Microsoft Download Center: https://www.microsoft.com/en-us/download/details.aspx?id=55494.
+    Choose the file "MSMpiSetup.exe". 
+6.  Open the Anaconda Prompt under the Anaconda* folder in the start menu
+7.  Install additional LFPy dependencies using `conda` (to avoid package clashes with i.e., `pip install <package_name>`)
     ::
         
-        Append ";/nrn73w/bin/" to "Path"
-        Create new entry: "NEURONHOME", value "/nrn73w/"
-        Create second entry "PYTHONPATH", value "/nrn73w/lib/python/"
-    
-    if running with 64 bit Windows and software, exchange "nrn73w" with "nrn73w64" and "bin" with "bin64" above. 
-
-4.  Issue in the "Anaconda Command Prompt":
-    ::
-    
-        pip install LFPy --user
-
-5.  Check if "import neuron" and "import LFPy" works both from within Spyder, IPython and the NEURON supplied Python interpreter.
+        conda install mpi4py
         
-
-If everything worked, one should now have a working Python/NEURON/LFPy environment.
-
-
+8.  Clone into LFPy using Git:
+    ::
+        
+        git clone https://github.com/LFPy/LFPy.git
+        
+9.  Build LFPy from source (without moving files)
+    ::
+        
+        python setup.py develop
+        
+10. NEURON NMODL (.mod) files will not be autocompiled when building LFPy as on MacOS/Linux, as the mknrndll script
+    cannot be run directly in the Anaconda Prompt. To fix this, run the "bash" file in the NEURON program group,
+    change directory within "bash" to the `<LFPy>/LFPy/test` folder,  then run `mknrndll`
 
 
 Installing NEURON with Python from source

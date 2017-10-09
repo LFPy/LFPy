@@ -1,4 +1,3 @@
-==================
 Module :mod:`LFPy`
 ==================
 .. automodule:: LFPy
@@ -98,7 +97,7 @@ Module :mod:`LFPy`
         :undoc-members:
 
     submodule :mod:`eegmegcalc`
-    =====================
+    ===========================
     .. autofunction:: get_current_dipole_moment
 
     submodule :mod:`lfpcalc`
