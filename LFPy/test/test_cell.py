@@ -17,6 +17,8 @@ GNU General Public License for more details.
 
 from __future__ import division
 import os
+import posixpath
+import sys
 import unittest
 import numpy as np
 import LFPy
@@ -25,7 +27,14 @@ import pickle
 import random
 
 # for nosetests to run load mechanisms
-neuron.load_mechanisms(os.path.join(LFPy.__path__[0], 'test'))
+if "win" in sys.platform:
+    pth = os.path.join(LFPy.__path__[0], 'test', 'nrnmech.dll')
+    pth = pth.replace(os.sep, posixpath.sep)
+    if not pth in neuron.nrn_dll_loaded:
+        neuron.h.nrn_load_dll(pth)
+        neuron.nrn_dll_loaded.append(pth)
+else:
+    neuron.load_mechanisms(os.path.join(LFPy.__path__[0], 'test'))
 
 class testCell(unittest.TestCase):
     """
