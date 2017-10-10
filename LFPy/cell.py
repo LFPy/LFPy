@@ -368,7 +368,8 @@ class Cell(object):
                             'while creating a Cell object.',
                             'One possible cause is the NEURON mechanisms have',
                             'not been compiled, ',
-                            'try running nrnivmodl. ',])
+                            'try running nrnivmodl or mknrndll (Windows) in ', 
+                            'the mod-file-containing folder. ',])
                         raise Exception(ERRMSG)
                 elif code.split('.')[-1] == 'py':
                     if sys.version >= "3.4":
