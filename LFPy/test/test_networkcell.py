@@ -31,8 +31,7 @@ if "win" in sys.platform:
     if not pth in neuron.nrn_dll_loaded:
         neuron.h.nrn_load_dll(pth)
         neuron.nrn_dll_loaded.append(pth)
-else:
-    neuron.load_mechanisms(os.path.join(LFPy.__path__[0], 'test'))
+neuron.load_mechanisms(os.path.join(LFPy.__path__[0], 'test'))
 
 
 class testNetworkCell(unittest.TestCase):
