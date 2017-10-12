@@ -51,7 +51,7 @@ To install LFPy you will need the following:
 
 2.  Python modules setuptools, numpy, scipy, matplotlib, Cython, h5py, mpi4py, csa
 
-3. Some example files may rely on additional Python dependencies. If some examples should fail to run due to some ``ImportError``, identify the missing dependency name and run
+3.  Some example files may rely on additional Python dependencies. If some examples should fail to run due to some ``ImportError``, identify the missing dependency name and run
     ::
         
         pip install <package>
@@ -120,6 +120,9 @@ There are few options to install LFPy:
     
         python setup.py develop --user
 
+
+    With any changes in LFPy ``*.pyx`` source files, rebuild LFPy.
+
     
 In a fresh terminal and python-session you should now be able to issue: 
 ::  
@@ -146,81 +149,89 @@ Python distributions such as the Anaconda Scientific Python distribution (http:/
 how to set up a working Python environment using Anaconda with the standard pre-built NEURON binaries on Linux, OSX and Windows.
 
 
-Ubuntu 10.04 LTS 64-bit with Anaconda Scientific Python distribution
+Ubuntu 12.04 LTS 64-bit with Anaconda Scientific Python distribution
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 By far the simplest solution relying on no source code compilation.
 
-1. Download and install Anaconda using the 64-bit Linux installer script from http://continuum.io/downloads
-2. Download and install the 64-bit Debian/Ubuntu .deb file with NEURON from http://www.neuron.yale.edu/neuron/download
-3. Edit your .bashrc or similar file located in the $HOME folder, e.g., by calling in the Terminal.app "gedit $HOME/.bashrc", to include the lines:
-
-::
-
-    # make NEURON python module available to Anaconda python
-    export PYTHONPATH="/usr/local/nrn/lib/python/:$PYTHONPATH"
-
-
-4. Open a fresh terminal window
-5. Install LFPy, e.g., from the python package index  (or see above)
-
-::
+1.  Download and install Anaconda using the 64-bit Linux installer script from http://continuum.io/downloads
+2.  Download and install the 64-bit Debian/Ubuntu .deb file with NEURON from http://www.neuron.yale.edu/neuron/download
+3.  Edit your .bashrc or similar file located in the $HOME folder, e.g., by calling in the Terminal.app "gedit $HOME/.bashrc", to include the lines:
+    ::
     
-    pip install LFPy
+        # make NEURON python module available to Anaconda python
+        export PYTHONPATH="/usr/local/nrn/lib/python/:$PYTHONPATH"
+
+4.  Open a fresh terminal window
+
+5.  Install LFPy dependencies (not installed by default) using conda
+    ::
+        
+        $ conda install mpi4py
+
+6.  Clone into LFPy using Git:
+    ::
+        
+        $ git clone https://github.com/LFPy/LFPy.git
+        
+7.  Build LFPy from source (without moving files)
+    ::
+        
+        $ python setup.py develop
     
-6. Test the installation
-
-::
-    
-    espen@espen-VirtualBox:~$ which python
-    /home/ehagen/anaconda/bin/python
-    espen@espen-VirtualBox:~$ python -c "import LFPy"
-    NEURON -- VERSION 7.5 (1515:79f6026b82d7) 2017-02-09
-    Duke, Yale, and the BlueBrain Project -- Copyright 1984-2016
-    See http://neuron.yale.edu/neuron/credits
-
-If everything worked, one should now have a working Python/NEURON/LFPy environment.
+8.  Test the installation from the terminal
+    ::
+        
+        $ python -c "import LFPy"
+        NEURON -- VERSION 7.5 master (6b4c19f) 2017-09-25
+        Duke, Yale, and the BlueBrain Project -- Copyright 1984-2016
+        See http://neuron.yale.edu/neuron/credits
 
 
-OSX 10.9.x with Anaconda Scientific Python distribution
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+OSX 10.12.x with Anaconda Scientific Python distribution
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 By far the simplest solution relying on no source code compilation.
 
-1. Download and install Anaconda using the 64-bit graphical installer from http://continuum.io/downloads
-2. Download and install the 64-bit Mac .dmg file with NEURON from http://www.neuron.yale.edu/neuron/download
-3. Edit your .bash_profile or similar file located in the $HOME folder, e.g., by calling in the Terminal.app "open -t $HOME/.bash_profile", to include the lines:
+1.  Download and install Anaconda using the 64-bit graphical installer from http://continuum.io/downloads
+2.  Download and install the 64-bit Mac ``.pkg`` file with NEURON from http://www.neuron.yale.edu/neuron/download
+    Do not choose to let the NEURON installer edit the ``~/.bash_profile`` file. The default file to edit is ``~/.profile`` (see below).
+3.  Edit your .profile or similar file located in the $HOME folder, e.g., by calling in the Terminal.app ``open -t $HOME/.profile``, to include the lines:
+    ::
+        
+        # make nrniv, mknrnivmodl, etc. available from the command line
+        export PATH=/Applications/NEURON-7.5/nrn/x86_64/bin/:$PATH
+        
+        # Append the path to the NEURON python extension module to PYTHONPATH
+        export PYTHONPATH=/Applications/NEURON-7.5/nrn/lib/python:$PYTHONPATH
+        
 
-::
-    
-    # added by Anaconda 2.0.1 installer
-    export PATH="/Users/ehagen_test/anaconda/bin:$PATH"
-    
-    # make neuron executable from terminal
-    export PATH="/Applications/NEURON-7.3/nrn/x86_64/bin:$PATH"
-    
-    # make NEURON python module available to Anaconda python
-    export PYTHONPATH="/Applications/NEURON-7.3/nrn/lib/python/:$PYTHONPATH"
+4.  Open a fresh terminal window
 
-4. Open a fresh terminal window
-5. Install LFPy, e.g., from the python package index (or see above)
+5.  Install LFPy dependencies (not installed by default) using conda
+    ::
+        
+        $ conda install mpi4py
 
-::
+6.  Clone into LFPy using Git:
+    ::
+        
+        git clone https://github.com/LFPy/LFPy.git
+        
+7.  Build LFPy from source (without moving files)
+    ::
+        
+        $ python setup.py develop
     
-    pip install LFPy
-    
-6. Test the installation from the terminal
+8.  Test the installation from the terminal
+    ::
+        
+        $ python -c "import LFPy"
+        NEURON -- VERSION 7.5 master (6b4c19f) 2017-09-25
+        Duke, Yale, and the BlueBrain Project -- Copyright 1984-2016
+        See http://neuron.yale.edu/neuron/credits
 
-::
-    
-    inm6078:VirtualBox VMs ehagen$ which python
-    /Users/ehagen/anaconda/bin/python
-    inm6078:VirtualBox VMs ehagen$ python -c "import LFPy"
-    NEURON -- VERSION 7.3 (1078:2b0c984183df) 2014-04-04
-    Duke, Yale, and the BlueBrain Project -- Copyright 1984-2014
-    See http://www.neuron.yale.edu/neuron/credits
-
-If everything worked, one should now have a working Python/NEURON/LFPy environment.
+If everything worked, you now have a working Python/NEURON/LFPy environment.
 
 
 
@@ -238,24 +249,24 @@ Windows 10 Pro/Education (64-bit) install instructions:
 5.  Download and install Microsoft MPI from the Official Microsoft Download Center: https://www.microsoft.com/en-us/download/details.aspx?id=55494.
     Choose the file "MSMpiSetup.exe". 
 6.  Open the Anaconda Prompt under the Anaconda* folder in the start menu
-7.  Install additional LFPy dependencies using `conda` (to avoid package clashes with i.e., `pip install <package_name>`)
+7.  Install additional LFPy dependencies using ``conda`` (to avoid package clashes with i.e., ``pip install <package_name>``)
     ::
         
-        conda install mpi4py
+        $ conda install mpi4py
         
 8.  Clone into LFPy using Git:
     ::
         
-        git clone https://github.com/LFPy/LFPy.git
+        $ git clone https://github.com/LFPy/LFPy.git
         
 9.  Build LFPy from source (without moving files)
     ::
         
-        python setup.py develop
+        $ python setup.py develop
         
 10. NEURON NMODL (.mod) files will not be autocompiled when building LFPy as on MacOS/Linux, as the mknrndll script
-    cannot be run directly in the Anaconda Prompt. To fix this, run the "bash" file in the NEURON program group,
-    change directory within "bash" to the `<LFPy>/LFPy/test` folder,  then run `mknrndll`
+    cannot be run directly in the Anaconda Prompt. To fix this, run the ``bash`` file in the NEURON program group,
+    change directory within "bash" to the ``<LFPy>/LFPy/test`` folder,  then run ``mknrndll``
 
 
 Installing NEURON with Python from source
@@ -275,17 +286,17 @@ The instructions below show how to meet all the requirements starting from a cle
 Start by installing the required packages
 ::
 
-    sudo apt-get install mercurial autoconf libtool
-    sudo apt-get install libxext-dev libncurses-dev
-    sudo apt-get install bison flex
-    sudo apt-get install python-dev python-numpy python-scipy python-matplotlib
-    sudo apt-get install ipython
+    $ sudo apt-get install mercurial autoconf libtool
+    $ sudo apt-get install libxext-dev libncurses-dev
+    $ sudo apt-get install bison flex
+    $ sudo apt-get install python-dev python-numpy python-scipy python-matplotlib
+    $ sudo apt-get install ipython
 
 The cython version provided in Ubuntu 10.4LTS is out of date, compile a more recent version yourself.
 Download Cython (Cython-0.15.1.tar.gz, or newer) from `Cython.org <http://www.cython.org>`_, unpack and install;
 ::
     
-    sudo python setup.py install
+    $ sudo python setup.py install
 
 
 
@@ -295,51 +306,51 @@ Linux/Unix installation of NEURON from source
 Now get the source code of NEURON using mercurial
 ::
 
-    cd $HOME
-    mkdir neuron
-    cd neuron
+    $ cd $HOME
+    $ mkdir neuron
+    $ cd neuron
 
-    hg clone http://www.neuron.yale.edu/hg/neuron/iv
-    hg clone http://www.neuron.yale.edu/hg/neuron/nrn
+    $ hg clone http://www.neuron.yale.edu/hg/neuron/iv
+    $ hg clone http://www.neuron.yale.edu/hg/neuron/nrn
 
 Compile and install InterViews
 ::
     
-    cd iv
-    sh build.sh 
-    ./configure --prefix=`pwd`
-    make
-    make install
+    $ cd iv
+    $ sh build.sh 
+    $ ./configure --prefix=`pwd`
+    $ make
+    $ make install
     
 Compile and install NEURON
 ::
 
-    cd ../nrn
-    sh build.sh 
-    ./configure --prefix=`pwd` --with-iv=$HOME/neuron/iv --with-nrnpython=/usr/bin/python
-    make
-    make install
+    $ cd ../nrn
+    $ sh build.sh 
+    $ ./configure --prefix=`pwd` --with-iv=$HOME/neuron/iv --with-nrnpython=/usr/bin/python
+    $ make
+    $ make install
 
 Install NEURON as a Python module
 ::
 
-    cd src/nrnpython/
-    sudo python setup.py install
+    $ cd src/nrnpython/
+    $ sudo python setup.py install
     
 (or ``python setup.py install --user`` if you want to install the Python package in your home folder). 
     
 Now you should be able to ``import neuron`` from Python console and run a small test with success;
 ::
 
-    cd $HOME
-    ipython
-    import neuron
-    neuron.test()
+    $ cd $HOME
+    $ ipython
+    $ import neuron
+    $ neuron.test()
     
 You might want to add the folder with NEURON executables to your PATH, so that you can easily compile NEURON mechanisms using ``nrnivmodl``
 ::
     
-    export PATH=$PATH:$HOME/neuron/nrn/x86_64/bin
+    $ export PATH=$PATH:$HOME/neuron/nrn/x86_64/bin
 
 
 NEURON dependencies and installation on Mac OSX from source
@@ -353,18 +364,18 @@ To start using MacPorts, follow the instructions on http://www.macports.org/inst
 Building a python 2.7 environment using MacPorts issue in Terminal:
 ::
     
-    sudo port install python27 py27-ipython py27-numpy py27-matplotlib py27-scipy py27-cython
+    $ sudo port install python27 py27-ipython py27-numpy py27-matplotlib py27-scipy py27-cython
 
 Make the installed Python and IPython default:
 ::
 
-    sudo port select --set python python27
-    sudo port select --set ipython ipython27
+    $ sudo port select --set python python27
+    $ sudo port select --set ipython ipython27
     
 Install the necessary packages for cloning into repository and compiling NEURON:
 ::
 
-    sudo port install automake autoconf libtool xorg-libXext ncurses mercurial bison flex
+    $ sudo port install automake autoconf libtool xorg-libXext ncurses mercurial bison flex
 
 Install NEURON from the bleeding edge source code. The following recipe assumes a 64 bit build of NEURON and Python on OSX 10.7 Lion, so change
 "x86_64-apple-darwin10.7.0" throughout to facilitate your system accordingly,
@@ -372,46 +383,46 @@ as found by running "./config.guess" in the root of the NEURON source code;
 ::
 
     #create a directory in home directory                                                                                                                                                               
-    cd $HOME
-    mkdir nrn64
-    cd nrn64
+    $ cd $HOME
+    $ mkdir nrn64
+    $ cd nrn64
     
     #creating directories                                                                                                                                                                               
-    sudo mkdir /Applications/NEURON-7.3
-    sudo mkdir /Applications/NEURON-7.3/iv
-    sudo mkdir /Applications/NEURON-7.3/nrn
+    $ sudo mkdir /Applications/NEURON-7.3
+    $ sudo mkdir /Applications/NEURON-7.3/iv
+    $ sudo mkdir /Applications/NEURON-7.3/nrn
     
     #Downloading bleeding edge source code                                                                                                                                                              
-    hg clone http://www.neuron.yale.edu/hg/neuron/iv
-    hg clone http://www.neuron.yale.edu/hg/neuron/nrn
-    cd iv
+    $ hg clone http://www.neuron.yale.edu/hg/neuron/iv
+    $ hg clone http://www.neuron.yale.edu/hg/neuron/nrn
+    $ cd iv
         
     #compiling and installing IV under folder /Applications/nrn7.3                                                                                                                                             
-    sh build.sh
-    ./configure --prefix=/Applications/NEURON-7.3/iv \
-        --build=x86_64-apple-darwin10.7.0 --host=x86_64-apple-darwin10.7.0
+    $ sh build.sh
+    $ ./configure --prefix=/Applications/NEURON-7.3/iv \
+          --build=x86_64-apple-darwin10.7.0 --host=x86_64-apple-darwin10.7.0
     
-    make
-    sudo make install
+    $ make
+    $ sudo make install
     
     #Building NEURON with InterViews, you may have to alter the path --with-nrnpython=/python-path                                                                                                      
-    cd $HOME/nrn64/nrn
-    sh build.sh
-    ./configure --prefix=/Applications/NEURON-7.3/nrn --with-iv=/Applications/NEURON-7.3/iv \
-        --with-x --x-includes=/usr/X11/include/ --x-libraries=/usr/X11/lib/ \
-        --with-nrnpython=/opt/local/Library/Frameworks/Python.framework/Versions/2.7/Resources/Python.app/Contents/MacOS/Python \
-        --host=x86_64-apple-darwin10.7.0 --build=x86_64-apple-darwin10.7.0
+    $ cd $HOME/nrn64/nrn
+    $ sh build.sh
+    $ ./configure --prefix=/Applications/NEURON-7.3/nrn --with-iv=/Applications/NEURON-7.3/iv \
+          --with-x --x-includes=/usr/X11/include/ --x-libraries=/usr/X11/lib/ \
+          --with-nrnpython=/opt/local/Library/Frameworks/Python.framework/Versions/2.7/Resources/Python.app/Contents/MacOS/Python \
+          --host=x86_64-apple-darwin10.7.0 --build=x86_64-apple-darwin10.7.0
     
-    make
-    sudo make install
-    sudo make install after_install
+    $ make
+    $ sudo make install
+    $ sudo make install after_install
     
     #You should now have a working NEURON application under Applications. Small test;                                                                                                                   
     #sudo /Applications/NEURON-7.3/nrn/x86_64/bin/neurondemo                                                                                                                                            
     
     #Final step is to install neuron as a python module                                                                                                                                                 
-    cd src/nrnpython
-    sudo python setup.py install
+    $ cd src/nrnpython
+    $ sudo python setup.py install
 
 
 LFPy on the Neuroscience Gateway Portal
