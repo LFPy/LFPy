@@ -46,7 +46,7 @@ if not os.path.isfile('L5bPCmodelsEH/morphologies/cell1.asc'):
     myzip.close()
 
 #compile mod files every time, because of incompatibility with Mainen96 files:
-if "win" in sys.platform:
+if "win32" in sys.platform:
     pth = "L5bPCmodelsEH/mod/"
     warn("no autompile of NMODL (.mod) files on Windows.\n" 
          + "Run mknrndll from NEURON bash in the folder L5bPCmodelsEH/mod and rerun example script")

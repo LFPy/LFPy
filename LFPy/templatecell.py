@@ -121,7 +121,7 @@ class TemplateCell(Cell):
         Initialization of the Template Cell object.
 
         """
-        if "win" in sys.platform and type(templatefile) is str:
+        if "win32" in sys.platform and type(templatefile) is str:
             templatefile = templatefile.replace(os.sep, posixpath.sep)
         self.templatefile = templatefile
         self.templatename = templatename
@@ -142,7 +142,7 @@ class TemplateCell(Cell):
                 neuron.h.load_file(self.templatefile)
             elif type(self.templatefile) == list:
                 for template in self.templatefile:
-                    if "win" in sys.platform:
+                    if "win32" in sys.platform:
                         template = template.replace(os.sep, posixpath.sep)
                     neuron.h.load_file(template)
         

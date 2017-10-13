@@ -58,7 +58,7 @@ if not os.path.isfile(join('cells', 'cells', 'j4a.hoc')) and RANK == 0:
 
 if RANK == 0:
     #compile mod files every time, because of incompatibility with Hay2011 files:
-    if "win" in sys.platform:
+    if "win32" in sys.platform:
         pth = "cells"
         warn("no autompile of NMODL (.mod) files on Windows. " 
              + "Run mknrndll from NEURON bash in the folder cells and rerun example script")
@@ -75,8 +75,6 @@ if RANK == 0:
     #sync threads
 COMM.Barrier()
     
-#os.system('nrnivmodl')
-LFPy.cell.neuron.load_mechanisms('cells')
 
 #set one global seed, ensure all randomizations are set on RANK 0 in script!
 np.random.seed(12345)

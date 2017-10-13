@@ -162,3 +162,5 @@ if __name__ == '__main__':
     ax_eeg.axvline(cell.tvec[time_max], c='gray', ls='--')
 
     plt.savefig('example_EEG.pdf')
+    plt.show()
+    

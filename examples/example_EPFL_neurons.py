@@ -73,21 +73,21 @@ if RANK == 0:
         for nmodl in glob(os.path.join(NRN, 'mechanisms', '*.mod')):
             while not os.path.isfile(os.path.join(NMODL,
                                                   os.path.split(nmodl)[-1])):
-                if "win" in sys.platform:
+                if "win32" in sys.platform:
                     os.system("copy {} {}".format(nmodl, NMODL))
                 else:
                     os.system('cp {} {}'.format(nmodl,
                                                 os.path.join(NMODL,
                                                          '.')))
     os.chdir(NMODL)
-    if "win" in sys.platform:
+    if "win32" in sys.platform:
         warn("no autompile of NMODL (.mod) files on Windows. " 
          + "Run mknrndll from NEURON bash in the folder %s and rerun example script" % NMODL)
     else:
         os.system('nrnivmodl')        
     os.chdir(CWD)
 COMM.Barrier()
-if "win" in sys.platform:
+if "win32" in sys.platform:
     if not NMODL in neuron.nrn_dll_loaded:
         neuron.h.nrn_load_dll(NMODL+"/nrnmech.dll")
     neuron.nrn_dll_loaded.append(NMODL)
@@ -102,7 +102,7 @@ if not os.path.isdir(FIGS):
 
 
 #load the LFPy SinSyn mechanism for stimulus
-if "win" in sys.platform:
+if "win32" in sys.platform:
     pth = os.path.join(LFPy.__path__[0], "test").replace(os.sep, posixpath.sep)
     if not pth in neuron.nrn_dll_loaded:
         neuron.h.nrn_load_dll(pth + "/nrnmech.dll")
@@ -390,6 +390,7 @@ if RANK == 0:
         if k == 0:
             ax.legend(loc='upper left', bbox_to_anchor=(1,1), frameon=False, fontsize=7)
     fig.savefig(os.path.join(CWD, FIGS, 'P2P_time_amplitude.pdf'))
+    print("wrote {}".format(os.path.join(CWD, FIGS, 'P2P_time_amplitude.pdf')))
     plt.close(fig)
 else:
     pass

@@ -67,7 +67,7 @@ if not os.path.isfile(join('cells', 'cells', 'j4a.hoc')):
     myzip.close()
 
 #compile mod files every time, because of incompatibility with Hay2011 files:
-if "win" in sys.platform:
+if "win32" in sys.platform:
     pth = "cells"
     warn("no autompile of NMODL (.mod) files on Windows. " 
          + "Run mknrndll from NEURON bash in the folder cells and rerun example script")

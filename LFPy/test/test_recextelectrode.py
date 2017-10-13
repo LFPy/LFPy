@@ -26,13 +26,14 @@ import LFPy
 import neuron
 
 # for nosetests to run load the SinSyn sinusoid synapse currrent mechanism
-if "win" in sys.platform:
+if "win32" in sys.platform:
     pth = os.path.join(LFPy.__path__[0], 'test', 'nrnmech.dll')
     pth = pth.replace(os.sep, posixpath.sep)
     if not pth in neuron.nrn_dll_loaded:
         neuron.h.nrn_load_dll(pth)
         neuron.nrn_dll_loaded.append(pth)
-neuron.load_mechanisms(os.path.join(LFPy.__path__[0], 'test'))
+else:
+    neuron.load_mechanisms(os.path.join(LFPy.__path__[0], 'test'))
 
 class testRecExtElectrode(unittest.TestCase):
     """

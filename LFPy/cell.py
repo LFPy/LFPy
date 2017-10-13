@@ -191,7 +191,7 @@ class Cell(object):
             assert(morphology is not None)
         except AssertionError:
             raise AssertionError('deprecated keyword argument morphology==None, value must be a file path or neuron.h.SectionList instance with neuron.h.Section instances')
-        if "win" in sys.platform and type(morphology) is str:
+        if "win32" in sys.platform and type(morphology) is str:
             # fix Path on windows
             morphology = morphology.replace(os.sep, posixpath.sep)
         self.morphology = morphology
@@ -357,7 +357,7 @@ class Cell(object):
         # load custom codes
         if custom_code is not None:
             for code in custom_code:
-                if "win" in sys.platform:
+                if "win32" in sys.platform:
                     code = code.replace(os.sep, posixpath.sep)
                 if code.split('.')[-1] == 'hoc':
                     try:
