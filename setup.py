@@ -87,7 +87,7 @@ setup(
         'Development Status :: 5 - Production/Stable',
         ],
     install_requires = [
-        'setuptools', 'numpy', 'scipy', 'matplotlib', 'Cython', 'h5py',
+        'setuptools', 'numpy', 'scipy', 'Cython', 'h5py',
         'mpi4py', 'csa',
         ],
     provides = ['LFPy'],
