@@ -19,12 +19,14 @@ GNU General Public License for more details.
 """
 
 import os
+import posixpath
 import sys
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
 from matplotlib.collections import PolyCollection, LineCollection
 from glob import glob
 import numpy as np
+from warnings import warn
 import scipy.signal as ss
 import neuron
 import LFPy
@@ -71,14 +73,26 @@ if RANK == 0:
         for nmodl in glob(os.path.join(NRN, 'mechanisms', '*.mod')):
             while not os.path.isfile(os.path.join(NMODL,
                                                   os.path.split(nmodl)[-1])):
-                os.system('cp {} {}'.format(nmodl,
-                                            os.path.join(NMODL,
+                if "win32" in sys.platform:
+                    os.system("copy {} {}".format(nmodl, NMODL))
+                else:
+                    os.system('cp {} {}'.format(nmodl,
+                                                os.path.join(NMODL,
                                                          '.')))
     os.chdir(NMODL)
-    os.system('nrnivmodl')
+    if "win32" in sys.platform:
+        warn("no autompile of NMODL (.mod) files on Windows. " 
+         + "Run mknrndll from NEURON bash in the folder %s and rerun example script" % NMODL)
+    else:
+        os.system('nrnivmodl')        
     os.chdir(CWD)
 COMM.Barrier()
-neuron.load_mechanisms(NMODL)
+if "win32" in sys.platform:
+    if not NMODL in neuron.nrn_dll_loaded:
+        neuron.h.nrn_load_dll(NMODL+"/nrnmech.dll")
+    neuron.nrn_dll_loaded.append(NMODL)
+else:
+    neuron.load_mechanisms(NMODL)
 
 os.chdir(CWD)
 
@@ -88,8 +102,19 @@ if not os.path.isdir(FIGS):
 
 
 #load the LFPy SinSyn mechanism for stimulus
-neuron.load_mechanisms(LFPy.__path__[0])
+if "win32" in sys.platform:
+    pth = os.path.join(LFPy.__path__[0], "test").replace(os.sep, posixpath.sep)
+    if not pth in neuron.nrn_dll_loaded:
+        neuron.h.nrn_load_dll(pth + "/nrnmech.dll")
+    neuron.nrn_dll_loaded.append(pth)
+else:
+    neuron.load_mechanisms(os.path.join(LFPy.__path__[0], "test"))
 
+def posixpth(pth):
+    """
+    Replace Windows path separators with posix style separators
+    """
+    return pth.replace(os.sep, posixpath.sep)
 
 def get_templatename(f):
     '''
@@ -107,7 +132,7 @@ def get_templatename(f):
     for line in f.readlines():
         if 'begintemplate' in line.split():
             templatename = line.split()[-1]
-            print 'template {} found!'.format(templatename)
+            print('template {} found!'.format(templatename))
             continue
     
     return templatename
@@ -146,22 +171,22 @@ for i, NRN in enumerate(neurons):
     os.chdir(NRN)
 
     #get the template name
-    f = file("template.hoc", 'r')
+    f = open("template.hoc", 'r')
     templatename = get_templatename(f)
     f.close()
     
     #get biophys template name
-    f = file("biophysics.hoc", 'r')
+    f = open("biophysics.hoc", 'r')
     biophysics = get_templatename(f)
     f.close()
     
     #get morphology template name
-    f = file("morphology.hoc", 'r')
+    f = open("morphology.hoc", 'r')
     morphology = get_templatename(f)
     f.close()
     
     #get synapses template name
-    f = file(os.path.join("synapses", "synapses.hoc"), 'r')
+    f = open(posixpth(os.path.join("synapses", "synapses.hoc")), 'r')
     synapses = get_templatename(f)
     f.close()
     
@@ -179,7 +204,7 @@ for i, NRN in enumerate(neurons):
         neuron.h.load_file(1, "biophysics.hoc")
     if not hasattr(neuron.h, synapses):
         # load synapses
-        neuron.h.load_file(1, os.path.join('synapses', 'synapses.hoc'))
+        neuron.h.load_file(1, posixpth(os.path.join('synapses', 'synapses.hoc')))
     if not hasattr(neuron.h, templatename): 
         # Load main cell template
         neuron.h.load_file(1, "template.hoc")
@@ -189,7 +214,7 @@ for i, NRN in enumerate(neurons):
         if COUNTER % SIZE == RANK:
             # Instantiate the cell(s) using LFPy
             cell = LFPy.TemplateCell(morphology=morphologyfile,
-                             templatefile=os.path.join(NRN, 'template.hoc'),
+                             templatefile=posixpth(os.path.join(NRN, 'template.hoc')),
                              templatename=templatename,
                              templateargs=1 if add_synapses else 0,
                              tstop=tstop,
@@ -252,7 +277,7 @@ for i, NRN in enumerate(neurons):
             #morphology
             zips = []
             for x, z in cell.get_idx_polygons(projection=('x', 'z')):
-                zips.append(zip(x, z))    
+                zips.append(list(zip(x, z)))    
             polycol = PolyCollection(zips,
                                      edgecolors='none',
                                      facecolors='k',
@@ -288,7 +313,7 @@ for i, NRN in enumerate(neurons):
             for j in range(n):
                 zips = []
                 for x in spw[j::n,]:
-                    zips.append(zip(tspw, x))
+                    zips.append(list(zip(tspw, x)))
                 linecol = LineCollection(zips,
                                          linewidths=0.5,
                                          colors=plt.cm.Spectral(int(255.*j/n)),
@@ -365,6 +390,7 @@ if RANK == 0:
         if k == 0:
             ax.legend(loc='upper left', bbox_to_anchor=(1,1), frameon=False, fontsize=7)
     fig.savefig(os.path.join(CWD, FIGS, 'P2P_time_amplitude.pdf'))
+    print("wrote {}".format(os.path.join(CWD, FIGS, 'P2P_time_amplitude.pdf')))
     plt.close(fig)
 else:
     pass

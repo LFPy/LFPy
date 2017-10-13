@@ -16,7 +16,7 @@ cdef extern from "math.h":
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
-cpdef np.ndarray[LTYPE_t, ndim=1, negative_indices=False] alias_method(np.ndarray[LTYPE_t, ndim=1, negative_indices=False] idx,
+cpdef np.ndarray[long, ndim=1, negative_indices=False] alias_method(np.ndarray[long, ndim=1, negative_indices=False] idx,
                  np.ndarray[DTYPE_t, ndim=1, negative_indices=False] probs,
                  int nsyn):
     """
@@ -44,7 +44,7 @@ cpdef np.ndarray[LTYPE_t, ndim=1, negative_indices=False] alias_method(np.ndarra
         raise ae('length of idx and probs arrays must be equal')
     
     #C-declare variables
-    cdef np.ndarray[LTYPE_t, ndim=1, negative_indices=False] J, spc
+    cdef np.ndarray[long, ndim=1, negative_indices=False] J, spc
     cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] q
     cdef np.ndarray[DTYPE_t, ndim=2, negative_indices=False] rands
     cdef int nn, j, ad, K, kk
@@ -91,8 +91,9 @@ cpdef alias_setup(np.ndarray[DTYPE_t, ndim=1, negative_indices=False] probs):
     """
     #C-declare variables
     cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] q
-    cdef np.ndarray[LTYPE_t, ndim=1, negative_indices=False] J, smaller, larger
-    cdef int K, small, large, kk, s_i, l_i
+    cdef np.ndarray[long, ndim=1, negative_indices=False] J, smaller, larger
+    cdef long K
+    cdef int small, large, kk, s_i, l_i
     cdef DTYPE_t prob
         
     K = probs.size

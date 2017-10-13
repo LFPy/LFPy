@@ -21,6 +21,7 @@ import neuron
 import numpy as np
 import scipy
 import sys
+import posixpath
 from warnings import warn
 import pickle
 from .run_simulation import _run_simulation, _run_simulation_with_electrode
@@ -190,6 +191,9 @@ class Cell(object):
             assert(morphology is not None)
         except AssertionError:
             raise AssertionError('deprecated keyword argument morphology==None, value must be a file path or neuron.h.SectionList instance with neuron.h.Section instances')
+        if "win32" in sys.platform and type(morphology) is str:
+            # fix Path on windows
+            morphology = morphology.replace(os.sep, posixpath.sep)
         self.morphology = morphology
         if type(self.morphology) is str:
             if os.path.isfile(self.morphology):
@@ -353,6 +357,8 @@ class Cell(object):
         # load custom codes
         if custom_code is not None:
             for code in custom_code:
+                if "win32" in sys.platform:
+                    code = code.replace(os.sep, posixpath.sep)
                 if code.split('.')[-1] == 'hoc':
                     try:
                         neuron.h.xopen(code)
@@ -362,7 +368,8 @@ class Cell(object):
                             'while creating a Cell object.',
                             'One possible cause is the NEURON mechanisms have',
                             'not been compiled, ',
-                            'try running nrnivmodl. ',])
+                            'try running nrnivmodl or mknrndll (Windows) in ', 
+                            'the mod-file-containing folder. ',])
                         raise Exception(ERRMSG)
                 elif code.split('.')[-1] == 'py':
                     if sys.version >= "3.4":

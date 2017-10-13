@@ -38,13 +38,16 @@ if sys.version < '3':
 else:    
     from urllib.request import urlopen
 import zipfile
+import ssl
+from warnings import warn
 
 
 
 #Fetch Hay et al. 2011 model files
 if not os.path.isfile('L5bPCmodelsEH/morphologies/cell1.asc'):
     #get the model files:
-    u = urlopen('http://senselab.med.yale.edu/ModelDB/eavBinDown.asp?o=139653&a=23&mime=application/zip')
+    u = urlopen('http://senselab.med.yale.edu/ModelDB/eavBinDown.asp?o=139653&a=23&mime=application/zip',
+                context=ssl._create_unverified_context())
     localFile = open('L5bPCmodelsEH.zip', 'w')
     localFile.write(u.read())
     localFile.close()
@@ -54,12 +57,19 @@ if not os.path.isfile('L5bPCmodelsEH/morphologies/cell1.asc'):
     myzip.close()
 
 #compile mod files every time, because of incompatibility with Mainen96 files:
-os.system('''
-          cd L5bPCmodelsEH/mod/
-          nrnivmodl
-          ''')
-#os.system('nrnivmodl')
-LFPy.cell.neuron.load_mechanisms('L5bPCmodelsEH/mod/')
+if "win32" in sys.platform:
+    pth = "L5bPCmodelsEH/mod/"
+    warn("no autompile of NMODL (.mod) files on Windows.\n" 
+         + "Run mknrndll from NEURON bash in the folder L5bPCmodelsEH/mod and rerun example script")
+    if not pth in neuron.nrn_dll_loaded:
+        neuron.h.nrn_load_dll(pth+"nrnmech.dll")
+    neuron.nrn_dll_loaded.append(pth)
+else:
+    os.system('''
+              cd L5bPCmodelsEH/mod/
+              nrnivmodl
+              ''')
+    neuron.load_mechanisms('L5bPCmodelsEH/mod/')
 
 #remove cells from previous script executions
 neuron.h('forall delete_section()')
