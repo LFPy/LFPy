@@ -138,7 +138,7 @@ if __name__ == '__main__':
     P_mag = np.sqrt(P[:, 0]**2 + P[:, 1]**2 + P[:, 2]**2)
 
     plt.close('all')
-    fig = plt.figure(figsize=[5, 8])
+    fig = plt.figure(figsize=[6, 8])
     fig.subplots_adjust(left=0.15, hspace=0.5, right=0.98, top=0.95)
 
     morph_ax = fig.add_subplot(321, aspect=1, frameon=False,
