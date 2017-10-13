@@ -99,7 +99,7 @@ class testNetwork(unittest.TestCase):
             name = 'test',
         )
         networkParameters = dict(
-            dt=0.1,
+            dt=2**-3,
             tstart=0.,
             tstop=100.,
             v_init=-65.,
@@ -166,7 +166,7 @@ class testNetwork(unittest.TestCase):
             name = 'test',
         )
         networkParameters = dict(
-            dt=0.1,
+            dt=2**-3,
             tstart=0.,
             tstop=100.,
             v_init=-65.,
@@ -188,6 +188,7 @@ class testNetwork(unittest.TestCase):
                 self.assertTrue(np.all(cell.somav == network.v_init))
 
         self.assertTrue(np.all(P['test'] == 0.))
+        self.assertTrue(P.shape[0] == cell.somav.size)
         self.assertTrue(len(LFP) == 0)
 
         network.pc.gid_clear()
@@ -221,7 +222,7 @@ class testNetwork(unittest.TestCase):
             name = 'test',
         )
         networkParameters = dict(
-            dt=0.1,
+            dt=2**-3,
             tstart=0.,
             tstop=100.,
             v_init=-65.,
