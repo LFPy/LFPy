@@ -245,7 +245,7 @@ class DummyCell(object):
                  xstart=np.array([]), xmid=np.array([]), xend=np.array([]),
                  ystart=np.array([]), ymid=np.array([]), yend=np.array([]),
                  zstart=np.array([]), zmid=np.array([]), zend=np.array([]),
-                 diam=np.array([]), area=np.array([])):
+                 diam=np.array([]), area=np.array([]), somainds=np.array([])):
         """
         Dummy Cell object initialized with all attributes needed for LFP
         calculations using the LFPy.RecExtElectrode class and methods. This cell
@@ -285,6 +285,13 @@ class DummyCell(object):
         self.zend = zend
         self.diam = diam
         self.area = area
+        self.somainds = somainds
+    
+    def get_idx(self, section="soma"):
+        if section=="soma":
+            return self.somainds
+        else:
+            raise ValueError('section argument must be "soma"')
 
 
 class NetworkPopulation(object):
@@ -994,7 +1001,7 @@ class Network(object):
                 nsegs[i] = [0]
         for i, y in enumerate(nsegs): nsegs[i] = np.sum(y)
         nsegs = np.array(nsegs, dtype=int)
-
+        
         totnsegs = nsegs.sum()
         imem = np.eye(totnsegs)
         xstart = np.array([])
@@ -1008,7 +1015,10 @@ class Network(object):
         zend = np.array([])
         diam = np.array([])
         area = np.array([])
-
+        
+        somainds = np.array([], dtype=int)
+        nseg = 0
+        
         for name in self.population_names:
             for cell in self.populations[name].cells:
                 xstart = np.r_[xstart, cell.xstart]
@@ -1022,6 +1032,10 @@ class Network(object):
                 zend = np.r_[zend, cell.zend]
                 diam = np.r_[diam, cell.diam]
                 area = np.r_[area, cell.area]
+                
+                somainds = np.r_[somainds, cell.get_idx("soma")+nseg]
+                nseg += cell.totnsegs
+
 
         # return number of segments per population and DummyCell object
         return nsegs, DummyCell(totnsegs,
@@ -1029,7 +1043,7 @@ class Network(object):
                          xstart, xmid, xend,
                          ystart, ymid, yend,
                          zstart, zmid, zend,
-                         diam, area)
+                         diam, area, somainds)
 
 
 def _run_simulation(network, cvode, variable_dt=False, atol=0.001):

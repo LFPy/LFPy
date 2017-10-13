@@ -356,7 +356,7 @@ class testRecExtElectrode(unittest.TestCase):
                            rec_imem=True, rec_vmem=True)
 
             np.testing.assert_allclose(isotropic_electrode.LFP,
-                                       anisotropic_electrode.LFP)
+                                       anisotropic_electrode.LFP, rtol=1E-7)
 
     def test_compare_anisotropic_lfp_methods(self):
 
