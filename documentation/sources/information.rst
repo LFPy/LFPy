@@ -43,10 +43,12 @@ To install LFPy you will need the following:
 
 1.  Python. LFPy's unit-test suite is integrated with and continuously tested using `Travis-CI <https://travis-ci.org>`_. Tests are run using NEURON 7.4 and Python 2.7, 3.4, 3.5 and 3.6, as well as other Python dependencies listed next.
     The code build testing status and results of the last test as well as the test coverage test using `Coveralls <https://coveralls.io>`_  can be seen here:
-.. image:: https://travis-ci.org/LFPy/LFPy.svg?branch=master
-    :target: https://travis-ci.org/LFPy/LFPy
-.. image:: https://coveralls.io/repos/github/LFPy/LFPy/badge.svg?branch=master
-    :target: https://coveralls.io/github/LFPy/LFPy?branch=master
+    
+    .. image:: https://travis-ci.org/LFPy/LFPy.svg?branch=master
+        :target: https://travis-ci.org/LFPy/LFPy
+    
+    .. image:: https://coveralls.io/repos/github/LFPy/LFPy/badge.svg?branch=master
+        :target: https://coveralls.io/github/LFPy/LFPy?branch=master
 
 
 2.  Python modules setuptools, numpy, scipy, matplotlib, Cython, h5py, mpi4py, csa
@@ -272,10 +274,11 @@ Windows 10 Pro/Education (64-bit) install instructions:
 Installing NEURON with Python from source
 -----------------------------------------
 
-Some users have difficulties install NEURON as a Python module,
+Some users have difficulties installing NEURON as a Python module,
 depending on their platform. 
 We will provide some explanations here, and otherwise direct to the NEURON download pages;
-http://www.neuron.yale.edu/neuron/download and http://www.neuron.yale.edu/neuron/download/getstd. The NEURON forum is
+http://www.neuron.yale.edu/neuron/download and http://www.neuron.yale.edu/neuron/download/getstd.
+The NEURON forum (https://www.neuron.yale.edu/phpBB/) is
 also a useful resource for installation problems.
 
 Dependencies: Ubuntu 10.04 LTS and other Debian-based Linux versions
@@ -303,15 +306,15 @@ Download Cython (Cython-0.15.1.tar.gz, or newer) from `Cython.org <http://www.cy
 Linux/Unix installation of NEURON from source
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Now get the source code of NEURON using mercurial
+Now get the source code of NEURON using git
 ::
 
     $ cd $HOME
     $ mkdir neuron
     $ cd neuron
 
-    $ hg clone http://www.neuron.yale.edu/hg/neuron/iv
-    $ hg clone http://www.neuron.yale.edu/hg/neuron/nrn
+    $ git clone https://github.com/nrnhines/iv
+    $ git clone https://github.com/nrnhines/nrn
 
 Compile and install InterViews
 ::
@@ -356,15 +359,16 @@ You might want to add the folder with NEURON executables to your PATH, so that y
 NEURON dependencies and installation on Mac OSX from source
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Most of the development work and testing of LFPy has been done on Max OS X 10.6.* Snow Leopard and 10.7.* Lion. Our preferred way of building Python 
+Most of the development work and testing of LFPy has been done on MacOS (10.6-). Our preferred way of building Python 
 has been through MacPorts; http://www.macports.org. Here is an step-by-step explanation on how to compile NEURON agains that installation of Python.
+Simpler solutions are stipulated above.
 
 To start using MacPorts, follow the instructions on http://www.macports.org/install.php.
 
 Building a python 2.7 environment using MacPorts issue in Terminal:
 ::
     
-    $ sudo port install python27 py27-ipython py27-numpy py27-matplotlib py27-scipy py27-cython
+    $ sudo port install python27 py27-ipython py27-numpy py27-matplotlib py27-scipy py27-cython py27-mpi4py py27-h5py
 
 Make the installed Python and IPython default:
 ::
@@ -377,9 +381,9 @@ Install the necessary packages for cloning into repository and compiling NEURON:
 
     $ sudo port install automake autoconf libtool xorg-libXext ncurses mercurial bison flex
 
-Install NEURON from the bleeding edge source code. The following recipe assumes a 64 bit build of NEURON and Python on OSX 10.7 Lion, so change
-"x86_64-apple-darwin10.7.0" throughout to facilitate your system accordingly,
-as found by running "./config.guess" in the root of the NEURON source code;
+Install NEURON from the bleeding edge source code. The following recipe assumes a 64 bit build of NEURON and Python on MacOS 10.12, so change
+"x86_64-apple-darwin16.7.0" throughout to facilitate your system accordingly,
+as found by running ``./config.guess`` in the root of the NEURON source code folder;
 ::
 
     #create a directory in home directory                                                                                                                                                               
@@ -399,26 +403,29 @@ as found by running "./config.guess" in the root of the NEURON source code;
         
     #compiling and installing IV under folder /Applications/nrn7.3                                                                                                                                             
     $ sh build.sh
-    $ ./configure --prefix=/Applications/NEURON-7.3/iv \
-          --build=x86_64-apple-darwin10.7.0 --host=x86_64-apple-darwin10.7.0
-    
+    $ ./configure --prefix=/Applications/NEURON-7.5/iv \
+            --build=x86_64-apple-darwin16.7.0 --host=x86_64-apple-darwin16.7.0 \
+            --x-includes=/usr/X11/include --x-libraries=/usr/X11/lib
     $ make
     $ sudo make install
     
     #Building NEURON with InterViews, you may have to alter the path --with-nrnpython=/python-path                                                                                                      
     $ cd $HOME/nrn64/nrn
     $ sh build.sh
-    $ ./configure --prefix=/Applications/NEURON-7.3/nrn --with-iv=/Applications/NEURON-7.3/iv \
-          --with-x --x-includes=/usr/X11/include/ --x-libraries=/usr/X11/lib/ \
-          --with-nrnpython=/opt/local/Library/Frameworks/Python.framework/Versions/2.7/Resources/Python.app/Contents/MacOS/Python \
-          --host=x86_64-apple-darwin10.7.0 --build=x86_64-apple-darwin10.7.0
-    
+    $ ./configure --prefix=/Applications/NEURON-7.5/nrn \
+            --with-nrnpython=/opt/local/Library/Frameworks/Python.framework/Versions/2.7/Resources/Python.app/Contents/MacOS/Python \
+            --host=x86_64-apple-darwin16.7.0 --build=x86_64-apple-darwin16.7.0 \
+            --with-paranrn \
+            --with-mpi \
+            --with-iv=/Applications/NEURON-7.5/iv \
+            CFLAGS='-O3 -Wno-return-type -Wno-implicit-function-declaration -Wno-implicit-int -fPIC' \
+            CXXFLAGS='-O3 -Wno-return-type -fPIC'
     $ make
     $ sudo make install
     $ sudo make install after_install
     
     #You should now have a working NEURON application under Applications. Small test;                                                                                                                   
-    #sudo /Applications/NEURON-7.3/nrn/x86_64/bin/neurondemo                                                                                                                                            
+    #sudo /Applications/NEURON-7.5/nrn/x86_64/bin/neurondemo                                                                                                                                            
     
     #Final step is to install neuron as a python module                                                                                                                                                 
     $ cd src/nrnpython
@@ -431,19 +438,20 @@ LFPy on the Neuroscience Gateway Portal
 LFPy is installed on the Neuroscience Gateway Portal (NSG, see http://www.nsgportal.org), and can be used to execute simulations with LFPy both serially and in parallel applications on high-performance computing facilities.
 The access to the NSG is entirely free, and access to other neuronal simulation software (NEST, NEURON, etc.) is also provided. The procedure for getting started with LFPy on the NSG is quite straightforward through their web-based interface:
 
-1. First, apply for a NSG user account by filling out their application form and sending it by email (follow instructions on http://www.nsgportal.org/portal2)
-2. After approval, log in using your credentials, change password if necessary
-3. As a first step after log in, create a new folder, e.g., named "LFPyTest" and with some description. This will be the home for your input files and output files, and should contain empty Data and Tasks folders
-4. Press the "Data (0)" folder in the left margin. Press the "Upload/Enter Data" button, showing the Upload File interface. Add a label, e.g., "LFPyTest".
-5. Next, LFPy simulation files have to be uploaded. As an example, download the example LFPy files https://github.com/espenhgn/LFPy/blob/master/examples/nsg_example/L5_Mainen96_wAxon_LFPy.hoc
-   and https://github.com/espenhgn/LFPy/blob/master/examples/nsg_example/nsg_example.py into a new local folder "nsg_example". Modify as needed. 
-6. Zip the "nsg_example" folder, upload it to the NSG (cf. step 4) and press "Save"
-7. Press "Tasks (0)" in the left margin and "Create New Task"
-8. Enter some Description, e.g., "LFPyTest", and "Select Input Data". Hook off "LFPyTest" and press "Select Data"
-9. Next, press "Select Tool", and then "Python (2.7.x)"
+1.  First, apply for a NSG user account by filling out their application form and sending it by email (follow instructions on http://www.nsgportal.org/portal2)
+2.  After approval, log in using your credentials, change password if necessary
+3.  As a first step after log in, create a new folder, e.g., named "LFPyTest" and with some description. This will be the home for your input files and output files, and should contain empty Data and Tasks folders
+4.  Press the "Data (0)" folder in the left margin. Press the "Upload/Enter Data" button, showing the Upload File interface. Add a label, e.g., "LFPyTest".
+5.  Next, LFPy simulation files have to be uploaded. As an example, download the example LFPy files https://github.com/espenhgn/LFPy/blob/master/examples/nsg_example/L5_Mainen96_wAxon_LFPy.hoc
+    and https://github.com/espenhgn/LFPy/blob/master/examples/nsg_example/nsg_example.py into a new local folder "nsg_example". Modify as needed. 
+6.  Zip the "nsg_example" folder, upload it to the NSG (cf. step 4) and press "Save"
+7.  Press "Tasks (0)" in the left margin and "Create New Task"
+8.  Enter some Description, e.g., "LFPyTest", and "Select Input Data". Hook off "LFPyTest" and press "Select Data"
+9.  Next, press "Select Tool", and then "Python (2.7.x)"
 10. Then, go to the "Set Parameters" tab. This allows for specifying simulation time, main simulation script, and number of parallel threads. Set "Maximum Hours" to 0.1,
     and "Main Input Python Filename" to "nsg_example.py". Node number and number of cores per node should both be 1. Press "Save Parameters"
 11. Everything that is needed has been set up, thus "Save and Run Task" in the Task Summary tab is all that is needed to start the job, but expect some delay for it to start. 
 12. Once the job is finished, you will be notified by email, or keep refreshing the Task window. The simulation output can be accessed through "View Output". Download the "output.tar.gz" file and unzip it.
     Among the output files, including stdout.txt and stderr.txt text files and jobscript details, the included folder "nsg_example" will contain the input files and any output files.
     For this particular example, only a pdf image file is generated, "nsg_example.pdf"
+
