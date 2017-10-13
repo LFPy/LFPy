@@ -258,9 +258,9 @@ class Population:
             ax = fig.add_axes([0.5, 0.075, 0.40, 0.4])
             cax = fig.add_axes([0.91, 0.075, 0.02, 0.40])
             im = ax.pcolormesh(tvec, self.electrodeParameters['z'], self.LFP,
-                           cmap='spectral_r',
-                           vmin = -abs(self.LFP).max(),
-                           vmax = abs(self.LFP).max())
+                           cmap='PRGn',
+                           vmin = -self.LFP.std()*3,
+                           vmax = self.LFP.std()*3)
             ax.axis(ax.axis('tight'))
             cbar = plt.colorbar(im, cax=cax)
             cbar.set_label('LFP (mV)')

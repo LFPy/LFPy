@@ -223,7 +223,7 @@ def plotstuff(cell, electrode):
     
     ax2.set_title('somatic potential', va='center')
 
-    ax2.text(-0.2, 1.0, 'b',
+    ax2.text(-0.3, 1.0, 'b',
         horizontalalignment='center',
         verticalalignment='center',
         fontsize=16, fontweight='demibold',
@@ -256,7 +256,7 @@ def plotstuff(cell, electrode):
                    
     ax3.set_title('extracellular spike', va='center')
 
-    ax3.text(-0.2, 1.0, 'c',
+    ax3.text(-0.3, 1.0, 'c',
         horizontalalignment='center',
         verticalalignment='center',
         fontsize=16, fontweight='demibold',
