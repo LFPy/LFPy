@@ -151,14 +151,14 @@ Python distributions such as the Anaconda Scientific Python distribution (http:/
 how to set up a working Python environment using Anaconda with the standard pre-built NEURON binaries on Linux, OSX and Windows.
 
 
-Ubuntu 12.04 LTS 64-bit with Anaconda Scientific Python distribution
+Ubuntu 16.04 LTS 64-bit with Anaconda Scientific Python distribution
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 By far the simplest solution relying on no source code compilation.
 
 1.  Download and install Anaconda using the 64-bit Linux installer script from http://continuum.io/downloads
 2.  Download and install the 64-bit Debian/Ubuntu .deb file with NEURON from http://www.neuron.yale.edu/neuron/download
-3.  Edit your .bashrc or similar file located in the $HOME folder, e.g., by calling in the Terminal.app "gedit $HOME/.bashrc", to include the lines:
+3.  Edit your .bashrc or similar file located in the $HOME folder, e.g., by calling in the terminal "gedit $HOME/.bashrc", to include the lines:
     ::
     
         # make NEURON python module available to Anaconda python
@@ -281,10 +281,10 @@ http://www.neuron.yale.edu/neuron/download and http://www.neuron.yale.edu/neuron
 The NEURON forum (https://www.neuron.yale.edu/phpBB/) is
 also a useful resource for installation problems.
 
-Dependencies: Ubuntu 10.04 LTS and other Debian-based Linux versions
+Dependencies: Ubuntu 16.04 LTS and other Debian-based Linux versions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The instructions below show how to meet all the requirements starting from a clean Ubuntu 10.4 for the installation of NEURON from the development branch. 
+The instructions below show how to meet all the requirements starting from a clean Ubuntu 16.4 for the installation of NEURON from the development branch. 
 
 Start by installing the required packages
 ::
@@ -295,8 +295,7 @@ Start by installing the required packages
     $ sudo apt-get install python-dev python-numpy python-scipy python-matplotlib
     $ sudo apt-get install ipython
 
-The cython version provided in Ubuntu 10.4LTS is out of date, compile a more recent version yourself.
-Download Cython (Cython-0.15.1.tar.gz, or newer) from `Cython.org <http://www.cython.org>`_, unpack and install;
+
 ::
     
     $ sudo python setup.py install
@@ -392,16 +391,16 @@ as found by running ``./config.guess`` in the root of the NEURON source code fol
     $ cd nrn64
     
     #creating directories                                                                                                                                                                               
-    $ sudo mkdir /Applications/NEURON-7.3
-    $ sudo mkdir /Applications/NEURON-7.3/iv
-    $ sudo mkdir /Applications/NEURON-7.3/nrn
+    $ sudo mkdir /Applications/NEURON-7.5
+    $ sudo mkdir /Applications/NEURON-7.5/iv
+    $ sudo mkdir /Applications/NEURON-7.5/nrn
     
     #Downloading bleeding edge source code                                                                                                                                                              
     $ hg clone http://www.neuron.yale.edu/hg/neuron/iv
     $ hg clone http://www.neuron.yale.edu/hg/neuron/nrn
     $ cd iv
         
-    #compiling and installing IV under folder /Applications/nrn7.3                                                                                                                                             
+    #compiling and installing IV under folder /Applications/nrn7.5                                                                                                                                             
     $ sh build.sh
     $ ./configure --prefix=/Applications/NEURON-7.5/iv \
             --build=x86_64-apple-darwin16.7.0 --host=x86_64-apple-darwin16.7.0 \

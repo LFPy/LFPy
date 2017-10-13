@@ -165,7 +165,7 @@ The files provided are
 - `example_anisotropy.py <https://github.com/LFPy/LFPy/blob/master/examples/example_anisotropy.py>`_
 - `example_loadL5bPCmodelsEH.py <https://github.com/LFPy/LFPy/blob/master/examples/example_loadL5bPCmodelsEH.py>`_
 - `example_network/example_Network.py <https://github.com/LFPy/LFPy/blob/master/examples/example_network/example_Network.py>`_
-
+- `example_EEG.py <https://github.com/LFPy/LFPy/blob/master/examples/example_EEG.py>`_
 
 
 
