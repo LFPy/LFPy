@@ -22,7 +22,7 @@ import unittest
 import numpy as np
 import LFPy
 import neuron
-from common import *
+from .common import *
 
 # for nosetests to run load the SinSyn sinusoid synapse currrent mechanism
 if "win32" in sys.platform:
