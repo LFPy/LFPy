@@ -47,13 +47,6 @@ Module :mod:`LFPy`
         :show-inheritance:
         :undoc-members:
 
-    class :class:`RecExtElectrodeSetup`
-    ===================================
-    .. autoclass:: RecExtElectrodeSetup
-        :members:
-        :show-inheritance:
-        :undoc-members:
-
     class :class:`RecExtElectrode`
     ==============================
     .. autoclass:: RecExtElectrode
