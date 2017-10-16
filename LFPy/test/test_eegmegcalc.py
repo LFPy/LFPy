@@ -16,6 +16,7 @@ GNU General Public License for more details.
 
 from __future__ import division
 import unittest
+import os
 import numpy as np
 import LFPy
 
@@ -240,6 +241,104 @@ class testInfiniteVolumeConductor(unittest.TestCase):
         inf_model = LFPy.InfiniteVolumeConductor(sigma)
         phi = inf_model.get_dipole_potential(p, r)
         np.testing.assert_allclose(phi, np.array([[1., 0.], [0., 1.]]))
+
+
+class testOneSphereVolumeConductor(unittest.TestCase):
+    """
+    test class OneSphereVolumeConductor
+    """
+    def test_OneSphereVolumeConductor_00(self):
+        """test case where sigma_i == sigma_o which
+        should be identical to the standard point-source potential in
+        infinite homogeneous media
+        """
+        # current magnitude
+        I = 1.
+        # conductivity
+        sigma = 0.3 
+        # sphere radius
+        R = 1000
+        # source location (along x-axis)
+        rs = 800
+        # sphere coordinates of observation points
+        radius = np.r_[np.arange(0, rs), np.arange(rs+1, rs*2)]
+        theta = np.zeros(radius.shape)
+        phi = np.zeros(radius.shape)
+        r = np.array([radius, theta, phi])
+        
+        # predict potential
+        sphere = LFPy.OneSphereVolumeConductor(r=r, R=R, sigma_i=sigma, sigma_o=sigma)
+        phi = sphere.calc_potential(rs=rs, I=I)
+        
+        # ground truth
+        phi_gt = I / (4*np.pi*sigma*abs(radius-rs))
+        
+        # test
+        np.testing.assert_almost_equal(phi, phi_gt)
+
+    def test_OneSphereVolumeConductor_01(self):
+        """test case where sigma_i == sigma_o which
+        should be identical to the standard point-source potential in
+        infinite homogeneous media
+        """
+        # current magnitude
+        I = np.ones(10)
+        # conductivity
+        sigma = 0.3 
+        # sphere radius
+        R = 1000
+        # source location (along x-axis)
+        rs = 800
+        # sphere coordinates of observation points
+        radius = np.r_[np.arange(0, rs), np.arange(rs+1, rs*2)]
+        theta = np.zeros(radius.shape)
+        phi = np.zeros(radius.shape)
+        r = np.array([radius, theta, phi])
+        
+        # predict potential
+        sphere = LFPy.OneSphereVolumeConductor(r=r, R=R, sigma_i=sigma, sigma_o=sigma)
+        phi = sphere.calc_potential(rs=rs, I=I)
+        
+        # ground truth
+        phi_gt = I[0] / (4*np.pi*sigma*abs(radius-rs))
+        
+        # test
+        np.testing.assert_almost_equal(phi, np.array([phi_gt]*I.size).T)
+
+    def test_OneSphereVolumeConductor_02(self):
+        """test case where sigma_i == sigma_o which
+        should be identical to the standard point-source potential in
+        infinite homogeneous media
+        """
+        # current magnitude
+        I = 1.
+        # conductivity
+        sigma = 0.3 
+        # sphere radius
+        R = 10000
+        # cell body position
+        xs = 8000.
+        # sphere coordinates of observation points
+        radius = np.r_[np.arange(0, xs), np.arange(xs+1, xs*2)][::10]
+        theta = np.zeros(radius.shape)+np.pi/2
+        phi = np.zeros(radius.shape)
+        r = np.array([radius, theta, phi])
+        # set up cell        
+        cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test', 'stick.hoc'))
+        cell.set_pos(x=xs, y=0, z=0)
+        cell.set_rotation(y=np.pi/2)
+        
+        # predict potential
+        sphere = LFPy.OneSphereVolumeConductor(r=r, R=R, sigma_i=sigma, sigma_o=sigma)
+        mapping = sphere.calc_mapping(cell=cell, n_max=100)
+                
+        # ground truth and tests
+        for i, x in enumerate(cell.xmid):
+            dist = radius-x
+            dist[abs(dist) < cell.diam[i]] = cell.diam[i]
+            phi_gt = I / (4*np.pi*sigma*abs(dist))
+            np.testing.assert_almost_equal(mapping[:, i], phi_gt)
+
 
 
 ######## Functions used by tests: ##############################################
