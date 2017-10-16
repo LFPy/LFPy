@@ -254,18 +254,18 @@ def calc_lfp_soma_as_point_anisotropic(cell, x, y, z, sigma, r_limit):
 
     r2_soma = dx2_soma + dy2_soma + dz2_soma
 
-    if np.abs(r2_soma) < 1e-6:
-        dx2_soma += 0.001
-        r2_soma += 0.001
+    # Go through and correct all (if any) somatic idxs that are too close
+    for close_idx in np.where(np.abs(r2_soma) < 1e-6)[0]:
+        dx2_soma[close_idx] += 0.001
+        r2_soma[close_idx] += 0.001
 
-
-    if r2_soma < r_limit[somainds]**2:
+    for close_idx in np.where(r2_soma < r_limit[somainds]**2)[0]:
         # For anisotropic media, the direction in which to move points matter.
         # Radial distance between point source and electrode is scaled to r_limit
-        r2_scale_factor = r_limit[somainds]*r_limit[somainds] / r2_soma
-        dx2_soma *= r2_scale_factor
-        dy2_soma *= r2_scale_factor
-        dz2_soma *= r2_scale_factor
+        r2_scale_factor = r_limit[somainds[close_idx]]*r_limit[somainds[close_idx]] / r2_soma[close_idx]
+        dx2_soma[close_idx] *= r2_scale_factor
+        dy2_soma[close_idx] *= r2_scale_factor
+        dz2_soma[close_idx] *= r2_scale_factor
 
     mapping[somainds] = 1/np.sqrt(sigma[1] * sigma[2] * dx2_soma
                     + sigma[0] * sigma[2] * dy2_soma
