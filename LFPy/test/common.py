@@ -114,7 +114,7 @@ def stickSimulationAveragingElectrode(contactRadius, contactNPoints, method):
 
     stick = LFPy.Cell(**stickParams)
     stick.set_pos(z=-stick.zstart[0])
-
+    
     synapse = LFPy.StimIntElectrode(stick, stick.get_closest_idx(0, 0, 1000),
                            **stimParams)
     stick.simulate(electrode, rec_imem=True, rec_vmem=True)

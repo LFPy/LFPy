@@ -53,7 +53,7 @@ class testRecExtElectrode(unittest.TestCase):
             LFP_analytic[i, ] = analytical_LFP(time, electrodeR=R[i],
                                                     electrodeZ=Z[i])
         np.testing.assert_allclose(LFP_analytic, LFP_LFPy, rtol=0,
-                                   atol=abs(LFP_analytic).max() / 20.)
+                                   atol=abs(LFP_analytic).max() / 10.)
     
     def test_method_linesource(self):
         #create LFPs using LFPy-model
@@ -69,7 +69,7 @@ class testRecExtElectrode(unittest.TestCase):
             LFP_analytic[i, ] = analytical_LFP(time, electrodeR=R[i],
                                                     electrodeZ=Z[i])
         np.testing.assert_allclose(LFP_analytic, LFP_LFPy, rtol=0,
-                                   atol=abs(LFP_analytic).max() / 20.)
+                                   atol=abs(LFP_analytic).max() / 10.)
 
     
     def test_method_soma_as_point(self):
@@ -86,7 +86,7 @@ class testRecExtElectrode(unittest.TestCase):
             LFP_analytic[i, ] = analytical_LFP(time, electrodeR=R[i],
                                                     electrodeZ=Z[i])
         np.testing.assert_allclose(LFP_analytic, LFP_LFPy, rtol=0,
-                                   atol=abs(LFP_analytic).max() / 20.)
+                                   atol=abs(LFP_analytic).max() / 10.)
 
     
     
@@ -104,7 +104,7 @@ class testRecExtElectrode(unittest.TestCase):
             LFP_analytic[i, ] = analytical_LFP(time, electrodeR=R[i],
                                                     electrodeZ=Z[i])
         np.testing.assert_allclose(LFP_analytic, LFP_LFPy, rtol=0,
-                                   atol=abs(LFP_analytic).max() / 20.)
+                                   atol=abs(LFP_analytic).max() / 10.)
 
     
     def test_method_linesource_dotprodcoeffs(self):
@@ -121,7 +121,7 @@ class testRecExtElectrode(unittest.TestCase):
             LFP_analytic[i, ] = analytical_LFP(time, electrodeR=R[i],
                                                     electrodeZ=Z[i])
         np.testing.assert_allclose(LFP_analytic, LFP_LFPy, rtol=0,
-                                   atol=abs(LFP_analytic).max() / 20.)
+                                   atol=abs(LFP_analytic).max() / 10.)
 
     
     def test_method_soma_as_point_dotprodcoeffs(self):
@@ -138,7 +138,7 @@ class testRecExtElectrode(unittest.TestCase):
             LFP_analytic[i, ] = analytical_LFP(time, electrodeR=R[i],
                                                     electrodeZ=Z[i])
         np.testing.assert_allclose(LFP_analytic, LFP_LFPy, rtol=0,
-                                   atol=abs(LFP_analytic).max() / 20.)
+                                   atol=abs(LFP_analytic).max() / 10.)
 
     
     def test_method_pointsource_contact_average_r10n100(self):
@@ -156,7 +156,7 @@ class testRecExtElectrode(unittest.TestCase):
             LFP_analytic[i, ] = analytical_LFP(time, electrodeR=R[i],
                                                     electrodeZ=Z[i])
         np.testing.assert_allclose(LFP_analytic, LFP_LFPy, rtol=0,
-                                   atol=abs(LFP_analytic).max() / 20.)
+                                   atol=abs(LFP_analytic).max() / 10.)
 
     
     def test_method_linesource_contact_average_r10n100(self):
@@ -174,7 +174,7 @@ class testRecExtElectrode(unittest.TestCase):
             LFP_analytic[i, ] = analytical_LFP(time, electrodeR=R[i],
                                                     electrodeZ=Z[i])
         np.testing.assert_allclose(LFP_analytic, LFP_LFPy, rtol=0,
-                                   atol=abs(LFP_analytic).max() / 20.)
+                                   atol=abs(LFP_analytic).max() / 10.)
 
     
     def test_method_soma_as_point_contact_average_r10n100(self):
@@ -192,7 +192,7 @@ class testRecExtElectrode(unittest.TestCase):
             LFP_analytic[i, ] = analytical_LFP(time, electrodeR=R[i],
                                                     electrodeZ=Z[i])
         np.testing.assert_allclose(LFP_analytic, LFP_LFPy, rtol=0,
-                                   atol=abs(LFP_analytic).max() / 20.)
+                                   atol=abs(LFP_analytic).max() / 10.)
 
     def test_sigma_inputs(self):
 
