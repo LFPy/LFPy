@@ -2,17 +2,14 @@
 # -*- coding: utf-8 -*-
 """
 Copyright (C) 2017 Computational Neuroscience Group, NMBU.
-
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
-
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
-
 """
 
 from __future__ import division
@@ -125,15 +122,8 @@ class FourSphereVolumeConductor(object):
 
         """
         p_rad, p_tan = self._decompose_dipole(p)
-        if np.linalg.norm(p_rad) != 1e-15:
-            pot_rad = self._calc_rad_potential(p_rad)
-        else:
-            pot_rad = 0.
-        if np.linalg.norm(p_tan) != 1e-15:
-            pot_tan = self._calc_tan_potential(p_tan)
-        else:
-            pot_tan = 0.
-
+        pot_rad = self._calc_rad_potential(p_rad)
+        pot_tan = self._calc_tan_potential(p_tan)
         pot_tot = pot_rad + pot_tan
         return pot_tot
 
@@ -357,7 +347,8 @@ class FourSphereVolumeConductor(object):
         const = 1.
         coeff_sum = 0.
         consts = []
-        while const > self.iteration_stop_factor*coeff_sum:
+        # while const > self.iteration_stop_factor*coeff_sum:
+        while const > 2./99.*1e-12*coeff_sum:
             c1n = self._calc_c1n(n)
             const = n*(c1n * (r / self.r1) ** n + (self.rz / r) ** (n + 1))
             coeff_sum += const
@@ -390,7 +381,8 @@ class FourSphereVolumeConductor(object):
         const = 1.
         coeff_sum = 0.
         consts = []
-        while const > self.iteration_stop_factor*coeff_sum:
+        # while const > self.iteration_stop_factor*coeff_sum:
+        while const > 2./99.*1e-6*coeff_sum:
             term1 = self._calc_csf_term1(n,r)
             term2 = self._calc_csf_term2(n,r)
             const = n*(term1 + term2)
@@ -424,7 +416,8 @@ class FourSphereVolumeConductor(object):
         const = 1.
         coeff_sum = 0.
         consts = []
-        while const > self.iteration_stop_factor*coeff_sum:
+        # while const > self.iteration_stop_factor*coeff_sum:
+        while const > 2./99.*1e-6*coeff_sum:
             c3n = self._calc_c3n(n)
             d3n = self._calc_d3n(n, c3n)
             const = n*(c3n * (r / self.r3) ** n + d3n * (self.r3 / r) ** (n + 1))
@@ -458,7 +451,8 @@ class FourSphereVolumeConductor(object):
         const = 1.
         coeff_sum = 0.
         consts = []
-        while const > self.iteration_stop_factor*coeff_sum:
+        # while const > self.iteration_stop_factor*coeff_sum:
+        while const > 2./99.*1e-6*coeff_sum:
             c4n = self._calc_c4n(n)
             d4n = self._calc_d4n(n, c4n)
             const = n*(c4n * (r / self.r4) ** n + d4n * (self.r4 / r) ** (n + 1))
@@ -492,7 +486,7 @@ class FourSphereVolumeConductor(object):
         const = 1.
         coeff_sum = 0.
         consts = []
-        while const > self.iteration_stop_factor*1e-6*coeff_sum:
+        while const > self.iteration_stop_factor*coeff_sum:
             c1n = self._calc_c1n(n)
             const = (c1n * (r / self.r1) ** n + (self.rz / r) ** (n + 1))
             coeff_sum += const

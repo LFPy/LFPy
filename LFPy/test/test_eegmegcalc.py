@@ -185,42 +185,48 @@ class testFourSphereVolumeConductor(unittest.TestCase):
         np.testing.assert_almost_equal(s_vector, np.array([1., -1.]))
 
     def test_calc_vn(self):
-        print('test calc_vn')
+        '''test that calc_vn gives correct values'''
         n = 1
         fs = make_simple_class_object()
         v1 = fs._calc_vn(1)
         np.testing.assert_almost_equal(v1, -4.75)
 
     def test_calc_yn(self):
-        print('test calc_vn')
+        '''test that calc_yn gives correct values'''
         n = 1
         fs = make_simple_class_object()
         y1 = fs._calc_yn(1)
         np.testing.assert_almost_equal(y1, -2.3875)
 
     def test_calc_zn(self):
-        print('test calc_vn')
+        '''test that calc_zn gives correct values'''
         n = 1
         fs = make_simple_class_object()
         z1 = fs._calc_zn(1)
         np.testing.assert_almost_equal(z1, -2.16574585635359)
 
     def test_calc_potential(self):
+        '''test comparison between four-sphere model and model for
+        infinite homogeneous space
+        when sigma is constant and r4 goes to infinity'''
         sigmas = [0.3, 0.3, 0.3+1e-16, 0.3]
-        radii = [10., 20., 30., 1e6]
+        radii = [10., 20*1e6, 30.*1e6, 40.*1e6]
         rz = np.array([0., 0., 3.])
-        p = np.array([[0., 0., 100.]])
+        p = np.array([[0., 0., 100.], [50., 50., 0.]])
         r_elec = np.array([[0., 0., 9.],
                            [0., 0., 15.],
                            [0., 0., 25.],
-                           [0., 0., 40.]])
+                           [0., 0., 40.],
+                           [0., 9., 0.],
+                           [0., 15., 0.],
+                           [0., 25., 0.],
+                           [0., 40., 0.]])
         four_s = LFPy.FourSphereVolumeConductor(radii, sigmas, r_elec, rz)
         pots_4s = four_s.calc_potential(p)
-
         inf_s = LFPy.InfiniteVolumeConductor(0.3)
-        pots_inf = inf_s.get_dipole_potential(p, r_elec)
+        pots_inf = inf_s.get_dipole_potential(p, r_elec - rz)
 
-        np.testing.assert_allclose(pots_4s, pots_inf, rtol=1e-2)
+        np.testing.assert_allclose(pots_4s, pots_inf, rtol=1e-6)
 
 
 class testInfiniteVolumeConductor(unittest.TestCase):
