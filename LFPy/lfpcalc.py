@@ -758,8 +758,10 @@ def calc_lfp_soma_as_point_moi(cell, x, y, z, sigma_T, sigma_S, sigma_G,
     pos = np.array([x, y, z])
     rs, closest_points = return_dist_from_segments(xstart, ystart, zstart,
                                                    xend, yend, zend, pos)
-    z0_ = z0
-    z0_[np.where(rs < r_limit)] = r_limit
+    z0_ = np.array(z0)
+    if np.any(rs < r_limit):
+        z0_[rs < r_limit] = r_limit
+
 
     ds = _deltaS_calc(xstart, xend, ystart, yend, zstart, zend)
     factor_a = ds*ds

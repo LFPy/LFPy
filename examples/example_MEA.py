@@ -81,7 +81,7 @@ def plot_results(cell, synapse, MEA, electrode):
 def plot_recording_set_up(cell, ax_neur, ax_side, MEA, elec_clr,
                            syn_idx, cell_plot_colors):
 
-    for comp in xrange(len(cell.xmid)):
+    for comp in range(len(cell.xmid)):
         if comp == 0:
             ax_neur.scatter(cell.xmid[comp], cell.ymid[comp], s=cell.diam[comp],
                             edgecolor='none', color='gray', zorder=1)
@@ -90,7 +90,7 @@ def plot_recording_set_up(cell, ax_neur, ax_side, MEA, elec_clr,
                          [cell.ystart[comp], cell.yend[comp]],
                          lw=cell.diam[comp]/2, color='gray', zorder=1)
 
-    for comp in xrange(len(cell.xmid)):
+    for comp in range(len(cell.xmid)):
         if comp == 0:
             ax_side.scatter(cell.xmid[comp], cell.zmid[comp], s=cell.diam[comp],
                             edgecolor='none', color='gray', zorder=1)

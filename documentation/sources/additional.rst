@@ -5,12 +5,12 @@ Notes on LFPy
 Morphology files
 ================
 
-Cell morphologies can be specified manually in a ``hoc`` file. For a simple example, see
+Cell morphologies can be specified manually in a ``.hoc`` file. For a simple example, see
 ``examples/morphologies/example_morphology.hoc``. Note the following conventions:
 
 -  Sections should be named according to the following scheme:
    
-   -  ``soma*[1]`` for somatic sections, ``*`` is optional
+   -  ``soma*[]`` for somatic sections, ``*`` is optional
    -  ``dend*[]`` for dendritic sections
    -  ``apic*[]`` for apical dendrite sections
    -  ``axon*[]`` for axonal sections
@@ -19,8 +19,12 @@ Cell morphologies can be specified manually in a ``hoc`` file. For a simple exam
 
 Also the morphologies exported from the NEURON simulator 
 (for example using Cell Builder -> Export) should
-work with LFPy, but some times ``create soma`` must be corrected to
+work with LFPy, but some times ``create soma`` may have to be corrected to
 ``create soma[1]`` directly in the files.
+Multi-sectioned somas may occurr e.g., due to faulty conversion from NeuroLucida or SWC format,
+however, we recommend that these files are corrected. It may not affect the predictions of intracellular
+voltages, but have implications for predictions of extracellular potentials. We usually assume
+that the soma is a single compartment and that it is the root section for all other sections.
 
 
 NEURON convention for creating morphology files in ``hoc``:
@@ -42,9 +46,8 @@ NEURON convention for creating morphology files in ``hoc``:
                     O
                 
     Note the conventions:
-     - soma needs to be a list (soma[0], not soma),
      - use soma for the soma compartment,
-     - use a name starting with dend for the dendrites.
+     - use a name starting with dend or apic for the dendrites.
     -----------------------------------------------------*/
 
 
@@ -78,20 +81,22 @@ NEURON convention for creating morphology files in ``hoc``:
 Other file formats
 ------------------
 
-Support for SWC, NeuroLucida3 and NeuroML file formats is added, but consider this
-experimental and is poorly tested. If there is something wrong with the files, strange behaviour may occur or LFPy may even fail
-to load the desired morphology at all.
+Support for SWC, NeuroLucida3 and NeuroML morphology file formats is added in LFPy, but consider this
+an experimental feature as the functionality is not properly tested. If there is something wrong with
+the files, strange behaviour may occur or LFPy may even fail
+to load the desired morphology.
 
 
-Using NEURON mechanisms
-=======================
+Using NEURON NMODL mechanisms
+=============================
 
 Custom NEURON mechanisms can be loaded from external ``.hoc``- or ``.py``-files - see ``example2.py`` and ``example3.py``.
 Python function definitions with arguments can also be given as input to the ``Cell``-class, specifying model specific conductances etc.
-Remeber to compile any ``mod`` files (if needed) using ``nrnivmodl`` (or ``mknrdll`` on Mac OS).
+Remeber to compile any ``mod`` files (if needed) using ``nrnivmodl`` (or ``mknrdll`` on Windows).
 
 These model specific declarations is typically run after the ``Cell``-class try to read the morphology file,
-and before optionally running the ``_set_nsegs()`` and ``_collect_geometry()`` procedures.
+and before running the ``_set_nsegs()`` and ``_collect_geometry()`` procedures. Hence, code that modifies the
+segmentation of the morphology will affect the properties of the instantiated ``LFPy.Cell`` object.
 
 
 Units
@@ -125,13 +130,19 @@ Depending on the mechanism files, some may use different units altogether, but t
 Contributors
 ============
 
-LFPy was developed by:
+LFPy was developed by (`as per commit <https://github.com/LFPy/LFPy/graphs/contributors>`_):
 
 *	Henrik Lindén https://lindenh.wordpress.com
 
 *	Espen Hagen http://www.mn.uio.no/fysikk/english/?vrtx=person-view&uid=espehage
 
 *	Szymon Łęski
+
+*   Torbjørn V. Ness
+
+*   Solveig Næss
+
+*   Alessio Buccino
 
 *	Eivind Norheim 
 

@@ -28,12 +28,14 @@ import scipy.stats as st
 import matplotlib.pyplot as plt
 from matplotlib.collections import PolyCollection
 import LFPy
+import neuron
 import sys
 if sys.version < '3':
     from urllib2 import urlopen
 else:    
     from urllib.request import urlopen
 import zipfile
+from warnings import warn
 from mpi4py import MPI
 
 #MPI stuff we're using
@@ -55,17 +57,24 @@ if not os.path.isfile(join('cells', 'cells', 'j4a.hoc')) and RANK == 0:
     myzip.close()
 
 if RANK == 0:
-    #compile mod files
-    os.system('''
-              cd cells
-              nrnivmodl
-              ''')
+    #compile mod files every time, because of incompatibility with Hay2011 files:
+    if "win32" in sys.platform:
+        pth = "cells"
+        warn("no autompile of NMODL (.mod) files on Windows. " 
+             + "Run mknrndll from NEURON bash in the folder cells and rerun example script")
+        if not pth in neuron.nrn_dll_loaded:
+            neuron.h.nrn_load_dll(pth+"/nrnmech.dll")
+        neuron.nrn_dll_loaded.append(pth)
+    else:
+        os.system('''
+                  cd cells
+                  nrnivmodl
+                  ''')
+        neuron.load_mechanisms('cells')
 
     #sync threads
 COMM.Barrier()
     
-#os.system('nrnivmodl')
-LFPy.cell.neuron.load_mechanisms('cells')
 
 #set one global seed, ensure all randomizations are set on RANK 0 in script!
 np.random.seed(12345)
@@ -249,9 +258,9 @@ class Population:
             ax = fig.add_axes([0.5, 0.075, 0.40, 0.4])
             cax = fig.add_axes([0.91, 0.075, 0.02, 0.40])
             im = ax.pcolormesh(tvec, self.electrodeParameters['z'], self.LFP,
-                           cmap='spectral_r',
-                           vmin = -abs(self.LFP).max(),
-                           vmax = abs(self.LFP).max())
+                           cmap='PRGn',
+                           vmin = -self.LFP.std()*3,
+                           vmax = self.LFP.std()*3)
             ax.axis(ax.axis('tight'))
             cbar = plt.colorbar(im, cax=cax)
             cbar.set_label('LFP (mV)')

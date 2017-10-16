@@ -22,17 +22,21 @@ if sys.version < '3':
     from urllib2 import urlopen
 else:    
     from urllib.request import urlopen
+import ssl
+from warnings import warn
 import zipfile
 import os
 import matplotlib.pyplot as plt
 from matplotlib.collections import LineCollection
 import LFPy
+import neuron
 
 
 #Fetch Hay et al. 2011 model files
 if not os.path.isfile('L5bPCmodelsEH/morphologies/cell1.asc'):
     #get the model files:
-    u = urlopen('http://senselab.med.yale.edu/ModelDB/eavBinDown.asp?o=139653&a=23&mime=application/zip')
+    u = urlopen('http://senselab.med.yale.edu/ModelDB/eavBinDown.asp?o=139653&a=23&mime=application/zip',
+                context=ssl._create_unverified_context())
     localFile = open('L5bPCmodelsEH.zip', 'wb')
     localFile.write(u.read())
     localFile.close()
@@ -42,12 +46,19 @@ if not os.path.isfile('L5bPCmodelsEH/morphologies/cell1.asc'):
     myzip.close()
 
 #compile mod files every time, because of incompatibility with Mainen96 files:
-os.system('''
-          cd L5bPCmodelsEH/mod/
-          nrnivmodl
-          ''')
-#os.system('nrnivmodl')
-LFPy.cell.neuron.load_mechanisms('L5bPCmodelsEH/mod/')
+if "win32" in sys.platform:
+    pth = "L5bPCmodelsEH/mod/"
+    warn("no autompile of NMODL (.mod) files on Windows.\n" 
+         + "Run mknrndll from NEURON bash in the folder L5bPCmodelsEH/mod and rerun example script")
+    if not pth in neuron.nrn_dll_loaded:
+        neuron.h.nrn_load_dll(pth+"nrnmech.dll")
+    neuron.nrn_dll_loaded.append(pth)
+else:
+    os.system('''
+              cd L5bPCmodelsEH/mod/
+              nrnivmodl
+              ''')
+    neuron.load_mechanisms('L5bPCmodelsEH/mod/')
 
     
 
@@ -212,7 +223,7 @@ def plotstuff(cell, electrode):
     
     ax2.set_title('somatic potential', va='center')
 
-    ax2.text(-0.2, 1.0, 'b',
+    ax2.text(-0.3, 1.0, 'b',
         horizontalalignment='center',
         verticalalignment='center',
         fontsize=16, fontweight='demibold',
@@ -245,7 +256,7 @@ def plotstuff(cell, electrode):
                    
     ax3.set_title('extracellular spike', va='center')
 
-    ax3.text(-0.2, 1.0, 'c',
+    ax3.text(-0.3, 1.0, 'c',
         horizontalalignment='center',
         verticalalignment='center',
         fontsize=16, fontweight='demibold',

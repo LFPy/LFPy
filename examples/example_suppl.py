@@ -20,6 +20,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 import neuron
 
+plt.rcParams.update({
+        'axes.xmargin': 0.0,
+        'axes.ymargin': 0.0,
+    })
 
 def plot_ex1(cell, electrode, X, Y, Z):
     '''
@@ -189,17 +193,18 @@ def plot_ex3(cell, electrode):
     #plot the synaptic current
     ax = fig.add_axes([0.1, 0.4, 0.5, 0.2])
     for i in range(len(cell.synapses)):
-        ax.plot(cell.tvec, cell.synapses[i].i, #color=cell.synapses[i].color
+        ax.plot(cell.tvec, cell.synapses[i].i,
+                color='C0' if cell.synapses[i].kwargs['e'] > cell.v_init else 'C1',
                 )
     ax.set_xlabel('Time (ms)')
     ax.set_ylabel('Syn. i (nA)')
     
     #plot the LFP as image plot
     ax = fig.add_axes([0.1, 0.1, 0.5, 0.2])
-    absmaxLFP = abs(np.array([electrode.LFP.max(), electrode.LFP.min()])).max()
+    absmaxLFP = electrode.LFP.std()*3 #abs(np.array([electrode.LFP.max(), electrode.LFP.min()])).max()
     im = ax.pcolormesh(cell.tvec, electrode.z, electrode.LFP,
                   vmax=absmaxLFP, vmin=-absmaxLFP,
-           cmap='spectral_r')
+           cmap='PRGn')
     
     rect = np.array(ax.get_position().bounds)
     rect[0] += rect[2] + 0.01
@@ -219,12 +224,12 @@ def plot_ex3(cell, electrode):
                 np.r_[cell.zstart[idx], cell.zend[idx][-1]],
                 color='k')
     for i in range(len(cell.synapses)):
-        ax.plot([cell.synapses[i].x], [cell.synapses[i].z], marker='.'
+        ax.plot([cell.synapses[i].x], [cell.synapses[i].z], marker='.',
+            color='C0' if cell.synapses[i].kwargs['e'] > cell.v_init else 'C1',
         )
     for i in range(electrode.x.size):
-        ax.plot(electrode.x[i], electrode.z[i], color='g', marker='o')
-    plt.axis('equal')
-    plt.axis(np.array(plt.axis())*0.8)
+        ax.plot(electrode.x[i], electrode.z[i], color='C2', marker='o')
+    # plt.axis(np.array(plt.axis())*0.8)
     ax.set_xticks([])
     ax.set_yticks([])
     

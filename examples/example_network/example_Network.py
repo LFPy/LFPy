@@ -120,10 +120,7 @@ def draw_lineplot(
         filterargs=dict(N=2, Wn=0.02, btype='lowpass')):
     """helper function to draw line plots"""
     tvec = np.arange(data.shape[1])*dt
-    try:
-        tinds = (tvec >= T[0]) & (tvec <= T[1])
-    except TypeError:
-        raise TypeError
+    tinds = (tvec >= T[0]) & (tvec <= T[1])
 
     # apply temporal filter
     if filter:

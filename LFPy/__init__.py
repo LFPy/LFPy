@@ -20,17 +20,25 @@ GNU General Public License for more details.
 
 :Classes:
   * Cell - The pythonic neuron object itself laying on top of NEURON representing cells
-  * TemplateCell - similar to Cell, but for models using cell templates
+  * TemplateCell - Similar to Cell, but for models using cell templates
   * Synapse - Convenience class for inserting synapses onto Cell objects
   * StimIntElectrode - Convenience class for inserting electrodes onto Cell objects
-  * PointProcess - parent class of Synapse and StimIntElectrode
+  * PointProcess - Parent class of Synapse and StimIntElectrode
   * RecExtElectrode - Class for performing simulations of extracellular potentials
-  * RecExtElectrodeSetup - parent class of RexExtElectrode
-
+  * RecMEAElectrode - Class for performing simulations of in vitro (slice) extracellular potentials
+  * Network - Class for creating distributed populations of cells and handling connections between cells in populations
+  * NetworkCell - Similar to `TemplateCell` with some attributes and methods for spike communication between parallel RANKs
+  * NetworkPopulation - Class representing group of Cell objects distributed across MPI RANKs
+  * OneSphereVolumeConductor - For computing extracellular potentials within and outside a homogeneous sphere
+  * FourSphereVolumeConductor - For computing extracellular potentials in 4-sphere model (brain, CSF, scalp, skull)
+  * InfiniteVolumeConductor - To compute extracellular potentials with current dipoles in infinite volume conductor
+  * MEG - Class for computing magnetic field from current dipole moment
 :Modules:
-  * lfpcalc - functions used by RecExtElectrode class
-  * tools - some convenient functions
-  * inputgenerators - functions for synaptic input time generation
+  * lfpcalc - Functions used by RecExtElectrode class
+  * tools - Some convenient functions
+  * inputgenerators - Functions for synaptic input time generation
+  * eegcalc - Functions for calculating current dipole moment vector P and P_tot from currents and distances.
+  * run_simulations - Functions to run NEURON simulations
 """
 
 __version__ = "2.0"
@@ -41,7 +49,7 @@ from .cell import Cell
 from .templatecell import TemplateCell
 from .network import NetworkCell, NetworkPopulation, Network
 from .test import _test as run_tests
-from .eegmegcalc import FourSphereVolumeConductor, InfiniteVolumeConductor, get_current_dipole_moment, MEG
+from .eegmegcalc import OneSphereVolumeConductor, FourSphereVolumeConductor, InfiniteVolumeConductor, get_current_dipole_moment, MEG
 from . import lfpcalc
 from . import tools
 from . import inputgenerators
