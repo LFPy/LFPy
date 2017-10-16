@@ -134,8 +134,8 @@ class testMEG(unittest.TestCase):
         meg = LFPy.MEG(sensor_locations)
         np.testing.assert_equal(gt, meg.calculate_H(current_dipole_moment,
                                                     dipole_location))
-        
-        
+
+
 class testFourSphereVolumeConductor(unittest.TestCase):
     """
     test class LFPy.FourSphereVolumeConductor
@@ -184,6 +184,50 @@ class testFourSphereVolumeConductor(unittest.TestCase):
         P1 = np.array([[0., 0., 1.], [0., 0., -2.]])
         s_vector = fs._sign_rad_dipole(P1)
         np.testing.assert_almost_equal(s_vector, np.array([1., -1.]))
+
+    def test_calc_vn(self):
+        '''test that calc_vn gives correct values'''
+        n = 1
+        fs = make_simple_class_object()
+        v1 = fs._calc_vn(1)
+        np.testing.assert_almost_equal(v1, -4.75)
+
+    def test_calc_yn(self):
+        '''test that calc_yn gives correct values'''
+        n = 1
+        fs = make_simple_class_object()
+        y1 = fs._calc_yn(1)
+        np.testing.assert_almost_equal(y1, -2.3875)
+
+    def test_calc_zn(self):
+        '''test that calc_zn gives correct values'''
+        n = 1
+        fs = make_simple_class_object()
+        z1 = fs._calc_zn(1)
+        np.testing.assert_almost_equal(z1, -2.16574585635359)
+
+    def test_calc_potential(self):
+        '''test comparison between four-sphere model and model for
+        infinite homogeneous space
+        when sigma is constant and r4 goes to infinity'''
+        sigmas = [0.3, 0.3, 0.3+1e-16, 0.3]
+        radii = [10., 20*1e6, 30.*1e6, 40.*1e6]
+        rz = np.array([0., 0., 3.])
+        p = np.array([[0., 0., 100.], [50., 50., 0.]])
+        r_elec = np.array([[0., 0., 9.],
+                           [0., 0., 15.],
+                           [0., 0., 25.],
+                           [0., 0., 40.],
+                           [0., 9., 0.],
+                           [0., 15., 0.],
+                           [0., 25., 0.],
+                           [0., 40., 0.]])
+        four_s = LFPy.FourSphereVolumeConductor(radii, sigmas, r_elec, rz)
+        pots_4s = four_s.calc_potential(p)
+        inf_s = LFPy.InfiniteVolumeConductor(0.3)
+        pots_inf = inf_s.get_dipole_potential(p, r_elec - rz)
+
+        np.testing.assert_allclose(pots_4s, pots_inf, rtol=1e-6)
 
 
 class testInfiniteVolumeConductor(unittest.TestCase):
@@ -306,6 +350,15 @@ def make_class_object(rz1, r_el):
     fs = LFPy.FourSphereVolumeConductor(radii, sigmas, r_el, rz1)
     return fs
 
+def make_simple_class_object():
+    '''Return class object fs'''
+    radii = [1., 2., 4., 8.]
+    sigmas = [1., 2., 4., 8.]
+    rz1 = np.array([0., 0., .9])
+    r_el = np.array([[0., 0., 1.5]])
+    fs = LFPy.FourSphereVolumeConductor(radii, sigmas, r_el, rz1)
+    return fs
+
 def decompose_dipole(P1):
     '''Return decomposed current dipole'''
     rz1 = np.array([0., 0., 70.])
@@ -313,4 +366,3 @@ def decompose_dipole(P1):
     fs = make_class_object(rz1, r_el)
     p_rad, p_tan = fs._decompose_dipole(P1)
     return p_rad, p_tan
-
