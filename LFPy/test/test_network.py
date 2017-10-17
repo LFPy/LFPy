@@ -304,14 +304,14 @@ class testNetwork(unittest.TestCase):
             celsius=6.3,
             OUTPUTPATH='tmp_testNetworkPopulation'
             )
-        
+
         electrodeParameters = dict(
             x=np.zeros(10),
             y=np.zeros(10),
             z=np.arange(10)*50,
             sigma=0.3
         )
-        
+
         # set up
         electrode = LFPy.RecExtElectrode(**electrodeParameters)
         network = LFPy.Network(**networkParameters)
