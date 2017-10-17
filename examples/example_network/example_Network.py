@@ -229,6 +229,8 @@ electrodeParameters = dict(
 networkSimulationArguments = dict(
     rec_current_dipole_moment = True,
     rec_pop_contributions = True,
+    to_memory = True,
+    to_file = False
 )
 
 # populations and connection probability
@@ -323,7 +325,6 @@ if __name__ == '__main__':
         electrode=electrode,
         **networkSimulationArguments
     )
-
 
     # collect somatic potentials across all RANKs to RANK 0
     if RANK == 0:

@@ -51,7 +51,7 @@ class NetworkCell(TemplateCell):
 
     This takes all the same parameters as the Cell class, but requires three
     more template related parameters
-    
+
     Parameters
     ----------
     morphology : str
@@ -972,21 +972,33 @@ class Network(object):
                     dest=0, tag=13)
                 COMM.send([x for x in self.populations[name].gids],
                     dest=0, tag=14)
-        
-        # create final output file, summing up single rank output.
-        if to_file and electrode is not None:
-            f = h5py.File(os.path.join(self.OUTPUTPATH, file_name), 'w')
-            for i in range(SIZE):
-                fname = os.path.join(self.OUTPUTPATH, 'tmp_output_RANK_{:03d}.h5'.format(i))
-                f0 = h5py.File(fname, 'r')
-                if i == 0:
-                    for key, val in f0.items():
-                        f[key] = val.value
-                else:
-                    for key, val in f0.items():
-                        f[key] += val
-            f.close()            
 
+        # create final output file, summing up single RANK output from temp files
+        if to_file and electrode is not None:
+            op=MPI.SUM
+            fname = os.path.join(self.OUTPUTPATH, 'tmp_output_RANK_{:03d}.h5'.format(RANK))
+            f0 = h5py.File(fname, 'r')
+            if RANK == 0:
+                f1 = h5py.File(os.path.join(self.OUTPUTPATH, file_name), 'w')
+            dtype = []
+            for key, value in f0[list(f0.keys())[0]].items():
+                dtype.append((str(key), np.float))
+            shape = value.shape
+            for grp in f0.keys():
+                if RANK == 0:
+                    f1[grp] = np.zeros(shape, dtype=dtype)
+                for key, value in f0[grp].items(): 
+                    if RANK == 0:
+                        recvbuf = np.zeros(shape)
+                    else:
+                        recvbuf = None
+                    COMM.Reduce(value.value, recvbuf, op=op, root=0)
+                    if RANK == 0:
+                        f1[grp][key] = recvbuf
+            f0.close()
+            if RANK == 0:
+                f1.close()
+            os.remove(fname)
 
 
         if electrode is None and dotprodcoeffs is None and not rec_current_dipole_moment and not rec_pop_contributions:
@@ -1149,7 +1161,7 @@ def _run_simulation_with_electrode(network, cvode,
         If to_file is True, file which extracellular potentials will be
         written to. The file format is HDF5, default is
         "output_RANK_{:03d}.h5". The output is written per RANK, and the
-        RANK # will be inserted into the corresponding file name. 
+        RANK # will be inserted into the corresponding file name.
     dotprodcoeffs : None or list of ndarrays
         Each element in list is a mapping of transmembrane currents to a measure
         on the form :math:`V = \mathbf{C} \cdot \mathbf{I}`
@@ -1193,7 +1205,7 @@ def _run_simulation_with_electrode(network, cvode,
     # array is used to slice indices such that single-population
     # contributions to the potential can be calculated.
     population_nsegs, network_dummycell = network._create_network_dummycell()
-    
+
     # Use electrode object(s) to calculate coefficient matrices for LFP
     # calculations. If electrode is a list, then
     # put electrodecoeff in a list, if it isn't already
@@ -1239,7 +1251,7 @@ def _run_simulation_with_electrode(network, cvode,
         electrodes = None
         # if rec_current_dipole_moment:
         #     population_nsegs, network_dummycell = network._create_network_dummycell()
-    
+
 
 
 
@@ -1321,8 +1333,13 @@ def _run_simulation_with_electrode(network, cvode,
         outputfile = h5py.File(os.path.join(network.OUTPUTPATH,
                                             file_name.format(RANK)), 'w')
         for i, coeffs in enumerate(dotprodcoeffs):
-            outputfile['OUTPUT[{:03d}]'.format(i)] = np.zeros((coeffs.shape[0],
-                                int(cell.tstop / cell.dt + 1)), dtype=dtype)
+            # can't do it this way until h5py issue #770
+            # (https://github.com/h5py/h5py/issues/770) is fixed:
+            # outputfile['OUTPUT[{}]'.format(i)] = np.zeros((coeffs.shape[0],
+            #                     int(network.tstop / network.dt) + 1), dtype=dtype)
+            grp = outputfile.create_group('OUTPUT[{}]'.format(i))
+            for key, val in dtype:
+                grp[key] = np.zeros((coeffs.shape[0], int(network.tstop / network.dt) + 1), dtype=val)
 
     # temp vector to store membrane currents at each timestep:
     imem = np.zeros(network_dummycell.totnsegs, dtype=dtype)
@@ -1391,31 +1408,28 @@ def _run_simulation_with_electrode(network, cvode,
 
             if to_file:
                 for j, coeffs in enumerate(dotprodcoeffs):
-                    outputfile['OUTPUT[{:03d}]'.format(j)
-                               ][:, tstep] = np.dot(coeffs, imem['imem'])
-                    outputfile['OUTPUT[{:03d}]'.format(j)
+                    outputfile['OUTPUT[{}]'.format(j)
                                ]['imem'][:, tstep] = np.dot(coeffs, imem['imem'])
                     if use_ipas:
-                        outputfile['OUTPUT[{:03d}]'.format(j)
+                        outputfile['OUTPUT[{}]'.format(j)
                                    ]['ipas'][:, tstep] = np.dot(coeffs, imem['ipas'] * network_dummycell.area * 1E-2)
                     if use_icap:
-                        outputfile['OUTPUT[{:03d}]'.format(j)
+                        outputfile['OUTPUT[{}]'.format(j)
                                    ]['icap'][:, tstep] = np.dot(coeffs, imem['icap'] * network_dummycell.area * 1E-2)
                     if use_isyn:
-                        outputfile['OUTPUT[{:03d}]'.format(j)
+                        outputfile['OUTPUT[{}]'.format(j)
                                    ]['isyn_e'][:, tstep] = np.dot(coeffs, imem['isyn_e'])
-                        outputfile['OUTPUT[{:03d}]'.format(j)
+                        outputfile['OUTPUT[{}]'.format(j)
                                    ]['isyn_i'][:, tstep] = np.dot(coeffs, imem['isyn_i'])
 
                 if rec_pop_contributions:
                     k = 0 # counter
                     for nsegs, name in zip(population_nsegs, network.population_names):
                         cellinds = np.arange(k, k+nsegs)
-                        outputfile['OUTPUT[{:03d}]'.format(j)
-                                   ][name][:, tstep] = np.dot(coeffs[:, cellinds],
-                                                              imem['imem'][cellinds, ])
+                        outputfile['OUTPUT[{}]'.format(j)
+                                   ][name][:, tstep] = np.dot(coeffs[:, cellinds], imem['imem'][cellinds, ])
                         k += nsegs
-
+                        
             tstep += 1
         neuron.h.fadvance()
         if neuron.h.t % 100. == 0.:
@@ -1477,36 +1491,31 @@ def _run_simulation_with_electrode(network, cvode,
 
         if to_file:
             for j, coeffs in enumerate(dotprodcoeffs):
-                outputfile['OUTPUT[{:03d}]'.format(j)
-                           ][:, tstep] = np.dot(coeffs, imem['imem'])
-                outputfile['OUTPUT[{:03d}]'.format(j)
+                outputfile['OUTPUT[{}]'.format(j)
                            ]['imem'][:, tstep] = np.dot(coeffs, imem['imem'])
                 if use_ipas:
-                    outputfile['OUTPUT[{:03d}]'.format(j)
+                    outputfile['OUTPUT[{}]'.format(j)
                                ]['ipas'][:, tstep] = np.dot(coeffs, imem['ipas'] * network_dummycell.area * 1E-2)
                 if use_icap:
-                    outputfile['OUTPUT[{:03d}]'.format(j)
+                    outputfile['OUTPUT[{}]'.format(j)
                                ]['icap'][:, tstep] = np.dot(coeffs, imem['icap'] * network_dummycell.area * 1E-2)
                 if use_isyn:
-                    outputfile['OUTPUT[{:03d}]'.format(j)
+                    outputfile['OUTPUT[{}]'.format(j)
                                ]['isyn_e'][:, tstep] = np.dot(coeffs, imem['isyn_e'])
-                    outputfile['OUTPUT[{:03d}]'.format(j)
+                    outputfile['OUTPUT[{}]'.format(j)
                                ]['isyn_i'][:, tstep] = np.dot(coeffs, imem['isyn_i'])
 
             if rec_pop_contributions:
                 k = 0 # counter
                 for nsegs, name in zip(population_nsegs, network.population_names):
                     cellinds = np.arange(k, k+nsegs)
-                    outputfile['OUTPUT[{:03d}]'.format(j)
+                    outputfile['OUTPUT[{}]'.format(j)
                                ][name][:, tstep] = np.dot(coeffs[:, cellinds],
                                                           imem['imem'][cellinds, ])
                     k += nsegs
 
-
-
     except IndexError:
         pass
-
 
     if to_memory:
         return RESULTS, DIPOLE_MOMENT
