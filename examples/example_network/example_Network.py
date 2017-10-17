@@ -223,6 +223,7 @@ electrodeParameters = dict(
     r = 5,
     n = 50,
     sigma = 0.3,
+    method="soma_as_point"
 )
 
 # method Network.simulate() parameters
