@@ -20,6 +20,7 @@ import unittest
 import numpy as np
 import LFPy
 import neuron
+import h5py
 
 class testNetworkPopulation(unittest.TestCase):
     """
@@ -297,43 +298,144 @@ class testNetwork(unittest.TestCase):
             name = 'test',
         )
         networkParameters = dict(
-            dt=0.1,
+            dt=2**-3,
             tstart=0.,
             tstop=100.,
             v_init=-65.,
             celsius=6.3,
             OUTPUTPATH='tmp_testNetworkPopulation'
             )
-
         electrodeParameters = dict(
-            x=np.zeros(10),
-            y=np.zeros(10),
-            z=np.arange(10)*50,
-            sigma=0.3
+            sigma=0.3,
+            x = np.arange(10)*100,
+            y = np.arange(10)*100,
+            z = np.arange(10)*100
         )
-
         # set up
-        electrode = LFPy.RecExtElectrode(**electrodeParameters)
         network = LFPy.Network(**networkParameters)
         network.create_population(**populationParameters)
-        connectivity = network.get_connectivity_rand(pre='test', post='test',
-                                                     connprob=0.5)
+        connectivity = network.get_connectivity_rand(pre='test', post='test', connprob=0.5)
+
+        # test set up
+        for population in network.populations.values():
+            self.assertTrue(len(population.cells) == population.POP_SIZE)
+            for cell, soma_pos, gid in zip(population.cells, population.soma_pos, population.gids):
+                self.assertTrue(type(cell) is LFPy.NetworkCell)
+                self.assertTrue((cell.somapos[0] == soma_pos['x']) &
+                                (cell.somapos[1] == soma_pos['y']) &
+                                (cell.somapos[2] == soma_pos['z']))
+                self.assertEqual(cell.gid, gid)
+                self.assertTrue(np.sqrt(soma_pos['x']**2 + soma_pos['y']**2) <= 100.)
+            np.testing.assert_equal(population.gids, np.arange(4))
+
+        np.testing.assert_equal(connectivity.shape, (population.POP_SIZE, population.POP_SIZE))
+        np.testing.assert_equal(connectivity.diagonal(), np.zeros(population.POP_SIZE))
+
+        # set up electrode
+        electrode = LFPy.RecExtElectrode(**electrodeParameters)
 
         # connect and run sim
         network.connect(pre='test', post='test', connectivity=connectivity)
-        SPIKES, LFP, P = network.simulate(electrode=electrode,
-                                          rec_current_dipole_moment=True)
+        network.simulate(electrode=electrode, to_file=True, to_memory=False,
+                         file_name='OUTPUT.h5')
 
         # test output
         for population in network.populations.values():
             for cell in population.cells:
                 self.assertTrue(np.all(cell.somav == network.v_init))
+            
+        f = h5py.File(os.path.join(network.OUTPUTPATH, 'OUTPUT.h5'), 'r')        
+        np.testing.assert_equal(f['OUTPUT[0]'].value, np.zeros_like(f['OUTPUT[0]'].value))
+        f.close()
 
-        self.assertTrue(np.all(P['test'] == 0.))
-        self.assertTrue(len(LFP) == 1)
-        self.assertTrue(np.all(LFP[0]['imem'] == 0.))
 
         network.pc.gid_clear()
         os.system('rm -r tmp_testNetworkPopulation')
         neuron.h('forall delete_section()')
 
+
+    def test_Network_04(self):
+        cellParameters = dict(
+            morphology=os.path.join(LFPy.__path__[0], 'test', 'ball_and_sticks_w_lists.hoc'),
+            templatefile=os.path.join(LFPy.__path__[0], 'test', 'ball_and_stick_template.hoc'),
+            templatename='ball_and_stick_template',
+            templateargs=None,
+            passive=False,
+            dt=2**-3,
+            tstop=100,
+            delete_sections=False,
+        )
+
+        populationParameters = dict(
+            CWD=None,
+            CELLPATH=None,
+            Cell=LFPy.NetworkCell,
+            cell_args = cellParameters,
+            pop_args = dict(
+                radius=100,
+                loc=0.,
+                scale=20.),
+            rotation_args = dict(x=0, y=0),
+            POP_SIZE = 4,
+            name = 'test',
+        )
+        networkParameters = dict(
+            dt=2**-3,
+            tstart=0.,
+            tstop=100.,
+            v_init=-65.,
+            celsius=6.3,
+            OUTPUTPATH='tmp_testNetworkPopulation'
+            )
+        electrodeParameters = dict(
+            sigma=0.3,
+            x = np.arange(10)*100,
+            y = np.arange(10)*100,
+            z = np.arange(10)*100
+        )
+        # set up
+        network = LFPy.Network(**networkParameters)
+        network.create_population(**populationParameters)
+        connectivity = network.get_connectivity_rand(pre='test', post='test',
+                                                     connprob=0.5)
+
+        # test set up
+        for population in network.populations.values():
+            self.assertTrue(len(population.cells) == population.POP_SIZE)
+            for cell, soma_pos, gid in zip(population.cells,
+                                           population.soma_pos,
+                                           population.gids):
+                self.assertTrue(type(cell) is LFPy.NetworkCell)
+                self.assertTrue((cell.somapos[0] == soma_pos['x']) &
+                                (cell.somapos[1] == soma_pos['y']) &
+                                (cell.somapos[2] == soma_pos['z']))
+                self.assertEqual(cell.gid, gid)
+                self.assertTrue(np.sqrt(soma_pos['x']**2 + soma_pos['y']**2) <= 100.)
+            np.testing.assert_equal(population.gids, np.arange(4))
+
+        np.testing.assert_equal(connectivity.shape,
+                                (population.POP_SIZE, population.POP_SIZE))
+        np.testing.assert_equal(connectivity.diagonal(),
+                                np.zeros(population.POP_SIZE))
+
+        # set up electrode
+        electrode = LFPy.RecExtElectrode(**electrodeParameters)
+
+        # connect and run sim
+        network.connect(pre='test', post='test', connectivity=connectivity)
+        SPIKES, RESULTS, P = network.simulate(electrode=electrode, to_file=True,
+                                      to_memory=True, file_name='OUTPUT.h5')
+
+        # test output
+        for population in network.populations.values():
+            for cell in population.cells:
+                self.assertTrue(np.all(cell.somav == network.v_init))
+            
+        f = h5py.File(os.path.join(network.OUTPUTPATH, 'OUTPUT.h5'), 'r')        
+        np.testing.assert_equal(f['OUTPUT[0]'].value, RESULTS[0])
+        f.close()
+
+
+        network.pc.gid_clear()
+        os.system('rm -r tmp_testNetworkPopulation')
+        neuron.h('forall delete_section()')

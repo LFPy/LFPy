@@ -540,3 +540,9 @@ class TestCell(object):
         self.zend = np.array([0.])
         self.diam = np.array([1.])
         self.totnsegs = len(self.xmid)
+    
+    def get_idx(self, section="soma"):
+        if section == "soma":
+            return np.array([0])
+        else:
+            return np.array([])

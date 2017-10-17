@@ -219,12 +219,15 @@ electrodeParameters = dict(
     r = 5.,
     n = 50,
     sigma = 0.3,
+    method="soma_as_point"
 )
 
 # method Network.simulate() parameters:
 networkSimulationArguments = dict(
     rec_current_dipole_moment = True,
     rec_pop_contributions = True,
+    to_memory = True,
+    to_file = False
 )
 
 # population names, sizez and connection probability:
