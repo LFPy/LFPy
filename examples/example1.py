@@ -23,6 +23,7 @@ if sys.version < '3':
     from urllib2 import urlopen
 else:    
     from urllib.request import urlopen
+import ssl
 import zipfile
 import matplotlib.pyplot as plt
 from matplotlib.collections import PolyCollection
@@ -32,7 +33,8 @@ from os.path import join
 #Fetch Mainen&Sejnowski 1996 model files
 if not os.path.isfile(join('cells', 'cells', 'j4a.hoc')):
     #get the model files:
-    u = urlopen('http://senselab.med.yale.edu/ModelDB/eavBinDown.asp?o=2488&a=23&mime=application/zip')
+    u = urlopen('http://senselab.med.yale.edu/ModelDB/eavBinDown.asp?o=2488&a=23&mime=application/zip',
+                context=ssl._create_unverified_context())
     localFile = open('patdemo.zip', 'wb')
     localFile.write(u.read())
     localFile.close()

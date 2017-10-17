@@ -15,6 +15,7 @@ GNU General Public License for more details.
 """
 
 import os
+import posixpath
 import sys
 import pickle
 import numpy as np
@@ -120,6 +121,8 @@ class TemplateCell(Cell):
         Initialization of the Template Cell object.
 
         """
+        if "win32" in sys.platform and type(templatefile) is str:
+            templatefile = templatefile.replace(os.sep, posixpath.sep)
         self.templatefile = templatefile
         self.templatename = templatename
         self.templateargs = templateargs
@@ -139,6 +142,8 @@ class TemplateCell(Cell):
                 neuron.h.load_file(self.templatefile)
             elif type(self.templatefile) == list:
                 for template in self.templatefile:
+                    if "win32" in sys.platform:
+                        template = template.replace(os.sep, posixpath.sep)
                     neuron.h.load_file(template)
         
         #initialize the cell object

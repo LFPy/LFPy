@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-Example plot for LFPy: Single-synapse contribution to the LFP
+Example plot for LFPy: Single-synapse contribution to the EEG
 
 Copyright (C) 2017 Computational Neuroscience Group, NMBU.
 
@@ -59,12 +59,10 @@ def plot_EEG_sphere(fig, eeg, x_eeg, y_eeg, z_eeg):
     m = plt.cm.ScalarMappable(cmap=plt.cm.PRGn)
     ticks = np.linspace(vmin, vmax, 5) # global normalization
     m.set_array(ticks)
-    cbar = fig.colorbar(m, cax=cax, #format='%3.6f',
+    cbar = fig.colorbar(m, cax=cax,
                         extend='both', orientation='horizontal')
     cbar.outline.set_visible(False)
     cbar.set_ticks(ticks)
-    #unit is pV
-    # cax.set_xticklabels([format(t, '3.1f') for t in ticks])
     cbar.set_label(r'$\phi$ (pV)', labelpad=1.)
 
 if __name__ == '__main__':
@@ -102,7 +100,6 @@ if __name__ == '__main__':
     P = cell.current_dipole_moment
 
     somapos = np.array([0., 0., 77500])
-    # cell.set_pos(x=somapos[0], y=somapos[1], z=somapos[2])
     r_soma_syns = [cell.get_intersegment_vector(idx0=0, idx1=i) for i in cell.synidx]
     r_mid = np.average(r_soma_syns, axis=0)
     r_mid = somapos + r_mid/2.
@@ -141,7 +138,7 @@ if __name__ == '__main__':
     P_mag = np.sqrt(P[:, 0]**2 + P[:, 1]**2 + P[:, 2]**2)
 
     plt.close('all')
-    fig = plt.figure(figsize=[5, 8])
+    fig = plt.figure(figsize=[6, 8])
     fig.subplots_adjust(left=0.15, hspace=0.5, right=0.98, top=0.95)
 
     morph_ax = fig.add_subplot(321, aspect=1, frameon=False,
@@ -152,7 +149,6 @@ if __name__ == '__main__':
     plot_EEG_sphere(fig, eeg, x_eeg, y_eeg, z_eeg)
 
     ax_p = fig.add_subplot(312, title="Current dipole moment", ylabel="nA$\cdot\mu$m")
-    # ax_p.plot(cell.tvec, P_mag, label="|P|")
     ax_p.plot(cell.tvec, P[:, 0], label="P$_x$")
     ax_p.plot(cell.tvec, P[:, 1], label="P$_y$")
     ax_p.plot(cell.tvec, P[:, 2], label="P$_z$")
@@ -162,8 +158,9 @@ if __name__ == '__main__':
     ax_eeg = fig.add_subplot(313, title="EEG at top", xlabel="Time (ms)",
                              ylabel='pV')
     ax_eeg.plot(cell.tvec, eeg_top[0, :], 'k')
-    # ax_eeg.plot(cell.tvec, P[:, 2], c='g', ls='--', label="z")
-
+    
     ax_eeg.axvline(cell.tvec[time_max], c='gray', ls='--')
 
     plt.savefig('example_EEG.pdf')
+    plt.show()
+    

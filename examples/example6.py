@@ -39,6 +39,8 @@ if sys.version < '3':
 else:    
     from urllib.request import urlopen
 import zipfile
+import ssl
+from warnings import warn
 import numpy as np
 import scipy.stats
 import neuron
@@ -54,7 +56,8 @@ np.random.seed(1234)
 #Fetch Mainen&Sejnowski 1996 model files
 if not os.path.isfile(join('cells', 'cells', 'j4a.hoc')):
     #get the model files:
-    u = urlopen('http://senselab.med.yale.edu/ModelDB/eavBinDown.asp?o=2488&a=23&mime=application/zip')
+    u = urlopen('http://senselab.med.yale.edu/ModelDB/eavBinDown.asp?o=2488&a=23&mime=application/zip',
+                context=ssl._create_unverified_context())
     localFile = open('patdemo.zip', 'w')
     localFile.write(u.read())
     localFile.close()
@@ -64,12 +67,19 @@ if not os.path.isfile(join('cells', 'cells', 'j4a.hoc')):
     myzip.close()
 
 #compile mod files every time, because of incompatibility with Hay2011 files:
-os.system('''
-          cd cells
-          nrnivmodl
-          ''')
-#os.system('nrnivmodl')
-LFPy.cell.neuron.load_mechanisms('cells')
+if "win32" in sys.platform:
+    pth = "cells"
+    warn("no autompile of NMODL (.mod) files on Windows. " 
+         + "Run mknrndll from NEURON bash in the folder cells and rerun example script")
+    if not pth in neuron.nrn_dll_loaded:
+        neuron.h.nrn_load_dll(pth+"/nrnmech.dll")
+    neuron.nrn_dll_loaded.append(pth)
+else:
+    os.system('''
+              cd cells
+              nrnivmodl
+              ''')
+    neuron.load_mechanisms('cells')
 
 ################################################################################
 # A couple of function declarations

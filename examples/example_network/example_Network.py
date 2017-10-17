@@ -98,7 +98,7 @@ def decimate(x, q=10, n=4, k=0.8, filterfun=ss.cheby1):
         return y[::q]
 
 def remove_axis_junk(ax, lines=['right', 'top']):
-    for loc, spine in ax.spines.iteritems():
+    for loc, spine in ax.spines.items():
         if loc in lines:
             spine.set_color('none')
     ax.xaxis.set_ticks_position('bottom')
@@ -123,7 +123,7 @@ def draw_lineplot(
     try:
         tinds = (tvec >= T[0]) & (tvec <= T[1])
     except TypeError:
-        print data.shape, T
+        print(data.shape, T)
         raise Exception
 
     # apply temporal filter
@@ -223,6 +223,7 @@ electrodeParameters = dict(
     r = 5,
     n = 50,
     sigma = 0.3,
+    method="soma_as_point"
 )
 
 # method Network.simulate() parameters
@@ -233,7 +234,7 @@ networkSimulationArguments = dict(
 
 # populations and connection probability
 population_names = ['E', 'I']
-population_sizes = [80, 20] 
+population_sizes = [80, 20]
 connectionProbability = 0.05
 
 # synapse model and specification
@@ -323,7 +324,7 @@ if __name__ == '__main__':
         electrode=electrode,
         **networkSimulationArguments
     )
-    
+
 
     # collect somatic potentials across all RANKs to RANK 0
     if RANK == 0:

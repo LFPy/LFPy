@@ -70,7 +70,7 @@ def _run_simulation(cell, cvode, variable_dt=False, atol=0.001):
         neuron.h.fadvance()
         counter += 1
         if counter % interval == 0:
-            rtfactor = (neuron.h.t - ti)  * 1E-3 / (time() - t0)
+            rtfactor = (neuron.h.t - ti)  * 1E-3 / (time() - t0 + 1E-9)
             if cell.verbose:
                 print('t = {:.0f}, realtime factor: {:.3f}'.format(neuron.h.t,
                                                                    rtfactor))

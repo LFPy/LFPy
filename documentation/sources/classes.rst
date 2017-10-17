@@ -1,4 +1,3 @@
-==================
 Module :mod:`LFPy`
 ==================
 .. automodule:: LFPy
@@ -48,13 +47,6 @@ Module :mod:`LFPy`
         :show-inheritance:
         :undoc-members:
 
-    class :class:`RecExtElectrodeSetup`
-    ===================================
-    .. autoclass:: RecExtElectrodeSetup
-        :members:
-        :show-inheritance:
-        :undoc-members:
-
     class :class:`RecExtElectrode`
     ==============================
     .. autoclass:: RecExtElectrode
@@ -98,7 +90,7 @@ Module :mod:`LFPy`
         :undoc-members:
 
     submodule :mod:`eegmegcalc`
-    =====================
+    ===========================
     .. autofunction:: get_current_dipole_moment
 
     submodule :mod:`lfpcalc`
