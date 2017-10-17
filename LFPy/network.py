@@ -51,7 +51,7 @@ class NetworkCell(TemplateCell):
 
     This takes all the same parameters as the Cell class, but requires three
     more template related parameters
-    
+
     Parameters
     ----------
     morphology : str
@@ -818,7 +818,8 @@ class Network(object):
                  rec_current_dipole_moment=False,
                  rec_pop_contributions=False,
                  rec_variables=[], variable_dt=False, atol=0.001,
-                 to_memory=True, to_file=False, file_name=None,
+                 to_memory=True, to_file=False,
+                 file_name='OUTPUT.h5',
                  dotprodcoeffs=None, **kwargs):
         """
         This is the main function running the simulation of the network model.
@@ -854,7 +855,10 @@ class Network(object):
         atol:       absolute tolerance used with NEURON variable timestep
         to_memory:  only valid with electrode, store lfp in -> electrode.LFP
         to_file:    only valid with electrode, save LFPs in hdf5 file format
-        file_name:  name of hdf5 file, '.h5' is appended if it doesnt exist
+        file_name : str
+            If to_file is True, file which extracellular potentials will be
+            written to. The file format is HDF5, default is "OUTPUT.h5", put
+            in folder Network.OUTPUTPATH
         dotprodcoeffs :  list of N x Nseg ndarray. These arrays will at
                     every timestep be multiplied by the membrane currents.
                     Presumably useful for memory efficient csd or lfp calcs
@@ -910,7 +914,7 @@ class Network(object):
                     cell._set_variable_recorders(rec_variables)
 
         #run fadvance until t >= tstop, and calculate LFP if asked for
-        if electrode is None and dotprodcoeffs is None and not rec_current_dipole_moment and not rec_pop_contributions:
+        if electrode is None and dotprodcoeffs is None and not rec_current_dipole_moment and not rec_pop_contributions and not to_file:
             if not rec_imem:
                 if self.verbose:
                     print("rec_imem = {}, not recording membrane currents!".format(rec_imem))
@@ -924,7 +928,7 @@ class Network(object):
                             atol=atol,
                             to_memory=to_memory,
                             to_file=to_file,
-                            file_name=file_name,
+                            file_name='tmp_output_RANK_{:03d}.h5',
                             dotprodcoeffs=dotprodcoeffs,
                             rec_current_dipole_moment=rec_current_dipole_moment,
                             rec_pop_contributions=rec_pop_contributions,
@@ -976,13 +980,43 @@ class Network(object):
                 COMM.send([x for x in self.populations[name].gids],
                     dest=0, tag=14)
 
+        # create final output file, summing up single RANK output from temp files
+        if to_file and electrode is not None:
+            op=MPI.SUM
+            fname = os.path.join(self.OUTPUTPATH, 'tmp_output_RANK_{:03d}.h5'.format(RANK))
+            f0 = h5py.File(fname, 'r')
+            if RANK == 0:
+                f1 = h5py.File(os.path.join(self.OUTPUTPATH, file_name), 'w')
+            dtype = []
+            for key, value in f0[list(f0.keys())[0]].items():
+                dtype.append((str(key), np.float))
+            shape = value.shape
+            for grp in f0.keys():
+                if RANK == 0:
+                    f1[grp] = np.zeros(shape, dtype=dtype)
+                for key, value in f0[grp].items(): 
+                    if RANK == 0:
+                        recvbuf = np.zeros(shape)
+                    else:
+                        recvbuf = None
+                    COMM.Reduce(value.value, recvbuf, op=op, root=0)
+                    if RANK == 0:
+                        f1[grp][key] = recvbuf
+            f0.close()
+            if RANK == 0:
+                f1.close()
+            os.remove(fname)
+
+
         if electrode is None and dotprodcoeffs is None and not rec_current_dipole_moment and not rec_pop_contributions:
             return dict(times=times, gids=gids)
         else:
             # communicate and sum up LFPs and dipole moments:
-            for i in range(len(LFP)):
-                LFP[i] = ReduceStructArray(LFP[i])
-            P = ReduceStructArray(P)
+            if LFP is not None:
+                for i in range(len(LFP)):
+                    LFP[i] = ReduceStructArray(LFP[i])
+            if P is not None:
+                P = ReduceStructArray(P)
             return dict(times=times, gids=gids), LFP, P
 
 
@@ -1135,11 +1169,13 @@ def _run_simulation_with_electrode(network, cvode,
     to_memory : bool
         Boolean flag for computing extracellular potentials, default is True
     to_file : bool or None
-        Boolean flag for computing extracellular potentials to file <file_name>,
-        default is False
-    file_name : str
-        If to_file is True, file which extracellular potentials will be written
-        to. The file format is HDF5
+        Boolean flag for computing extracellular potentials to file
+        <OUTPUTPATH/file_name>, default is False
+    file_name : formattable str
+        If to_file is True, file which extracellular potentials will be
+        written to. The file format is HDF5, default is
+        "output_RANK_{:03d}.h5". The output is written per RANK, and the
+        RANK # will be inserted into the corresponding file name.
     dotprodcoeffs : None or list of ndarrays
         Each element in list is a mapping of transmembrane currents to a measure
         on the form :math:`V = \mathbf{C} \cdot \mathbf{I}`
@@ -1177,12 +1213,12 @@ def _run_simulation_with_electrode(network, cvode,
 
 
     """
-    try:
-        import h5py
-    except ImportError:
-        print('h5py not installed, LFP to file not possible')
-        to_file = False
-        file_name = None
+
+    # create a dummycell object lumping together needed attributes
+    # for calculation of extracellular potentials etc. The population_nsegs
+    # array is used to slice indices such that single-population
+    # contributions to the potential can be calculated.
+    population_nsegs, network_dummycell = network._create_network_dummycell()
 
     # Use electrode object(s) to calculate coefficient matrices for LFP
     # calculations. If electrode is a list, then
@@ -1210,11 +1246,11 @@ def _run_simulation_with_electrode(network, cvode,
         # V_r(r, t_i) = G x I(r, t_i)
 
 
-        # create a dummycell object lumping together needed attributes
-        # for calculation of extracellular potentials. The population_nsegs
-        # array is used to slice indices such that single-population
-        # contributions to the potential can be calculated.
-        population_nsegs, network_dummycell = network._create_network_dummycell()
+        # # create a dummycell object lumping together needed attributes
+        # # for calculation of extracellular potentials. The population_nsegs
+        # # array is used to slice indices such that single-population
+        # # contributions to the potential can be calculated.
+        # population_nsegs, network_dummycell = network._create_network_dummycell()
 
         # We can have a number of separate electrode objects in a list, create
         # mappings for each
@@ -1227,8 +1263,11 @@ def _run_simulation_with_electrode(network, cvode,
 
     elif electrode is None:
         electrodes = None
-        if rec_current_dipole_moment:
-            population_nsegs, network_dummycell = network._create_network_dummycell()
+        # if rec_current_dipole_moment:
+        #     population_nsegs, network_dummycell = network._create_network_dummycell()
+
+
+
 
     # set maximum integration step, it is necessary for communication of
     # spikes across RANKs to occur.
@@ -1284,28 +1323,37 @@ def _run_simulation_with_electrode(network, cvode,
     if to_memory:
         RESULTS = []
         for coeffs in dotprodcoeffs:
-            RESULTS.append(np.zeros((coeffs.shape[0], int(network.tstop / network.dt) + 1), dtype=dtype))
+            RESULTS.append(np.zeros((coeffs.shape[0],
+                                     int(network.tstop / network.dt) + 1),
+                                    dtype=dtype)
+                           )
+    else:
+        RESULTS = None
 
     # container for electric current dipole moment for the individual
     # populations captured inside the DummyCell instance
     if rec_current_dipole_moment:
         DIPOLE_MOMENT = np.zeros((int(network.tstop / network.dt) + 1, 3),
-            dtype=list(zip(network.population_names, [np.float]*len(network.population_names))))
+            dtype=list(zip(network.population_names,
+                           [np.float]*len(network.population_names))))
     else:
         DIPOLE_MOMENT = None
 
     #LFPs for each electrode will be put here during simulations
     if to_file:
-        raise NotImplementedError('to_file arg implementation not yet tested')
         #ensure right ending:
         if file_name.split('.')[-1] != 'h5':
             file_name += '.h5'
-        el_LFP_file = h5py.File(file_name, 'w')
-        i = 0
-        for coeffs in dotprodcoeffs:
-            el_LFP_file['electrode{:03d}'.format(i)] = np.zeros((coeffs.shape[0],
-                                int(cell.tstop / cell.dt + 1)))
-            i += 1
+        outputfile = h5py.File(os.path.join(network.OUTPUTPATH,
+                                            file_name.format(RANK)), 'w')
+        for i, coeffs in enumerate(dotprodcoeffs):
+            # can't do it this way until h5py issue #770
+            # (https://github.com/h5py/h5py/issues/770) is fixed:
+            # outputfile['OUTPUT[{}]'.format(i)] = np.zeros((coeffs.shape[0],
+            #                     int(network.tstop / network.dt) + 1), dtype=dtype)
+            grp = outputfile.create_group('OUTPUT[{}]'.format(i))
+            for key, val in dtype:
+                grp[key] = np.zeros((coeffs.shape[0], int(network.tstop / network.dt) + 1), dtype=val)
 
     # temp vector to store membrane currents at each timestep:
     imem = np.zeros(network_dummycell.totnsegs, dtype=dtype)
@@ -1313,7 +1361,9 @@ def _run_simulation_with_electrode(network, cvode,
     # create a 2D array representation of segment midpoints for dot product
     # with transmembrane currents when computing dipole moment
     if rec_current_dipole_moment:
-        midpoints = np.c_[network_dummycell.xmid, network_dummycell.ymid, network_dummycell.zmid]
+        midpoints = np.c_[network_dummycell.xmid,
+                          network_dummycell.ymid,
+                          network_dummycell.zmid]
 
     #run fadvance until time limit, and calculate LFPs for each timestep
     tstep = 0
@@ -1343,6 +1393,14 @@ def _run_simulation_with_electrode(network, cvode,
 
                 totnsegs += cell.totnsegs
 
+            if rec_current_dipole_moment:
+                k = 0 # counter
+                for nsegs, name in zip(population_nsegs, network.population_names):
+                    cellinds = np.arange(k, k+nsegs)
+                    DIPOLE_MOMENT[name][tstep, ] = np.dot(imem['imem'][cellinds, ],
+                                                          midpoints[cellinds, ])
+                    k += nsegs
+
             if to_memory:
                 for j, coeffs in enumerate(dotprodcoeffs):
                     RESULTS[j]['imem'][:, tstep] = np.dot(coeffs, imem['imem'])
@@ -1353,25 +1411,39 @@ def _run_simulation_with_electrode(network, cvode,
                     if use_isyn:
                         RESULTS[j]['isyn_e'][:, tstep] = np.dot(coeffs, imem['isyn_e'])
                         RESULTS[j]['isyn_i'][:, tstep] = np.dot(coeffs, imem['isyn_i'])
-                if rec_current_dipole_moment:
-                    k = 0 # counter
-                    for nsegs, name in zip(population_nsegs, network.population_names):
-                        cellinds = np.arange(k, k+nsegs)
-                        DIPOLE_MOMENT[name][tstep, ] = np.dot(imem['imem'][cellinds, ], midpoints[cellinds, ])
-                        k += nsegs
 
                 if rec_pop_contributions:
                     k = 0 # counter
                     for nsegs, name in zip(population_nsegs, network.population_names):
                         cellinds = np.arange(k, k+nsegs)
-                        RESULTS[j][name][:, tstep] = np.dot(coeffs[:, cellinds], imem['imem'][cellinds, ])
+                        RESULTS[j][name][:, tstep] = np.dot(coeffs[:, cellinds],
+                                                            imem['imem'][cellinds, ])
                         k += nsegs
 
             if to_file:
                 for j, coeffs in enumerate(dotprodcoeffs):
-                    el_LFP_file['electrode{:03d}'.format(j)
-                                ][:, tstep] = np.dot(coeffs, imem['imem'])
+                    outputfile['OUTPUT[{}]'.format(j)
+                               ]['imem'][:, tstep] = np.dot(coeffs, imem['imem'])
+                    if use_ipas:
+                        outputfile['OUTPUT[{}]'.format(j)
+                                   ]['ipas'][:, tstep] = np.dot(coeffs, imem['ipas'] * network_dummycell.area * 1E-2)
+                    if use_icap:
+                        outputfile['OUTPUT[{}]'.format(j)
+                                   ]['icap'][:, tstep] = np.dot(coeffs, imem['icap'] * network_dummycell.area * 1E-2)
+                    if use_isyn:
+                        outputfile['OUTPUT[{}]'.format(j)
+                                   ]['isyn_e'][:, tstep] = np.dot(coeffs, imem['isyn_e'])
+                        outputfile['OUTPUT[{}]'.format(j)
+                                   ]['isyn_i'][:, tstep] = np.dot(coeffs, imem['isyn_i'])
 
+                if rec_pop_contributions:
+                    k = 0 # counter
+                    for nsegs, name in zip(population_nsegs, network.population_names):
+                        cellinds = np.arange(k, k+nsegs)
+                        outputfile['OUTPUT[{}]'.format(j)
+                                   ][name][:, tstep] = np.dot(coeffs[:, cellinds], imem['imem'][cellinds, ])
+                        k += nsegs
+                        
             tstep += 1
         neuron.h.fadvance()
         if neuron.h.t % 100. == 0.:
@@ -1405,6 +1477,13 @@ def _run_simulation_with_electrode(network, cvode,
 
             totnsegs += cell.totnsegs
 
+        if rec_current_dipole_moment:
+            k = 0 # counter
+            for nsegs, name in zip(population_nsegs, network.population_names):
+                cellinds = np.arange(k, k+nsegs)
+                DIPOLE_MOMENT[name][tstep, ] = np.dot(imem['imem'][cellinds, ], midpoints[cellinds, ])
+                k += nsegs
+
         if to_memory:
             for j, coeffs in enumerate(dotprodcoeffs):
                 RESULTS[j]['imem'][:, tstep] = np.dot(coeffs, imem['imem'])
@@ -1415,12 +1494,6 @@ def _run_simulation_with_electrode(network, cvode,
                 if use_isyn:
                     RESULTS[j]['isyn_e'][:, tstep] = np.dot(coeffs, imem['isyn_e'])
                     RESULTS[j]['isyn_i'][:, tstep] = np.dot(coeffs, imem['isyn_i'])
-            if rec_current_dipole_moment:
-                k = 0 # counter
-                for nsegs, name in zip(population_nsegs, network.population_names):
-                    cellinds = np.arange(k, k+nsegs)
-                    DIPOLE_MOMENT[name][tstep, ] = np.dot(imem['imem'][cellinds, ], midpoints[cellinds, ])
-                    k += nsegs
 
             if rec_pop_contributions:
                 k = 0 # counter
@@ -1432,22 +1505,38 @@ def _run_simulation_with_electrode(network, cvode,
 
         if to_file:
             for j, coeffs in enumerate(dotprodcoeffs):
-                el_LFP_file['electrode{:03d}'.format(j)
-                            ][:, tstep] = np.dot(coeffs, imem['imem'])
+                outputfile['OUTPUT[{}]'.format(j)
+                           ]['imem'][:, tstep] = np.dot(coeffs, imem['imem'])
+                if use_ipas:
+                    outputfile['OUTPUT[{}]'.format(j)
+                               ]['ipas'][:, tstep] = np.dot(coeffs, imem['ipas'] * network_dummycell.area * 1E-2)
+                if use_icap:
+                    outputfile['OUTPUT[{}]'.format(j)
+                               ]['icap'][:, tstep] = np.dot(coeffs, imem['icap'] * network_dummycell.area * 1E-2)
+                if use_isyn:
+                    outputfile['OUTPUT[{}]'.format(j)
+                               ]['isyn_e'][:, tstep] = np.dot(coeffs, imem['isyn_e'])
+                    outputfile['OUTPUT[{}]'.format(j)
+                               ]['isyn_i'][:, tstep] = np.dot(coeffs, imem['isyn_i'])
+
+            if rec_pop_contributions:
+                k = 0 # counter
+                for nsegs, name in zip(population_nsegs, network.population_names):
+                    cellinds = np.arange(k, k+nsegs)
+                    outputfile['OUTPUT[{}]'.format(j)
+                               ][name][:, tstep] = np.dot(coeffs[:, cellinds],
+                                                          imem['imem'][cellinds, ])
+                    k += nsegs
 
     except IndexError:
         pass
 
-
-    # Final step, put LFPs in the electrode object, superimpose if necessary
-    # If electrode.perCellLFP, store individual LFPs
     if to_memory:
-        # return the electrode.LFP
         return RESULTS, DIPOLE_MOMENT
 
     if to_file:
-        el_LFP_file.close()
-        return
+        outputfile.close()
+        return RESULTS, DIPOLE_MOMENT
 
 
 def ReduceStructArray(sendbuf, op=MPI.SUM):
