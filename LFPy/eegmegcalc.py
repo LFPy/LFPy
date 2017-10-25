@@ -95,7 +95,7 @@ class OneSphereVolumeConductor(object):
         self.sigma_o = sigma_o
                 
     
-    def calc_potential(self, rs, I, min_distance=1., n_max=100):
+    def calc_potential(self, rs, I, min_distance=1., n_max=500):
         """
         Return the electric potential at observation points for source current
         with magnitude I as function of time.
@@ -135,23 +135,28 @@ class OneSphereVolumeConductor(object):
         phi_i = np.zeros(r.size)
         phi_o = np.zeros(r.size)
 
-        # potential in homogeneous media
-        if min_distance is None:
-            phi_i[r <= self.R] = 1. / np.sqrt(r[r <= self.R]**2 + rs**2 - 2*r[r <= self.R]*rs*np.cos(theta[r <= self.R]))
-        else:
-            denom = np.sqrt(r[r <= self.R]**2 + rs**2 - 2*r[r <= self.R]*rs*np.cos(theta[r <= self.R]))
-            denom[denom < min_distance] = min_distance
-            phi_i[r <= self.R] = 1./denom
         
         # add harmonical contributions due to inhomogeneous media
         for n in range(n_max):
             P_n = legendre(n)
             
             # observation points r <= R
-            phi_i[r <= self.R] += 1./self.R*((self.sigma_i - self.sigma_o)*(n+1))  / (self.sigma_i*n + self.sigma_o*(n+1)) * ((r[r <= self.R]*rs)/self.R**2)**n * P_n(np.cos(theta[r <= self.R]))
+            phi_i[r <= self.R] += ((self.sigma_i - self.sigma_o)*(n+1))  / (self.sigma_i*n + self.sigma_o*(n+1)) * ((r[r <= self.R]*rs)/self.R**2)**n * P_n(np.cos(theta[r <= self.R]))
         
             # observation points r > R
-            phi_o[r > self.R] += 1/r[r > self.R]*(self.sigma_i*(2*n+1) ) / (self.sigma_i*n + self.sigma_o*(n+1)) * (rs / r[r > self.R])**n * P_n(np.cos(theta[r > self.R]))
+            phi_o[r > self.R] += (self.sigma_i*(2*n+1) ) / (self.sigma_i*n + self.sigma_o*(n+1)) * (rs / r[r > self.R])**n * P_n(np.cos(theta[r > self.R]))
+
+        phi_i[r <= self.R] *= 1./self.R
+        phi_o[r > self.R] *= 1./r[r > self.R]
+
+        # potential in homogeneous media
+        if min_distance is None:
+            phi_i[r <= self.R] += 1. / np.sqrt(r[r <= self.R]**2 + rs**2 - 2*r[r <= self.R]*rs*np.cos(theta[r <= self.R]))
+        else:
+            denom = np.sqrt(r[r <= self.R]**2 + rs**2 - 2*r[r <= self.R]*rs*np.cos(theta[r <= self.R]))
+            denom[denom < min_distance] = min_distance
+            phi_i[r <= self.R] += 1./denom
+
 
         if type(I) is np.ndarray:
             try:
@@ -171,7 +176,7 @@ class OneSphereVolumeConductor(object):
             return I / (4.*np.pi*self.sigma_i)*(phi_i + phi_o)
     
     
-    def calc_mapping(self, cell, n_max=100):
+    def calc_mapping(self, cell, n_max=500):
         """
         Compute linear mapping between transmembrane currents of LFPy.Cell like
         object instantiation and extracellular potential in and outside of
@@ -197,7 +202,7 @@ class OneSphereVolumeConductor(object):
         >>> import matplotlib.pyplot as plt
         >>> from matplotlib.collections import PolyCollection
         >>> # create cell
-        >>> cell = LFPy.Cell(morphology=os.path.join('test', 'ball_and_sticks.hoc'),
+        >>> cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test', 'ball_and_sticks.hoc'),
         >>>                  tstop=10.)
         >>> cell.set_pos(z=9800.)
         >>> # stimulus
@@ -213,9 +218,9 @@ class OneSphereVolumeConductor(object):
         >>>               np.arctan2(Y, X).flatten()])
         >>> # set up class object and compute mapping between segment currents
         >>> # and electric potential in space
-        >>> sphere = OneSphereVolumeConductor(r, R=10000.,
-        >>>                                   sigma_i=0.3, sigma_o=0.03)
-        >>> mapping = sphere.calc_mapping(cell, n_max=100)
+        >>> sphere = LFPy.OneSphereVolumeConductor(r=r, R=10000.,
+        >>>                                        sigma_i=0.3, sigma_o=1.5)
+        >>> mapping = sphere.calc_mapping(cell, n_max=500)
         >>> # pick out some time index for the potential and compute potential
         >>> ind = cell.tvec==2.
         >>> Phi = np.dot(mapping, cell.imem)[:, ind].reshape(X.shape)
