@@ -585,14 +585,7 @@ class FourSphereVolumeConductor(object):
             If radial part of p[i] points inwards, sign_vector[i] = -1.
 
         """
-        # sign_vector = np.ones(len(p))
-        # radial_test = np.dot(p, self.rzloc) / (np.linalg.norm(p, axis=1) * self.rz)
-        # for i in range(len(p)):
-        #     if np.abs(radial_test[i] + 1) < 10 ** -8:
-        #         sign_vector[i] = -1.
-
-        sign_vector = np.sign(np.dot(p, self.rzloc) * self.rz)
-
+        sign_vector = np.sign(np.dot(p, self.rzloc))
         return sign_vector
 
     def _potential_brain_rad(self, r, theta):
