@@ -158,6 +158,7 @@ class OneSphereVolumeConductor(object):
             phi_i[r <= self.R] += 1./denom
 
 
+        
         if type(I) is np.ndarray:
             try:
                 assert(np.all(np.isfinite(I)))
