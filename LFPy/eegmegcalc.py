@@ -552,15 +552,17 @@ class FourSphereVolumeConductor(object):
             y-axis is defined in the direction of p (orthogonal to rzloc).
             x-axis is defined as cross product between p and rzloc (x).
         """
-        proj_rxyz_rz = (np.dot(self.rxyz,
-                        self.rzloc) / np.sum(self.rzloc **
-                        2)).reshape(len(self.rxyz),1) * self.rzloc.reshape(1,3)
+        proj_rxyz_rz = (np.dot(self.rxyz, self.rzloc) /
+                        np.sum(self.rzloc ** 2)).reshape(len(self.rxyz),1)\
+                        * self.rzloc.reshape(1,3)
                         # projection of rxyz onto rzloc
         rxy = self.rxyz - proj_rxyz_rz  # projection of rxyz into xy-plane
         x = np.cross(p_tan, self.rzloc)  # vector giving direction of x-axis
-        cos_phi = np.dot(rxy, x.T)/np.dot(np.linalg.norm(rxy,
-                         axis=1).reshape(len(rxy),1),np.linalg.norm(x,
-                         axis=1).reshape(1, len(x)))
+
+        denominator = np.dot(np.linalg.norm(rxy, axis=1).reshape(len(rxy),1),
+                             np.linalg.norm(x, axis=1).reshape(1, len(x)))
+        denominator[np.where(denominator == 0)] = 1e-12
+        cos_phi = np.dot(rxy, x.T) / denominator
         cos_phi = np.nan_to_num(cos_phi)
         phi_temp = np.arccos(cos_phi) # nb: phi_temp is in range [0, pi]
         phi = phi_temp
@@ -590,11 +592,7 @@ class FourSphereVolumeConductor(object):
             If radial part of p[i] points inwards, sign_vector[i] = -1.
 
         """
-        sign_vector = np.ones(len(p))
-        radial_test = np.dot(p, self.rzloc) / (np.linalg.norm(p, axis=1) * self.rz)
-        for i in range(len(p)):
-            if np.abs(radial_test[i] + 1) < 10 ** -8:
-                sign_vector[i] = -1.
+        sign_vector = np.sign(np.dot(p, self.rzloc))
         return sign_vector
 
     def _potential_brain_rad(self, r, theta):
@@ -866,14 +864,20 @@ class FourSphereVolumeConductor(object):
     def _calc_vn(self, n):
         r_const = ((self.r34 ** (2*n + 1) - 1) /
                   ((n + 1) / n * self.r34 ** (2*n + 1) + 1))
-        v = (n / (n + 1) * self.sigma34 - r_const) / (self.sigma34 + r_const)
+        if self.sigma23 + r_const == 0.0:
+            v = 1e12
+        else:
+            v = (n / (n + 1) * self.sigma34 - r_const) / (self.sigma34 + r_const)
         return v
 
     def _calc_yn(self, n):
         vn = self._calc_vn(n)
         r_const = ((n / (n + 1) * self.r23 ** (2*n + 1) - vn) /
                   (self.r23 ** (2*n + 1) + vn))
-        y = (n / (n + 1) * self.sigma23 - r_const) / (self.sigma23 + r_const)
+        if self.sigma23 + r_const == 0.0:
+            y = 1e12
+        else:
+            y = (n / (n + 1) * self.sigma23 - r_const) / (self.sigma23 + r_const)
         return y
 
     def _calc_zn(self, n):
