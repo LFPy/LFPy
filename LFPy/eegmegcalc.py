@@ -151,8 +151,9 @@ class OneSphereVolumeConductor(object):
             phi_i[r <= self.R] += 1./self.R*((self.sigma_i - self.sigma_o)*(n+1))  / (self.sigma_i*n + self.sigma_o*(n+1)) * ((r[r <= self.R]*rs)/self.R**2)**n * P_n(np.cos(theta[r <= self.R]))
         
             # observation points r > R
-            phi_o[r > self.R] += 1/r[r > self.R]*(self.sigma_i*(2*n+1) ) / (self.sigma_i*n + self.sigma_o*(n+1)) * (rs / r[r > self.R])**n * P_n(np.cos(theta[r > self.R]))
+            phi_o[r > self.R] += 1./r[r > self.R]*(self.sigma_i*(2*n+1) ) / (self.sigma_i*n + self.sigma_o*(n+1)) * (rs / r[r > self.R])**n * P_n(np.cos(theta[r > self.R]))
 
+        
         if type(I) is np.ndarray:
             try:
                 assert(np.all(np.isfinite(I)))
