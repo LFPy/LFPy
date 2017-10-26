@@ -117,7 +117,8 @@ class OneSphereVolumeConductor(object):
         -------
         Phi : ndarray
             shape (n-points, ) ndarray of floats if I is float like. If I is
-            an 1D ndarray, and shape (n-points, I.size) ndarray is returned
+            an 1D ndarray, and shape (n-points, I.size) ndarray is returned.
+            Unit (mV).
         """
         try:
             assert(type(rs) in [int, float, np.float64])
