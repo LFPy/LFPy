@@ -138,25 +138,27 @@ class OneSphereVolumeConductor(object):
 
         
         # add harmonical contributions due to inhomogeneous media
+        inds_i = r <= self.R
+        inds_o = r > self.R
         for n in range(n_max):
             P_n = legendre(n)
             
             # observation points r <= R
-            phi_i[r <= self.R] += ((self.sigma_i - self.sigma_o)*(n+1))  / (self.sigma_i*n + self.sigma_o*(n+1)) * ((r[r <= self.R]*rs)/self.R**2)**n * P_n(np.cos(theta[r <= self.R]))
+            phi_i[inds_i] += ((self.sigma_i - self.sigma_o)*(n+1))  / (self.sigma_i*n + self.sigma_o*(n+1)) * ((r[inds_i]*rs)/self.R**2)**n * P_n(np.cos(theta[inds_i]))
         
             # observation points r > R
-            phi_o[r > self.R] += (self.sigma_i*(2*n+1) ) / (self.sigma_i*n + self.sigma_o*(n+1)) * (rs / r[r > self.R])**n * P_n(np.cos(theta[r > self.R]))
+            phi_o[inds_o] += (self.sigma_i*(2*n+1) ) / (self.sigma_i*n + self.sigma_o*(n+1)) * (rs / r[inds_o])**n * P_n(np.cos(theta[inds_o]))
 
-        phi_i[r <= self.R] *= 1./self.R
-        phi_o[r > self.R] *= 1./r[r > self.R]
+        phi_i[inds_i] *= 1./self.R
+        phi_o[inds_o] *= 1./r[inds_o]
 
         # potential in homogeneous media
         if min_distance is None:
-            phi_i[r <= self.R] += 1. / np.sqrt(r[r <= self.R]**2 + rs**2 - 2*r[r <= self.R]*rs*np.cos(theta[r <= self.R]))
+            phi_i[inds_i] += 1. / np.sqrt(r[r <= self.R]**2 + rs**2 - 2*r[inds_i]*rs*np.cos(theta[inds_i]))
         else:
-            denom = np.sqrt(r[r <= self.R]**2 + rs**2 - 2*r[r <= self.R]*rs*np.cos(theta[r <= self.R]))
+            denom = np.sqrt(r[inds_i]**2 + rs**2 - 2*r[inds_i]*rs*np.cos(theta[inds_i]))
             denom[denom < min_distance] = min_distance
-            phi_i[r <= self.R] += 1./denom
+            phi_i[inds_i] += 1./denom
 
 
         
