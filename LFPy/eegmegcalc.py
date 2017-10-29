@@ -51,7 +51,7 @@ class OneSphereVolumeConductor(object):
     >>> import numpy as np
     >>> import matplotlib.pyplot as plt
     >>> # observation points in spherical coordinates (flattened)
-    >>> X, Y = np.mgrid[-15000:15100:200., -15000:15100:200.]
+    >>> X, Y = np.mgrid[-15000:15100:1000., -15000:15100:1000.]
     >>> r = np.array([np.sqrt(X**2 + Y**2).flatten(),
     >>>               np.arctan2(Y, X).flatten(),
     >>>               np.zeros(X.size)])
@@ -95,7 +95,7 @@ class OneSphereVolumeConductor(object):
         self.sigma_o = sigma_o
                 
     
-    def calc_potential(self, rs, I, min_distance=1., n_max=100):
+    def calc_potential(self, rs, I, min_distance=1., n_max=1000):
         """
         Return the electric potential at observation points for source current
         with magnitude I as function of time.
@@ -117,7 +117,8 @@ class OneSphereVolumeConductor(object):
         -------
         Phi : ndarray
             shape (n-points, ) ndarray of floats if I is float like. If I is
-            an 1D ndarray, and shape (n-points, I.size) ndarray is returned
+            an 1D ndarray, and shape (n-points, I.size) ndarray is returned.
+            Unit (mV).
         """
         try:
             assert(type(rs) in [int, float, np.float64])
@@ -132,27 +133,41 @@ class OneSphereVolumeConductor(object):
         r = self.r[0]
         theta = self.r[1]
 
+        
+        # add harmonical contributions due to inhomogeneous media
+        inds_i = r <= self.R
+        inds_o = r > self.R
+
+        # observation points r <= R
         phi_i = np.zeros(r.size)
+        for j, (theta_i, r_i) in enumerate(zip(theta[inds_i], r[inds_i])):
+            coeffs_i = np.zeros(n_max)
+            for n in range(n_max):
+                coeffs_i[n] = ((self.sigma_i - self.sigma_o)*(n+1))  / (self.sigma_i*n + self.sigma_o*(n+1)) * ((r_i*rs)/self.R**2)**n
+            poly_i = np.polynomial.legendre.Legendre(coeffs_i)
+            phi_i[np.where(inds_i)[0][j]] = poly_i(np.cos(theta_i))
+        phi_i[inds_i] *= 1./self.R
+        
+        # observation points r > R
         phi_o = np.zeros(r.size)
+        for j, (theta_o, r_o) in enumerate(zip(theta[inds_o], r[inds_o])):
+            coeffs_o = np.zeros(n_max)
+            for n in range(n_max):
+                coeffs_o[n] = (self.sigma_i*(2*n+1) ) / (self.sigma_i*n + self.sigma_o*(n+1)) * (rs / r_o)**n
+            poly_o = np.polynomial.legendre.Legendre(coeffs_o)
+            phi_o[np.where(inds_o)[0][j]] = poly_o(np.cos(theta_o))
+        phi_o[inds_o] *= 1./r[inds_o]
 
         # potential in homogeneous media
         if min_distance is None:
-            phi_i[r <= self.R] = 1. / np.sqrt(r[r <= self.R]**2 + rs**2 - 2*r[r <= self.R]*rs*np.cos(theta[r <= self.R]))
+            phi_i[inds_i] += 1. / np.sqrt(r[r <= self.R]**2 + rs**2 - 2*r[inds_i]*rs*np.cos(theta[inds_i]))
         else:
-            denom = np.sqrt(r[r <= self.R]**2 + rs**2 - 2*r[r <= self.R]*rs*np.cos(theta[r <= self.R]))
+            denom = np.sqrt(r[inds_i]**2 + rs**2 - 2*r[inds_i]*rs*np.cos(theta[inds_i]))
             denom[denom < min_distance] = min_distance
-            phi_i[r <= self.R] = 1./denom
-        
-        # add harmonical contributions due to inhomogeneous media
-        for n in range(n_max):
-            P_n = legendre(n)
-            
-            # observation points r <= R
-            phi_i[r <= self.R] += 1./self.R*((self.sigma_i - self.sigma_o)*(n+1))  / (self.sigma_i*n + self.sigma_o*(n+1)) * ((r[r <= self.R]*rs)/self.R**2)**n * P_n(np.cos(theta[r <= self.R]))
-        
-            # observation points r > R
-            phi_o[r > self.R] += 1/r[r > self.R]*(self.sigma_i*(2*n+1) ) / (self.sigma_i*n + self.sigma_o*(n+1)) * (rs / r[r > self.R])**n * P_n(np.cos(theta[r > self.R]))
+            phi_i[inds_i] += 1./denom
 
+
+        
         if type(I) is np.ndarray:
             try:
                 assert(np.all(np.isfinite(I)))
@@ -171,7 +186,7 @@ class OneSphereVolumeConductor(object):
             return I / (4.*np.pi*self.sigma_i)*(phi_i + phi_o)
     
     
-    def calc_mapping(self, cell, n_max=100):
+    def calc_mapping(self, cell, n_max=1000):
         """
         Compute linear mapping between transmembrane currents of LFPy.Cell like
         object instantiation and extracellular potential in and outside of
@@ -197,7 +212,7 @@ class OneSphereVolumeConductor(object):
         >>> import matplotlib.pyplot as plt
         >>> from matplotlib.collections import PolyCollection
         >>> # create cell
-        >>> cell = LFPy.Cell(morphology=os.path.join('test', 'ball_and_sticks.hoc'),
+        >>> cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test', 'ball_and_sticks.hoc'),
         >>>                  tstop=10.)
         >>> cell.set_pos(z=9800.)
         >>> # stimulus
@@ -213,9 +228,9 @@ class OneSphereVolumeConductor(object):
         >>>               np.arctan2(Y, X).flatten()])
         >>> # set up class object and compute mapping between segment currents
         >>> # and electric potential in space
-        >>> sphere = OneSphereVolumeConductor(r, R=10000.,
-        >>>                                   sigma_i=0.3, sigma_o=0.03)
-        >>> mapping = sphere.calc_mapping(cell, n_max=100)
+        >>> sphere = LFPy.OneSphereVolumeConductor(r=r, R=10000.,
+        >>>                                        sigma_i=0.3, sigma_o=0.03)
+        >>> mapping = sphere.calc_mapping(cell, n_max=1000)
         >>> # pick out some time index for the potential and compute potential
         >>> ind = cell.tvec==2.
         >>> Phi = np.dot(mapping, cell.imem)[:, ind].reshape(X.shape)
