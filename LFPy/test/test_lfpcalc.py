@@ -76,6 +76,44 @@ class testLfpCalc(unittest.TestCase):
 
         np.testing.assert_equal(in_vivo, in_vitro)
 
+
+    def test_calc_lfp_moi_ecog(self):
+        """
+        Test that LFPy ECoG scenario gives expected analytical result
+        """
+
+        sigma_T = 0.3
+        sigma_G = 0.3
+        sigma_S = 1.5
+        h = 5000
+        steps = 20
+        cell = TestCell()
+        cell.zmid[0] = h - 50
+        cell.zstart[0] = h - 50
+        cell.zend[0] = h - 50
+
+        cell.xmid[0] = 0
+        cell.xstart[0] = 0
+        cell.xend[0] = 0
+
+        source_scaling = (sigma_T - sigma_S) / (sigma_S + sigma_T)
+
+        z = h - 20  # Recording position z <= h, z != cell.zmid[0]
+
+        analytic = cell.imem[0] / (4 * np.pi * sigma_T) * (
+                   1 / np.abs(z - cell.zmid[0]) +  # real source
+                   source_scaling / np.abs(z - (2 * h - cell.zmid[0]))  # image source
+                   )
+
+        moi_method_lfpy = lfpcalc.calc_lfp_pointsource_moi(cell,
+                                x=0., y=0, z=z, sigma_T=sigma_T,
+                                sigma_G=sigma_G, sigma_S=sigma_S,
+                                r_limit=cell.diam/2, h=h, steps=steps)
+
+        np.testing.assert_equal(analytic, moi_method_lfpy)
+
+
+
     def test_calc_lfp_pointsource_moi_too_close(self):
         """
         Very close to point source, in vivo and in vitro have similar results,
