@@ -1097,7 +1097,7 @@ class MEG(object):
     >>> cell.set_pos(0., 0., 0.)
     >>> syn = LFPy.Synapse(cell, idx=0, syntype='ExpSyn', weight=0.01, record_current=True)
     >>> syn.set_spike_times_w_netstim()
-    >>> cell.simulate(rec_isyn=syn.record_current, rec_current_dipole_moment=True)
+    >>> cell.simulate(rec_current_dipole_moment=True)
 
     Compute the dipole location as an average of segment locations weighted by membrane area
 
@@ -1141,6 +1141,9 @@ class MEG(object):
 
     def calculate_H(self, current_dipole_moment, dipole_location):
         """
+        Compute magnetic field H from single current-dipole moment localized
+        somewhere in space
+        
         Parameters
         ----------
         current_dipole_moment : ndarray, dtype=float
@@ -1152,8 +1155,8 @@ class MEG(object):
         Returns
         -------
         ndarray, dtype=float
-            shape (n_locations x n_timesteps x 3) array with x,y,z-components of the magnetic
-            field :math:`\mathbf{H}` in units of (nA/µm)
+            shape (n_locations x n_timesteps x 3) array with x,y,z-components
+            of the magnetic field :math:`\mathbf{H}` in units of (nA/µm)
 
         Raises
         ------
@@ -1190,3 +1193,81 @@ class MEG(object):
                               R) / (4 * np.pi * np.sqrt((R**2).sum())**3)
 
         return H
+
+
+
+    def calculate_H_from_iaxial(self, cell):
+        """
+        Computes the magnetic field in space from axial currents computed from
+        membrane potential values and axial resistances of multicompartment
+        cells.
+        
+        See:
+        Blagoev et al. (2007) Modelling the magnetic signature of neuronal
+        tissue. NeuroImage 37 (2007) 137–148
+        DOI: 10.1016/j.neuroimage.2007.04.033
+        
+        for details on the biophysics governing magnetic fields from axial
+        currents.
+        
+        Parameters
+        ----------
+        cell : object
+            LFPy.Cell-like object. Must have attribute vmem containing recorded
+            membrane potentials in units of mV
+        
+        Examples
+        --------
+        Define cell object, create synapse, compute current dipole moment:
+    
+        >>> import LFPy, os, numpy as np, matplotlib.pyplot as plt
+        >>> cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test', 'ball_and_sticks.hoc'),
+        >>>                  passive=True)
+        >>> cell.set_pos(0., 0., 0.)
+        >>> syn = LFPy.Synapse(cell, idx=0, syntype='ExpSyn', weight=0.01, record_current=True)
+        >>> syn.set_spike_times_w_netstim()
+        >>> cell.simulate(rec_vmem=True)
+    
+        Instantiate the LFPy.MEG object, compute and plot the magnetic signal in a sensor location:
+    
+        >>> sensor_locations = np.array([[1E4, 0, 0]])
+        >>> meg = LFPy.MEG(sensor_locations)
+        >>> H = meg.calculate_H_from_iaxial(cell)
+        >>> plt.subplot(311)
+        >>> plt.plot(cell.tvec, cell.somav)
+        >>> plt.subplot(312)
+        >>> plt.plot(cell.tvec, syn.i)
+        >>> plt.subplot(313)
+        >>> plt.plot(cell.tvec, H[0])
+
+        Returns
+        -------
+        H : ndarray, dtype=float
+            shape (n_locations x n_timesteps x 3) array with x,y,z-components
+            of the magnetic field :math:`\mathbf{H}` in units of (nA/µm)
+        """
+        d_list, iaxial = cell.get_axial_currents_from_vmem()
+
+        R = self.sensor_locations
+        H = np.zeros((R.shape[0], cell.tvec.size, 3))
+
+        r_seg = np.c_[cell.xmid, cell.ymid, cell.zmid]
+
+        for i, R_ in enumerate(R):        
+            for r_seg_, d_list_, iaxial_ in zip(r_seg,
+                                                d_list[::2, ],
+                                                iaxial[::2]):
+                r_rel = R_ - r_seg_
+                H[i, :, :] += np.dot(iaxial_.reshape((-1, 1)),
+                                     np.cross(d_list_, r_rel).reshape((1, -1))
+                                     ) / (4*np.pi*np.sqrt((r_rel**2).sum())**3)
+            for r_seg_, d_list_, iaxial_ in zip(r_seg,
+                                                d_list[1::2, ],
+                                                iaxial[1::2]):
+                r_rel = R_ - r_seg_
+                H[i, :, :] += np.dot(iaxial_.reshape((-1, 1)),
+                                     np.cross(d_list_, r_rel).reshape((1, -1))
+                                     ) / (4*np.pi*np.sqrt((r_rel**2).sum())**3)        
+        
+        return H
+
