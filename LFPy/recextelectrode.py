@@ -558,17 +558,17 @@ class RecMEAElectrode(RecExtElectrode):
 
     Set-up:
 
-              SALINE -> sigma_S
-    <----------------------------------------------------> z = + h
+              Above neural tissue (Saline) -> sigma_S
+    <----------------------------------------------------> z = z_shift + h
 
-              TISSUE -> sigma_T
+              Neural Tissue -> sigma_T
 
                    o -> source_pos = [x',y',z']
 
-    <-----------*----------------------------------------> z = 0
+    <-----------*----------------------------------------> z = z_shift + 0
                  \-> elec_pos = [x,y,z]
 
-                 MEA ELECTRODE PLATE -> sigma_G
+              Below neural tissue (MEA Glass plate) -> sigma_G
 
     Parameters
     ----------
@@ -582,6 +582,13 @@ class RecMEAElectrode(RecExtElectrode):
     sigma_G : float
         conductivity of MEA glass electrode plate. Most commonly
         assumed non-conducting [0.0] (S/m)
+    h : float, int
+        Thickness in um of neural tissue layer containing current
+        the current sources (i.e., in vitro slice or cortex)
+    z_shift : float, int
+        Height in um of neural tissue layer bottom. If e.g., top of neural tissue
+        layer should be z=0, use z_shift=-h. Defaults to z_shift = 0, so
+        that the neural tissue layer extends from z=0 to z=h.
     squeeze_cell_factor : float or None
         Factor to squeeze the cell in the z-direction. This is
         needed for large cells that are thicker than the slice, since no part
@@ -669,7 +676,7 @@ class RecMEAElectrode(RecExtElectrode):
 
     """
     def __init__(self, cell=None, sigma_T=0.3, sigma_S=1.5, sigma_G=0.0,
-                 h=300., steps=20,
+                 h=300., z_shift=0., steps=20,
                  x=np.array([0]), y=np.array([0]), z=np.array([0]),
                  N=None, r=None, n=None, r_z=None,
                  perCellLFP=False, method='linesource',
@@ -688,6 +695,7 @@ class RecMEAElectrode(RecExtElectrode):
         self.sigma_S = sigma_S
         self.sigma = None
         self.h = h
+        self.z_shift = z_shift
         self.steps = steps
         self.squeeze_cell_factor = squeeze_cell_factor
         self.moi_param_kwargs = {"h": self.h,
@@ -703,7 +711,7 @@ class RecMEAElectrode(RecExtElectrode):
         if method == 'pointsource':
             self.lfp_method = lfpcalc.calc_lfp_pointsource_moi
         elif method == "linesource":
-            if (np.abs(z) > 1e-9).any():
+            if (np.abs(z - self.z_shift) > 1e-9).any():
                 raise NotImplementedError("The method 'linesource' is only "
                                           "supported for electrodes at the "
                                           "z=0 plane. Use z=0 or method "
@@ -715,7 +723,7 @@ class RecMEAElectrode(RecExtElectrode):
                                           "'pointsource'.")
             self.lfp_method = lfpcalc.calc_lfp_linesource_moi
         elif method == "soma_as_point":
-            if (np.abs(z) > 1e-9).any():
+            if (np.abs(z - self.z_shift) > 1e-9).any():
                 raise NotImplementedError("The method 'soma_as_point' is only "
                                           "supported for electrodes at the "
                                           "z=0 plane. Use z=0 or method "
@@ -742,8 +750,8 @@ class RecMEAElectrode(RecExtElectrode):
         self.cell.zstart = (self.cell.zstart - zpos) * self.squeeze_cell_factor + zpos
         self.cell.zend = (self.cell.zend - zpos) * self.squeeze_cell_factor + zpos
 
-        if (np.max([self.cell.zstart, self.cell.zend]) > self.h or
-            np.min([self.cell.zstart, self.cell.zend]) < 0):
+        if (np.max([self.cell.zstart, self.cell.zend]) > self.h + self.z_shift or
+            np.min([self.cell.zstart, self.cell.zend]) < self.z_shif):
             raise RuntimeError("Squeeze factor not large enough to confine "
                                "cell to slice. Increase squeeze_cell_factor,"
                                "move or rotate cell.")
@@ -757,13 +765,13 @@ class RecMEAElectrode(RecExtElectrode):
         """
         if self.cell is None:
             raise RuntimeError("Does not have cell instance")
-        if (not np.all(0 < self.cell.zend) or
-            not np.all(self.cell.zend < self.h)):
+        if (not np.all(self.z_shift < self.cell.zend) or
+            not np.all(self.cell.zend < self.z_shift + self.h)):
             if self.verbose:
                 print("Cell extends outside slice. ")
 
             if self.squeeze_cell_factor is not None:
-                if not 0 < self.cell.zmid[0] < self.h:
+                if not self.z_shift < self.cell.zmid[0] < self.z_shift + self.h:
                     raise RuntimeError("Soma position is not in slice")
                 self._squeeze_cell_in_depth_direction()
             else:
@@ -799,6 +807,13 @@ class RecMEAElectrode(RecExtElectrode):
             self.set_cell(cell)
         self.test_cell_extent()
 
+        # Temporarily shift coordinate system so middle layer extends
+        # from z=0 to z=h
+        self.z = self.z - self.z_shift
+        self.cell.zstart = self.cell.zstart - self.z_shift
+        self.cell.zmid = self.cell.zmid - self.z_shift
+        self.cell.zend = self.cell.zend - self.z_shift
+
         if self.n is not None and self.N is not None and self.r is not None:
             if self.n <= 1:
                 raise ValueError("n = %i must be larger that 1" % self.n)
@@ -815,6 +830,14 @@ class RecMEAElectrode(RecExtElectrode):
             if self.verbose:
                 print('calculations finished, %s, %s' % (str(self),
                                                          str(self.cell)))
+
+        # Shift coordinate system back so middle layer extends
+        # from z=z_shift to z=z_shift + h
+        self.z = self.z + self.z_shift
+        self.cell.zstart = self.cell.zstart + self.z_shift
+        self.cell.zmid = self.cell.zmid + self.z_shift
+        self.cell.zend = self.cell.zend + self.z_shift
+
 
     def calc_lfp(self, t_indices=None, cell=None):
         """Calculate LFP on electrode geometry from all cell instances.
