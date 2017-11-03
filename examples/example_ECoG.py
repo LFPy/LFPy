@@ -208,11 +208,16 @@ cellParameters = {
 #Initialize cell instance, using the LFPy.Cell class
 cell = LFPy.Cell(**cellParameters)
 
-# Cell bottom needs to be above 0 because of convention in calculation of
-# ECoG potentials using the Method of Images (in class RecMEAElectrode):
-cell.set_pos(z=cell.somapos[2] - np.min(cell.zend) + 1)
+top_of_cortex = 0
 
-top_of_cortex = np.max(cell.zend) + 50
+# We place top of cell 50 um below the cortical surface
+cell.set_pos(z=top_of_cortex-np.max(cell.zend) - 50)
+
+# Cell bottom needs to be above bottom layer because of convention in
+# calculation of ECoG potentials using the Method of Images in
+# class RecMEAElectrode. This means thickness of middle layer
+# must be greater than length of cell.
+h = np.max(cell.zend) - np.min(cell.zend) + 1
 
 # Synaptic parameters taken from Hendrickson et al 2011
 # Excitatory synapse parameters:
@@ -279,7 +284,6 @@ insert_synapses(synapseParameters_GABA_A, **insert_synapses_GABA_A_args)
 sigma_S = 1.5  # Condictivity of medium above cortex
 sigma_T = 0.3  # Conductivity of cortex
 
-
 # Define electrode geometry corresponding to a laminar electrode, where contact
 # points have a radius r, surface normal vectors N, and LFP calculated as the
 # average LFP in n random points on each contact:
@@ -302,7 +306,8 @@ elec_with_MoIParameters = {
     'sigma_S' : sigma_S,  # Conductitivy above cortex
     'sigma_T' : sigma_T,  # Conductivity of cortex
     'sigma_G' : sigma_T,  # Conductivity below cortex. Assume same as cortex
-    'h': top_of_cortex,
+    'h': h,
+    'z_shift': -h,
     'x' : np.zeros(num_LFP_elecs),      # x,y,z-coordinates of electrode contacts
     'y' : np.zeros(num_LFP_elecs),
     'z' : np.linspace(cell.somapos[2]-200, top_of_cortex, num_LFP_elecs),
@@ -325,7 +330,8 @@ ecogParameters = {
     'sigma_S' : sigma_S,
     'sigma_T' : 0.3,              # Extracellular potential
     'sigma_G' : 0.3,
-    'h': top_of_cortex,
+    'h': h,
+    'z_shift': -h,
     'x' : np.zeros(num_ECoG_elecs),      # x,y,z-coordinates of electrode contacts
     'y' : np.zeros(num_ECoG_elecs),
     'z' : np.array([top_of_cortex] * num_ECoG_elecs), # Assume that top of cortex is 50 um above cell top

@@ -311,7 +311,111 @@ class testRecExtElectrode(unittest.TestCase):
         MEA = LFPy.RecMEAElectrode(stick, **electrodeParams)
         np.testing.assert_raises(RuntimeError, MEA.test_cell_extent)
 
+    def test_position_shifted_slice(self):
 
+        electrodeParams = {
+            'sigma_T' : 0.3,
+            'sigma_S' : 1.5,
+            'sigma_G' : 0.0,
+            'h': 200,
+            'z_shift': -200,
+            'x' : np.linspace(0, 1000, 11),
+            'y' : np.zeros(11),
+            'z' : np.zeros(11) - 100,
+            'method': "pointsource",
+            'squeeze_cell_factor': None,
+        }
+
+        stickParams = {
+            'morphology' : os.path.join(LFPy.__path__[0], 'test', 'ball_and_sticks.hoc'),
+            'passive_parameters' : {'g_pas' : 1./30000, 'e_pas' : -65},
+            'passive': True,
+            'tstart' : -10,
+            'tstop' : 20,
+            'dt' : 2**-4,
+            'nsegs_method' : 'lambda_f',
+            'lambda_f' : 100,
+        }
+        stick = LFPy.Cell(**stickParams)
+        stick.set_rotation(y=np.pi/2)
+        stick.set_pos(z=-100)
+
+        MEA = LFPy.RecMEAElectrode(stick, **electrodeParams)
+        MEA.test_cell_extent()
+
+    def test_slice_shift_invariance_pointsource(self):
+        h = 200
+        z_shift_1 = 0
+        z_shift_2 = -352
+
+        electrodeParams_1 = {
+            'sigma_T' : 0.3,
+            'sigma_S' : 1.5,
+            'sigma_G' : 0.0,
+            'h': h,
+            'z_shift': z_shift_1,
+            'x' : np.linspace(0, 1000, 11),
+            'y' : np.zeros(11),
+            'z' : np.zeros(11) + z_shift_1,
+            'squeeze_cell_factor': None,
+        }
+
+        electrodeParams_2 = {
+            'sigma_T' : 0.3,
+            'sigma_S' : 1.5,
+            'sigma_G' : 0.0,
+            'h': h,
+            'z_shift': z_shift_2,
+            'x' : np.linspace(0, 1000, 11),
+            'y' : np.zeros(11),
+            'z' : np.zeros(11) + z_shift_2,
+            'squeeze_cell_factor': None,
+        }
+        stimParams = {
+            'pptype' : 'SinSyn',
+            'delay' : -100.,
+            'dur' : 1000.,
+            'pkamp' : 1.,
+            'freq' : 100.,
+            'phase' : -np.pi/2,
+            'bias' : 0.,
+            'record_current' : True
+        }
+        stickParams = {
+            'morphology' : os.path.join(LFPy.__path__[0], 'test', 'ball_and_sticks.hoc'),
+            'passive_parameters' : {'g_pas' : 1./30000, 'e_pas' : -65},
+            'passive': True,
+            'tstart' : -10,
+            'tstop' : 20,
+            'dt' : 2**-4,
+            'nsegs_method' : 'lambda_f',
+            'lambda_f' : 100,
+        }
+        stick = LFPy.Cell(**stickParams)
+        stick.set_rotation(y=np.pi/2)
+
+        synapse = LFPy.StimIntElectrode(stick, stick.get_closest_idx(0, 0, 0),
+                                   **stimParams)
+
+        stick.simulate(rec_imem=True)
+
+        methods = ["pointsource", "linesource", "soma_as_point"]
+
+        for method in methods:
+            electrodeParams_1["method"] = method
+            electrodeParams_2["method"] = method
+
+
+            stick.set_pos(z=z_shift_1 + h/2)
+            MEA_shift_1 = LFPy.RecMEAElectrode(stick, **electrodeParams_1)
+            MEA_shift_1.calc_lfp()
+
+            stick.set_pos(z=z_shift_2 + h/2)
+            MEA_shift_2 = LFPy.RecMEAElectrode(stick, **electrodeParams_2)
+            MEA_shift_2.calc_lfp()
+
+            np.testing.assert_allclose(MEA_shift_1.LFP,
+                                       MEA_shift_2.LFP, rtol=1E-7)
 
     def test_isotropic_version_of_anisotropic_methods(self):
 
