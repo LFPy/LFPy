@@ -1084,7 +1084,10 @@ class MEG(object):
     ----------
     sensor_locations : ndarray, dtype=float
         shape (n_locations x 3) array with x,y,z-locations of measurement
-        devices where magnetic field of current dipole moments is calculated
+        devices where magnetic field of current dipole moments is calculated.
+        In unit of (µm)
+    mu : float
+        Permeability. Default is permeability of vacuum (mu_0 = 4*pi*1E-7 T*m/A)
 
 
     Examples
@@ -1122,7 +1125,7 @@ class MEG(object):
 
 
     """
-    def __init__(self, sensor_locations):
+    def __init__(self, sensor_locations, mu=4*np.pi*1E-7):
         """
         Initialize class MEG
         """
@@ -1137,6 +1140,7 @@ class MEG(object):
 
         # set attributes
         self.sensor_locations = sensor_locations
+        self.mu = mu
 
 
     def calculate_H(self, current_dipole_moment, dipole_location):
