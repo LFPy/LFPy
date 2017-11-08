@@ -25,24 +25,24 @@ class OneSphereVolumeConductor(object):
     independent) conductivity in and outside the sphere with a radius R. The
     conductivity in and outside the sphere must be greater than 0, and the
     current source(s) must be located within the radius R.
-    
+
     The implementation is based on the description of electric potentials of
     point charge in an dielectric sphere embedded in dielectric media, which is
     mathematically equivalent to a current source in conductive media, as
     published by Deng (2008), Journal of Electrostatics 66:549-560
-    
+
     Parameters
     ----------
     r : ndarray, dtype=float
         shape(3, n_points) observation points in space in spherical coordinates
-        (radius, theta, phi) relative to the center of the sphere. 
+        (radius, theta, phi) relative to the center of the sphere.
     R : float
         sphere radius (µm)
     sigma_i : float
         electric conductivity for radius r <= R (S/m)
     sigma_o : float
         electric conductivity for radius r > R (S/m)
-    
+
     Examples
     --------
     Compute the potential for a single monopole along the x-axis:
@@ -88,18 +88,18 @@ class OneSphereVolumeConductor(object):
             assert((sigma_i > 0) & (sigma_o > 0))
         except AssertionError as ae:
             raise AssertionError('sigma_i and sigma_o must both be positive values')
-        
+
         self.r = r
         self.R = R
         self.sigma_i = sigma_i
         self.sigma_o = sigma_o
-                
-    
+
+
     def calc_potential(self, rs, I, min_distance=1., n_max=1000):
         """
         Return the electric potential at observation points for source current
         with magnitude I as function of time.
-        
+
         Parameters
         ----------
         rs : float
@@ -112,7 +112,7 @@ class OneSphereVolumeConductor(object):
         n_max : int
             Number of elements in polynomial expansion to sum over
             (see Deng 2008).
-        
+
         Returns
         -------
         Phi : ndarray
@@ -129,11 +129,11 @@ class OneSphereVolumeConductor(object):
             assert((min_distance is None) or (type(min_distance) in [float, int, np.float64]))
         except AssertionError:
             raise AssertionError('min_distance must be None or a float')
-        
+
         r = self.r[0]
         theta = self.r[1]
 
-        
+
         # add harmonical contributions due to inhomogeneous media
         inds_i = r <= self.R
         inds_o = r > self.R
@@ -147,7 +147,7 @@ class OneSphereVolumeConductor(object):
             poly_i = np.polynomial.legendre.Legendre(coeffs_i)
             phi_i[np.where(inds_i)[0][j]] = poly_i(np.cos(theta_i))
         phi_i[inds_i] *= 1./self.R
-        
+
         # observation points r > R
         phi_o = np.zeros(r.size)
         for j, (theta_o, r_o) in enumerate(zip(theta[inds_o], r[inds_o])):
@@ -167,7 +167,7 @@ class OneSphereVolumeConductor(object):
             phi_i[inds_i] += 1./denom
 
 
-        
+
         if type(I) is np.ndarray:
             try:
                 assert(np.all(np.isfinite(I)))
@@ -175,24 +175,24 @@ class OneSphereVolumeConductor(object):
                 assert(I.ndim == 1)
             except AssertionError:
                 raise AssertionError('input argument I must be float or 1D ndarray with float values')
-            
+
             return np.dot((phi_i + phi_o).reshape((1, -1)).T,
-                I.reshape((1, -1))) / (4.*np.pi*self.sigma_i)            
+                I.reshape((1, -1))) / (4.*np.pi*self.sigma_i)
         else:
             try:
-                assert(np.isfinite(I)) and (np.shape(I) == ())           
+                assert(np.isfinite(I)) and (np.shape(I) == ())
             except AssertionError:
-                raise AssertionError('input argument I must be float or 1D ndarray with float values') 
+                raise AssertionError('input argument I must be float or 1D ndarray with float values')
             return I / (4.*np.pi*self.sigma_i)*(phi_i + phi_o)
-    
-    
+
+
     def calc_mapping(self, cell, n_max=1000):
         """
         Compute linear mapping between transmembrane currents of LFPy.Cell like
         object instantiation and extracellular potential in and outside of
         sphere. Cell position must be set in space, using the method
         Cell.set_pos(**kwargs).
-        
+
         Parameters
         ----------
         cell : LFPy.Cell like instance
@@ -200,7 +200,7 @@ class OneSphereVolumeConductor(object):
         n_max : int
             Number of elements in polynomial expansion to sum over
             (see Deng 2008).
-        
+
         Examples
         --------
         # Compute extracellular potential in one-sphere volume conductor model
@@ -252,14 +252,14 @@ class OneSphereVolumeConductor(object):
         >>> ax.set_xlim(X.min(), X.max())
         >>> ax.set_ylim(Z.min(), Z.max())
         >>> fig.colorbar(im, ax=ax)
-        >>> plt.show()  
+        >>> plt.show()
 
         Returns
         -------
         ndarray
             Shape (n_points, n_compartments) mapping between individual
             segments and extracellular potential in extracellular locations
-            
+
         Notes
         -----
         Each segment is treated as a point source in space. The minimum
@@ -271,17 +271,17 @@ class OneSphereVolumeConductor(object):
         theta = np.arccos(cell.zmid/radius)
         phi = np.arctan2(cell.ymid, cell.xmid)
         diam = cell.diam
-        
+
         # since the sources must be located on the x-axis, we keep a copy
         # of the unrotated coordinate system for the contact points:
         r_orig = np.copy(self.r)
-        
+
         # unit current amplitude
         I = 1.
-        
+
         # initialize mapping array
         mapping = np.zeros((self.r.shape[1], radius.size))
-        
+
         # compute the mapping for each compartment
         for i, (radius_i, theta_i, _, diam_i) in enumerate(zip(radius, theta, phi, diam)):
             self.r = np.array([r_orig[0], # radius unchanged
@@ -291,7 +291,7 @@ class OneSphereVolumeConductor(object):
 
         # reset measurement locations
         self.r = r_orig
-        
+
         # return mapping between segment currents and contrib in each
         # measurement location
         return mapping
@@ -985,8 +985,8 @@ class InfiniteVolumeConductor(object):
             current dipole moment in units of (nA*µm) for all timesteps
         r : ndarray, dtype=float
             Shape (n_contacts, 3) array contaning the displacement vectors
-            from dipole location to measurement location        
-        
+            from dipole location to measurement location
+
         Returns
         -------
         potential : ndarray, dtype=float
@@ -1012,8 +1012,8 @@ def get_current_dipole_moment(dist, current):
         axial currents between compartments in cell in units of nA
     dist : ndarray, dtype=float
         When input current is an array of axial currents,
-        the dist is the length of each axial current.
-        When current is the an array of transmembrane
+        dist is the length of each axial current.
+        When current is an array of transmembrane
         currents, dist is the position vector of each
         compartment middle. Unit is (µm).
 

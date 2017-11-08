@@ -21,7 +21,6 @@ import neuron
 import numpy as np
 import scipy
 import sys
-import posixpath
 from warnings import warn
 import pickle
 from .run_simulation import _run_simulation, _run_simulation_with_electrode
@@ -191,9 +190,6 @@ class Cell(object):
             assert(morphology is not None)
         except AssertionError:
             raise AssertionError('deprecated keyword argument morphology==None, value must be a file path or neuron.h.SectionList instance with neuron.h.Section instances')
-        if "win32" in sys.platform and type(morphology) is str:
-            # fix Path on windows
-            morphology = morphology.replace(os.sep, posixpath.sep)
         self.morphology = morphology
         if type(self.morphology) is str:
             if os.path.isfile(self.morphology):
@@ -357,8 +353,6 @@ class Cell(object):
         # load custom codes
         if custom_code is not None:
             for code in custom_code:
-                if "win32" in sys.platform:
-                    code = code.replace(os.sep, posixpath.sep)
                 if code.split('.')[-1] == 'hoc':
                     try:
                         neuron.h.xopen(code)
@@ -368,8 +362,7 @@ class Cell(object):
                             'while creating a Cell object.',
                             'One possible cause is the NEURON mechanisms have',
                             'not been compiled, ',
-                            'try running nrnivmodl or mknrndll (Windows) in ', 
-                            'the mod-file-containing folder. ',])
+                            'try running nrnivmodl. ',])
                         raise Exception(ERRMSG)
                 elif code.split('.')[-1] == 'py':
                     if sys.version >= "3.4":
@@ -759,7 +752,7 @@ class Cell(object):
         self.ymid = .5*(self.ystart+self.yend).flatten()
         self.zmid = .5*(self.zstart+self.zend).flatten()
 
-    def get_idx(self, section='allsec', z_min=-np.inf, z_max=np.inf):
+    def get_idx(self, section='allsec', z_min=-10000, z_max=10000):
         """Returns compartment idx of segments from sections with names that match
         the pattern defined in input section on interval [z_min, z_max].
 
@@ -825,7 +818,7 @@ class Cell(object):
         return np.argmin(dist)
 
     def get_rand_idx_area_norm(self, section='allsec', nidx=1,
-                               z_min=-1E6, z_max=1E6):
+                               z_min=-10000, z_max=10000):
         """Return nidx segment indices in section with random probability
         normalized to the membrane area of segment on
         interval [z_min, z_max]
@@ -1904,7 +1897,7 @@ class Cell(object):
         >>> import matplotlib.pyplot as plt
         >>> cell = LFPy.Cell(morphology='PATH/TO/MORPHOLOGY')
         >>> zips = []
-        >>> for x, z in cell.get_pt3d_polygons(projection=('x', 'z')):
+        >>> for x, z in cell.get_idx_polygons(projection=('x', 'z')):
         >>>     zips.append(zip(x, z))
         >>> polycol = PolyCollection(zips,
         >>>                          edgecolors='none',
@@ -1928,10 +1921,6 @@ class Cell(object):
             mssg = "projection must be a length 2 tuple of 'x', 'y' or 'z'!"
             raise ValueError(mssg)
 
-        try:
-            assert(self.pt3d is True)
-        except AssertionError:
-            raise AssertionError('Cell keyword argument pt3d != True')
         polygons = []
         for i in range(len(self.x3d)):
             polygons.append(self._create_polygon(i, projection))
@@ -2119,22 +2108,27 @@ class Cell(object):
 
     def get_axial_currents_from_vmem(self):
         """
-        Compute axial currents from cell sim: get current |I| and distance vecs.
+        Compute axial currents from cell sim: get current magnitude,
+        distance vectors and position vectors.
 
         Returns
         -------
-        d_list : ndarray, dtype=float
-            Shape (cell.totnsegs*2, 3) array of distance vectors of each axial
-            current i_axial in units of (µm). The entries along the first axis
-            of d_list is ordered such that entry # // 2 correspond to the
-            segment index of the cell. Each segment thus has two corresponding
-            axial currents from its midpoint to each of its end nodes.
         i_axial : ndarray, dtype=float
-            Shape (cell.totnsegs*2, cell.tvec.size) array of axial current
-            magnitudes I in units of (nA) for each segment of the cell at all
-            timesteps of the simulation (i.e., for cell.tvec). The indices of
-            the first axis correspond to the first axis of d_list.
-
+            Shape ((cell.totnsegs-1)*2, cell.tvec.size) array of axial current
+            magnitudes I in units of (nA) in cell at all timesteps of the
+            simulation. Contains two current magnitudes per segment,
+            (except for the root segment): 1) the current from the mid point of
+            the segment to the segment start point, and 2) the current from
+            the segment start point to the mid point of the parent segment.
+        d_vectors : ndarray, dtype=float
+            Shape ((cell.totnsegs-1)*2, 3) array of distance vectors traveled by
+            each axial current in i_axial in units of (µm). The indices of the
+            first axis, correspond to the first axis of i_axial and pos_vectors.
+        pos_vectors : ndarray, dtype=float
+            Shape ((cell.totnsegs-1)*2, 3) array of position vectors pointing to
+            the mid point of each axial current in i_axial in units of (µm). The
+            indices of the first axis, correspond to the first axis
+            of i_axial and d_vectors.
         Raises
         ------
         AttributeError
@@ -2142,11 +2136,9 @@ class Cell(object):
         """
         if not hasattr(self, 'vmem'):
             raise AttributeError('no vmem, run cell.simulate(rec_vmem=True)')
-
-
-        iaxial = np.zeros((self.totnsegs*2, len(self.tvec)))
-        d_list = np.zeros((self.totnsegs*2, 3))
-
+        i_axial = []
+        d_vectors = []
+        pos_vectors = []
         dseg = np.c_[self.xmid - self.xstart,
                      self.ymid - self.ystart,
                      self.zmid - self.zstart]
@@ -2174,25 +2166,45 @@ class Cell(object):
                                                         bottom_seg, branch,
                                                         parentsec)
 
-                tot_parent_idx = int(parent_idx*2 + 1)
-                tot_seg_idx = seg_idx*2
-                d_list[tot_parent_idx] = dpar[parent_idx]
-                d_list[tot_seg_idx] = dseg[seg_idx]
-                iaxial[tot_parent_idx] += ipar
-                iaxial[tot_seg_idx] = iseg
+                if bottom_seg:
+                    # if a seg is connencted to soma, it is
+                    # connected to the middle of soma,
+                    # and dpar needs to be altered.
+                    par_dist = np.array([(self.xstart[seg_idx] -
+                                        self.xmid[parent_idx]),
+                                        (self.ystart[seg_idx] -
+                                        self.ymid[parent_idx]),
+                                        (self.zstart[seg_idx] -
+                                        self.zmid[parent_idx])])
+
+                else:
+                    par_dist = dpar[parent_idx]
+                d_vectors.append(par_dist)
+                d_vectors.append(dseg[seg_idx])
+                i_axial.append(ipar)
+                i_axial.append(iseg)
+
+                pos_par = np.array([self.xstart[seg_idx],
+                                    self.ystart[seg_idx],
+                                    self.zstart[seg_idx]]) - 0.5*par_dist
+
+                pos_seg = np.array([self.xmid[seg_idx],
+                                    self.ymid[seg_idx],
+                                    self.zmid[seg_idx]]) - 0.5*dseg[seg_idx]
+                pos_vectors.append(pos_par)
+                pos_vectors.append(pos_seg)
 
                 parent_idx = seg_idx
                 seg_idx += 1
                 branch = False
                 bottom_seg = False
                 parent_ri = 0
-        return d_list, iaxial
+        return np.array(i_axial), np.array(d_vectors), np.array(pos_vectors)
 
 
     def get_axial_resistance(self):
         """
         Return NEURON axial resistance for all cell compartments.
-
         Returns
         -------
         ri_list : ndarray, dtype=float
@@ -2221,7 +2233,6 @@ class Cell(object):
     def get_dict_of_children_idx(self):
         """
         Return dictionary with children segment indices for all sections.
-
         Returns
         -------
         children_dict : dictionary
@@ -2243,14 +2254,12 @@ class Cell(object):
     def get_dict_parent_connections(self):
         """
         Return dictionary with parent connection point for all sections.
-
         Returns
         -------
         connection_dict : dictionary
             Dictionary containing a float in range [0, 1] for each section
             in cell. The float gives the location on the parent segment
             to which the section is connected to.
-
             The dictionary is needed for computing axial currents.
         """
         connection_dict = {}
@@ -2264,7 +2273,6 @@ class Cell(object):
         """
         Return axial current from segment (seg_idx) mid to segment start,
         and current from parent segment (parent_idx) end to parent segment mid.
-
         Parameters
         ----------
         seg_idx : int
@@ -2276,7 +2284,6 @@ class Cell(object):
         bottom_seg : boolean
         branch : boolean
         parentsec : neuron.Section object
-
         Returns
         -------
         iseg : dtype=float
@@ -2293,38 +2300,35 @@ class Cell(object):
         children_dict = self.get_dict_of_children_idx()
         connection_dict = self.get_dict_parent_connections()
 
-        if not bottom_seg:
+        conn_point = neuron.h.parent_connection()
+        if bottom_seg and conn_point == 1:
+            parent_ri = neuron.h.ri(0)
+            if not branch:
+                ri = parent_ri + seg_ri
+                iseg = (vpar - vseg) / ri
+                ipar = iseg
+            else:
+                [sib_idcs] = np.take(children_dict[parentsec.name()],
+                                  np.where(children_dict[parentsec.name()]
+                                           != seg_idx))
+                sib_idcs = list(sib_idcs)
+
+                if type(sib_idcs) == int or np.int64:
+                    sib_idcs = [sib_idcs]
+                sibs = [self.get_idx_name(np.array(sib_idcs))[0][i][1] for i in range(len(sib_idcs[0]))]
+                v_branch_num = vpar/parent_ri + vseg/seg_ri
+                v_branch_denom = 1./parent_ri + 1./seg_ri
+                for sib_idx, sib in zip(sib_idcs, sibs):
+                    sib_conn_point = connection_dict[sib]
+                    if sib_conn_point == 1:
+
+                        v_branch_num += self.vmem[sib_idx][0]/ri_list[sib_idx]
+                        v_branch_denom += 1./ ri_list[sib_idx]
+                v_branch = v_branch_num/v_branch_denom
+                iseg = (v_branch - vseg)/seg_ri
+                ipar = iseg
+        else:
             iseg = (vpar - vseg) / seg_ri
             ipar = iseg
-        else:
-            conn_point = neuron.h.parent_connection()
-            if conn_point != 1:
-                iseg = (vpar - vseg) / seg_ri
-                ipar = np.zeros(len(vpar))
-            else:
-                parent_ri = neuron.h.ri(0)
-                if not branch:
-                    ri = parent_ri + seg_ri
-                    iseg = (vpar - vseg) / ri
-                    ipar = iseg
-                else:
-                    [sib_idcs] = np.take(children_dict[parentsec.name()],
-                                      np.where(children_dict[parentsec.name()]
-                                               != seg_idx))
-                    sib_idcs = list(sib_idcs)
 
-                    if type(sib_idcs) == int or np.int64:
-                        sib_idcs = [sib_idcs]
-                    sibs = [self.get_idx_name(np.array(sib_idcs))[0][i][1] for i in range(len(sib_idcs[0]))]
-                    v_branch_num = vpar/parent_ri + vseg/seg_ri
-                    v_branch_denom = 1./parent_ri + 1./seg_ri
-                    for sib_idx, sib in zip(sib_idcs, sibs):
-                        sib_conn_point = connection_dict[sib]
-                        if sib_conn_point == 1:
-
-                            v_branch_num += self.vmem[sib_idx][0]/ri_list[sib_idx]
-                            v_branch_denom += 1./ ri_list[sib_idx]
-                    v_branch = v_branch_num/v_branch_denom
-                    iseg = (v_branch - vseg)/seg_ri
-                    ipar = iseg
         return iseg, ipar
