@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+from __future__ import division
 import numpy as np
 cimport numpy as np
 cimport cython
@@ -13,38 +16,35 @@ cdef extern from "math.h":
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
-cpdef np.ndarray[LTYPE_t, ndim=1, negative_indices=False] alias_method(np.ndarray[LTYPE_t, ndim=1, negative_indices=False] idx,
+cpdef np.ndarray[long, ndim=1, negative_indices=False] alias_method(np.ndarray[long, ndim=1, negative_indices=False] idx,
                  np.ndarray[DTYPE_t, ndim=1, negative_indices=False] probs,
                  int nsyn):
-    '''
+    """
     Alias method for drawing random numbers from a discrete probability
     distribution. See http://www.keithschwarz.com/darts-dice-coins/
     
-    Arguments
-    ::
-        
-        idx : np.ndarray
-            compartment indices as array of ints
-        probs : np.ndarray
-            compartment areas as array of floats
-        nsyn : int
-            number of randomized compartment indices
-            
-    
+    Parameters
+    ----------
+    idx : np.ndarray
+        compartment indices as array of ints
+    probs : np.ndarray
+        compartment areas as array of floats
+    nsyn : int
+        number of randomized compartment indices
+
     Returns
-    ::
-        
-        out : np.ndarray
-            integer array of randomly drawn compartment indices
-            
-    '''
+    -------
+    out : np.ndarray
+        integer array of randomly drawn compartment indices
+
+    """
     try:
         assert idx.size == probs.size
     except AssertionError as ae:
-        raise ae, 'length of idx and probs arrays must be equal'
+        raise ae('length of idx and probs arrays must be equal')
     
     #C-declare variables
-    cdef np.ndarray[LTYPE_t, ndim=1, negative_indices=False] J, spc
+    cdef np.ndarray[long, ndim=1, negative_indices=False] J, spc
     cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] q
     cdef np.ndarray[DTYPE_t, ndim=2, negative_indices=False] rands
     cdef int nn, j, ad, K, kk
@@ -73,28 +73,27 @@ cpdef np.ndarray[LTYPE_t, ndim=1, negative_indices=False] alias_method(np.ndarra
 @cython.boundscheck(False)
 @cython.wraparound(False)
 cpdef alias_setup(np.ndarray[DTYPE_t, ndim=1, negative_indices=False] probs):
-    '''
-    Set up function for alias method.
+    """Set up function for alias method.
     See http://www.keithschwarz.com/darts-dice-coins/
     
-    Arguments
-    ::
-        
-        probs : np.ndarray
-            float array of compartment areas
-    
+    Parameters
+    ----------
+    probs : np.ndarray
+        float array of compartment areas
+
     Returns
-    ::
-        
-        J : np.ndarray
-            array of ints
-        q : np.ndarray
-            array of floats
-    '''
+    -------
+    J : np.ndarray
+        array of ints
+    q : np.ndarray
+        array of floats
+
+    """
     #C-declare variables
     cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] q
-    cdef np.ndarray[LTYPE_t, ndim=1, negative_indices=False] J, smaller, larger
-    cdef int K, small, large, kk, s_i, l_i
+    cdef np.ndarray[long, ndim=1, negative_indices=False] J, smaller, larger
+    cdef long K
+    cdef int small, large, kk, s_i, l_i
     cdef DTYPE_t prob
         
     K = probs.size

@@ -1,0 +1,14 @@
+begintemplate stick_template
+public dend         
+public all, basal
+objref all, basal
+proc init() {
+    all = new SectionList()
+    basal = new SectionList()
+}
+
+create dend[1]
+
+endtemplate stick_template
+
+

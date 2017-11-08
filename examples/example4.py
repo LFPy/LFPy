@@ -1,7 +1,20 @@
 #!/usr/bin/env python
-'''
+# -*- coding: utf-8 -*-
+"""
 Example plot for LFPy: Single-synapse contribution to the LFP
-'''
+
+Copyright (C) 2017 Computational Neuroscience Group, NMBU.
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+"""
 import LFPy
 import numpy as np
 import matplotlib.pyplot as plt
@@ -13,18 +26,16 @@ import matplotlib.pyplot as plt
 # Define cell parameters
 cell_parameters = {          # various cell parameters,
     'morphology' : 'morphologies/L5_Mainen96_LFPy.hoc', # Mainen&Sejnowski, 1996
-    'rm' : 30000.,      # membrane resistance
     'cm' : 1.0,         # membrane capacitance
     'Ra' : 150.,        # axial resistance
     'v_init' : -65.,    # initial crossmembrane potential
-    'e_pas' : -65.,     # reversal potential passive mechs
-    'passive' : True,   # switch on passive mechs
-    'nsegs_method' : 'lambda_f',
-    'lambda_f' : 100.,
-    'timeres_NEURON' : 2.**-3,   # [ms] dt's should be in powers of 2 for both,
-    'timeres_python' : 2.**-3,   # need binary representation
-    'tstartms' : 0.,    # start time of simulation, recorders start at t=0
-    'tstopms' : 100.,   # stop simulation at 200 ms. These can be overridden
+    'passive' : True,   # turn on passive mechanism for all sections
+    'passive_parameters' : {'g_pas' : 1./30000, 'e_pas' : -65}, # passive params
+    'nsegs_method' : 'lambda_f', # lambda_f method
+    'lambda_f' : 100.,  # lambda_f critical frequency
+    'dt' : 2.**-3,      # simulation time step size
+    'tstart' : 0.,      # start time of simulation, recorders start at t=0
+    'tstop' : 100.,     # stop simulation at 200 ms. These can be overridden
                         # by setting these arguments in cell.simulation()
 }
 
@@ -63,7 +74,7 @@ electrode = LFPy.RecExtElectrode(**electrode_parameters)
 
 # Run simulation, electrode object argument in cell.simulate
 print("running simulation...")
-cell.simulate(electrode=electrode, rec_isyn=True)
+cell.simulate(electrode=electrode)
 print("done")
 
 #create a plot

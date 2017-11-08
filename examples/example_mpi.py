@@ -1,26 +1,41 @@
 #!/usr/bin/env python
-'''
-################################################################################
-# An LFPy example file showing how cells can be run in parallel using MPI.
-# To run using MPI with 4 cpu cores, issue in terminal
-# openmpirun -np 4 python example_mpi.py
-#
-# The example uses mpi4py with openmpi, and do not rely on NEURON's MPI.
-################################################################################
-'''
+# -*- coding: utf-8 -*-
+"""
+An LFPy example file showing how cells can be run in parallel using MPI.
+To run using MPI with 4 cpu cores, issue in terminal
+openmpirun -np 4 python example_mpi.py
+
+The example uses mpi4py with openmpi, and do not rely on NEURON's MPI
+implementation.
+
+Copyright (C) 2017 Computational Neuroscience Group, NMBU.
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+"""
 
 import os
 from os.path import join
 import numpy as np
+import scipy.stats as st
 import matplotlib.pyplot as plt
 from matplotlib.collections import PolyCollection
 import LFPy
+import neuron
 import sys
 if sys.version < '3':
     from urllib2 import urlopen
 else:    
     from urllib.request import urlopen
 import zipfile
+from warnings import warn
 from mpi4py import MPI
 
 #MPI stuff we're using
@@ -42,17 +57,24 @@ if not os.path.isfile(join('cells', 'cells', 'j4a.hoc')) and RANK == 0:
     myzip.close()
 
 if RANK == 0:
-    #compile mod files
-    os.system('''
-              cd cells
-              nrnivmodl
-              ''')
+    #compile mod files every time, because of incompatibility with Hay2011 files:
+    if "win32" in sys.platform:
+        pth = "cells"
+        warn("no autompile of NMODL (.mod) files on Windows. " 
+             + "Run mknrndll from NEURON bash in the folder cells and rerun example script")
+        if not pth in neuron.nrn_dll_loaded:
+            neuron.h.nrn_load_dll(pth+"/nrnmech.dll")
+        neuron.nrn_dll_loaded.append(pth)
+    else:
+        os.system('''
+                  cd cells
+                  nrnivmodl
+                  ''')
+        neuron.load_mechanisms('cells')
 
     #sync threads
 COMM.Barrier()
     
-#os.system('nrnivmodl')
-LFPy.cell.neuron.load_mechanisms('cells')
 
 #set one global seed, ensure all randomizations are set on RANK 0 in script!
 np.random.seed(12345)
@@ -128,12 +150,12 @@ class Population:
         if RANK == 0:
             RandSpikeTimes = []
             for cellindex in range(self.POPULATION_SIZE):
-                sptimes = LFPy.inputgenerators.stationary_gamma(
-                    self.cellParameters['tstartms'],
-                    self.cellParameters['tstopms'],
-                    tmin=self.cellParameters['tstartms'],
-                    **self.stationaryGammaArgs)
-                RandSpikeTimes.append(sptimes)
+                sptimes = LFPy.inputgenerators.get_activation_times_from_distribution(
+                    n=1, tstart=0, tstop=cellParameters['tstop'],
+                    distribution=st.gamma,
+                    rvs_args = self.stationaryGammaArgs
+                )
+                RandSpikeTimes.append(sptimes[0])
         else:
             RandSpikeTimes = None
         return COMM.bcast(RandSpikeTimes, root=0)
@@ -175,9 +197,9 @@ class Population:
         #Initialize cell instance, using the LFPy.Cell class
         cell = LFPy.Cell(**self.cellParameters)
         #set the position of midpoint in soma
-        cell.set_pos(xpos = self.cellPositions[cellindex, 0],
-                     ypos = self.cellPositions[cellindex, 1],
-                     zpos = self.cellPositions[cellindex, 2])
+        cell.set_pos(x = self.cellPositions[cellindex, 0],
+                     y = self.cellPositions[cellindex, 1],
+                     z = self.cellPositions[cellindex, 2])
         #rotate the morphology
         cell.set_rotation(z = self.cellRotations[cellindex])
         
@@ -202,9 +224,9 @@ class Population:
                         xticks=[], xticklabels=[], yticks=[], yticklabels=[])
             for cellindex in range(self.POPULATION_SIZE):
                 cell = LFPy.Cell(**self.cellParameters)
-                cell.set_pos(xpos = self.cellPositions[cellindex, 0],
-                     ypos = self.cellPositions[cellindex, 1],
-                     zpos = self.cellPositions[cellindex, 2])
+                cell.set_pos(x = self.cellPositions[cellindex, 0],
+                             y = self.cellPositions[cellindex, 1],
+                             z = self.cellPositions[cellindex, 2])
                 cell.set_rotation(z = self.cellRotations[cellindex])
 
                 zips = []
@@ -225,7 +247,7 @@ class Population:
             ax = fig.add_axes([0.5, 0.55, 0.40, 0.4])
             for key, value in list(self.results.items()):
                 tvec = np.arange(value['somav'].size) * \
-                                        self.cellParameters['timeres_python']
+                                        self.cellParameters['dt']
                 ax.plot(tvec, value['somav'],
                         label = 'cell %i' % key)
             leg = ax.legend()
@@ -236,9 +258,9 @@ class Population:
             ax = fig.add_axes([0.5, 0.075, 0.40, 0.4])
             cax = fig.add_axes([0.91, 0.075, 0.02, 0.40])
             im = ax.pcolormesh(tvec, self.electrodeParameters['z'], self.LFP,
-                           cmap='spectral_r',
-                           vmin = -abs(self.LFP).max(),
-                           vmax = abs(self.LFP).max())
+                           cmap='PRGn',
+                           vmin = -self.LFP.std()*3,
+                           vmax = self.LFP.std()*3)
             ax.axis(ax.axis('tight'))
             cbar = plt.colorbar(im, cax=cax)
             cbar.set_label('LFP (mV)')
@@ -247,6 +269,7 @@ class Population:
             ax.set_ylabel('$z$ ($\mu$m)')
             
             fig.savefig('example_mpi.pdf', dpi=300)
+            plt.show()
         
 
 if __name__ == '__main__':
@@ -254,18 +277,16 @@ if __name__ == '__main__':
     #define cell parameters used as input to cell-class
     cellParameters = {
         'morphology' : join('morphologies', 'L5_Mainen96_wAxon_LFPy.hoc'),
-        'rm' : 30000,               # membrane resistance
         'cm' : 1.0,                 # membrane capacitance
         'Ra' : 150,                 # axial resistance
         'v_init' : -65,             # initial crossmembrane potential
-        'e_pas' : -65,              # reversal potential passive mechs
         'passive' : True,           # switch on passive mechs
+        'passive_parameters' : {'g_pas' : 1./30000, 'e_pas' : -65}, # passive params
         'nsegs_method' : 'lambda_f',# method for setting number of segments,
         'lambda_f' : 10,            # segments are isopotential at frequency
-        'timeres_NEURON' : 2**-3,   # dt of LFP and NEURON simulation.
-        'timeres_python' : 2**-3,
-        'tstartms' : -100,          #start time, recorders start at t=0
-        'tstopms' : 200,            #stop time of simulation
+        'dt' : 2**-3,               # dt of LFP and NEURON simulation.
+        'tstart' : -100,          #start time, recorders start at t=0
+        'tstop' : 200,            #stop time of simulation
         'custom_code'  : ['active_declarations_example3.hoc'], #active decl.
     }
     
@@ -282,8 +303,8 @@ if __name__ == '__main__':
     
     #parameter args for LFPy.inputgenerators.stationary_gamma()
     stationaryGammaArgs = {
-        'k' : 0.25,               #shape parameter
-        'theta' : 12,             #"rate" parameter
+        'a' : 0.25,               #shape parameter
+        'scale' : 12,             #"rate" parameter
     }
     
     # Define electrode geometry corresponding to a laminar electrode, where
@@ -322,5 +343,4 @@ if __name__ == '__main__':
                      stationaryGammaArgs,)
     population.run()
     population.plotstuff()
-    plt.show()
-
+    

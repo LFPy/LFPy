@@ -1,0 +1,25 @@
+language: python
+python:
+  - "2.7"
+  - "3.4"
+  - "3.5"
+  - "3.6"
+addons:
+   apt:
+      packages:
+      - liblapack-dev
+      - libopenmpi-dev
+      - openmpi-bin 
+      - libhdf5-serial-dev
+      - gfortran
+install:
+  - travis_wait 30 pip install scipy -q
+  - pip install setuptools cython coveralls h5py mpi4py -q
+  - source continuous_integration/install.sh
+script:
+  - bash continuous_integration/test_script.sh
+after_success:
+  coveralls
+cache:
+  - apt
+  - pip

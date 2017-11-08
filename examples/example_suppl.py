@@ -1,9 +1,29 @@
 #!/usr/bin/env python
-'''some plottin' functions used by the example scripts'''
+# -*- coding: utf-8 -*-
+"""Some plottin' functions used by the example scripts
+
+Copyright (C) 2017 Computational Neuroscience Group, NMBU.
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+"""
+
+from __future__ import division
 import numpy as np
 import matplotlib.pyplot as plt
 import neuron
 
+plt.rcParams.update({
+        'axes.xmargin': 0.0,
+        'axes.ymargin': 0.0,
+    })
 
 def plot_ex1(cell, electrode, X, Y, Z):
     '''
@@ -34,8 +54,8 @@ def plot_ex1(cell, electrode, X, Y, Z):
                 np.r_[cell.zstart[idx], cell.zend[idx][-1]],
                 color='k')
     for i in range(len(cell.synapses)):
-        ax1.plot([cell.synapses[i].x], [cell.synapses[i].z],
-            color=cell.synapses[i].color, marker=cell.synapses[i].marker, 
+        ax1.plot([cell.synapses[i].x], [cell.synapses[i].z], '.',
+            #color=cell.synapses[i].color, marker=cell.synapses[i].marker, 
             markersize=10)
     
     #contour lines
@@ -167,22 +187,24 @@ def plot_ex3(cell, electrode):
     #plot the somatic trace
     ax = fig.add_axes([0.1, 0.7, 0.5, 0.2])
     ax.plot(cell.tvec, cell.somav)
-    ax.set_xlabel('Time [ms]')
-    ax.set_ylabel('Soma pot. [mV]')
+    ax.set_xlabel('Time (ms)')
+    ax.set_ylabel('Soma pot. (mV)')
     
     #plot the synaptic current
     ax = fig.add_axes([0.1, 0.4, 0.5, 0.2])
     for i in range(len(cell.synapses)):
-        ax.plot(cell.tvec, cell.synapses[i].i, color=cell.synapses[i].color)
-    ax.set_xlabel('Time [ms]')
-    ax.set_ylabel('Syn. i [nA]')
+        ax.plot(cell.tvec, cell.synapses[i].i,
+                color='C0' if cell.synapses[i].kwargs['e'] > cell.v_init else 'C1',
+                )
+    ax.set_xlabel('Time (ms)')
+    ax.set_ylabel('Syn. i (nA)')
     
     #plot the LFP as image plot
     ax = fig.add_axes([0.1, 0.1, 0.5, 0.2])
-    absmaxLFP = abs(np.array([electrode.LFP.max(), electrode.LFP.min()])).max()
+    absmaxLFP = electrode.LFP.std()*3 #abs(np.array([electrode.LFP.max(), electrode.LFP.min()])).max()
     im = ax.pcolormesh(cell.tvec, electrode.z, electrode.LFP,
                   vmax=absmaxLFP, vmin=-absmaxLFP,
-           cmap='spectral_r')
+           cmap='PRGn')
     
     rect = np.array(ax.get_position().bounds)
     rect[0] += rect[2] + 0.01
@@ -191,8 +213,8 @@ def plot_ex3(cell, electrode):
     cbar = plt.colorbar(im, cax=cax)
     cbar.set_label('LFP (mV)')
     ax.axis(ax.axis('tight'))
-    ax.set_xlabel('Time [ms]')
-    ax.set_ylabel('z [$\mu$m]')
+    ax.set_xlabel('Time (ms)')
+    ax.set_ylabel('z ($\mu$m)')
     
     #plot the morphology, electrode contacts and synapses
     ax = fig.add_axes([0.65, 0.1, 0.25, 0.8], frameon=False)
@@ -202,12 +224,12 @@ def plot_ex3(cell, electrode):
                 np.r_[cell.zstart[idx], cell.zend[idx][-1]],
                 color='k')
     for i in range(len(cell.synapses)):
-        ax.plot([cell.synapses[i].x], [cell.synapses[i].z], \
-            color=cell.synapses[i].color, marker=cell.synapses[i].marker)
+        ax.plot([cell.synapses[i].x], [cell.synapses[i].z], marker='.',
+            color='C0' if cell.synapses[i].kwargs['e'] > cell.v_init else 'C1',
+        )
     for i in range(electrode.x.size):
-        ax.plot(electrode.x[i], electrode.z[i], color='g', marker='o')
-    plt.axis('equal')
-    plt.axis(np.array(plt.axis())*0.8)
+        ax.plot(electrode.x[i], electrode.z[i], color='C2', marker='o')
+    # plt.axis(np.array(plt.axis())*0.8)
     ax.set_xticks([])
     ax.set_yticks([])
     

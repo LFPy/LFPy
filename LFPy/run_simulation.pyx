@@ -1,5 +1,6 @@
 #!/usr/bin/env python
-'''Copyright (C) 2012 Computational Neuroscience Group, NMBU.
+# -*- coding: utf-8 -*-
+"""Copyright (C) 2012 Computational Neuroscience Group, NMBU.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -9,35 +10,36 @@ the Free Software Foundation, either version 3 of the License, or
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.'''
+GNU General Public License for more details.
 
+"""
+
+from __future__ import division
+from time import time
 import numpy as np
 cimport numpy as np
 import neuron
-from time import time
 
 DTYPE = np.float64
 ctypedef np.float64_t DTYPE_t
 ctypedef Py_ssize_t   LTYPE_t
 
 
-def _run_simulation(cell, variable_dt=False, atol=0.001):
-    '''
+def _run_simulation(cell, cvode, variable_dt=False, atol=0.001):
+    """
     Running the actual simulation in NEURON, simulations in NEURON
     is now interruptable.
-    '''
-    neuron.h.dt = cell.timeres_NEURON
-    
-    cvode = neuron.h.CVode()
-    
-    #don't know if this is the way to do, but needed for variable dt method
+    """
+    neuron.h.dt = cell.dt
+
+    # variable dt method
     if variable_dt:
         cvode.active(1)
         cvode.atol(atol)
     else:
         cvode.active(0)
     
-    #initialize state
+    #re-initialize state
     neuron.h.finitialize(cell.v_init)
     
     #initialize current- and record
@@ -48,27 +50,27 @@ def _run_simulation(cell, variable_dt=False, atol=0.001):
     neuron.h.frecord_init()
     
     #Starting simulation at t != 0
-    neuron.h.t = cell.tstartms
+    neuron.h.t = cell.tstart
     
     cell._loadspikes()
         
     #print sim.time at intervals
     cdef int counter = 0
     cdef double interval
-    cdef double tstopms = cell.tstopms
+    cdef double tstop = cell.tstop
     cdef double t0 = time()
     cdef double ti = neuron.h.t
     cdef double rtfactor
-    if tstopms > 10000:
-        interval = 1 / cell.timeres_NEURON * 1000
+    if tstop >= 10000:
+        interval = 1000. / cell.dt
     else:
-        interval = 1 / cell.timeres_NEURON * 100
+        interval = 100. / cell.dt
     
-    while neuron.h.t < tstopms:
+    while neuron.h.t < tstop:
         neuron.h.fadvance()
         counter += 1
-        if divmod(counter, interval)[1] == 0:
-            rtfactor = (neuron.h.t - ti)  * 1E-3 / (time() - t0)
+        if counter % interval == 0:
+            rtfactor = (neuron.h.t - ti)  * 1E-3 / (time() - t0 + 1E-9)
             if cell.verbose:
                 print('t = {:.0f}, realtime factor: {:.3f}'.format(neuron.h.t,
                                                                    rtfactor))
@@ -76,33 +78,31 @@ def _run_simulation(cell, variable_dt=False, atol=0.001):
             ti = neuron.h.t
 
 
-def _run_simulation_with_electrode(cell, electrode=None,
+def _run_simulation_with_electrode(cell, cvode, electrode=None,
                                    variable_dt=False, atol=0.001,
                                    to_memory=True, to_file=False,
-                                   file_name=None, dotprodcoeffs=None):
-    '''
+                                   file_name=None, dotprodcoeffs=None,
+                                   rec_current_dipole_moment=False):
+    """
     Running the actual simulation in NEURON.
     electrode argument used to determine coefficient
     matrix, and calculate the LFP on every time step.
-    '''
+    """
     
     #c-declare some variables
-    cdef int i, j, tstep, ncoeffs
-    cdef int totnsegs = cell.totnsegs
-    cdef double tstopms = cell.tstopms
+    cdef int i, j, tstep#, ncoeffs
+    #cdef int totnsegs = cell.totnsegs
+    cdef double tstop = cell.tstop
     cdef int counter
-    cdef int lendotrodcoeffs0
+    cdef int lendotprodcoeffs0
     cdef double interval
     cdef double t0
     cdef double ti
     cdef double rtfactor
-    cdef double timeres_NEURON = cell.timeres_NEURON
-    cdef double timeres_python = cell.timeres_python
+    cdef double dt = cell.dt
     cdef np.ndarray[DTYPE_t, ndim=2, negative_indices=False] coeffs
-    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] imem = \
-        np.empty(totnsegs)
-    cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] area = \
-        cell.area.copy()
+    cdef np.ndarray[DTYPE_t, ndim=2, negative_indices=False] current_dipole_moment
+    cdef np.ndarray[DTYPE_t, ndim=2, negative_indices=False] midpoints
     
     #check if h5py exist and saving is possible
     try:
@@ -128,9 +128,9 @@ def _run_simulation_with_electrode(cell, electrode=None,
         dotprodcoeffs = []
     
     #just for safekeeping
-    lendotrodcoeffs0 = len(dotprodcoeffs)
+    lendotprodcoeffs0 = len(dotprodcoeffs)
      
-    #access electrode object and append dotprodcoeffs        
+    #access electrode object and append mapping        
     if electrode is not None:
         #put electrode argument in list if needed
         if type(electrode) == list:
@@ -138,77 +138,28 @@ def _run_simulation_with_electrode(cell, electrode=None,
         else:
             electrodes = [electrode]
         
-        #calculate list of dotprodcoeffs, will try temp storage of
-        #imem, tvec, LFP
-        cellTvec = cell.tvec
-        try:
-            cellImem = cell.imem.copy()
-        except:
-            pass
-        
-        cell.imem = np.eye(totnsegs)
-        cell.tvec = np.arange(totnsegs) * timeres_python
-        electrodeLFP = []   #list of electrode.LFP objects if they exist
-        restoreLFP = False
-        restoreCellLFP = False
-        ncoeffs = 0
         for el in electrodes:
-            if hasattr(el, 'LFP'):
-                LFPcopy = el.LFP
-                del el.LFP
-                restoreLFP = True
-            if hasattr(el, 'CellLFP'):
-                CellLFP = el.CellLFP
-                restoreCellLFP = True
-            el.calc_lfp(cell=cell)
-            dotprodcoeffs.append(el.LFP.copy())
-            if restoreLFP:
-                del el.LFP
-                el.LFP = LFPcopy
-            else:
-                del el.LFP
-            if restoreCellLFP:
-                el.CellLFP = CellLFP
-            else:
-                if hasattr(el, 'CellLFP'):
-                    del el.CellLFP
-            ncoeffs += 1
-        
-        #putting back variables
-        cell.tvec = cellTvec        
-        try:
-            cell.imem = cellImem
-        except:
-            del cell.imem
+            el.calc_mapping(cell)
+            dotprodcoeffs.append(el.mapping)
     elif electrode is None:
         electrodes = None
 
     
     # Initialize NEURON simulations of cell object    
-    neuron.h.dt = timeres_NEURON
-    
-    #integrator
-    cvode = neuron.h.CVode()
-    
+    neuron.h.dt = dt
+        
     #don't know if this is the way to do, but needed for variable dt method
-    if variable_dt:
+    if cell.dt <= 1E-8:
         cvode.active(1)
         cvode.atol(atol)
-    else:
-        cvode.active(0)
     
-    #initialize state
+    #re-initialize state
     neuron.h.finitialize(cell.v_init)
-    
-    #initialize current- and record
-    if cvode.active():
-        cvode.re_init()
-    else:
-        neuron.h.fcurrent()
-    neuron.h.frecord_init()
+    neuron.h.frecord_init() # wrong voltages t=0 for tstart < 0 otherwise
+    neuron.h.fcurrent()
     
     #Starting simulation at t != 0
-    neuron.h.t = cell.tstartms
+    neuron.h.t = cell.tstart
     
     #load spike times from NetCon
     cell._loadspikes()
@@ -218,19 +169,19 @@ def _run_simulation_with_electrode(cell, electrode=None,
     tstep = 0
     t0 = time()
     ti = neuron.h.t
-    if tstopms > 10000:
-        interval = 1. / timeres_NEURON * 1000
+    if tstop >= 10000:
+        interval = 1000. / dt
     else:
-        interval = 1. / timeres_NEURON * 100
+        interval = 100. / dt
         
     #temp vector to store membrane currents at each timestep
-    imem = np.empty(cell.totnsegs)
+    imem = np.zeros(cell.totnsegs)
     #LFPs for each electrode will be put here during simulation
     if to_memory:
         electrodesLFP = []
         for coeffs in dotprodcoeffs:
-            electrodesLFP.append(np.empty((coeffs.shape[0],
-                                    int(tstopms / timeres_NEURON + 1))))
+            electrodesLFP.append(np.zeros((coeffs.shape[0],
+                                    int(tstop / dt + 1))))
     #LFPs for each electrode will be put here during simulations
     if to_file:
         #ensure right ending:
@@ -239,24 +190,28 @@ def _run_simulation_with_electrode(cell, electrode=None,
         el_LFP_file = h5py.File(file_name, 'w')
         i = 0
         for coeffs in dotprodcoeffs:
-            el_LFP_file['electrode{:03d}'.format(i)] = np.empty((coeffs.shape[0],
-                                            int(tstopms / timeres_NEURON + 1)))
+            el_LFP_file['electrode{:03d}'.format(i)] = np.zeros((coeffs.shape[0],
+                                            int(tstop / dt + 1)))
             i += 1
 
-
-    #multiply segment areas with specific membrane currents later:
-    #mum2 conversion factor:
-    area *= 1E-2    
+    # create a 2D array representation of segment midpoints for dot product
+    # with transmembrane currents when computing dipole moment
+    if rec_current_dipole_moment:
+        current_dipole_moment = cell.current_dipole_moment.copy()
+        cell.current_dipole_moment = np.array([[]])
+        midpoints = np.c_[cell.xmid, cell.ymid, cell.zmid]
+        
     #run fadvance until time limit, and calculate LFPs for each timestep
-    while neuron.h.t < tstopms:
+    while neuron.h.t < tstop:
         if neuron.h.t >= 0:
             i = 0
             for sec in cell.allseclist:
                 for seg in sec:
-                    imem[i] = seg.i_membrane
+                    imem[i] = seg.i_membrane_
                     i += 1
-            #pA/mum2 -> nA conversion
-            imem *= area
+
+            if rec_current_dipole_moment:
+                current_dipole_moment[tstep, ] = np.dot(imem, midpoints)
 
             if to_memory:
                 for j, coeffs in enumerate(dotprodcoeffs):
@@ -266,7 +221,7 @@ def _run_simulation_with_electrode(cell, electrode=None,
                 for j, coeffs in enumerate(dotprodcoeffs):
                     el_LFP_file['electrode{:03d}'.format(j)
                                 ][:, tstep] = np.dot(coeffs, imem)
-            
+
             tstep += 1
         neuron.h.fadvance()
         counter += 1
@@ -283,15 +238,15 @@ def _run_simulation_with_electrode(cell, electrode=None,
         i = 0
         for sec in cell.allseclist:
             for seg in sec:
-                imem[i] = seg.i_membrane
+                imem[i] = seg.i_membrane_
                 i += 1
-        #pA/mum2 -> nA conversion
-        imem *= area
+
+        if rec_current_dipole_moment:
+            current_dipole_moment[tstep, ] = np.dot(imem, midpoints)
 
         if to_memory:
             for j, coeffs in enumerate(dotprodcoeffs):
                 electrodesLFP[j][:, tstep] = np.dot(coeffs, imem)
-                #j += 1
         if to_file:
             for j, coeffs in enumerate(dotprodcoeffs):
                 el_LFP_file['electrode{:03d}'.format(j)
@@ -300,33 +255,37 @@ def _run_simulation_with_electrode(cell, electrode=None,
     except:
         pass
     
+    # update current dipole moment values
+    if rec_current_dipole_moment:
+        cell.current_dipole_moment = current_dipole_moment
+    
     # Final step, put LFPs in the electrode object, superimpose if necessary
     # If electrode.perCellLFP, store individual LFPs
     if to_memory:
         #the first few belong to input dotprodcoeffs
-        cell.dotprodresults = electrodesLFP[:lendotrodcoeffs0]
+        cell.dotprodresults = electrodesLFP[:lendotprodcoeffs0]
         #the remaining belong to input electrode arguments
         if electrodes is not None:
             for j, LFP in enumerate(electrodesLFP):
-                if not j < lendotrodcoeffs0:
-                    if hasattr(electrodes[j-lendotrodcoeffs0], 'LFP'):
-                        electrodes[j-lendotrodcoeffs0].LFP += LFP
+                if not j < lendotprodcoeffs0:
+                    if hasattr(electrodes[j-lendotprodcoeffs0], 'LFP'):
+                        electrodes[j-lendotprodcoeffs0].LFP += LFP
                     else:
-                        electrodes[j-lendotrodcoeffs0].LFP = LFP
+                        electrodes[j-lendotprodcoeffs0].LFP = LFP
                     #will save each cell contribution separately
-                    if electrodes[j-lendotrodcoeffs0].perCellLFP:
+                    if electrodes[j-lendotprodcoeffs0].perCellLFP:
                         if not hasattr(electrodes[j], 'CellLFP'):
-                            electrodes[j-lendotrodcoeffs0].CellLFP = []
-                        electrodes[j-lendotrodcoeffs0].CellLFP.append(LFP)
-                    electrodes[j-lendotrodcoeffs0].electrodecoeff = dotprodcoeffs[j]
+                            electrodes[j-lendotprodcoeffs0].CellLFP = []
+                        electrodes[j-lendotprodcoeffs0].CellLFP.append(LFP)
+                    electrodes[j-lendotprodcoeffs0].electrodecoeff = dotprodcoeffs[j]
     
     if to_file:
         el_LFP_file.close()
 
 
 cpdef _collect_geometry_neuron(cell):
-    '''Loop over allseclist to determine area, diam, xyz-start- and
-    endpoints, embed geometry to cell object'''
+    """Loop over allseclist to determine area, diam, xyz-start- and
+    endpoints, embed geometry to cell object"""
     
     
     cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] areavec = np.zeros(cell.totnsegs)

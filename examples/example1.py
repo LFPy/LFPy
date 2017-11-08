@@ -1,7 +1,20 @@
 #!/usr/bin/env python
-'''
+# -*- coding: utf-8 -*-
+"""
 Example plot for LFPy: Single-synapse contribution to the LFP
-'''
+
+Copyright (C) 2017 Computational Neuroscience Group, NMBU.
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+"""
 import LFPy
 import numpy as np
 import os
@@ -10,19 +23,19 @@ if sys.version < '3':
     from urllib2 import urlopen
 else:    
     from urllib.request import urlopen
+import ssl
 import zipfile
 import matplotlib.pyplot as plt
 from matplotlib.collections import PolyCollection
 from os.path import join
-plt.interactive(1)
-plt.close('all')
 
 
 #Fetch Mainen&Sejnowski 1996 model files
 if not os.path.isfile(join('cells', 'cells', 'j4a.hoc')):
     #get the model files:
-    u = urlopen('http://senselab.med.yale.edu/ModelDB/eavBinDown.asp?o=2488&a=23&mime=application/zip')
-    localFile = open('patdemo.zip', 'w')
+    u = urlopen('http://senselab.med.yale.edu/ModelDB/eavBinDown.asp?o=2488&a=23&mime=application/zip',
+                context=ssl._create_unverified_context())
+    localFile = open('patdemo.zip', 'wb')
     localFile.write(u.read())
     localFile.close()
     #unzip:
@@ -37,21 +50,18 @@ if not os.path.isfile(join('cells', 'cells', 'j4a.hoc')):
 ################################################################################
 
 # Define cell parameters
-cell_parameters = {          # various cell parameters,
-    'morphology' : join('cells', 'cells', 'j4a.hoc'), # Mainen&Sejnowski, 1996
-    'rm' : 30000.,      # membrane resistance
+cell_parameters = {
+    'morphology' : join('cells', 'cells', 'j4a.hoc'), # from Mainen & Sejnowski, J Comput Neurosci, 1996
     'cm' : 1.0,         # membrane capacitance
-    'Ra' : 150,        # axial resistance
+    'Ra' : 150.,        # axial resistance
     'v_init' : -65.,    # initial crossmembrane potential
-    'e_pas' : -65.,     # reversal potential passive mechs
-    'passive' : True,   # switch on passive mechs
-    'nsegs_method' : 'lambda_f',
-    'lambda_f' : 100.,
-    'timeres_NEURON' : 2.**-3,   # [ms] dt's should be in powers of 2 for both,
-    'timeres_python' : 2.**-3,   # need binary representation
-    'tstartms' : 0.,    # start time of simulation, recorders start at t=0
-    'tstopms' : 100.,   # stop simulation at 200 ms. These can be overridden
-                        # by setting these arguments i cell.simulation()
+    'passive' : True,   # turn on NEURONs passive mechanism for all sections
+    'passive_parameters' : {'g_pas' : 1./30000, 'e_pas' : -65},
+    'nsegs_method' : 'lambda_f', # spatial discretization method
+    'lambda_f' : 100.,           # frequency where length constants are computed
+    'dt' : 2.**-3,      # simulation time step size
+    'tstart' : 0.,      # start time of simulation, recorders start at t=0
+    'tstop' : 100.,     # stop simulation at 100 ms.
 }
 
 # Create cell
@@ -99,7 +109,7 @@ point_electrode_parameters = {
 
 # Run simulation, electrode object argument in cell.simulate
 print("running simulation...")
-cell.simulate(rec_imem=True,rec_isyn=True)
+cell.simulate(rec_imem=True)
 
 # Create electrode objects
 grid_electrode = LFPy.RecExtElectrode(cell,**grid_electrode_parameters)
@@ -200,3 +210,4 @@ ax.set_xticklabels([])
 # fig = plot_ex1(cell, electrode, X, Y, Z)
 # Optionally save figure (uncomment the line below)
 plt.savefig('example1.pdf', dpi=300)
+plt.show()

@@ -1,35 +1,33 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 from __future__ import division
 import numpy as np
 
 
 def alias_method(idx, probs, nsyn):
-    '''
+    """
     Alias method for drawing random numbers from a discrete probability
     distribution. See http://www.keithschwarz.com/darts-dice-coins/
     
-    Arguments
-    ::
-        
-        idx : np.ndarray
-            compartment indices as array of ints
-        probs : np.ndarray
-            compartment areas as array of floats
-        nsyn : int
-            number of randomized compartment indices
-            
-    
+    Parameters
+    ----------
+    idx : np.ndarray
+        compartment indices as array of ints
+    probs : np.ndarray
+        compartment areas as array of floats
+    nsyn : int
+        number of randomized compartment indices
+
     Returns
-    ::
-        
-        out : np.ndarray
-            integer array of randomly drawn compartment indices
-            
-    '''
+    -------
+    out : np.ndarray
+        integer array of randomly drawn compartment indices
+
+    """
     try:
         assert idx.size == probs.size
     except AssertionError as ae:
-        raise ae, 'length of idx and probs arrays must be equal'
+        raise ae('length of idx and probs arrays must be equal')
 
     # Construct the table.
     J, q = alias_setup(probs)
@@ -43,7 +41,7 @@ def alias_method(idx, probs, nsyn):
     K = J.size 
     # Generate variates using alias draw method
     for nn in range(nsyn):
-        kk = np.floor(rands[nn, 0]*K)
+        kk = np.floor(rands[nn, 0]*K).astype(int)
         if rands[nn, 1] < q[kk]:
             spc[nn] = idx[kk]
         else:
@@ -53,24 +51,22 @@ def alias_method(idx, probs, nsyn):
 
 
 def alias_setup(probs):
-    '''
-    Set up function for alias method.
+    """Set up function for alias method.
     See http://www.keithschwarz.com/darts-dice-coins/
     
-    Arguments
-    ::
-        
-        probs : np.ndarray
-            float array of compartment areas
-    
+    Parameters
+    ----------
+    probs : np.ndarray
+        float array of compartment areas
+
     Returns
-    ::
-        
-        J : np.ndarray
-            array of ints
-        q : np.ndarray
-            array of floats
-    '''        
+    -------
+    J : np.ndarray
+        array of ints
+    q : np.ndarray
+        array of floats
+
+    """        
     K = probs.size
     q = probs*K
     J = np.zeros(K, dtype=int)

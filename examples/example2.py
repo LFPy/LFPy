@@ -1,25 +1,43 @@
 #!/usr/bin/env python
-'''Run Hay et al. (2011), generating and plotting a single action potential'''
+# -*- coding: utf-8 -*-
+"""
+Run Hay et al. (2011) layer 5b pyramidal cell model, generating and plotting a
+single action potential and corresponding extracellular potentials (spikes)
+
+Copyright (C) 2017 Computational Neuroscience Group, NMBU.
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+"""
 import numpy as np
 import sys
 if sys.version < '3':
     from urllib2 import urlopen
 else:    
     from urllib.request import urlopen
+import ssl
+from warnings import warn
 import zipfile
 import os
 import matplotlib.pyplot as plt
 from matplotlib.collections import LineCollection
 import LFPy
+import neuron
 
-plt.interactive(1)
-plt.close('all')
 
 #Fetch Hay et al. 2011 model files
 if not os.path.isfile('L5bPCmodelsEH/morphologies/cell1.asc'):
     #get the model files:
-    u = urlopen('http://senselab.med.yale.edu/ModelDB/eavBinDown.asp?o=139653&a=23&mime=application/zip')
-    localFile = open('L5bPCmodelsEH.zip', 'w')
+    u = urlopen('http://senselab.med.yale.edu/ModelDB/eavBinDown.asp?o=139653&a=23&mime=application/zip',
+                context=ssl._create_unverified_context())
+    localFile = open('L5bPCmodelsEH.zip', 'wb')
     localFile.write(u.read())
     localFile.close()
     #unzip:
@@ -28,12 +46,19 @@ if not os.path.isfile('L5bPCmodelsEH/morphologies/cell1.asc'):
     myzip.close()
 
 #compile mod files every time, because of incompatibility with Mainen96 files:
-os.system('''
-          cd L5bPCmodelsEH/mod/
-          nrnivmodl
-          ''')
-#os.system('nrnivmodl')
-LFPy.cell.neuron.load_mechanisms('L5bPCmodelsEH/mod/')
+if "win32" in sys.platform:
+    pth = "L5bPCmodelsEH/mod/"
+    warn("no autompile of NMODL (.mod) files on Windows.\n" 
+         + "Run mknrndll from NEURON bash in the folder L5bPCmodelsEH/mod and rerun example script")
+    if not pth in neuron.nrn_dll_loaded:
+        neuron.h.nrn_load_dll(pth+"nrnmech.dll")
+    neuron.nrn_dll_loaded.append(pth)
+else:
+    os.system('''
+              cd L5bPCmodelsEH/mod/
+              nrnivmodl
+              ''')
+    neuron.load_mechanisms('L5bPCmodelsEH/mod/')
 
     
 
@@ -50,10 +75,9 @@ cellParameters = {
     'templateargs'  : 'L5bPCmodelsEH/morphologies/cell1.asc',
     'passive' : False,
     'nsegs_method' : None,
-    'timeres_NEURON' : 2**-6,
-    'timeres_python' : 2**-6,
-    'tstartms' : -159,
-    'tstopms' : 10,
+    'dt' : 2**-6,
+    'tstart' : -159,
+    'tstop' : 10,
     'v_init' : -60,
     'celsius': 34,
     'pt3d' : True,
@@ -67,7 +91,7 @@ electrodeParameters = {
     'x' : X.flatten(),      # x,y,z-coordinates of contacts
     'y' : Y.flatten(),
     'z' : Z.flatten(),
-    'method' : 'som_as_point',  #sphere source soma segment
+    'method' : 'soma_as_point',  #sphere source soma segment
     'N' : np.array([[0, 1, 0]]*X.size), #surface normals
     'r' : 2.5,              # contact site radius
     'n' : 20,               # datapoints for averaging
@@ -199,7 +223,7 @@ def plotstuff(cell, electrode):
     
     ax2.set_title('somatic potential', va='center')
 
-    ax2.text(-0.2, 1.0, 'b',
+    ax2.text(-0.3, 1.0, 'b',
         horizontalalignment='center',
         verticalalignment='center',
         fontsize=16, fontweight='demibold',
@@ -232,7 +256,7 @@ def plotstuff(cell, electrode):
                    
     ax3.set_title('extracellular spike', va='center')
 
-    ax3.text(-0.2, 1.0, 'c',
+    ax3.text(-0.3, 1.0, 'c',
         horizontalalignment='center',
         verticalalignment='center',
         fontsize=16, fontweight='demibold',
@@ -244,5 +268,4 @@ def plotstuff(cell, electrode):
 #Plotting of simulation results:
 fig = plotstuff(cell, electrode)
 fig.savefig('example2.pdf', dpi=300)
-
 plt.show()

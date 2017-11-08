@@ -1,4 +1,3 @@
-==================
 Module :mod:`LFPy`
 ==================
 .. automodule:: LFPy
@@ -20,10 +19,18 @@ Module :mod:`LFPy`
         :show-inheritance:
         :undoc-members:
     
+    class :class:`NetworkCell`
+    ===========================
+    .. autoclass:: NetworkCell
+        :members:
+        :show-inheritance:
+        :undoc-members:
+
     class :class:`PointProcess`
     ===========================
     .. autoclass:: PointProcess
         :members:
+        :show-inheritance:
         :undoc-members:
 
     class :class:`Synapse`
@@ -40,12 +47,6 @@ Module :mod:`LFPy`
         :show-inheritance:
         :undoc-members:
 
-    class :class:`RecExtElectrodeSetup`
-    ===================================
-    .. autoclass:: RecExtElectrodeSetup
-        :members:
-        :undoc-members:
-
     class :class:`RecExtElectrode`
     ==============================
     .. autoclass:: RecExtElectrode
@@ -53,6 +54,44 @@ Module :mod:`LFPy`
         :show-inheritance:
         :undoc-members:
 
+    class :class:`Network`
+    ======================
+    .. autoclass:: Network
+        :members:
+        :show-inheritance:
+        :undoc-members:
+
+    class :class:`NetworkPopulation`
+    ================================
+    .. autoclass:: NetworkPopulation
+        :members:
+        :show-inheritance:
+        :undoc-members:
+
+    class :class:`InfiniteVolumeConductor`
+    ======================================
+    .. autoclass:: InfiniteVolumeConductor
+        :members:
+        :show-inheritance:
+        :undoc-members:
+
+    class :class:`FourSphereVolumeConductor`
+    ========================================
+    .. autoclass:: FourSphereVolumeConductor
+        :members:
+        :show-inheritance:
+        :undoc-members:
+
+    class :class:`MEG`
+    ==================
+    .. autoclass:: MEG
+        :members:
+        :show-inheritance:
+        :undoc-members:
+
+    submodule :mod:`eegmegcalc`
+    ===========================
+    .. autofunction:: get_current_dipole_moment
 
     submodule :mod:`lfpcalc`
     ========================
@@ -77,3 +116,4 @@ Module :mod:`LFPy`
     .. automodule:: LFPy.run_simulation
         :members:
         :undoc-members:
+
