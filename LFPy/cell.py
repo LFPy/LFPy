@@ -752,7 +752,7 @@ class Cell(object):
         self.ymid = .5*(self.ystart+self.yend).flatten()
         self.zmid = .5*(self.zstart+self.zend).flatten()
 
-    def get_idx(self, section='allsec', z_min=-10000, z_max=10000):
+    def get_idx(self, section='allsec', z_min=-np.inf, z_max=np.inf):
         """Returns compartment idx of segments from sections with names that match
         the pattern defined in input section on interval [z_min, z_max].
 
