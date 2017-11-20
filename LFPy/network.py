@@ -878,7 +878,7 @@ class Network(object):
         OUTPUT : list of ndarray
             if parameters electrode is not None and/or dotprodcoeffs is not
             None, contains the
-            [electrode.LFP, (dotprodcoeffs[0] dot I)(t), ...]
+            [electrode.LFP, ...., (dotprodcoeffs[0] dot I)(t), ...]
             The first output is a structured array, so OUTPUT[0]['imem']
             corresponds to the total LFP and the other the per-population
             contributions.
@@ -1201,7 +1201,7 @@ def _run_simulation_with_electrode(network, cvode,
     Returns
     -------
     RESULTS : list
-        ordered according to [electrode, ... dotprodcoeffs, ...], each element
+        ordered according to [dotprodcoeffs, ..., electrode, ...], each element
         being the superimposed contribution to i.e., the extracellular potential
         at each timestep from all cell objects on this particular RANK.
         Thus, no single-cell contributions to the LFP
@@ -1257,7 +1257,7 @@ def _run_simulation_with_electrode(network, cvode,
         for el in electrodes:
             # el.calc_lfp(cell=network_dummycell)
             el.calc_mapping(cell=network_dummycell)
-            dotprodcoeffs = [el.mapping] + dotprodcoeffs
+            dotprodcoeffs += [el.mapping]
             # del el.LFP
             del el.mapping
 
@@ -1411,14 +1411,15 @@ def _run_simulation_with_electrode(network, cvode,
                     if use_isyn:
                         RESULTS[j]['isyn_e'][:, tstep] = np.dot(coeffs, imem['isyn_e'])
                         RESULTS[j]['isyn_i'][:, tstep] = np.dot(coeffs, imem['isyn_i'])
-
+                
                 if rec_pop_contributions:
-                    k = 0 # counter
-                    for nsegs, name in zip(population_nsegs, network.population_names):
-                        cellinds = np.arange(k, k+nsegs)
-                        RESULTS[j][name][:, tstep] = np.dot(coeffs[:, cellinds],
-                                                            imem['imem'][cellinds, ])
-                        k += nsegs
+                    for j, coeffs in enumerate(dotprodcoeffs):
+                        k = 0 # counter
+                        for nsegs, name in zip(population_nsegs, network.population_names):
+                            cellinds = np.arange(k, k+nsegs)
+                            RESULTS[j][name][:, tstep] = np.dot(coeffs[:, cellinds],
+                                                                imem['imem'][cellinds, ])
+                            k += nsegs
 
             if to_file:
                 for j, coeffs in enumerate(dotprodcoeffs):
@@ -1437,12 +1438,13 @@ def _run_simulation_with_electrode(network, cvode,
                                    ]['isyn_i'][:, tstep] = np.dot(coeffs, imem['isyn_i'])
 
                 if rec_pop_contributions:
-                    k = 0 # counter
-                    for nsegs, name in zip(population_nsegs, network.population_names):
-                        cellinds = np.arange(k, k+nsegs)
-                        outputfile['OUTPUT[{}]'.format(j)
-                                   ][name][:, tstep] = np.dot(coeffs[:, cellinds], imem['imem'][cellinds, ])
-                        k += nsegs
+                    for j, coeffs in enumerate(dotprodcoeffs):
+                        k = 0 # counter
+                        for nsegs, name in zip(population_nsegs, network.population_names):
+                            cellinds = np.arange(k, k+nsegs)
+                            outputfile['OUTPUT[{}]'.format(j)
+                                       ][name][:, tstep] = np.dot(coeffs[:, cellinds], imem['imem'][cellinds, ])
+                            k += nsegs
                         
             tstep += 1
         neuron.h.fadvance()
@@ -1496,11 +1498,12 @@ def _run_simulation_with_electrode(network, cvode,
                     RESULTS[j]['isyn_i'][:, tstep] = np.dot(coeffs, imem['isyn_i'])
 
             if rec_pop_contributions:
-                k = 0 # counter
-                for nsegs, name in zip(population_nsegs, network.population_names):
-                    cellinds = np.arange(k, k+nsegs)
-                    RESULTS[j][name][:, tstep] = np.dot(coeffs[:, cellinds], imem['imem'][cellinds, ])
-                    k += nsegs
+                for j, coeffs in enumerate(dotprodcoeffs):
+                    k = 0 # counter
+                    for nsegs, name in zip(population_nsegs, network.population_names):
+                        cellinds = np.arange(k, k+nsegs)
+                        RESULTS[j][name][:, tstep] = np.dot(coeffs[:, cellinds], imem['imem'][cellinds, ])
+                        k += nsegs
 
 
         if to_file:
@@ -1520,13 +1523,14 @@ def _run_simulation_with_electrode(network, cvode,
                                ]['isyn_i'][:, tstep] = np.dot(coeffs, imem['isyn_i'])
 
             if rec_pop_contributions:
-                k = 0 # counter
-                for nsegs, name in zip(population_nsegs, network.population_names):
-                    cellinds = np.arange(k, k+nsegs)
-                    outputfile['OUTPUT[{}]'.format(j)
-                               ][name][:, tstep] = np.dot(coeffs[:, cellinds],
-                                                          imem['imem'][cellinds, ])
-                    k += nsegs
+                for j, coeffs in enumerate(dotprodcoeffs):
+                    k = 0 # counter
+                    for nsegs, name in zip(population_nsegs, network.population_names):
+                        cellinds = np.arange(k, k+nsegs)
+                        outputfile['OUTPUT[{}]'.format(j)
+                                   ][name][:, tstep] = np.dot(coeffs[:, cellinds],
+                                                              imem['imem'][cellinds, ])
+                        k += nsegs
 
     except IndexError:
         pass
