@@ -1251,12 +1251,8 @@ class MEG(object):
             of the magnetic field :math:`\mathbf{H}` in units of (nA/µm)
         """
         i_axial, d_vectors, pos_vectors = cell.get_axial_currents_from_vmem()
-        # d_list, iaxial = cell.get_axial_currents_from_vmem()
-
         R = self.sensor_locations
         H = np.zeros((R.shape[0], cell.tvec.size, 3))
-
-        # r_seg = np.c_[cell.xmid, cell.ymid, cell.zmid]
 
         for i, R_ in enumerate(R):
             for i_, d_, r_ in zip(i_axial, d_vectors, pos_vectors):
