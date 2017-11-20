@@ -418,7 +418,7 @@ class NetworkPopulation(object):
         COMM.Barrier()
 
 
-    def draw_rand_pos(self, POP_SIZE, radius, loc, scale):
+    def draw_rand_pos(self, POP_SIZE, radius, loc, scale, cap=None):
         """
         Draw some random location for POP_SIZE cells within radius radius,
         at mean depth loc and standard deviation scale.
@@ -436,6 +436,9 @@ class NetworkPopulation(object):
             expected mean depth of somas of population.
         scale : float
             expected standard deviation of depth of somas of population.
+        cap : None or float
+            if float, cap distribution between [loc-cap, loc+cap)
+
 
         Returns
         -------
@@ -457,6 +460,10 @@ class NetworkPopulation(object):
                 x[i] = (np.random.rand()-0.5)*radius*2
                 y[i] = (np.random.rand()-0.5)*radius*2
         z = np.random.normal(loc=loc, scale=scale, size=POP_SIZE)
+        if cap is not None:
+            while np.any((z >= loc-cap) & (z < loc+cap)):
+                inds = (z >= loc-cap) & (z < loc+cap)
+                z[inds] = np.random.normal(loc=loc, scale=scale, size=inds.sum())
 
         soma_pos = []
         for i in range(POP_SIZE):
