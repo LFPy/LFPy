@@ -1250,28 +1250,19 @@ class MEG(object):
             shape (n_locations x n_timesteps x 3) array with x,y,z-components
             of the magnetic field :math:`\mathbf{H}` in units of (nA/µm)
         """
-        d_list, iaxial = cell.get_axial_currents_from_vmem()
+        i_axial, d_vectors, pos_vectors = cell.get_axial_currents_from_vmem()
+        # d_list, iaxial = cell.get_axial_currents_from_vmem()
 
         R = self.sensor_locations
         H = np.zeros((R.shape[0], cell.tvec.size, 3))
 
-        r_seg = np.c_[cell.xmid, cell.ymid, cell.zmid]
+        # r_seg = np.c_[cell.xmid, cell.ymid, cell.zmid]
 
-        for i, R_ in enumerate(R):        
-            for r_seg_, d_list_, iaxial_ in zip(r_seg,
-                                                d_list[::2, ],
-                                                iaxial[::2]):
-                r_rel = R_ - r_seg_
-                H[i, :, :] += np.dot(iaxial_.reshape((-1, 1)),
-                                     np.cross(d_list_, r_rel).reshape((1, -1))
-                                     ) / (4*np.pi*np.sqrt((r_rel**2).sum())**3)
-            for r_seg_, d_list_, iaxial_ in zip(r_seg,
-                                                d_list[1::2, ],
-                                                iaxial[1::2]):
-                r_rel = R_ - r_seg_
-                H[i, :, :] += np.dot(iaxial_.reshape((-1, 1)),
-                                     np.cross(d_list_, r_rel).reshape((1, -1))
-                                     ) / (4*np.pi*np.sqrt((r_rel**2).sum())**3)        
-        
+        for i, R_ in enumerate(R):
+            for i_, d_, r_ in zip(i_axial, d_vectors, pos_vectors):
+                r_rel = R_ - r_
+                H[i, :, :] += np.dot(i_.reshape((-1, 1)),
+                                     np.cross(d_, r_rel).reshape((1, -1))
+                                     ) / (4*np.pi*np.sqrt((r_rel**2).sum())**3)       
         return H
 
