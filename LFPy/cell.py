@@ -21,6 +21,7 @@ import neuron
 import numpy as np
 import scipy
 import sys
+import posixpath
 from warnings import warn
 import pickle
 from .run_simulation import _run_simulation, _run_simulation_with_electrode
@@ -190,6 +191,9 @@ class Cell(object):
             assert(morphology is not None)
         except AssertionError:
             raise AssertionError('deprecated keyword argument morphology==None, value must be a file path or neuron.h.SectionList instance with neuron.h.Section instances')
+        if "win32" in sys.platform and type(morphology) is str:
+            # fix Path on windows
+            morphology = morphology.replace(os.sep, posixpath.sep)
         self.morphology = morphology
         if type(self.morphology) is str:
             if os.path.isfile(self.morphology):
@@ -353,6 +357,8 @@ class Cell(object):
         # load custom codes
         if custom_code is not None:
             for code in custom_code:
+                if "win32" in sys.platform:
+                    code = code.replace(os.sep, posixpath.sep)
                 if code.split('.')[-1] == 'hoc':
                     try:
                         neuron.h.xopen(code)
@@ -362,7 +368,8 @@ class Cell(object):
                             'while creating a Cell object.',
                             'One possible cause is the NEURON mechanisms have',
                             'not been compiled, ',
-                            'try running nrnivmodl. ',])
+                            'try running nrnivmodl or mknrndll (Windows) in ', 
+                            'the mod-file-containing folder. ',])
                         raise Exception(ERRMSG)
                 elif code.split('.')[-1] == 'py':
                     if sys.version >= "3.4":
@@ -818,7 +825,7 @@ class Cell(object):
         return np.argmin(dist)
 
     def get_rand_idx_area_norm(self, section='allsec', nidx=1,
-                               z_min=-10000, z_max=10000):
+                               z_min=-1E6, z_max=1E6):
         """Return nidx segment indices in section with random probability
         normalized to the membrane area of segment on
         interval [z_min, z_max]
@@ -1897,7 +1904,7 @@ class Cell(object):
         >>> import matplotlib.pyplot as plt
         >>> cell = LFPy.Cell(morphology='PATH/TO/MORPHOLOGY')
         >>> zips = []
-        >>> for x, z in cell.get_idx_polygons(projection=('x', 'z')):
+        >>> for x, z in cell.get_pt3d_polygons(projection=('x', 'z')):
         >>>     zips.append(zip(x, z))
         >>> polycol = PolyCollection(zips,
         >>>                          edgecolors='none',
@@ -1921,6 +1928,10 @@ class Cell(object):
             mssg = "projection must be a length 2 tuple of 'x', 'y' or 'z'!"
             raise ValueError(mssg)
 
+        try:
+            assert(self.pt3d is True)
+        except AssertionError:
+            raise AssertionError('Cell keyword argument pt3d != True')
         polygons = []
         for i in range(len(self.x3d)):
             polygons.append(self._create_polygon(i, projection))
