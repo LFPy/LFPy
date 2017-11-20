@@ -461,8 +461,8 @@ class NetworkPopulation(object):
                 y[i] = (np.random.rand()-0.5)*radius*2
         z = np.random.normal(loc=loc, scale=scale, size=POP_SIZE)
         if cap is not None:
-            while np.any((z >= loc-cap) & (z < loc+cap)):
-                inds = (z >= loc-cap) & (z < loc+cap)
+            while not np.all((z >= loc-cap) & (z < loc+cap)):
+                inds = (z < loc-cap) ^ (z > loc+cap)
                 z[inds] = np.random.normal(loc=loc, scale=scale, size=inds.sum())
 
         soma_pos = []
