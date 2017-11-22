@@ -1076,6 +1076,31 @@ class testNetworkCell(unittest.TestCase):
     
         np.testing.assert_allclose(electrode.LFP, electrode1.LFP)
 
+    def test_cell_distort_geometry_01(self):
+        cell0 = LFPy.NetworkCell(morphology=os.path.join(LFPy.__path__[0], 'test',
+                                                  'ball_and_sticks_w_lists.hoc' ),
+                        templatefile=os.path.join(LFPy.__path__[0], 'test', 'ball_and_stick_template.hoc'),
+                        templatename='ball_and_stick_template',
+                        templateargs=None,
+                        )
+        factors = [-0.2, 0.1, 0., 0.1, 0.2]
+        nus = [-0.5, 0., 0.5]
+        for factor in factors:
+            for nu in nus:
+                for axis in 'xyz':
+                    cell1 = LFPy.NetworkCell(morphology=os.path.join(LFPy.__path__[0], 'test',
+                                                  'ball_and_sticks_w_lists.hoc' ),
+                        templatefile=os.path.join(LFPy.__path__[0], 'test', 'ball_and_stick_template.hoc'),
+                        templatename='ball_and_stick_template',
+                        templateargs=None,
+                        )
+                    cell1.distort_geometry(factor=factor, nu=nu, axis=axis)
+                    for attr in ['start', 'mid', 'end']:
+                        for ax in 'xyz'.replace(axis, ''):
+                            np.testing.assert_allclose(getattr(cell0, ax+attr)*(1+factor*nu),
+                                                       getattr(cell1, ax+attr))
+                        np.testing.assert_allclose(getattr(cell0, axis+attr)*(1-factor),
+                                                   getattr(cell1, axis+attr))
 
 def stickSimulationTesttvec(**kwargs):
     stick = LFPy.NetworkCell(morphology = os.path.join(LFPy.__path__[0], 'test',
