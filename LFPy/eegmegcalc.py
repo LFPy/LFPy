@@ -401,9 +401,25 @@ class FourSphereVolumeConductor(object):
             of (mV) for all timesteps of current dipole moment p
 
         """
-        p_rad, p_tan = self._decompose_dipole(p)
-        pot_rad = self._calc_rad_potential(p_rad)
-        pot_tan = self._calc_tan_potential(p_tan)
+        n_contacts = self.r.shape[0]
+        n_timesteps = p.shape[0]
+
+        if np.linalg.norm(p) != 0:
+            p_rad, p_tan = self._decompose_dipole(p)
+        else:
+            p_rad = np.zeros((n_timesteps, 3))
+            p_tan = np.zeros((n_timesteps, 3))
+
+        if np.linalg.norm(p_rad) != 0.:
+            pot_rad = self._calc_rad_potential(p_rad)
+        else:
+            pot_rad = np.zeros((n_contacts, n_timesteps))
+
+        if np.linalg.norm(p_tan) != 0.:
+            pot_tan = self._calc_tan_potential(p_tan)
+        else:
+            pot_tan = np.zeros((n_contacts, n_timesteps))
+
         pot_tot = pot_rad + pot_tan
         return pot_tot
 
@@ -460,7 +476,7 @@ class FourSphereVolumeConductor(object):
 
             if el_rad <= self.rz:
                 n_terms[el_point] = np.nan
-                warn('Electrode must be farther away from brain center than dipole. r = %s, rz = %s', self.r, self.rz)
+                warn('Electrode must be farther away from brain center than dipole. r = %s, rz = %s', el_rad, self.rz)
             elif el_rad <= self.r1:
                 n_terms[el_point] = self._potential_brain_rad(el_rad,
                                                              theta_point)
@@ -475,8 +491,9 @@ class FourSphereVolumeConductor(object):
                                                              theta_point)
             else:
                 n_terms[el_point] = 0.
-                warn('Electrode located outside head model. Maximum r = %s µm.',
-                                 self.r4, '\n your r = ', self.r)
+                warn('Electrode located outside head model. Maximum r = %s µm. Your r = %s µm', self.r4, el_rad)
+        print 'phi_const', phi_const.shape
+        print 'n_terms', n_terms.shape
         potential = phi_const * n_terms
         return potential
 
@@ -948,6 +965,161 @@ class FourSphereVolumeConductor(object):
                 (r / self.r1) ** (n+1)*yn))
         return term2
 
+class MiniDipolesInFourSphereVolumeConductor(object):
+    """Class for computing extracellular potentials from mini dipoles
+    in four-sphere head model.
+
+    By mini dipoles we mean dipoles computed from all axial currents in a neuron
+    simulation, typically two axial currents per compartment, except for the
+    root compartment.
+
+    Parameters
+    ----------
+    radii : list, dtype=float
+        Len 4 list with the outer radii in units of (µm) for the 4
+        concentric shells in the four-sphere model: brain, csf, skull and
+        scalp, respectively.
+    sigmas : list, dtype=float
+        Len 4 list with the electrical conductivity in units of (S/m) of
+        the four shells in the four-sphere model: brain, csf, skull and
+        scalp, respectively.
+
+    Examples
+    --------
+    Compute extracellular potential from neuron simulation in
+    four-sphere head model. Instead of simplifying the neural activity to
+    a single dipole, we compute the contribution from every mini dipole from
+    all axial currents in neuron simulation.
+    >>> import LFPy
+    >>> import numpy as np
+    >>> cell = LFPy.Cell('PATH/TO/MORPHOLOGY', extracellular=False)
+    >>> syn = LFPy.Synapse(cell, idx=cell.get_closest_idx(0,0,100),
+    >>>                   syntype='ExpSyn', e=0., tau=1., weight=0.001)
+    >>> syn.set_spike_times(np.mgrid[20:100:20])
+    >>> cell.simulate(rec_vmem=True, rec_imem=False)
+    >>> radii = [200., 300., 400., 500.]
+    >>> sigmas = [0.3, 1.5, 0.015, 0.3]
+    >>> electrode_locs = np.array([[50., -50., 250.]])
+    >>> MD_4s = LFPy.MiniDipolesInFourSphereVolumeConductor(radii, sigmas)
+    >>> phi = MD_4s.compute_potential_from_mini_dipoles_4s(cell, electrode_locs)
+    """
+
+    def __init__(self, radii, sigmas):
+        """Initialize class MiniDipolesInFourSphereVolumeConductor"""
+        self.sigmas = sigmas
+        self.radii = radii
+
+    def compute_potential_from_mini_dipoles_4s(self, cell, electrode_locs):
+        """
+        Return potentials from mini-dipoles from cell in four-sphere head model.
+
+        Parameters
+        ----------
+        cell : Cell object from LFPy
+
+        electrode_locs : ndarray, dtype=float
+            Shape (n_contacts, 3) array containing n_contacts electrode
+            locations in cartesian coordinates in units of (µm).
+            All r_el in electrode_locs must be placed so that |r_el| is
+            less than or equal to scalp radius and larger than
+            the distance between dipole and sphere
+            center: |rz| < |r_el| <= radii[3].
+
+        Returns
+        -------
+        potential : ndarray, dtype=float
+            Shape (n_contacts, n_timesteps) array containing the electric
+            potential at contact point(s) electrode_locs in units
+            of (mV) for all timesteps of neuron simulation
+
+        """
+        mini_p, mini_p_locs = get_mini_current_dipole_moments(cell)
+        N_elec = electrode_locs.shape[0]
+        Ni, Nt, Nd = mini_p.shape
+        potential = np.zeros((N_elec, Nt))
+        for i in range(Ni):
+            four_sphere_cb =  FourSphereVolumeConductor(self.radii,
+                                                        self.sigmas,
+                                                        electrode_locs,
+                                                        mini_p_locs[i])
+            pot = four_sphere_cb.calc_potential(mini_p[i])
+            potential += pot
+        return potential
+
+class MiniDipolesInInfiniteVolumeConductor(object):
+    """Class for computing extracellular potentials from mini dipoles
+    in infinite colume conductor.
+
+    By mini dipoles we mean dipoles computed from all axial currents in a neuron
+    simulation, typically two axial currents per compartment, except for the
+    root compartment.
+
+    Parameters
+    ----------
+    sigma : Float
+        Electrical conductivity in units of (S/m) of
+        the extracellular space.
+
+    Examples
+    --------
+    Compute extracellular potential from neuron simulation in
+    four-sphere head model. Instead of simplifying the neural activity to
+    a single dipole, we compute the contribution from every mini dipole from
+    all axial currents in neuron simulation.
+    >>> import LFPy
+    >>> import numpy as np
+    >>> cell = LFPy.Cell('#PATH/TO/MORPHOLOGY', extracellular=False)  #PATH/TO/MORPHOLOGY
+    >>> syn = LFPy.Synapse(cell, idx=cell.get_closest_idx(0,0,100),
+    >>>                   syntype='ExpSyn', e=0., tau=1., weight=0.001)
+    >>> syn.set_spike_times(np.mgrid[20:100:20])
+    >>> cell.simulate(rec_vmem=True, rec_imem=False)
+    >>> sigma = 0.3
+    >>> electrode_locs = np.array([[50., -50., 250.]])
+    >>> MD_INF = LFPy.MiniDipolesInInfiniteVolumeConductor(sigma)
+    >>> phi = MD_INF.compute_potential_from_mini_dipoles_INF(cell, electrode_locs)
+    """
+
+    def __init__(self, sigma):
+        """Initialize class MiniDipolesInInfiniteVolumeConductor"""
+        self.sigma = sigma
+
+    def compute_potential_from_mini_dipoles_INF(self, cell, electrode_locs):
+        """
+        Return potential from mini-dipoles in cell in infinite volume conductor.
+
+        Parameters
+        ----------
+        cell : Cell object from LFPy
+
+        electrode_locs : ndarray, dtype=float
+            Shape (n_contacts, 3) array containing n_contacts electrode
+            locations in cartesian coordinates in units of (µm).
+            All r_el in electrode_locs must be placed so that |r_el| is
+            less than or equal to scalp radius and larger than
+            the distance between dipole and sphere
+            center: |rz| < |r_el| <= radii[3].
+
+        Returns
+        -------
+        potential : ndarray, dtype=float
+            Shape (n_contacts, n_timesteps) array containing the electric
+            potential at contact point(s) electrode_locs in units
+            of (mV) for all timesteps of neuron simulation
+
+        """
+        mini_p, mini_p_locs = get_mini_current_dipole_moments(cell)
+        N_elec = electrode_locs.shape[0]
+        Ni, Nt, Nd = mini_p.shape
+        potentials = np.zeros((N_elec, Nt))
+        for i in range(Ni):
+            p = mini_p[i]
+            r = electrode_locs - mini_p_locs[i]
+            inf =  InfiniteVolumeConductor(self.sigma)
+            pot = inf.get_dipole_potential(p, r)
+            potentials += pot
+        return potentials
+
+
 class InfiniteVolumeConductor(object):
     """
     Main class for computing extracellular potentials with current dipole
@@ -1059,6 +1231,48 @@ def get_current_dipole_moment(dist, current):
     P_tot = np.sqrt(np.sum(P**2, axis=1))
     return P, P_tot
 
+def get_mini_current_dipole_moments(cell):
+    '''
+    Return 3D current dipole moment vector and middle position vector
+    from each axial current in space.
+
+    Parameters
+    ----------
+    cell : Cell object from LFPy
+
+    Returns
+    -------
+    mini_dipoles : ndarray, dtype = float
+        Shape (n_axial_currents, n_timepoints, 3) array
+        containing the x-,y-,z-components of the current dipole moment
+        from each axial current in cell, at all timepoints.
+        The number of axial currents, n_axial_currents = (cell.totnsegs-1)*2
+        and the number of timepoints, n_timepoints = cell.tvec.size.
+        The current dipole moments are given in units of (nA µm).
+
+    pos_axial : ndarray, dtype = float
+        Shape (n_axial_currents, 3) array containing the x-, y-, and
+        z-components giving the mid position in space of each mini_dipole
+        in units of (µm).
+
+    Examples
+    --------
+    Get all current dipole moments and positions from all axial currents in a
+    single neuron simulation.
+    >>> import LFPy
+    >>> import numpy as np
+    >>> cell = LFPy.Cell('PATH/TO/MORPHOLOGY', extracellular=False)
+    >>> syn = LFPy.Synapse(cell, idx=cell.get_closest_idx(0,0,1000),
+    >>>                   syntype='ExpSyn', e=0., tau=1., weight=0.001)
+    >>> syn.set_spike_times(np.mgrid[20:100:20])
+    >>> cell.simulate(rec_vmem=True, rec_imem=False)
+    >>> mini_dipoles, dipole_locs = LFPy.get_mini_current_dipole_moments(cell)
+    '''
+    i_axial, d_axial, pos_axial = cell.get_axial_currents_from_vmem()
+    Ni, Nt = i_axial.shape
+    mini_dipoles = np.array([[i_axial[i,j]*d_axial[i] for j in range(Nt)] for i in range(Ni)])
+
+    return mini_dipoles, pos_axial
 
 class MEG(object):
     """
@@ -1147,7 +1361,7 @@ class MEG(object):
         """
         Compute magnetic field H from single current-dipole moment localized
         somewhere in space
-        
+
         Parameters
         ----------
         current_dipole_moment : ndarray, dtype=float
@@ -1205,25 +1419,25 @@ class MEG(object):
         Computes the magnetic field in space from axial currents computed from
         membrane potential values and axial resistances of multicompartment
         cells.
-        
+
         See:
         Blagoev et al. (2007) Modelling the magnetic signature of neuronal
         tissue. NeuroImage 37 (2007) 137–148
         DOI: 10.1016/j.neuroimage.2007.04.033
-        
+
         for details on the biophysics governing magnetic fields from axial
         currents.
-        
+
         Parameters
         ----------
         cell : object
             LFPy.Cell-like object. Must have attribute vmem containing recorded
             membrane potentials in units of mV
-        
+
         Examples
         --------
         Define cell object, create synapse, compute current dipole moment:
-    
+
         >>> import LFPy, os, numpy as np, matplotlib.pyplot as plt
         >>> cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test', 'ball_and_sticks.hoc'),
         >>>                  passive=True)
@@ -1231,9 +1445,9 @@ class MEG(object):
         >>> syn = LFPy.Synapse(cell, idx=0, syntype='ExpSyn', weight=0.01, record_current=True)
         >>> syn.set_spike_times_w_netstim()
         >>> cell.simulate(rec_vmem=True)
-    
+
         Instantiate the LFPy.MEG object, compute and plot the magnetic signal in a sensor location:
-    
+
         >>> sensor_locations = np.array([[1E4, 0, 0]])
         >>> meg = LFPy.MEG(sensor_locations)
         >>> H = meg.calculate_H_from_iaxial(cell)
@@ -1259,6 +1473,5 @@ class MEG(object):
                 r_rel = R_ - r_
                 H[i, :, :] += np.dot(i_.reshape((-1, 1)),
                                      np.cross(d_, r_rel).reshape((1, -1))
-                                     ) / (4*np.pi*np.sqrt((r_rel**2).sum())**3)       
+                                     ) / (4*np.pi*np.sqrt((r_rel**2).sum())**3)
         return H
-

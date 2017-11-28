@@ -49,7 +49,7 @@ from .cell import Cell
 from .templatecell import TemplateCell
 from .network import NetworkCell, NetworkPopulation, Network
 from .test import _test as run_tests
-from .eegmegcalc import OneSphereVolumeConductor, FourSphereVolumeConductor, InfiniteVolumeConductor, get_current_dipole_moment, MEG
+from .eegmegcalc import OneSphereVolumeConductor, FourSphereVolumeConductor, MiniDipolesInFourSphereVolumeConductor, MiniDipolesInInfiniteVolumeConductor, InfiniteVolumeConductor, get_current_dipole_moment, get_mini_current_dipole_moments, MEG
 from . import lfpcalc
 from . import tools
 from . import inputgenerators
