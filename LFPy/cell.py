@@ -368,7 +368,7 @@ class Cell(object):
                             'while creating a Cell object.',
                             'One possible cause is the NEURON mechanisms have',
                             'not been compiled, ',
-                            'try running nrnivmodl or mknrndll (Windows) in ', 
+                            'try running nrnivmodl or mknrndll (Windows) in ',
                             'the mod-file-containing folder. ',])
                         raise Exception(ERRMSG)
                 elif code.split('.')[-1] == 'py':
@@ -2343,3 +2343,46 @@ class Cell(object):
             ipar = iseg
 
         return iseg, ipar
+
+    def get_multi_current_dipole_moments(self):
+        '''
+        Return 3D current dipole moment vector and middle position vector
+        from each axial current in space.
+
+        Parameters
+        ----------
+        cell : Cell object from LFPy
+
+        Returns
+        -------
+        multi_dipoles : ndarray, dtype = float
+            Shape (n_axial_currents, n_timepoints, 3) array
+            containing the x-,y-,z-components of the current dipole moment
+            from each axial current in cell, at all timepoints.
+            The number of axial currents, n_axial_currents = (cell.totnsegs-1)*2
+            and the number of timepoints, n_timepoints = cell.tvec.size.
+            The current dipole moments are given in units of (nA µm).
+
+        pos_axial : ndarray, dtype = float
+            Shape (n_axial_currents, 3) array containing the x-, y-, and
+            z-components giving the mid position in space of each multi_dipole
+            in units of (µm).
+
+        Examples
+        --------
+        Get all current dipole moments and positions from all axial currents in a
+        single neuron simulation.
+        >>> import LFPy
+        >>> import numpy as np
+        >>> cell = LFPy.Cell('PATH/TO/MORPHOLOGY', extracellular=False)
+        >>> syn = LFPy.Synapse(cell, idx=cell.get_closest_idx(0,0,1000),
+        >>>                   syntype='ExpSyn', e=0., tau=1., weight=0.001)
+        >>> syn.set_spike_times(np.mgrid[20:100:20])
+        >>> cell.simulate(rec_vmem=True, rec_imem=False)
+        >>> multi_dipoles, dipole_locs = LFPy.get_multi_current_dipole_moments(cell)
+        '''
+        i_axial, d_axial, pos_axial = self.get_axial_currents_from_vmem()
+        Ni, Nt = i_axial.shape
+        multi_dipoles = np.array([i_axial[i][:, np.newaxis]*d_axial[i] for i in range(Ni)])
+
+        return multi_dipoles, pos_axial

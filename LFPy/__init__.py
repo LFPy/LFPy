@@ -30,7 +30,7 @@ GNU General Public License for more details.
   * NetworkCell - Similar to `TemplateCell` with some attributes and methods for spike communication between parallel RANKs
   * NetworkPopulation - Class representing group of Cell objects distributed across MPI RANKs
   * OneSphereVolumeConductor - For computing extracellular potentials within and outside a homogeneous sphere
-  * FourSphereVolumeConductor - For computing extracellular potentials in 4-sphere model (brain, CSF, scalp, skull)
+  * FourSphereVolumeConductor - For computing extracellular potentials in 4-sphere model (brain, CSF, skull, scalp)
   * InfiniteVolumeConductor - To compute extracellular potentials with current dipoles in infinite volume conductor
   * MEG - Class for computing magnetic field from current dipole moment
 :Modules:
@@ -49,7 +49,7 @@ from .cell import Cell
 from .templatecell import TemplateCell
 from .network import NetworkCell, NetworkPopulation, Network
 from .test import _test as run_tests
-from .eegmegcalc import OneSphereVolumeConductor, FourSphereVolumeConductor, MiniDipolesInFourSphereVolumeConductor, MiniDipolesInInfiniteVolumeConductor, InfiniteVolumeConductor, get_current_dipole_moment, get_mini_current_dipole_moments, MEG
+from .eegmegcalc import OneSphereVolumeConductor, FourSphereVolumeConductor, InfiniteVolumeConductor, get_current_dipole_moment, MEG
 from . import lfpcalc
 from . import tools
 from . import inputgenerators
