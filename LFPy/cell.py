@@ -2117,15 +2117,15 @@ class Cell(object):
 
         return
 
-    def get_axial_currents_from_vmem(self, timepoints=False):
+    def get_axial_currents_from_vmem(self, timepoints=None):
         """
         Compute axial currents from cell sim: get current magnitude,
         distance vectors and position vectors.
 
         Parameters
         ----------
-        timepoints : list, dtype=int
-            list of timepoints in simulation at which you want to compute
+        timepoints : ndarray, dtype=int
+            array of timepoints in simulation at which you want to compute
             the axial currents. Defaults to False. If not given,
             all simulation timesteps will be included.
 
@@ -2134,7 +2134,7 @@ class Cell(object):
         i_axial : ndarray, dtype=float
             Shape ((cell.totnsegs-1)*2, len(timepoints)) array of axial current
             magnitudes I in units of (nA) in cell at all timesteps in timepoints,
-            or at all timesteps of the simulation if timepoints=False.
+            or at all timesteps of the simulation if timepoints=None.
             Contains two current magnitudes per segment,
             (except for the root segment): 1) the current from the mid point of
             the segment to the segment start point, and 2) the current from
@@ -2288,7 +2288,7 @@ class Cell(object):
 
 
     def _parent_and_segment_current(self, seg_idx, parent_idx, bottom_seg,
-                              branch, parentsec, timepoints=False):
+                              branch, parentsec, timepoints=None):
         """
         Return axial current from segment (seg_idx) mid to segment start,
         and current from parent segment (parent_idx) end to parent segment mid.
@@ -2303,9 +2303,9 @@ class Cell(object):
         bottom_seg : boolean
         branch : boolean
         parentsec : neuron.Section object
-        timepoints : list, dtype=int
-            list of timepoints in simulation at which you want to compute
-            the axial currents. Defaults to False. If not given,
+        timepoints : ndarray, dtype=int
+            array of timepoints in simulation at which you want to compute
+            the axial currents. Defaults to None. If not given,
             all simulation timesteps will be included.
 
         Returns
@@ -2320,7 +2320,7 @@ class Cell(object):
         ri_list = self.get_axial_resistance()
         seg_ri = ri_list[seg_idx]
         vmem = self.vmem
-        if timepoints:
+        if timepoints is not None:
             vmem = self.vmem[:,timepoints]
         vpar = vmem[parent_idx]
         vseg = vmem[seg_idx]
@@ -2360,16 +2360,16 @@ class Cell(object):
 
         return iseg, ipar
 
-    def get_multi_current_dipole_moments(self, timepoints=False):
+    def get_multi_current_dipole_moments(self, timepoints=None):
         '''
         Return 3D current dipole moment vector and middle position vector
         from each axial current in space.
 
         Parameters
         ----------
-        timepoints : list, dtype=int
-            list of timepoints at which you want to compute
-            the current dipole moments. Defaults to False. If not given,
+        timepoints : ndarray, dtype=int
+            array of timepoints at which you want to compute
+            the current dipole moments. Defaults to None. If not given,
             all simulation timesteps will be included.
 
         Returns
@@ -2398,7 +2398,7 @@ class Cell(object):
         >>>                   syntype='ExpSyn', e=0., tau=1., weight=0.001)
         >>> syn.set_spike_times(np.mgrid[20:100:20])
         >>> cell.simulate(rec_vmem=True, rec_imem=False)
-        >>> timepoints = [1,2,3,4]
+        >>> timepoints = np.array([1,2,3,4])
         >>> multi_dipoles, dipole_locs = cell.get_multi_current_dipole_moments(timepoints=timepoints)
         '''
         i_axial, d_axial, pos_axial = self.get_axial_currents_from_vmem(timepoints=timepoints)

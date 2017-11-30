@@ -428,7 +428,7 @@ class FourSphereVolumeConductor(object):
         pot_tot = pot_rad + pot_tan
         return pot_tot
 
-    def calc_potential_from_multi_dipoles(self, cell, timepoints=False):
+    def calc_potential_from_multi_dipoles(self, cell, timepoints=None):
         """
         Return electric potential from multiple current dipoles from cell.
 
@@ -439,9 +439,9 @@ class FourSphereVolumeConductor(object):
         Parameters
         ----------
         cell : LFPy Cell object, LFPy.Cell
-        timepoints : list, dtype=int
-            list of timepoints at which you want to compute
-            the electric potential. Defaults to False. If not given,
+        timepoints : ndarray, dtype=int
+            array of timepoints at which you want to compute
+            the electric potential. Defaults to None. If not given,
             all simulation timesteps will be included.
 
         Returns
@@ -467,7 +467,7 @@ class FourSphereVolumeConductor(object):
         >>> radii = [200., 300., 400., 500.]
         >>> sigmas = [0.3, 1.5, 0.015, 0.3]
         >>> electrode_locs = np.array([[50., -50., 250.]])
-        >>> timepoints = [0,100]
+        >>> timepoints = np.array([0,100])
         >>> MD_4s = LFPy.FourSphereVolumeConductor(radii,
         >>>                                        sigmas,
         >>>                                        electrode_locs)
@@ -1076,7 +1076,7 @@ class InfiniteVolumeConductor(object):
         phi = 1./(4*np.pi*self.sigma)*(dotprod.T/ r_factor).T
         return phi
 
-    def get_multi_dipole_potential(self, cell, electrode_locs, timepoints=False):
+    def get_multi_dipole_potential(self, cell, electrode_locs, timepoints=None):
         """
         Return electric potential from multiple current dipoles from cell
 
@@ -1094,8 +1094,10 @@ class InfiniteVolumeConductor(object):
             less than or equal to scalp radius and larger than
             the distance between dipole and sphere
             center: |rz| < |r_el| <= radii[3].
-        timepoints : list, dtype=int
-            list of timepoints at which you want to compute the potential
+        timepoints : ndarray, dtype=int
+            array of timepoints at which you want to compute
+            the electric potential. Defaults to None. If not given,
+            all simulation timesteps will be included.
 
         Returns
         -------
@@ -1118,7 +1120,7 @@ class InfiniteVolumeConductor(object):
         >>> syn.set_spike_times(np.mgrid[20:100:20])
         >>> cell.simulate(rec_vmem=True, rec_imem=False)
         >>> sigma = 0.3
-        >>> timepoints = [10, 20, 50, 100]
+        >>> timepoints = np.array([10, 20, 50, 100])
         >>> electrode_locs = np.array([[50., -50., 250.]])
         >>> MD_INF = LFPy.InfiniteVolumeConductor(sigma)
         >>> phi = MD_INF.get_multi_dipole_potential(cell, electrode_locs,
