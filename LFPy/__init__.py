@@ -30,7 +30,7 @@ GNU General Public License for more details.
   * NetworkCell - Similar to `TemplateCell` with some attributes and methods for spike communication between parallel RANKs
   * NetworkPopulation - Class representing group of Cell objects distributed across MPI RANKs
   * OneSphereVolumeConductor - For computing extracellular potentials within and outside a homogeneous sphere
-  * FourSphereVolumeConductor - For computing extracellular potentials in 4-sphere model (brain, CSF, scalp, skull)
+  * FourSphereVolumeConductor - For computing extracellular potentials in 4-sphere model (brain, CSF, skull, scalp)
   * InfiniteVolumeConductor - To compute extracellular potentials with current dipoles in infinite volume conductor
   * MEG - Class for computing magnetic field from current dipole moment
 :Modules:

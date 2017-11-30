@@ -320,9 +320,6 @@ class FourSphereVolumeConductor(object):
         All r_el in r must be less than or equal to scalp radius
         and larger than the distance between dipole and sphere
         center: |rz| < r_el <= radii[3].
-    rz : ndarray, dtype=float
-        Shape (3, ) array containing the position of the current dipole in
-        cartesian coordinates. Units of (µm).
 
     Examples
     --------
@@ -335,15 +332,15 @@ class FourSphereVolumeConductor(object):
     >>> sigmas = [0.3, 1.5, 0.015, 0.3]
     >>> r = np.array([[0., 0., 90000.], [0., 85000., 0.]])
     >>> rz = np.array([0., 0., 78000.])
-    >>> sphere_model = LFPy.FourSphereVolumeConductor(radii, sigmas, r, rz)
+    >>> sphere_model = LFPy.FourSphereVolumeConductor(radii, sigmas, r)
     >>> # current dipole moment
     >>> p = np.array([[10., 10., 10.]]*10) # 10 timesteps
     >>> # compute potential
-    >>> potential = sphere_model.calc_potential(p)
+    >>> potential = sphere_model.calc_potential(p, rz)
 
     """
 
-    def __init__(self, radii, sigmas, r, rz, iter_factor = 2./99.*1e-6):
+    def __init__(self, radii, sigmas, r, iter_factor = 2./99.*1e-6):
         """Initialize class FourSphereVolumeConductor"""
         self.r1 = radii[0]
         self.r2 = radii[1]
@@ -370,42 +367,121 @@ class FourSphereVolumeConductor(object):
         self.sigma43 = self.sigma4 / self.sigma3
 
         self.rxyz = r
-        self.rzloc = rz
-        self.rz = np.sqrt(np.sum(rz ** 2))
-        self.rz1 = self.rz / self.r1
-        if self.rz1 > 0.99999:
-            warn('Dipole should be placed minimum ~1µm away from brain surface, '
-                  'to avoid extremely slow convergence.')
-        elif self.rz1 > 0.9999:
-            warn('Computation time might be long due to slow convergence. '
-                 'Can be avoided by placing dipole further away from brain surface.')
         self.r = np.sqrt(np.sum(r ** 2, axis=1))
 
         self.iteration_stop_factor = iter_factor
 
-    def calc_potential(self, p):
+    def _rz_params(self, rz):
+        self._rzloc = rz
+        self._rz = np.sqrt(np.sum(rz ** 2))
+        self._rz1 = self._rz / self.r1
+        if self._rz1 > 0.99999:
+            warn('Dipole should be placed minimum ~1µm away from brain surface, '
+                  'to avoid extremely slow convergence.')
+        elif self._rz1 > 0.9999:
+            warn('Computation time might be long due to slow convergence. '
+                 'Can be avoided by placing dipole further away from brain surface.')
+
+
+    def calc_potential(self, p, rz):
         """
-        Return electric potential from current dipole moment p
+        Return electric potential from current dipole moment p.
 
         Parameters
         ----------
         p : ndarray, dtype=float
             Shape (n_timesteps, 3) array containing the x,y,z components of the
-            current dipole moment in units of (nA*µm) for all timesteps
+            current dipole moment in units of (nA*µm) for all timesteps.
+        rz : ndarray, dtype=float
+            Shape (3, ) array containing the position of the current dipole in
+            cartesian coordinates. Units of (µm).
 
         Returns
         -------
         potential : ndarray, dtype=float
             Shape (n_contacts, n_timesteps) array containing the electric
             potential at contact point(s) FourSphereVolumeConductor.r in units
-            of (mV) for all timesteps of current dipole moment p
+            of (mV) for all timesteps of current dipole moment p.
 
         """
-        p_rad, p_tan = self._decompose_dipole(p)
-        pot_rad = self._calc_rad_potential(p_rad)
-        pot_tan = self._calc_tan_potential(p_tan)
+
+        self._rz_params(rz)
+        n_contacts = self.r.shape[0]
+        n_timesteps = p.shape[0]
+
+        if np.linalg.norm(p) != 0:
+            p_rad, p_tan = self._decompose_dipole(p)
+        else:
+            p_rad = np.zeros((n_timesteps, 3))
+            p_tan = np.zeros((n_timesteps, 3))
+
+        if np.linalg.norm(p_rad) != 0.:
+            pot_rad = self._calc_rad_potential(p_rad)
+        else:
+            pot_rad = np.zeros((n_contacts, n_timesteps))
+
+        if np.linalg.norm(p_tan) != 0.:
+            pot_tan = self._calc_tan_potential(p_tan)
+        else:
+            pot_tan = np.zeros((n_contacts, n_timesteps))
+
         pot_tot = pot_rad + pot_tan
         return pot_tot
+
+    def calc_potential_from_multi_dipoles(self, cell, timepoints=None):
+        """
+        Return electric potential from multiple current dipoles from cell.
+
+        By multiple current dipoles we mean the dipoles computed from all
+        axial currents in a neuron simulation, typically two
+        axial currents per compartment, except for the root compartment.
+
+        Parameters
+        ----------
+        cell : LFPy Cell object, LFPy.Cell
+        timepoints : ndarray, dtype=int
+            array of timepoints at which you want to compute
+            the electric potential. Defaults to None. If not given,
+            all simulation timesteps will be included.
+
+        Returns
+        -------
+        potential : ndarray, dtype=float
+            Shape (n_contacts, n_timesteps) array containing the electric
+            potential at contact point(s) electrode_locs in units
+            of (mV) for all timesteps of neuron simulation.
+
+        Examples
+        --------
+        Compute extracellular potential from neuron simulation in
+        four-sphere head model. Instead of simplifying the neural activity to
+        a single dipole, we compute the contribution from every multi dipole
+        from all axial currents in neuron simulation.
+        >>> import LFPy
+        >>> import numpy as np
+        >>> cell = LFPy.Cell('PATH/TO/MORPHOLOGY', extracellular=False)
+        >>> syn = LFPy.Synapse(cell, idx=cell.get_closest_idx(0,0,100),
+        >>>                   syntype='ExpSyn', e=0., tau=1., weight=0.001)
+        >>> syn.set_spike_times(np.mgrid[20:100:20])
+        >>> cell.simulate(rec_vmem=True, rec_imem=False)
+        >>> radii = [200., 300., 400., 500.]
+        >>> sigmas = [0.3, 1.5, 0.015, 0.3]
+        >>> electrode_locs = np.array([[50., -50., 250.]])
+        >>> timepoints = np.array([0,100])
+        >>> MD_4s = LFPy.FourSphereVolumeConductor(radii,
+        >>>                                        sigmas,
+        >>>                                        electrode_locs)
+        >>> phi = MD_4s.calc_potential_from_multi_dipoles(cell,
+        >>>                                               timepoints)
+        """
+        multi_p, multi_p_locs = cell.get_multi_current_dipole_moments(timepoints)
+        N_elec = self.rxyz.shape[0]
+        Ni, Nt, Nd = multi_p.shape
+        potential = np.zeros((N_elec, Nt))
+        for i in range(Ni):
+            pot = self.calc_potential(multi_p[i], multi_p_locs[i])
+            potential += pot
+        return potential
 
     def _decompose_dipole(self, p):
         """
@@ -420,13 +496,13 @@ class FourSphereVolumeConductor(object):
         Returns:
         -------
         p_rad : ndarray, dtype=float
-            Shape (n_timesteps, 3) array, radial part of p, parallel to self.rz
+            Shape (n_timesteps, 3) array, radial part of p, parallel to self._rz
         p_tan : ndarray, dtype=float
             Shape (n_timesteps, 3) array, tangential part of p,
-            orthogonal to self.rz
+            orthogonal to self._rz
         """
-        p_rad = (np.dot(p, self.rzloc)/self.rz ** 2
-                 ).reshape(len(p), 1) * self.rzloc.reshape(1, len(self.rzloc))
+        p_rad = (np.dot(p, self._rzloc)/self._rz ** 2
+                 ).reshape(len(p), 1) * self._rzloc.reshape(1, len(self._rzloc))
         p_tan = p - p_rad
 
         return p_rad, p_tan
@@ -439,7 +515,7 @@ class FourSphereVolumeConductor(object):
         ----------
         p_rad : ndarray, dtype=float
             Shape (n_timesteps, 3) array, radial part of p
-            in units of (nA*µm), parallel to self.rz
+            in units of (nA*µm), parallel to self._rz
 
         Returns
         -------
@@ -452,15 +528,15 @@ class FourSphereVolumeConductor(object):
         p_tot = np.linalg.norm(p_rad, axis=1)
         theta = self.calc_theta()
         s_vector = self._sign_rad_dipole(p_rad)
-        phi_const = s_vector * p_tot / (4 * np.pi * self.sigma1 * self.rz ** 2)
+        phi_const = s_vector * p_tot / (4 * np.pi * self.sigma1 * self._rz ** 2)
         n_terms = np.zeros((len(self.r), len(p_tot)))
         for el_point in range(len(self.r)):
             el_rad = self.r[el_point]
             theta_point = theta[el_point]
 
-            if el_rad <= self.rz:
+            if el_rad <= self._rz:
                 n_terms[el_point] = np.nan
-                warn('Electrode must be farther away from brain center than dipole. r = %s, rz = %s', self.r, self.rz)
+                warn('Electrode must be farther away from brain center than dipole. r = %s, rz = %s', el_rad, self._rz)
             elif el_rad <= self.r1:
                 n_terms[el_point] = self._potential_brain_rad(el_rad,
                                                              theta_point)
@@ -475,8 +551,7 @@ class FourSphereVolumeConductor(object):
                                                              theta_point)
             else:
                 n_terms[el_point] = 0.
-                warn('Electrode located outside head model. Maximum r = %s µm.',
-                                 self.r4, '\n your r = ', self.r)
+                warn('Electrode located outside head model. Maximum r = %s µm. Your r = %s µm', self.r4, el_rad)
         potential = phi_const * n_terms
         return potential
 
@@ -488,7 +563,7 @@ class FourSphereVolumeConductor(object):
         ----------
         p_tan : ndarray, dtype=float
             Shape (n_timesteps, 3) array, tangential part of p
-            in units of (nA*µm), orthogonal to self.rz
+            in units of (nA*µm), orthogonal to self._rz
 
         Returns
         _______
@@ -500,14 +575,14 @@ class FourSphereVolumeConductor(object):
         theta = self.calc_theta()
         phi = self.calc_phi(p_tan)
         p_tot = np.linalg.norm(p_tan, axis=1)
-        phi_hom = - p_tot / (4 * np.pi * self.sigma1 * self.rz ** 2) * np.sin(phi)
+        phi_hom = - p_tot / (4 * np.pi * self.sigma1 * self._rz ** 2) * np.sin(phi)
         n_terms = np.zeros((len(self.r), len(p_tot)))
         for el_point in range(len(self.r)):
             el_rad = self.r[el_point]
             theta_point = theta[el_point]
-            if el_rad <= self.rz:
+            if el_rad <= self._rz:
                 n_terms[el_point] = np.nan
-                warn('Electrode must be farther away from brain center than dipole. r = %s, rz = %s', self.r, self.rz)
+                warn('Electrode must be farther away from brain center than dipole. r = %s, rz = %s', self.r, self._rz)
             elif el_rad <= self.r1:
                 n_terms[el_point] = self._potential_brain_tan(el_rad, theta_point)
             elif el_rad <= self.r2:
@@ -535,7 +610,7 @@ class FourSphereVolumeConductor(object):
             point location vector(s) in FourSphereVolumeConductor.rxyz
             z-axis is defined in the direction of rzloc and the radial dipole.
         """
-        cos_theta = np.dot(self.rxyz, self.rzloc) / (np.linalg.norm(self.rxyz, axis=1) * np.linalg.norm(self.rzloc))
+        cos_theta = np.dot(self.rxyz, self._rzloc) / (np.linalg.norm(self.rxyz, axis=1) * np.linalg.norm(self._rzloc))
         cos_theta = np.nan_to_num(cos_theta)
         theta = np.arccos(cos_theta)
         return theta
@@ -560,12 +635,12 @@ class FourSphereVolumeConductor(object):
             y-axis is defined in the direction of p (orthogonal to rzloc).
             x-axis is defined as cross product between p and rzloc (x).
         """
-        proj_rxyz_rz = (np.dot(self.rxyz, self.rzloc) /
-                        np.sum(self.rzloc ** 2)).reshape(len(self.rxyz),1)\
-                        * self.rzloc.reshape(1,3)
+        proj_rxyz_rz = (np.dot(self.rxyz, self._rzloc) /
+                        np.sum(self._rzloc ** 2)).reshape(len(self.rxyz),1)\
+                        * self._rzloc.reshape(1,3)
                         # projection of rxyz onto rzloc
         rxy = self.rxyz - proj_rxyz_rz  # projection of rxyz into xy-plane
-        x = np.cross(p_tan, self.rzloc)  # vector giving direction of x-axis
+        x = np.cross(p_tan, self._rzloc)  # vector giving direction of x-axis
 
         denominator = np.dot(np.linalg.norm(rxy, axis=1).reshape(len(rxy),1),
                              np.linalg.norm(x, axis=1).reshape(1, len(x)))
@@ -600,7 +675,7 @@ class FourSphereVolumeConductor(object):
             If radial part of p[i] points inwards, sign_vector[i] = -1.
 
         """
-        sign_vector = np.sign(np.dot(p, self.rzloc))
+        sign_vector = np.sign(np.dot(p, self._rzloc))
         return sign_vector
 
     def _potential_brain_rad(self, r, theta):
@@ -628,7 +703,7 @@ class FourSphereVolumeConductor(object):
         # while const > self.iteration_stop_factor*coeff_sum:
         while const > 2./99.*1e-12*coeff_sum:
             c1n = self._calc_c1n(n)
-            const = n*(c1n * (r / self.r1) ** n + (self.rz / r) ** (n + 1))
+            const = n*(c1n * (r / self.r1) ** n + (self._rz / r) ** (n + 1))
             coeff_sum += const
             consts.append(const)
             n += 1
@@ -766,7 +841,7 @@ class FourSphereVolumeConductor(object):
         consts = []
         while const > self.iteration_stop_factor*coeff_sum:
             c1n = self._calc_c1n(n)
-            const = (c1n * (r / self.r1) ** n + (self.rz / r) ** (n + 1))
+            const = (c1n * (r / self.r1) ** n + (self._rz / r) ** (n + 1))
             coeff_sum += const
             consts.append(const)
             n += 1
@@ -895,13 +970,13 @@ class FourSphereVolumeConductor(object):
 
     def _calc_c1n(self, n):
         zn = self._calc_zn(n)
-        c1 = (((n + 1) / n * self.sigma12 + zn) / (self.sigma12 - zn) * self.rz1**(n+1))
+        c1 = (((n + 1) / n * self.sigma12 + zn) / (self.sigma12 - zn) * self._rz1**(n+1))
         return c1
 
     def _calc_c2n(self, n):
         yn = self._calc_yn(n)
         c1 = self._calc_c1n(n)
-        c2 = ((c1 + self.rz1**(n+1)) * self.r12 ** (n + 1) /
+        c2 = ((c1 + self._rz1**(n+1)) * self.r12 ** (n + 1) /
              (self.r12 ** (2 * n + 1) + yn))
         return c2
 
@@ -936,17 +1011,18 @@ class FourSphereVolumeConductor(object):
     def _calc_csf_term1(self, n, r):
         yn = self._calc_yn(n)
         c1 = self._calc_c1n(n)
-        term1 = ((c1 + self.rz1 ** (n + 1)) * self.r12*((self.r1*r)/
+        term1 = ((c1 + self._rz1 ** (n + 1)) * self.r12*((self.r1*r)/
                 (self.r2 ** 2)) **n / (self.r12**(2*n+1) + yn))
         return term1
 
     def _calc_csf_term2(self, n, r):
         yn = self._calc_yn(n)
         c1 = self._calc_c1n(n)
-        term2 = (yn*(c1 + self.rz1 ** (n + 1))/
+        term2 = (yn*(c1 + self._rz1 ** (n + 1))/
                 (r/self.r2*((self.r1 * r) / self.r2**2) ** n +
                 (r / self.r1) ** (n+1)*yn))
         return term2
+
 
 class InfiniteVolumeConductor(object):
     """
@@ -999,6 +1075,68 @@ class InfiniteVolumeConductor(object):
         r_factor = np.linalg.norm(r, axis=1)**3
         phi = 1./(4*np.pi*self.sigma)*(dotprod.T/ r_factor).T
         return phi
+
+    def get_multi_dipole_potential(self, cell, electrode_locs, timepoints=None):
+        """
+        Return electric potential from multiple current dipoles from cell
+
+        By multiple current dipoles we mean the dipoles computed from all
+        axial currents in a neuron simulation, typically two
+        axial currents per compartment, except for the root compartment.
+
+        Parameters
+        ----------
+        cell : Cell object from LFPy
+        electrode_locs : ndarray, dtype=float
+            Shape (n_contacts, 3) array containing n_contacts electrode
+            locations in cartesian coordinates in units of (µm).
+            All r_el in electrode_locs must be placed so that |r_el| is
+            less than or equal to scalp radius and larger than
+            the distance between dipole and sphere
+            center: |rz| < |r_el| <= radii[3].
+        timepoints : ndarray, dtype=int
+            array of timepoints at which you want to compute
+            the electric potential. Defaults to None. If not given,
+            all simulation timesteps will be included.
+
+        Returns
+        -------
+        potential : ndarray, dtype=float
+            Shape (n_contacts, n_timesteps) array containing the electric
+            potential at contact point(s) electrode_locs in units
+            of (mV) for all timesteps of neuron simulation
+
+        Examples
+        --------
+        Compute extracellular potential from neuron simulation in
+        four-sphere head model. Instead of simplifying the neural activity to
+        a single dipole, we compute the contribution from every multi dipole
+        from all axial currents in neuron simulation.
+        >>> import LFPy
+        >>> import numpy as np
+        >>> cell = LFPy.Cell('PATH/TO/MORPHOLOGY', extracellular=False)
+        >>> syn = LFPy.Synapse(cell, idx=cell.get_closest_idx(0,0,100),
+        >>>                   syntype='ExpSyn', e=0., tau=1., weight=0.001)
+        >>> syn.set_spike_times(np.mgrid[20:100:20])
+        >>> cell.simulate(rec_vmem=True, rec_imem=False)
+        >>> sigma = 0.3
+        >>> timepoints = np.array([10, 20, 50, 100])
+        >>> electrode_locs = np.array([[50., -50., 250.]])
+        >>> MD_INF = LFPy.InfiniteVolumeConductor(sigma)
+        >>> phi = MD_INF.get_multi_dipole_potential(cell, electrode_locs,
+        >>>                                         timepoints = timepoints)
+        """
+
+        multi_p, multi_p_locs = cell.get_multi_current_dipole_moments(timepoints=timepoints)
+        N_elec = electrode_locs.shape[0]
+        Ni, Nt, Nd = multi_p.shape
+        potentials = np.zeros((N_elec, Nt))
+        for i in range(Ni):
+            p = multi_p[i]
+            r = electrode_locs - multi_p_locs[i]
+            pot = self.get_dipole_potential(p, r)
+            potentials += pot
+        return potentials
 
 def get_current_dipole_moment(dist, current):
     """
@@ -1058,7 +1196,6 @@ def get_current_dipole_moment(dist, current):
     P = np.dot(current.T, dist)
     P_tot = np.sqrt(np.sum(P**2, axis=1))
     return P, P_tot
-
 
 class MEG(object):
     """
@@ -1147,7 +1284,7 @@ class MEG(object):
         """
         Compute magnetic field H from single current-dipole moment localized
         somewhere in space
-        
+
         Parameters
         ----------
         current_dipole_moment : ndarray, dtype=float
@@ -1205,25 +1342,25 @@ class MEG(object):
         Computes the magnetic field in space from axial currents computed from
         membrane potential values and axial resistances of multicompartment
         cells.
-        
+
         See:
         Blagoev et al. (2007) Modelling the magnetic signature of neuronal
         tissue. NeuroImage 37 (2007) 137–148
         DOI: 10.1016/j.neuroimage.2007.04.033
-        
+
         for details on the biophysics governing magnetic fields from axial
         currents.
-        
+
         Parameters
         ----------
         cell : object
             LFPy.Cell-like object. Must have attribute vmem containing recorded
             membrane potentials in units of mV
-        
+
         Examples
         --------
         Define cell object, create synapse, compute current dipole moment:
-    
+
         >>> import LFPy, os, numpy as np, matplotlib.pyplot as plt
         >>> cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test', 'ball_and_sticks.hoc'),
         >>>                  passive=True)
@@ -1231,9 +1368,9 @@ class MEG(object):
         >>> syn = LFPy.Synapse(cell, idx=0, syntype='ExpSyn', weight=0.01, record_current=True)
         >>> syn.set_spike_times_w_netstim()
         >>> cell.simulate(rec_vmem=True)
-    
+
         Instantiate the LFPy.MEG object, compute and plot the magnetic signal in a sensor location:
-    
+
         >>> sensor_locations = np.array([[1E4, 0, 0]])
         >>> meg = LFPy.MEG(sensor_locations)
         >>> H = meg.calculate_H_from_iaxial(cell)
@@ -1259,6 +1396,5 @@ class MEG(object):
                 r_rel = R_ - r_
                 H[i, :, :] += np.dot(i_.reshape((-1, 1)),
                                      np.cross(d_, r_rel).reshape((1, -1))
-                                     ) / (4*np.pi*np.sqrt((r_rel**2).sum())**3)       
+                                     ) / (4*np.pi*np.sqrt((r_rel**2).sum())**3)
         return H
-
