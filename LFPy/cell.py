@@ -2360,6 +2360,63 @@ class Cell(object):
 
         return iseg, ipar
 
+
+    def distort_geometry(self, factor=0., axis='z', nu=0.0):
+        """
+        Distorts cellular morphology with a relative factor along a chosen axis
+        preserving Poisson's ratio. A ratio nu=0.5 assumes uncompressible and
+        isotropic media that embeds the cell. A ratio nu=0 will only affect
+        geometry along the chosen axis. A ratio nu=-1 will isometrically scale
+        the neuron geometry along each axis.
+        
+        This method does not affect the underlying cable properties of the cell,
+        only predictions of extracellular measurements (by affecting the
+        relative locations of sources representing the compartments).
+        
+        Parameters
+        ----------
+        factor : float
+            relative compression/stretching factor of morphology. Default is 0
+            (no compression/stretching). Positive values implies a compression
+            along the chosen axis.
+        axis : str
+            which axis to apply compression/stretching. Default is "z".
+        nu : float
+            Poisson's ratio. Ratio between axial and transversal
+            compression/stretching. Default is 0.
+        """
+        try:
+            assert(abs(factor) < 1.)
+        except AssertionError:
+            raise AssertionError('abs(factor) >= 1, factor must be in <-1, 1>')
+        try:
+            assert(axis in ['x', 'y', 'z'])
+        except AssertionError:
+            raise AssertionError('axis={} not "x", "y" or "z"'.format(axis))
+        
+        for pos, dir_ in zip(self.somapos, 'xyz'):
+            geometry = np.c_[getattr(self, dir_+'start'),
+                             getattr(self, dir_+'mid'),
+                             getattr(self, dir_+'end')]
+            if dir_ == axis:
+                geometry -= pos
+                geometry *= (1. - factor)
+                geometry += pos
+            else:
+                geometry -= pos
+                geometry *= (1. + factor*nu)
+                geometry += pos
+            
+            setattr(self, dir_+'start', geometry[:, 0])
+            setattr(self, dir_+'mid', geometry[:, 1])
+            setattr(self, dir_+'end', geometry[:, 2])
+        
+        # recompute length of each segment
+        self.length = np.sqrt((self.xend - self.xstart)**2 +
+                              (self.yend - self.ystart)**2 +
+                              (self.zend - self.zstart)**2)
+    
+    
     def get_multi_current_dipole_moments(self, timepoints=None):
         '''
         Return 3D current dipole moment vector and middle position vector

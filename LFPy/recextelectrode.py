@@ -744,11 +744,8 @@ class RecMEAElectrode(RecExtElectrode):
         """Will squeeze self.cell centered around the soma by a scaling factor,
         so that it fits inside the slice. If scaling factor is not big enough,
         a RuntimeError is raised. """
-
-        zpos = self.cell.zmid[0]
-        self.cell.zmid = (self.cell.zmid - zpos) * self.squeeze_cell_factor + zpos
-        self.cell.zstart = (self.cell.zstart - zpos) * self.squeeze_cell_factor + zpos
-        self.cell.zend = (self.cell.zend - zpos) * self.squeeze_cell_factor + zpos
+        
+        self.cell.distort_geometry(factor=self.squeeze_cell_factor)
 
         if (np.max([self.cell.zstart, self.cell.zend]) > self.h + self.z_shift or
             np.min([self.cell.zstart, self.cell.zend]) < self.z_shif):
