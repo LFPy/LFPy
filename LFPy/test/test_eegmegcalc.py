@@ -19,6 +19,7 @@ import unittest
 import os
 import numpy as np
 import LFPy
+import neuron
 
 
 class testMEG(unittest.TestCase):
@@ -222,12 +223,83 @@ class testFourSphereVolumeConductor(unittest.TestCase):
                            [0., 15., 0.],
                            [0., 25., 0.],
                            [0., 40., 0.]])
-        four_s = LFPy.FourSphereVolumeConductor(radii, sigmas, r_elec, rz)
-        pots_4s = four_s.calc_potential(p)
+        four_s = LFPy.FourSphereVolumeConductor(radii, sigmas, r_elec)
+        pots_4s = four_s.calc_potential(p, rz)
         inf_s = LFPy.InfiniteVolumeConductor(0.3)
         pots_inf = inf_s.get_dipole_potential(p, r_elec - rz)
 
         np.testing.assert_allclose(pots_4s, pots_inf, rtol=1e-6)
+
+    def test_calc_potential_from_multi_dipoles00(self):
+        neuron.h('forall delete_section()')
+        soma = neuron.h.Section(name='soma')
+        dend1 = neuron.h.Section(name='dend1')
+        dend2 = neuron.h.Section(name='dend2')
+        dend1.connect(soma(0.5), 0)
+        dend2.connect(dend1(1.0), 0)
+        morphology = neuron.h.SectionList()
+        morphology.wholetree()
+        radii = [300, 400, 500, 600]
+        sigmas = [0.3, 1.5, 0.015, 0.3]
+        electrode_locs = np.array([[0., 0., 290.],
+                                   [10., 90., 300.],
+                                   [-90, 50., 400.],
+                                   [110.3, -100., 500.]])
+        cell = cell_w_synapse_from_sections(morphology)
+        t_point = [1,100,-1]
+
+        MD_4s = LFPy.FourSphereVolumeConductor(radii, sigmas, electrode_locs)
+        p, dipole_locs = cell.get_multi_current_dipole_moments(t_point)
+        Np, Nt, Nd = p.shape
+        Ne = electrode_locs.shape[0]
+        pot_MD = MD_4s.calc_potential_from_multi_dipoles(cell, t_point)
+
+        pot_sum = np.zeros((Ne, Nt))
+        for i in range(Np):
+            dip = p[i]
+            dip_loc = dipole_locs[i]
+            fs = LFPy.FourSphereVolumeConductor(radii, sigmas, electrode_locs)
+            pot = fs.calc_potential(dip, dip_loc)
+            pot_sum += pot
+
+        np.testing.assert_almost_equal(pot_MD, pot_sum)
+        np.testing.assert_allclose(pot_MD, pot_sum, rtol=1E-4)
+
+    def test_calc_potential_from_multi_dipoles01(self):
+        neuron.h('forall delete_section()')
+        soma = neuron.h.Section(name='soma')
+        dend1 = neuron.h.Section(name='dend1')
+        dend2 = neuron.h.Section(name='dend2')
+        dend1.connect(soma(0.5), 0)
+        dend2.connect(dend1(1.0), 0)
+        morphology = neuron.h.SectionList()
+        morphology.wholetree()
+        radii = [300, 400, 500, 600]
+        sigmas = [0.3, 1.5, 0.015, 0.3]
+        electrode_locs = np.array([[0., 0., 290.],
+                                   [10., 90., 300.],
+                                   [-90, 50., 400.],
+                                   [110.3, -100., 500.]])
+        cell = cell_w_synapse_from_sections(morphology)
+        t_point = -1
+
+        MD_4s = LFPy.FourSphereVolumeConductor(radii, sigmas, electrode_locs)
+        dipoles, dipole_locs = cell.get_multi_current_dipole_moments()
+        p = dipoles[:,t_point,:]
+        Np = p.shape[0]
+        Nt = 1
+        Ne = electrode_locs.shape[0]
+        pot_MD = MD_4s.calc_potential_from_multi_dipoles(cell)[:,t_point]
+        pot_sum = np.zeros((Ne, Nt))
+        for i in range(Np):
+            dip = np.array([p[i]])
+            dip_loc = dipole_locs[i]
+            fs = LFPy.FourSphereVolumeConductor(radii, sigmas, electrode_locs)
+            pot = fs.calc_potential(dip, dip_loc)
+            pot_sum += pot
+        pot_sum = pot_sum.reshape(4)
+        np.testing.assert_almost_equal(pot_MD, pot_sum)
+        np.testing.assert_allclose(pot_MD, pot_sum, rtol=1E-4)
 
 
 class testInfiniteVolumeConductor(unittest.TestCase):
@@ -242,6 +314,61 @@ class testInfiniteVolumeConductor(unittest.TestCase):
         phi = inf_model.get_dipole_potential(p, r)
         np.testing.assert_allclose(phi, np.array([[1., 0.], [0., 1.]]))
 
+    def test_get_multi_dipole_potential00(self):
+        neuron.h('forall delete_section()')
+        soma = neuron.h.Section(name='soma')
+        dend1 = neuron.h.Section(name='dend1')
+        dend2 = neuron.h.Section(name='dend2')
+        dend3 = neuron.h.Section(name='dend3')
+        dend4 = neuron.h.Section(name='dend4')
+        dend5 = neuron.h.Section(name='dend5')
+        dend1.connect(soma(0.5), 0)
+        dend2.connect(dend1(1.0), 0)
+        dend3.connect(dend2(1.0), 0)
+        dend4.connect(dend3(1.0), 0)
+        dend5.connect(dend4(1.0), 0)
+        morphology = neuron.h.SectionList()
+        morphology.wholetree()
+        electrode_locs = np.array([[0., 0., 10000.]])
+        cell, electrode = cell_w_synapse_from_sections_w_electrode(morphology, electrode_locs)
+        sigma = 0.3
+        t_point = 0
+
+        MD_inf = LFPy.InfiniteVolumeConductor(sigma)
+        pot_MD = MD_inf.get_multi_dipole_potential(cell, electrode_locs)
+        pot_cb = electrode.LFP
+
+        np.testing.assert_almost_equal(pot_MD, pot_cb)
+        np.testing.assert_allclose(pot_MD, pot_cb, rtol=1E-4)
+
+    def test_get_multi_dipole_potential01(self):
+        morphology = os.path.join(LFPy.__path__[0], 'test', 'ball_and_sticks.hoc')
+        electrode_locs = np.array([[0., 0., 10000.]])
+        cell, electrode = cell_w_synapse_from_sections_w_electrode(morphology, electrode_locs)
+        sigma = 0.3
+        t_point = 0
+
+        MD_inf = LFPy.InfiniteVolumeConductor(sigma)
+        pot_MD = MD_inf.get_multi_dipole_potential(cell, electrode_locs)
+        pot_cb = electrode.LFP
+
+        np.testing.assert_almost_equal(pot_MD, pot_cb)
+        np.testing.assert_allclose(pot_MD, pot_cb, rtol=1E-3)
+
+    def test_get_multi_dipole_potential02(self):
+        morphology = os.path.join(LFPy.__path__[0], 'test', 'ball_and_sticks.hoc')
+        electrode_locs = np.array([[0., 0., 10000.]])
+        cell, electrode = cell_w_synapse_from_sections_w_electrode(morphology, electrode_locs)
+        sigma = 0.3
+        t_point = [10, 100, 1000]
+
+        MD_inf = LFPy.InfiniteVolumeConductor(sigma)
+        pot_MD = MD_inf.get_multi_dipole_potential(cell, electrode_locs, t_point)
+        pot_cb = electrode.LFP[:,t_point]
+
+        np.testing.assert_almost_equal(pot_MD, pot_cb)
+        np.testing.assert_allclose(pot_MD, pot_cb, rtol=1E-3)
+
 
 class testOneSphereVolumeConductor(unittest.TestCase):
     """
@@ -255,7 +382,7 @@ class testOneSphereVolumeConductor(unittest.TestCase):
         # current magnitude
         I = 1.
         # conductivity
-        sigma = 0.3 
+        sigma = 0.3
         # sphere radius
         R = 1000
         # source location (along x-axis)
@@ -265,14 +392,14 @@ class testOneSphereVolumeConductor(unittest.TestCase):
         theta = np.zeros(radius.shape)
         phi = np.zeros(radius.shape)
         r = np.array([radius, theta, phi])
-        
+
         # predict potential
         sphere = LFPy.OneSphereVolumeConductor(r=r, R=R, sigma_i=sigma, sigma_o=sigma)
         phi = sphere.calc_potential(rs=rs, I=I)
-        
+
         # ground truth
         phi_gt = I / (4*np.pi*sigma*abs(radius-rs))
-        
+
         # test
         np.testing.assert_almost_equal(phi, phi_gt)
 
@@ -284,7 +411,7 @@ class testOneSphereVolumeConductor(unittest.TestCase):
         # current magnitude
         I = np.ones(10)
         # conductivity
-        sigma = 0.3 
+        sigma = 0.3
         # sphere radius
         R = 1000
         # source location (along x-axis)
@@ -294,14 +421,14 @@ class testOneSphereVolumeConductor(unittest.TestCase):
         theta = np.zeros(radius.shape)
         phi = np.zeros(radius.shape)
         r = np.array([radius, theta, phi])
-        
+
         # predict potential
         sphere = LFPy.OneSphereVolumeConductor(r=r, R=R, sigma_i=sigma, sigma_o=sigma)
         phi = sphere.calc_potential(rs=rs, I=I)
-        
+
         # ground truth
         phi_gt = I[0] / (4*np.pi*sigma*abs(radius-rs))
-        
+
         # test
         np.testing.assert_almost_equal(phi, np.array([phi_gt]*I.size).T)
 
@@ -313,7 +440,7 @@ class testOneSphereVolumeConductor(unittest.TestCase):
         # current magnitude
         I = 1.
         # conductivity
-        sigma = 0.3 
+        sigma = 0.3
         # sphere radius
         R = 10000
         # cell body position
@@ -323,15 +450,15 @@ class testOneSphereVolumeConductor(unittest.TestCase):
         theta = np.zeros(radius.shape)+np.pi/2
         phi = np.zeros(radius.shape)
         r = np.array([radius, theta, phi])
-        # set up cell        
+        # set up cell
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test', 'stick.hoc'))
         cell.set_pos(x=xs, y=0, z=0)
         cell.set_rotation(y=np.pi/2)
-        
+
         # predict potential
         sphere = LFPy.OneSphereVolumeConductor(r=r, R=R, sigma_i=sigma, sigma_o=sigma)
         mapping = sphere.calc_mapping(cell=cell, n_max=100)
-                
+
         # ground truth and tests
         for i, x in enumerate(cell.xmid):
             dist = radius-x
@@ -340,14 +467,14 @@ class testOneSphereVolumeConductor(unittest.TestCase):
             np.testing.assert_almost_equal(mapping[:, i], phi_gt)
 
 
-
 ######## Functions used by tests: ##############################################
 
-def make_class_object(rz1, r_el):
+def make_class_object(rz, r_el):
     '''Return class object fs'''
     radii = [79., 80., 85., 90.]
     sigmas = [0.3, 0.015, 15, 0.3]
-    fs = LFPy.FourSphereVolumeConductor(radii, sigmas, r_el, rz1)
+    fs = LFPy.FourSphereVolumeConductor(radii, sigmas, r_el)
+    fs._rz_params(rz)
     return fs
 
 def make_simple_class_object():
@@ -356,7 +483,8 @@ def make_simple_class_object():
     sigmas = [1., 2., 4., 8.]
     rz1 = np.array([0., 0., .9])
     r_el = np.array([[0., 0., 1.5]])
-    fs = LFPy.FourSphereVolumeConductor(radii, sigmas, r_el, rz1)
+    fs = LFPy.FourSphereVolumeConductor(radii, sigmas, r_el)
+    fs._rz_params(rz1)
     return fs
 
 def decompose_dipole(P1):
@@ -366,3 +494,70 @@ def decompose_dipole(P1):
     fs = make_class_object(rz1, r_el)
     p_rad, p_tan = fs._decompose_dipole(P1)
     return p_rad, p_tan
+
+def cell_w_synapse_from_sections(morphology):
+    '''
+    Make cell and synapse objects, set spike, simulate and return cell
+    '''
+    cellParams = {
+        'morphology': morphology,
+        'cm' : 1,
+        'Ra' : 150,
+        'v_init' : -65,
+        'passive' : True,
+        'passive_parameters' : {'g_pas' : 1./30000, 'e_pas' : -65},
+        'dt' : 2**-6,
+        'tstart' : -50,
+        'tstop' : 50,
+        'delete_sections' : False
+    }
+
+    synapse_parameters = {'e': 0.,
+                      'syntype': 'ExpSyn',
+                      'tau': 5.,
+                      'weight': .001,
+                      'record_current': True,
+                      'idx': 1}
+
+    cell = LFPy.Cell(**cellParams)
+    synapse = LFPy.Synapse(cell, **synapse_parameters)
+    synapse.set_spike_times(np.array([1.]))
+    cell.simulate(rec_current_dipole_moment=True, rec_vmem=True)
+    return cell
+
+def cell_w_synapse_from_sections_w_electrode(morphology, electrode_locs):
+    '''
+    Make cell and synapse objects, set spike, simulate and return cell
+    '''
+    cellParams = {
+        'morphology': morphology,
+        'cm' : 1,
+        'Ra' : 150,
+        'v_init' : -65,
+        'passive' : True,
+        'passive_parameters' : {'g_pas' : 1./30000, 'e_pas' : -65},
+        'dt' : 2**-6,
+        'tstart' : -50,
+        'tstop' : 50,
+        'delete_sections' : False
+    }
+
+    electrodeParams = {'sigma': 0.3,
+                        'x': electrode_locs[:,0],
+                        'y': electrode_locs[:,1],
+                        'z': electrode_locs[:,2],
+                        }
+    cell = LFPy.Cell(**cellParams)
+    electrode = LFPy.RecExtElectrode(cell, **electrodeParams)
+
+    synapse_parameters = {'e': 0.,
+                      'syntype': 'ExpSyn',
+                      'tau': 5.,
+                      'weight': .1,
+                      'record_current': True,
+                      'idx': cell.totnsegs-1}
+
+    synapse = LFPy.Synapse(cell, **synapse_parameters)
+    synapse.set_spike_times(np.array([1.]))
+    cell.simulate(electrode=[electrode],rec_current_dipole_moment=True, rec_vmem=True)
+    return cell, electrode
