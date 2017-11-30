@@ -468,7 +468,6 @@ class FourSphereVolumeConductor(object):
         """
         multi_p, multi_p_locs = cell.get_multi_current_dipole_moments()
         N_elec = self.rxyz.shape[0]
-        print 'N_elec', N_elec
         Ni, Nt, Nd = multi_p.shape
         potential = np.zeros((N_elec, Nt))
         for i in range(Ni):
