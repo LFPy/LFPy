@@ -2398,7 +2398,8 @@ class Cell(object):
         >>>                   syntype='ExpSyn', e=0., tau=1., weight=0.001)
         >>> syn.set_spike_times(np.mgrid[20:100:20])
         >>> cell.simulate(rec_vmem=True, rec_imem=False)
-        >>> multi_dipoles, dipole_locs = cell.get_multi_current_dipole_moments()
+        >>> timepoints = [1,2,3,4]
+        >>> multi_dipoles, dipole_locs = cell.get_multi_current_dipole_moments(timepoints=timepoints)
         '''
         i_axial, d_axial, pos_axial = self.get_axial_currents_from_vmem(timepoints=timepoints)
         Ni, Nt = i_axial.shape

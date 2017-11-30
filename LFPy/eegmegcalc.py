@@ -385,13 +385,13 @@ class FourSphereVolumeConductor(object):
 
     def calc_potential(self, p, rz):
         """
-        Return electric potential from current dipole moment p
+        Return electric potential from current dipole moment p.
 
         Parameters
         ----------
         p : ndarray, dtype=float
             Shape (n_timesteps, 3) array containing the x,y,z components of the
-            current dipole moment in units of (nA*µm) for all timesteps
+            current dipole moment in units of (nA*µm) for all timesteps.
         rz : ndarray, dtype=float
             Shape (3, ) array containing the position of the current dipole in
             cartesian coordinates. Units of (µm).
@@ -401,7 +401,7 @@ class FourSphereVolumeConductor(object):
         potential : ndarray, dtype=float
             Shape (n_contacts, n_timesteps) array containing the electric
             potential at contact point(s) FourSphereVolumeConductor.r in units
-            of (mV) for all timesteps of current dipole moment p
+            of (mV) for all timesteps of current dipole moment p.
 
         """
 
@@ -430,7 +430,7 @@ class FourSphereVolumeConductor(object):
 
     def calc_potential_from_multi_dipoles(self, cell, timepoints=False):
         """
-        Return electric potential from multiple current dipoles from cell
+        Return electric potential from multiple current dipoles from cell.
 
         By multiple current dipoles we mean the dipoles computed from all
         axial currents in a neuron simulation, typically two
@@ -449,7 +449,7 @@ class FourSphereVolumeConductor(object):
         potential : ndarray, dtype=float
             Shape (n_contacts, n_timesteps) array containing the electric
             potential at contact point(s) electrode_locs in units
-            of (mV) for all timesteps of neuron simulation
+            of (mV) for all timesteps of neuron simulation.
 
         Examples
         --------
@@ -459,7 +459,7 @@ class FourSphereVolumeConductor(object):
         from all axial currents in neuron simulation.
         >>> import LFPy
         >>> import numpy as np
-        >>> cell = LFPy.Cell('# PATH/TO/MORPHOLOGY'', extracellular=False)
+        >>> cell = LFPy.Cell('PATH/TO/MORPHOLOGY', extracellular=False)
         >>> syn = LFPy.Synapse(cell, idx=cell.get_closest_idx(0,0,100),
         >>>                   syntype='ExpSyn', e=0., tau=1., weight=0.001)
         >>> syn.set_spike_times(np.mgrid[20:100:20])
@@ -1112,15 +1112,17 @@ class InfiniteVolumeConductor(object):
         from all axial currents in neuron simulation.
         >>> import LFPy
         >>> import numpy as np
-        >>> cell = LFPy.Cell('#PATH/TO/MORPHOLOGY', extracellular=False
+        >>> cell = LFPy.Cell('PATH/TO/MORPHOLOGY', extracellular=False)
         >>> syn = LFPy.Synapse(cell, idx=cell.get_closest_idx(0,0,100),
         >>>                   syntype='ExpSyn', e=0., tau=1., weight=0.001)
         >>> syn.set_spike_times(np.mgrid[20:100:20])
         >>> cell.simulate(rec_vmem=True, rec_imem=False)
         >>> sigma = 0.3
+        >>> timepoints = [10, 20, 50, 100]
         >>> electrode_locs = np.array([[50., -50., 250.]])
         >>> MD_INF = LFPy.InfiniteVolumeConductor(sigma)
-        >>> phi = MD_INF.get_multi_dipole_potential(cell, electrode_locs)
+        >>> phi = MD_INF.get_multi_dipole_potential(cell, electrode_locs,
+        >>>                                         timepoints = timepoints)
         """
 
         multi_p, multi_p_locs = cell.get_multi_current_dipole_moments(timepoints=timepoints)
