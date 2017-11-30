@@ -428,7 +428,7 @@ class FourSphereVolumeConductor(object):
         pot_tot = pot_rad + pot_tan
         return pot_tot
 
-    def calc_potential_from_multi_dipoles(self, cell):
+    def calc_potential_from_multi_dipoles(self, cell, timepoints=False):
         """
         Return electric potential from multiple current dipoles from cell
 
@@ -438,7 +438,11 @@ class FourSphereVolumeConductor(object):
 
         Parameters
         ----------
-        cell : Cell object from LFPy
+        cell : LFPy Cell object, LFPy.Cell
+        timepoints : list, dtype=int
+            list of timepoints at which you want to compute
+            the electric potential. Defaults to False. If not given,
+            all simulation timesteps will be included.
 
         Returns
         -------
@@ -451,11 +455,11 @@ class FourSphereVolumeConductor(object):
         --------
         Compute extracellular potential from neuron simulation in
         four-sphere head model. Instead of simplifying the neural activity to
-        a single dipole, we compute the contribution from every multi dipole from
-        all axial currents in neuron simulation.
+        a single dipole, we compute the contribution from every multi dipole
+        from all axial currents in neuron simulation.
         >>> import LFPy
         >>> import numpy as np
-        >>> cell = LFPy.Cell('PATH/TO/MORPHOLOGY', extracellular=False)
+        >>> cell = LFPy.Cell('# PATH/TO/MORPHOLOGY'', extracellular=False)
         >>> syn = LFPy.Synapse(cell, idx=cell.get_closest_idx(0,0,100),
         >>>                   syntype='ExpSyn', e=0., tau=1., weight=0.001)
         >>> syn.set_spike_times(np.mgrid[20:100:20])
@@ -463,12 +467,15 @@ class FourSphereVolumeConductor(object):
         >>> radii = [200., 300., 400., 500.]
         >>> sigmas = [0.3, 1.5, 0.015, 0.3]
         >>> electrode_locs = np.array([[50., -50., 250.]])
-        >>> MD_4s = LFPy.MultiDipolesInFourSphereVolumeConductor(radii, sigmas)
-        >>> phi = MD_4s.compute_potential_from_multi_dipoles_4s(cell, electrode_locs)
+        >>> timepoints = [0,100]
+        >>> MD_4s = LFPy.FourSphereVolumeConductor(radii,
+        >>>                                        sigmas,
+        >>>                                        electrode_locs)
+        >>> phi = MD_4s.calc_potential_from_multi_dipoles(cell,
+        >>>                                               timepoints)
         """
-        multi_p, multi_p_locs = cell.get_multi_current_dipole_moments()
+        multi_p, multi_p_locs = cell.get_multi_current_dipole_moments(timepoints)
         N_elec = self.rxyz.shape[0]
-        print 'N_elec', N_elec
         Ni, Nt, Nd = multi_p.shape
         potential = np.zeros((N_elec, Nt))
         for i in range(Ni):
@@ -545,8 +552,6 @@ class FourSphereVolumeConductor(object):
             else:
                 n_terms[el_point] = 0.
                 warn('Electrode located outside head model. Maximum r = %s µm. Your r = %s µm', self.r4, el_rad)
-        print 'phi_const', phi_const.shape
-        print 'n_terms', n_terms.shape
         potential = phi_const * n_terms
         return potential
 
@@ -1071,7 +1076,7 @@ class InfiniteVolumeConductor(object):
         phi = 1./(4*np.pi*self.sigma)*(dotprod.T/ r_factor).T
         return phi
 
-    def get_multi_dipole_potential(self, cell, electrode_locs):
+    def get_multi_dipole_potential(self, cell, electrode_locs, timepoints=False):
         """
         Return electric potential from multiple current dipoles from cell
 
@@ -1082,7 +1087,6 @@ class InfiniteVolumeConductor(object):
         Parameters
         ----------
         cell : Cell object from LFPy
-
         electrode_locs : ndarray, dtype=float
             Shape (n_contacts, 3) array containing n_contacts electrode
             locations in cartesian coordinates in units of (µm).
@@ -1090,6 +1094,8 @@ class InfiniteVolumeConductor(object):
             less than or equal to scalp radius and larger than
             the distance between dipole and sphere
             center: |rz| < |r_el| <= radii[3].
+        timepoints : list, dtype=int
+            list of timepoints at which you want to compute the potential
 
         Returns
         -------
@@ -1117,7 +1123,7 @@ class InfiniteVolumeConductor(object):
         >>> phi = MD_INF.get_multi_dipole_potential(cell, electrode_locs)
         """
 
-        multi_p, multi_p_locs = cell.get_multi_current_dipole_moments()
+        multi_p, multi_p_locs = cell.get_multi_current_dipole_moments(timepoints=timepoints)
         N_elec = electrode_locs.shape[0]
         Ni, Nt, Nd = multi_p.shape
         potentials = np.zeros((N_elec, Nt))
@@ -1186,49 +1192,6 @@ def get_current_dipole_moment(dist, current):
     P = np.dot(current.T, dist)
     P_tot = np.sqrt(np.sum(P**2, axis=1))
     return P, P_tot
-#
-# def get_multi_current_dipole_moments(cell):
-#     '''
-#     Return 3D current dipole moment vector and middle position vector
-#     from each axial current in space.
-#
-#     Parameters
-#     ----------
-#     cell : Cell object from LFPy
-#
-#     Returns
-#     -------
-#     multi_dipoles : ndarray, dtype = float
-#         Shape (n_axial_currents, n_timepoints, 3) array
-#         containing the x-,y-,z-components of the current dipole moment
-#         from each axial current in cell, at all timepoints.
-#         The number of axial currents, n_axial_currents = (cell.totnsegs-1)*2
-#         and the number of timepoints, n_timepoints = cell.tvec.size.
-#         The current dipole moments are given in units of (nA µm).
-#
-#     pos_axial : ndarray, dtype = float
-#         Shape (n_axial_currents, 3) array containing the x-, y-, and
-#         z-components giving the mid position in space of each multi_dipole
-#         in units of (µm).
-#
-#     Examples
-#     --------
-#     Get all current dipole moments and positions from all axial currents in a
-#     single neuron simulation.
-#     >>> import LFPy
-#     >>> import numpy as np
-#     >>> cell = LFPy.Cell('PATH/TO/MORPHOLOGY', extracellular=False)
-#     >>> syn = LFPy.Synapse(cell, idx=cell.get_closest_idx(0,0,1000),
-#     >>>                   syntype='ExpSyn', e=0., tau=1., weight=0.001)
-#     >>> syn.set_spike_times(np.mgrid[20:100:20])
-#     >>> cell.simulate(rec_vmem=True, rec_imem=False)
-#     >>> multi_dipoles, dipole_locs = LFPy.get_multi_current_dipole_moments(cell)
-#     '''
-#     i_axial, d_axial, pos_axial = cell.get_axial_currents_from_vmem()
-#     Ni, Nt = i_axial.shape
-#     multi_dipoles = np.array([[i_axial[i,j]*d_axial[i] for j in range(Nt)] for i in range(Ni)])
-#
-#     return multi_dipoles, pos_axial
 
 class MEG(object):
     """
