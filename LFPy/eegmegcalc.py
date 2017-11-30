@@ -332,11 +332,11 @@ class FourSphereVolumeConductor(object):
     >>> sigmas = [0.3, 1.5, 0.015, 0.3]
     >>> r = np.array([[0., 0., 90000.], [0., 85000., 0.]])
     >>> rz = np.array([0., 0., 78000.])
-    >>> sphere_model = LFPy.FourSphereVolumeConductor(radii, sigmas, r, rz)
+    >>> sphere_model = LFPy.FourSphereVolumeConductor(radii, sigmas, r)
     >>> # current dipole moment
     >>> p = np.array([[10., 10., 10.]]*10) # 10 timesteps
     >>> # compute potential
-    >>> potential = sphere_model.calc_potential(p)
+    >>> potential = sphere_model.calc_potential(p, rz)
 
     """
 
