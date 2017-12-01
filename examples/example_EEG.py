@@ -105,8 +105,8 @@ if __name__ == '__main__':
     r_mid = somapos + r_mid/2.
 
     eeg_coords_top = np.array([[0., 0., radii[3] - rad_tol]])
-    four_sphere_top = LFPy.FourSphereVolumeConductor(radii, sigmas, eeg_coords_top, r_mid)
-    pot_db_4s_top = four_sphere_top.calc_potential(P)
+    four_sphere_top = LFPy.FourSphereVolumeConductor(radii, sigmas, eeg_coords_top)
+    pot_db_4s_top = four_sphere_top.calc_potential(P, r_mid)
     eeg_top = np.array(pot_db_4s_top) * 1e9
 
     #measurement points
@@ -131,8 +131,8 @@ if __name__ == '__main__':
     # potential in 4S with db
     time_max = np.argmax(np.linalg.norm(P, axis=1))
     p = P[time_max, None]
-    four_sphere = LFPy.FourSphereVolumeConductor(radii, sigmas, eeg_coords, r_mid)
-    pot_db_4s = four_sphere.calc_potential(p)
+    four_sphere = LFPy.FourSphereVolumeConductor(radii, sigmas, eeg_coords)
+    pot_db_4s = four_sphere.calc_potential(p, r_mid)
     eeg = pot_db_4s.reshape(num_theta, num_phi)*1e9# from mV to pV
 
     P_mag = np.sqrt(P[:, 0]**2 + P[:, 1]**2 + P[:, 2]**2)
@@ -158,9 +158,8 @@ if __name__ == '__main__':
     ax_eeg = fig.add_subplot(313, title="EEG at top", xlabel="Time (ms)",
                              ylabel='pV')
     ax_eeg.plot(cell.tvec, eeg_top[0, :], 'k')
-    
+
     ax_eeg.axvline(cell.tvec[time_max], c='gray', ls='--')
 
     plt.savefig('example_EEG.pdf')
     plt.show()
-    

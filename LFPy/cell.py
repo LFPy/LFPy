@@ -368,7 +368,7 @@ class Cell(object):
                             'while creating a Cell object.',
                             'One possible cause is the NEURON mechanisms have',
                             'not been compiled, ',
-                            'try running nrnivmodl or mknrndll (Windows) in ', 
+                            'try running nrnivmodl or mknrndll (Windows) in ',
                             'the mod-file-containing folder. ',])
                         raise Exception(ERRMSG)
                 elif code.split('.')[-1] == 'py':
@@ -2117,17 +2117,25 @@ class Cell(object):
 
         return
 
-    def get_axial_currents_from_vmem(self):
+    def get_axial_currents_from_vmem(self, timepoints=None):
         """
         Compute axial currents from cell sim: get current magnitude,
         distance vectors and position vectors.
 
+        Parameters
+        ----------
+        timepoints : ndarray, dtype=int
+            array of timepoints in simulation at which you want to compute
+            the axial currents. Defaults to False. If not given,
+            all simulation timesteps will be included.
+
         Returns
         -------
         i_axial : ndarray, dtype=float
-            Shape ((cell.totnsegs-1)*2, cell.tvec.size) array of axial current
-            magnitudes I in units of (nA) in cell at all timesteps of the
-            simulation. Contains two current magnitudes per segment,
+            Shape ((cell.totnsegs-1)*2, len(timepoints)) array of axial current
+            magnitudes I in units of (nA) in cell at all timesteps in timepoints,
+            or at all timesteps of the simulation if timepoints=None.
+            Contains two current magnitudes per segment,
             (except for the root segment): 1) the current from the mid point of
             the segment to the segment start point, and 2) the current from
             the segment start point to the mid point of the parent segment.
@@ -2175,7 +2183,7 @@ class Cell(object):
             for _ in sec:
                 iseg, ipar = self._parent_and_segment_current(seg_idx, parent_idx,
                                                         bottom_seg, branch,
-                                                        parentsec)
+                                                        parentsec, timepoints)
 
                 if bottom_seg:
                     # if a seg is connencted to soma, it is
@@ -2280,7 +2288,7 @@ class Cell(object):
 
 
     def _parent_and_segment_current(self, seg_idx, parent_idx, bottom_seg,
-                              branch, parentsec):
+                              branch, parentsec, timepoints=None):
         """
         Return axial current from segment (seg_idx) mid to segment start,
         and current from parent segment (parent_idx) end to parent segment mid.
@@ -2295,6 +2303,11 @@ class Cell(object):
         bottom_seg : boolean
         branch : boolean
         parentsec : neuron.Section object
+        timepoints : ndarray, dtype=int
+            array of timepoints in simulation at which you want to compute
+            the axial currents. Defaults to None. If not given,
+            all simulation timesteps will be included.
+
         Returns
         -------
         iseg : dtype=float
@@ -2306,8 +2319,11 @@ class Cell(object):
         """
         ri_list = self.get_axial_resistance()
         seg_ri = ri_list[seg_idx]
-        vpar = self.vmem[parent_idx]
-        vseg = self.vmem[seg_idx]
+        vmem = self.vmem
+        if timepoints is not None:
+            vmem = self.vmem[:,timepoints]
+        vpar = vmem[parent_idx]
+        vseg = vmem[seg_idx]
         children_dict = self.get_dict_of_children_idx()
         connection_dict = self.get_dict_parent_connections()
 
@@ -2333,7 +2349,7 @@ class Cell(object):
                     sib_conn_point = connection_dict[sib]
                     if sib_conn_point == 1:
 
-                        v_branch_num += self.vmem[sib_idx][0]/ri_list[sib_idx]
+                        v_branch_num += vmem[sib_idx][0]/ri_list[sib_idx]
                         v_branch_denom += 1./ ri_list[sib_idx]
                 v_branch = v_branch_num/v_branch_denom
                 iseg = (v_branch - vseg)/seg_ri
@@ -2343,3 +2359,107 @@ class Cell(object):
             ipar = iseg
 
         return iseg, ipar
+
+
+    def distort_geometry(self, factor=0., axis='z', nu=0.0):
+        """
+        Distorts cellular morphology with a relative factor along a chosen axis
+        preserving Poisson's ratio. A ratio nu=0.5 assumes uncompressible and
+        isotropic media that embeds the cell. A ratio nu=0 will only affect
+        geometry along the chosen axis. A ratio nu=-1 will isometrically scale
+        the neuron geometry along each axis.
+        
+        This method does not affect the underlying cable properties of the cell,
+        only predictions of extracellular measurements (by affecting the
+        relative locations of sources representing the compartments).
+        
+        Parameters
+        ----------
+        factor : float
+            relative compression/stretching factor of morphology. Default is 0
+            (no compression/stretching). Positive values implies a compression
+            along the chosen axis.
+        axis : str
+            which axis to apply compression/stretching. Default is "z".
+        nu : float
+            Poisson's ratio. Ratio between axial and transversal
+            compression/stretching. Default is 0.
+        """
+        try:
+            assert(abs(factor) < 1.)
+        except AssertionError:
+            raise AssertionError('abs(factor) >= 1, factor must be in <-1, 1>')
+        try:
+            assert(axis in ['x', 'y', 'z'])
+        except AssertionError:
+            raise AssertionError('axis={} not "x", "y" or "z"'.format(axis))
+        
+        for pos, dir_ in zip(self.somapos, 'xyz'):
+            geometry = np.c_[getattr(self, dir_+'start'),
+                             getattr(self, dir_+'mid'),
+                             getattr(self, dir_+'end')]
+            if dir_ == axis:
+                geometry -= pos
+                geometry *= (1. - factor)
+                geometry += pos
+            else:
+                geometry -= pos
+                geometry *= (1. + factor*nu)
+                geometry += pos
+            
+            setattr(self, dir_+'start', geometry[:, 0])
+            setattr(self, dir_+'mid', geometry[:, 1])
+            setattr(self, dir_+'end', geometry[:, 2])
+        
+        # recompute length of each segment
+        self.length = np.sqrt((self.xend - self.xstart)**2 +
+                              (self.yend - self.ystart)**2 +
+                              (self.zend - self.zstart)**2)
+    
+    
+    def get_multi_current_dipole_moments(self, timepoints=None):
+        '''
+        Return 3D current dipole moment vector and middle position vector
+        from each axial current in space.
+
+        Parameters
+        ----------
+        timepoints : ndarray, dtype=int
+            array of timepoints at which you want to compute
+            the current dipole moments. Defaults to None. If not given,
+            all simulation timesteps will be included.
+
+        Returns
+        -------
+        multi_dipoles : ndarray, dtype = float
+            Shape (n_axial_currents, n_timepoints, 3) array
+            containing the x-,y-,z-components of the current dipole moment
+            from each axial current in cell, at all timepoints.
+            The number of axial currents, n_axial_currents = (cell.totnsegs-1)*2
+            and the number of timepoints, n_timepoints = cell.tvec.size.
+            The current dipole moments are given in units of (nA µm).
+
+        pos_axial : ndarray, dtype = float
+            Shape (n_axial_currents, 3) array containing the x-, y-, and
+            z-components giving the mid position in space of each multi_dipole
+            in units of (µm).
+
+        Examples
+        --------
+        Get all current dipole moments and positions from all axial currents in a
+        single neuron simulation.
+        >>> import LFPy
+        >>> import numpy as np
+        >>> cell = LFPy.Cell('PATH/TO/MORPHOLOGY', extracellular=False)
+        >>> syn = LFPy.Synapse(cell, idx=cell.get_closest_idx(0,0,1000),
+        >>>                   syntype='ExpSyn', e=0., tau=1., weight=0.001)
+        >>> syn.set_spike_times(np.mgrid[20:100:20])
+        >>> cell.simulate(rec_vmem=True, rec_imem=False)
+        >>> timepoints = np.array([1,2,3,4])
+        >>> multi_dipoles, dipole_locs = cell.get_multi_current_dipole_moments(timepoints=timepoints)
+        '''
+        i_axial, d_axial, pos_axial = self.get_axial_currents_from_vmem(timepoints=timepoints)
+        Ni, Nt = i_axial.shape
+        multi_dipoles = np.array([i_axial[i][:, np.newaxis]*d_axial[i] for i in range(Ni)])
+
+        return multi_dipoles, pos_axial
