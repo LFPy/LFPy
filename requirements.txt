@@ -5,11 +5,9 @@ scipy>=0.14
 Cython>=0.20
 h5py>=2.5
 mpi4py>=1.2
-matplotlib>=1.5
+matplotlib>=2.0
 git+https://github.com/INCF/csa.git@master
 # essential, not automatically installable:
 # neuron>=7.4
-# optional, for running examples:
-matplotlib>=2.0
 # optional, for running tests:
 nose>=1.3
