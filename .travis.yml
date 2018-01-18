@@ -14,6 +14,7 @@ addons:
       - gfortran
 install:
   - travis_wait 30 pip install scipy -q
+  - pip install setuptools cython coveralls h5py matplotlib mpi4py -q
   - pip install -r requirements.txt
   - source continuous_integration/install.sh
 script:
