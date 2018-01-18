@@ -63,6 +63,7 @@ setup(
                               os.path.join('powerpc', '*'),
                               os.path.join('powerpc', '.libs', '*'),
                               ]},
+    include_package_data=True,
     cmdclass = cmdclass,
     ext_modules = ext_modules,
     url='http://LFPy.github.io',

@@ -1,6 +1,10 @@
 include README.md
 include LICENSE
 
+recursive-include LFPy/test x86_64 *
+recursive-include LFPy/test i686 *
+recursive-include LFPy/test powerpc *
+
 recursive-include examples *.py
 recursive-include examples *.ipynb
 recursive-include examples *.hoc
