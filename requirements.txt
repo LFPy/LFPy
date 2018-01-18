@@ -5,7 +5,7 @@ scipy>=0.14
 Cython>=0.20
 h5py>=2.5
 mpi4py>=1.2
--e csa+https://github.com/INCF/csa.git@master
+git+https://github.com/INCF/csa.git@master
 # essential, not automatically installable:
 # neuron>=7.4
 # optional, for running examples:
