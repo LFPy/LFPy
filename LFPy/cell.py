@@ -1248,12 +1248,11 @@ class Cell(object):
             self.recvariablesreclist.append(variablereclist)
             for sec in self.allseclist:
                 for seg in sec:
-                    recvector = neuron.h.Vector(int(self.tstop /
-                                                    self.dt + 1))
-                    if hasattr(seg, variable):
+                    recvector = neuron.h.Vector(int(self.tstop / self.dt + 1))
+                    try:
                         recvector.record(getattr(seg, '_ref_%s' % variable),
                                          self.dt)
-                    else:
+                    except(NameError, AttributeError):
                         print('non-existing variable %s, section %s.%f' %
                                 (variable, sec.name(), seg.x))
                     variablereclist.append(recvector)
