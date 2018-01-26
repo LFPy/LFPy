@@ -6,7 +6,7 @@ Cython>=0.20
 h5py>=2.5
 mpi4py>=1.2
 matplotlib>=2.0
-git+https://github.com/INCF/csa.git@master
+-e git+https://github.com/INCF/csa.git@master#egg=LFPy
 # essential, not automatically installable:
 # neuron>=7.4
 # optional, for running tests:
