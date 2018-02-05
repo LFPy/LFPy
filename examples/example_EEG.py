@@ -131,7 +131,9 @@ if __name__ == '__main__':
     # potential in 4S with db
     time_max = np.argmax(np.linalg.norm(P, axis=1))
     p = P[time_max, None]
+
     four_sphere = LFPy.FourSphereVolumeConductor(radii, sigmas, eeg_coords)
+
     pot_db_4s = four_sphere.calc_potential(p, r_mid)
     eeg = pot_db_4s.reshape(num_theta, num_phi)*1e9# from mV to pV
 
@@ -161,5 +163,5 @@ if __name__ == '__main__':
 
     ax_eeg.axvline(cell.tvec[time_max], c='gray', ls='--')
 
-    plt.savefig('example_EEG.pdf')
+    # plt.savefig('example_EEG.pdf')
     plt.show()
