@@ -748,7 +748,7 @@ class RecMEAElectrode(RecExtElectrode):
         self.cell.distort_geometry(factor=self.squeeze_cell_factor)
 
         if (np.max([self.cell.zstart, self.cell.zend]) > self.h + self.z_shift or
-            np.min([self.cell.zstart, self.cell.zend]) < self.z_shif):
+            np.min([self.cell.zstart, self.cell.zend]) < self.z_shift):
             raise RuntimeError("Squeeze factor not large enough to confine "
                                "cell to slice. Increase squeeze_cell_factor,"
                                "move or rotate cell.")
