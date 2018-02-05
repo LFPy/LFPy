@@ -1,0 +1,34 @@
+/* ----------------------------------------------------
+sticks_not_connected_head_to_toe.hoc
+Note the conventions:
+ - soma needs to be a list (soma[0], not soma),
+ - use soma for the soma compartment,
+ - use a name starting with dend for the dendrites.
+-----------------------------------------------------*/
+
+
+create soma, dend1, dend2, dend3
+
+soma {
+    pt3dadd(0, 0, -10, 10)
+    pt3dadd(0, 0, 0, 10)
+}
+
+dend1 {
+    pt3dadd(0, 0, 0, 5)
+    pt3dadd(0, 0, 200, 5)
+}
+
+dend2 {
+    pt3dadd(0, 0, 100, 2)
+    pt3dadd(0, 20, 200, 2)
+}
+
+dend3 {
+    pt3dadd(0, 0, 140, 2)
+    pt3dadd(-10, -50, 200, 2)
+}
+
+connect dend1(0), soma(1)
+connect dend2(0), dend1(.5)
+connect dend3(0), dend1(.7)
