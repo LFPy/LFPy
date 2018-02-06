@@ -874,6 +874,23 @@ class testCell(unittest.TestCase):
 
     def test_cell_get_axial_currents_from_vmem_09(self):
         '''
+        Check Kirchhoff in 2-comp model where dend 0 is connected to soma 0.
+        '''
+        neuron.h('forall delete_section()')
+        soma = neuron.h.Section(name='soma')
+        dend1 = neuron.h.Section(name='dend1')
+        dend1.connect(soma(0.0), 0)
+        morphology = neuron.h.SectionList()
+        morphology.wholetree()
+        cell = cell_w_synapse_from_sections(morphology)
+        iaxial, d_list, pos_list = cell.get_axial_currents_from_vmem()
+        np.testing.assert_almost_equal(iaxial[0], -cell.imem[0], decimal=9)
+        np.testing.assert_almost_equal(iaxial[0], cell.imem[1], decimal=9)
+        np.testing.assert_allclose(iaxial[0], -cell.imem[0], rtol=1E-3)
+        np.testing.assert_allclose(iaxial[0], cell.imem[1], rtol=1E-3)
+
+    def test_cell_get_axial_currents_from_vmem_10(self):
+        '''
         Check that len(iaxial) = (cell.totnsegs - 1)*2
         '''
         soma = neuron.h.Section(name='soma[0]')
@@ -889,7 +906,7 @@ class testCell(unittest.TestCase):
         iaxial, d_list, pos_list = cell.get_axial_currents_from_vmem()
         self.assertEqual(iaxial.shape[0], (cell.totnsegs - 1)*2)
 
-    def test_cell_get_axial_currents_from_vmem_10(self):
+    def test_cell_get_axial_currents_from_vmem_11(self):
         '''
         Check Kirchhoff in soma when two dends connected to soma mid.
         '''
@@ -908,7 +925,28 @@ class testCell(unittest.TestCase):
         np.testing.assert_almost_equal(-iaxial[0]-iaxial[2]-iaxial[4], cell.imem[0], decimal=9)
         np.testing.assert_allclose(-iaxial[0]-iaxial[2]-iaxial[4], cell.imem[0], rtol=1E-3)
 
-    def test_cell_get_axial_currents_from_vmem_11(self):
+    def test_cell_get_axial_currents_from_vmem_12(self):
+        '''
+        Check Kirchhoff in morph where secs are connected to arc length 0.5.
+        '''
+        morphology = os.path.join(LFPy.__path__[0], 'test', 'sticks_not_connected_head_to_toe.hoc')
+        cell = cell_w_synapse_from_sections(morphology)
+        iaxial, d_list, pos_list = cell.get_axial_currents_from_vmem()
+        np.testing.assert_almost_equal(iaxial[6]+iaxial[10]+cell.imem[3], iaxial[5], decimal=9)
+        np.testing.assert_allclose(iaxial[6]+iaxial[10]+cell.imem[3], iaxial[5], rtol=1E-5)
+
+    def test_cell_get_axial_currents_from_vmem_13(self):
+        '''
+        Check Kirchhoff in morph where secs are connected to arc length 0.7.
+        '''
+        morphology = os.path.join(LFPy.__path__[0], 'test', 'sticks_not_connected_head_to_toe.hoc')
+        cell = cell_w_synapse_from_sections(morphology)
+        iaxial, d_list, pos_list = cell.get_axial_currents_from_vmem()
+        np.testing.assert_almost_equal(iaxial[8]+iaxial[20]+cell.imem[4], iaxial[7], decimal=9)
+        np.testing.assert_allclose(iaxial[8]+iaxial[20]+cell.imem[4], iaxial[7], rtol=1E-5)
+
+
+    def test_cell_get_axial_currents_from_vmem_14(self):
         '''
         Check iaxial current mid positions in three-section stick.
         '''
@@ -941,7 +979,7 @@ class testCell(unittest.TestCase):
         np.testing.assert_almost_equal(mid_current_positions, pos_list2, decimal=9)
         np.testing.assert_allclose(mid_current_positions, pos_list2, rtol=1E-4)
 
-    def test_cell_get_axial_currents_from_vmem_12(self):
+    def test_cell_get_axial_currents_from_vmem_15(self):
         '''
         Check iaxial current mid positions in ball-n-y.
         '''

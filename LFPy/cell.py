@@ -2116,6 +2116,7 @@ class Cell(object):
 
         return
 
+
     def get_axial_currents_from_vmem(self, timepoints=None):
         """
         Compute axial currents from cell sim: get current magnitude,
@@ -2167,22 +2168,59 @@ class Cell(object):
         children_dict = self.get_dict_of_children_idx()
         for sec in self.allseclist.allsec():
             if not neuron.h.SectionRef(sec.name()).has_parent():
-                # skip soma, since soma is an orphan
-                continue
-            bottom_seg = True
-            secref = neuron.h.SectionRef(sec.name())
-            parentseg = secref.parent()
-            parentsec = parentseg.sec
-
-            branch = len(children_dict[parentsec.name()]) > 1
-
-            parent_idx = self.get_idx(section=parentsec.name())[-1]
-            seg_idx = self.get_idx(section=sec.name())[0]
-
+                print('sec has no parent')
+                if sec.nseg == 1:
+                    # skip soma, since soma is an orphan
+                    continue
+                else:
+                    print('first section')
+                    seg_idx = 1
+                    parent_idx = 0
+                    bottom_seg = False
+                    first_sec = True
+                    branch=False
+                    parentsec=None
+                    children_dict=None
+                    connection_dict=None
+                    conn_point=1
+            else:
+                print('sec has parent')
+                first_sec = False
+                bottom_seg = True
+                secref = neuron.h.SectionRef(sec.name())
+                parentseg = secref.parent()
+                parentsec = parentseg.sec
+                children_dict = self.get_dict_of_children_idx()
+                branch = len(children_dict[parentsec.name()]) > 1
+                connection_dict = self.get_dict_parent_connections()
+                conn_point = connection_dict[sec.name()]
+                # find parent index
+                if conn_point == 1 or parentsec.nseg == 1:
+                    internal_parent_idx = - 1
+                elif conn_point == 0:
+                    internal_parent_idx = 0
+                else:
+                    segment_xlist = np.array([segment.x for segment in parentsec])
+                    internal_parent_idx = np.abs(segment_xlist - conn_point).argmin()
+                parent_idx = self.get_idx(section=parentsec.name())[internal_parent_idx]
+                # find segment index
+                seg_idx = self.get_idx(section=sec.name())[0]
             for _ in sec:
-                iseg, ipar = self._parent_and_segment_current(seg_idx, parent_idx,
-                                                        bottom_seg, branch,
-                                                        parentsec, timepoints)
+                print('parent_idx:', parent_idx)
+                print('seg_idx:', seg_idx)
+                if first_sec:
+                    first_sec = False
+                    continue
+                iseg, ipar = self._parent_and_segment_current(seg_idx,
+                                                              parent_idx,
+                                                              bottom_seg,
+                                                              branch,
+                                                              parentsec,
+                                                              children_dict,
+                                                              connection_dict,
+                                                              conn_point,
+                                                              timepoints
+                                                              )
 
                 if bottom_seg:
                     # if a seg is connencted to soma, it is
@@ -2277,7 +2315,7 @@ class Cell(object):
         connection_dict : dictionary
             Dictionary containing a float in range [0, 1] for each section
             in cell. The float gives the location on the parent segment
-            to which the section is connected to.
+            to which the section is connected.
             The dictionary is needed for computing axial currents.
         """
         connection_dict = {}
@@ -2287,7 +2325,9 @@ class Cell(object):
 
 
     def _parent_and_segment_current(self, seg_idx, parent_idx, bottom_seg,
-                              branch, parentsec, timepoints=None):
+                                    branch=False, parentsec=None,
+                                    children_dict=None, connection_dict=None,
+                                    conn_point=1, timepoints=None):
         """
         Return axial current from segment (seg_idx) mid to segment start,
         and current from parent segment (parent_idx) end to parent segment mid.
@@ -2316,6 +2356,7 @@ class Cell(object):
             Axial current in units of (nA)
             from parent segment end point to parent segment mid point.
         """
+        print('parent_idx, seg_idx: ', parent_idx, seg_idx)
         ri_list = self.get_axial_resistance()
         seg_ri = ri_list[seg_idx]
         vmem = self.vmem
@@ -2323,17 +2364,24 @@ class Cell(object):
             vmem = self.vmem[:,timepoints]
         vpar = vmem[parent_idx]
         vseg = vmem[seg_idx]
-        children_dict = self.get_dict_of_children_idx()
-        connection_dict = self.get_dict_parent_connections()
-
-        conn_point = neuron.h.parent_connection()
-        if bottom_seg and conn_point == 1:
-            parent_ri = neuron.h.ri(0)
+        if bottom_seg and (conn_point == 0 or conn_point == 1):
+            print('bottom_seg and conn_point is 0 or 1')
+            if conn_point == 0:
+                print( 'conn_point is 0')
+                parent_ri = ri_list[parent_idx]
+            else:
+                print( 'conn_point is 1')
+                parent_ri = neuron.h.ri(0)
+            print('parent_ri:', parent_ri)
             if not branch:
+                print('no branch')
                 ri = parent_ri + seg_ri
+                print('ri:', ri)
                 iseg = (vpar - vseg) / ri
+                print('vseg, vpar, :', vpar, vseg)
                 ipar = iseg
             else:
+                print('branch')
                 [sib_idcs] = np.take(children_dict[parentsec.name()],
                                   np.where(children_dict[parentsec.name()]
                                            != seg_idx))
@@ -2354,10 +2402,12 @@ class Cell(object):
                 iseg = (v_branch - vseg)/seg_ri
                 ipar = iseg
         else:
+            print('normal ohm.')
             iseg = (vpar - vseg) / seg_ri
             ipar = iseg
-
+            print('vpar, vseg, seg_ri:', vpar, vseg, seg_ri)
         return iseg, ipar
+
 
 
     def distort_geometry(self, factor=0., axis='z', nu=0.0):
@@ -2367,11 +2417,11 @@ class Cell(object):
         isotropic media that embeds the cell. A ratio nu=0 will only affect
         geometry along the chosen axis. A ratio nu=-1 will isometrically scale
         the neuron geometry along each axis.
-        
+
         This method does not affect the underlying cable properties of the cell,
         only predictions of extracellular measurements (by affecting the
         relative locations of sources representing the compartments).
-        
+
         Parameters
         ----------
         factor : float
@@ -2392,7 +2442,7 @@ class Cell(object):
             assert(axis in ['x', 'y', 'z'])
         except AssertionError:
             raise AssertionError('axis={} not "x", "y" or "z"'.format(axis))
-        
+
         for pos, dir_ in zip(self.somapos, 'xyz'):
             geometry = np.c_[getattr(self, dir_+'start'),
                              getattr(self, dir_+'mid'),
@@ -2405,17 +2455,17 @@ class Cell(object):
                 geometry -= pos
                 geometry *= (1. + factor*nu)
                 geometry += pos
-            
+
             setattr(self, dir_+'start', geometry[:, 0])
             setattr(self, dir_+'mid', geometry[:, 1])
             setattr(self, dir_+'end', geometry[:, 2])
-        
+
         # recompute length of each segment
         self.length = np.sqrt((self.xend - self.xstart)**2 +
                               (self.yend - self.ystart)**2 +
                               (self.zend - self.zstart)**2)
-    
-    
+
+
     def get_multi_current_dipole_moments(self, timepoints=None):
         '''
         Return 3D current dipole moment vector and middle position vector
