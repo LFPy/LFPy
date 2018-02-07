@@ -436,8 +436,9 @@ class NetworkPopulation(object):
             expected mean depth of somas of population.
         scale : float
             expected standard deviation of depth of somas of population.
-        cap : None or float
-            if float, cap distribution between [loc-cap, loc+cap)
+        cap : None, float or length to list of floats
+            if float, cap distribution between [loc-cap, loc+cap),
+            if list, cap distribution between [loc-cap[0], loc+cap[1]]
 
 
         Returns
@@ -460,10 +461,20 @@ class NetworkPopulation(object):
                 x[i] = (np.random.rand()-0.5)*radius*2
                 y[i] = (np.random.rand()-0.5)*radius*2
         z = np.random.normal(loc=loc, scale=scale, size=POP_SIZE)
-        if cap is not None:
+        if type(cap) is float:
             while not np.all((z >= loc-cap) & (z < loc+cap)):
                 inds = (z < loc-cap) ^ (z > loc+cap)
                 z[inds] = np.random.normal(loc=loc, scale=scale, size=inds.sum())
+        elif type(cap) is list:
+            try:
+                assert(len(cap) == 2)
+            except AssertionError:
+                raise AssertionError('cap = {} is not a length 2 list'.format(float))
+            while not np.all((z >= loc-cap[0]) & (z < loc+cap[1])):
+                inds = (z < loc-cap[0]) ^ (z > loc+cap[1])
+                z[inds] = np.random.normal(loc=loc, scale=scale, size=inds.sum())
+
+
 
         soma_pos = []
         for i in range(POP_SIZE):
