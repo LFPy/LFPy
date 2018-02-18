@@ -16,7 +16,7 @@ Active development of LFPy, as well as issue tracking and revision tracking, rel
 Clone LFPy on `GitHub.com <https://github.com/LFPy/LFPy>`_: ``git clone https://github.com/LFPy/LFPy.git``
 
 LFPy provides a set of easy-to-use Python classes for setting up your model, running your simulations and calculating the extracellular potentials arising from activity in your model neuron. If you have a model
-working in `NEURON <http://www.neuron.yale.edu>`_ or `NeuroML2 <https://www.neuroml.org/neuromlv2>`
+working in `NEURON <http://www.neuron.yale.edu>`_ or `NeuroML2 <https://www.neuroml.org/neuromlv2>`_
 already, it is likely that it can be adapted to work with LFPy.
 
 The extracellular potentials are calculated from transmembrane currents in multi-compartment neuron models using the line-source method (Holt & Koch, J Comp Neurosci 1999),
@@ -52,7 +52,7 @@ This scientific software is released under the GNU Public License `GPLv3 <http:/
 Tutorial slides on LFPy
 -----------------------
 
-Slides for OCNS 2017 meeting tutorial `T4: Modeling and analysis of extracellular potentials <http://www.cnsorg.org/cns-2017-tutorials#t4>`_ hosted in Antwerp, Belgium on LFPy and hybridLFPy: `CNS2017_LFPy_tutorial.pdf  <http://LFPy.github.io/downloads/CNS2017_LFPy_tutorial.pdf`_
+Slides for OCNS 2017 meeting tutorial `T4: Modeling and analysis of extracellular potentials <http://www.cnsorg.org/cns-2017-tutorials#t4>`_ hosted in Antwerp, Belgium on LFPy and hybridLFPy: `CNS2017_LFPy_tutorial.pdf  <http://LFPy.github.io/downloads/CNS2017_LFPy_tutorial.pdf>`_
 
 Slides from OCNS 2015 meeting tutorial `T2:  Modeling and analysis of extracellular potentials <http://www.cnsorg.org/cns-2015-tutorials#t2>`_ hosted in Prague, Czech Republic on LFPy and hybridLFPy: `CNS2015_LFPy_tutorial.pdf  <http://LFPy.github.io/downloads/CNS2015_LFPy_tutorial.pdf>`_
 
