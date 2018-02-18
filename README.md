@@ -96,10 +96,14 @@ There are few options to install LFPy:
 Documentation
 =============
 
-To generate the html documentation, issue from the LFPy source code directory:
+To generate the html documentation using Sphinx, issue from the LFPy source code directory:
 ::
     
-    sphinx-build -b html /path/to/LFPy/documentation/sources path/to/dest
+    sphinx-build -b html /path/to/LFPy/doc path/to/dest
 
-The main html file is now in path/to/dest/index.html
+The main html file is in path/to/dest/index.html. The ReadTheDocs theme may be needed:
+::
+
+    pip install sphinx-rtd-theme --user
+    
 
