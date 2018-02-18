@@ -1,0 +1,4 @@
+requirements_file: requirements.txt
+requirements_file: doc/requirements.txt
+install:
+  - source continuous_integration/install.sh
