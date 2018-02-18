@@ -16,7 +16,7 @@ Active development of LFPy, as well as issue tracking and revision tracking, rel
 Clone LFPy on `GitHub.com <https://github.com/LFPy/LFPy>`_: ``git clone https://github.com/LFPy/LFPy.git``
 
 LFPy provides a set of easy-to-use Python classes for setting up your model, running your simulations and calculating the extracellular potentials arising from activity in your model neuron. If you have a model
-working in `NEURON <http://www.neuron.yale.edu>`_ or `NeuroML2 <https://www.neuroml.org/neuromlv2>`
+working in `NEURON <http://www.neuron.yale.edu>`_ or `NeuroML2 <https://www.neuroml.org/neuromlv2>`_
 already, it is likely that it can be adapted to work with LFPy.
 
 The extracellular potentials are calculated from transmembrane currents in multi-compartment neuron models using the line-source method (Holt & Koch, J Comp Neurosci 1999),

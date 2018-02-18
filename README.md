@@ -35,7 +35,7 @@ Code status
 ===========
 [![Build Status](https://travis-ci.org/LFPy/LFPy.svg?branch=master)](https://travis-ci.org/LFPy/LFPy)
 [![Coverage Status](https://coveralls.io/repos/github/LFPy/LFPy/badge.svg?branch=master)](https://coveralls.io/github/LFPy/LFPy)
-
+[![Documentation Status](https://readthedocs.org/projects/lfpy/badge/?version=latest)](http://lfpy.readthedocs.io/en/latest/?badge=latest)
 
 Requirements
 ============
