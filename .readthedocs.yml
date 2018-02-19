@@ -1,5 +1,4 @@
-requirements_file:
-  - requirements.txt
-  - doc/requirements.txt
+conda:
+  - doc/environment.yml
 install:
   - source continuous_integration/install.sh

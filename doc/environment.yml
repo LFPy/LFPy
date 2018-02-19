@@ -9,5 +9,8 @@ dependencies:
   - cython
   - mpi4py
   - nose
+  - numpydoc
+  - sphinx
   - pip:
+    - sphinx-rtd-theme
     - -e git+https://github.com/INCF/csa.git@master#egg=LFPy
