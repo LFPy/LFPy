@@ -1,4 +1,6 @@
 name: lfpy
+channels:
+  - mattions
 dependencies:
   - python=2.7
   - setuptools
@@ -11,6 +13,7 @@ dependencies:
   - nose
   - numpydoc
   - sphinx
+  - neuron
   - pip:
     - sphinx-rtd-theme
     - git+https://github.com/INCF/csa.git@master
