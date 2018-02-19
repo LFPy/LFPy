@@ -1,0 +1,13 @@
+name: lfpy
+dependencies:
+  - python=2.7
+  - setuptools
+  - numpy
+  - matplotlib
+  - scipy
+  - h5py
+  - cython
+  - mpi4py
+  - nose
+  - pip:
+    - -e git+https://github.com/INCF/csa.git@master#egg=LFPy
