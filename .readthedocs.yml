@@ -1,4 +1,4 @@
 conda:
-  - doc/environment.yml
+  file: doc/environment.yml
 install:
   - source continuous_integration/install.sh
