@@ -13,4 +13,4 @@ dependencies:
   - sphinx
   - pip:
     - sphinx-rtd-theme
-    - -e git+https://github.com/INCF/csa.git@master#egg=LFPy
+    - git+https://github.com/INCF/csa.git@master
