@@ -59,6 +59,9 @@ To install LFPy you will need the following:
 
 2.  Python modules setuptools, numpy, scipy, matplotlib, Cython, h5py, mpi4py, csa
 
+    Depending on how LFPy is obtained, missing dependencies will be installed automatically (using `pip``). Manual installation of dependencies can be done using ``pip`` and the  ``requirements.txt`` file which is supplied with the LFPy source codes (since v2.0).
+    See next section for details. 
+
 3.  Some example files may rely on additional Python dependencies. If some examples should fail to run due to some ``ImportError``, identify the missing dependency name and run
     ::
         
@@ -111,6 +114,7 @@ There are few options to install LFPy:
     
         tar -xzf LFPy-x.x.tar.gz
         cd LFPy-x.x
+        (sudo) pip install -r requirements.txt (--user) # install dependencies
         (sudo) python setup.py install (--user)
 
 
@@ -121,6 +125,7 @@ There are few options to install LFPy:
         cd LFPy
         # git tag -l # list versions
         # git checkout <tag name> # choose particular version 
+        (sudo) pip install -r requirements.txt (--user) # install dependencies
         (sudo) python setup.py install (--user)
 
     
