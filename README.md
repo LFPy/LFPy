@@ -83,14 +83,23 @@ There are few options to install LFPy:
     
         tar -xzf LFPy-x.x.tar.gz
         cd LFPy-x.x
-        (sudo) python setup.py install (--user)
+        (sudo) python setup.py develop (--user)
 
 4.  Development version from the GitHub repository:
     ::
 
         git clone https://github.com/LFPy/LFPy.git
         cd LFPy
-        (sudo) python setup.py install (--user)
+        (sudo) python setup.py develop (--user)
+
+
+Uninstall
+=========
+
+To remove installed LFPy files it should suffice to issue (repeat until no more LFPy files are found):
+::
+
+    (sudo) pip uninstall LFPy
 
 
 Documentation
@@ -99,11 +108,12 @@ Documentation
 To generate the html documentation using Sphinx, issue from the LFPy source code directory:
 ::
     
-    sphinx-build -b html /path/to/LFPy/doc path/to/dest
+    sphinx-build -b html <path to LFPy>/doc <path to output>
 
-The main html file is in path/to/dest/index.html. The ReadTheDocs theme may be needed:
+The main html file is in ``<path to output>/index.html``. Numpydoc and the ReadTheDocs theme may be needed:
 ::
 
+    pip install numpydoc --user
     pip install sphinx-rtd-theme --user
     
 

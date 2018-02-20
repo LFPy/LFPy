@@ -8,7 +8,7 @@ In order to obtain all necessary files, please obtain the LFPy source files as d
 Change directory to the LFPy examples folder, and start the interactive `IPython <https://ipython.org>`_ interpreter
 ::
     
-    $ cd <path/to/LFPy>/examples
+    $ cd <path to LFPy>/examples
     $ ipython
 
 Let us start by importing ``LFPy``, as well as the ``numpy`` and ``os`` modules

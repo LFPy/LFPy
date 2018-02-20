@@ -102,11 +102,11 @@ segmentation of the morphology will affect the properties of the instantiated ``
 Units
 =====
 
-Units follow the NEURON conventions, `see here. <https://www.neuron.yale.edu/neuron/static/docs/units/unitchart.html>`_
+Units follow the NEURON conventions found `here <https://www.neuron.yale.edu/neuron/static/docs/units/unitchart.html>`_.
 The units in LFPy for given quantities are:
 
 +----------------------------+-----------+
-| What                       | Unit      |
+| Quantity                   | Unit      |
 +============================+===========+
 | Potential                  | [mV]      |
 +----------------------------+-----------+
@@ -120,7 +120,13 @@ The units in LFPy for given quantities are:
 +----------------------------+-----------+
 | Dimension                  | [μm]      |
 +----------------------------+-----------+
-| Syn. weight                | [µS]      |
+| Synaptic weight            | [µS]      |
++----------------------------+-----------+
+| Current dipole moment      | [nA µm]   |
++----------------------------+-----------+
+| Magnetic field (H)         | [nA/µm]   |
++----------------------------+-----------+
+| Permeability (µ)           | [T m/A]   |
 +----------------------------+-----------+
 
 Note: resistance, conductance and capacitance are usually specific values, i.e per membrane area (lowercase r_m, g, c_m)
@@ -146,15 +152,15 @@ LFPy was developed by (`as per commit <https://github.com/LFPy/LFPy/graphs/contr
 
 *	Eivind Norheim 
 
-*       Klas H. Pettersen http://www.med.uio.no/imb/english/?vrtx=person-view&uid=klashp
+*   Klas H. Pettersen http://www.med.uio.no/imb/english/?vrtx=person-view&uid=klashp
 
-*       Gaute T. Einevoll https://www.nmbu.no/ans/gaute.einevoll
+*   Gaute T. Einevoll https://www.nmbu.no/ans/gaute.einevoll
 
 
 Contact
 =======
 
 If you want to contact us with questions, bugs and comments,
-you can send us an email to either `Espen <mailto:espen.hagen@fys.uio.no?Subject=LFPy-Questions/Comments>`_ or `Henrik <mailto:hlinden@sund.dk?Subject=LFPy-Question/Comments>`_.
+please create an issue on `GitHub.com/LFPy/LFPy/issues <https://github.com/LFPy/LFPy/issues>`_. 
 We are of course happy to receive feedback of any kind.
 

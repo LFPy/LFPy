@@ -7,7 +7,7 @@ Downlad the latest stable version of LFPy from the Python Package Index: `http:/
 Or, download the development version of LFPy using `git <https://git-scm.com>`_ from `GitHub.com <https://github.com/LFPy/LFPy>`_ into a local folder:
 ::
     
-    cd /where/to/put/repositories
+    cd <where to put repositories>
     git clone https://github.com/LFPy/LFPy.git
 
 The LFPy source code and examples is then found under "LFPy".
@@ -15,9 +15,9 @@ The LFPy source code and examples is then found under "LFPy".
 The stable versions of LFPy can be accessed by listing and checking out tags, e.g.,
 ::
     
-    cd /path/to/LFPy
+    cd <path to LFPy>
     git tag -l
-    git checkout tags/<tag name>
+    git checkout <tag name>
     
 
 To browse the documentation and source codes online, see `http://lfpy.github.io/classes.html <http://lfpy.github.io/classes.html>`_ or `https://github.com/LFPy/LFPy <https://github.com/LFPy/LFPy>`_
@@ -42,13 +42,22 @@ Dependencies
 To install LFPy you will need the following:
 
 1.  Python. LFPy's unit-test suite is integrated with and continuously tested using `Travis-CI <https://travis-ci.org>`_. Tests are run using NEURON 7.4 and Python 2.7, 3.4, 3.5 and 3.6, as well as other Python dependencies listed next.
-    The code build testing status and results of the last test as well as the test coverage test using `Coveralls <https://coveralls.io>`_  can be seen here:
+    The code build testing status, results of the last test, test coverage test using `Coveralls <https://coveralls.io>`_ and documentation status can be seen here:
     
     .. image:: https://travis-ci.org/LFPy/LFPy.svg?branch=master
         :target: https://travis-ci.org/LFPy/LFPy
+        :alt: TravisCI Status
     
     .. image:: https://coveralls.io/repos/github/LFPy/LFPy/badge.svg?branch=master
         :target: https://coveralls.io/github/LFPy/LFPy?branch=master
+        :alt: Coveralls Status
+        
+    .. image:: https://readthedocs.org/projects/lfpy/badge/?version=latest
+        :target: http://lfpy.readthedocs.io/en/latest/?badge=latest
+        :alt: Documentation Status
+
+
+[![Documentation Status](https://readthedocs.org/projects/lfpy/badge/?version=latest)](http://lfpy.readthedocs.io/en/latest/?badge=latest)
 
 
 2.  Python modules setuptools, numpy, scipy, matplotlib, Cython, h5py, mpi4py, csa
@@ -113,6 +122,8 @@ There are few options to install LFPy:
     
         git clone https://github.com/LFPy/LFPy.git
         cd LFPy
+        # git tag -l # list versions
+        # git checkout <tag name> # choose particular version 
         (sudo) python setup.py install (--user)
 
     
@@ -124,6 +135,12 @@ There are few options to install LFPy:
 
 
     With any changes in LFPy ``*.pyx`` source files, rebuild LFPy.
+    
+    In case of problems, it may be necessary to remove temporary and compiled files from the git repository before new attempts at building LFPy can be made:
+    ::
+        
+        git clean -n # list files that will be removed
+        git clean -fd # remove files
 
     
 In a fresh terminal and python-session you should now be able to issue: 
@@ -135,12 +152,27 @@ In a fresh terminal and python-session you should now be able to issue:
 Uninstalling LFPy
 -----------------
 
-Some times it may be necessary to remove installed versions of LFPy. Depending on how LFPy was installed in the first place, it should for most circumstances suffice to execute
+Some times it may be necessary to remove installed versions of LFPy. Depending on how LFPy was installed in the first place, it should under most circumstances suffice to execute
 ::
     
     (sudo) pip uninstall LFPy
     
 If several versions was installed in the past, repeat until no more LFPy files are found. 
+
+
+Documentation
+=============
+
+To generate the html documentation using Sphinx, issue from the LFPy source code directory:
+::
+    
+    sphinx-build -b html <path to LFPy>/doc <path to output>
+
+The main html file is in ``<path to output>/index.html``. Numpydoc and the ReadTheDocs theme may be needed:
+::
+
+    pip install numpydoc --user
+    pip install sphinx-rtd-theme --user
 
 
 Installing NEURON with Python
