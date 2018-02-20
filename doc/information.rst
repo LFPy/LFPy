@@ -57,9 +57,6 @@ To install LFPy you will need the following:
         :alt: Documentation Status
 
 
-[![Documentation Status](https://readthedocs.org/projects/lfpy/badge/?version=latest)](http://lfpy.readthedocs.io/en/latest/?badge=latest)
-
-
 2.  Python modules setuptools, numpy, scipy, matplotlib, Cython, h5py, mpi4py, csa
 
 3.  Some example files may rely on additional Python dependencies. If some examples should fail to run due to some ``ImportError``, identify the missing dependency name and run
