@@ -19,47 +19,49 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 """
-import matplotlib.pyplot as plt
+# import modules:
+from matplotlib.pyplot import subplot, plot, ylabel, xlabel, show, close
 from LFPy import NetworkCell, StimIntElectrode
 import neuron
-# class NetworkCell parameters
+# class NetworkCell parameters:
 cellParameters = dict(
     morphology='BallAndStick.hoc',
     templatefile='BallAndStickTemplate.hoc',
     templatename='BallAndStickTemplate',
     templateargs=None,
-    passive=False,
-    v_init=-65
+    v_init=-65.
     )
-# create cell instance
+# create cell:
 cell = NetworkCell(
-    tstart=0, tstop=100,
+    tstart=0., tstop=100.,
     **cellParameters
     )
-# stimulus device
+# create stimulus device:
 iclamp = StimIntElectrode(
     cell=cell,
     idx=0,
     pptype='IClamp',
     amp=0.5,
-    dur=80,
-    delay=10,
+    dur=80.,
+    delay=10.,
     record_current=True
     )
-# run simulation
+# run simulation:
 cell.simulate()
 
-plt.subplot(2,1,1)
-plt.plot(cell.tvec, iclamp.i)
-plt.ylabel(r'$i_\mathrm{clamp}$ (nA)')
-plt.subplot(2,1,2)
-plt.plot(cell.tvec, cell.somav)
-plt.ylabel(r'$V_\mathrm{soma}$ (mV)')
-plt.xlabel(r'$t$ (ms)')
-plt.show()
+# plot cell response:
+subplot(2,1,1)
+plot(cell.tvec, iclamp.i)
+ylabel(r'$i_\mathrm{clamp}$ (nA)')
+subplot(2,1,2)
+plot(cell.tvec, cell.somav)
+ylabel(r'$V_\mathrm{soma}$ (mV)')
+xlabel(r'$t$ (ms)')
+show()
 
-# customary cleanup of object references:
-plt.close('all')
+# customary cleanup of object references
+# allowing for consecutive runs:
+close('all')
 iclamp = None
 cell = None
 neuron.h('forall delete_section()')

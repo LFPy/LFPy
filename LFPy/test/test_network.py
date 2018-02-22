@@ -272,8 +272,6 @@ class testNetwork(unittest.TestCase):
         neuron.h('forall delete_section()')
 
 
-
-
     def test_Network_03(self):
         cellParameters = dict(
             morphology=os.path.join(LFPy.__path__[0], 'test', 'ball_and_sticks_w_lists.hoc'),

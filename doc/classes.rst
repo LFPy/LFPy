@@ -74,6 +74,13 @@ Module :mod:`LFPy`
         :members:
         :show-inheritance:
         :undoc-members:
+    
+    class :class:`OneSphereVolumeConductor`
+    =======================================
+    .. autoclass:: OneSphereVolumeConductor
+        :members:
+        :show-inheritance:
+        :undoc-members:
 
     class :class:`FourSphereVolumeConductor`
     ========================================

@@ -1,31 +1,30 @@
 /* -----------------------------------------------------------------------------
 BallAndStick.hoc
 ----------------------------------------------------------------------------- */
+// Create sections:
 create soma[1]
 create apic[1]
 
+// Add 3D information:
 soma[0] {
     pt3dadd(0, 0, -15, 30)
     pt3dadd(0, 0, 15, 30)
 }
-
 apic[0] {
     pt3dadd(0, 0, 15, 3)
     pt3dadd(0, 0, 1015, 3)
 }
 
+// Connect section end points:
 connect apic[0](0), soma[0](1)
 
+// Set biophysical parameters:
 forall {
     Ra = 100.
     cm = 1.
     all.append()
 }
-
-soma {
-    insert hh
-}
-
+soma { insert hh }
 apic {
     insert pas
     g_pas = 0.0002

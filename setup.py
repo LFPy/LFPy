@@ -63,6 +63,7 @@ setup(
                               os.path.join('powerpc', '*'),
                               os.path.join('powerpc', '.libs', '*'),
                               ]},
+    include_package_data=True,
     cmdclass = cmdclass,
     ext_modules = ext_modules,
     url='http://LFPy.github.io',
@@ -87,8 +88,8 @@ setup(
         'Development Status :: 5 - Production/Stable',
         ],
     install_requires = [
-        'setuptools', 'numpy', 'scipy', 'matplotlib', 'Cython', 'h5py',
-        'mpi4py'
+        'setuptools', 'numpy', 'scipy', 'Cython', 'h5py',
+        'mpi4py', 'csa',
         ],
     provides = ['LFPy'],
     )

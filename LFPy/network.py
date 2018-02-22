@@ -24,6 +24,8 @@ import h5py
 from mpi4py import MPI
 import neuron
 from .templatecell import TemplateCell
+import csa
+import scipy.sparse as ss
 
 # set up MPI environment
 COMM = MPI.COMM_WORLD
@@ -416,7 +418,7 @@ class NetworkPopulation(object):
         COMM.Barrier()
 
 
-    def draw_rand_pos(self, POP_SIZE, radius, loc, scale):
+    def draw_rand_pos(self, POP_SIZE, radius, loc, scale, cap=None):
         """
         Draw some random location for POP_SIZE cells within radius radius,
         at mean depth loc and standard deviation scale.
@@ -434,6 +436,10 @@ class NetworkPopulation(object):
             expected mean depth of somas of population.
         scale : float
             expected standard deviation of depth of somas of population.
+        cap : None, float or length to list of floats
+            if float, cap distribution between [loc-cap, loc+cap),
+            if list, cap distribution between [loc-cap[0], loc+cap[1]]
+
 
         Returns
         -------
@@ -455,6 +461,20 @@ class NetworkPopulation(object):
                 x[i] = (np.random.rand()-0.5)*radius*2
                 y[i] = (np.random.rand()-0.5)*radius*2
         z = np.random.normal(loc=loc, scale=scale, size=POP_SIZE)
+        if type(cap) is float:
+            while not np.all((z >= loc-cap) & (z < loc+cap)):
+                inds = (z < loc-cap) ^ (z > loc+cap)
+                z[inds] = np.random.normal(loc=loc, scale=scale, size=inds.sum())
+        elif type(cap) is list:
+            try:
+                assert(len(cap) == 2)
+            except AssertionError:
+                raise AssertionError('cap = {} is not a length 2 list'.format(float))
+            while not np.all((z >= loc-cap[0]) & (z < loc+cap[1])):
+                inds = (z < loc-cap[0]) ^ (z > loc+cap[1])
+                z[inds] = np.random.normal(loc=loc, scale=scale, size=inds.sum())
+
+
 
         soma_pos = []
         for i in range(POP_SIZE):
@@ -597,8 +617,13 @@ class Network(object):
 
     def get_connectivity_rand(self, pre='L5PC', post='L5PC', connprob = 0.2):
         """
-        Dummy function creating a (sparse) cell to cell connectivity matrix
-        between pre and postsynaptic populations.
+        Dummy function creating a (boolean) cell to cell connectivity matrix
+        between pre and postsynaptic populations relying on the use of the
+        'Connection Set Algebra (CSA)' implementation in Python; see
+        https://github.com/INCF/csa, Mikael Djurfeldt (2012) "The Connection-set
+        Algebra---A Novel Formalism for the Representation of Connectivity
+        Structure in Neuronal Network Models" Neuroinformatics 10(3), 1539-2791,
+        http://dx.doi.org/10.1007/s12021-012-9146-1
 
         Connections are drawn randomly between presynaptic cell gids in
         population 'pre' and postsynaptic cell gids in 'post' on this RANK with
@@ -618,25 +643,33 @@ class Network(object):
         ndarray, dtype bool
             n_pre x n_post array of connections between n_pre presynaptic
             neurons and n_post postsynaptic neurons on this RANK. Entries
-            with True denotes a connection.
-
-        """
+            with True denotes a connection.        
+        """                
         n_pre = self.populations[pre].POP_SIZE
         n_post = self.populations[post].POP_SIZE
 
         first_gid = self.populations[post].first_gid
         gids = np.array(self.populations[post].gids).astype(int)
 
-        # define incoming connections for cells on this RANK
-        if pre == post:
-            c = (1-np.eye(n_pre))[:, gids-first_gid]
+        # first check if there are any postsyn cells on this RANK
+        if gids.size > 0:
+            # define incoming connections for cells on this RANK
+            if pre == post:
+                # avoid self connections
+                c = np.array([x for x in csa.cross(range(n_pre), range(gids.size)) *
+                              (csa.random(connprob) - csa.oneToOne)])
+            else:
+                c = np.array([x for x in csa.cross(range(n_pre), range(gids.size)) *
+                              csa.random(connprob)])
+            if c.ndim == 2:
+                # construct sparse boolean array
+                C = ss.csr_matrix((np.ones(c.shape[0], dtype=bool), (c[:, 0], c[:, 1])),
+                                  shape=(n_pre, gids.size), dtype=bool)                
+                return C.toarray()
+            else:
+                return np.zeros((n_pre, gids.size), dtype=bool)
         else:
-            c = np.ones((n_pre, n_post))[:, gids-first_gid]
-        # create random connectivity matrix and multiply with matrix for all
-        # possible pairs
-        c *= (np.random.rand(c.shape[0], c.shape[1]) <= connprob)
-        return c.astype(bool)
-
+            return np.zeros((n_pre, 0), dtype=bool)
 
     def connect(self, pre, post, connectivity,
                 syntype=neuron.h.ExpSyn,
@@ -654,7 +687,8 @@ class Network(object):
                                   funargs=[dict(loc=0, scale=100)]*2,
                                   funweights=[0.5]*2,
                                   z_min=-1E6, z_max=1E6,
-                                  )
+                                  ),
+                save_connections=False,
                 ):
         """
         Connect presynaptic cells to postsynaptic cells. Connections are
@@ -696,6 +730,13 @@ class Network(object):
             arguments passed to inherited LFPy.Cell method
             NetworkCell.get_rand_idx_area_and_distribution_norm to find
             synapse locations.
+        save_connections : bool
+            if True (default False), save instantiated connections to HDF5 file
+            "Network.OUTPUTPATH/synapse_positions.h5" as dataset "<pre>:<post>"
+            using a structured ndarray with dtype
+            [('gid', 'i8'), ('x', float), ('y', float), ('z', float)]
+            where gid is postsynaptic cell id, and x,y,z the corresponding
+            midpoint coordinates of the target compartment.
         """
         # set up connections from all cells in presynaptic to post across RANKs
         n0 = self.populations[pre].first_gid
@@ -782,31 +823,32 @@ class Network(object):
 
 
         # gather and write syn_idx_pos data
-        if RANK == 0:
-            synData = flattenlist(COMM.gather(syn_idx_pos))
-
-            # convert to structured array
-            dtype = [('gid', 'i8'), ('x', float), ('y', float), ('z', float)]
-            synDataArray = np.empty((len(synData), ), dtype=dtype)
-            for i, (gid, x, y, z) in enumerate(synData):
-                synDataArray[i]['gid'] = gid
-                synDataArray[i]['x'] = x
-                synDataArray[i]['y'] = y
-                synDataArray[i]['z'] = z
-            # Dump to hdf5 file, append to file if entry exists
-            f = h5py.File(os.path.join(self.OUTPUTPATH,
-                                       'synapse_positions.h5'))
-            key = '{}:{}'.format(pre, post)
-            if key in f.keys():
-                del f[key]
-                try:
-                    assert key not in f.keys()
-                except AssertionError:
-                    raise AssertionError
-            f[key] = synDataArray
-            f.close()
-        else:
-            COMM.gather(syn_idx_pos)
+        if save_connections:
+            if RANK == 0:
+                synData = flattenlist(COMM.gather(syn_idx_pos))
+    
+                # convert to structured array
+                dtype = [('gid', 'i8'), ('x', float), ('y', float), ('z', float)]
+                synDataArray = np.empty((len(synData), ), dtype=dtype)
+                for i, (gid, x, y, z) in enumerate(synData):
+                    synDataArray[i]['gid'] = gid
+                    synDataArray[i]['x'] = x
+                    synDataArray[i]['y'] = y
+                    synDataArray[i]['z'] = z
+                # Dump to hdf5 file, append to file if entry exists
+                f = h5py.File(os.path.join(self.OUTPUTPATH,
+                                           'synapse_positions.h5'))
+                key = '{}:{}'.format(pre, post)
+                if key in f.keys():
+                    del f[key]
+                    try:
+                        assert key not in f.keys()
+                    except AssertionError:
+                        raise AssertionError
+                f[key] = synDataArray
+                f.close()
+            else:
+                COMM.gather(syn_idx_pos)
 
         return COMM.bcast([conncount, syncount])
 
@@ -894,8 +936,14 @@ class Network(object):
         try:
             cvode.use_fast_imem(1)
         except AttributeError as ae:
-            raise Exception('neuron.h.CVode().use_fast_imem() not found. Please update NEURON to v.7.5 or newer')
+            raise Exception('neuron.h.CVode().use_fast_imem() not found. Please update NEURON to v.7.4 or newer')
 
+        # test some of the inputs
+        try:
+            if electrode is None:
+                assert(rec_pop_contributions is False)
+        except AssertionError:
+            raise AssertionError('rec_pop_contributions can not be True when electrode is None')
 
         for name in self.population_names:
             for cell in self.populations[name].cells:
