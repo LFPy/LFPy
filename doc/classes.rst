@@ -118,9 +118,3 @@ Module :mod:`LFPy`
         :members:
         :undoc-members:
 
-    submodule :mod:`run_simulation`
-    ===============================
-    .. automodule:: LFPy.run_simulation
-        :members:
-        :undoc-members:
-

@@ -29,7 +29,7 @@ def get_activation_times_from_distribution(n, tstart=0., tstop=1.E6,
     scipy.stats.rv_continous, e.g., scipy.stats.expon or scipy.stats.gamma.
     
     The most likely initial first entry is
-    tstart + method.rvs(size=inf, **rvs_args).mean()
+    ``tstart + method.rvs(size=inf, **rvs_args).mean()``
     
     Parameters
     ----------
@@ -43,12 +43,12 @@ def get_activation_times_from_distribution(n, tstart=0., tstop=1.E6,
         subclass of scipy.stats.rv_continous. Distributions
         producing negative values should be avoided if continously increasing
         values should be obtained, i.e., the probability density function
-        (distribution.pdf(**rvs_args)) should be 0 for x < 0, but this is not
+        ``(distribution.pdf(**rvs_args))`` should be ``0`` for ``x < 0``, but this is not
         explicitly tested for.
     rvs_args : dict
         parameters for method.rvs method. If "size" is in dict, then tstop will
         be ignored, and each ndarray in output list will be
-        distribution.rvs(**rvs_args).cumsum() + tstart. If size is not given in dict,
+        ``distribution.rvs(**rvs_args).cumsum() + tstart``. If size is not given in dict,
         then values up to tstop will be included
     maxiter : int
         maximum number of iterations

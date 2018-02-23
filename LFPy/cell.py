@@ -88,6 +88,7 @@ class Cell(object):
     --------
     Simple example of how to use the Cell class with a passive-circuit
     morphology (modify morphology path accordingly):
+    
     >>> import os
     >>> import LFPy
     >>> cellParameters = {
@@ -1751,7 +1752,6 @@ class Cell(object):
 
         Examples
         --------
-
         >>> cell = LFPy.Cell(**kwargs)
         >>> rotation = {'x' : 1.233, 'y' : 0.236, 'z' : np.pi}
         >>> cell.set_pt3d_rotation(**rotation)
@@ -1898,7 +1898,6 @@ class Cell(object):
 
         Examples
         --------
-
         >>> from matplotlib.collections import PolyCollection
         >>> import matplotlib.pyplot as plt
         >>> cell = LFPy.Cell(morphology='PATH/TO/MORPHOLOGY')
@@ -2052,7 +2051,6 @@ class Cell(object):
 
         Examples
         --------
-
         >>> import LFPy
         >>> import numpy as np
         >>> import matplotlib.pyplot as plt
@@ -2148,6 +2146,7 @@ class Cell(object):
             the mid point of each axial current in i_axial in units of (µm). The
             indices of the first axis, correspond to the first axis
             of i_axial and d_vectors.
+        
         Raises
         ------
         AttributeError
@@ -2261,6 +2260,7 @@ class Cell(object):
     def get_axial_resistance(self):
         """
         Return NEURON axial resistance for all cell compartments.
+        
         Returns
         -------
         ri_list : ndarray, dtype=float
@@ -2289,6 +2289,7 @@ class Cell(object):
     def get_dict_of_children_idx(self):
         """
         Return dictionary with children segment indices for all sections.
+        
         Returns
         -------
         children_dict : dictionary
@@ -2310,6 +2311,7 @@ class Cell(object):
     def get_dict_parent_connections(self):
         """
         Return dictionary with parent connection point for all sections.
+        
         Returns
         -------
         connection_dict : dictionary
@@ -2331,6 +2333,7 @@ class Cell(object):
         """
         Return axial current from segment (seg_idx) mid to segment start,
         and current from parent segment (parent_idx) end to parent segment mid.
+        
         Parameters
         ----------
         seg_idx : int
@@ -2497,6 +2500,7 @@ class Cell(object):
         --------
         Get all current dipole moments and positions from all axial currents in a
         single neuron simulation.
+        
         >>> import LFPy
         >>> import numpy as np
         >>> cell = LFPy.Cell('PATH/TO/MORPHOLOGY', extracellular=False)

@@ -46,6 +46,7 @@ class OneSphereVolumeConductor(object):
     Examples
     --------
     Compute the potential for a single monopole along the x-axis:
+
     >>> # import modules
     >>> from LFPy import OneSphereVolumeConductor
     >>> import numpy as np
@@ -191,7 +192,7 @@ class OneSphereVolumeConductor(object):
         Compute linear mapping between transmembrane currents of LFPy.Cell like
         object instantiation and extracellular potential in and outside of
         sphere. Cell position must be set in space, using the method
-        Cell.set_pos(**kwargs).
+        ``Cell.set_pos(**kwargs)``.
 
         Parameters
         ----------
@@ -203,8 +204,9 @@ class OneSphereVolumeConductor(object):
 
         Examples
         --------
-        # Compute extracellular potential in one-sphere volume conductor model
-        # from LFPy.Cell object
+        Compute extracellular potential in one-sphere volume conductor model
+        from LFPy.Cell object:
+
         >>> # import modules
         >>> import LFPy
         >>> import os
@@ -265,6 +267,7 @@ class OneSphereVolumeConductor(object):
         Each segment is treated as a point source in space. The minimum
         source to measurement site distance will be set to the diameter of
         each segment
+
         """
         # midpoint position of compartments in spherical coordinates
         radius = np.sqrt(cell.xmid**2 + cell.ymid**2 + cell.zmid**2)
@@ -317,14 +320,14 @@ class FourSphereVolumeConductor(object):
     r : ndarray, dtype=float
         Shape (n_contacts, 3) array containing n_contacts electrode locations
         in cartesian coordinates in units of (µm).
-        All r_el in r must be less than or equal to scalp radius
+        All ``r_el`` in ``r`` must be less than or equal to scalp radius
         and larger than the distance between dipole and sphere
-        center: |rz| < r_el <= radii[3].
+        center: ``|rz| < r_el <= radii[3]``.
 
     Examples
     --------
     Compute extracellular potential from current dipole moment in four-sphere
-    head model
+    head model:
 
     >>> import LFPy
     >>> import numpy as np
@@ -456,7 +459,8 @@ class FourSphereVolumeConductor(object):
         Compute extracellular potential from neuron simulation in
         four-sphere head model. Instead of simplifying the neural activity to
         a single dipole, we compute the contribution from every multi dipole
-        from all axial currents in neuron simulation.
+        from all axial currents in neuron simulation:
+
         >>> import LFPy
         >>> import numpy as np
         >>> cell = LFPy.Cell('PATH/TO/MORPHOLOGY', extracellular=False)
@@ -1038,7 +1042,8 @@ class InfiniteVolumeConductor(object):
     Examples
     --------
     Computing the potential from dipole moment valid in the far field limit.
-    Theta correspond to the dipole alignment angle from the vertical z-axis.
+    Theta correspond to the dipole alignment angle from the vertical z-axis:
+
     >>> import LFPy
     >>> import numpy as np
     >>> inf_model = LFPy.InfiniteVolumeConductor(sigma=0.3)
@@ -1054,7 +1059,8 @@ class InfiniteVolumeConductor(object):
 
     def get_dipole_potential(self, p, r):
         """
-        Return electric potential from current dipole with current dipole approx
+        Return electric potential from current dipole with current dipole
+        approximation
 
         p : ndarray, dtype=float
             Shape (n_timesteps, 3) array containing the x,y,z components of the
@@ -1090,10 +1096,10 @@ class InfiniteVolumeConductor(object):
         electrode_locs : ndarray, dtype=float
             Shape (n_contacts, 3) array containing n_contacts electrode
             locations in cartesian coordinates in units of (µm).
-            All r_el in electrode_locs must be placed so that |r_el| is
+            All ``r_el`` in electrode_locs must be placed so that ``|r_el|`` is
             less than or equal to scalp radius and larger than
             the distance between dipole and sphere
-            center: |rz| < |r_el| <= radii[3].
+            center: ``|rz| < |r_el| <= radii[3]``.
         timepoints : ndarray, dtype=int
             array of timepoints at which you want to compute
             the electric potential. Defaults to None. If not given,
@@ -1111,7 +1117,8 @@ class InfiniteVolumeConductor(object):
         Compute extracellular potential from neuron simulation in
         four-sphere head model. Instead of simplifying the neural activity to
         a single dipole, we compute the contribution from every multi dipole
-        from all axial currents in neuron simulation.
+        from all axial currents in neuron simulation:
+
         >>> import LFPy
         >>> import numpy as np
         >>> cell = LFPy.Cell('PATH/TO/MORPHOLOGY', extracellular=False)
@@ -1167,7 +1174,8 @@ def get_current_dipole_moment(dist, current):
     Examples
     --------
     Get current dipole moment vector and scalar moment from axial currents
-    computed from membrane potentials
+    computed from membrane potentials:
+
     >>> import LFPy
     >>> import numpy as np
     >>> cell = LFPy.Cell('PATH/TO/MORPHOLOGY', extracellular=False)
@@ -1179,7 +1187,8 @@ def get_current_dipole_moment(dist, current):
     >>> P_ax, P_ax_tot = LFPy.get_current_dipole_moment(d_list, i_axial)
 
     Get current dipole moment vector and scalar moment from transmembrane
-    currents using the extracellular mechanism in NEURON
+    currents using the extracellular mechanism in NEURON:
+
     >>> import LFPy
     >>> import numpy as np
     >>> cell = LFPy.Cell('PATH/TO/MORPHOLOGY', extracellular=True)
@@ -1229,7 +1238,7 @@ class MEG(object):
 
     Examples
     --------
-    Define cell object, create synapse, compute current dipole moment
+    Define cell object, create synapse, compute current dipole moment:
 
     >>> import LFPy, os, numpy as np, matplotlib.pyplot as plt
     >>> cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test', 'ball_and_sticks.hoc'),
@@ -1239,11 +1248,11 @@ class MEG(object):
     >>> syn.set_spike_times_w_netstim()
     >>> cell.simulate(rec_current_dipole_moment=True)
 
-    Compute the dipole location as an average of segment locations weighted by membrane area
+    Compute the dipole location as an average of segment locations weighted by membrane area:
 
     >>> dipole_location = (cell.area * np.c_[cell.xmid, cell.ymid, cell.zmid].T / cell.area.sum()).sum(axis=1)
 
-    Instantiate the LFPy.MEG object, compute and plot the magnetic signal in a sensor location
+    Instantiate the LFPy.MEG object, compute and plot the magnetic signal in a sensor location:
 
     >>> sensor_locations = np.array([[1E4, 0, 0]])
     >>> meg = LFPy.MEG(sensor_locations)

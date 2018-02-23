@@ -63,13 +63,13 @@ class RecExtElectrode:
 
     Examples
     --------
-
     Compute extracellular potentials after simulating and storage of
     transmembrane currents with the LFPy.Cell class:
+
     >>> import numpy as np
     >>> import matplotlib.pyplot as plt
     >>> import LFPy
-
+    >>>
     >>> cellParameters = {
     >>>     'morphology' : 'examples/morphologies/L5_Mainen96_LFPy.hoc',  # morphology file
     >>>     'v_init' : -65,                          # initial voltage
@@ -82,7 +82,7 @@ class RecExtElectrode:
     >>>     'tstop' : 50.,                        # end t of simulation
     >>> }
     >>> cell = LFPy.Cell(**cellParameters)
-
+    >>>
     >>> synapseParameters = {
     >>>     'idx' : cell.get_closest_idx(x=0, y=0, z=800), # compartment
     >>>     'e' : 0,                                # reversal potential
@@ -93,9 +93,9 @@ class RecExtElectrode:
     >>> }
     >>> synapse = LFPy.Synapse(cell, **synapseParameters)
     >>> synapse.set_spike_times(np.array([10., 15., 20., 25.]))
-
+    >>>
     >>> cell.simulate(rec_imem=True)
-
+    >>>
     >>> N = np.empty((16, 3))
     >>> for i in xrange(N.shape[0]): N[i,] = [1, 0, 0] #normal vec. of contacts
     >>> electrodeParameters = {         #parameters for RecExtElectrode class
@@ -116,10 +116,11 @@ class RecExtElectrode:
 
 
     Compute extracellular potentials during simulation (recommended):
+    
     >>> import numpy as np
     >>> import matplotlib.pyplot as plt
     >>> import LFPy
-
+    >>>
     >>> cellParameters = {
     >>>     'morphology' : 'examples/morphologies/L5_Mainen96_LFPy.hoc',  # morphology file
     >>>     'v_init' : -65,                          # initial voltage
@@ -132,7 +133,7 @@ class RecExtElectrode:
     >>>     'tstop' : 50.,                        # end t of simulation
     >>> }
     >>> cell = LFPy.Cell(**cellParameters)
-
+    >>>
     >>> synapseParameters = {
     >>>     'idx' : cell.get_closest_idx(x=0, y=0, z=800), # compartment
     >>>     'e' : 0,                                # reversal potential
@@ -143,7 +144,7 @@ class RecExtElectrode:
     >>> }
     >>> synapse = LFPy.Synapse(cell, **synapseParameters)
     >>> synapse.set_spike_times(np.array([10., 15., 20., 25.]))
-
+    >>>
     >>> N = np.empty((16, 3))
     >>> for i in xrange(N.shape[0]): N[i,] = [1, 0, 0] #normal vec. of contacts
     >>> electrodeParameters = {         #parameters for RecExtElectrode class
@@ -156,9 +157,9 @@ class RecExtElectrode:
     >>>     'N' : N,
     >>> }
     >>> electrode = LFPy.RecExtElectrode(**electrodeParameters)
-
+    >>>
     >>> cell.simulate(electrode=electrode)
-
+    >>>
     >>> plt.matshow(electrode.LFP)
     >>> plt.colorbar()
     >>> plt.axis('tight')
@@ -628,7 +629,7 @@ class RecMEAElectrode(RecExtElectrode):
     >>> import numpy as np
     >>> import matplotlib.pyplot as plt
     >>> import LFPy
-
+    >>>
     >>> cellParameters = {
     >>>     'morphology' : 'examples/morphologies/L5_Mainen96_LFPy.hoc',  # morphology file
     >>>     'v_init' : -65,                          # initial voltage
@@ -653,7 +654,7 @@ class RecMEAElectrode(RecExtElectrode):
     >>> }
     >>> synapse = LFPy.Synapse(cell, **synapseParameters)
     >>> synapse.set_spike_times(np.array([10., 15., 20., 25.]))
-
+    >>>
     >>> MEA_electrode_parameters = {
     >>>     'sigma_T' : 0.3,      # extracellular conductivity
     >>>     'sigma_G' : 0.0,      # MEA glass electrode plate conductivity
@@ -666,9 +667,9 @@ class RecMEAElectrode(RecExtElectrode):
     >>>     "squeeze_cell_factor": 0.3,
     >>> }
     >>> MEA = LFPy.RecMEAElectrode(cell, **MEA_electrode_parameters)
-
+    >>>
     >>> cell.simulate(electrode=MEA)
-
+    >>>
     >>> plt.matshow(MEA.LFP)
     >>> plt.colorbar()
     >>> plt.axis('tight')
