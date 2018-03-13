@@ -297,7 +297,8 @@ class DummyCell(object):
 
 
 class NetworkPopulation(object):
-    def __init__(self, CWD=None, CELLPATH=None, first_gid=0, Cell=NetworkCell, POP_SIZE=4, name='L5PC',
+    def __init__(self, CWD=None, CELLPATH=None, first_gid=0, Cell=NetworkCell,
+                 POP_SIZE=4, name='L5PC',
                  cell_args=dict(), pop_args=dict(),
                  rotation_args=dict(),
                  OUTPUTPATH='example_parallel_network'):
