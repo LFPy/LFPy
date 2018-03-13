@@ -256,8 +256,9 @@ MEA_electrode_parameters = {
     'N' : np.array([[0, 0, 1]]*X.size), #surface normals
     'r' : 50,              # contact site radius
     'n' : 100,               # datapoints for averaging,
+    'h': 300,
     "seedvalue": 12,
-    "squeeze_cell_factor": 0.4,
+    "squeeze_cell_factor": 0.6,
 }
 
 
