@@ -757,7 +757,19 @@ class RecMEAElectrode(RecExtElectrode):
             raise RuntimeError(msg)
 
     def _return_comp_outside_slice(self):
+        """
+        Assuming part of the cell is outside the valid region,
+        i.e, not in the slice (self.z_shift < z < self.z_shift + self.h)
+        this function check what array (cell.zstart or cell.zend) that is
+        outside, and if it is above or below the valid region.
 
+        Raises: RuntimeError
+            If no compartment is outside valid region.
+
+        Returns: array, str
+            Numpy array with the compartments that are outside the slice,
+            and a string with additional information on the problem.
+        """
         zstart_above = np.where(self.cell.zstart > self.z_shift + self.h)[0]
         zend_above = np.where(self.cell.zend > self.z_shift + self.h)[0]
         zend_below = np.where(self.cell.zend < self.z_shift)[0]
