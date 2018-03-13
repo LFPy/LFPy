@@ -311,6 +311,64 @@ class testRecExtElectrode(unittest.TestCase):
         MEA = LFPy.RecMEAElectrode(stick, **electrodeParams)
         np.testing.assert_raises(RuntimeError, MEA.test_cell_extent)
 
+
+    def test_return_comp_outside_slice(self):
+
+        electrodeParams = {
+            'sigma_T' : 0.3,
+            'sigma_S' : 1.5,
+            'sigma_G' : 0.0,
+            'h': 200,
+            'x' : np.linspace(0, 1000, 11),
+            'y' : np.zeros(11),
+            'z' : np.zeros(11),
+            'method': "pointsource",
+            'squeeze_cell_factor': None,
+        }
+
+        stickParams = {
+            'morphology' : os.path.join(LFPy.__path__[0], 'test', 'ball_and_sticks.hoc'),
+            'passive_parameters' : {'g_pas' : 1./30000, 'e_pas' : -65},
+            'passive': True,
+            'tstart' : -10,
+            'tstop' : 20,
+            'dt' : 2**-4,
+            'nsegs_method' : 'lambda_f',
+            'lambda_f' : 1000,
+
+        }
+        stick = LFPy.Cell(**stickParams)
+        stick.set_rotation(y=np.pi/2)
+        stick.set_pos(z=100)
+        stick.simulate(rec_imem=True)
+        MEA = LFPy.RecMEAElectrode(stick, **electrodeParams)
+        np.testing.assert_raises(RuntimeError, MEA._return_comp_outside_slice)
+        true_bad_comp = np.array([2, 3, 6])
+
+        stick.zstart[true_bad_comp] = 1000
+        bad_comp, reason = MEA._return_comp_outside_slice()
+        np.testing.assert_equal(reason, "zstart above")
+        np.testing.assert_equal(true_bad_comp, bad_comp)
+        stick.zstart[true_bad_comp] = 100
+
+        stick.zstart[true_bad_comp] = -1000
+        bad_comp, reason = MEA._return_comp_outside_slice()
+        np.testing.assert_equal(reason, "zstart below")
+        np.testing.assert_equal(true_bad_comp, bad_comp)
+        stick.zstart[true_bad_comp] = 100
+
+        stick.zend[true_bad_comp] = 1000
+        bad_comp, reason = MEA._return_comp_outside_slice()
+        np.testing.assert_equal(reason, "zend above")
+        np.testing.assert_equal(true_bad_comp, bad_comp)
+        stick.zend[true_bad_comp] = 100
+
+        stick.zend[true_bad_comp] = -1000
+        bad_comp, reason = MEA._return_comp_outside_slice()
+        np.testing.assert_equal(reason, "zend below")
+        np.testing.assert_equal(true_bad_comp, bad_comp)
+        stick.zend[true_bad_comp] = 100
+
     def test_position_shifted_slice(self):
 
         electrodeParams = {

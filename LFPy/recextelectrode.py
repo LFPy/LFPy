@@ -740,7 +740,6 @@ class RecMEAElectrode(RecExtElectrode):
                              "Should be 'soma_as_point', 'linesource' "
                              "or 'pointsource'")
 
-
     def _squeeze_cell_in_depth_direction(self):
         """Will squeeze self.cell centered around the soma by a scaling factor,
         so that it fits inside the slice. If scaling factor is not big enough,
@@ -750,9 +749,42 @@ class RecMEAElectrode(RecExtElectrode):
 
         if (np.max([self.cell.zstart, self.cell.zend]) > self.h + self.z_shift or
             np.min([self.cell.zstart, self.cell.zend]) < self.z_shift):
-            raise RuntimeError("Squeeze factor not large enough to confine "
-                               "cell to slice. Increase squeeze_cell_factor,"
-                               "move or rotate cell.")
+            bad_comps, reason = self._return_comp_outside_slice()
+            msg = ("Compartments {} of cell ({}) has cell.{} slice. "
+                   "Increase squeeze_cell_factor, move or rotate cell."
+                   ).format(bad_comps, self.cell.morphology, reason)
+
+            raise RuntimeError(msg)
+
+    def _return_comp_outside_slice(self):
+        """
+        Assuming part of the cell is outside the valid region,
+        i.e, not in the slice (self.z_shift < z < self.z_shift + self.h)
+        this function check what array (cell.zstart or cell.zend) that is
+        outside, and if it is above or below the valid region.
+
+        Raises: RuntimeError
+            If no compartment is outside valid region.
+
+        Returns: array, str
+            Numpy array with the compartments that are outside the slice,
+            and a string with additional information on the problem.
+        """
+        zstart_above = np.where(self.cell.zstart > self.z_shift + self.h)[0]
+        zend_above = np.where(self.cell.zend > self.z_shift + self.h)[0]
+        zend_below = np.where(self.cell.zend < self.z_shift)[0]
+        zstart_below = np.where(self.cell.zstart < self.z_shift)[0]
+
+        if len(zstart_above) > 0:
+            return zstart_above, "zstart above"
+        if len(zstart_below) > 0:
+            return zstart_below, "zstart below"
+        if len(zend_above) > 0:
+            return zend_above, "zend above"
+        if len(zend_below) > 0:
+            return zend_below, "zend below"
+        raise RuntimeError("This function should only be called if cell"
+                           "extends outside slice")
 
     def test_cell_extent(self):
         """
@@ -762,25 +794,31 @@ class RecMEAElectrode(RecExtElectrode):
 
         """
         if self.cell is None:
-            raise RuntimeError("Does not have cell instance")
-        if (not np.all(self.z_shift < self.cell.zend) or
-            not np.all(self.cell.zend < self.z_shift + self.h)):
+            raise RuntimeError("Does not have cell instance.")
+
+        if (np.max([self.cell.zstart, self.cell.zend]) > self.z_shift + self.h or
+                np.min([self.cell.zstart, self.cell.zend]) < self.z_shift):
+
             if self.verbose:
-                print("Cell extends outside slice. ")
+                print("Cell extends outside slice.")
 
             if self.squeeze_cell_factor is not None:
                 if not self.z_shift < self.cell.zmid[0] < self.z_shift + self.h:
-                    raise RuntimeError("Soma position is not in slice")
+                    raise RuntimeError("Soma position is not in slice.")
                 self._squeeze_cell_in_depth_direction()
             else:
-                raise RuntimeError("Cell extends outside slice, and argument "
-                                   "squeeze_cell_factor is None")
+                bad_comps, reason = self._return_comp_outside_slice()
+                msg = ("Compartments {} of cell ({}) has cell.{} slice "
+                       "and argument squeeze_cell_factor is None."
+                       ).format(bad_comps, self.cell.morphology, reason)
+                raise RuntimeError(msg)
         else:
             if self.verbose:
-                print("Cell position is good. ")
+                print("Cell position is good.")
             if self.squeeze_cell_factor is not None:
                 if self.verbose:
                     print("Squeezing cell anyway.")
+                self._squeeze_cell_in_depth_direction()
 
     def calc_mapping(self, cell):
         """Creates a linear mapping of transmembrane currents of each segment
