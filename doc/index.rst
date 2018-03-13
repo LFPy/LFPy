@@ -8,6 +8,8 @@
 LFPy Homepage
 =============
 
+(Looking for the old LFPy documentation? Follow `link <https://lfpy.github.io/v1.3>`_)
+
 LFPy is a `Python <http://www.python.org>`_ package for calculation of extracellular potentials from multicompartment neuron models and recurrent networks of multicompartment neurons.
 It relies on the `NEURON simulator <http://www.neuron.yale.edu/neuron/>`_ and uses the 
 `Python interface <http://www.frontiersin.org/neuroinformatics/10.3389/neuro.11.001.2009/abstract>`_ it provides.

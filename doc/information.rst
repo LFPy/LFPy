@@ -20,7 +20,7 @@ The stable versions of LFPy can be accessed by listing and checking out tags, e.
     git checkout <tag name>
     
 
-To browse the documentation and source codes online, see `http://lfpy.github.io/classes.html <http://lfpy.github.io/classes.html>`_ or `https://github.com/LFPy/LFPy <https://github.com/LFPy/LFPy>`_
+To browse the documentation and source codes online, see `http://lfpy.readthedocs.io/classes.html <http://lfpy.readthedocs.io/classes.html>`_ or `https://github.com/LFPy/LFPy <https://github.com/LFPy/LFPy>`_
 
 
 Developing LFPy

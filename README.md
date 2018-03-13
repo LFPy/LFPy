@@ -27,7 +27,7 @@ in collaboration with the Laboratory of Neuroinformatics (http://www.nencki.gov.
 Nencki Institute of Experimental Biology (http://www.nencki.gov.pl), Warsaw, Poland. The effort was supported by 
 International Neuroinformatics Coordinating Facility (http://incf.org), the Research Council of Norway (http://www.forskningsradet.no/english) (eScience, NevroNor) and EU-FP7 (BrainScaleS, http://www.brainscales.org).
 
-For updated information on LFPy and online documentation, see the LFPy homepage (http://LFPy.github.io).
+For updated information on LFPy and online documentation, see the LFPy homepage (http://lfpy.readthedocs.io).
 
 This scientific software is released under the GNU Public License GPLv3.
 
