@@ -88,7 +88,7 @@ class Cell(object):
     --------
     Simple example of how to use the Cell class with a passive-circuit
     morphology (modify morphology path accordingly):
-    
+
     >>> import os
     >>> import LFPy
     >>> cellParameters = {
@@ -2114,7 +2114,6 @@ class Cell(object):
 
         return
 
-
     def get_axial_currents_from_vmem(self, timepoints=None):
         """
         Compute axial currents from cell sim: get current magnitude,
@@ -2146,7 +2145,6 @@ class Cell(object):
             the mid point of each axial current in i_axial in units of (µm). The
             indices of the first axis, correspond to the first axis
             of i_axial and d_vectors.
-        
         Raises
         ------
         AttributeError
@@ -2167,23 +2165,23 @@ class Cell(object):
         children_dict = self.get_dict_of_children_idx()
         for sec in self.allseclist.allsec():
             if not neuron.h.SectionRef(sec.name()).has_parent():
-                print('sec has no parent')
                 if sec.nseg == 1:
                     # skip soma, since soma is an orphan
                     continue
                 else:
-                    print('first section')
+                    # the first segment has more than one segment,
+                    # need to compute axial currents within this section.
                     seg_idx = 1
                     parent_idx = 0
                     bottom_seg = False
                     first_sec = True
-                    branch=False
-                    parentsec=None
-                    children_dict=None
-                    connection_dict=None
-                    conn_point=1
+                    branch = False
+                    parentsec = None
+                    children_dict = None
+                    connection_dict = None
+                    conn_point = 1
             else:
-                print('sec has parent')
+                # section has parent section
                 first_sec = False
                 bottom_seg = True
                 secref = neuron.h.SectionRef(sec.name())
@@ -2195,18 +2193,17 @@ class Cell(object):
                 conn_point = connection_dict[sec.name()]
                 # find parent index
                 if conn_point == 1 or parentsec.nseg == 1:
-                    internal_parent_idx = - 1
+                    internal_parent_idx = -1 # last seg in sec
                 elif conn_point == 0:
-                    internal_parent_idx = 0
+                    internal_parent_idx = 0 # first seg in sec
                 else:
+                    # if connection on seg that's not first or last
                     segment_xlist = np.array([segment.x for segment in parentsec])
                     internal_parent_idx = np.abs(segment_xlist - conn_point).argmin()
                 parent_idx = self.get_idx(section=parentsec.name())[internal_parent_idx]
                 # find segment index
                 seg_idx = self.get_idx(section=sec.name())[0]
             for _ in sec:
-                print('parent_idx:', parent_idx)
-                print('seg_idx:', seg_idx)
                 if first_sec:
                     first_sec = False
                     continue
@@ -2256,11 +2253,9 @@ class Cell(object):
                 parent_ri = 0
         return np.array(i_axial), np.array(d_vectors), np.array(pos_vectors)
 
-
     def get_axial_resistance(self):
         """
         Return NEURON axial resistance for all cell compartments.
-        
         Returns
         -------
         ri_list : ndarray, dtype=float
@@ -2285,11 +2280,9 @@ class Cell(object):
 
         return ri_list
 
-
     def get_dict_of_children_idx(self):
         """
         Return dictionary with children segment indices for all sections.
-        
         Returns
         -------
         children_dict : dictionary
@@ -2311,7 +2304,6 @@ class Cell(object):
     def get_dict_parent_connections(self):
         """
         Return dictionary with parent connection point for all sections.
-        
         Returns
         -------
         connection_dict : dictionary
@@ -2325,7 +2317,6 @@ class Cell(object):
             connection_dict[sec.name()] = neuron.h.parent_connection()
         return connection_dict
 
-
     def _parent_and_segment_current(self, seg_idx, parent_idx, bottom_seg,
                                     branch=False, parentsec=None,
                                     children_dict=None, connection_dict=None,
@@ -2333,7 +2324,6 @@ class Cell(object):
         """
         Return axial current from segment (seg_idx) mid to segment start,
         and current from parent segment (parent_idx) end to parent segment mid.
-        
         Parameters
         ----------
         seg_idx : int
@@ -2359,7 +2349,6 @@ class Cell(object):
             Axial current in units of (nA)
             from parent segment end point to parent segment mid point.
         """
-        print('parent_idx, seg_idx: ', parent_idx, seg_idx)
         ri_list = self.get_axial_resistance()
         seg_ri = ri_list[seg_idx]
         vmem = self.vmem
@@ -2368,23 +2357,15 @@ class Cell(object):
         vpar = vmem[parent_idx]
         vseg = vmem[seg_idx]
         if bottom_seg and (conn_point == 0 or conn_point == 1):
-            print('bottom_seg and conn_point is 0 or 1')
             if conn_point == 0:
-                print( 'conn_point is 0')
                 parent_ri = ri_list[parent_idx]
             else:
-                print( 'conn_point is 1')
                 parent_ri = neuron.h.ri(0)
-            print('parent_ri:', parent_ri)
             if not branch:
-                print('no branch')
                 ri = parent_ri + seg_ri
-                print('ri:', ri)
                 iseg = (vpar - vseg) / ri
-                print('vseg, vpar, :', vpar, vseg)
                 ipar = iseg
             else:
-                print('branch')
                 [sib_idcs] = np.take(children_dict[parentsec.name()],
                                   np.where(children_dict[parentsec.name()]
                                            != seg_idx))
@@ -2398,20 +2379,15 @@ class Cell(object):
                 for sib_idx, sib in zip(sib_idcs, sibs):
                     sib_conn_point = connection_dict[sib]
                     if sib_conn_point == 1:
-
                         v_branch_num += vmem[sib_idx][0]/ri_list[sib_idx]
                         v_branch_denom += 1./ ri_list[sib_idx]
                 v_branch = v_branch_num/v_branch_denom
                 iseg = (v_branch - vseg)/seg_ri
                 ipar = iseg
         else:
-            print('normal ohm.')
             iseg = (vpar - vseg) / seg_ri
             ipar = iseg
-            print('vpar, vseg, seg_ri:', vpar, vseg, seg_ri)
         return iseg, ipar
-
-
 
     def distort_geometry(self, factor=0., axis='z', nu=0.0):
         """
@@ -2468,7 +2444,6 @@ class Cell(object):
                               (self.yend - self.ystart)**2 +
                               (self.zend - self.zstart)**2)
 
-
     def get_multi_current_dipole_moments(self, timepoints=None):
         '''
         Return 3D current dipole moment vector and middle position vector
@@ -2500,7 +2475,7 @@ class Cell(object):
         --------
         Get all current dipole moments and positions from all axial currents in a
         single neuron simulation.
-        
+
         >>> import LFPy
         >>> import numpy as np
         >>> cell = LFPy.Cell('PATH/TO/MORPHOLOGY', extracellular=False)
