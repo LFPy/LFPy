@@ -5,6 +5,7 @@
 """
 
 import os
+import sys
 import shutil
 try:
     from setuptools import setup, Extension
@@ -33,16 +34,17 @@ except ImportError as ie:
 #NEURON extension file LFPy/sinsyn.mod can be compiled in place and be copied
 #as part of the package_data, allowing unit tests to run
 from distutils.spawn import find_executable, spawn
-if find_executable('nrnivmodl') is not None:
-    os.chdir(os.path.join('LFPy', 'test'))
-    for path in ['x86_64', 'i686', 'powerpc']:
-        if os.path.isdir(path):
-            shutil.rmtree(path)
-    spawn([find_executable('nrnivmodl')])
-    os.chdir(os.path.join('..', '..'))
-else:
-    print("nrnivmodl script not found in PATH, thus NEURON .mod files could" +
-          "not be compiled, and LFPy.test() functions will fail")
+if not 'sdist' in sys.argv: 
+    if find_executable('nrnivmodl') is not None:
+        os.chdir(os.path.join('LFPy', 'test'))
+        for path in ['x86_64', 'i686', 'powerpc']:
+            if os.path.isdir(path):
+                shutil.rmtree(path)
+        spawn([find_executable('nrnivmodl')])
+        os.chdir(os.path.join('..', '..'))
+    else:
+        print("nrnivmodl script not found in PATH, thus NEURON .mod files could" +
+              "not be compiled, and LFPy.test() functions will fail")
 
 with open('README.md') as file:
     long_description = file.read()
