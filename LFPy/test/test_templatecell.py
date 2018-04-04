@@ -1146,6 +1146,9 @@ class testTemplateCell(unittest.TestCase):
         electrode1.calc_lfp()
 
         np.testing.assert_allclose(electrode.LFP, electrode1.LFP)
+        self.assertTrue(stick.tvec.size == stick.imem.shape[1] ==
+                        electrode.LFP.shape[1] == electrode1.LFP.shape[1] ==
+                        int(stick.tstop/stick.dt)+1)
 
 
     def test_cell_with_recextelectrode_01(self):
@@ -1196,8 +1199,114 @@ class testTemplateCell(unittest.TestCase):
         electrode1.calc_lfp()
 
         np.testing.assert_allclose(electrode.LFP, electrode1.LFP)
+        self.assertTrue(stick.tvec.size == stick.imem.shape[1] ==
+                        electrode.LFP.shape[1] == electrode1.LFP.shape[1] ==
+                        int(stick.tstop/stick.dt)+1)
 
+    def test_cell_with_recextelectrode_02(self):
+        stickParams = {
+            'morphology' : os.path.join(LFPy.__path__[0], 'test', 'stick.hoc'),
+            'templatefile' : os.path.join(LFPy.__path__[0], 'test', 'stick_template.hoc'),
+            'templatename' : 'stick_template',
+            'templateargs' : None,
+            'cm' : 1,
+            'Ra' : 150,
+            'v_init' : -65,
+            'passive' : True,
+            'passive_parameters' : {'g_pas' : 1./30000, 'e_pas' : -65},
+            'tstart' : 0,
+            'tstop' : 100,
+            'dt' : 0.1,
+            'nsegs_method' : 'lambda_f',
+            'lambda_f' : 100,
 
+        }
+
+        electrodeParams = {
+            'sigma' : 0.3,
+            'x' : np.ones(11) * 100.,
+            'y' : np.zeros(11),
+            'z' : np.linspace(1000, 0, 11),
+            'method' : 'pointsource'
+        }
+
+        stimParams = {
+            'pptype' : 'SinSyn',
+            'delay' : 0.,
+            'dur' : 1000.,
+            'pkamp' : 1.,
+            'freq' : 100.,
+            'phase' : 0,
+            'bias' : 0.,
+            'record_current' : False
+        }
+
+        stick = LFPy.TemplateCell(**stickParams)
+        synapse = LFPy.StimIntElectrode(stick, stick.get_closest_idx(0, 0, 1000),
+                               **stimParams)
+        electrode = LFPy.RecExtElectrode(**electrodeParams)
+        stick.simulate(electrode, rec_imem=True)
+
+        electrode1 = LFPy.RecExtElectrode(cell=stick, **electrodeParams)
+        electrode1.calc_lfp()
+
+        np.testing.assert_allclose(electrode.LFP, electrode1.LFP)
+        self.assertTrue(stick.tvec.size == stick.imem.shape[1] ==
+                        electrode.LFP.shape[1] == electrode1.LFP.shape[1] ==
+                        int(stick.tstop/stick.dt)+1)
+
+    def test_cell_with_recextelectrode_03(self):
+        stickParams = {
+            'morphology' : os.path.join(LFPy.__path__[0], 'test', 'stick.hoc'),
+            'templatefile' : os.path.join(LFPy.__path__[0], 'test', 'stick_template.hoc'),
+            'templatename' : 'stick_template',
+            'templateargs' : None,
+            'cm' : 1,
+            'Ra' : 150,
+            'v_init' : -65,
+            'passive' : True,
+            'passive_parameters' : {'g_pas' : 1./30000, 'e_pas' : -65},
+            'tstart' : 0,
+            'tstop' : 100,
+            'dt' : 0.2,
+            'nsegs_method' : 'lambda_f',
+            'lambda_f' : 100,
+
+        }
+
+        electrodeParams = {
+            'sigma' : 0.3,
+            'x' : np.ones(11) * 100.,
+            'y' : np.zeros(11),
+            'z' : np.linspace(1000, 0, 11),
+            'method' : 'pointsource'
+        }
+
+        stimParams = {
+            'pptype' : 'SinSyn',
+            'delay' : 0.,
+            'dur' : 1000.,
+            'pkamp' : 1.,
+            'freq' : 100.,
+            'phase' : 0,
+            'bias' : 0.,
+            'record_current' : False
+        }
+
+        stick = LFPy.TemplateCell(**stickParams)
+        synapse = LFPy.StimIntElectrode(stick, stick.get_closest_idx(0, 0, 1000),
+                               **stimParams)
+        electrode = LFPy.RecExtElectrode(**electrodeParams)
+        stick.simulate(electrode, rec_imem=True)
+
+        electrode1 = LFPy.RecExtElectrode(cell=stick, **electrodeParams)
+        electrode1.calc_lfp()
+
+        np.testing.assert_allclose(electrode.LFP, electrode1.LFP)
+        self.assertTrue(stick.tvec.size == stick.imem.shape[1] ==
+                        electrode.LFP.shape[1] == electrode1.LFP.shape[1] ==
+                        int(stick.tstop/stick.dt)+1)
+        
     def test_cell_distort_geometry_01(self):
         cell0 = LFPy.TemplateCell(morphology=os.path.join(LFPy.__path__[0], 'test',
                                                   'ball_and_sticks_w_lists.hoc' ),
