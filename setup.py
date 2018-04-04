@@ -34,7 +34,7 @@ except ImportError as ie:
 #NEURON extension file LFPy/sinsyn.mod can be compiled in place and be copied
 #as part of the package_data, allowing unit tests to run
 from distutils.spawn import find_executable, spawn
-if not 'sdist' in sys.argv: 
+if not any(arg in sys.argv for arg in ['sdist', 'upload']): 
     if find_executable('nrnivmodl') is not None:
         os.chdir(os.path.join('LFPy', 'test'))
         for path in ['x86_64', 'i686', 'powerpc']:
@@ -51,7 +51,7 @@ with open('README.md') as file:
 
 setup(
     name = "LFPy",
-    version = "2.0rc2",
+    version = "2.0rc3",
     maintainer = "Espen Hagen",
     maintainer_email = 'espen.hagen@fys.uio.no',
     packages = ['LFPy'],
