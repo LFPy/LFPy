@@ -50,53 +50,50 @@ class testTemplateCell(unittest.TestCase):
         tvec_numpy = np.linspace(0, stickParams['tstop'],
                     stickParams['tstop']/stickParams['dt'] + 1)
 
-        self.assertEqual(tvec.size, tvec_numpy.size)
+        np.testing.assert_equal(tvec, tvec_numpy)
 
     def test_cell_tvec_01(self):
         stickParams = {
             'dt' : 2**-3,
             'tstart' : 0.,
-            'tstop' : 100.,
+            'tstop' : 10000.,
         }
 
         tvec = stickSimulationTesttvec(**stickParams)
         tvec_numpy = np.linspace(0, stickParams['tstop'],
                     stickParams['tstop']/stickParams['dt'] + 1)
 
-        for i in range(tvec.size):
-            self.assertEqual(tvec[i], tvec_numpy[i])
+        np.testing.assert_equal(tvec, tvec_numpy)
 
     def test_cell_tvec_02(self):
         stickParams = {
-            'dt' : 2**-3,
-            'tstart' : 0.,
-            'tstop' : 10000.,
+            'dt' : 0.1,
+            'tstart' : 0,
+            'tstop' : 100,
         }
 
         tvec = stickSimulationTesttvec(**stickParams)
         tvec_numpy = np.linspace(0, stickParams['tstop'],
                     stickParams['tstop']/stickParams['dt'] + 1)
 
-        self.assertEqual(tvec.size, tvec_numpy.size)
+        np.testing.assert_equal(tvec, tvec_numpy)
 
     def test_cell_tvec_03(self):
         stickParams = {
-            'dt' : 2**-3,
-            'tstart' : 0.,
-            'tstop' : 10000.,
+            'dt' : 0.1,
+            'tstart' : 0,
+            'tstop' : 10000,
         }
 
         tvec = stickSimulationTesttvec(**stickParams)
         tvec_numpy = np.linspace(0, stickParams['tstop'],
                     stickParams['tstop']/stickParams['dt'] + 1)
 
-        for i in range(tvec.size):
-            self.assertEqual(tvec[i], tvec_numpy[i])
-
+        np.testing.assert_equal(tvec, tvec_numpy)
 
     def test_cell_tvec_04(self):
         stickParams = {
-            'dt' : 0.1,
+            'dt' : 0.2,
             'tstart' : 0,
             'tstop' : 100,
         }
@@ -105,25 +102,11 @@ class testTemplateCell(unittest.TestCase):
         tvec_numpy = np.linspace(0, stickParams['tstop'],
                     stickParams['tstop']/stickParams['dt'] + 1)
 
-        self.assertEqual(tvec.size, tvec_numpy.size)
+        np.testing.assert_equal(tvec, tvec_numpy)
 
     def test_cell_tvec_05(self):
         stickParams = {
-            'dt' : 0.1,
-            'tstart' : 0.,
-            'tstop' : 100.,
-        }
-
-        tvec = stickSimulationTesttvec(**stickParams)
-        tvec_numpy = np.linspace(0, stickParams['tstop'],
-                    stickParams['tstop']/stickParams['dt'] + 1)
-
-        for i in range(tvec.size):
-            self.assertAlmostEqual(tvec[i], tvec_numpy[i])
-
-    def test_cell_tvec_06(self):
-        stickParams = {
-            'dt' : 0.1,
+            'dt' : 0.2,
             'tstart' : 0,
             'tstop' : 10000,
         }
@@ -132,81 +115,49 @@ class testTemplateCell(unittest.TestCase):
         tvec_numpy = np.linspace(0, stickParams['tstop'],
                     stickParams['tstop']/stickParams['dt'] + 1)
 
-        self.assertEqual(tvec.size, tvec_numpy.size)
+        np.testing.assert_equal(tvec, tvec_numpy)
+
+    def test_cell_tvec_06(self):
+        stickParams = {
+            'dt' : 2**-3,
+            'tstart' : -100,
+            'tstop' : 100,
+        }
+
+        tvec = stickSimulationTesttvec(**stickParams)
+        tvec_numpy = np.linspace(0, stickParams['tstop'],
+                    stickParams['tstop']/stickParams['dt'] + 1)
+
+        np.testing.assert_equal(tvec, tvec_numpy)
 
     def test_cell_tvec_07(self):
         stickParams = {
-            'dt' : 0.1,
-            'tstart' : 0.,
-            'tstop' : 10000.,
+            'dt' : 2**-3,
+            'tstart' : -100,
+            'tstop' : 10000,
         }
 
         tvec = stickSimulationTesttvec(**stickParams)
         tvec_numpy = np.linspace(0, stickParams['tstop'],
                     stickParams['tstop']/stickParams['dt'] + 1)
 
-        for i in range(tvec.size):
-            self.assertEqual(tvec[i], tvec_numpy[i])
+        np.testing.assert_equal(tvec, tvec_numpy)
 
     def test_cell_tvec_08(self):
         stickParams = {
-            'dt' : 2**-3,
+            'dt' : 0.1,
             'tstart' : -100,
-            'tstop' : 100,
+            'tstop' : 10000,
         }
 
-        tvec = stickSimulationTesttvec(**stickParams)
-        tvec_numpy = np.linspace(0, stickParams['tstop'],
-                    stickParams['tstop']/stickParams['dt'] + 1)
-
-        self.assertEqual(tvec.size, tvec_numpy.size)
-
+        try:
+            stickSimulationTesttvec(**stickParams)
+        except AssertionError:
+            pass
 
     def test_cell_tvec_09(self):
         stickParams = {
-            'dt' : 2**-3,
-            'tstart' : -100,
-            'tstop' : 100,
-        }
-
-        tvec = stickSimulationTesttvec(**stickParams)
-        tvec_numpy = np.linspace(0, stickParams['tstop'],
-                    stickParams['tstop']/stickParams['dt'] + 1)
-
-        for i in range(tvec.size):
-            self.assertEqual(tvec[i], tvec_numpy[i])
-
-    def test_cell_tvec_10(self):
-        stickParams = {
-            'dt' : 2**-3,
-            'tstart' : -100,
-            'tstop' : 10000,
-        }
-
-        tvec = stickSimulationTesttvec(**stickParams)
-        tvec_numpy = np.linspace(0, stickParams['tstop'],
-                    stickParams['tstop']/stickParams['dt'] + 1)
-
-        self.assertEqual(tvec.size, tvec_numpy.size)
-
-
-    def test_cell_tvec_11(self):
-        stickParams = {
-            'dt' : 2**-3,
-            'tstart' : -100,
-            'tstop' : 10000,
-        }
-
-        tvec = stickSimulationTesttvec(**stickParams)
-        tvec_numpy = np.linspace(0, stickParams['tstop'],
-                    stickParams['tstop']/stickParams['dt'] + 1)
-
-        for i in range(tvec.size):
-            self.assertEqual(tvec[i], tvec_numpy[i])
-
-    def test_cell_tvec_12(self):
-        stickParams = {
-            'dt' : 0.1,
+            'dt' : 0.2,
             'tstart' : -100,
             'tstop' : 10000,
         }
@@ -816,7 +767,178 @@ class testTemplateCell(unittest.TestCase):
                 self.assertEqual(type(getattr(cell, attribute)),
                                  type(getattr(pickled_cell, attribute)))
 
+    def test_cell_simulate_recorder_00(self):
+        stickParams = {
+            'morphology' : os.path.join(LFPy.__path__[0], 'test', 'stick.hoc'),
+            'templatefile' : os.path.join(LFPy.__path__[0], 'test', 'stick_template.hoc'),
+            'templatename' : 'stick_template',
+            'templateargs' : None,
+            'cm' : 1,
+            'Ra' : 150,
+            'v_init' : -65,
+            'passive' : True,
+            'passive_parameters' : {'g_pas' : 1./30000, 'e_pas' : -65},
+            'tstart' : 0,
+            'tstop' : 100,
+            'dt' : 2**-4,
+            'nsegs_method' : 'lambda_f',
+            'lambda_f' : 100,
+        }
 
+        stick = LFPy.TemplateCell(**stickParams)
+        stick.simulate(rec_vmem=True, rec_imem=True,
+                       rec_current_dipole_moment=True)
+        self.assertTrue(stick.tvec.size ==
+                        stick.vmem.shape[1] ==
+                        stick.imem.shape[1] ==
+                        stick.current_dipole_moment.shape[0])
+        self.assertTrue(np.all(stick.vmem == stick.v_init))
+        self.assertTrue(np.all(stick.imem == 0.))
+        self.assertTrue(np.all(stick.current_dipole_moment == 0.))
+        
+
+    def test_cell_simulate_recorder_01(self):
+        stickParams = {
+            'morphology' : os.path.join(LFPy.__path__[0], 'test', 'stick.hoc'),
+            'templatefile' : os.path.join(LFPy.__path__[0], 'test', 'stick_template.hoc'),
+            'templatename' : 'stick_template',
+            'templateargs' : None,
+            'cm' : 1,
+            'Ra' : 150,
+            'v_init' : -65,
+            'passive' : True,
+            'passive_parameters' : {'g_pas' : 1./30000, 'e_pas' : -65},
+            'tstart' : 0,
+            'tstop' : 100,
+            'dt' : 0.1,
+            'nsegs_method' : 'lambda_f',
+            'lambda_f' : 100,
+        }
+        stick = LFPy.TemplateCell(**stickParams)
+        stick.simulate(rec_vmem=True, rec_imem=True,
+                       rec_current_dipole_moment=True)
+        self.assertTrue(stick.tvec.size ==
+                        stick.vmem.shape[1] ==
+                        stick.imem.shape[1] ==
+                        stick.current_dipole_moment.shape[0])
+        self.assertTrue(np.all(stick.vmem == stick.v_init))
+        self.assertTrue(np.all(stick.imem == 0.))
+        self.assertTrue(np.all(stick.current_dipole_moment == 0.))
+
+    def test_cell_simulate_recorder_02(self):
+        stickParams = {
+            'morphology' : os.path.join(LFPy.__path__[0], 'test', 'stick.hoc'),
+            'templatefile' : os.path.join(LFPy.__path__[0], 'test', 'stick_template.hoc'),
+            'templatename' : 'stick_template',
+            'templateargs' : None,
+            'cm' : 1,
+            'Ra' : 150,
+            'v_init' : -65,
+            'passive' : True,
+            'passive_parameters' : {'g_pas' : 1./30000, 'e_pas' : -65},
+            'tstart' : 0,
+            'tstop' : 100,
+            'dt' : 0.2,
+            'nsegs_method' : 'lambda_f',
+            'lambda_f' : 100,
+        }
+        stick = LFPy.TemplateCell(**stickParams)
+        stick.simulate(rec_vmem=True, rec_imem=True,
+                       rec_current_dipole_moment=True)
+        self.assertTrue(stick.tvec.size ==
+                        stick.vmem.shape[1] ==
+                        stick.imem.shape[1] ==
+                        stick.current_dipole_moment.shape[0])
+        self.assertTrue(np.all(stick.vmem == stick.v_init))
+        self.assertTrue(np.all(stick.imem == 0.))
+        self.assertTrue(np.all(stick.current_dipole_moment == 0.))
+
+    def test_cell_simulate_recorder_03(self):
+        stickParams = {
+            'morphology' : os.path.join(LFPy.__path__[0], 'test', 'stick.hoc'),
+            'templatefile' : os.path.join(LFPy.__path__[0], 'test', 'stick_template.hoc'),
+            'templatename' : 'stick_template',
+            'templateargs' : None,
+            'cm' : 1,
+            'Ra' : 150,
+            'v_init' : -65,
+            'passive' : True,
+            'passive_parameters' : {'g_pas' : 1./30000, 'e_pas' : -65},
+            'tstart' : 0,
+            'tstop' : 10000,
+            'dt' : 2**-4,
+            'nsegs_method' : 'lambda_f',
+            'lambda_f' : 100,
+        }
+
+        stick = LFPy.TemplateCell(**stickParams)
+        stick.simulate(rec_vmem=True, rec_imem=True,
+                       rec_current_dipole_moment=True)
+        self.assertTrue(stick.tvec.size ==
+                        stick.vmem.shape[1] ==
+                        stick.imem.shape[1] ==
+                        stick.current_dipole_moment.shape[0])
+        self.assertTrue(np.all(stick.vmem == stick.v_init))
+        self.assertTrue(np.all(stick.imem == 0.))
+        self.assertTrue(np.all(stick.current_dipole_moment == 0.))
+        
+
+    def test_cell_simulate_recorder_04(self):
+        stickParams = {
+            'morphology' : os.path.join(LFPy.__path__[0], 'test', 'stick.hoc'),
+            'templatefile' : os.path.join(LFPy.__path__[0], 'test', 'stick_template.hoc'),
+            'templatename' : 'stick_template',
+            'templateargs' : None,
+            'cm' : 1,
+            'Ra' : 150,
+            'v_init' : -65,
+            'passive' : True,
+            'passive_parameters' : {'g_pas' : 1./30000, 'e_pas' : -65},
+            'tstart' : 0,
+            'tstop' : 10000,
+            'dt' : 0.1,
+            'nsegs_method' : 'lambda_f',
+            'lambda_f' : 100,
+        }
+        stick = LFPy.TemplateCell(**stickParams)
+        stick.simulate(rec_vmem=True, rec_imem=True,
+                       rec_current_dipole_moment=True)
+        self.assertTrue(stick.tvec.size ==
+                        stick.vmem.shape[1] ==
+                        stick.imem.shape[1] ==
+                        stick.current_dipole_moment.shape[0])
+        self.assertTrue(np.all(stick.vmem == stick.v_init))
+        self.assertTrue(np.all(stick.imem == 0.))
+        self.assertTrue(np.all(stick.current_dipole_moment == 0.))
+
+    def test_cell_simulate_recorder_05(self):
+        stickParams = {
+            'morphology' : os.path.join(LFPy.__path__[0], 'test', 'stick.hoc'),
+            'templatefile' : os.path.join(LFPy.__path__[0], 'test', 'stick_template.hoc'),
+            'templatename' : 'stick_template',
+            'templateargs' : None,
+            'cm' : 1,
+            'Ra' : 150,
+            'v_init' : -65,
+            'passive' : True,
+            'passive_parameters' : {'g_pas' : 1./30000, 'e_pas' : -65},
+            'tstart' : 0,
+            'tstop' : 10000,
+            'dt' : 0.2,
+            'nsegs_method' : 'lambda_f',
+            'lambda_f' : 100,
+        }
+        stick = LFPy.TemplateCell(**stickParams)
+        stick.simulate(rec_vmem=True, rec_imem=True,
+                       rec_current_dipole_moment=True)
+        self.assertTrue(stick.tvec.size ==
+                        stick.vmem.shape[1] ==
+                        stick.imem.shape[1] ==
+                        stick.current_dipole_moment.shape[0])
+        self.assertTrue(np.all(stick.vmem == stick.v_init))
+        self.assertTrue(np.all(stick.imem == 0.))
+        self.assertTrue(np.all(stick.current_dipole_moment == 0.))
+        
     def test_cell_simulate_current_dipole_moment_00(self):
         stickParams = {
             'morphology' : os.path.join(LFPy.__path__[0], 'test', 'stick.hoc'),
