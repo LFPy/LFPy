@@ -95,8 +95,7 @@ There are few options to install LFPy:
 1.  From the Python Package Index with only local access using pip
     ::
         
-        pip install --user LFPy
-
+        pip install LFPy --user
 
     as sudoer (in general not recommended as system Python files may be overwritten):
     ::
@@ -106,8 +105,12 @@ There are few options to install LFPy:
     Upgrading LFPy from the Python package index (without attempts at upgrading dependencies):
     ::
         
-        pip install --upgrade --no-deps LFPy
+        pip install --upgrade --no-deps LFPy --user
 
+    LFPy release candidates can be installed as
+    ::
+        
+        pip install --pre --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple LFPy --user
 
 2.  From source:
     ::
