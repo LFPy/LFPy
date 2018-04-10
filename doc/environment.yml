@@ -16,4 +16,4 @@ dependencies:
   - neuron
   - pip:
     - sphinx-rtd-theme
-    - git+https://github.com/INCF/csa.git@master
+    - csa
