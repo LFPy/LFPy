@@ -3,6 +3,14 @@
 """
 LFPs from a population of cells relying on MPI (Message Passing Interface)
 
+Execution:
+
+    <mpiexec> -n <processes> python example3.py
+
+Notes:
+- on certain platforms and with mpirun, the --oversubscribe argument is needed
+  to get more processes than the number of physical CPU cores.
+
 Copyright (C) 2017 Computational Neuroscience Group, NMBU.
 
 This program is free software: you can redistribute it and/or modify
@@ -36,6 +44,9 @@ COMM = MPI.COMM_WORLD
 SIZE = COMM.Get_size()
 RANK = COMM.Get_rank()
 
+#set the numpy random seeds
+global_seed = 1234
+np.random.seed(global_seed)
 
 def stationary_poisson(nsyn,lambd,tstart,tstop):
     ''' Generates nsyn stationary possion processes with rate lambda between tstart and tstop'''
@@ -75,7 +86,7 @@ cell_parameters = {          # various cell parameters,
     'Ra' : 150,         # axial resistance
     'v_init' : -65.,    # initial crossmembrane potential
     'passive' : True,   # turn on passive mechanism for all sections
-    'passive_parameters' : {'g_pas' : 1./30000, 'e_pas' : -65}, # passive parameters
+    'passive_parameters' : {'g_pas' : 1./30000, 'e_pas' : -65}, # passive params
     'nsegs_method' : 'lambda_f',
     'lambda_f' : 100.,
     'dt' : 2.**-3,      # simulation time step size
@@ -102,66 +113,104 @@ point_electrode_parameters = {
     'z' : 0.,
 }
 
+# number of units
+n_cells = 6
 
-#number of units
-n_cells = SIZE
-cell_id = RANK
-
-#set the numpy random seeds
-global_seed = 1234
-np.random.seed(global_seed)
-
-
-#assign cell positions
+# assign cell positions
 x_cell_pos = np.linspace(-250., 250., n_cells)
 
-z_rotation = np.random.permutation(np.arange(0., np.pi, np.pi / n_cells))
+# default rotation around x and y axis
+xy_rotations = dict(x=4.99, y=-4.33)
 
-#synaptic spike times
+# rotations around z-axis
+if RANK == 0:
+    z_rotation = COMM.bcast(np.random.permutation(np.arange(0., np.pi,
+                                                            np.pi / n_cells)),
+                            root=0)
+else:
+    z_rotation = COMM.bcast(None, root=0)
+
+
+#synaptic spike times drawn on RANK 0 distributed to all processes
 n_pre_syn = 1000
-pre_syn_sptimes = stationary_poisson(nsyn=n_pre_syn, lambd=5., tstart=0, tstop=300)
+if RANK == 0:
+    pre_syn_sptimes = COMM.bcast(stationary_poisson(nsyn=n_pre_syn, lambd=5.,
+                                                    tstart=0, tstop=300),
+                                 root=0)
+else:
+    pre_syn_sptimes = COMM.bcast(None, root=0)
 
-#re-seed the random number generator
-cell_seed = global_seed + cell_id
-np.random.seed(cell_seed)
-
-# Create cell
-cell = LFPy.Cell(**cell_parameters)
-
-#Have to position and rotate the cells!
-cell.set_rotation(x=4.99, y=-4.33, z=z_rotation[RANK])
-cell.set_pos(x=x_cell_pos[RANK])
-
-#assign spike times to different units
+# number of synapses on each cell
 n_synapses = 100
 
-# Create synapse and set time of synaptic input
-pre_syn_pick = np.random.permutation(np.arange(n_pre_syn))[0:n_synapses]
-
-for i_syn in range(n_synapses):
-    syn_idx = int(cell.get_rand_idx_area_norm())
-    synapse_parameters.update({'idx' : syn_idx})
-    synapse = LFPy.Synapse(cell, **synapse_parameters)
-    synapse.set_spike_times(pre_syn_sptimes[pre_syn_pick[i_syn]])
-
-#run the cell simulation
-cell.simulate(rec_imem=True)
-
-#set up the extracellular device
-point_electrode = LFPy.RecExtElectrode(cell, **point_electrode_parameters)
-point_electrode.calc_lfp()
-
-if RANK==0:
-    single_LFPs = [point_electrode.LFP[0]]
-    for i_proc in range(1, SIZE):
-        single_LFPs = np.r_['0,2', single_LFPs, COMM.recv(source=i_proc)]
+# indices for presynaptic spike trains for each neuron also picked on RANK 0
+# and scattered (for illustrating purposes, not efficiency)
+if RANK == 0:
+    # set up len SIZE nested list for spike train IDs.
+    pre_syn_ids = [[]]*SIZE
+    for cell_id in range(n_cells):
+        pre_syn_ids[cell_id % SIZE] += [np.random.permutation(np.arange(
+                                                    n_pre_syn))[0:n_synapses]]
 else:
-    COMM.send(point_electrode.LFP[0], dest=0)
+    pre_syn_ids = None
+pre_syn_ids = COMM.scatter(pre_syn_ids, root=0)
+
+# containers for per-cell LFP and summed LFPs
+single_LFPs = []
+summed_LFP = np.zeros(int(cell_parameters['tstop'] / cell_parameters['dt'] + 1))
+
+# get state of random seed generator
+state = np.random.get_state()
+
+# iterate over cells in populations
+for cell_id in range(n_cells):
+    if cell_id % SIZE == RANK:
+        # get set seed per cell in order to synapse locations
+        np.random.seed(global_seed + cell_id)   
+        
+        # Create cell
+        cell = LFPy.Cell(**cell_parameters)
+        
+        #Have to position and rotate the cells!
+        cell.set_rotation(z=z_rotation[cell_id], **xy_rotations)
+        cell.set_pos(x=x_cell_pos[cell_id])
+                
+        for i_syn in range(n_synapses):
+            syn_idx = cell.get_rand_idx_area_norm()
+            synapse_parameters.update({'idx' : syn_idx})
+            synapse = LFPy.Synapse(cell, **synapse_parameters)
+            synapse.set_spike_times(pre_syn_sptimes[pre_syn_ids[
+                                                        cell_id % SIZE][i_syn]])
+        
+        #run the cell simulation
+        cell.simulate(rec_imem=True)
+        
+        #set up the extracellular device
+        point_electrode = LFPy.RecExtElectrode(cell,
+                                               **point_electrode_parameters)
+        point_electrode.calc_lfp()
+
+        # sum LFP on this RANK
+        summed_LFP += point_electrode.LFP[0]
+                
+        # send LFP of this cell to RANK 0
+        if RANK != 0:
+            COMM.send(point_electrode.LFP[0], dest=0)
+        else:
+            single_LFPs += [point_electrode.LFP[0]]
+    
+    # collect single LFP contributions on RANK 0
+    if RANK == 0:
+        if cell_id % SIZE != RANK:
+            single_LFPs += [COMM.recv(source=cell_id % SIZE)]
 
 # we can also use MPI to sum arrays directly:
-summed_LFP = COMM.reduce(point_electrode.LFP[0])
+summed_LFP = COMM.reduce(summed_LFP)        
 
+# reset state of random number generator
+np.random.set_state(state)
 
+# plot output on RANK 0.
 if RANK==0:
     #assign color to each unit
     color_vec = [plt.cm.rainbow(int(x*256./n_cells)) for x in range(n_cells)]
@@ -177,7 +226,7 @@ if RANK==0:
         cell = LFPy.Cell(join('cells', 'cells', 'j4a.hoc'),
                          nsegs_method='lambda_f',
                          lambda_f=5)
-        cell.set_rotation(x=4.99, y=-4.33, z=z_rotation[i_cell])
+        cell.set_rotation(z=z_rotation[i_cell], **xy_rotations)
         cell.set_pos(x=x_cell_pos[i_cell])
 
         zips = []
@@ -274,10 +323,10 @@ if RANK==0:
     plt.title('Single neuron extracellular potentials')
     plt.axis('off')
 
-    for i_cell in range(n_cells):
+    for cell_id in range(n_cells):
         plt.plot(tvec,
-                        i_cell+2.e3*single_LFPs[i_cell],
-                        color=color_vec[i_cell], lw=1,
+                        cell_id+2.e3*single_LFPs[cell_id],
+                        color=color_vec[cell_id], lw=1,
                         )
 
     plt.ylim([-1,n_cells-.5])
