@@ -3,6 +3,10 @@
 """
 Example plot for LFPy: Single-synapse contribution to the LFP
 
+Execution:
+
+    python example1.py
+
 Copyright (C) 2017 Computational Neuroscience Group, NMBU.
 
 This program is free software: you can redistribute it and/or modify
@@ -142,7 +146,7 @@ cbar.outline.set_visible(False)
 #get some log-linear tickmarks and ticklabels
 ticks = np.arange(np.ceil(np.log10(LFP.min())), np.floor(np.log10(LFP.max())))
 cbar.set_ticks(ticks)
-cbar.set_ticklabels(10.**ticks * 1E6) #mV -> nV
+cbar.set_ticklabels(np.round(10.**ticks * 1E6, decimals=1)) #mV -> nV
 
 #plot morphology
 zips = []

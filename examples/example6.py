@@ -17,6 +17,10 @@ Here, excitatory and inhibitory neurons are distributed on different parts of
 the morphology, with stochastic spike times produced by the
 LFPy.inputgenerators.stationary_gamma() function.
 
+Execution:
+
+    python example6.py
+    
 Copyright (C) 2017 Computational Neuroscience Group, NMBU.
 
 This program is free software: you can redistribute it and/or modify

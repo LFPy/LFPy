@@ -4,6 +4,10 @@
 Run Hay et al. (2011) layer 5b pyramidal cell model, generating and plotting a
 single action potential and corresponding extracellular potentials (spikes)
 
+Execution:
+
+    python example2.py
+
 Copyright (C) 2017 Computational Neuroscience Group, NMBU.
 
 This program is free software: you can redistribute it and/or modify
@@ -147,7 +151,7 @@ def plotstuff(cell, electrode):
     line_segments = LineCollection(zips,
                                     linewidths = (1),
                                     linestyles = 'solid',
-                                    cmap='spectral',
+                                    cmap='nipy_spectral',
                                     zorder=1,
                                     rasterized=False)
     line_segments.set_array(np.log10(-LFPmin))
@@ -158,7 +162,7 @@ def plotstuff(cell, electrode):
     xticklabels = np.array([-0.1  , -0.05 , -0.02 , -0.01 , -0.005, -0.002])
     xticks = np.log10(-xticklabels)
     axcb.set_ticks(xticks)
-    axcb.set_ticklabels(-10**xticks)    
+    axcb.set_ticklabels(np.round(-10**xticks, decimals=3))  
     axcb.set_label('spike amplitude (mV)', va='center')
     
     ax1.plot([22, 38], [100, 100], color='k', lw = 1)

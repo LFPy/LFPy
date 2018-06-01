@@ -15,6 +15,10 @@ A single excitatory synapse drive the neuron into producing a single action-
 potential, and the local field potential are calculated on a dense 2D-grid
 on around the soma.
 
+Execution:
+
+    python example5.py
+
 Copyright (C) 2017 Computational Neuroscience Group, NMBU.
 
 This program is free software: you can redistribute it and/or modify

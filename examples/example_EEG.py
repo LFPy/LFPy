@@ -3,6 +3,10 @@
 """
 Example plot for LFPy: Single-synapse contribution to the EEG
 
+Execution:
+
+    python example_EEG.py
+    
 Copyright (C) 2017 Computational Neuroscience Group, NMBU.
 
 This program is free software: you can redistribute it and/or modify

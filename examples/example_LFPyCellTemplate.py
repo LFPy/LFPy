@@ -5,6 +5,10 @@ A very generic case where the same morphology on different file formats
 is loaded in LFPy using a generic template specification, defined by
 file LFPyCellTemplate.hoc
 
+Execution:
+
+    python example_LFPyCellTemplate.py
+    
 Copyright (C) 2017 Computational Neuroscience Group, NMBU.
 
 This program is free software: you can redistribute it and/or modify
