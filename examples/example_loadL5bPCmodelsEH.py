@@ -15,6 +15,10 @@ Note that LFPy can only deal with one cell at the time, creating several
 cell objects will slow everything down, but each cell *should* get the correct
 cell responses.
 
+Execution:
+
+    python example_loadL5bPCmodelsEH.py
+
 Copyright (C) 2017 Computational Neuroscience Group, NMBU.
 
 This program is free software: you can redistribute it and/or modify

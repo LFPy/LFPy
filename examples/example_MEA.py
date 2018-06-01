@@ -7,6 +7,10 @@ conductivity (MEA chip, slice, saline) in comparison to LFPy.RecExtElectrode
 which incorporates an infinite homogeneous isotropic/anisotropic extracellular
 conductivity. 
 
+Execution:
+
+    python example_MEA.py
+    
 Copyright (C) 2017 Computational Neuroscience Group, NMBU.
 
 This program is free software: you can redistribute it and/or modify
@@ -55,7 +59,7 @@ def plot_results(cell, synapse, MEA, electrode):
                        xlabel='ms', ylabel='mV',
                        ylim=[-70, -50], xlim=time_window)
 
-    elec_clr = lambda idx: plt.cm.spectral(1./(len(MEA.x) - 1) * idx)
+    elec_clr = lambda idx: plt.cm.nipy_spectral(1./(len(MEA.x) - 1) * idx)
 
     l_elec, l_syn = plot_recording_set_up(cell, ax1, ax3, MEA, elec_clr,
                                               syn_idx, cell_plot_colors)

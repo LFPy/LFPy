@@ -8,6 +8,14 @@ openmpirun -np 4 python example_mpi.py
 The example uses mpi4py with openmpi, and do not rely on NEURON's MPI
 implementation.
 
+Execution:
+
+    <mpiexec> -n <processes> python example_mpi.py
+
+Notes:
+- on certain platforms and with mpirun, the --oversubscribe argument is needed
+  to get more processes than the number of physical CPU cores.
+
 Copyright (C) 2017 Computational Neuroscience Group, NMBU.
 
 This program is free software: you can redistribute it and/or modify
@@ -56,24 +64,24 @@ if not os.path.isfile(join('cells', 'cells', 'j4a.hoc')) and RANK == 0:
     myzip.extractall('.')
     myzip.close()
 
-if RANK == 0:
-    #compile mod files every time, because of incompatibility with Hay2011 files:
-    if "win32" in sys.platform:
-        pth = "cells"
-        warn("no autompile of NMODL (.mod) files on Windows. " 
-             + "Run mknrndll from NEURON bash in the folder cells and rerun example script")
-        if not pth in neuron.nrn_dll_loaded:
-            neuron.h.nrn_load_dll(pth+"/nrnmech.dll")
-        neuron.nrn_dll_loaded.append(pth)
-    else:
+#compile mod files every time, because of incompatibility with Hay2011 files:
+if "win32" in sys.platform:
+    pth = "cells"
+    warn("no autompile of NMODL (.mod) files on Windows. " 
+         + "Run mknrndll from NEURON bash in the folder cells and rerun example script")
+    if not pth in neuron.nrn_dll_loaded:
+        neuron.h.nrn_load_dll(pth+"/nrnmech.dll")
+    neuron.nrn_dll_loaded.append(pth)
+else:
+    if RANK == 0:
         os.system('''
                   cd cells
                   nrnivmodl
                   ''')
-        neuron.load_mechanisms('cells')
+    COMM.Barrier()
+    neuron.load_mechanisms('cells')
 
-    #sync threads
-COMM.Barrier()
+
     
 
 #set one global seed, ensure all randomizations are set on RANK 0 in script!

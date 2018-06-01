@@ -11,6 +11,10 @@ LFPy.inputgenerators.stationary_gamma() function.
 
 Same as "example6.py", just without the active conductances
 
+Execution:
+
+    python example7.py
+    
 Copyright (C) 2017 Computational Neuroscience Group, NMBU.
 
 This program is free software: you can redistribute it and/or modify

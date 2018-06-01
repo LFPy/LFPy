@@ -5,6 +5,10 @@ Example plot for LFPy: Single-synapse contribution to the LFP
 
 Copyright (C) 2017 Computational Neuroscience Group, NMBU.
 
+Execution:
+
+    python example_anisotropy.py
+    
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or

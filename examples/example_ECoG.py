@@ -13,6 +13,10 @@ medium that is covers the cortex. In addition the ECoG signal is
 calculated at the top of the brain, with a large recording electrode,
 which introduces strong spatial averaging.
 
+Execution:
+
+    python example_ECoG.py
+    
 Copyright (C) 2017 Computational Neuroscience Group, NMBU.
 
 This program is free software: you can redistribute it and/or modify
