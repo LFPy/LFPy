@@ -29,18 +29,24 @@ Ailamaki A, Alonso-Nanclares L, Antille N, Arsever S et al. (2015).
 Reconstruction and Simulation of Neocortical Microcircuitry.
 Cell 163:2, 456 - 492. doi: 10.1016/j.cell.2015.09.029
 
-A zip file with all single-cell models can be downloaded by copy-pasting the
-following link into a browser:
-https://bbp.epfl.ch/nmc-portal/documents/10184/7288948/hoc_combos_syn.1_0_10.allzips.tar
+A tar file with all single-cell models zipped can be downloaded and unpacked by issuing:
+$ wget https://bbp.epfl.ch/nmc-portal/documents/10184/7288948/hoc_combos_syn.1_0_10.allzips.tar
+$ tar -xvf hoc_combos_syn.1_0_10.allzips.tar
+$ cd hoc_combos_syn.1_0_10.allzips
+$ unzip L4_PC_cADpyr230_1.zip
+$ unzip L4_LBC_dNAC222_1.zip
+$ unzip L5_TTPC1_cADpyr232_1.zip
+$ unzip L5_MC_bAC217_1.zip
+$ cd -
 
-untar the files in this folder, and unzip all zip files. Some preparatory steps
-has to be made in order to compile NMODL language files used by the neuron
-models:
+Some preparatory steps has to be made in order to compile NMODL language
+files used by the neuron models:
 
 Set working dir
 >>> import os
 >>> import sys
 >>> import neuron
+>>> from glob import glob
 >>> CWD = os.getcwd()
 >>> NMODL = 'hoc_combos_syn.1_0_10.allmods'
 
@@ -57,33 +63,24 @@ Define a list of the neuron models (defined in the parameter file)
 
 Attempt to set up a folder with all unique mechanism mod files, compile, and
 load them all
->>> if RANK == 0:
->>>     if not os.path.isdir(NMODL):
->>>         os.mkdir(NMODL)
->>>     for NRN in neurons:
->>>         for nmodl in glob(os.path.join(NRN, 'mechanisms', '*.mod')):
->>>             while not os.path.isfile(os.path.join(NMODL,
->>>                                                   os.path.split(nmodl)[-1])):
->>>                 if "win32" in sys.platform:
->>>                     os.system("copy {} {}".format(nmodl, NMODL))
->>>                 else:
->>>                     os.system('cp {} {}'.format(nmodl,
->>>                                                 os.path.join(NMODL,
->>>                                                          '.')))
->>>     os.chdir(NMODL)
->>>     if "win32" in sys.platform:
->>>         warn("no autompile of NMODL (.mod) files on Windows. " 
->>>          + "Run mknrndll from NEURON bash in the folder %s and rerun example script" % NMODL)
->>>     else:
->>>         os.system('nrnivmodl')        
->>>     os.chdir(CWD)
->>> COMM.Barrier()
+>>> if not os.path.isdir(NMODL):
+>>>     os.mkdir(NMODL)
+>>> for NRN in neurons:
+>>>     for nmodl in glob(os.path.join(NRN, 'mechanisms', '*.mod')):
+>>>         while not os.path.isfile(os.path.join(NMODL,
+>>>                                               os.path.split(nmodl)[-1])):
+>>>             if "win32" in sys.platform:
+>>>                 os.system("copy {} {}".format(nmodl, NMODL))
+>>>             else:
+>>>                 os.system('cp {} {}'.format(nmodl,
+>>>                                             os.path.join(NMODL,
+>>>                                                      '.')))
+>>> os.chdir(NMODL)
 >>> if "win32" in sys.platform:
->>>     if not NMODL in neuron.nrn_dll_loaded:
->>>         neuron.h.nrn_load_dll(NMODL+"/nrnmech.dll")
->>>     neuron.nrn_dll_loaded.append(NMODL)
+>>>     warn("no autompile of NMODL (.mod) files on Windows. " 
+>>>          + "Run mknrndll from NEURON bash in the folder %s and rerun example script" % NMODL)
 >>> else:
->>>     neuron.load_mechanisms(NMODL)
+>>>     os.system('nrnivmodl')        
 >>> os.chdir(CWD)
 
 
@@ -441,7 +438,7 @@ if __name__ == '__main__':
         
         nrows = np.sum([len(population.gids)
                         for population in network.populations.values()])
-        ncols = 1 # if PSET.COMPUTE_LFP else 1
+        ncols = 1
             
         gs = GridSpec(nrows=nrows, ncols=ncols)
         
@@ -472,14 +469,6 @@ if __name__ == '__main__':
                 else: 
                     ax.set_xticklabels([])
         
-        # if PSET.COMPUTE_LFP:
-        #     ax = fig.add_subplot(gs[:, 1])
-        #     ax.set_title('extracellular potentials')
-        #     vlimround = draw_lineplot(ax=ax, data=decimate(OUTPUT[0][0]['imem'],
-        #                                                    q=PSET.decimate_q),
-        #                               dt=PSET.dt*PSET.decimate_q, T=T, color='k')      
-        # 
-        # 
         # save figure output
         fig.savefig(os.path.join(PSET.OUTPUTPATH,
                                  'example_parallel_network_RANK_{}.pdf'.format(
@@ -519,7 +508,6 @@ if __name__ == '__main__':
                                      label=name,
                                      )
             ax.add_collection(polycol)
-        ax.axis(ax.axis('equal'))
         ax.set_xlim(-400, 400)
         axis = ax.axis()
         ax.hlines(np.r_[0., -PSET.layer_data['thickness'].cumsum()],
