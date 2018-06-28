@@ -1,0 +1,15 @@
+#!/bin/bash
+##################################################################
+#SBATCH --job-name LFPy-network
+#SBATCH --time 00:20:00
+#SBATCH -o example_parallel_network.txt
+#SBATCH -e example_parallel_network.txt
+### Number of nodes to allocate for the job with exclusive access to all cores:
+#SBATCH -N 24
+#SBATCH --exclusive
+### Number of MPI processes, assumes 24 physical cores per node:
+#SBATCH --ntasks 1152
+##################################################################
+# from here on we can run whatever command we want
+unset DISPLAY # DISPLAY somehow problematic with Slurm
+srun python example_parallel_network.py

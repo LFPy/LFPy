@@ -9,7 +9,13 @@ This folder contains the simulation files for the preprint describing the LFPy v
 
 Files
 =====
-figure_2.py: Simulation and plotting script reproducing figure 2 of the manuscript
-simplemorpho_modded.hoc: morphology file used for figure 2.
-
+* figure_2.py: Simulation and plotting script reproducing figure 2 of the manuscript
+* simplemorpho_modded.hoc: morphology file used for figure 2.
+* example_parallel_network.py: Main simulation script for network, needed for figure 4-6. See docstring in file for set up details.
+* example_parallel_network_parameters.py: Corresponding parameter script
+* example_parallel_network_methods.py: Helper script
+* example_parallel_network_plotting.py: Helper script
+* figure_4.py: Generates figure 4
+* figure_5.py: Generates figure 5
+* figure_6.py: Generates figure 6
 
