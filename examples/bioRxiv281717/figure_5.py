@@ -64,7 +64,6 @@ def plot_spike_raster(ax, PSET, T):
         ax.plot(x[inds], y[inds], '|',
                 color=colors[i], markersize=2, lw=2, clip_on=True, label=m_name)
     f.close()
-    # ax.axis(ax.axis('tight'))
     ax.set_xlim(T[0], T[1])
     ax.set_ylim(-0.5, PSET.populationParameters['POP_SIZE'].sum()+0.5)
     ax.invert_yaxis()

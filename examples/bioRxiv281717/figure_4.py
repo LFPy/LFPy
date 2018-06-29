@@ -16,8 +16,6 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 '''
 from __future__ import division
-# import matplotlib
-# matplotlib.use('agg')
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
 from matplotlib.collections import PolyCollection
@@ -35,7 +33,6 @@ COMM = MPI.COMM_WORLD
 SIZE = COMM.Get_size()
 RANK = COMM.Get_rank()
 
-# plt.interactive(1)
 
 # # set default plotting parameters
 plt.rcParams.update({
@@ -90,7 +87,6 @@ def plot_quantity_YXL(axes, PSET, quantity,
         ax.invert_yaxis()
 
         ax.axis(ax.axis('tight'))
-        # ax.xaxis.set_ticks_position('top')
         ax.set_xticks(np.arange(len(y))+0.5)
         ax.set_yticks(np.arange(len(layers))+0.5)
         
@@ -104,12 +100,7 @@ def plot_quantity_YXL(axes, PSET, quantity,
             ax.set_xticklabels(y, rotation=90)
         else:
             ax.set_xticklabels([])
-        # ax.xaxis.set_label_position('top')
         
-        # ax.text(0.5, -0.13, r'$Y=$'+yi,
-        #     horizontalalignment='center',
-        #     verticalalignment='center',
-        #     transform=ax.transAxes)
         ax.set_title(r'$Y=${}'.format(yi))
     
         #colorbar
@@ -131,7 +122,7 @@ def plot_multapseargs(ax, PSET, cmap=plt.get_cmap('inferno'),
     
     masked_array = np.ma.array(array, mask=np.array(array)==0.)
     cmap.set_bad('k', 0.5)
-    im = ax.pcolormesh(masked_array, cmap=cmap, vmin=0, ) #interpolation='nearest')
+    im = ax.pcolormesh(masked_array, cmap=cmap, vmin=0, )
     ax.axis(ax.axis('tight'))
     ax.invert_yaxis()
     ax.xaxis.set_ticks_position('top')
@@ -200,7 +191,6 @@ if __name__ == '__main__':
     ax.set_ylim(top=z-v_spacing, bottom=z-len(keys)*v_spacing+v_spacing)
     for i, (label, key) in enumerate(zip(labels, keys)):
         ax.text(axis[0], z-(i+1)*v_spacing, label, ha='right', va='top')
-        # ax.text(-h_spacing / 2., z-(i+1)*v_spacing, label, ha='right')
         for j, popData in enumerate(PSET.populationParameters):
             if key == 'pop_args[loc]':
                 ax.text(j*h_spacing, z-(i+1)*v_spacing, int(popData['pop_args']['loc']), ha='center', va='top')
@@ -307,15 +297,12 @@ if __name__ == '__main__':
 
     ax.axis(ax.axis('equal'))
     ax.set_ylim(-PSET.layer_data['thickness'].sum(), 0)
-    # axis = ax.axis()
     # draw lines showing the layer boundaries
     ax.hlines(np.r_[0., -PSET.layer_data['thickness'].cumsum()], -536.09990331936808, 536.09990331936808, 'k', lw=0.5)
-    # ax.hlines(np.r_[0., -PSET.layer_data['thickness'].cumsum()], ax.axis()[0], ax.axis()[1], 'k', lw=0.5)
     ax.set_yticks(PSET.layer_data['center'])
     ax.set_yticklabels(PSET.layer_data['layer'])
     ax.set_ylabel('layer')
     ax.set_xticks([-data['pop_args']['radius'], 0, data['pop_args']['radius']])
-    # ax.set_xticklabels([])
     ax.set_xlabel('$x$ ($\mu$m)')
     
 
@@ -342,8 +329,6 @@ if __name__ == '__main__':
     bins = np.arange(0, -PSET.layer_data['thickness'].sum(), -50)[::-1]
     for color, post, key in zip(colors, PSET.populationParameters['m_type'], PSET.populationParameters['me_type']):
         ax.hist(f[key]['z'], bins=bins, color=color, alpha=1, orientation='horizontal', histtype='step', label=r'{}'.format(post), clip_on=False)
-    # ax.set_ylabel(r'$z$ ($\mu$m)')
-    # ax.set_ylabel('layer')
     ax.set_xlabel('count')
     axis = ax.axis('tight')
     ax.axis(axis)
@@ -352,7 +337,6 @@ if __name__ == '__main__':
     ax.hlines(np.r_[0., -PSET.layer_data['thickness'].cumsum()], axis[0], axis[1], 'k', lw=0.5)
     ax.set_yticks(PSET.layer_data['center'])
     ax.set_yticklabels([])
-    # ax.set_yticklabels(PSET.layer_data['layer'])
     ax.legend(loc=8)
     ax.xaxis.set_major_locator(MaxNLocator(3))
     
@@ -385,8 +369,6 @@ if __name__ == '__main__':
         # draw lines showing the layer boundaries
         ax.hlines(np.r_[0., -PSET.layer_data['thickness'].cumsum()], axis[0], axis[1], 'k', lw=0.5)
         ax.set_yticks(PSET.layer_data['center'])
-        # if i == 0:
-        #     ax.legend(loc=8)
         ax.xaxis.set_major_locator(MaxNLocator(2))
         
 
