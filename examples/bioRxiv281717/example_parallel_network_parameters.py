@@ -311,7 +311,7 @@ if RANK == 0:
         if not os.path.isfile(fname):
             u = urlopen('https://bbp.epfl.ch/nmc-portal/documents/10184/7288948/'+fname)
             localFile = open(fname, 'w')
-            localFile.write(u.read())
+            localFile.write(u.read().decode('utf-8'))
             localFile.close()
             u.close()
 COMM.Barrier()
