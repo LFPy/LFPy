@@ -33,10 +33,10 @@ A tar file with all single-cell models zipped can be downloaded and unpacked by 
 $ wget https://bbp.epfl.ch/nmc-portal/documents/10184/7288948/hoc_combos_syn.1_0_10.allzips.tar
 $ tar -xvf hoc_combos_syn.1_0_10.allzips.tar
 $ cd hoc_combos_syn.1_0_10.allzips
-$ unzip L4_PC_cADpyr230_1.zip
-$ unzip L4_LBC_dNAC222_1.zip
-$ unzip L5_TTPC1_cADpyr232_1.zip
-$ unzip L5_MC_bAC217_1.zip
+$ unzip 'L4_PC_*.zip'
+$ unzip 'L4_LBC_*.zip'
+$ unzip 'L5_TTPC1_*.zip'
+$ unzip 'L5_MC_*.zip'
 $ cd -
 
 Some preparatory steps has to be made in order to compile NMODL language
