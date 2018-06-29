@@ -304,18 +304,17 @@ PSET.cellParameters = dict()
 
 
 # autodownload some json files with anatomical and pathway specific data
-pathway_files = [os.path.join('..', 'pathways_anatomy_factsheets_simplified.json'),
-                 os.path.join('..', 'pathways_physiology_factsheets_simplified.json')]
+pathway_files = ['pathways_anatomy_factsheets_simplified.json',
+                 'pathways_physiology_factsheets_simplified.json']
 if RANK == 0:
     for fname in pathway_files:            
         if not os.path.isfile(fname):
-            u = urlopen('https://bbp.epfl.ch/nmc-portal/documents/10184/7288948/'+fname[-1])
+            u = urlopen('https://bbp.epfl.ch/nmc-portal/documents/10184/7288948/'+fname)
             localFile = open(fname, 'w')
             localFile.write(u.read())
             localFile.close()
             u.close()
 COMM.Barrier()
-
 
 #flag for cell template file to switch on (inactive) synapses
 add_synapses = False
