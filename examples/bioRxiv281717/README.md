@@ -14,6 +14,7 @@ Files
 * simplemorpho_modded.hoc: morphology file used for figure 2.
 * example_parallel_network.py: Main simulation script for network, needed for figure 4-6. See docstring in file for set up details.
 * example_parallel_network_parameters.py: Corresponding parameter script
+* example_parallel_network.job: SLURM workload manager job submission script. See main sim. script for details.
 * example_parallel_network_methods.py: Helper script
 * example_parallel_network_plotting.py: Helper script
 * figure_4.py: Generates figure 4
