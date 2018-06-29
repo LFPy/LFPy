@@ -9,6 +9,7 @@ This folder contains the simulation files for the preprint describing the LFPy v
 
 Files
 =====
+* requirements.txt: pip requirements file to install modules needed for the examples. 
 * figure_2.py: Simulation and plotting script reproducing figure 2 of the manuscript
 * simplemorpho_modded.hoc: morphology file used for figure 2.
 * example_parallel_network.py: Main simulation script for network, needed for figure 4-6. See docstring in file for set up details.
