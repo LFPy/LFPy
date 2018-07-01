@@ -51,7 +51,7 @@ with open('README.md') as file:
 
 setup(
     name = "LFPy",
-    version = "2.0",
+    version = "2.0.0",
     maintainer = "Espen Hagen",
     maintainer_email = 'espen.hagen@fys.uio.no',
     packages = ['LFPy'],
