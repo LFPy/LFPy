@@ -1048,10 +1048,10 @@ class Network(object):
                     f1[grp] = np.zeros(shape, dtype=dtype)
                 for key, value in f0[grp].items(): 
                     if RANK == 0:
-                        recvbuf = np.zeros(shape)
+                        recvbuf = np.zeros(shape, dtype=np.float)
                     else:
                         recvbuf = None
-                    COMM.Reduce(value.value, recvbuf, op=op, root=0)
+                    COMM.Reduce(value.value.astype(np.float), recvbuf, op=op, root=0)
                     if RANK == 0:
                         f1[grp][key] = recvbuf
             f0.close()
