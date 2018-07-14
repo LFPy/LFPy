@@ -56,6 +56,8 @@ This scientific software is released under the GNU Public License `GPLv3 <http:/
 Tutorial slides on LFPy
 -----------------------
 
+Slides for OCNS 2018 meeting tutorial `T5: Modeling and analysis of extracellular potentials <https://www.cnsorg.org/cns-2018-tutorials#T5>`_ hosted in Seattle, USA on LFPy: `CNS2018_LFPy_tutorial.pdf  <http://LFPy.github.io/downloads/CNS2018_LFPy_tutorial.pdf>`_
+
 Slides for OCNS 2017 meeting tutorial `T4: Modeling and analysis of extracellular potentials <http://www.cnsorg.org/cns-2017-tutorials#t4>`_ hosted in Antwerp, Belgium on LFPy and hybridLFPy: `CNS2017_LFPy_tutorial.pdf  <http://LFPy.github.io/downloads/CNS2017_LFPy_tutorial.pdf>`_
 
 Slides from OCNS 2015 meeting tutorial `T2:  Modeling and analysis of extracellular potentials <http://www.cnsorg.org/cns-2015-tutorials#t2>`_ hosted in Prague, Czech Republic on LFPy and hybridLFPy: `CNS2015_LFPy_tutorial.pdf  <http://LFPy.github.io/downloads/CNS2015_LFPy_tutorial.pdf>`_
