@@ -1,10 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""Demonstrate usage of LFPy.NetworkPopulation with a ball-and-stick type
+"""Demonstrate usage of LFPy.NetworkCell with a ball-and-stick type
 morphology with active HH channels inserted in the soma and passive-leak
 channels distributed throughout the apical stick. The corresponding morphology
 and template-specification is in the files BallAndStick.hoc and
 BallAndStickTemplate.hoc.
+
+Execution:
+
+    python example_network_cell.py
 
 Copyright (C) 2017 Computational Neuroscience Group, NMBU.
 
@@ -19,34 +23,49 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 """
-# import modules
-from mpi4py.MPI import COMM_WORLD as COMM
-from LFPy import NetworkPopulation, NetworkCell
+# import modules:
+from matplotlib.pyplot import subplot, plot, ylabel, xlabel, show, close
+import neuron
+from LFPy import NetworkCell, StimIntElectrode
 # class NetworkCell parameters:
 cellParameters = dict(
     morphology='BallAndStick.hoc',
     templatefile='BallAndStickTemplate.hoc',
     templatename='BallAndStickTemplate',
     templateargs=None,
-    delete_sections=False,
+    v_init=-65.
 )
-# class NetworkPopulation parameters:
-populationParameters = dict(
-    Cell=NetworkCell,
-    cell_args = cellParameters,
-    pop_args = dict(
-        radius=100.,
-        loc=0.,
-        scale=20.),
-    rotation_args = dict(x=0., y=0.),
+# create cell:
+cell = NetworkCell(
+    tstart=0., tstop=100.,
+    **cellParameters
 )
-# create population:
-population = NetworkPopulation(
-    first_gid=0, name='E',
-    **populationParameters
-    )
-# print out some info:
-for cell in population.cells:
-    print('RANK {}; pop {}; gid {}; cell {}'.format(
-        COMM.Get_rank(), population.name,
-        cell.gid, cell))
+# create stimulus device:
+iclamp = StimIntElectrode(
+    cell=cell,
+    idx=0,
+    pptype='IClamp',
+    amp=0.5,
+    dur=80.,
+    delay=10.,
+    record_current=True
+)
+# run simulation:
+cell.simulate()
+
+# plot cell response:
+subplot(2, 1, 1)
+plot(cell.tvec, iclamp.i)
+ylabel(r'$i_\mathrm{clamp}$ (nA)')
+subplot(2, 1, 2)
+plot(cell.tvec, cell.somav)
+ylabel(r'$V_\mathrm{soma}$ (mV)')
+xlabel(r'$t$ (ms)')
+show()
+
+# customary cleanup of object references
+# allowing for consecutive runs:
+close('all')
+iclamp = None
+cell = None
+neuron.h('forall delete_section()')

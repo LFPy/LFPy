@@ -6,6 +6,10 @@ channels distributed throughout the apical dendrite. The corresponding
 morphology and template specifications are in the files BallAndStick.hoc and
 BallAndStickTemplate.hoc.
 
+Execution (w. MPI):
+
+    mpirun -np 2 python example_network.py
+
 Copyright (C) 2017 Computational Neuroscience Group, NMBU.
 
 This program is free software: you can redistribute it and/or modify
@@ -20,16 +24,16 @@ GNU General Public License for more details.
 
 """
 # import modules:
+import os
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
 from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 import scipy.signal as ss
 import scipy.stats as st
-import os
 from mpi4py import MPI
-from LFPy import NetworkCell, Network, Synapse, RecExtElectrode
 import neuron
+from LFPy import NetworkCell, Network, Synapse, RecExtElectrode
 
 # set up MPI variables:
 COMM = MPI.COMM_WORLD
@@ -116,14 +120,14 @@ def draw_lineplot(
         ylabels=True,
         color='r',
         ztransform=True,
-        filter=False,
+        filter_data=False,
         filterargs=dict(N=2, Wn=0.02, btype='lowpass')):
     """helper function to draw line plots"""
     tvec = np.arange(data.shape[1])*dt
     tinds = (tvec >= T[0]) & (tvec <= T[1])
 
     # apply temporal filter
-    if filter:
+    if filter_data:
         b, a = ss.butter(**filterargs)
         data = ss.filtfilt(b, a, data, axis=-1)
 
@@ -139,7 +143,7 @@ def draw_lineplot(
     else:
         pass
 
-    yticklabels=[]
+    yticklabels = []
     yticks = []
 
     for i, z in enumerate(zvec):
@@ -158,7 +162,8 @@ def draw_lineplot(
         ax.plot([tvec[-1], tvec[-1]],
                 [-1, -2], lw=2, color='k', clip_on=False)
         ax.text(tvec[-1]+np.diff(T)*0.02, -1.5,
-                '$2^{' + '{}'.format(np.log2(vlimround)) + '}$ ' + '{0}'.format(unit),
+                '$2^{' + '{}'.format(np.log2(vlimround)
+                                    ) + '}$ ' + '{0}'.format(unit),
                 color='k', rotation='vertical',
                 va='center')
 
@@ -179,7 +184,7 @@ def draw_lineplot(
 # Set up shared and population-specific parameters
 ################################################################################
 # relative path for simulation output:
-OUTPUTPATH='example_network_output'
+OUTPUTPATH = 'example_network_output'
 
 # class NetworkCell parameters:
 cellParameters = dict(
@@ -193,47 +198,47 @@ cellParameters = dict(
 # class NetworkPopulation parameters:
 populationParameters = dict(
     Cell=NetworkCell,
-    cell_args = cellParameters,
-    pop_args = dict(
+    cell_args=cellParameters,
+    pop_args=dict(
         radius=100.,
         loc=0.,
         scale=20.),
-    rotation_args = dict(x=0., y=0.),
+    rotation_args=dict(x=0., y=0.),
 )
 
 # class Network parameters:
 networkParameters = dict(
-    dt = 2**-4,
-    tstop = 1200.,
-    v_init = -65.,
-    celsius = 6.5,
-    OUTPUTPATH = OUTPUTPATH
+    dt=2**-4,
+    tstop=1200.,
+    v_init=-65.,
+    celsius=6.5,
+    OUTPUTPATH=OUTPUTPATH
 )
 
 # class RecExtElectrode parameters:
 electrodeParameters = dict(
-    x = np.zeros(13),
-    y = np.zeros(13),
-    z = np.linspace(1000., -200., 13),
-    N = np.array([[0., 1., 0.]]*13),
-    r = 5.,
-    n = 50,
-    sigma = 0.3,
+    x=np.zeros(13),
+    y=np.zeros(13),
+    z=np.linspace(1000., -200., 13),
+    N=np.array([[0., 1., 0.] for _ in range(13)]),
+    r=5.,
+    n=50,
+    sigma=0.3,
     method="soma_as_point"
 )
 
 # method Network.simulate() parameters:
 networkSimulationArguments = dict(
-    rec_current_dipole_moment = True,
-    rec_pop_contributions = True,
-    to_memory = True,
-    to_file = False
+    rec_current_dipole_moment=True,
+    rec_pop_contributions=True,
+    to_memory=True,
+    to_file=False
 )
 
-# population names, sizez and connection probability:
+# population names, sizes and connection probability:
 population_names = ['E', 'I']
-population_sizes = [80, 20] 
-connectionProbability = [[0.05, 0.05]]*2
+population_sizes = [80, 20]
+connectionProbability = [[0.05, 0.05], [0.05, 0.05]]
 
 # synapse model. All corresponding parameters for weights,
 # connection delays, multapses and layerwise positions are
@@ -243,30 +248,41 @@ connectionProbability = [[0.05, 0.05]]*2
 #  ["I:E", "I:I"]].
 synapseModel = neuron.h.Exp2Syn
 # synapse parameters
-synapseParameters = [[dict(tau1=0.2, tau2=1.8, e=0.)]*2,
-                     [dict(tau1=0.1, tau2=9.0, e=-80.)]*2]
+synapseParameters = [[dict(tau1=0.2, tau2=1.8, e=0.),
+                      dict(tau1=0.2, tau2=1.8, e=0.)],
+                     [dict(tau1=0.1, tau2=9.0, e=-80.),
+                      dict(tau1=0.1, tau2=9.0, e=-80.)]]
 # synapse max. conductance (function, mean, st.dev., min.):
 weightFunction = np.random.normal
-weightArguments = [[dict(loc=0.002, scale=0.0002)]*2,
-                   [dict(loc=0.01,  scale=0.001)]*2]
+weightArguments = [[dict(loc=0.002, scale=0.0002),
+                    dict(loc=0.002, scale=0.0002)],
+                   [dict(loc=0.01, scale=0.001),
+                    dict(loc=0.01, scale=0.001)]]
 minweight = 0.
 # conduction delay (function, mean, st.dev., min.):
 delayFunction = np.random.normal
-delayArguments = [[dict(loc=1.5, scale=0.3)]*2]*2
+delayArguments = [[dict(loc=1.5, scale=0.3),
+                   dict(loc=1.5, scale=0.3)],
+                  [dict(loc=1.5, scale=0.3),
+                   dict(loc=1.5, scale=0.3)]]
 mindelay = 0.3
 multapseFunction = np.random.normal
-multapseArguments = [[dict(loc=2., scale=.5)]*2,
-                     [dict(loc=5., scale=1.)]*2]
+multapseArguments = [[dict(loc=2., scale=.5), dict(loc=2., scale=.5)],
+                     [dict(loc=5., scale=1.), dict(loc=5., scale=1.)]]
 # method NetworkCell.get_rand_idx_area_and_distribution_norm
 # parameters for layerwise synapse positions:
 synapsePositionArguments = [[dict(section=['soma', 'apic'],
-                                  fun=[st.norm]*2,
-                                  funargs=[dict(loc=500., scale=100.)]*2,
-                                  funweights=[0.5, 1.])]*2,
+                                  fun=[st.norm, st.norm],
+                                  funargs=[dict(loc=500., scale=100.),
+                                           dict(loc=500., scale=100.)],
+                                  funweights=[0.5, 1.]
+                                 ) for _ in range(2)],
                             [dict(section=['soma', 'apic'],
-                                  fun=[st.norm]*2,
-                                  funargs=[dict(loc=0., scale=100.)]*2,
-                                  funweights=[1., 0.5])]*2]
+                                  fun=[st.norm, st.norm],
+                                  funargs=[dict(loc=0., scale=100.),
+                                           dict(loc=0., scale=100.)],
+                                  funweights=[1., 0.5]
+                                 ) for _ in range(2)]]
 
 if __name__ == '__main__':
     ############################################################################
@@ -303,25 +319,27 @@ if __name__ == '__main__':
         for j, post in enumerate(population_names):
             # boolean connectivity matrix between pre- and post-synaptic neurons
             # in each population (postsynaptic on this RANK)
-            connectivity = network.get_connectivity_rand(pre=pre, post=post,
-                                                connprob=connectionProbability[i][j])
-                        
+            connectivity = network.get_connectivity_rand(
+                pre=pre, post=post,
+                connprob=connectionProbability[i][j]
+                )
+
             # connect network:
             (conncount, syncount) = network.connect(
-                            pre=pre, post=post,
-                            connectivity=connectivity,
-                            syntype=synapseModel,
-                            synparams=synapseParameters[i][j],
-                            weightfun=np.random.normal,
-                            weightargs=weightArguments[i][j],
-                            minweight=minweight,
-                            delayfun=delayFunction,
-                            delayargs=delayArguments[i][j],
-                            mindelay=mindelay,
-                            multapsefun=multapseFunction,
-                            multapseargs=multapseArguments[i][j],
-                            syn_pos_args=synapsePositionArguments[i][j],
-                            )
+                pre=pre, post=post,
+                connectivity=connectivity,
+                syntype=synapseModel,
+                synparams=synapseParameters[i][j],
+                weightfun=np.random.normal,
+                weightargs=weightArguments[i][j],
+                minweight=minweight,
+                delayfun=delayFunction,
+                delayargs=delayArguments[i][j],
+                mindelay=mindelay,
+                multapsefun=multapseFunction,
+                multapseargs=multapseArguments[i][j],
+                syn_pos_args=synapsePositionArguments[i][j],
+                )
 
     # set up extracellular recording device:
     electrode = RecExtElectrode(**electrodeParameters)
@@ -331,7 +349,7 @@ if __name__ == '__main__':
         electrode=electrode,
         **networkSimulationArguments
     )
-    
+
     # collect somatic potentials across all RANKs to RANK 0:
     if RANK == 0:
         somavs = []
@@ -345,14 +363,14 @@ if __name__ == '__main__':
         somavs = None
         for name in population_names:
             COMM.send([cell.somav for cell in network.populations[name].cells],
-                dest=0, tag=15)
+                      dest=0, tag=15)
 
     ############################################################################
     # Plot some output on RANK 0
     ############################################################################
     if RANK == 0:
         # spike raster
-        fig, ax = plt.subplots(1,1)
+        fig, ax = plt.subplots(1, 1)
         for name, spts, gids in zip(population_names, SPIKES['times'], SPIKES['gids']):
             t = []
             g = []
@@ -375,15 +393,16 @@ if __name__ == '__main__':
         gs = GridSpec(5, 1)
         ax = fig.add_subplot(gs[:4])
         draw_lineplot(ax, decimate(np.array(somavs)[0], q=16), dt=network.dt*16,
-                    T=(200, 1200),
-                    scaling_factor=1.,
-                    vlimround=16,
-                    label='E',
-                    scalebar=True,
-                    unit='mV',
-                    ylabels=False,
-                    color='C0',
-        ztransform=True)
+                      T=(200, 1200),
+                      scaling_factor=1.,
+                      vlimround=16,
+                      label='E',
+                      scalebar=True,
+                      unit='mV',
+                      ylabels=False,
+                      color='C0',
+                      ztransform=True
+                     )
         ax.set_yticks([])
         ax.set_xticklabels([])
         ax.set_ylabel('E')
@@ -392,15 +411,16 @@ if __name__ == '__main__':
 
         ax = fig.add_subplot(gs[4])
         draw_lineplot(ax, decimate(np.array(somavs)[1], q=16), dt=network.dt*16,
-                    T=(200, 1200),
-                    scaling_factor=1.,
-                    vlimround=16,
-                    label='I',
-                    scalebar=True,
-                    unit='mV',
-                    ylabels=False,
-                    color='C1',
-                    ztransform=True)
+                      T=(200, 1200),
+                      scaling_factor=1.,
+                      vlimround=16,
+                      label='I',
+                      scalebar=True,
+                      unit='mV',
+                      ylabels=False,
+                      color='C1',
+                      ztransform=True
+                     )
         ax.set_yticks([])
         ax.set_ylabel('I')
 
@@ -415,15 +435,16 @@ if __name__ == '__main__':
         for i, (ax, name, label) in enumerate(zip(axes, ['E', 'I', 'imem'],
                                                   ['E', 'I', 'sum'])):
             draw_lineplot(ax, decimate(OUTPUT[0][name], q=16), dt=network.dt*16,
-                        T=(200, 1200),
-                        scaling_factor=1.,
-                        vlimround=None,
-                        label=label,
-                        scalebar=True,
-                        unit='mV',
-                        ylabels=True if i == 0 else False,
-                        color='C{}'.format(i),
-                        ztransform=True)
+                          T=(200, 1200),
+                          scaling_factor=1.,
+                          vlimround=None,
+                          label=label,
+                          scalebar=True,
+                          unit='mV',
+                          ylabels=True if i == 0 else False,
+                          color='C{}'.format(i),
+                          ztransform=True
+                         )
             ax.set_title(label)
         fig.savefig(os.path.join(OUTPUTPATH, 'extracellular_potential.pdf'),
                     bbox_inches='tight')
