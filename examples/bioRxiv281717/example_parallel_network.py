@@ -62,7 +62,7 @@ Define a list of the neuron models (defined in the parameter file)
                os.path.join('hoc_combos_syn.1_0_10.allzips', 'L5_MC_bAC217_1')]
 
 Attempt to set up a folder with all unique mechanism mod files, compile, and
-load them all
+load them all. One synapse mechanism file is faulty and must be patched.
 >>> if not os.path.isdir(NMODL):
 >>>     os.mkdir(NMODL)
 >>> for NRN in neurons:
@@ -76,6 +76,15 @@ load them all
 >>>                                             os.path.join(NMODL,
 >>>                                                      '.')))
 >>> os.chdir(NMODL)
+>>> diff = """319c319
+<                 urand = scop_random(1)
+---
+>                 value = scop_random(1)
+"""
+>>> f = open('ProbGABAAB_EMS.patch', 'w')
+>>> f.writelines(diff)
+>>> f.close()
+>>> os.system('patch ProbGABAAB_EMS.mod ProbGABAAB_EMS.patch')
 >>> if "win32" in sys.platform:
 >>>     warn("no autompile of NMODL (.mod) files on Windows. " 
 >>>          + "Run mknrndll from NEURON bash in the folder %s and rerun example script" % NMODL)
@@ -144,7 +153,7 @@ from time import time
 from mpi4py import MPI
 import neuron
 import LFPy
-from example_parallel_network_plotting import draw_lineplot, decimate
+from example_parallel_network_plotting import decimate
 
 
 # set up MPI environment
