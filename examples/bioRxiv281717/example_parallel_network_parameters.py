@@ -35,7 +35,7 @@ if sys.version < '3':
 else:
     stringType = 'U'
     from urllib.request import urlopen
-from example_parallel_network_methods import get_templatename, get_params, get_syn_params, get_L_yXL
+from example_parallel_network_methods import get_templatename, get_params, get_syn_params
 import LFPy
 
 # set up MPI environment
