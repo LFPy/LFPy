@@ -504,12 +504,12 @@ class RecExtElectrode:
                 if j == 0:
                     lfp_e = tmp
                 else:
-                    lfp_e = np.r_['0,2', lfp_e, tmp]
+                    lfp_e += tmp
 
                 #no longer needed
                 del tmp
 
-            return lfp_e.mean(axis=0)
+            return lfp_e / self.n
 
         #loop over contacts
         for i in range(len(self.x)):
