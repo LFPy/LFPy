@@ -20,4 +20,5 @@ Files
 * figure_4.py: Generates figure 4
 * figure_5.py: Generates figure 5
 * figure_6.py: Generates figure 6
+* figure_7_8/*: Code for running benchmark simulations and generation of figures 7 and 8
 
