@@ -650,6 +650,12 @@ class FourSphereVolumeConductor(object):
                              np.linalg.norm(x, axis=1).reshape(1, len(x)))
         denominator[np.where(denominator == 0)] = 1e-12
         cos_phi = np.dot(rxy, x.T) / denominator
+
+        # Numerical round-off error can cause cos_phi to be slightly above 1.0,
+        # resulting in a NaN.
+        cos_phi[np.where(cos_phi > 1.0)] -= 1e-6
+        cos_phi[np.where(cos_phi < -1.0)] += 1e-6
+
         cos_phi = np.nan_to_num(cos_phi)
         phi_temp = np.arccos(cos_phi) # nb: phi_temp is in range [0, pi]
         phi = phi_temp
