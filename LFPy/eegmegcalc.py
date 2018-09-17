@@ -653,8 +653,8 @@ class FourSphereVolumeConductor(object):
 
         # Numerical round-off error can cause cos_phi to be slightly above 1.0,
         # resulting in a NaN.
-        cos_phi[np.where(cos_phi > 1.0)] -= 1e-6
-        cos_phi[np.where(cos_phi < -1.0)] += 1e-6
+        cos_phi[np.where(cos_phi > 1.0)] = 1.
+        cos_phi[np.where(cos_phi < -1.0)] = -1.
 
         cos_phi = np.nan_to_num(cos_phi)
         phi_temp = np.arccos(cos_phi) # nb: phi_temp is in range [0, pi]
