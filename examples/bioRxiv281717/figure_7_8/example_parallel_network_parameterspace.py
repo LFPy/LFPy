@@ -74,30 +74,30 @@ PSPACES['MPI'].update(dict(
     # preserve expected synapse in-degree or total number of connections
     PRESERVE = ps.ParameterRange(['indegree'])
     ))
-
-PSPACES['MPI5'] = ps.ParameterSpace(dict())
-PSPACES['MPI5'].update(dict(
-    # Population sizes
-    POP_SIZE_REF = [12000, 2400],
-
-    # allow different seeds for different network iterations
-    GLOBALSEED = ps.ParameterRange([1234, 65135, 216579876]),
-    
-    # MPI pool size
-    MPISIZE = ps.ParameterRange([600, 1200, 2400, 4800]),
-    
-    # bool flag switching LFP calculations on or off (faster)
-    COMPUTE_LFP = ps.ParameterRange([False, True]),
-    
-    # population size scaling (multiplied with values in populationParams['POP_SIZE']):
-    POPSCALING = ps.ParameterRange([1.]),
-    
-    # preserve expected synapse in-degree or total number of connections
-    PRESERVE = ps.ParameterRange(['indegree'])
-    ))
-
-
-
+# 
+# PSPACES['MPI5'] = ps.ParameterSpace(dict())
+# PSPACES['MPI5'].update(dict(
+#     # Population sizes
+#     POP_SIZE_REF = [12000, 2400],
+# 
+#     # allow different seeds for different network iterations
+#     GLOBALSEED = ps.ParameterRange([1234, 65135, 216579876]),
+#     
+#     # MPI pool size
+#     MPISIZE = ps.ParameterRange([600, 1200, 2400, 4800]),
+#     
+#     # bool flag switching LFP calculations on or off (faster)
+#     COMPUTE_LFP = ps.ParameterRange([False, True]),
+#     
+#     # population size scaling (multiplied with values in populationParams['POP_SIZE']):
+#     POPSCALING = ps.ParameterRange([1.]),
+#     
+#     # preserve expected synapse in-degree or total number of connections
+#     PRESERVE = ps.ParameterRange(['indegree'])
+#     ))
+# 
+# 
+# 
 # check scaling with population size
 PSPACES['POP'] = ps.ParameterSpace(dict())
 PSPACES['POP'].update(dict(
@@ -119,27 +119,27 @@ PSPACES['POP'].update(dict(
     # preserve expected synapse in-degree or total number of connections across population scalings
     PRESERVE = ps.ParameterRange(['total', 'indegree'])
     ))
-
-PSPACES['POP5'] = ps.ParameterSpace(dict())
-PSPACES['POP5'].update(dict(
-    # Population sizes
-    POP_SIZE_REF = [12000, 2400],
-
-    # allow different seeds for different network iterations
-    GLOBALSEED = ps.ParameterRange([1234, 65135, 216579876]),
-    
-    # MPI pool size
-    MPISIZE = ps.ParameterRange([2400]),
-    
-    # bool flag switching LFP calculations on or off (faster)
-    COMPUTE_LFP = ps.ParameterRange([False, True]),
-    
-    # population size scaling (multiplied with values in populationParams['POP_SIZE']):
-    POPSCALING = ps.ParameterRange([0.2, 0.25, 0.5, 1., 2.0, 4.0]), 
-
-    # preserve expected synapse in-degree or total number of connections across population scalings
-    PRESERVE = ps.ParameterRange(['total', 'indegree'])
-    ))
+# 
+# PSPACES['POP5'] = ps.ParameterSpace(dict())
+# PSPACES['POP5'].update(dict(
+#     # Population sizes
+#     POP_SIZE_REF = [12000, 2400],
+# 
+#     # allow different seeds for different network iterations
+#     GLOBALSEED = ps.ParameterRange([1234, 65135, 216579876]),
+#     
+#     # MPI pool size
+#     MPISIZE = ps.ParameterRange([2400]),
+#     
+#     # bool flag switching LFP calculations on or off (faster)
+#     COMPUTE_LFP = ps.ParameterRange([False, True]),
+#     
+#     # population size scaling (multiplied with values in populationParams['POP_SIZE']):
+#     POPSCALING = ps.ParameterRange([0.2, 0.25, 0.5, 1., 2.0, 4.0]), 
+# 
+#     # preserve expected synapse in-degree or total number of connections across population scalings
+#     PRESERVE = ps.ParameterRange(['total', 'indegree'])
+#     ))
 
 # PSPACES['TEST'] = ps.ParameterSpace(dict())
 # PSPACES['TEST'].update(dict(
