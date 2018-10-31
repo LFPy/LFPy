@@ -16,7 +16,7 @@ and calculations of set up times etc.
 
 Files
 =====
-* example_parallel_network.py: Main simulation script for network
+* example_parallel_network.py: Main simulation script for network. See file header for set up instructions. 
 * example_parallel_network_parameters.py: Corresponding parameter script
 * example_parallel_network_methods.py: Helper script
 * example_parallel_network_plotting.py: Helper script
