@@ -463,7 +463,7 @@ class NetworkPopulation(object):
                 y[i] = (np.random.rand()-0.5)*radius*2
         z = np.random.normal(loc=loc, scale=scale, size=POP_SIZE)
         if cap is not None:
-            if type(cap) is float:
+            if type(cap) in [float, np.float, np.float32, np.float64]:
                 while not np.all((z >= loc-cap) & (z < loc+cap)):
                     inds = (z < loc-cap) ^ (z > loc+cap)
                     z[inds] = np.random.normal(loc=loc, scale=scale,

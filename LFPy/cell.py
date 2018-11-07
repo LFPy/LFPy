@@ -19,7 +19,7 @@ from __future__ import division
 import os
 import neuron
 import numpy as np
-import scipy
+import scipy.stats
 import sys
 import posixpath
 from warnings import warn
@@ -878,9 +878,11 @@ class Cell(object):
             depth filter
         z_max: float
             depth filter
-        fun : function or iterable
-            iterable (list, tuple, numpy.array) of function, probability
-            distribution in scipy.stats module
+        fun : function or str, or iterable of function or str
+            if function a scipy.stats method, if str, must be method in
+            scipy.stats module with the same name (like 'norm'), 
+            if iterable (list, tuple, numpy.array) of function or str some
+            probability distribution in scipy.stats module
         funargs : dict or iterable
             iterable (list, tuple, numpy.array) of dict, arguments to fun.pdf
             method (e.g., w. keys 'loc' and 'scale')
@@ -922,10 +924,14 @@ class Cell(object):
                 assert((len(fun) == len(funargs)) & (len(fun) == len(funweights)))
                 mod = np.zeros(poss_idx.shape)
                 for f, args, scl in zip(fun, funargs, funweights):
+                    if type(f) is str and f in dir(scipy.stats):
+                        exec('f = scipy.stats.{}'.format(f))
                     df = f(**args)
                     mod += df.pdf(x=self.zmid[poss_idx])*scl
                 p *= mod
             else:
+                if type(fun) is str and fun in dir(scipy.stats):
+                    exec('fun = scipy.stats.{}'.format(fun))
                 df = fun(**funargs)
                 p *= df.pdf(x=self.zmid[poss_idx])
             # normalize
