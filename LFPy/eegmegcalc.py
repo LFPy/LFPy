@@ -13,7 +13,7 @@ GNU General Public License for more details.
 """
 
 from __future__ import division
-from scipy.special import eval_legendre, lpmv, legendre
+from scipy.special import lpmv
 import numpy as np
 from warnings import warn
 
