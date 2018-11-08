@@ -20,7 +20,7 @@ import warnings
 import numpy as np
 from . import lfpcalc, tools
 
-class RecExtElectrode:
+class RecExtElectrode(object):
     """class RecExtElectrode
 
     Main class that represents an extracellular electric recording devices such
