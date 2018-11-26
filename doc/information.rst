@@ -188,43 +188,132 @@ Python distributions such as the Anaconda Scientific Python distribution (http:/
 how to set up a working Python environment using Anaconda with the standard pre-built NEURON binaries on Linux, OSX and Windows.
 
 
-Ubuntu 16.04 LTS 64-bit with Anaconda Scientific Python distribution
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Ubuntu 18.04.1 LTS 64-bit with Anaconda Scientific Python distribution
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-By far the simplest solution relying on no source code compilation.
+Probably the simplest solution relying on no source code compilation.
+This recipe is tested on a clean installation of Ubuntu 18.04.1 running in VirtualBox (https://www.virtualbox.org).
+The VirtualBox guest additions were installed.
 
-1.  Download and install Anaconda using the 64-bit Linux installer script from http://continuum.io/downloads
-2.  Download and install the 64-bit Debian/Ubuntu .deb file with NEURON from http://www.neuron.yale.edu/neuron/download
-3.  Edit your .bashrc or similar file located in the $HOME folder, e.g., by calling in the terminal "gedit $HOME/.bashrc", to include the lines:
+1.  Download and install Anaconda using the 64-bit Linux installer script from https://www.anaconda.com/download (https://repo.anaconda.com/archive/Anaconda3-5.3.1-Linux-x86_64.sh)
+
+    Open Terminal application, then issue:
+    ::
+        
+        $ cd $HOME/Downloads
+        $ bash Anaconda3-5.3.1-Linux-x86_64.sh
+    
+    Accept the license and default options. Allow the installer to modify your ``.bashrc`` file. Installing MS Visual Studio Code (VSCode) is optional.
+    
+2.  Download and install the 64-bit Debian/Ubuntu .deb file with NEURON from https://www.neuron.yale.edu/neuron/download (https://neuron.yale.edu/ftp/neuron/versions/v7.6/nrn-7.6.x86_64-linux.deb)
+3.  The ``readline``, ``ncurses``, ``libtool`` library files as well as ``make`` may be needed by NEURON. Install them from the terminal calling
+    ::
+        
+        $ sudo apt install libreadline-dev libncurses-dev libtool make
+
+4.  Edit your ``.bashrc`` or similar file located in the ``$HOME`` folder, e.g., by calling in the terminal ``$ gedit $HOME/.bashrc``, to include the lines:
     ::
     
         # make NEURON python module available to Anaconda python
         export PYTHONPATH="/usr/local/nrn/lib/python/:$PYTHONPATH"
 
-4.  Open a fresh terminal window
+5.  Open a fresh terminal window (or type ``$ source ~/.bashrc`` in the terminal)
 
-5.  Install LFPy dependencies (not installed by default) using conda
+6.  Activate the ``base`` conda environment:
     ::
         
-        $ conda install mpi4py
+        $ conda activate
 
-6.  Clone into LFPy using Git:
+
+7.  Install LFPy dependencies (not installed by default) using conda
+    ::
+        
+        $ conda install mpi4py # numpy matplotlib scipy h5py
+
+
+8.  Clone into LFPy using Git (https://git-scm.com), installable by calling ``$ sudo apt install git`` in the terminal:
     ::
         
         $ git clone https://github.com/LFPy/LFPy.git
-        
-7.  Build LFPy from source (without moving files)
+        $ cd LFPy
+
+
+9.  Build LFPy from source inplace (without moving files)
     ::
         
-        $ python setup.py develop
+        $ python setup.py develop --user
     
-8.  Test the installation from the terminal
+    or perform a local installation of LFPy:
     ::
         
-        $ python -c "import LFPy"
-        NEURON -- VERSION 7.5 master (6b4c19f) 2017-09-25
-        Duke, Yale, and the BlueBrain Project -- Copyright 1984-2016
-        See http://neuron.yale.edu/neuron/credits
+        $ python setup.py install --user
+    
+9.  Test the installation from the terminal
+    ::
+        
+        $ nosetests
+    
+    which will run through the LFPy test suite. Hopefully without errors.
+
+
+Python 2.7
+""""""""""
+
+1.  Follow the above steps up until point 6. Then in the terminal create a new environment based on Python 2.7
+    (assuming that the Python 3 version of Anaconda was installed):
+    ::
+        
+        $ conda create -n py27 python=2.7 anaconda
+        $ conda activate py27
+
+2.  Continue with step 7 above.
+        
+        
+Ubuntu 18.04.1 LTS w. system Python 3.6
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Another option is to rely on the system Python installation (Python 3.6.7).
+Make sure that nothing in ``$PATH`` points to an Anaconda-installed version of Python (may break e.g., ``pip3``)
+
+1.  Install dependencies through the terminal:
+    ::
+        
+        $ sudo apt install libreadline-dev libncurses-dev libtool make
+        $ sudo apt install ipython3 cython3 jupyter-notebook python3-nose \
+          python3-numpy python3-scipy python3-matplotlib python3-mpi4py python3-h5py  
+
+2.  Download and install the 64-bit Debian/Ubuntu .deb file with NEURON from https://www.neuron.yale.edu/neuron/download (https://neuron.yale.edu/ftp/neuron/versions/v7.6/nrn-7.6.x86_64-linux.deb)
+
+3.  Edit your ``.bashrc`` or similar file located in the ``$HOME`` folder, e.g., by calling in the terminal ``$ gedit $HOME/.bashrc``, to include the lines:
+    ::
+    
+        # make NEURON python module available to Anaconda python
+        export PYTHONPATH="/usr/local/nrn/lib/python/:$PYTHONPATH"
+
+4.  Open a fresh terminal window (or type ``$ source ~/.bashrc`` in the terminal)
+
+5.  Clone into LFPy using Git (https://git-scm.com), installable by calling ``$ sudo apt install git`` in the terminal:
+    ::
+        
+        $ git clone https://github.com/LFPy/LFPy.git
+        $ cd LFPy
+
+
+6.  Build LFPy from source inplace (without moving files)
+    ::
+        
+        $ python3 setup.py develop --user
+    
+    or perform a local installation of LFPy:
+    ::
+        
+        $ python3 setup.py install --user
+    
+7.  Test the installation from the terminal
+    ::
+        
+        $ nosetests3
+    
+    which will run through the LFPy test suite. Hopefully without errors.
 
 
 OSX 10.12.x with Anaconda Scientific Python distribution
