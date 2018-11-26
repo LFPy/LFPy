@@ -2262,6 +2262,7 @@ class Cell(object):
     def get_axial_resistance(self):
         """
         Return NEURON axial resistance for all cell compartments.
+        
         Returns
         -------
         ri_list : ndarray, dtype=float
@@ -2289,6 +2290,7 @@ class Cell(object):
     def get_dict_of_children_idx(self):
         """
         Return dictionary with children segment indices for all sections.
+        
         Returns
         -------
         children_dict : dictionary
@@ -2310,6 +2312,7 @@ class Cell(object):
     def get_dict_parent_connections(self):
         """
         Return dictionary with parent connection point for all sections.
+        
         Returns
         -------
         connection_dict : dictionary
@@ -2330,6 +2333,7 @@ class Cell(object):
         """
         Return axial current from segment (seg_idx) mid to segment start,
         and current from parent segment (parent_idx) end to parent segment mid.
+        
         Parameters
         ----------
         seg_idx : int
