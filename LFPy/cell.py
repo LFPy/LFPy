@@ -2169,7 +2169,7 @@ class Cell(object):
                      self.zend - self.zmid]
 
         children_dict = self.get_dict_of_children_idx()
-        for sec in self.allseclist.allsec():
+        for sec in self.allseclist:
             if not neuron.h.SectionRef(sec.name()).has_parent():
                 if sec.nseg == 1:
                     # skip soma, since soma is an orphan
@@ -2300,7 +2300,7 @@ class Cell(object):
             sibling of a segment.
         """
         children_dict = {}
-        for sec in self.allseclist.allsec():
+        for sec in self.allseclist:
             children_dict[sec.name()] = []
             for child in neuron.h.SectionRef(sec.name()).child:
                 # add index of first segment of each child
