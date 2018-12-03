@@ -7,15 +7,15 @@ tar -xf master.tar.gz
 cd nrn-master
 echo "installing NEURON:"
 echo "running sh build.sh"
-sh build.sh > /dev/null
+sh build.sh # > /dev/null
 echo "running ./configure"
-./configure --prefix=$HOME/.local/nrn --without-iv --with-nrnpython --with-mpi > /dev/null
+./configure --prefix=$HOME/.local/nrn --without-iv --with-nrnpython --with-mpi #> /dev/null
 echo "running make"
-make > /dev/null
+make #> /dev/null
 echo "running make install"
-make install > /dev/null
+make install #> /dev/null
 cd src/nrnpython
 echo "installing neuron python module"
-python setup.py install > /dev/null
+python setup.py install #> /dev/null
 cd $TRAVIS_BUILD_DIR
 
