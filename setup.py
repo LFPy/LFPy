@@ -69,7 +69,7 @@ setup(
     cmdclass = cmdclass,
     ext_modules = ext_modules,
     url='http://LFPy.readthedocs.io',
-    download_url = 'https://github.com/LFPy/LFPy/tarball/v2.0',
+    download_url = 'https://github.com/LFPy/LFPy/tarball/v2.0.1',
     license='LICENSE',
     description='A module for modeling extracellular potentials of multicompartment neuron models built on NEURON',
     long_description=long_description,
@@ -99,8 +99,6 @@ setup(
         'csa>=0.1.8',
         ],
     extras_require = {'tests': ['nose>=1.3.3']},
-    dependency_links = [
-        "https://github.com/INCF/csa/tarball/master#egg=csa-0.1.7"
-    ],
+    dependency_links = [],
     provides = ['LFPy'],
     )
