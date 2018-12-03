@@ -8,6 +8,6 @@ mpi4py>=1.2
 matplotlib>=2.0
 csa >= 0.1.8
 # essential, not automatically installable:
-# neuron>=7.4
+# neuron>=7.6.4
 # optional, for running tests:
 nose>=1.3
