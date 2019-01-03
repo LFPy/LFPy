@@ -28,6 +28,15 @@ from .run_simulation import _run_simulation, _run_simulation_with_electrode
 from .run_simulation import _collect_geometry_neuron
 from .alias_method import alias_method
 
+# check neuron version:
+try:
+    try:
+        assert(neuron.version >= '7.6.4')
+    except AttributeError:
+        warn('LFPy could not read NEURON version info. v7.6.4 or newer required')
+except AssertionError:
+    warn('LFPy requires NEURON v7.6.4 or newer. Found v{}'.format(neuron.version))
+    
 
 class Cell(object):
     """
@@ -2169,7 +2178,7 @@ class Cell(object):
                      self.zend - self.zmid]
 
         children_dict = self.get_dict_of_children_idx()
-        for sec in self.allseclist.allsec():
+        for sec in self.allseclist:
             if not neuron.h.SectionRef(sec.name()).has_parent():
                 if sec.nseg == 1:
                     # skip soma, since soma is an orphan
@@ -2262,6 +2271,7 @@ class Cell(object):
     def get_axial_resistance(self):
         """
         Return NEURON axial resistance for all cell compartments.
+        
         Returns
         -------
         ri_list : ndarray, dtype=float
@@ -2289,6 +2299,7 @@ class Cell(object):
     def get_dict_of_children_idx(self):
         """
         Return dictionary with children segment indices for all sections.
+        
         Returns
         -------
         children_dict : dictionary
@@ -2298,7 +2309,7 @@ class Cell(object):
             sibling of a segment.
         """
         children_dict = {}
-        for sec in self.allseclist.allsec():
+        for sec in self.allseclist:
             children_dict[sec.name()] = []
             for child in neuron.h.SectionRef(sec.name()).child:
                 # add index of first segment of each child
@@ -2310,6 +2321,7 @@ class Cell(object):
     def get_dict_parent_connections(self):
         """
         Return dictionary with parent connection point for all sections.
+        
         Returns
         -------
         connection_dict : dictionary
@@ -2330,6 +2342,7 @@ class Cell(object):
         """
         Return axial current from segment (seg_idx) mid to segment start,
         and current from parent segment (parent_idx) end to parent segment mid.
+        
         Parameters
         ----------
         seg_idx : int

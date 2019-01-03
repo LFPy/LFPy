@@ -907,7 +907,7 @@ class testCell(unittest.TestCase):
         dend1.connect(soma(1), 0)
         dend2.connect(soma(1), 0)
         morphology = neuron.h.SectionList()
-        morphology.wholetree()
+        morphology.wholetree(sec=soma)
         cell = cell_w_synapse_from_sections(morphology)
         iaxial, d_list, pos_list = cell.get_axial_currents_from_vmem()
         new_x = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
@@ -925,7 +925,7 @@ class testCell(unittest.TestCase):
         cell._collect_geometry()
         cell2 = cell_w_synapse_from_sections(morphology)
         iaxial2, d_list2, pos_list2 = cell2.get_axial_currents_from_vmem()
-        mid_current_positions = np.array([[0., 0., 5], [0., 0., 12.5], [0., 0., 5.], [0., 0., 20.]])
+        mid_current_positions = np.array([[0., 0., 5], [0., 0., 20], [0., 0., 5.], [0., 0., 12.5]])
         np.testing.assert_almost_equal(mid_current_positions, pos_list2, decimal=9)
         np.testing.assert_allclose(mid_current_positions, pos_list2, rtol=1E-4)
 
@@ -942,7 +942,7 @@ class testCell(unittest.TestCase):
         dend2.connect(dend1(1.), 0)
         dend3.connect(dend1(.5), 0)
         morphology = neuron.h.SectionList()
-        morphology.wholetree()
+        morphology.wholetree(sec=soma)
         cell = cell_w_synapse_from_sections(morphology)
         iaxial1, d_list1, pos_list1 = cell.get_axial_currents_from_vmem()
         new_x = [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 5, 10]]
@@ -961,8 +961,8 @@ class testCell(unittest.TestCase):
         cell2 = cell_w_synapse_from_sections(morphology)
         iaxial2, d_list2, pos_list2 = cell2.get_axial_currents_from_vmem()
         mid_current_positions = np.array([[0., 0., 5.], [0., 0., 12.5],
-                                          [0., 0., 17.5], [0., 0., 25],
-                                          [0., 0., 15.],[2.5, 0., 15.]])
+                                          [0., 0., 15.], [2.5, 0., 15.],
+                                          [0., 0., 17.5], [0, 0., 25.]])
         np.testing.assert_almost_equal(mid_current_positions, pos_list2, decimal=9)
         np.testing.assert_allclose(mid_current_positions, pos_list2, rtol=1E-4)
 
@@ -991,7 +991,7 @@ class testCell(unittest.TestCase):
         self.assertTrue(np.all(stick.vmem == stick.v_init))
         self.assertTrue(np.all(stick.imem == 0.))
         self.assertTrue(np.all(stick.current_dipole_moment == 0.))
-        
+
 
     def test_cell_simulate_recorder_01(self):
         stickParams = {
@@ -1068,7 +1068,7 @@ class testCell(unittest.TestCase):
         self.assertTrue(np.all(stick.vmem == stick.v_init))
         self.assertTrue(np.all(stick.imem == 0.))
         self.assertTrue(np.all(stick.current_dipole_moment == 0.))
-        
+
 
     def test_cell_simulate_recorder_04(self):
         stickParams = {
@@ -1415,7 +1415,7 @@ class testCell(unittest.TestCase):
         self.assertTrue(stick.tvec.size == stick.imem.shape[1] ==
                         electrode.LFP.shape[1] == electrode1.LFP.shape[1] ==
                         int(stick.tstop/stick.dt)+1)
-        
+
     def test_cell_with_recextelectrode_03(self):
         stickParams = {
             'morphology' : os.path.join(LFPy.__path__[0], 'test', 'stick.hoc'),
