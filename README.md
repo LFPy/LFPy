@@ -47,11 +47,12 @@ Requirements
 
 To install LFPy you will need the following:
 
-- Python modules numpy, scipy and matplotlib
-- NEURON (from http://www.neuron.yale.edu) compiled as a Python module, so the following should execute without error in Python console::
+- Python modules numpy, scipy, matplotlib, h5py, mpi4py, csa, Cython
+- NEURON (from http://www.neuron.yale.edu, v7.6.4 or newer) and corresponding Python module. The following should execute without error in a Python console:
+    ::
     
-    import neuron
-    neuron.test()
+        import neuron
+        neuron.test()
 
 - Cython (C-extensions for python, http://cython.org) to speed up simulations of extracellular fields
 
