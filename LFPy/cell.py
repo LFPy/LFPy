@@ -28,6 +28,15 @@ from .run_simulation import _run_simulation, _run_simulation_with_electrode
 from .run_simulation import _collect_geometry_neuron
 from .alias_method import alias_method
 
+# check neuron version:
+try:
+    try:
+        assert(neuron.version >= '7.6.4')
+    except AttributeError:
+        warn('LFPy could not read NEURON version info. v7.6.4 or newer required')
+except AssertionError:
+    warn('LFPy requires NEURON v7.6.4 or newer. Found v{}'.format(neuron.version))
+    
 
 class Cell(object):
     """
