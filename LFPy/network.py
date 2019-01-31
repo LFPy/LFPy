@@ -140,7 +140,7 @@ class NetworkCell(TemplateCell):
         TemplateCell.__init__(self, **args)
 
         # create list netconlist for spike detecting NetCon object(s)
-        self.netconlist = neuron.h.List()
+        self.sd_netconlist = neuron.h.List()
         # create list of recording device for action potentials
         self.spikes = []
         # create list of random number generators used with synapse model
@@ -215,7 +215,7 @@ class NetworkCell(TemplateCell):
         """
         Create spike-detecting NetCon object attached to the cell's soma
         midpoint, but this could be extended to having multiple spike-detection
-        sites. The NetCon object created is attached to the cell's netconlist
+        sites. The NetCon object created is attached to the cell's sd_netconlist
         attribute, and will be used by the Network class when creating
         connections between all presynaptic cells and postsynaptic cells on
         each local RANK.
@@ -233,12 +233,23 @@ class NetworkCell(TemplateCell):
         # create new NetCon objects for the connections. Activation times will
         # be triggered on the somatic voltage with a given threshold.
         for sec in self.somalist:
-            self.netconlist.append(neuron.h.NetCon(sec(0.5)._ref_v,
+            self.sd_netconlist.append(neuron.h.NetCon(sec(0.5)._ref_v,
                                                 target,
                                                 sec=sec))
-            self.netconlist[-1].threshold = threshold
-            self.netconlist[-1].weight[0] = weight
-            self.netconlist[-1].delay = delay
+            self.sd_netconlist[-1].threshold = threshold
+            self.sd_netconlist[-1].weight[0] = weight
+            self.sd_netconlist[-1].delay = delay
+
+
+    def _loadspikes(self):
+        """
+        Initialize spiketimes from netcon if they exist
+        """
+        if hasattr(self, 'synlist'):
+            if len(self.synlist) == len(self.sptimeslist):
+                for i in range(int(self.synlist.count())):
+                    for ii in range(int(self.sptimeslist.o(i).size)):
+                        self.netconlist.o(i).event(float(self.sptimeslist.o(i)[ii]))
 
 
 class DummyCell(object):
@@ -606,11 +617,11 @@ class Network(object):
             # target to cell gid
             cell.create_spike_detector(None)
             # assosiate cell gid with the NetCon source
-            self.pc.cell(gid, cell.netconlist[-1])
+            self.pc.cell(gid, cell.sd_netconlist[-1])
 
             # record spike events
             population.spike_vectors.append(neuron.h.Vector())
-            cell.netconlist[-1].record(population.spike_vectors[-1])
+            cell.sd_netconlist[-1].record(population.spike_vectors[-1])
 
         # add population object to dictionary of populations
         self.populations[name] = population
