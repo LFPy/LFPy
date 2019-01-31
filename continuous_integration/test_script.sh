@@ -5,9 +5,10 @@ set -e
 python --version
 python -c "import numpy; print('numpy %s' % numpy.__version__)"
 python -c "import scipy; print('scipy %s' % scipy.__version__)"
+python -c "import neuron; print('neuron %s' % neuron.version); print(neuron.__file__)"
 
 # build LFPy inplace (compile cython extensions, NMODL files)
-python setup.py build_ext -i
+python setup.py develop
 
 # run tests, but if mystery segmentation fault occurr, rerun tests to get
 # clean exit
