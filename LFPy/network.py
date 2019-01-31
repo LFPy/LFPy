@@ -241,17 +241,6 @@ class NetworkCell(TemplateCell):
             self.sd_netconlist[-1].delay = delay
 
 
-    def _loadspikes(self):
-        """
-        Initialize spiketimes from netcon if they exist
-        """
-        if hasattr(self, 'synlist'):
-            if len(self.synlist) == len(self.sptimeslist):
-                for i in range(int(self.synlist.count())):
-                    for ii in range(int(self.sptimeslist.o(i).size)):
-                        self.netconlist.o(i).event(float(self.sptimeslist.o(i)[ii]))
-
-
 class DummyCell(object):
     def __init__(self, totnsegs=0,
                  imem=np.array([[]]),
