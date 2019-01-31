@@ -495,7 +495,13 @@ class testNetwork(unittest.TestCase):
         
         # test that the input results in the correct amount of PSPs
         np.testing.assert_equal(ss.argrelextrema(cell.somav, np.greater)[0].size, numsynapses)
-    
+        
         network.pc.gid_clear()
+        cell = None
+        network.populations['test'].cells[0] = None
+        network.populations = None
+        network = None
+        synlist = None
+        neuron.h('forall delete_section()')
         os.system('rm -r tmp_testNetworkPopulation')
-    
+
