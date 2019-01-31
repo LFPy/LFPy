@@ -1,6 +1,10 @@
 #!/bin/bash
 export PATH=$HOME/.local/nrn/x86_64/bin:$PATH
 
+# make sure no neuron module installation exist
+rm -r /home/travis/virtualenv/python*/lib/python*/site-packages/neuron
+rm /home/travis/virtualenv/python*/lib/python*/site-packages/NEURON*
+
 cd $HOME
 wget https://github.com/neuronsimulator/nrn/archive/7.7.0.tar.gz
 tar -xf 7.7.0.tar.gz
