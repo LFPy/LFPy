@@ -345,7 +345,7 @@ class testNetwork(unittest.TestCase):
                 self.assertTrue(np.all(cell.somav == network.v_init))
             
         f = h5py.File(os.path.join(network.OUTPUTPATH, 'OUTPUT.h5'), 'r')        
-        np.testing.assert_equal(f['OUTPUT[0]'].value, np.zeros_like(f['OUTPUT[0]'].value))
+        np.testing.assert_equal(f['OUTPUT[0]'][()], np.zeros_like(f['OUTPUT[0]'][()]))
         f.close()
 
 
@@ -432,7 +432,7 @@ class testNetwork(unittest.TestCase):
                 self.assertTrue(np.all(cell.somav == network.v_init))
             
         f = h5py.File(os.path.join(network.OUTPUTPATH, 'OUTPUT.h5'), 'r')        
-        np.testing.assert_equal(f['OUTPUT[0]'].value, RESULTS[0])
+        np.testing.assert_equal(f['OUTPUT[0]'][()], RESULTS[0])
         f.close()
 
 
