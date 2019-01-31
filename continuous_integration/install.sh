@@ -2,9 +2,9 @@
 export PATH=$HOME/.local/nrn/x86_64/bin:$PATH
 
 cd $HOME
-wget https://github.com/neuronsimulator/nrn/archive/master.tar.gz
-tar -xf master.tar.gz
-cd nrn-master
+wget https://github.com/neuronsimulator/nrn/archive/7.7.0.tar.gz
+tar -xf nrn-7.7.0.tar.gz
+cd nrn-7.7.0
 echo "installing NEURON:"
 echo "running sh build.sh"
 sh build.sh > /dev/null
