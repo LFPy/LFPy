@@ -493,10 +493,9 @@ class testNetwork(unittest.TestCase):
         
         network.simulate()
         
-        try:
-            np.testing.assert_equal(ss.argrelextrema(cell.somav, np.greater)[0].size, numsynapses)
-        except AssertionError as ae:
-            network.pc.gid_clear()
-            os.system('rm -r tmp_testNetworkPopulation')
-            raise ae
-
+        # test that the input results in the correct amount of PSPs
+        np.testing.assert_equal(ss.argrelextrema(cell.somav, np.greater)[0].size, numsynapses)
+    
+        network.pc.gid_clear()
+        os.system('rm -r tmp_testNetworkPopulation')
+    
