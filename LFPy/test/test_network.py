@@ -361,6 +361,66 @@ class testNetwork(unittest.TestCase):
             templatefile=os.path.join(LFPy.__path__[0], 'test', 'ball_and_stick_template.hoc'),
             templatename='ball_and_stick_template',
             templateargs=None,
+            passive=True,
+            dt=2**-3,
+            tstop=100,
+            delete_sections=False,
+        )
+        
+        synapseParameters = dict(idx=0, syntype='Exp2Syn', weight=0.002,
+                                 tau1=0.1, tau2=0.1, e=0)
+        
+        populationParameters = dict(
+            CWD=None,
+            CELLPATH=None,
+            Cell=LFPy.NetworkCell,
+            cell_args = cellParameters,
+            pop_args = dict(
+                radius=100,
+                loc=0.,
+                scale=20.),
+            rotation_args = dict(x=0, y=0),
+            POP_SIZE = 1,
+            name = 'test',
+        )
+        networkParameters = dict(
+            dt=2**-3,
+            tstart=0.,
+            tstop=100.,
+            v_init=-70.,
+            celsius=6.3,
+            OUTPUTPATH='tmp_testNetworkPopulation'
+            )
+        # set up
+        network = LFPy.Network(**networkParameters)
+        network.create_population(**populationParameters)
+        
+        cell = network.populations['test'].cells[0]
+        
+        # create synapses
+        synlist = []
+        numsynapses = 2
+        for i in range(numsynapses):
+            synlist.append(LFPy.Synapse(cell=cell, **synapseParameters))
+            synlist[-1].set_spike_times(np.array([10+(i*10)]))
+        
+        network.simulate()
+        
+        # test that the input results in the correct amount of PSPs
+        np.testing.assert_equal(ss.argrelextrema(cell.somav, np.greater)[0].size, numsynapses)
+
+        # clean up
+        network.pc.gid_clear()
+        os.system('rm -r tmp_testNetworkPopulation')
+        neuron.h('forall delete_section()')
+
+
+    def test_Network_05(self):
+        cellParameters = dict(
+            morphology=os.path.join(LFPy.__path__[0], 'test', 'ball_and_sticks_w_lists.hoc'),
+            templatefile=os.path.join(LFPy.__path__[0], 'test', 'ball_and_stick_template.hoc'),
+            templatename='ball_and_stick_template',
+            templateargs=None,
             passive=False,
             dt=2**-3,
             tstop=100,
@@ -440,68 +500,4 @@ class testNetwork(unittest.TestCase):
         network.pc.gid_clear()
         os.system('rm -r tmp_testNetworkPopulation')
         neuron.h('forall delete_section()')
-
-
-    def test_Network_05(self):
-        cellParameters = dict(
-            morphology=os.path.join(LFPy.__path__[0], 'test', 'ball_and_sticks_w_lists.hoc'),
-            templatefile=os.path.join(LFPy.__path__[0], 'test', 'ball_and_stick_template.hoc'),
-            templatename='ball_and_stick_template',
-            templateargs=None,
-            passive=True,
-            dt=2**-3,
-            tstop=100,
-            delete_sections=False,
-        )
-        
-        synapseParameters = dict(idx=0, syntype='Exp2Syn', weight=0.002,
-                                 tau1=0.1, tau2=0.1, e=0)
-        
-        populationParameters = dict(
-            CWD=None,
-            CELLPATH=None,
-            Cell=LFPy.NetworkCell,
-            cell_args = cellParameters,
-            pop_args = dict(
-                radius=100,
-                loc=0.,
-                scale=20.),
-            rotation_args = dict(x=0, y=0),
-            POP_SIZE = 1,
-            name = 'test',
-        )
-        networkParameters = dict(
-            dt=2**-3,
-            tstart=0.,
-            tstop=100.,
-            v_init=-70.,
-            celsius=6.3,
-            OUTPUTPATH='tmp_testNetworkPopulation'
-            )
-        # set up
-        network = LFPy.Network(**networkParameters)
-        network.create_population(**populationParameters)
-        
-        cell = network.populations['test'].cells[0]
-        
-        # create synapses
-        synlist = []
-        numsynapses = 2
-        for i in range(numsynapses):
-            synlist.append(LFPy.Synapse(cell=cell, **synapseParameters))
-            synlist[-1].set_spike_times(np.array([10+(i*10)]))
-        
-        network.simulate()
-        
-        # test that the input results in the correct amount of PSPs
-        np.testing.assert_equal(ss.argrelextrema(cell.somav, np.greater)[0].size, numsynapses)
-        
-        network.pc.gid_clear()
-        cell = None
-        network.populations['test'].cells[0] = None
-        network.populations = None
-        network = None
-        synlist = None
-        neuron.h('forall delete_section()')
-        os.system('rm -r tmp_testNetworkPopulation')
 
