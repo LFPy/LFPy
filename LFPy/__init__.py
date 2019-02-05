@@ -41,7 +41,7 @@ GNU General Public License for more details.
   * run_simulations - Functions to run NEURON simulations
 """
 
-__version__ = "2.0.1"
+__version__ = "2.0.2"
 
 from .pointprocess import Synapse, PointProcess, StimIntElectrode
 from .recextelectrode import RecExtElectrode, RecMEAElectrode

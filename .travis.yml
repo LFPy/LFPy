@@ -21,6 +21,4 @@ script:
   - bash continuous_integration/test_script.sh
 after_success:
   coveralls
-cache:
-  - apt
-  - pip
+
