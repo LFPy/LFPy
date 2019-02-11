@@ -198,10 +198,10 @@ class NetworkCell(TemplateCell):
             cell.rng_list.append(rng) # must store ref to rng object
         cell.netconsynapses.append(syntype(x, sec=sec))
 
-        # check that synapses are parameterized correctly
-        if assert_syn_values:
-            for key, value in synparams.items():
-                exec("cell.netconsynapses[-1].{} = {}".format(key, value))
+        for key, value in synparams.items():
+            exec("cell.netconsynapses[-1].{} = {}".format(key, value))
+            # check that synapses are parameterized correctly
+            if assert_syn_values:
                 try:
                     np.testing.assert_almost_equal(getattr(cell.netconsynapses[-1], key), value)
                 except AssertionError:
