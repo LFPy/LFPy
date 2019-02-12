@@ -238,7 +238,7 @@ networkSimulationArguments = dict(
 # population names, sizes and connection probability:
 population_names = ['E', 'I']
 population_sizes = [80, 20]
-connectionProbability = [[0.05, 0.05], [0.05, 0.05]]
+connectionProbability = [[0.1, 0.1], [0.1, 0.1]]
 
 # synapse model. All corresponding parameters for weights,
 # connection delays, multapses and layerwise positions are
@@ -256,8 +256,8 @@ synapseParameters = [[dict(tau1=0.2, tau2=1.8, e=0.),
 weightFunction = np.random.normal
 weightArguments = [[dict(loc=0.002, scale=0.0002),
                     dict(loc=0.002, scale=0.0002)],
-                   [dict(loc=0.01, scale=0.001),
-                    dict(loc=0.01, scale=0.001)]]
+                   [dict(loc=0.02, scale=0.002),
+                    dict(loc=0.02, scale=0.002)]]
 minweight = 0.
 # conduction delay (function, mean, st.dev., min.):
 delayFunction = np.random.normal
@@ -311,7 +311,7 @@ if __name__ == '__main__':
                 syn = Synapse(cell=cell, idx=i, syntype='Exp2Syn',
                               weight=0.002,
                               **dict(tau1=0.2, tau2=1.8, e=0.))
-                syn.set_spike_times_w_netstim(interval=200.)
+                syn.set_spike_times_w_netstim(interval=100.)
 
 
     # create connectivity matrices and connect populations:
@@ -377,7 +377,7 @@ if __name__ == '__main__':
             for spt, gid in zip(spts, gids):
                 t = np.r_[t, spt]
                 g = np.r_[g, np.zeros(spt.size)+gid]
-            ax.plot(t[t >= 200], g[t >= 200], '.', label=name)
+            ax.plot(t[t >= 200], g[t >= 200], '|', label=name)
         ax.legend(loc=1)
         remove_axis_junk(ax, lines=['right', 'top'])
         ax.set_xlabel('t (ms)')
