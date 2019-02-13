@@ -80,7 +80,13 @@ if __name__ == '__main__':
     syn_loc = (0, 0, 1000)
 
     cell_params = {'morphology': 'morphologies/L5_Mainen96_LFPy.hoc',
+                   'cm' : 1.0,                 # membrane capacitance
+                   'Ra' : 150,                 # axial resistance
                    'tstart': 0.,
+                   'passive' : True,           # switch on passive mechs
+                   'nsegs_method' : 'lambda_f',# method for setting number of segments,
+                   'lambda_f' : 100,           # segments are isopotential at this frequency
+                   'passive_parameters' : {'g_pas' : 1./30000, 'e_pas' : -70}, # passive params
                    'tstop': 40
                    }
 
