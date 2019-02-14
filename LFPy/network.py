@@ -23,7 +23,6 @@ import h5py
 from mpi4py import MPI
 import neuron
 from .templatecell import TemplateCell
-import csa
 import scipy.sparse as ss
 
 # set up MPI environment
@@ -618,57 +617,7 @@ class Network(object):
         self.population_names.append(name)
 
 
-    def get_connectivity_rand_naive(self, pre='L5PC', post='L5PC', connprob = 0.2):
-        """
-        Dummy function creating a (boolean) cell to cell connectivity matrix
-        between pre and postsynaptic populations.
-        
-        Connections are drawn randomly between presynaptic cell gids in
-        population 'pre' and postsynaptic cell gids in 'post' on this RANK with
-        a fixed connection probability.
-
-        Parameters
-        ----------
-        pre : str
-            presynaptic population name
-        post : str
-            postsynaptic population name
-        connprob : float in [0, 1]
-            connection probability, connections are drawn on random
-
-        Returns
-        -------
-        ndarray, dtype bool
-            n_pre x n_post array of connections between n_pre presynaptic
-            neurons and n_post postsynaptic neurons on this RANK. Entries
-            with True denotes a connection.        
-        """
-        n_pre = self.populations[pre].POP_SIZE
-        #n_post = self.populations[post].POP_SIZE
-        
-        gids_pre = np.arange(n_pre).astype(int) + self.populations[pre].first_gid
-        gids = np.array(self.populations[post].gids).astype(int)
-        
-        if gids.size > 0:
-            c = []
-            for j in gids_pre:
-                for i in gids:
-                    if np.random.rand() < connprob:
-                        if j != i:
-                            c.append([j, i])
-            c = np.array(c)
-            c[:, 0] -= self.populations[pre].first_gid
-            c[:, 1] -= gids[0] # assume round-robin distribution of cells
-            c[:, 1] //= SIZE
- 
-            C = ss.csr_matrix((np.ones(c.shape[0], dtype=bool),
-                               (c[:, 0], c[:, 1])), shape=(n_pre, gids.size), dtype=bool)    
-            return C.toarray()
-        else:
-            return np.zeros((n_pre, 0), dtype=bool)       
-        
-
-    def get_connectivity_rand_fast(self, pre='L5PC', post='L5PC', connprob = 0.2):
+    def get_connectivity_rand(self, pre='L5PC', post='L5PC', connprob = 0.2):
         """
         Dummy function creating a (boolean) cell to cell connectivity matrix
         between pre and postsynaptic populations.
@@ -717,67 +666,13 @@ class Network(object):
                 gids_post -= self.populations[post].gids[0]
                 gids_post //= SIZE
                 c = np.c_[gids_pre, gids_post]
+                # create boolean matrix
                 C = ss.csr_matrix((np.ones(gids_pre.shape[0], dtype=bool),
                                    (c[:, 0], c[:, 1])),
                                   shape=(n_pre, gids.size), dtype=bool)    
                 return C.toarray()
             else:
                 return C
-        else:
-            return np.zeros((n_pre, 0), dtype=bool)
-
-    
-    def get_connectivity_rand(self, pre='L5PC', post='L5PC', connprob = 0.2):
-        """
-        Dummy function creating a (boolean) cell to cell connectivity matrix
-        between pre and postsynaptic populations relying on the use of the
-        'Connection Set Algebra (CSA)' implementation in Python; see
-        https://github.com/INCF/csa, Mikael Djurfeldt (2012) "The Connection-set
-        Algebra---A Novel Formalism for the Representation of Connectivity
-        Structure in Neuronal Network Models" Neuroinformatics 10(3), 1539-2791,
-        http://dx.doi.org/10.1007/s12021-012-9146-1
-    
-        Connections are drawn randomly between presynaptic cell gids in
-        population 'pre' and postsynaptic cell gids in 'post' on this RANK with
-        a fixed connection probability.
-    
-        Parameters
-        ----------
-        pre : str
-            presynaptic population name
-        post : str
-            postsynaptic population name
-        connprob : float in [0, 1]
-            connection probability, connections are drawn on random
-    
-        Returns
-        -------
-        ndarray, dtype bool
-            n_pre x n_post array of connections between n_pre presynaptic
-            neurons and n_post postsynaptic neurons on this RANK. Entries
-            with True denotes a connection.        
-        """                
-        n_pre = self.populations[pre].POP_SIZE
-        #n_post = self.populations[post].POP_SIZE
-    
-        #first_gid = self.populations[post].first_gid
-        gids = np.array(self.populations[post].gids).astype(int)
-    
-        # first check if there are any postsyn cells on this RANK
-        if gids.size > 0:
-            # define incoming connections for cells on this RANK
-            if pre == post:
-                # avoid self connections
-                c = np.array([x for x in csa.cross(range(n_pre), range(gids.size)) * (csa.random(connprob) - csa.oneToOne)])
-            else:
-                c = np.array([x for x in csa.cross(range(n_pre), range(gids.size)) * csa.random(connprob)])
-            if c.ndim == 2:
-                # construct sparse boolean array
-                C = ss.csr_matrix((np.ones(c.shape[0], dtype=bool), (c[:, 0], c[:, 1])),
-                                  shape=(n_pre, gids.size), dtype=bool)                
-                return C.toarray()
-            else:
-                return np.zeros((n_pre, gids.size), dtype=bool)
         else:
             return np.zeros((n_pre, 0), dtype=bool)
         
@@ -966,7 +861,6 @@ class Network(object):
                 COMM.gather(syn_idx_pos)
 
         return COMM.bcast([conncount, syncount])
-
 
 
     def simulate(self, electrode=None, rec_imem=False, rec_vmem=False,

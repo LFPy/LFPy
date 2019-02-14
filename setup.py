@@ -96,7 +96,6 @@ setup(
         'Cython>=0.20',
         'h5py>=2.5',
         'mpi4py>=1.2',
-        'csa>=0.1.8',
         ],
     extras_require = {'tests': ['nose>=1.3.3']},
     dependency_links = [],
