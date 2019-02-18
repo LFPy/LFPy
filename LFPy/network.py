@@ -644,9 +644,6 @@ class Network(object):
             with True denotes a connection.        
         """                
         n_pre = self.populations[pre].POP_SIZE
-        #n_post = self.populations[post].POP_SIZE
-
-        #first_gid = self.populations[post].first_gid
         gids = np.array(self.populations[post].gids).astype(int)
 
         # first check if there are any postsyn cells on this RANK
@@ -749,10 +746,6 @@ class Network(object):
         # gids of presynaptic neurons:
         pre_gids = np.arange(n0, n0 + self.populations[pre].POP_SIZE)
 
-        # # global population sizes
-        # n_pre = self.populations[pre].POP_SIZE
-        # n_post = self.populations[post].POP_SIZE
-
         # count connections and synapses made on this RANK
         conncount = connectivity.astype(int).sum()
         syncount = 0
@@ -780,8 +773,6 @@ class Network(object):
                         j += 1
                     if j == 1000:
                         raise Exception('change multapseargs as no positive synapse count was found in 1000 trials')
-
-                # print('connecting cell {} to cell {} with {} synapses on RANK {}'.format(pre_gid, post_gid, nidx, RANK))
 
                 # find synapse locations and corresponding section names
                 idxs = cell.get_rand_idx_area_and_distribution_norm(nidx=nidx, **syn_pos_args)
