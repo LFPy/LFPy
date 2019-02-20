@@ -44,6 +44,27 @@ SIZE = COMM.Get_size()
 RANK = COMM.Get_rank()
 
 
+#######################
+# Functions
+#######################
+def get_pre_m_type(post):
+    '''little helper function to return the most populuous excitatory m_type
+    within the layer of m_type post, assuming this is representative for
+    excitatory external connections onto postsynaptic cells '''
+    if post.startswith('L23'):
+        return 'L23_PC'
+    elif post.startswith('L4'):
+        return 'L4_PC'
+    elif post.startswith('L5'):
+        return 'L5_TTPC1'
+    elif post.startswith('L6'):
+        return 'L6_IPC'
+
+#######################
+# Parameters
+#######################
+
+
 # load some neuron-interface files needed for the EPFL cell types
 neuron.h.load_file("stdrun.hoc")
 neuron.h.load_file("import3d.hoc")
@@ -654,13 +675,13 @@ PSET.save_connections = False
 PSET.connParamsExtrinsic = dict(
     # synapse type
     syntype = 'ProbAMPANMDA_EMS',
-    # synapse parameters (chosen using pre==post)
+    # synapse parameters (assumes parameters of excitatory population in the layer)
     synparams = [dict(
-                        Use = syn_param_stats['{}:{}'.format(post, post)]['Use_mean'],
-                        Dep = syn_param_stats['{}:{}'.format(post, post)]['Dep_mean'],
-                        Fac = syn_param_stats['{}:{}'.format(post, post)]['Fac_mean'],
+                        Use = syn_param_stats['{}:{}'.format(get_pre_m_type(post), post)]['Use_mean'],
+                        Dep = syn_param_stats['{}:{}'.format(get_pre_m_type(post), post)]['Dep_mean'],
+                        Fac = syn_param_stats['{}:{}'.format(get_pre_m_type(post), post)]['Fac_mean'],
                         tau_r_AMPA = 0.2,
-                        tau_d_AMPA = syn_param_stats['{}:{}'.format(pre, post)]['tau_d_mean'],
+                        tau_d_AMPA = syn_param_stats['{}:{}'.format(get_pre_m_type(post), post)]['tau_d_mean'],
                         tau_r_NMDA = 0.29,
                         tau_d_NMDA = 43,
                         e=0,

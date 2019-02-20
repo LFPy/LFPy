@@ -136,6 +136,8 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 '''
 from __future__ import division
+from mpi4py import MPI
+import neuron
 import matplotlib
 matplotlib.use('agg')
 import matplotlib.pyplot as plt
@@ -150,8 +152,6 @@ if LooseVersion(h5py.version.hdf5_version) < LooseVersion('1.8.16'):
         h5py.version.hdf5_version))
 import os
 from time import time
-from mpi4py import MPI
-import neuron
 import LFPy
 from example_parallel_network_plotting import decimate
 
