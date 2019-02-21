@@ -226,21 +226,21 @@ PSET.populationParameters = np.array([
         # # Excitatory
         # ('L4_PC',       'cAD', 'L4_PC_cADpyr230_1',        2674,
         #  dict(radius=210, loc=PSET.layer_data[3]['center'], scale=100., cap=[1078., 97.]),
-        #  dict(x=np.pi/2, y=0.), ['dend', 'apic'],            ['dend', 'apic'],   0.05,    5.),
+        #  dict(x=np.pi/2, y=0.), ['dend', 'apic'],            ['dend', 'apic'],   0.125,    5.),
         # # Inhibitory
         # ('L4_LBC',      'dNAC', 'L4_LBC_dNAC222_1',         122,
         #  dict(radius=210, loc=PSET.layer_data[3]['center'], scale=100., cap=[938., 670]),
-        #  dict(x=np.pi/2, y=0.), ['soma', 'dend', 'apic'],    ['dend', 'apic'],   0.05,    5.),
+        #  dict(x=np.pi/2, y=0.), ['soma', 'dend', 'apic'],    ['dend', 'apic'],   0.125,    5.),
         
         # Layer 5
         # Excitatory
         ('L5_TTPC1',    'cAD', 'L5_TTPC1_cADpyr232_1',     2403,
          dict(radius=210, loc=PSET.layer_data[4]['center'], scale=125., cap=[719, 73.]),
-         dict(x=np.pi/2, y=0.), ['dend', 'apic'],            ['dend', 'apic'],   0.045,   5.),
+         dict(x=np.pi/2, y=0.), ['dend', 'apic'],            ['dend', 'apic'],   0.1,   5.),
         # Inhibitory
         ('L5_MC',       'bAC', 'L5_MC_bAC217_1',            395,
          dict(radius=210, loc=PSET.layer_data[4]['center'], scale=125., cap=[378., 890]),
-         dict(x=np.pi/2, y=0.), ['soma', 'dend', 'apic'],    ['dend', 'apic'],   0.05,    5.),
+         dict(x=np.pi/2, y=0.), ['soma', 'dend', 'apic'],    ['dend', 'apic'],   0.125,    5.),
         ],
     dtype = [('m_type', '|{}32'.format(stringType)), ('e_type', '|{}32'.format(stringType)),
              ('me_type', '|{}32'.format(stringType)), ('POP_SIZE', 'i8'), ('pop_args', dict),
