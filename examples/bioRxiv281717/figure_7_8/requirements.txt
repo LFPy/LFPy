@@ -1,0 +1,1 @@
+-e git+git@github.com:espenhgn/parameters.git@fix_py3#egg=parameters
