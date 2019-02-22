@@ -18,15 +18,9 @@ GNU General Public License for more details.
 from __future__ import division
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
-from matplotlib.collections import PolyCollection
-from mpl_toolkits.axes_grid.axislines import SubplotZero
-import mpl_toolkits.axes_grid.axes_size as Size
-from mpl_toolkits.axes_grid import Divider
 import os
 import numpy as np
-import scipy.signal as ss
 import h5py
-from LFPy import NetworkCell, FourSphereVolumeConductor, MEG
 import example_parallel_network_plotting as plotting
 from mpi4py import MPI
 
@@ -69,7 +63,7 @@ if __name__ == '__main__':
         ax = fig.add_subplot(gs[:8, j])
         f = h5py.File(os.path.join(PSET.OUTPUTPATH, 'example_parallel_network_output.h5'), 'r')
         for data, title, color in zip(
-                               [f['SUMMED_OUTPUT'].value[me_type]],
+                               [f['SUMMED_OUTPUT'][()][me_type]],
                                [m_type],
                                ['k']):
             ax.set_title(title)
@@ -127,7 +121,7 @@ if __name__ == '__main__':
     f = h5py.File(os.path.join(PSET.OUTPUTPATH, 'example_parallel_network_output.h5'), 'r')
     
     for m_type, me_type, color in zip(list(PSET.populationParameters['m_type'])+['summed'], list(PSET.populationParameters['me_type'])+['imem'], colors+['k']):
-        data = f['SUMMED_OUTPUT'].value[me_type]
+        data = f['SUMMED_OUTPUT'][()][me_type]
         ax.semilogx(data[:, tind:].var(axis=1), y, lw=2, label=m_type, color=color)
     f.close()
     ax.set_yticks(y)

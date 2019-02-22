@@ -12,9 +12,8 @@ import LFPy
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
-from mpl_toolkits.axes_grid.axislines import SubplotZero
-from matplotlib.collections import PolyCollection, LineCollection, PatchCollection
-from matplotlib import colors, patches
+from mpl_toolkits.axisartist.axislines import SubplotZero
+from matplotlib.collections import PolyCollection
 import neuron
 
 # set some plotting parameters
@@ -258,7 +257,7 @@ def draw_lineplot(
 
 
 def remove_axis_junk(ax, lines=['right', 'top']):
-    for loc, spine in ax.spines.iteritems():
+    for loc, spine in ax.spines.items():
         if loc in lines:
             spine.set_color('none')            
     ax.xaxis.set_ticks_position('bottom')
@@ -305,7 +304,7 @@ ax5 = fig.add_subplot(gs[7:, 2], sharey=ax4) # MEG
 zips = []
 xz = cell.get_idx_polygons()
 for x, z in xz:
-    zips.append(zip(x, z))
+    zips.append(list(zip(x, z)))
 for ax in [ax0]:
     polycol = PolyCollection(zips,
                              linewidths=(0.5),
@@ -336,7 +335,7 @@ for ax in [ax1, ax2]:
 zips = []
 offset = 0.
 for x, z in cell.get_pt3d_polygons():
-    zips.append(zip(x-offset, z+offset))
+    zips.append(list(zip(x-offset, z+offset)))
 polycol = PolyCollection(zips,
                          edgecolors='none',
                          facecolors='gray',
