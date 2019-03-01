@@ -125,6 +125,8 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 '''
 from __future__ import division
+from mpi4py import MPI
+import neuron
 import matplotlib
 matplotlib.use('agg')
 import matplotlib.pyplot as plt
@@ -139,12 +141,10 @@ if LooseVersion(h5py.version.hdf5_version) < LooseVersion('1.8.16'):
         h5py.version.hdf5_version))
 import os
 from time import time
-from mpi4py import MPI
-import neuron
 import LFPy
 from example_parallel_network_plotting import decimate
 import sys
-import NeuroTools.parameters as ps
+import parameters as ps
 
 
 # set up MPI environment
@@ -263,7 +263,7 @@ if __name__ == '__main__':
     if RANK == 0:
         parameters_time = time() - tic
         # open file object for writing
-        logfile = file(os.path.join(PSET.OUTPUTPATH, 'log.txt'), 'w', 0)
+        logfile = open(os.path.join(PSET.OUTPUTPATH, 'log.txt'), 'w')
         logfile.write('initialization {}\n'.format(initialization_time))
         print('Parameters in {} seconds'.format(parameters_time))
         logfile.write('parameters {}\n'.format(parameters_time))
@@ -574,7 +574,6 @@ if __name__ == '__main__':
                                      label=name,
                                      )
             ax.add_collection(polycol)
-        ax.axis(ax.axis('equal'))
         ax.set_xlim(-400, 400)
         axis = ax.axis()
         ax.hlines(np.r_[0., -PSET.layer_data['thickness'].cumsum()],

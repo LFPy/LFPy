@@ -18,15 +18,11 @@ GNU General Public License for more details.
 from __future__ import division
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec, GridSpecFromSubplotSpec
-from matplotlib.collections import PolyCollection
-from mpl_toolkits.axes_grid.axislines import SubplotZero
-import mpl_toolkits.axes_grid.axes_size as Size
-from mpl_toolkits.axes_grid import Divider
+from mpl_toolkits.axisartist.axislines import SubplotZero
 import os
 import numpy as np
-import scipy.signal as ss
 import h5py
-from LFPy import NetworkCell, FourSphereVolumeConductor, MEG
+from LFPy import FourSphereVolumeConductor, MEG
 import example_parallel_network_plotting as plotting
 from mpi4py import MPI
 
@@ -53,7 +49,7 @@ def plot_spike_raster(ax, PSET, T):
     for i, (m_name, name) in enumerate(zip(PSET.populationParameters['m_type'], PSET.populationParameters['me_type'])):
         x = []
         y = []
-        ax.hlines(f['SPIKES'][name]['gids'].value.min(), T[0], T[1], 'k', lw=0.25)
+        ax.hlines(f['SPIKES'][name]['gids'][()].min(), T[0], T[1], 'k', lw=0.25)
         for gid, spt in zip(f['SPIKES'][name]['gids'], f['SPIKES'][name]['times']):
             if len(spt) > 0:
                 y += [gid]*spt.size
@@ -121,7 +117,7 @@ if __name__ == '__main__':
     for i, (m_name, name) in enumerate(zip(PSET.populationParameters['m_type'], PSET.populationParameters['me_type'])):
         ax = axes[i]
         plotting.remove_axis_junk(ax)
-        data = np.hstack(f['SPIKES'][name]['times'].value.flat)
+        data = np.hstack(f['SPIKES'][name]['times'][()].flat)
         ax.hist(data, bins=bins, color=colors[i][:-1], label=m_name)
         ax.axis(ax.axis('tight'))
         ax.set_xlim(PSET.TRANSIENT, PSET.TRANSIENT+1000.)
@@ -146,7 +142,7 @@ if __name__ == '__main__':
     ax = fig.add_subplot(gs0[:-2])
     f = h5py.File(os.path.join(PSET.OUTPUTPATH, 'example_parallel_network_output.h5'), 'r')
     for data, title, color in zip(
-                           [f['SUMMED_OUTPUT'].value['imem']],
+                           [f['SUMMED_OUTPUT'][()]['imem']],
                            ['extracellular potentials, summed'],
                            ['k']):
         ax.set_title(title)
@@ -169,12 +165,12 @@ if __name__ == '__main__':
     # PANEL D ECoG potential
     ax = fig.add_subplot(gs0[-1])
     f = h5py.File(os.path.join(PSET.OUTPUTPATH, 'example_parallel_network_output.h5'), 'r')
-    data = f['SUMMED_ECOG'].value['imem']
+    data = f['SUMMED_ECOG'][()]['imem']
     title = 'ECoG potential, summed'
     color = 'k'
     ax.set_title(title)
     vlimround = plotting.draw_lineplot(ax=ax,
-                               data=plotting.decimate(f['SUMMED_OUTPUT'].value['imem'][0, ].reshape((1, -1)),
+                               data=plotting.decimate(f['SUMMED_OUTPUT'][()]['imem'][0, ].reshape((1, -1)),
                                                       q=PSET.decimate_q),
                               dt=PSET.dt*PSET.decimate_q,
                               scalebar=False,

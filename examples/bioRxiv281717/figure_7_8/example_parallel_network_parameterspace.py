@@ -6,7 +6,7 @@ import numpy as np
 import operator
 import pickle
 import hashlib
-import NeuroTools.parameters as ps
+import parameters as ps
 
 
 def sort_deep_dict(d):

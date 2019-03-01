@@ -17,7 +17,6 @@ GNU General Public License for more details.'''
 import os
 import numpy as np
 import example_parallel_network_parameterspace as ps
-#from example_parallel_network_parameterspace import *
 from example_parallel_network_parameters import PSET
 import matplotlib.pyplot as plt
 from matplotlib.ticker import ScalarFormatter

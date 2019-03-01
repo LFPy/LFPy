@@ -22,7 +22,6 @@ from matplotlib.collections import PolyCollection
 from matplotlib.ticker import MaxNLocator
 import os
 import numpy as np
-import scipy.signal as ss
 import h5py
 from LFPy import NetworkCell
 import example_parallel_network_plotting as plotting
