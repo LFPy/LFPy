@@ -1411,8 +1411,8 @@ class Cell(object):
             if ax == 'y' and y is not None:
                 phi = -y
                 rotation_y = np.array([[np.cos(phi), 0, np.sin(phi)],
-                                        [0, 1, 0],
-                                        [-np.sin(phi), 0, np.cos(phi)]])
+                                       [0, 1, 0],
+                                       [-np.sin(phi), 0, np.cos(phi)]])
 
                 rel_start, rel_end = self._rel_positions()
 

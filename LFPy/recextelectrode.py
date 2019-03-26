@@ -310,8 +310,8 @@ class RecExtElectrode(object):
 
         sum_imem = self.cell.imem.sum(axis=0)
         #check if eye matrix is supplied:
-        #if np.any(sum_imem == np.ones(self.cell.totnsegs)):
-        if (self.cell.imem.shape == (self.cell.totnsegs, self.cell.totnsegs)) and (np.all(self.cell.imem == np.eye(self.cell.totnsegs))):
+        if ((self.cell.imem.shape == (self.cell.totnsegs, self.cell.totnsegs))
+            and (np.all(self.cell.imem == np.eye(self.cell.totnsegs)))):
             pass
         else:
             if abs(sum_imem).max() >= tolerance:
