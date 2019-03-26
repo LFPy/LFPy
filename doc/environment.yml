@@ -1,8 +1,8 @@
 name: lfpy
 channels:
-  - mattions
+  - conda-forge
 dependencies:
-  - python=2.7
+  - python=3.6
   - setuptools
   - numpy
   - matplotlib
@@ -10,10 +10,8 @@ dependencies:
   - h5py
   - cython
   - mpi4py
-  - nose
   - numpydoc
   - sphinx
   - neuron
   - pip:
     - sphinx-rtd-theme
-    - csa
