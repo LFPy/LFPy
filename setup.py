@@ -97,7 +97,7 @@ setup(
         'h5py>=2.5',
         'mpi4py>=1.2',
         ],
-    extras_require = {'tests': ['nose>=1.3.3']},
+    extras_require = {'tests': ['pytest']},
     dependency_links = [],
     provides = ['LFPy'],
     )

@@ -14,10 +14,8 @@ GNU General Public License for more details.
 
 """
 from __future__ import division
-import os
 import unittest
 import numpy as np
-import LFPy
 from LFPy import lfpcalc
 
 class testLfpCalc(unittest.TestCase):
@@ -25,7 +23,7 @@ class testLfpCalc(unittest.TestCase):
     test class LFPy.lfpcalc
     """
     def test_return_dist_from_segment(self):
-        cell = TestCell()
+        cell = DummyCell()
         dist, clostest_point = lfpcalc.return_dist_from_segments(
                                            cell.xstart, cell.ystart,
                                            cell.zstart, cell.xend,
@@ -45,7 +43,7 @@ class testLfpCalc(unittest.TestCase):
         """Test that function calc_lfp_pointsource
         reproduces analytic formula"""
         sigma = 0.3
-        cell = TestCell()
+        cell = DummyCell()
         np.testing.assert_equal(1./(4*np.pi*sigma),
                                 lfpcalc.calc_lfp_pointsource(cell,
                                 x=0.5, y=0, z=1, sigma=sigma,
@@ -61,7 +59,7 @@ class testLfpCalc(unittest.TestCase):
         sigma_S = 0.3
         h = 300
         steps = 20
-        cell = TestCell()
+        cell = DummyCell()
         cell.zmid[0] = h/2
         cell.zstart[0] = h/2
         cell.zend[0] = h/2
@@ -87,7 +85,7 @@ class testLfpCalc(unittest.TestCase):
         sigma_S = 1.5
         h = 5000
         steps = 20
-        cell = TestCell()
+        cell = DummyCell()
         cell.zmid[0] = h - 50
         cell.zstart[0] = h - 50
         cell.zend[0] = h - 50
@@ -124,7 +122,7 @@ class testLfpCalc(unittest.TestCase):
         sigma_S = 1.5
         h = 2000
         steps = 20
-        cell = TestCell()
+        cell = DummyCell()
         cell.zmid[0] = h/2
         cell.zstart[0] = h/2
         cell.zend[0] = h/2
@@ -150,7 +148,7 @@ class testLfpCalc(unittest.TestCase):
         h = 200
 
         steps = 20
-        cell = TestCell()
+        cell = DummyCell()
         cell.zstart[0] = 0.0
         cell.zend[0] = 0.0
 
@@ -174,7 +172,7 @@ class testLfpCalc(unittest.TestCase):
         sigma_S = 1.5
         h = 2000
         steps = 20
-        cell = TestCell()
+        cell = DummyCell()
         cell.zmid[0] = 0
         cell.zstart[0] = 0
         cell.zend[0] = 0
@@ -195,7 +193,7 @@ class testLfpCalc(unittest.TestCase):
         Test that calc_lfp_linesource method does not give infinite potential
         """
         sigma_T = 0.3
-        cell = TestCell()
+        cell = DummyCell()
         cell.zmid[0] = 0.0
         cell.zstart[0] = 0.0
         cell.zend[0] = 0.0
@@ -216,7 +214,7 @@ class testLfpCalc(unittest.TestCase):
         h = 200
         steps = 3
 
-        cell = TestCell()
+        cell = DummyCell()
         cell.zstart[0] = 50
         cell.zmid[0] = 50
         cell.zend[0] = 50
@@ -242,7 +240,7 @@ class testLfpCalc(unittest.TestCase):
         h = 200
         steps = 3
 
-        cell = TestCell()
+        cell = DummyCell()
         cell.zstart[0] = 50
         cell.zmid[0] = 50
         cell.zend[0] = 50
@@ -268,7 +266,7 @@ class testLfpCalc(unittest.TestCase):
         h = 200
         steps = 3
 
-        cell = TestCell()
+        cell = DummyCell()
         cell.zstart[0] = 50
         cell.zmid[0] = 50
         cell.zend[0] = 50
@@ -294,7 +292,7 @@ class testLfpCalc(unittest.TestCase):
         h = 200
         steps = 20
 
-        cell = TestCell()
+        cell = DummyCell()
         cell.zstart[0] = 100
         cell.zmid[0] = 100
         cell.zend[0] = 100
@@ -321,7 +319,7 @@ class testLfpCalc(unittest.TestCase):
         h = 200
         steps = 20
 
-        cell = TestCell()
+        cell = DummyCell()
         cell.zstart[0] = 100
         cell.zmid[0] = 100
         cell.zend[0] = 100
@@ -349,7 +347,7 @@ class testLfpCalc(unittest.TestCase):
         h = 200
         steps = 20
 
-        cell = TestCell()
+        cell = DummyCell()
         cell.zstart[0] = 100
         cell.zmid[0] = 100
         cell.zend[0] = 100
@@ -381,7 +379,7 @@ class testLfpCalc(unittest.TestCase):
 
         correct = 0.00108189
 
-        cell = TestCell()
+        cell = DummyCell()
         cell.zmid[0] = 110
         cell.xmid[0] = -100
 
@@ -406,7 +404,7 @@ class testLfpCalc(unittest.TestCase):
 
         correct = 0.00246539
 
-        cell = TestCell()
+        cell = DummyCell()
         cell.zstart[0] = 0
         cell.zend[0] = 110
         cell.xstart[0] = -100
@@ -432,7 +430,7 @@ class testLfpCalc(unittest.TestCase):
 
         correct = 0.00108189
 
-        cell = TestCell()
+        cell = DummyCell()
         cell.zmid[0] = 110
         cell.xmid[0] = -100
 
@@ -455,7 +453,7 @@ class testLfpCalc(unittest.TestCase):
         h = 1e10
         steps = 20
 
-        cell = TestCell()
+        cell = DummyCell()
         cell.zstart[0] = 100
         cell.zmid[0] = 100
         cell.zend[0] = 100
@@ -483,7 +481,7 @@ class testLfpCalc(unittest.TestCase):
         h = 1e10
         steps = 20
 
-        cell = TestCell()
+        cell = DummyCell()
         cell.zstart[0] = 100
         cell.zmid[0] = 100
         cell.zend[0] = 100
@@ -510,7 +508,7 @@ class testLfpCalc(unittest.TestCase):
         h = 1e10
         steps = 20
 
-        cell = TestCell()
+        cell = DummyCell()
         cell.zstart[0] = 100
         cell.zmid[0] = 100
         cell.zend[0] = 100
@@ -532,7 +530,7 @@ class testLfpCalc(unittest.TestCase):
     def test_calc_lfp_pointsource_anisotropic(self):
 
         sigma = [0.6, 0.3, 0.45]
-        cell = TestCell()
+        cell = DummyCell()
         cell.xmid = cell.ymid = cell.zmid = np.array([1.2])
         sigma_r = np.sqrt(sigma[1] * sigma[2] * 1.2**2
                         + sigma[0] * sigma[2] * 1.2**2
@@ -546,7 +544,7 @@ class testLfpCalc(unittest.TestCase):
 
 
     def test_deltaS_calc(self):
-        cell = TestCell()
+        cell = DummyCell()
         cell.yend[0] = 5
         ds = lfpcalc._deltaS_calc(cell.xstart, cell.xend,
                                   cell.ystart, cell.yend,
@@ -555,7 +553,7 @@ class testLfpCalc(unittest.TestCase):
 
 
 
-class TestCell(object):
+class DummyCell(object):
     """Cell like object with attributes for predicting extracellular potentials,
     but with:
         - 1 compartment

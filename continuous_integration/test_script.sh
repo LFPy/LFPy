@@ -13,7 +13,7 @@ python setup.py develop
 # run tests, but if mystery segmentation fault occurr, rerun tests to get
 # clean exit
 while true; do
-    nosetests --with-coverage --cover-package=LFPy
+    py.test LFPy/test/test*.py --cov-report term --cov=LFPy/test/
     if [ $? -eq 0 ]
     then
         exit 0

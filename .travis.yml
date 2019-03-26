@@ -16,6 +16,8 @@ install:
   - travis_wait 30 pip install scipy -q
   - pip install setuptools cython coveralls h5py matplotlib mpi4py -q
   - pip install -r requirements.txt
+  - pip install -I pytest-cov==2.5.1
+  - pip install pytest codecov
   - source continuous_integration/install.sh
 script:
   - bash continuous_integration/test_script.sh
