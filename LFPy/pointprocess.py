@@ -180,16 +180,19 @@ class Synapse(PointProcess):
 
 
 class StimIntElectrode(PointProcess):
-    """Class for NEURON point processes, ie VClamp, SEClamp and ICLamp,
-    SinIClamp, ChirpIClamp with arguments.
+    """Class for NEURON point processes representing electrode currents,
+    such as VClamp, SEClamp and ICLamp.
     
-    Electrode currents go here.
     Membrane currents will no longer sum to zero if these mechanisms are used,
     as the equivalent circuit is akin to a current input to the compartment
     from a far away extracellular location ("ground"), not immediately from
-    the surface to the inside of the compartment as for transmembrane currents.
+    the surface to the inside of the compartment as with transmembrane currents.
     
-    Refer to NEURON documentation @ neuron.yale.edu for kwargs
+    Refer to NEURON documentation @ neuron.yale.edu for keyword arguments or 
+    class documentation in Python issuing e.g.
+        
+        help(neuron.h.VClamp)
+    
     Will insert pptype on cell-instance, pass the corresponding kwargs onto
     cell.set_point_process.
 
@@ -214,7 +217,7 @@ class StimIntElectrode(PointProcess):
     Examples
     --------
     >>> import pylab as pl
-    >>> pl.interactive(1)
+    >>> pl.ion()
     >>> import os
     >>> import LFPy
     >>> #define a list of different electrode implementations from NEURON
