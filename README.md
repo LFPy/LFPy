@@ -2,7 +2,7 @@ LFPy
 ====
 
 LFPy is a Python-module for calculation of extracellular potentials from multicompartment neuron models.
-It relies on the NEURON simulator (http://www.neuron.yale.edu/neuron) and uses the 
+It relies on the NEURON simulator (http://www.neuron.yale.edu/neuron) and uses the
 Python interface (http://www.frontiersin.org/neuroinformatics/10.3389/neuro.11.001.2009/abstract) it provides.
 
 LFPy provides a set of easy-to-use Python classes for setting up your model, running your simulations and calculating the extracellular potentials arising from activity in your model neuron. If you have a model working in NEURON (www.neuron.yale.edu)
@@ -27,8 +27,8 @@ Citing LFPy:
 
 LFPy was developed in the Computational Neuroscience Group, Department of Mathemathical Sciences and Technology (http://www.nmbu.no/imt),
 at the Norwegian University of Life Sciences (http://www.nmbu.no),
-in collaboration with the Laboratory of Neuroinformatics (http://www.nencki.gov.pl/en/laboratory-of-neuroinformatics), 
-Nencki Institute of Experimental Biology (http://www.nencki.gov.pl), Warsaw, Poland. The effort was supported by 
+in collaboration with the Laboratory of Neuroinformatics (http://www.nencki.gov.pl/en/laboratory-of-neuroinformatics),
+Nencki Institute of Experimental Biology (http://www.nencki.gov.pl), Warsaw, Poland. The effort was supported by
 International Neuroinformatics Coordinating Facility (http://incf.org), the Research Council of Norway (http://www.forskningsradet.no/english) (eScience, NevroNor) and EU-FP7 (BrainScaleS, http://www.brainscales.org).
 
 For updated information on LFPy and online documentation, see the LFPy homepage (http://lfpy.readthedocs.io).
@@ -40,6 +40,7 @@ Code status
 [![Build Status](https://travis-ci.org/LFPy/LFPy.svg?branch=master)](https://travis-ci.org/LFPy/LFPy)
 [![Coverage Status](https://coveralls.io/repos/github/LFPy/LFPy/badge.svg?branch=master)](https://coveralls.io/github/LFPy/LFPy?branch=master)
 [![Documentation Status](https://readthedocs.org/projects/lfpy/badge/?version=latest)](http://lfpy.readthedocs.io/en/latest/?badge=latest)
+[![Anaconda-Server Badge](https://anaconda.org/LFPy/LFPy/badges/installer/conda.svg)](https://conda.anaconda.org/LFPy/LFPy)
 [![DOI](https://zenodo.org/badge/78627256.svg)](https://zenodo.org/badge/latestdoi/78627256)
 
 Requirements
@@ -49,7 +50,7 @@ To install LFPy you will need the following:
 
 - Python modules numpy, scipy, matplotlib, h5py, mpi4py, csa, Cython
 - NEURON (from http://www.neuron.yale.edu, v7.6.4 or newer) and corresponding Python module. The following should execute without error in a Python console:
-    
+
         import neuron
         neuron.test()
 
@@ -62,32 +63,32 @@ Installation
 There are few options to install LFPy:
 
 1.  From the Python Package Index with only local access using pip:
-        
-        pip install LFPy --user 
+
+        pip install LFPy --user
 
     as sudoer (in general not recommended as system Python files may be overwritten):
-    
+
         sudo pip install LFPy
 
     Upgrading LFPy from the Python package index (without attempts at upgrading dependencies):
-        
+
         pip install --upgrade --no-deps LFPy --user
-    
+
     LFPy release candidates can be installed as:
-        
+
         pip install --pre --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple LFPy --user
 
 
 2.  From the Python Package Index with only local access using easy_install:
-    
+
         easy_install --user LFPy
 
     As sudoer:
-    
+
         sudo easy_install LFPy
 
 3.  From source:
-    
+
         tar -xzf LFPy-x.x.tar.gz
         cd LFPy-x.x
         (sudo) python setup.py develop (--user)
@@ -112,12 +113,10 @@ Documentation
 =============
 
 To generate the html documentation using Sphinx, issue from the LFPy source code directory:
-    
+
     sphinx-build -b html <path to LFPy>/doc <path to output>
 
 The main html file is in ``<path to output>/index.html``. Numpydoc and the ReadTheDocs theme may be needed:
 
     pip install numpydoc --user
     pip install sphinx-rtd-theme --user
-    
-

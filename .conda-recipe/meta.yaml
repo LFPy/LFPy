@@ -1,0 +1,53 @@
+package:
+  name: lfpy
+  version: {{ environ.get("GIT_STRING", "0.0.0_custom")|replace("v", "")|replace("-", "_") }}
+
+source:
+  git_url: ..
+
+build:
+    noarch: python
+    script: python setup.py install
+
+requirements:
+  build:
+    - python
+    - setuptools
+    - numpy
+    - scipy
+    - Cython
+    - h5py
+    - neuron
+    - mpi4py
+    - matplotlib
+  run:
+    - python
+    - setuptools
+    - pip
+    - numpy
+    - scipy
+    - Cython
+    - h5py
+    - neuron
+    - mpi4py
+    - matplotlib
+
+test:
+  source_files:
+    - LFPy
+  requires:
+    - pytest
+    - pytest-cov
+    - coveralls
+    - codecov
+  imports:
+    - LFPy
+  commands:
+    - coverage run --source LFPy/test/ -m py.test -s
+    - coverage report
+    - codecov
+
+about:
+  home: https://github.com/LFPy/LFPy/
+  license: GPLv3
+  license_file: LICENSE
