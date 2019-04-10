@@ -3,7 +3,8 @@ package:
   version: {{ environ.get("GIT_STRING", "0.0.0_custom")|replace("v", "")|replace("-", "_") }}
 
 source:
-  git_url: ..
+  git_rev:
+  git_url: https://github.com/LFPy/LFPy.git
 
 build:
     noarch: python
@@ -13,18 +14,19 @@ requirements:
   build:
     - python
     - setuptools
-    - numpy
+    - numpy {{ numpy }}
     - scipy
     - Cython
     - h5py
     - neuron
+    - mpich
     - mpi4py
     - matplotlib
   run:
     - python
     - setuptools
     - pip
-    - numpy
+    - {{ pin_compatible('numpy') }}
     - scipy
     - Cython
     - h5py
