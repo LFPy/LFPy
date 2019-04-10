@@ -3,6 +3,7 @@ package:
   version: {{ environ.get("GIT_STRING", "0.0.0_custom")|replace("v", "")|replace("-", "_") }}
 
 source:
+  git_rev:
   git_url: ..
 
 build:
@@ -12,26 +13,28 @@ build:
 requirements:
   build:
     - python
+    - pip
     - setuptools
     - numpy
     - scipy
     - Cython
     - h5py
     - neuron
+    - gxx_linux-64
     - matplotlib
-    pip:
-      - mpi4py
+    - mpi4py
   run:
     - python
     - setuptools
+    - pip
     - numpy
     - scipy
     - Cython
     - h5py
     - neuron
+    - gxx_linux-64
     - matplotlib
-    pip:
-      - mpi4py
+    - mpi4py
 
 test:
   source_files:
