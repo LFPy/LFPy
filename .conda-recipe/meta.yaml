@@ -18,19 +18,20 @@ requirements:
     - Cython
     - h5py
     - neuron
-    - mpi4py
     - matplotlib
+    pip:
+      - mpi4py
   run:
     - python
     - setuptools
-    - pip
     - numpy
     - scipy
     - Cython
     - h5py
     - neuron
-    - mpi4py
     - matplotlib
+    pip:
+      - mpi4py
 
 test:
   source_files:
