@@ -5,7 +5,7 @@ LFPs from a population of cells relying on MPI (Message Passing Interface)
 
 Execution:
 
-    <mpiexec> -n <processes> python example3.py
+    <mpiexec> -n <processes> python example_mpi_2.py
 
 Notes:
 - on certain platforms and with mpirun, the --oversubscribe argument is needed
@@ -32,7 +32,7 @@ from os.path import join
 import sys
 if sys.version < '3':
     from urllib2 import urlopen
-else:    
+else:
     from urllib.request import urlopen
 import zipfile
 import LFPy
@@ -166,25 +166,25 @@ state = np.random.get_state()
 for cell_id in range(n_cells):
     if cell_id % SIZE == RANK:
         # get set seed per cell in order to synapse locations
-        np.random.seed(global_seed + cell_id)   
-        
+        np.random.seed(global_seed + cell_id)
+
         # Create cell
         cell = LFPy.Cell(**cell_parameters)
-        
+
         #Have to position and rotate the cells!
         cell.set_rotation(z=z_rotation[cell_id], **xy_rotations)
         cell.set_pos(x=x_cell_pos[cell_id])
-                
+
         for i_syn in range(n_synapses):
             syn_idx = cell.get_rand_idx_area_norm()
             synapse_parameters.update({'idx' : syn_idx})
             synapse = LFPy.Synapse(cell, **synapse_parameters)
             synapse.set_spike_times(pre_syn_sptimes[pre_syn_ids[
                                                         cell_id % SIZE][i_syn]])
-        
+
         #run the cell simulation
         cell.simulate(rec_imem=True)
-        
+
         #set up the extracellular device
         point_electrode = LFPy.RecExtElectrode(cell,
                                                **point_electrode_parameters)
@@ -192,20 +192,20 @@ for cell_id in range(n_cells):
 
         # sum LFP on this RANK
         summed_LFP += point_electrode.LFP[0]
-                
+
         # send LFP of this cell to RANK 0
         if RANK != 0:
             COMM.send(point_electrode.LFP[0], dest=0)
         else:
             single_LFPs += [point_electrode.LFP[0]]
-    
+
     # collect single LFP contributions on RANK 0
     if RANK == 0:
         if cell_id % SIZE != RANK:
             single_LFPs += [COMM.recv(source=cell_id % SIZE)]
 
 # we can also use MPI to sum arrays directly:
-summed_LFP = COMM.reduce(summed_LFP)        
+summed_LFP = COMM.reduce(summed_LFP)
 
 # reset state of random number generator
 np.random.set_state(state)
@@ -217,7 +217,7 @@ if RANK==0:
 
     #figure
     fig = plt.figure(figsize=(12, 8))
-    
+
     # Morphologies axes:
     plt.axes([.175, .0, .65, 1], aspect='equal')
     plt.axis('off')
@@ -236,11 +236,11 @@ if RANK==0:
                     edgecolor = 'none',
                     facecolor = color_vec[i_cell],
                     rasterized=False,
-                    )            
+                    )
 
         ax = plt.gca()
         ax.add_collection(linecol)
-    
+
     axis = ax.axis(ax.axis('equal'))
     ax.axis(np.array(axis) / 1.15)
 
@@ -273,7 +273,7 @@ if RANK==0:
         sp = pre_syn_sptimes[i_pre]
         for i_sp in range(len(sp)):
             pop_sptimes.append(sp[i_sp])
-               
+
     for i_pre in range(n_pre_syn):
         plt.scatter(pre_syn_sptimes[i_pre],
                     i_pre*np.ones(len(pre_syn_sptimes[i_pre])),
@@ -283,14 +283,14 @@ if RANK==0:
     plt.xlim([0,cell_parameters['tstop']])
     plt.ylabel('train #', ha='left', labelpad=0)
     plt.title('Presynaptic spike times')
-    
+
     ax = plt.gca()
     for loc, spine in ax.spines.items():
         if loc in ['right', 'top']:
-            spine.set_color('none')            
+            spine.set_color('none')
     ax.xaxis.set_ticks_position('bottom')
     ax.yaxis.set_ticks_position('left')
-    
+
     ax.set_xticklabels([])
 
     #spike rate axes
@@ -304,16 +304,16 @@ if RANK==0:
 
     plt.xlim([0,cell_parameters['tstop']])
     plt.ylim([0,10.])
-    
-    tvec = np.arange(point_electrode.LFP.shape[1])*cell.dt 
+
+    tvec = np.arange(point_electrode.LFP.shape[1])*cell.dt
 
     plt.xlabel('$t$ (ms)')
     plt.ylabel('Rate (spike/s)')
-    
+
     ax = plt.gca()
     for loc, spine in ax.spines.items():
         if loc in ['right', 'top']:
-            spine.set_color('none')            
+            spine.set_color('none')
     ax.xaxis.set_ticks_position('bottom')
     ax.yaxis.set_ticks_position('left')
 
@@ -343,11 +343,10 @@ if RANK==0:
     ax = plt.gca()
     for loc, spine in ax.spines.items():
         if loc in ['right', 'top']:
-            spine.set_color('none')            
+            spine.set_color('none')
     ax.xaxis.set_ticks_position('bottom')
     ax.yaxis.set_ticks_position('left')
 
 
-    fig.savefig('example3.pdf', dpi=300)
+    fig.savefig('example_mpi_2.pdf', dpi=300)
     plt.show()
-
