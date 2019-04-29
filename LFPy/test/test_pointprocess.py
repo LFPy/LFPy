@@ -108,6 +108,133 @@ class testSynapse(unittest.TestCase):
         self.assertFalse(hasattr(syn3, 'i'))
         self.assertFalse(hasattr(syn3, 'v'))
 
+
+    def test_Synapse_02(self):
+        cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
+                                                 'ball_and_sticks.hoc'))
+        t0 = 10.
+        t1 = 30.
+        tau = 5.
+        syn0 = LFPy.Synapse(cell=cell, idx=0, syntype='ExpSynI',
+                           weight=1., tau=tau, record_current=True,
+                           record_potential=True)
+        syn0.set_spike_times_w_netstim(noise=0., start=t0-1, number=1) # -1 to acct for delay
+
+        syn1 = LFPy.Synapse(cell=cell, idx=0, syntype='ExpSynI',
+                           weight=1., tau=tau, record_current=True,
+                           record_potential=True)
+        syn1.set_spike_times(np.array([t1]))
+
+        cell.simulate()
+        
+        i0 = np.zeros(cell.tvec.size)
+        i0[cell.tvec > t0] = -np.exp(-np.arange((cell.tvec > t0).sum())*cell.dt / tau)
+
+        i1 = np.zeros(cell.tvec.size)
+        i1[cell.tvec > t1] = -np.exp(-np.arange((cell.tvec > t1).sum())*cell.dt / tau)
+
+        np.testing.assert_allclose(i0, syn0.i, rtol=1E-1)
+        np.testing.assert_equal(cell.somav, syn0.v)
+
+        np.testing.assert_allclose(i1, syn1.i, rtol=1E-1)
+        np.testing.assert_equal(cell.somav, syn1.v)
+
+
+    def test_Synapse_03(self):
+        cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
+                                                 'ball_and_sticks.hoc'))
+        t0 = 10.
+        t1 = 30.
+        tau = 5.
+        syn0 = LFPy.Synapse(cell=cell, idx=0, syntype='ExpSynI',
+                           weight=1., tau=tau, record_current=True,
+                           record_potential=True)
+        syn0.set_spike_times_w_netstim(noise=0., start=t0-1, number=1) # -1 to acct for delay
+
+        syn1 = LFPy.Synapse(cell=cell, idx=0, syntype='ExpSynI',
+                           weight=1., tau=tau, record_current=True,
+                           record_potential=True)
+        syn1.set_spike_times_w_netstim(noise=0., start=t1-1, number=1) # -1 to acct for delay
+
+        cell.simulate()
+        
+        i0 = np.zeros(cell.tvec.size)
+        i0[cell.tvec > t0] = -np.exp(-np.arange((cell.tvec > t0).sum())*cell.dt / tau)
+
+        i1 = np.zeros(cell.tvec.size)
+        i1[cell.tvec > t1] = -np.exp(-np.arange((cell.tvec > t1).sum())*cell.dt / tau)
+
+        np.testing.assert_allclose(i0, syn0.i, rtol=1E-1)
+        np.testing.assert_equal(cell.somav, syn0.v)
+
+        np.testing.assert_allclose(i1, syn1.i, rtol=1E-1)
+        np.testing.assert_equal(cell.somav, syn1.v)
+
+
+    def test_Synapse_04(self):
+        cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
+                                                 'ball_and_sticks.hoc'))
+        t0 = 10.
+        t1 = 30.
+        tau = 5.
+        syn0 = LFPy.Synapse(cell=cell, idx=0, syntype='ExpSynI',
+                           weight=1., tau=tau, record_current=True,
+                           record_potential=True)
+
+        syn1 = LFPy.Synapse(cell=cell, idx=0, syntype='ExpSynI',
+                           weight=1., tau=tau, record_current=True,
+                           record_potential=True)
+
+        syn0.set_spike_times_w_netstim(noise=0., start=t0-1, number=1) # -1 to acct for delay
+        syn1.set_spike_times(np.array([t1]))
+
+        cell.simulate()
+        
+        i0 = np.zeros(cell.tvec.size)
+        i0[cell.tvec > t0] = -np.exp(-np.arange((cell.tvec > t0).sum())*cell.dt / tau)
+
+        i1 = np.zeros(cell.tvec.size)
+        i1[cell.tvec > t1] = -np.exp(-np.arange((cell.tvec > t1).sum())*cell.dt / tau)
+
+        np.testing.assert_allclose(i0, syn0.i, rtol=1E-1)
+        np.testing.assert_equal(cell.somav, syn0.v)
+
+        np.testing.assert_allclose(i1, syn1.i, rtol=1E-1)
+        np.testing.assert_equal(cell.somav, syn1.v)
+        
+        
+    def test_Synapse_05(self):
+        cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
+                                                 'ball_and_sticks.hoc'))
+        t0 = 10.
+        t1 = 30.
+        tau = 5.
+        syn0 = LFPy.Synapse(cell=cell, idx=0, syntype='ExpSynI',
+                           weight=1., tau=tau, record_current=True,
+                           record_potential=True)
+
+        syn1 = LFPy.Synapse(cell=cell, idx=0, syntype='ExpSynI',
+                           weight=1., tau=tau, record_current=True,
+                           record_potential=True)
+
+        syn1.set_spike_times(np.array([t1]))
+        syn0.set_spike_times_w_netstim(noise=0., start=t0-1, number=1) # -1 to acct for delay
+
+        cell.simulate()
+        
+        i0 = np.zeros(cell.tvec.size)
+        i0[cell.tvec > t0] = -np.exp(-np.arange((cell.tvec > t0).sum())*cell.dt / tau)
+
+        i1 = np.zeros(cell.tvec.size)
+        i1[cell.tvec > t1] = -np.exp(-np.arange((cell.tvec > t1).sum())*cell.dt / tau)
+
+        np.testing.assert_allclose(i0, syn0.i, rtol=1E-1)
+        np.testing.assert_equal(cell.somav, syn0.v)
+
+        np.testing.assert_allclose(i1, syn1.i, rtol=1E-1)
+        np.testing.assert_equal(cell.somav, syn1.v)
+
+
 class testStimIntElectrode(unittest.TestCase):
     """
     test class LFPy.StimIntElectrode

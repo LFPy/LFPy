@@ -127,8 +127,10 @@ class Synapse(PointProcess):
                                            record_current=record_current,
                                            record_potential=record_potential,
                                            **kwargs))
+        self._ns_index = int(cell.netstimlist.count()) - 1
         cell.synapses.append(self)
         cell.synidx.append(idx)
+        self.cell.sptimeslist.append(np.array([]))
 
     def set_spike_times(self, sptimes=np.zeros(0)):
         """Set the spike times explicitly using numpy arrays"""
@@ -136,7 +138,8 @@ class Synapse(PointProcess):
             assert type(sptimes) is np.ndarray
         except AssertionError:
             raise AssertionError('synapse activation times must be a np.ndarray, not type({})'.format(type(sptimes)))
-        self.cell.sptimeslist.append(sptimes)
+        self.cell.sptimeslist.insrt(self._ns_index, sptimes)
+        self.cell.sptimeslist.remove(self._ns_index + 1)
     
     def set_spike_times_w_netstim(self, noise=1., start=0., number=1E3,
                                   interval=10., seed=1234.):
@@ -158,11 +161,11 @@ class Synapse(PointProcess):
         seed : float
             Random seed value
         """
-        self.cell.netstimlist[-1].noise = noise
-        self.cell.netstimlist[-1].start = start
-        self.cell.netstimlist[-1].number = number
-        self.cell.netstimlist[-1].interval = interval        
-        self.cell.netstimlist[-1].seed(seed)
+        self.cell.netstimlist[self._ns_index].noise = noise
+        self.cell.netstimlist[self._ns_index].start = start
+        self.cell.netstimlist[self._ns_index].number = number
+        self.cell.netstimlist[self._ns_index].interval = interval        
+        self.cell.netstimlist[self._ns_index].seed(seed)
 
     def collect_current(self, cell):
         """Collect synapse current"""
