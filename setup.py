@@ -90,7 +90,6 @@ setup(
         'Development Status :: 5 - Production/Stable',
         ],
     install_requires = [
-        'setuptools>=23.1.0',
         'numpy>=1.8',
         'scipy>=0.14',
         'Cython>=0.20',
