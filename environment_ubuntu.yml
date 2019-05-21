@@ -1,0 +1,16 @@
+name: lfpy
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.7
+  - numpy
+  - scipy
+  - matplotlib
+  - Cython
+  - h5py
+  - gxx_linux-64
+  - neuron=*=mpi*
+  - pytest
+  - ipython
+  - mpi4py

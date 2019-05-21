@@ -9,10 +9,8 @@ dependencies:
   - matplotlib
   - Cython
   - h5py
-  - neuron
-  - gxx_linux-64
+  - clang_osx-64
+  - neuron=*=mpi*
   - pytest
   - ipython
-  - pip
-  pip:
-    - mpi4py
+  - mpi4py
