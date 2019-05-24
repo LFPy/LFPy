@@ -19,7 +19,7 @@ requirements:
     - scipy
     - Cython
     - h5py
-    - neuron
+    - neuron=*=mpi_openmpi*
     - gxx_linux-64
     - matplotlib
     - mpi4py
@@ -31,7 +31,7 @@ requirements:
     - scipy
     - Cython
     - h5py
-    - neuron
+    - neuron=*=mpi*
     - gxx_linux-64
     - matplotlib
     - mpi4py
