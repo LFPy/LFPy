@@ -36,7 +36,7 @@ try:
         warn('LFPy could not read NEURON version info. v7.6.4 or newer required')
 except AssertionError:
     warn('LFPy requires NEURON v7.6.4 or newer. Found v{}'.format(neuron.version))
-    
+
 
 class Cell(object):
     """
@@ -888,7 +888,7 @@ class Cell(object):
             depth filter
         fun : function or str, or iterable of function or str
             if function a scipy.stats method, if str, must be method in
-            scipy.stats module with the same name (like 'norm'), 
+            scipy.stats module with the same name (like 'norm'),
             if iterable (list, tuple, numpy.array) of function or str some
             probability distribution in scipy.stats module
         funargs : dict or iterable
@@ -933,13 +933,13 @@ class Cell(object):
                 mod = np.zeros(poss_idx.shape)
                 for f, args, scl in zip(fun, funargs, funweights):
                     if type(f) is str and f in dir(scipy.stats):
-                        exec('f = scipy.stats.{}'.format(f))
+                        f = getattr(scipy.stats, f)
                     df = f(**args)
                     mod += df.pdf(x=self.zmid[poss_idx])*scl
                 p *= mod
             else:
                 if type(fun) is str and fun in dir(scipy.stats):
-                    exec('fun = scipy.stats.{}'.format(fun))
+                    fun = getattr(scipy.stats, fun)
                 df = fun(**funargs)
                 p *= df.pdf(x=self.zmid[poss_idx])
             # normalize
@@ -2270,7 +2270,7 @@ class Cell(object):
     def get_axial_resistance(self):
         """
         Return NEURON axial resistance for all cell compartments.
-        
+
         Returns
         -------
         ri_list : ndarray, dtype=float
@@ -2298,7 +2298,7 @@ class Cell(object):
     def get_dict_of_children_idx(self):
         """
         Return dictionary with children segment indices for all sections.
-        
+
         Returns
         -------
         children_dict : dictionary
@@ -2320,7 +2320,7 @@ class Cell(object):
     def get_dict_parent_connections(self):
         """
         Return dictionary with parent connection point for all sections.
-        
+
         Returns
         -------
         connection_dict : dictionary
@@ -2341,7 +2341,7 @@ class Cell(object):
         """
         Return axial current from segment (seg_idx) mid to segment start,
         and current from parent segment (parent_idx) end to parent segment mid.
-        
+
         Parameters
         ----------
         seg_idx : int
