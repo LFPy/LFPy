@@ -42,8 +42,8 @@ Code status
 [![Documentation Status](https://readthedocs.org/projects/lfpy/badge/?version=latest)](http://lfpy.readthedocs.io/en/latest/?badge=latest)
 [![DOI](https://zenodo.org/badge/78627256.svg)](https://zenodo.org/badge/latestdoi/78627256)
 
-Current release info
-====================
+Conda-forge release info
+========================
 
 | Name | Downloads | Version | Platforms |
 | --- | --- | --- | --- |

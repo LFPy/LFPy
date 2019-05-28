@@ -188,6 +188,18 @@ Python distributions such as the Anaconda Scientific Python distribution (http:/
 how to set up a working Python environment using Anaconda with the standard pre-built NEURON binaries on Linux, OSX and Windows.
 
 
+macOS/linux with Anaconda Scientific Python distribution
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Neuron and LFPy is now installable from the conda-forge (https://conda-forge.org), which makes installation a breeze.
+Download and install Anaconda using the 64-bit installer from https://www.anaconda.com/download.
+In order to install LFPy in the current (base) environment, issue in the terminal:
+::
+    
+    conda config --add channels conda-forge 
+    conda install lfpy neuron=*=mpi*
+
+
 Ubuntu 18.04.1 LTS 64-bit with Anaconda Scientific Python distribution
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -251,7 +263,7 @@ The VirtualBox guest additions were installed.
 9.  Test the installation from the terminal
     ::
 
-        nosetests
+        py.test
 
     which will run through the LFPy test suite. Hopefully without errors.
 
@@ -278,7 +290,7 @@ Make sure that nothing in ``$PATH`` points to an Anaconda-installed version of P
     ::
 
         sudo apt install libreadline-dev libncurses-dev libtool make
-        sudo apt install ipython3 cython3 jupyter-notebook python3-nose \
+        sudo apt install ipython3 cython3 jupyter-notebook python3-pytest \
           python3-numpy python3-scipy python3-matplotlib python3-mpi4py python3-h5py
 
 2.  Download and install the 64-bit Debian/Ubuntu .deb file with NEURON from https://www.neuron.yale.edu/neuron/download (https://neuron.yale.edu/ftp/neuron/versions/v7.6/nrn-7.6.x86_64-linux.deb)
@@ -311,7 +323,7 @@ Make sure that nothing in ``$PATH`` points to an Anaconda-installed version of P
 7.  Test the installation from the terminal
     ::
 
-        nosetests3
+        py.test-3
 
     which will run through the LFPy test suite. Hopefully without errors.
 
