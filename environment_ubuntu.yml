@@ -10,6 +10,6 @@ dependencies:
   - Cython
   - h5py
   - gxx_linux-64
-  - neuron=*=mpi_openmpi*
+  - neuron=*=mpi_*
   - pytest
   - mpi4py
