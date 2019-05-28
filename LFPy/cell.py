@@ -587,12 +587,11 @@ class Cell(object):
             self.sptimeslist = neuron.h.List()
 
         i = 0
-        cmd1 = 'syn = neuron.h.'
-        cmd2 = '(seg.x, sec=sec)'
+        cmd = 'syn = neuron.h.{}(seg.x, sec=sec)'
         for sec in self.allseclist:
             for seg in sec:
                 if i == idx:
-                    command = cmd1 + syntype + cmd2
+                    command = cmd.format(syntype)
                     if sys.version >= "3.4":
                         exec(command, locals(), globals())
                     else:
@@ -618,7 +617,7 @@ class Cell(object):
 
                     #record currents
                     if record_current:
-                        synirec = neuron.h.Vector(int(self.tstop /
+                        synirec = neuron.h.Vector(int(self.tstop //
                                                       self.dt+1))
                         synirec.record(syn._ref_i, self.dt)
                         self.synireclist.append(synirec)
@@ -628,7 +627,7 @@ class Cell(object):
 
                     #record potential
                     if record_potential:
-                        synvrec = neuron.h.Vector(int(self.tstop /
+                        synvrec = neuron.h.Vector(int(self.tstop //
                                                       self.dt+1))
                         synvrec.record(seg._ref_v, self.dt)
                         self.synvreclist.append(synvrec)
