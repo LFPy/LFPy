@@ -193,11 +193,25 @@ macOS/linux with Anaconda Scientific Python distribution
 
 Neuron and LFPy is now installable from the conda-forge (https://conda-forge.org), which makes installation a breeze.
 Download and install Anaconda using the 64-bit installer from https://www.anaconda.com/download.
-In order to install LFPy in the current (base) environment, issue in the terminal:
+In order to install LFPy in the current (e.g., `base`) environment, issue in the terminal:
 ::
     
     conda config --add channels conda-forge 
     conda install lfpy neuron=*=mpi*
+
+
+Complete LFPy environments can be created using the `environment_linux.yml` or `environment_macos.yml` files found in the root of the LFPy source code tree:
+::
+
+    git clone https://github.com/LFPy/LFPy.git
+    cd LFPy
+    conda env create -f environment_macos.yml
+    conda activate lfpy
+
+Note that other useful packages like `ipython`, `pandas` etc. must be installed separately, as:
+::
+    
+    conda install <package-name>
 
 
 Ubuntu 18.04.1 LTS 64-bit with Anaconda Scientific Python distribution
