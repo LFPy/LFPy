@@ -40,15 +40,21 @@ Code status
 [![Build Status](https://travis-ci.org/LFPy/LFPy.svg?branch=master)](https://travis-ci.org/LFPy/LFPy)
 [![Coverage Status](https://coveralls.io/repos/github/LFPy/LFPy/badge.svg?branch=master)](https://coveralls.io/github/LFPy/LFPy?branch=master)
 [![Documentation Status](https://readthedocs.org/projects/lfpy/badge/?version=latest)](http://lfpy.readthedocs.io/en/latest/?badge=latest)
-[![Anaconda-Server Badge](https://anaconda.org/LFPy/LFPy/badges/installer/conda.svg)](https://conda.anaconda.org/LFPy/LFPy)
 [![DOI](https://zenodo.org/badge/78627256.svg)](https://zenodo.org/badge/latestdoi/78627256)
+
+Current release info
+====================
+
+| Name | Downloads | Version | Platforms |
+| --- | --- | --- | --- |
+| [![Conda Recipe](https://img.shields.io/badge/recipe-lfpy-green.svg)](https://anaconda.org/conda-forge/lfpy) | [![Conda Downloads](https://img.shields.io/conda/dn/conda-forge/lfpy.svg)](https://anaconda.org/conda-forge/lfpy) | [![Conda Version](https://img.shields.io/conda/vn/conda-forge/lfpy.svg)](https://anaconda.org/conda-forge/lfpy) | [![Conda Platforms](https://img.shields.io/conda/pn/conda-forge/lfpy.svg)](https://anaconda.org/conda-forge/lfpy) |
 
 Requirements
 ============
 
 To install LFPy you will need the following:
 
-- Python modules numpy, scipy, matplotlib, h5py, mpi4py, csa, Cython
+- Python modules numpy, scipy, matplotlib, h5py, mpi4py, Cython
 - NEURON (from http://www.neuron.yale.edu, v7.6.4 or newer) and corresponding Python module. The following should execute without error in a Python console:
 
         import neuron
@@ -100,6 +106,13 @@ There are few options to install LFPy:
         (sudo) pip install -r requirements.txt (--user) # install dependencies
         (sudo) python setup.py develop (--user)
 
+5. Anaconda Python (macos/linux):
+
+        conda install lfpy neuron=*=mpi* # installs LFPy and Neuron in the current conda environment
+    
+    or
+    
+        conda create -n lfpy lfpy neuron=*=mpi* # creates new conda environment with LFPy and Neuron
 
 Uninstall
 =========
