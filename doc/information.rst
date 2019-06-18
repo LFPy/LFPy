@@ -195,22 +195,22 @@ Neuron and LFPy is now installable from the conda-forge (https://conda-forge.org
 Download and install Anaconda using the 64-bit installer from https://www.anaconda.com/download.
 In order to install LFPy in the current (e.g., `base`) environment, issue in the terminal:
 ::
-    
-    conda config --add channels conda-forge 
+
+    conda config --add channels conda-forge
     conda install lfpy neuron=*=mpi*
 
 
-Complete LFPy environments can be created using the `environment_linux.yml` or `environment_macos.yml` files found in the root of the LFPy source code tree:
+Complete LFPy environments can be created using the `conda_environment_ubuntu.yml` or `conda_environment_macos.yml` files found in the root of the LFPy source code tree:
 ::
 
     git clone https://github.com/LFPy/LFPy.git
     cd LFPy
-    conda env create -f environment_macos.yml
+    conda env create -f conda_environment_macos.yml
     conda activate lfpy
 
 Note that other useful packages like `ipython`, `pandas` etc. must be installed separately, as:
 ::
-    
+
     conda install <package-name>
 
 
@@ -408,7 +408,7 @@ Windows 10 Pro/Education (64-bit) install instructions:
         conda create -n LFPy python=3.6 mpi4py numpy scipy matplotlib h5py Cython jupyter
         conda activate LFPy
 
-    For every future session, the LFPy environment needs to be used by issuing `conda activate LFPy`. From hereon, skip to step 9. 
+    For every future session, the LFPy environment needs to be used by issuing `conda activate LFPy`. From hereon, skip to step 9.
 8.  Install additional LFPy dependencies listed in `requirements.txt` using ``conda`` (to avoid package clashes with i.e., ``pip install <package_name>``)
     ::
 
