@@ -34,7 +34,7 @@ class RecExtElectrode(object):
         extracellular conductivity in units of (S/m). A scalar value implies an
         isotropic extracellular conductivity. If a length 3 list or array of
         floats is provided, these values corresponds to an anisotropic
-        conductor with conductivities [sigma_x, sigma_y, sigma_z] accordingly. 
+        conductor with conductivities [sigma_x, sigma_y, sigma_z] accordingly.
     x, y, z : np.ndarray
         coordinates or arrays of coordinates in units of (um). Must be same length
     N : None or list of lists
@@ -116,7 +116,7 @@ class RecExtElectrode(object):
 
 
     Compute extracellular potentials during simulation (recommended):
-    
+
     >>> import numpy as np
     >>> import matplotlib.pyplot as plt
     >>> import LFPy
@@ -675,7 +675,6 @@ class RecMEAElectrode(RecExtElectrode):
     >>> plt.colorbar()
     >>> plt.axis('tight')
     >>> plt.show()
-
     """
     def __init__(self, cell=None, sigma_T=0.3, sigma_S=1.5, sigma_G=0.0,
                  h=300., z_shift=0., steps=20,
@@ -745,7 +744,7 @@ class RecMEAElectrode(RecExtElectrode):
         """Will squeeze self.cell centered around the soma by a scaling factor,
         so that it fits inside the slice. If scaling factor is not big enough,
         a RuntimeError is raised. """
-        
+
         self.cell.distort_geometry(factor=self.squeeze_cell_factor)
 
         if (np.max([self.cell.zstart, self.cell.zend]) > self.h + self.z_shift or
