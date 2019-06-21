@@ -13,7 +13,7 @@ GNU General Public License for more details.
 """
 
 from __future__ import division
-from scipy.special import lpmv
+from scipy.special import eval_legendre, lpmv, legendre
 import numpy as np
 from warnings import warn
 
@@ -317,7 +317,7 @@ class FourSphereVolumeConductor(object):
         Len 4 list with the electrical conductivity in units of (S/m) of
         the four shells in the four-sphere model: brain, csf, skull and
         scalp, respectively.
-    r : ndarray, dtype=float
+    r_ : ndarray, dtype=float
         Shape (n_contacts, 3) array containing n_contacts electrode locations
         in cartesian coordinates in units of (µm).
         All ``r_el`` in ``r`` must be less than or equal to scalp radius
@@ -343,17 +343,17 @@ class FourSphereVolumeConductor(object):
 
     """
 
-    def __init__(self, radii, sigmas, r, iter_factor = 2./99.*1e-6):
+    def __init__(self, radii, sigmas, r_electrodes, iter_factor = 2./99.*1e-6):
         """Initialize class FourSphereVolumeConductor"""
-        self.r1 = radii[0]
-        self.r2 = radii[1]
-        self.r3 = radii[2]
-        self.r4 = radii[3]
+        self.r1 = float(radii[0])
+        self.r2 = float(radii[1])
+        self.r3 = float(radii[2])
+        self.r4 = float(radii[3])
 
-        self.sigma1 = sigmas[0]
-        self.sigma2 = sigmas[1]
-        self.sigma3 = sigmas[2]
-        self.sigma4 = sigmas[3]
+        self.sigma1 = float(sigmas[0])
+        self.sigma2 = float(sigmas[1])
+        self.sigma3 = float(sigmas[2])
+        self.sigma4 = float(sigmas[3])
 
         self.r12 = self.r1 / self.r2
         self.r21 = self.r2 / self.r1
@@ -369,21 +369,57 @@ class FourSphereVolumeConductor(object):
         self.sigma34 = self.sigma3 / self.sigma4
         self.sigma43 = self.sigma4 / self.sigma3
 
-        self.rxyz = r
-        self.r = np.sqrt(np.sum(r ** 2, axis=1))
+        self.rxyz = r_electrodes
+        self.r = np.sqrt(np.sum(r_electrodes ** 2, axis=1))
 
         self.iteration_stop_factor = iter_factor
+        self._check_params()
+
+    def _check_params(self):
+        """Check that radii, sigmas and r contain reasonable values"""
+        if (self.r1 < 0) or (self.r1 > self.r2) or (self.r2 > self.r3) or (self.r3 > self.r4):
+            raise RuntimeError('Radii of brain (radii[0]), CSF (radii[1]), '
+                               'skull (radii[2]) and scalp (radii[3]) '
+                               'must be positive ints or floats such that '
+                               '0 < radii[0] < radii[1] < radii[2] < radii[3].')
+
+        if (self.sigma1 < 0) or (self.sigma2 < 0) or (self.sigma3 < 0) or (self.sigma4 < 0):
+            raise RuntimeError('Conductivities (sigmas), must contain positive'
+                               ' ints or floats.')
+
+        if any(r > self.r4 for r in self.r):
+            raise ValueError('Electrode located outside head model.'
+                               'r > radii[3]. r = %s, r4 = %s',
+                               self.r, self.r4)
 
     def _rz_params(self, rz):
+        """Define dipole location vector, and check that dipole is located in
+        the brain, closer to the center than any measurement location."""
         self._rzloc = rz
         self._rz = np.sqrt(np.sum(rz ** 2))
+        if self._rz == 0:
+            raise RuntimeError('Placing dipole in center of head model causes division by zero.')
+
         self._rz1 = self._rz / self.r1
-        if self._rz1 > 0.99999:
+
+        if self._rz1 >= 1:
+            raise RuntimeError('Dipole should be placed inside brain, i.e. |rz| < |r1|')
+
+        elif self._rz1 > 0.99999:
             warn('Dipole should be placed minimum ~1µm away from brain surface, '
                   'to avoid extremely slow convergence.')
+
         elif self._rz1 > 0.9999:
             warn('Computation time might be long due to slow convergence. '
                  'Can be avoided by placing dipole further away from brain surface.')
+
+        if any(r < self._rz for r in self.r):
+            raise RuntimeError('Electrode must be farther away from'
+                               'brain center than dipole: r > rz.'
+                               'r = %s, rz = %s', self.r, self._rz)
+
+        # compute theta angle between rzloc and rxyz
+        self._theta = self.calc_theta()
 
 
     def calc_potential(self, p, rz):
@@ -530,32 +566,24 @@ class FourSphereVolumeConductor(object):
         """
 
         p_tot = np.linalg.norm(p_rad, axis=1)
-        theta = self.calc_theta()
         s_vector = self._sign_rad_dipole(p_rad)
         phi_const = s_vector * p_tot / (4 * np.pi * self.sigma1 * self._rz ** 2)
         n_terms = np.zeros((len(self.r), len(p_tot)))
         for el_point in range(len(self.r)):
-            el_rad = self.r[el_point]
-            theta_point = theta[el_point]
-
-            if el_rad <= self._rz:
-                n_terms[el_point] = np.nan
-                warn('Electrode must be farther away from brain center than dipole. r = %s, rz = %s', el_rad, self._rz)
-            elif el_rad <= self.r1:
-                n_terms[el_point] = self._potential_brain_rad(el_rad,
+            r_point = self.r[el_point]
+            theta_point = self._theta[el_point]
+            if r_point <= self.r1:
+                n_terms[el_point] = self._potential_brain_rad(r_point,
                                                              theta_point)
-            elif el_rad <= self.r2:
-                n_terms[el_point] = self._potential_csf_rad(el_rad,
+            elif r_point <= self.r2:
+                n_terms[el_point] = self._potential_csf_rad(r_point,
                                                            theta_point)
-            elif el_rad <= self.r3:
-                n_terms[el_point] = self._potential_skull_rad(el_rad,
-                                                             theta_point)
-            elif el_rad <= (self.r4):
-                n_terms[el_point] = self._potential_scalp_rad(el_rad,
+            elif r_point <= self.r3:
+                n_terms[el_point] = self._potential_skull_rad(r_point,
                                                              theta_point)
             else:
-                n_terms[el_point] = 0.
-                warn('Electrode located outside head model. Maximum r = %s µm. Your r = %s µm', self.r4, el_rad)
+                n_terms[el_point] = self._potential_scalp_rad(r_point,
+                                                             theta_point)
         potential = phi_const * n_terms
         return potential
 
@@ -576,30 +604,27 @@ class FourSphereVolumeConductor(object):
             potential at n_contacts contact point(s) FourSphereVolumeConductor.r
             in units of (mV) for all timesteps of p_tan
         """
-        theta = self.calc_theta()
         phi = self.calc_phi(p_tan)
         p_tot = np.linalg.norm(p_tan, axis=1)
         phi_hom = - p_tot / (4 * np.pi * self.sigma1 * self._rz ** 2) * np.sin(phi)
-        n_terms = np.zeros((len(self.r), len(p_tot)))
+        n_terms = np.zeros((len(self.r),1))
         for el_point in range(len(self.r)):
-            el_rad = self.r[el_point]
-            theta_point = theta[el_point]
-            if el_rad <= self._rz:
-                n_terms[el_point] = np.nan
-                warn('Electrode must be farther away from brain center than dipole. r = %s, rz = %s', self.r, self._rz)
-            elif el_rad <= self.r1:
-                n_terms[el_point] = self._potential_brain_tan(el_rad, theta_point)
-            elif el_rad <= self.r2:
-                n_terms[el_point] = self._potential_csf_tan(el_rad, theta_point)
-            elif el_rad <= self.r3:
-                n_terms[el_point] = self._potential_skull_tan(el_rad, theta_point)
-            elif el_rad <= self.r4:
-                n_terms[el_point] = self._potential_scalp_tan(el_rad, theta_point)
+            r_point = self.r[el_point]
+            theta_point = self._theta[el_point]
+            # if r_electrode is orthogonal to p_tan, i.e. theta = 0 or theta = pi,
+            # there is no contribution to electric potential from p_tan
+            if (theta_point == 0.) or (theta_point == np.pi):
+                n_terms[el_point] = 0
+            elif r_point <= self.r1:
+                n_terms[el_point] = self._potential_brain_tan(r_point, theta_point)
+            elif r_point <= self.r2:
+                n_terms[el_point] = self._potential_csf_tan(r_point, theta_point)
+            elif r_point <= self.r3:
+                n_terms[el_point] = self._potential_skull_tan(r_point, theta_point)
             else:
-                n_terms[el_point] = 0.
-                warn('Electrode located outside head model. Maximum r = %s µm.',
-                                 self.r4, '\n your r = ', self.r)
-        potential = phi_hom * n_terms
+                n_terms[el_point] = self._potential_scalp_tan(r_point, theta_point)
+        potential = n_terms * phi_hom
+
         return potential
 
     def calc_theta(self):
@@ -615,7 +640,6 @@ class FourSphereVolumeConductor(object):
             z-axis is defined in the direction of rzloc and the radial dipole.
         """
         cos_theta = np.dot(self.rxyz, self._rzloc) / (np.linalg.norm(self.rxyz, axis=1) * np.linalg.norm(self._rzloc))
-        cos_theta = np.nan_to_num(cos_theta)
         theta = np.arccos(cos_theta)
         return theta
 
@@ -636,28 +660,34 @@ class FourSphereVolumeConductor(object):
             in units of (radians) between x-axis vector(s) and projection of
             contact point location vector(s) rxyz into xy-plane.
             z-axis is defined in the direction of rzloc.
-            y-axis is defined in the direction of p (orthogonal to rzloc).
-            x-axis is defined as cross product between p and rzloc (x).
+            y-axis is defined in the direction of p_tan (orthogonal to rzloc).
+            x-axis is defined as cross product between p_tan and rzloc (x).
         """
-        proj_rxyz_rz = (np.dot(self.rxyz, self._rzloc) /
-                        np.sum(self._rzloc ** 2)).reshape(len(self.rxyz),1)\
-                        * self._rzloc.reshape(1,3)
-                        # projection of rxyz onto rzloc
-        rxy = self.rxyz - proj_rxyz_rz  # projection of rxyz into xy-plane
-        x = np.cross(p_tan, self._rzloc)  # vector giving direction of x-axis
 
-        denominator = np.dot(np.linalg.norm(rxy, axis=1).reshape(len(rxy),1),
-                             np.linalg.norm(x, axis=1).reshape(1, len(x)))
-        denominator[np.where(denominator == 0)] = 1e-12
-        cos_phi = np.dot(rxy, x.T) / denominator
-        cos_phi = np.nan_to_num(cos_phi)
-        phi_temp = np.arccos(cos_phi) # nb: phi_temp is in range [0, pi]
-        phi = phi_temp
-        range_test = np.dot(rxy, p_tan.T)  # if range_test < 0, phi > pi
-        for i in range(len(self.r)):
-            for j in range(len(p_tan)):
-                if range_test[i,j] < 0:
-                    phi[i,j] = 2*np.pi - phi_temp[i,j]
+        # project rxyz onto z-axis (rzloc)
+        proj_rxyz_rz = np.outer(np.dot(self.rxyz, self._rzloc) / self._rz ** 2, self._rzloc)
+        # find projection of rxyz in xy-plane
+        rxy = self.rxyz - proj_rxyz_rz
+        # define x-axis
+        x = np.cross(p_tan, self._rzloc)
+
+        phi = np.zeros((len(self.rxyz), len(p_tan)))
+        # phi is not defined when theta= 0,pi or |p_tan| = 0
+        mask = np.ones(phi.shape, dtype=bool)
+        mask[np.where((self._theta == 0) |
+                      (self._theta == np.pi))] = np.zeros(len(p_tan))
+        mask[:,np.where(np.abs(np.linalg.norm(p_tan, axis=1)) == 0)] = 0
+        cos_phi = np.zeros(phi.shape)
+        # compute cos_phi using mask to avoid zerodivision
+        cos_phi[mask] = np.dot(rxy, x.T)[mask] / np.outer(np.linalg.norm(rxy,
+                  axis=1), np.linalg.norm(x, axis=1))[mask]
+        # compute phi in [0, pi]
+        phi[mask] = np.arccos(cos_phi[mask])
+
+        # nb: phi in [-pi, pi]. since p_tan defines direction of y-axis,
+        # phi < 0 when rxy*p_tan < 0
+        phi[np.where(np.dot(rxy, p_tan.T) < 0)] *= -1
+
         return phi
 
     def _sign_rad_dipole(self, p):
