@@ -317,11 +317,11 @@ class FourSphereVolumeConductor(object):
         Len 4 list with the electrical conductivity in units of (S/m) of
         the four shells in the four-sphere model: brain, csf, skull and
         scalp, respectively.
-    r_ : ndarray, dtype=float
+    r_electrodes : ndarray, dtype=float
         Shape (n_contacts, 3) array containing n_contacts electrode locations
         in cartesian coordinates in units of (µm).
-        All ``r_el`` in ``r`` must be less than or equal to scalp radius
-        and larger than the distance between dipole and sphere
+        All ``r_el`` in ``r_electrodes`` must be less than or equal to scalp
+        radius and larger than the distance between dipole and sphere
         center: ``|rz| < r_el <= radii[3]``.
 
     Examples
@@ -674,9 +674,9 @@ class FourSphereVolumeConductor(object):
         phi = np.zeros((len(self.rxyz), len(p_tan)))
         # phi is not defined when theta= 0,pi or |p_tan| = 0
         mask = np.ones(phi.shape, dtype=bool)
-        mask[np.where((self._theta == 0) |
-                      (self._theta == np.pi))] = np.zeros(len(p_tan))
-        mask[:,np.where(np.abs(np.linalg.norm(p_tan, axis=1)) == 0)] = 0
+        mask[(self._theta == 0) |
+             (self._theta == np.pi)] = np.zeros(len(p_tan))
+        mask[:,np.abs(np.linalg.norm(p_tan, axis=1)) == 0] = 0
         cos_phi = np.zeros(phi.shape)
         # compute cos_phi using mask to avoid zerodivision
         cos_phi[mask] = np.dot(rxy, x.T)[mask] / np.outer(np.linalg.norm(rxy,
@@ -686,7 +686,7 @@ class FourSphereVolumeConductor(object):
 
         # nb: phi in [-pi, pi]. since p_tan defines direction of y-axis,
         # phi < 0 when rxy*p_tan < 0
-        phi[np.where(np.dot(rxy, p_tan.T) < 0)] *= -1
+        phi[np.dot(rxy, p_tan.T) < 0] *= -1
 
         return phi
 
