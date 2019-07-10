@@ -11,7 +11,7 @@ dependencies:
   - cython
   - mpi4py
   - numpydoc
-  - sphinx=1.8.5
+  - sphinx==1.8.5
   - neuron
   - pip:
     - sphinx-rtd-theme==0.4.3
