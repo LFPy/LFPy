@@ -14,3 +14,5 @@ dependencies:
   - sphinx==1.8.5
   - sphinx_rtd_theme==0.4.3
   - neuron
+  - mock
+  - pillow
