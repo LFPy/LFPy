@@ -34,7 +34,7 @@ except ImportError as ie:
 #NEURON extension file LFPy/sinsyn.mod can be compiled in place and be copied
 #as part of the package_data, allowing unit tests to run
 from distutils.spawn import find_executable, spawn
-if not any(arg in sys.argv for arg in ['sdist', 'upload']): 
+if not any(arg in sys.argv for arg in ['sdist', 'upload']):
     if find_executable('nrnivmodl') is not None:
         os.chdir(os.path.join('LFPy', 'test'))
         for path in ['x86_64', 'i686', 'powerpc']:
@@ -51,7 +51,7 @@ with open('README.md') as file:
 
 setup(
     name = "LFPy",
-    version = "2.0.2",
+    version = "2.0.3",
     maintainer = "Espen Hagen",
     maintainer_email = 'espen.hagen@fys.uio.no',
     packages = ['LFPy'],
@@ -69,7 +69,7 @@ setup(
     cmdclass = cmdclass,
     ext_modules = ext_modules,
     url='http://LFPy.readthedocs.io',
-    download_url = 'https://github.com/LFPy/LFPy/tarball/v2.0.2',
+    download_url = 'https://github.com/LFPy/LFPy/tarball/v2.0.3',
     license='LICENSE',
     description='A module for modeling extracellular potentials of multicompartment neuron models built on NEURON',
     long_description=long_description,
@@ -80,6 +80,7 @@ setup(
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
         'Programming Language :: Cython',
         'Operating System :: OS Independent',
         'Topic :: Scientific/Engineering',

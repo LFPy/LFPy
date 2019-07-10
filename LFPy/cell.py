@@ -2129,8 +2129,7 @@ class Cell(object):
         return
 
     def get_axial_currents_from_vmem(self, timepoints=None):
-        """
-        Compute axial currents from cell sim: get current magnitude,
+        """Compute axial currents from cell sim: get current magnitude,
         distance vectors and position vectors.
 
         Parameters
@@ -2159,6 +2158,7 @@ class Cell(object):
             the mid point of each axial current in i_axial in units of (µm). The
             indices of the first axis, correspond to the first axis
             of i_axial and d_vectors.
+        
         Raises
         ------
         AttributeError
