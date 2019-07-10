@@ -37,6 +37,7 @@ This scientific software is released under the GNU Public License GPLv3.
 
 Code status
 ===========
+[![PyPI version](https://badge.fury.io/py/LFPy.svg)](https://badge.fury.io/py/LFPy)
 [![Build Status](https://travis-ci.org/LFPy/LFPy.svg?branch=master)](https://travis-ci.org/LFPy/LFPy)
 [![Coverage Status](https://coveralls.io/repos/github/LFPy/LFPy/badge.svg?branch=master)](https://coveralls.io/github/LFPy/LFPy?branch=master)
 [![Documentation Status](https://readthedocs.org/projects/lfpy/badge/?version=latest)](http://lfpy.readthedocs.io/en/latest/?badge=latest)
@@ -109,9 +110,9 @@ There are few options to install LFPy:
 5. Anaconda Python (macos/linux):
 
         conda install lfpy neuron=*=mpi* # installs LFPy and Neuron in the current conda environment
-    
+
     or
-    
+
         conda create -n lfpy lfpy neuron=*=mpi* # creates new conda environment with LFPy and Neuron
 
 Uninstall
