@@ -13,5 +13,6 @@ dependencies:
   - numpydoc
   - sphinx==1.8.5
   - neuron
+  - pip
   - pip:
     - sphinx-rtd-theme==0.4.3
