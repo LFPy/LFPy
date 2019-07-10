@@ -14,4 +14,4 @@ dependencies:
   - sphinx=1.8.5
   - neuron
   - pip:
-    - sphinx-rtd-theme=0.4.3
+    - sphinx-rtd-theme==0.4.3
