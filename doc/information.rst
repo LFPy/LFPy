@@ -419,7 +419,7 @@ Windows 10 Pro/Education (64-bit) install instructions:
 
         git clone https://github.com/LFPy/LFPy.git
 
-10.  Build LFPy from source (without moving files)
+10. Build LFPy from source (without moving files)
     ::
 
         python setup.py develop

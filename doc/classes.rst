@@ -18,7 +18,7 @@ Module :mod:`LFPy`
         :members:
         :show-inheritance:
         :undoc-members:
-    
+
     class :class:`NetworkCell`
     ===========================
     .. autoclass:: NetworkCell
@@ -74,7 +74,7 @@ Module :mod:`LFPy`
         :members:
         :show-inheritance:
         :undoc-members:
-    
+
     class :class:`OneSphereVolumeConductor`
     =======================================
     .. autoclass:: OneSphereVolumeConductor
@@ -105,16 +105,15 @@ Module :mod:`LFPy`
     .. automodule:: LFPy.lfpcalc
         :members:
         :undoc-members:
-    
+
     submodule :mod:`tools`
     ======================
     .. automodule:: LFPy.tools
         :members:
         :undoc-members:
-    
+
     submodule :mod:`inputgenerators`
     ================================
     .. automodule:: LFPy.inputgenerators
         :members:
         :undoc-members:
-
