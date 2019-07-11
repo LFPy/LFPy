@@ -97,7 +97,7 @@ setup(
         'mpi4py>=1.2',
         ],
     extras_require={'tests': ['pytest'],
-                    'docs': ['sphinx <= 1.8.5', 'numpydoc', 'sphinx_rtd_theme']
+                    'docs': ['sphinx', 'numpydoc', 'sphinx_rtd_theme']
                     },
     dependency_links=[],
     provides=['LFPy'],
