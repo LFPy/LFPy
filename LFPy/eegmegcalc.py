@@ -397,6 +397,7 @@ class FourSphereVolumeConductor(object):
         the brain, closer to the center than any measurement location."""
         self._rzloc = rz
         self._rz = np.sqrt(np.sum(rz ** 2))
+        self._z = self._rzloc/self._rz
         if self._rz == 0:
             raise RuntimeError('Placing dipole in center of head model causes division by zero.')
 
@@ -541,8 +542,7 @@ class FourSphereVolumeConductor(object):
             Shape (n_timesteps, 3) array, tangential part of p,
             orthogonal to self._rz
         """
-        p_rad = (np.dot(p, self._rzloc)/self._rz ** 2
-                 ).reshape(len(p), 1) * self._rzloc.reshape(1, len(self._rzloc))
+        p_rad = p*self._z
         p_tan = p - p_rad
 
         return p_rad, p_tan
@@ -650,7 +650,7 @@ class FourSphereVolumeConductor(object):
         Parameters
         ----------
         p_tan : ndarray, dtype=float
-            Shape (n_contacts, n_timesteps) array containing
+            Shape (n_timesteps, 3) array containing
             tangential component of current dipole moment in units of (nA*µm)
 
         Returns
@@ -665,22 +665,24 @@ class FourSphereVolumeConductor(object):
         """
 
         # project rxyz onto z-axis (rzloc)
-        proj_rxyz_rz = np.outer(np.dot(self.rxyz, self._rzloc) / self._rz ** 2, self._rzloc)
+        proj_rxyz_rz = self.rxyz*self._z
         # find projection of rxyz in xy-plane
         rxy = self.rxyz - proj_rxyz_rz
         # define x-axis
-        x = np.cross(p_tan, self._rzloc)
+        x = np.cross(p_tan, self._z)
 
         phi = np.zeros((len(self.rxyz), len(p_tan)))
-        # phi is not defined when theta= 0,pi or |p_tan| = 0
+        # create masks to avoid computing phi when phi is not defined
         mask = np.ones(phi.shape, dtype=bool)
-        mask[(self._theta == 0) |
-             (self._theta == np.pi)] = np.zeros(len(p_tan))
+        # phi is not defined when theta= 0,pi or |p_tan| = 0
+        mask[(self._theta == 0) | (self._theta == np.pi)] = np.zeros(len(p_tan))
         mask[:,np.abs(np.linalg.norm(p_tan, axis=1)) == 0] = 0
+
         cos_phi = np.zeros(phi.shape)
         # compute cos_phi using mask to avoid zerodivision
         cos_phi[mask] = np.dot(rxy, x.T)[mask] / np.outer(np.linalg.norm(rxy,
                   axis=1), np.linalg.norm(x, axis=1))[mask]
+
         # compute phi in [0, pi]
         phi[mask] = np.arccos(cos_phi[mask])
 
