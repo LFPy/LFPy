@@ -232,19 +232,47 @@ class testFourSphereVolumeConductor(unittest.TestCase):
         theta = fs.calc_theta()
         np.testing.assert_almost_equal(theta, np.array([0., np.pi, np.pi/2, np.pi/2, np.pi/4]))
 
-    def test_calc_phi(self):
+    def test_calc_phi01(self):
         '''Test phi: azimuthal angle between rx and rxy'''
         rz1 = np.array([0., 0., 0.5])
         r_el = np.array([[0., 1., 0], [-1., -1., 1.],
                          [1., 1., 4.], [0., 0., 89.], [0., 0., -80.]])
         fs = make_class_object(rz1, r_el)
-        P1 = np.array([[0., 1., 0.], [1., 0., 0.], [0., 0., 0.]])
-        phi = fs.calc_phi(P1)
+        P_tan = np.array([[0., 1., 0.], [1., 0., 0.], [0., 0., 0.]])
+        phi = fs.calc_phi(P_tan)
         np.testing.assert_almost_equal(phi, np.array([[np.pi/2, np.pi, 0.],
                                                       [-3*np.pi/4, -np.pi/4, 0.],
                                                       [np.pi/4, 3*np.pi/4, 0.],
                                                       [0., 0., 0.],
                                                       [0., 0., 0.]]))
+
+    def test_calc_phi02(self):
+        '''Test phi: azimuthal angle between rx and rxy,
+           check that theta is not NaN, due to round-off errors'''
+        radii = [79000., 80000., 85000., 100000.]
+        sigmas = [0.3, 0.015, 15, 0.3]
+        rz = np.array([0., 0., 76500.])
+        r_el = np.array([[1e-5, 0, 99999.],
+                         [0, 0.000123, 99998.9],
+                         [-5.59822325e3, -9.69640709e3, -9.93712111e4],
+                         [99990., 0., 0.001]])
+
+        fs = LFPy.FourSphereVolumeConductor(radii, sigmas, r_el)
+        fs._rz_params(rz)
+
+        P1 = np.array([[0., 0., 123456789.],
+                       [0., 0., 0.05683939],
+                       [89892340., 0., -123456789],
+                       [0.00004, 0.002, .0987654321],
+                       [0., 0., 0.05683939],
+                       [0.0003, 0.001, 123456789.],
+                       [1e-11, 1e-12, 1000.],
+                       [1e-15, 0, 1000.]])
+        p_rad, p_tan = fs._decompose_dipole(P1)
+        phi = fs.calc_phi(p_tan)
+
+        np.testing.assert_equal(np.isnan(phi).any(), False)
+
 
     def test_rad_sign(self):
         '''Test if radial dipole points inwards or outwards'''
