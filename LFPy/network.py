@@ -286,7 +286,7 @@ class DummyCell(object):
         self.diam = diam
         self.area = area
         self.somainds = somainds
-    
+
     def get_idx(self, section="soma"):
         if section=="soma":
             return self.somainds
@@ -621,7 +621,7 @@ class Network(object):
         """
         Dummy function creating a (boolean) cell to cell connectivity matrix
         between pre and postsynaptic populations.
-        
+
         Connections are drawn randomly between presynaptic cell gids in
         population 'pre' and postsynaptic cell gids in 'post' on this RANK with
         a fixed connection probability. self-connections are disabled if
@@ -641,8 +641,8 @@ class Network(object):
         ndarray, dtype bool
             n_pre x n_post array of connections between n_pre presynaptic
             neurons and n_post postsynaptic neurons on this RANK. Entries
-            with True denotes a connection.        
-        """                
+            with True denotes a connection.
+        """
         n_pre = self.populations[pre].POP_SIZE
         gids = np.array(self.populations[post].gids).astype(int)
 
@@ -666,13 +666,13 @@ class Network(object):
                 # create boolean matrix
                 C = ss.csr_matrix((np.ones(gids_pre.shape[0], dtype=bool),
                                    (c[:, 0], c[:, 1])),
-                                  shape=(n_pre, gids.size), dtype=bool)    
+                                  shape=(n_pre, gids.size), dtype=bool)
                 return C.toarray()
             else:
                 return C
         else:
             return np.zeros((n_pre, 0), dtype=bool)
-        
+
 
     def connect(self, pre, post, connectivity,
                 syntype=neuron.h.ExpSyn,
@@ -761,7 +761,7 @@ class Network(object):
                 # throw a warning if sender neuron is identical to receiving neuron
                 if post_gid == pre_gid:
                     print('connecting cell w. gid {} to itself (RANK {})'.format(post_gid, RANK))
-                
+
                 # assess number of synapses
                 if multapsefun is None:
                     nidx = 1
@@ -827,7 +827,7 @@ class Network(object):
         if save_connections:
             if RANK == 0:
                 synData = flattenlist(COMM.gather(syn_idx_pos))
-    
+
                 # convert to structured array
                 dtype = [('gid', 'i8'), ('x', float), ('y', float), ('z', float)]
                 synDataArray = np.empty((len(synData), ), dtype=dtype)
@@ -1044,7 +1044,7 @@ class Network(object):
             for grp in f0.keys():
                 if RANK == 0:
                     f1[grp] = np.zeros(shape, dtype=dtype)
-                for key, value in f0[grp].items(): 
+                for key, value in f0[grp].items():
                     if RANK == 0:
                         recvbuf = np.zeros(shape, dtype=np.float)
                     else:
@@ -1085,7 +1085,7 @@ class Network(object):
                 nsegs[i] = [0]
         for i, y in enumerate(nsegs): nsegs[i] = np.sum(y)
         nsegs = np.array(nsegs, dtype=int)
-        
+
         totnsegs = nsegs.sum()
         imem = np.eye(totnsegs)
         xstart = np.array([])
@@ -1099,10 +1099,10 @@ class Network(object):
         zend = np.array([])
         diam = np.array([])
         area = np.array([])
-        
+
         somainds = np.array([], dtype=int)
         nseg = 0
-        
+
         for name in self.population_names:
             for cell in self.populations[name].cells:
                 xstart = np.r_[xstart, cell.xstart]
@@ -1116,7 +1116,7 @@ class Network(object):
                 zend = np.r_[zend, cell.zend]
                 diam = np.r_[diam, cell.diam]
                 area = np.r_[area, cell.area]
-                
+
                 somainds = np.r_[somainds, cell.get_idx("soma")+nseg]
                 nseg += cell.totnsegs
 
@@ -1260,10 +1260,7 @@ def _run_simulation_with_electrode(network, cvode,
         Shape (n_timesteps, 3) array containing the x,y,z-components of the
         current-dipole moment summed up over contributions from cells across
         all populations on this MPI RANK.
-
-
     """
-
     # create a dummycell object lumping together needed attributes
     # for calculation of extracellular potentials etc. The population_nsegs
     # array is used to slice indices such that single-population
@@ -1461,7 +1458,7 @@ def _run_simulation_with_electrode(network, cvode,
                     if use_isyn:
                         RESULTS[j]['isyn_e'][:, tstep] = np.dot(coeffs, imem['isyn_e'])
                         RESULTS[j]['isyn_i'][:, tstep] = np.dot(coeffs, imem['isyn_i'])
-                
+
                 if rec_pop_contributions:
                     for j, coeffs in enumerate(dotprodcoeffs):
                         k = 0 # counter
@@ -1495,7 +1492,7 @@ def _run_simulation_with_electrode(network, cvode,
                             outputfile['OUTPUT[{}]'.format(j)
                                        ][name][:, tstep] = np.dot(coeffs[:, cellinds], imem['imem'][cellinds, ])
                             k += nsegs
-                        
+
             tstep += 1
         neuron.h.fadvance()
         if neuron.h.t % 100. == 0.:

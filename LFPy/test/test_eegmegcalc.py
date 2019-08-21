@@ -270,7 +270,7 @@ class testFourSphereVolumeConductor(unittest.TestCase):
                        [1e-15, 0, 1000.]])
         p_rad, p_tan = fs._decompose_dipole(P1)
         phi = fs.calc_phi(p_tan)
-        
+
         np.testing.assert_equal(np.isnan(phi).any(), False)
 
 

@@ -1300,8 +1300,6 @@ class MEG(object):
     ------
     AssertionError
         If dimensionality of sensor_locations is wrong
-
-
     """
     def __init__(self, sensor_locations, mu=4*np.pi*1E-7):
         """
@@ -1338,12 +1336,13 @@ class MEG(object):
         -------
         ndarray, dtype=float
             shape (n_locations x n_timesteps x 3) array with x,y,z-components
-            of the magnetic field :math:`\mathbf{H}` in units of (nA/µm)
+            of the magnetic field :math:`\\mathbf{H}` in units of (nA/µm)
 
         Raises
         ------
         AssertionError
-            If dimensionality of current_dipole_moment and/or dipole_location is wrong
+            If dimensionality of current_dipole_moment and/or dipole_location
+            is wrong
         """
         try:
             assert(current_dipole_moment.ndim == 2)
@@ -1375,7 +1374,6 @@ class MEG(object):
                               R) / (4 * np.pi * np.sqrt((R**2).sum())**3)
 
         return H
-
 
 
     def calculate_H_from_iaxial(self, cell):
@@ -1426,7 +1424,7 @@ class MEG(object):
         -------
         H : ndarray, dtype=float
             shape (n_locations x n_timesteps x 3) array with x,y,z-components
-            of the magnetic field :math:`\mathbf{H}` in units of (nA/µm)
+            of the magnetic field :math:`\\mathbf{H}` in units of (nA/µm)
         """
         i_axial, d_vectors, pos_vectors = cell.get_axial_currents_from_vmem()
         R = self.sensor_locations

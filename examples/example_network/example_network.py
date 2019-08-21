@@ -303,7 +303,7 @@ if __name__ == '__main__':
                                   **populationParameters)
 
 
-        # create excitatpry background synaptic activity for each cell
+        # create excitatory background synaptic activity for each cell
         # with Poisson statistics
         for cell in network.populations[name].cells:
             idx = cell.get_rand_idx_area_norm(section='allsec', nidx=64)
