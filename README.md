@@ -1,6 +1,6 @@
-LFPy
+LFPy  [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/LFPy/LFPy_binder_examples/master)
 ====
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/LFPy/LFPy_binder_examples/master)
+
 LFPy is a Python-module for calculation of extracellular potentials from multicompartment neuron models.
 It relies on the NEURON simulator (http://www.neuron.yale.edu/neuron) and uses the
 Python interface (http://www.frontiersin.org/neuroinformatics/10.3389/neuro.11.001.2009/abstract) it provides.
