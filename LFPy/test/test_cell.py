@@ -858,7 +858,7 @@ class testCell(unittest.TestCase):
 
     def test_cell_get_axial_currents_from_vmem_11(self):
         '''
-        Check Kirchhoff in soma when two dends connected to soma mid.
+        Check Kirchhoff in soma when three dends connected to soma mid.
         '''
         neuron.h('forall delete_section()')
         soma = neuron.h.Section(name='soma')
@@ -965,6 +965,25 @@ class testCell(unittest.TestCase):
                                           [0., 0., 17.5], [0, 0., 25.]])
         np.testing.assert_almost_equal(mid_current_positions, pos_list2, decimal=9)
         np.testing.assert_allclose(mid_current_positions, pos_list2, rtol=1E-4)
+
+    def test_cell_get_axial_currents_from_vmem_16(self):
+        '''
+        Check Kirchhoff in soma when three dends connected to soma end.
+        '''
+        neuron.h('forall delete_section()')
+        soma = neuron.h.Section(name='soma')
+        dend1 = neuron.h.Section(name='dend1')
+        dend2 = neuron.h.Section(name='dend2')
+        dend3 = neuron.h.Section(name='dend3')
+        dend1.connect(soma(1.0), 0)
+        dend2.connect(soma(1.0), 0)
+        dend3.connect(soma(1.0), 0)
+        morphology = neuron.h.SectionList()
+        morphology.wholetree()
+        cell = cell_w_synapse_from_sections(morphology)
+        iaxial, d_list, pos_list = cell.get_axial_currents_from_vmem()
+        np.testing.assert_almost_equal(-cell.imem[0], iaxial[1] + iaxial[3] + iaxial[5], decimal=9)
+        np.testing.assert_allclose(-cell.imem[0], iaxial[1] + iaxial[3] + iaxial[5], rtol=1E-3)
 
     def test_cell_simulate_recorder_00(self):
         stickParams = {
@@ -1465,7 +1484,7 @@ class testCell(unittest.TestCase):
                         electrode.LFP.shape[1] == electrode1.LFP.shape[1] ==
                         int(stick.tstop/stick.dt)+1)
 
-    def get_multi_current_dipole_moments00(self):
+    def test_get_multi_current_dipole_moments00(self):
         neuron.h('forall delete_section()')
         soma = neuron.h.Section(name='soma')
         dend1 = neuron.h.Section(name='dend1')
@@ -1482,7 +1501,63 @@ class testCell(unittest.TestCase):
         np.testing.assert_almost_equal(P, P_from_multi_dipoles)
         np.testing.assert_allclose(P, P_from_multi_dipoles, rtol=1E-5)
 
-    def get_multi_current_dipole_moments01(self):
+    def test_get_multi_current_dipole_moments01(self):
+        neuron.h('forall delete_section()')
+        soma = neuron.h.Section(name='soma')
+        dend1 = neuron.h.Section(name='dend1')
+        dend2 = neuron.h.Section(name='dend2')
+        dend3 = neuron.h.Section(name='dend3')
+        dend1.connect(soma(1.), 0)
+        dend2.connect(soma(1.), 0)
+        dend3.connect(soma(1.), 0)
+        morphology = neuron.h.SectionList()
+        morphology.wholetree()
+        cell = cell_w_synapse_from_sections(morphology)
+        dipoles, dipole_locs = cell.get_multi_current_dipole_moments()
+        t_point = -1
+        P_from_multi_dipoles = np.sum(dipoles[:,t_point,:],axis=0)
+        P = cell.current_dipole_moment[t_point]
+        np.testing.assert_almost_equal(P, P_from_multi_dipoles)
+
+    def test_get_multi_current_dipole_moments02(self):
+        neuron.h('forall delete_section()')
+        dend1 = neuron.h.Section(name='dend1')
+        dend2 = neuron.h.Section(name='dend2')
+        dend3 = neuron.h.Section(name='dend3')
+        dend2.connect(dend1(1.), 0)
+        dend3.connect(dend2(.5), 0)
+        morphology = neuron.h.SectionList()
+        morphology.wholetree()
+        cell = cell_w_synapse_from_sections(morphology)
+        dipoles, dipole_locs = cell.get_multi_current_dipole_moments()
+        t_point = -1
+        P_from_multi_dipoles = np.sum(dipoles[:,t_point,:],axis=0)
+        P = cell.current_dipole_moment[t_point]
+        np.testing.assert_almost_equal(P, P_from_multi_dipoles)
+
+    def test_get_multi_current_dipole_moments03(self):
+        neuron.h('forall delete_section()')
+        soma = neuron.h.Section(name='soma')
+        dend1 = neuron.h.Section(name='dend1')
+        dend2 = neuron.h.Section(name='dend2')
+        dend3 = neuron.h.Section(name='dend3')
+        dend4 = neuron.h.Section(name='dend4')
+        dend5 = neuron.h.Section(name='dend5')
+        dend1.connect(soma(1.), 0)
+        dend2.connect(soma(0.), 0)
+        dend3.connect(soma(0.), 0)
+        dend4.connect(soma(0.), 0)
+        dend5.connect(soma(0.432), 0)
+        morphology = neuron.h.SectionList()
+        morphology.wholetree()
+        cell = cell_w_synapse_from_sections(morphology)
+        dipoles, dipole_locs = cell.get_multi_current_dipole_moments()
+        t_point = -1
+        P_from_multi_dipoles = np.sum(dipoles[:,t_point,:],axis=0)
+        P = cell.current_dipole_moment[t_point]
+        np.testing.assert_almost_equal(P, P_from_multi_dipoles)
+
+    def test_get_multi_current_dipole_moments04(self):
         morphology = os.path.join(LFPy.__path__[0], 'test', 'ball_and_sticks.hoc')
         cell = cell_w_synapse_from_sections(morphology)
         dipoles, dipole_locs = cell.get_multi_current_dipole_moments()
@@ -1490,7 +1565,6 @@ class testCell(unittest.TestCase):
         P_from_multi_dipoles = np.sum(dipoles[:,t_point,:],axis=0)
         P = cell.current_dipole_moment[t_point]
         np.testing.assert_almost_equal(P, P_from_multi_dipoles)
-        np.testing.assert_allclose(P, P_from_multi_dipoles, rtol=1E-5)
 
 
     def test_cell_distort_geometry_01(self):
