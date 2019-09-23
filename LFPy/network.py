@@ -400,7 +400,7 @@ class NetworkPopulation(object):
 
             # Dump to hdf5 file, append to file if it exists
             f = h5py.File(os.path.join(self.OUTPUTPATH,
-                                       'cell_positions_and_rotations.h5'))
+                                       'cell_positions_and_rotations.h5'), 'a')
             # delete old entry if it exist
             if self.name in f.keys():
                 del f[self.name]
@@ -838,7 +838,7 @@ class Network(object):
                     synDataArray[i]['z'] = z
                 # Dump to hdf5 file, append to file if entry exists
                 f = h5py.File(os.path.join(self.OUTPUTPATH,
-                                           'synapse_positions.h5'))
+                                           'synapse_positions.h5'), 'a')
                 key = '{}:{}'.format(pre, post)
                 if key in f.keys():
                     del f[key]
@@ -1228,7 +1228,7 @@ def _run_simulation_with_electrode(network, cvode,
         RANK # will be inserted into the corresponding file name.
     dotprodcoeffs : None or list of ndarrays
         Each element in list is a mapping of transmembrane currents to a measure
-        on the form :math:`V = \mathbf{C} \cdot \mathbf{I}`
+        on the form :math:`V = \\mathbf{C} \\cdot \\mathbf{I}`
     rec_current_dipole_moment : bool
         if True, compute and store the total current-dipole moment per time
         step as the sum over each individual population

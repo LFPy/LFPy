@@ -1,9 +1,11 @@
-LFPy
+LFPy  
 ====
 
 LFPy is a Python-module for calculation of extracellular potentials from multicompartment neuron models.
 It relies on the NEURON simulator (http://www.neuron.yale.edu/neuron) and uses the
 Python interface (http://www.frontiersin.org/neuroinformatics/10.3389/neuro.11.001.2009/abstract) it provides.
+
+You can now test some LFPy examples online without installation: [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/LFPy/LFPy_binder_examples/master)
 
 LFPy provides a set of easy-to-use Python classes for setting up your model, running your simulations and calculating the extracellular potentials arising from activity in your model neuron. If you have a model working in NEURON (www.neuron.yale.edu)
 already, it is likely that it can be adapted to work with LFPy.
