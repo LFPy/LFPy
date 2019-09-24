@@ -273,7 +273,6 @@ class testFourSphereVolumeConductor(unittest.TestCase):
 
         np.testing.assert_equal(np.isnan(phi).any(), False)
 
-
     def test_rad_sign(self):
         '''Test if radial dipole points inwards or outwards'''
         rz1 = np.array([0., 0., 70.])
@@ -387,8 +386,10 @@ class testFourSphereVolumeConductor(unittest.TestCase):
         soma = neuron.h.Section(name='soma')
         dend1 = neuron.h.Section(name='dend1')
         dend2 = neuron.h.Section(name='dend2')
-        dend1.connect(soma(0.5), 0)
-        dend2.connect(dend1(1.0), 0)
+        dend3 = neuron.h.Section(name='dend3')
+        dend1.connect(soma(1.0), 0)
+        dend2.connect(soma(1.0), 0)
+        dend3.connect(soma(1.0), 0)
         morphology = neuron.h.SectionList()
         morphology.wholetree()
         radii = [300, 400, 500, 600]
@@ -399,26 +400,24 @@ class testFourSphereVolumeConductor(unittest.TestCase):
                                    [110.3, -100., 500.]])
         cell = cell_w_synapse_from_sections(morphology)
         cell.set_pos(x=0, y=0, z=100)
-        t_point = -1
+        t_point = [1,100,-1]
 
         MD_4s = LFPy.FourSphereVolumeConductor(radii, sigmas, electrode_locs)
-        dipoles, dipole_locs = cell.get_multi_current_dipole_moments()
-        p = dipoles[:,t_point,:]
-        Np = p.shape[0]
-        Nt = 1
+        p, dipole_locs = cell.get_multi_current_dipole_moments(t_point)
+        Np, Nt, Nd = p.shape
         Ne = electrode_locs.shape[0]
-        pot_MD = MD_4s.calc_potential_from_multi_dipoles(cell)[:,t_point]
+        pot_MD = MD_4s.calc_potential_from_multi_dipoles(cell, t_point)
+
         pot_sum = np.zeros((Ne, Nt))
         for i in range(Np):
-            dip = np.array([p[i]])
+            dip = p[i]
             dip_loc = dipole_locs[i]
             fs = LFPy.FourSphereVolumeConductor(radii, sigmas, electrode_locs)
             pot = fs.calc_potential(dip, dip_loc)
             pot_sum += pot
-        pot_sum = pot_sum.reshape(4)
+
         np.testing.assert_almost_equal(pot_MD, pot_sum)
         np.testing.assert_allclose(pot_MD, pot_sum, rtol=1E-4)
-
 
 class testInfiniteVolumeConductor(unittest.TestCase):
     """

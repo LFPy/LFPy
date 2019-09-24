@@ -2,17 +2,14 @@
 # -*- coding: utf-8 -*-
 """
 Copyright (C) 2012 Computational Neuroscience Group, NMBU.
-
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
-
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
-
 """
 
 from __future__ import division
@@ -41,7 +38,6 @@ except AssertionError:
 class Cell(object):
     """
     The main cell class used in LFPy.
-
     Parameters
     ----------
     morphology : str or neuron.h.SectionList
@@ -92,12 +88,10 @@ class Cell(object):
         or in custom code it is 6.3 celcius
     verbose : bool
         Verbose output switch. Defaults to False
-
     Examples
     --------
     Simple example of how to use the Cell class with a passive-circuit
     morphology (modify morphology path accordingly):
-
     >>> import os
     >>> import LFPy
     >>> cellParameters = {
@@ -114,7 +108,6 @@ class Cell(object):
     >>> cell = LFPy.Cell(**cellParameters)
     >>> cell.simulate()
     >>> print(cell.somav)
-
     """
     def __init__(self, morphology,
                     v_init=-70.,
@@ -499,7 +492,6 @@ class Cell(object):
     def _set_nsegs_lambda_f(self, frequency=100, d_lambda=0.1):
         """Set the number of segments for section according to the
         d_lambda-rule for a given input frequency
-
         Parameters
         ----------
         frequency : float
@@ -556,7 +548,6 @@ class Cell(object):
                     record_potential=False,
                     weight=None, **kwargs):
         """Insert synapse on cell segment
-
         Parameters
         ----------
         idx : int
@@ -571,7 +562,6 @@ class Cell(object):
             Strength of synapse
         kwargs
             arguments passed on from class Synapse
-
         """
         if not hasattr(self, 'synlist'):
             self.synlist = neuron.h.List()
@@ -643,7 +633,6 @@ class Cell(object):
                           record_potential=False, **kwargs):
         """Insert pptype-electrode type pointprocess on segment numbered
         idx on cell object
-
         Parameters
         ----------
         idx : int
@@ -655,7 +644,6 @@ class Cell(object):
             Decides if current is stored
         kwargs
             Parameters passed on from class StimIntElectrode
-
         """
 
         if not hasattr(self, 'stimlist'):
@@ -771,7 +759,6 @@ class Cell(object):
     def get_idx(self, section='allsec', z_min=-np.inf, z_max=np.inf):
         """Returns compartment idx of segments from sections with names that match
         the pattern defined in input section on interval [z_min, z_max].
-
         Parameters
         ----------
         section : str
@@ -780,14 +767,12 @@ class Cell(object):
             Depth filter. Specify minimum z-position
         z_max : float
             Depth filter. Specify maximum z-position
-
         Examples
         --------
         >>> idx = cell.get_idx(section='allsec')
         >>> print(idx)
         >>> idx = cell.get_idx(section=['soma', 'dend', 'apic'])
         >>> print(idx)
-
         """
 
         if section == 'allsec':
@@ -814,7 +799,6 @@ class Cell(object):
     def get_closest_idx(self, x=0., y=0., z=0., section='allsec'):
         """Get the index number of a segment in specified section which
         midpoint is closest to the coordinates defined by the user
-
         Parameters
         ----------
         x: float
@@ -825,7 +809,6 @@ class Cell(object):
             z-coordinate
         section: str
             String matching a section-name. Defaults to 'allsec'.
-
         """
         idx = self.get_idx(section)
         dist = ((self.xmid[idx] - x)**2 +
@@ -838,7 +821,6 @@ class Cell(object):
         """Return nidx segment indices in section with random probability
         normalized to the membrane area of segment on
         interval [z_min, z_max]
-
         Parameters
         ----------
         section : str
@@ -849,7 +831,6 @@ class Cell(object):
             Depth filter
         z_max : float
             Depth filter
-
         """
         poss_idx = self.get_idx(section=section, z_min=z_min, z_max=z_max)
         if nidx < 1:
@@ -875,7 +856,6 @@ class Cell(object):
         the value of the probability density function of "fun", a function
         in the scipy.stats module with corresponding function arguments
         in "funargs" on the interval [z_min, z_max]
-
         Parameters
         ----------
         section: str
@@ -897,7 +877,6 @@ class Cell(object):
         funweights : None or iterable
             iterable (list, tuple, numpy.array) of floats, scaling of each
             individual fun (i.e., introduces layer specificity)
-
         Examples
         --------
         >>> import LFPy
@@ -905,10 +884,8 @@ class Cell(object):
         >>> import scipy.stats as ss
         >>> import matplotlib.pyplot as plt
         >>> from os.path import join
-
         >>> cell = LFPy.Cell(morphology=join('cells', 'cells', 'j4a.hoc'))
         >>> cell.set_rotation(x=4.99, y=-4.33, z=3.14)
-
         >>> idx = cell.get_rand_idx_area_and_distribution_norm(nidx=10000,
                                                            fun=ss.norm,
                                                            funargs=dict(loc=0, scale=200))
@@ -956,7 +933,6 @@ class Cell(object):
         """
         This is the main function running the simulation of the NEURON model.
         Start NEURON simulation and record variables specified by arguments.
-
         Parameters
         ----------
         electrode : :obj: or list, optional
@@ -997,7 +973,6 @@ class Cell(object):
             List of N x Nseg ndarray. These arrays will at
             every timestep be multiplied by the membrane currents.
             Presumably useful for memory efficient csd or lfp calcs
-
         """
         for key in kwargs.keys():
             if key in ['rec_isyn', 'rec_vmemsyn', 'rec_istim', 'rec_vmemstim']:
@@ -1254,7 +1229,6 @@ class Cell(object):
         """
         Create a recorder for each variable name in list
         rec_variables
-
         Variables is stored in nested list self.recvariablesreclist
         """
         self.recvariablesreclist = neuron.h.List()
@@ -1275,10 +1249,8 @@ class Cell(object):
 
     def set_pos(self, x=0., y=0., z=0.):
         """Set the cell position.
-
         Move the cell geometry so that midpoint of soma section is
         in (x, y, z). If no soma pos, use the first segment
-
         Parameters
         ----------
         x : float
@@ -1322,27 +1294,20 @@ class Cell(object):
     def cellpickler(self, filename, pickler=pickle.dump):
         """Save data in cell to filename, using cPickle. It will however destroy
         any neuron.h objects upon saving, as c-objects cannot be pickled
-
         Parameters
         ----------
         filename : str
             Where to save cell
-
         Examples
         --------
         To save a cell, use:
-
         >>> cell.cellpickler('cell.cpickle')
-
         To load this cell again in another session:
-
         >>> import cPickle
         >>> f = file('cell.cpickle', 'rb')
         >>> cell = cPickle.load(f)
         >>> f.close()
-
         alternatively:
-
         >>> import LFPy
         >>> cell = LFPy.tools.load('cell.cpickle')
         """
@@ -1368,13 +1333,10 @@ class Cell(object):
         described by rotation_order parameter.
         rotation_order should be a string with 3 elements containing x, y, and z
         e.g. 'xyz', 'zyx'
-
         Input should be angles in radians.
-
         using rotation matrices, takes dict with rot. angles,
         where x, y, z are the rotation angles around respective axes.
         All rotation angles are optional.
-
         Examples
         --------
         >>> cell = LFPy.Cell(**kwargs)
@@ -1451,12 +1413,10 @@ class Cell(object):
         """
         Mirror the morphology around given axis, (default x-axis),
         useful to introduce more heterogeneouties in morphology shapes
-
         Parameters
         ----------
         axis : str
             'x' or 'y' or 'z'
-
         """
         #morphology relative to soma-position
         rel_start, rel_end = self._rel_positions()
@@ -1526,7 +1486,6 @@ class Cell(object):
         Return the probability (0-1) for synaptic coupling on segments
         in section sum(prob)=1 over all segments in section.
         Probability normalized by area.
-
         Parameters
         ----------
         section : str
@@ -1535,7 +1494,6 @@ class Cell(object):
             depth filter
         z_max : float
             depth filter
-
         """
         idx = self.get_idx(section=section, z_min=z_min, z_max = z_max)
         prob = self.area[idx] / sum(self.area[idx])
@@ -1546,12 +1504,10 @@ class Cell(object):
         Return the normalized probability (0-1) for synaptic coupling on
         segments in idx-array.
         Normalised probability determined by area of segments.
-
         Parameters
         ----------
         idx : ndarray, dtype=int.
             array of segment indices
-
         """
         prob = self.area[idx] / sum(self.area[idx])
         return prob
@@ -1560,12 +1516,10 @@ class Cell(object):
         """Return the distance between midpoints of two segments with index
         idx0 and idx1. The argument returned is a vector [x, y, z], where
         x = self.xmid[idx1] - self.xmid[idx0] etc.
-
         Parameters
         ----------
         idx0 : int
         idx1 : int
-
         """
         vector = []
         try:
@@ -1582,17 +1536,14 @@ class Cell(object):
     def get_intersegment_distance(self, idx0=0, idx1=0):
         """
         Return the Euclidean distance between midpoints of two segments.
-
         Parameters
         ----------
         idx0 : int
         idx1 : int
-
         Returns
         -------
         float
             Will return a float in unit of micrometers.
-
         """
         try:
             vector = np.array(self.get_intersegment_vector(idx0, idx1))
@@ -1604,12 +1555,10 @@ class Cell(object):
     def get_idx_children(self, parent="soma[0]"):
         """Get the idx of parent's children sections, i.e. compartments ids
         of sections connected to parent-argument
-
         Parameters
         ----------
         parent : str
             name-pattern matching a sectionname. Defaults to "soma[0]"
-
         """
         idxvec = np.zeros(self.totnsegs)
         secnamelist = []
@@ -1638,7 +1587,6 @@ class Cell(object):
         Get all idx of segments of parent and children sections, i.e. segment
         idx of sections connected to parent-argument, and also of the parent
         segments
-
         Parameters
         ----------
         parent : str
@@ -1657,10 +1605,8 @@ class Cell(object):
         The returned argument is a list of tuples with corresponding
         segment idx, section name, and position along the section, like;
         [(0, 'neuron.h.soma[0]', 0.5),]
-
         kwargs:
         ::
-
             idx : ndarray, dtype int
                 segment indices, must be between 0 and cell.totnsegs
         '''
@@ -1757,13 +1703,10 @@ class Cell(object):
         in the order described by rotation_order parameter.
         rotation_order should be a string with 3 elements containing x, y, and z
         e.g. 'xyz', 'zyx'
-
         Input should be angles in radians.
-
         using rotation matrices, takes dict with rot. angles,
         where x, y, z are the rotation angles around respective axes.
         All rotation angles are optional.
-
         Examples
         --------
         >>> cell = LFPy.Cell(**kwargs)
@@ -1903,13 +1846,11 @@ class Cell(object):
         """For each section create a polygon in the plane determined by keyword
         argument projection=('x', 'z'), that can be
         visualized using e.g., plt.fill()
-
         Returns
         -------
         list
             list of (x, z) tuples giving the trajectory
             of each section that can be plotted using PolyCollection
-
         Examples
         --------
         >>> from matplotlib.collections import PolyCollection
@@ -1926,7 +1867,6 @@ class Cell(object):
         >>> ax.add_collection(polycol)
         >>> ax.axis(ax.axis('equal'))
         >>> plt.show()
-
         """
         if len(projection) != 2:
             raise ValueError("projection arg be a tuple like ('x', 'y')")
@@ -1993,22 +1933,18 @@ class Cell(object):
         determined by the projection kwarg (default ('x', 'z')),
         that can be visualized using plt.fill() or
         mpl.collections.PolyCollection
-
         Parameters
         ----------
         projection : tuple of strings
             Determining projection. Defaults to ('x', 'z')
-
         Returns
         -------
         polygons : list
             list of (ndarray, ndarray) tuples
             giving the trajectory of each section
-
         Examples
         --------
         The most efficient way of using this would be something like
-
         >>> from matplotlib.collections import PolyCollection
         >>> import matplotlib.pyplot as plt
         >>> cell = LFPy.Cell(morphology='PATH/TO/MORPHOLOGY')
@@ -2023,7 +1959,6 @@ class Cell(object):
         >>> ax.add_collection(polycol)
         >>> ax.axis(ax.axis('equal'))
         >>> plt.show()
-
         """
         if len(projection) != 2:
             raise ValueError("projection arg be a tuple like ('x', 'y')")
@@ -2045,7 +1980,6 @@ class Cell(object):
 
     def insert_v_ext(self, v_ext, t_ext):
         """Set external extracellular potential around cell.
-
         Playback of some extracellular potential v_ext on each cell.totnseg
         compartments. Assumes that the "extracellular"-mechanism is inserted
         on each compartment.
@@ -2055,32 +1989,26 @@ class Cell(object):
         to (list of) neuron.h.Vector types, to allow playback into each
         compartment e_extracellular reference.
         Can not be deleted prior to running cell.simulate()
-
         Parameters
         ----------
         v_ext : ndarray
             Numpy array of size cell.totnsegs x t_ext.size, unit mV
         t_ext : ndarray
             Time vector of v_ext
-
         Examples
         --------
         >>> import LFPy
         >>> import numpy as np
         >>> import matplotlib.pyplot as plt
-
         >>> #create cell
         >>> cell = LFPy.Cell(morphology='morphologies/example_morphology.hoc',
         >>>                  passive=True)
-
         >>> #time vector and extracellular field for every segment:
         >>> t_ext = np.arange(cell.tstop / cell.dt+ 1) * cell.dt
         >>> v_ext = np.random.rand(cell.totnsegs, t_ext.size)-0.5
-
         >>> #insert potentials and record response:
         >>> cell.insert_v_ext(v_ext, t_ext)
         >>> cell.simulate(rec_imem=True, rec_vmem=True)
-
         >>> fig = plt.figure()
         >>> ax1 = fig.add_subplot(311)
         >>> ax2 = fig.add_subplot(312)
@@ -2099,7 +2027,6 @@ class Cell(object):
         >>> cb3.set_label('vmem')
         >>> ax3.set_xlabel('tstep')
         >>> plt.show()
-
         """
 
         #test dimensions of input
@@ -2131,14 +2058,12 @@ class Cell(object):
     def get_axial_currents_from_vmem(self, timepoints=None):
         """Compute axial currents from cell sim: get current magnitude,
         distance vectors and position vectors.
-
         Parameters
         ----------
         timepoints : ndarray, dtype=int
             array of timepoints in simulation at which you want to compute
             the axial currents. Defaults to False. If not given,
             all simulation timesteps will be included.
-
         Returns
         -------
         i_axial : ndarray, dtype=float
@@ -2158,7 +2083,7 @@ class Cell(object):
             the mid point of each axial current in i_axial in units of (µm). The
             indices of the first axis, correspond to the first axis
             of i_axial and d_vectors.
-        
+
         Raises
         ------
         AttributeError
@@ -2211,7 +2136,7 @@ class Cell(object):
                 elif conn_point == 0:
                     internal_parent_idx = 0 # first seg in sec
                 else:
-                    # if connection on seg that's not first or last
+                    # if parentseg is not first or last seg in parentsec
                     segment_xlist = np.array([segment.x for segment in parentsec])
                     internal_parent_idx = np.abs(segment_xlist - conn_point).argmin()
                 parent_idx = self.get_idx(section=parentsec.name())[internal_parent_idx]
@@ -2233,7 +2158,7 @@ class Cell(object):
                                                               )
 
                 if bottom_seg:
-                    # if a seg is connencted to soma, it is
+                    # if a seg is connected to soma, it is
                     # connected to the middle of soma,
                     # and dpar needs to be altered.
                     par_dist = np.array([(self.xstart[seg_idx] -
@@ -2270,7 +2195,6 @@ class Cell(object):
     def get_axial_resistance(self):
         """
         Return NEURON axial resistance for all cell compartments.
-
         Returns
         -------
         ri_list : ndarray, dtype=float
@@ -2298,7 +2222,6 @@ class Cell(object):
     def get_dict_of_children_idx(self):
         """
         Return dictionary with children segment indices for all sections.
-
         Returns
         -------
         children_dict : dictionary
@@ -2320,7 +2243,6 @@ class Cell(object):
     def get_dict_parent_connections(self):
         """
         Return dictionary with parent connection point for all sections.
-
         Returns
         -------
         connection_dict : dictionary
@@ -2341,7 +2263,6 @@ class Cell(object):
         """
         Return axial current from segment (seg_idx) mid to segment start,
         and current from parent segment (parent_idx) end to parent segment mid.
-
         Parameters
         ----------
         seg_idx : int
@@ -2357,7 +2278,6 @@ class Cell(object):
             array of timepoints in simulation at which you want to compute
             the axial currents. Defaults to None. If not given,
             all simulation timesteps will be included.
-
         Returns
         -------
         iseg : dtype=float
@@ -2367,13 +2287,17 @@ class Cell(object):
             Axial current in units of (nA)
             from parent segment end point to parent segment mid point.
         """
+        # list of axial resistance between segments
         ri_list = self.get_axial_resistance()
+        # axial resistance between segment mid and parent node
         seg_ri = ri_list[seg_idx]
         vmem = self.vmem
         if timepoints is not None:
             vmem = self.vmem[:,timepoints]
         vpar = vmem[parent_idx]
         vseg = vmem[seg_idx]
+        # if segment is the first in its section and it is connected to
+        # top or bottom of parent section, we need to find parent_ri explicitly
         if bottom_seg and (conn_point == 0 or conn_point == 1):
             if conn_point == 0:
                 parent_ri = ri_list[parent_idx]
@@ -2384,23 +2308,23 @@ class Cell(object):
                 iseg = (vpar - vseg) / ri
                 ipar = iseg
             else:
+                # if branch, need to compute iseg and ipar separately
                 [sib_idcs] = np.take(children_dict[parentsec.name()],
                                   np.where(children_dict[parentsec.name()]
                                            != seg_idx))
-                sib_idcs = list(sib_idcs)
-
-                if type(sib_idcs) == int or np.int64:
-                    sib_idcs = [sib_idcs]
-                sibs = [self.get_idx_name(np.array(sib_idcs))[0][i][1] for i in range(len(sib_idcs[0]))]
+                sibs = [self.get_idx_name(sib_idcs)[i][1] for i in range(len(sib_idcs))]
+                # compute potential in branch point between parent and siblings
                 v_branch_num = vpar/parent_ri + vseg/seg_ri
                 v_branch_denom = 1./parent_ri + 1./seg_ri
                 for sib_idx, sib in zip(sib_idcs, sibs):
                     sib_conn_point = connection_dict[sib]
-                    if sib_conn_point == 1:
-                        v_branch_num += vmem[sib_idx][0]/ri_list[sib_idx]
+                    if sib_conn_point == conn_point:
+                        v_branch_num += vmem[sib_idx]/ri_list[sib_idx]
                         v_branch_denom += 1./ ri_list[sib_idx]
                 v_branch = v_branch_num/v_branch_denom
                 iseg = (v_branch - vseg)/seg_ri
+                # set ipar=iseg
+                # only fraction of total current into parent is added per sibling
                 ipar = iseg
         else:
             iseg = (vpar - vseg) / seg_ri
@@ -2414,11 +2338,9 @@ class Cell(object):
         isotropic media that embeds the cell. A ratio nu=0 will only affect
         geometry along the chosen axis. A ratio nu=-1 will isometrically scale
         the neuron geometry along each axis.
-
         This method does not affect the underlying cable properties of the cell,
         only predictions of extracellular measurements (by affecting the
         relative locations of sources representing the compartments).
-
         Parameters
         ----------
         factor : float
@@ -2466,14 +2388,12 @@ class Cell(object):
         '''
         Return 3D current dipole moment vector and middle position vector
         from each axial current in space.
-
         Parameters
         ----------
         timepoints : ndarray, dtype=int
             array of timepoints at which you want to compute
             the current dipole moments. Defaults to None. If not given,
             all simulation timesteps will be included.
-
         Returns
         -------
         multi_dipoles : ndarray, dtype = float
@@ -2483,17 +2403,14 @@ class Cell(object):
             The number of axial currents, n_axial_currents = (cell.totnsegs-1)*2
             and the number of timepoints, n_timepoints = cell.tvec.size.
             The current dipole moments are given in units of (nA µm).
-
         pos_axial : ndarray, dtype = float
             Shape (n_axial_currents, 3) array containing the x-, y-, and
             z-components giving the mid position in space of each multi_dipole
             in units of (µm).
-
         Examples
         --------
         Get all current dipole moments and positions from all axial currents in a
         single neuron simulation.
-
         >>> import LFPy
         >>> import numpy as np
         >>> cell = LFPy.Cell('PATH/TO/MORPHOLOGY', extracellular=False)
