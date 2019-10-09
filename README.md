@@ -131,7 +131,7 @@ Docker
 We provide a Docker (https://www.docker.com) container build file with LFPy.
 To get started, install Docker and issue:
 
-    docker build -t lfpy https://raw.githubusercontent.com/LFPy/LFPy/docker/Dockerfile
+    docker build -t lfpy https://raw.githubusercontent.com/LFPy/LFPy/master/Dockerfile
     docker run -it -p 8888:8888 lfpy
 
 Various LFPy example files can be found in the folder ``/opt/LFPy/examples/``
