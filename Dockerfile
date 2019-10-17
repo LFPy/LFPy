@@ -1,7 +1,6 @@
 FROM continuumio/miniconda3
 
 RUN conda config --add channels conda-forge
-RUN conda config --set channel_priority strict
 
 RUN conda create -n lfpy python=3.7 lfpy ipython jupyter git matplotlib make gxx_linux-64
 
