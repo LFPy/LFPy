@@ -125,6 +125,26 @@ To remove installed LFPy files it should suffice to issue (repeat until no more 
     (sudo) pip uninstall LFPy
 
 
+Docker
+======
+
+We provide a Docker (https://www.docker.com) container build file with LFPy.
+To get started, install Docker and issue:
+
+    docker build -t lfpy https://raw.githubusercontent.com/LFPy/LFPy/master/Dockerfile
+    docker run -it -p 5000:5000 lfpy
+
+Various LFPy example files can be found in the folder ``/opt/LFPy/examples/``
+when the container is running. Jupyter notebook servers running from within the
+container can be accessed after invoking them by issuing:
+
+    cd /opt/LFPy/examples/
+    jupyter notebook --ip 0.0.0.0 --port=5000 --no-browser --allow-root
+
+and opening the resulting URL in a browser the host computer, similar to:
+http://127.0.0.1:5000/?token=dcf8f859f859740fc858c568bdd5b015e0cf15bfc2c5b0c1
+
+
 Documentation
 =============
 
