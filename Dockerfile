@@ -7,5 +7,4 @@ RUN conda create -n lfpy python=3.7 lfpy ipython jupyter git matplotlib make gxx
 RUN echo "source activate lfpy" > ~/.bashrc
 ENV PATH /opt/conda/envs/lfpy/bin:$PATH
 
-RUN cd /opt
-RUN git clone https://github.com/LFPy/LFPy.git
+RUN git clone https://github.com/LFPy/LFPy.git /opt/LFPy
