@@ -556,6 +556,17 @@ class testCell(unittest.TestCase):
         self.assertEqual(cell.get_closest_idx(x=-25, y=0, z=175),
                              cell.get_idx(section='dend[1]')[0])
 
+    def test_cell_get_closest_idx_01(self):
+        cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
+                                                  'ball_and_sticks.hoc' ))
+        x = -41.7
+        z = 156.7
+        sec_name = "dend"
+
+        idx1 = cell.get_closest_idx(x=x, z=z)
+        idx2 = cell.get_closest_idx(x=x, z=z, section=sec_name)
+        self.assertEqual(idx1, idx2)
+
 
     def test_cell_get_idx_children_00(self):
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
