@@ -184,7 +184,7 @@ htmlhelp_basename = 'LFPydoc'
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
   ('index', 'LFPy.tex', u'LFPy Homepage',
-   u'Espen Hagen', 'manual'),
+   u'LFPy-team', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -221,5 +221,5 @@ numpydoc_show_class_members = False
 # (source start file, name, description, authors, manual section).
 man_pages = [
     ('index', 'lfpy', u'LFPy Homepage',
-     [u'Espen Hagen'], 1)
+     [u'LFPy-team'], 1)
 ]
