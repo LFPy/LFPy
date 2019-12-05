@@ -52,7 +52,7 @@ setup(
     name="LFPy",
     version="2.0.4",
     maintainer="LFPy-team",
-    maintainer_email='lfpy@users.github.com',
+    maintainer_email='lfpy@users.noreply.github.com',
     packages=['LFPy'],
     package_data={'LFPy': [os.path.join('test', '*.hoc'),
                            os.path.join('test', '*.py'),
