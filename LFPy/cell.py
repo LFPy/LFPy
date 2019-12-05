@@ -814,7 +814,7 @@ class Cell(object):
         dist = ((self.xmid[idx] - x)**2 +
                 (self.ymid[idx] - y)**2 +
                 (self.zmid[idx] - z)**2)
-        return np.argmin(dist)
+        return idx[np.argmin(dist)]
 
     def get_rand_idx_area_norm(self, section='allsec', nidx=1,
                                z_min=-1E6, z_max=1E6):
