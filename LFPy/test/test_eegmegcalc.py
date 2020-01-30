@@ -206,11 +206,38 @@ class testFourSphereVolumeConductor(unittest.TestCase):
         with np.testing.assert_raises(ValueError):
             LFPy.FourSphereVolumeConductor(radii, sigmas, r_el2)
 
-    def test_decompose_dipole(self):
+    def test_decompose_dipole01(self):
         '''Test radial and tangential parts of dipole sums to dipole'''
         P1 = np.array([[1., 1., 1.]])
         p_rad, p_tan = decompose_dipole(P1)
         np.testing.assert_equal(p_rad + p_tan, P1)
+
+    def test_decompose_dipole02(self):
+        '''Test radial and tangential parts of dipole sums to dipole'''
+        radii = [88000, 90000, 95000, 100000]
+        sigmas = [0.3, 1.5, 0.015, 0.3]
+        ps = np.array([[ 1000., 0., 0.],
+                       [-1000., 0., 0.],
+                       [0.,  1000., 0.],
+                       [0., -1000., 0.],
+                       [0., 0.,  1000.],
+                       [0., 0., -1000.],
+                       [10., 20., 30.],
+                       [-10., -20., -30.]])
+        p_locs = np.array([[ 87000., 0., 0.],
+                           [-87000., 0., 0.],
+                           [0.,  87000., 0.],
+                           [0., -87000., 0.],
+                           [0., 0.,  87000.],
+                           [0., 0., -87000.],
+                           [80000., 2000., 3000.],
+                           [-2000., -80000., -3000.]])
+        el_locs = np.array([[90000., 5000., -5000.]])
+        fs = LFPy.FourSphereVolumeConductor(radii, sigmas, el_locs)
+        for p_loc in p_locs:
+            fs._rz_params(p_loc)
+            p_rads, p_tans = fs._decompose_dipole(ps)
+            np.testing.assert_equal(p_rads + p_tans, ps)
 
     def test_rad_dipole(self):
         '''Test that radial part of decomposed dipole is correct'''
