@@ -415,7 +415,7 @@ class FourSphereVolumeConductor(object):
                  'Can be avoided by placing dipole further away from brain surface.')
 
         if any(r < self._rz for r in self.r):
-            raise RuntimeError('Electrode must be farther away from'
+            raise RuntimeError('Electrode must be farther away from '
                                'brain center than dipole: r > rz.'
                                'r = %s, rz = %s', self.r, self._rz)
 
@@ -454,7 +454,6 @@ class FourSphereVolumeConductor(object):
         else:
             p_rad = np.zeros((n_timesteps, 3))
             p_tan = np.zeros((n_timesteps, 3))
-
         if np.linalg.norm(p_rad) != 0.:
             pot_rad = self._calc_rad_potential(p_rad)
         else:
@@ -542,9 +541,8 @@ class FourSphereVolumeConductor(object):
             Shape (n_timesteps, 3) array, tangential part of p,
             orthogonal to self._rz
         """
-        p_rad = p*self._z
+        p_rad = np.dot(p, self._z).reshape(len(p),1)*self._z.reshape(1, len(self._z))
         p_tan = p - p_rad
-
         return p_rad, p_tan
 
     def _calc_rad_potential(self, p_rad):
