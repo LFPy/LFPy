@@ -454,8 +454,6 @@ class FourSphereVolumeConductor(object):
         else:
             p_rad = np.zeros((n_timesteps, 3))
             p_tan = np.zeros((n_timesteps, 3))
-        print('p_rad:', p_rad)
-        print('p_tan:', p_tan)
         if np.linalg.norm(p_rad) != 0.:
             pot_rad = self._calc_rad_potential(p_rad)
         else:
