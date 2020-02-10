@@ -370,6 +370,42 @@ class testFourSphereVolumeConductor(unittest.TestCase):
         global_error = np.abs(pot_analytical - pot_fem)/(np.max(np.abs(pot_fem)))
         np.testing.assert_array_less(global_error, 0.01)
 
+    def test_calc_potential02(self):
+        '''Test radial and tangential parts of dipole sums to dipole'''
+        radii = [88000, 90000, 95000, 100000]
+        sigmas = [0.3, 1.5, 0.015, 0.3]
+
+        dips = np.array([[[ 1000., 0., 0.]],
+                         [[-1000., 0., 0.]],
+                         [[0.,  1000., 0.]],
+                         [[0., -1000., 0.]],
+                         [[0., 0.,  1000.]],
+                         [[0., 0., -1000.]]])
+
+        p_locs = np.array([[ 87000., 0., 0.],
+                           [-87000., 0., 0.],
+                           [0.,  87000., 0.],
+                           [0., -87000., 0.],
+                           [0., 0.,  87000],
+                           [0., 0., -87000]])
+
+        el_locs = np.array([[[ 99000., 0., 0.]],
+                            [[-99000., 0., 0.]],
+                            [[0.,  99000., 0.]],
+                            [[0., -99000., 0.]],
+                            [[0., 0.,  99000.]],
+                            [[0., 0., -99000.]]])
+
+
+        for i in range(len(p_locs)):
+            fs = LFPy.FourSphereVolumeConductor(radii, sigmas, el_locs[i])
+            phi = fs.calc_potential(dips[i], p_locs[i])
+            if i == 0:
+                phi0 = phi[0][0]
+            else:
+                np.testing.assert_equal(phi0, phi[0][0])
+
+
     def test_calc_potential_from_multi_dipoles00(self):
         """test comparison between multi-dipoles and single dipole approach"""
         neuron.h('forall delete_section()')

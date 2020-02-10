@@ -541,7 +541,8 @@ class FourSphereVolumeConductor(object):
             Shape (n_timesteps, 3) array, tangential part of p,
             orthogonal to self._rz
         """
-        p_rad = np.dot(p, self._z).reshape(len(p),1)*self._z.reshape(1, len(self._z))
+        z_ = np.expand_dims(self._z, -1) # reshape z-axis vector
+        p_rad = np.dot(np.dot(p, z_), z_.T)
         p_tan = p - p_rad
         return p_rad, p_tan
 
