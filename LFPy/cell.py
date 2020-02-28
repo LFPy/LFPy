@@ -47,19 +47,20 @@ class Cell(object):
     v_init : float
         Initial membrane potential. Defaults to -70 mV.
     Ra : float
-        Axial resistance. Defaults to 150 Ohm/cm
+        Axial resistance. Defaults to 35.4 Ohm*cm
     cm : float
         Membrane capacitance. Defaults to 1.0 uF/cm2.
     passive : bool
         Passive mechanisms are initialized if True. Defaults to False
     passive_parameters : dict
         parameter dictionary with values for the passive membrane mechanism in
-        NEURON ('pas'). The dictionary must contain keys 'g_pas' and 'e_pas',
-        like the default: passive_parameters=dict(g_pas=0.001, e_pas=-70)
+        NEURON ('pas'). The dictionary must contain keys 'g_pas' [S/cm^2] and
+        'e_pas' [mV], like the default:
+        passive_parameters=dict(g_pas=0.001, e_pas=-70)
     extracellular : bool
         Switch for NEURON's extracellular mechanism. Defaults to False
     dt : float
-        simulation timestep. Defaults to 0.1 ms
+        simulation timestep. Defaults to 2^-4 ms
     tstart : float
         Initialization time for simulation <= 0 ms. Defaults to 0.
     tstop : float
