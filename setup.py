@@ -7,6 +7,11 @@
 import os
 import sys
 import shutil
+
+d = {}
+exec(open("LFPy/version.py").read(), None, d)
+version = d['version']
+
 try:
     from setuptools import setup, Extension
 except ImportError as ie:
@@ -50,7 +55,7 @@ with open('README.md') as file:
 
 setup(
     name="LFPy",
-    version="2.0.4",
+    version=version,
     maintainer="LFPy-team",
     maintainer_email='lfpy@users.noreply.github.com',
     packages=['LFPy'],
@@ -96,6 +101,7 @@ setup(
         'Cython>=0.20',
         'h5py>=2.5',
         'mpi4py>=1.2',
+        'MEAutility>=1.4.0'
         ],
     extras_require={'tests': ['pytest'],
                     'docs': ['sphinx', 'numpydoc', 'sphinx_rtd_theme']

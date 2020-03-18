@@ -18,7 +18,9 @@ from __future__ import division
 import sys
 import warnings
 import numpy as np
+import MEAutility as mu
 from . import lfpcalc, tools
+
 
 class RecExtElectrode(object):
     """class RecExtElectrode
@@ -35,6 +37,8 @@ class RecExtElectrode(object):
         isotropic extracellular conductivity. If a length 3 list or array of
         floats is provided, these values corresponds to an anisotropic
         conductor with conductivities [sigma_x, sigma_y, sigma_z] accordingly.
+    probe : MEAutility MEA object or None
+        MEAutility probe object
     x, y, z : np.ndarray
         coordinates or arrays of coordinates in units of (um). Must be same length
     N : None or list of lists
@@ -165,10 +169,50 @@ class RecExtElectrode(object):
     >>> plt.axis('tight')
     >>> plt.show()
 
+    Use MEAutility to to handle probes
+
+    >>> import numpy as np
+    >>> import matplotlib.pyplot as plt
+    >>> import MEAutility as mu
+    >>> import LFPy
+    >>>
+    >>> cellParameters = {
+    >>>     'morphology' : 'examples/morphologies/L5_Mainen96_LFPy.hoc',  # morphology file
+    >>>     'v_init' : -65,                          # initial voltage
+    >>>     'cm' : 1.0,                             # membrane capacitance
+    >>>     'Ra' : 150,                             # axial resistivity
+    >>>     'passive' : True,                        # insert passive channels
+    >>>     'passive_parameters' : {"g_pas":1./3E4, "e_pas":-65}, # passive params
+    >>>     'dt' : 2**-4,                           # simulation time res
+    >>>     'tstart' : 0.,                        # start t of simulation
+    >>>     'tstop' : 50.,                        # end t of simulation
+    >>> }
+    >>> cell = LFPy.Cell(**cellParameters)
+    >>>
+    >>> synapseParameters = {
+    >>>     'idx' : cell.get_closest_idx(x=0, y=0, z=800), # compartment
+    >>>     'e' : 0,                                # reversal potential
+    >>>     'syntype' : 'ExpSyn',                   # synapse type
+    >>>     'tau' : 2,                              # syn. time constant
+    >>>     'weight' : 0.01,                       # syn. weight
+    >>>     'record_current' : True                 # syn. current record
+    >>> }
+    >>> synapse = LFPy.Synapse(cell, **synapseParameters)
+    >>> synapse.set_spike_times(np.array([10., 15., 20., 25.]))
+    >>>
+    >>> cell.simulate(rec_imem=True)
+    >>>
+    >>> probe = mu.return_mea('Neuropixels-128')
+    >>> electrode = LFPy.RecExtElectrode(cell, probe=probe)
+    >>> electrode.calc_lfp()
+    >>> mu.plot_mea_recording(electrode.LFP, probe)
+    >>> plt.axis('tight')
+    >>> plt.show()
+
     """
 
-    def __init__(self, cell=None, sigma=0.3,
-                 x=np.array([0]), y=np.array([0]), z=np.array([0]),
+    def __init__(self, cell=None, sigma=0.3, probe=None,
+                 x=None, y=None, z=None,
                  N=None, r=None, n=None, contact_shape='circle', r_z=None,
                  perCellLFP=False, method='linesource',
                  from_file=False, cellfile=None, verbose=False,
@@ -188,53 +232,77 @@ class RecExtElectrode(object):
             self.sigma = sigma
             self.anisotropic = False
 
-        if type(x) in [float, int]:
-            self.x = np.array([x])
-        else:
-            self.x = np.array(x).flatten()
-        if type(y) in [float, int]:
-            self.y = np.array([y])
-        else:
-            self.y = np.array(y).flatten()
-        if type(z) in [float, int]:
-            self.z = np.array([z])
-        else:
-            self.z = np.array(z).flatten()
-        try:
-            assert((self.x.size==self.y.size) and (self.x.size==self.z.size))
-        except AssertionError:
-            raise AssertionError("The number of elements in [x, y, z] must be identical")
-
-        if N is not None:
-            if type(N) != np.array:
-                try:
-                    N = np.array(N)
-                except:
-                    print('Keyword argument N could not be converted to a '
-                          'numpy.ndarray of shape (n_contacts, 3)')
-                    print(sys.exc_info()[0])
-                    raise
-            if N.shape[-1] == 3:
-                self.N = N
+        if probe is None:
+            if x is None:
+                x = np.array([0])
+            if y is None:
+                y = np.array([0])
+            if z is None:
+                z = np.array([0])
+            if type(x) in [float, int]:
+                self.x = np.array([x])
             else:
-                self.N = N.T
-                if N.shape[-1] != 3:
-                    raise Exception('N.shape must be (n_contacts, 1, 3)!')
+                self.x = np.array(x).flatten()
+            if type(y) in [float, int]:
+                self.y = np.array([y])
+            else:
+                self.y = np.array(y).flatten()
+            if type(z) in [float, int]:
+                self.z = np.array([z])
+            else:
+                self.z = np.array(z).flatten()
+            try:
+                assert ((self.x.size == self.y.size) and (self.x.size == self.z.size))
+            except AssertionError:
+                raise AssertionError("The number of elements in [x, y, z] must be identical")
+
+            if N is not None:
+                if type(N) != np.array:
+                    try:
+                        N = np.array(N)
+                    except:
+                        print('Keyword argument N could not be converted to a '
+                              'numpy.ndarray of shape (n_contacts, 3)')
+                        print(sys.exc_info()[0])
+                        raise
+                if N.shape[-1] == 3:
+                    self.N = N
+                else:
+                    self.N = N.T
+                    if N.shape[-1] != 3:
+                        raise Exception('N.shape must be (n_contacts, 1, 3)!')
+            else:
+                self.N = N
+
+            self.r = r
+            self.n = n
+
+            if contact_shape is None:
+                self.contact_shape = 'circle'
+            elif contact_shape in ['circle', 'square', 'rect']:
+                self.contact_shape = contact_shape
+            else:
+                raise ValueError('The contact_shape argument must be either: '
+                                 'None, \'circle\', \'square\', \'rect\'')
+            if self.contact_shape == 'rect':
+                assert len(np.array(self.r)) == 2, "For 'rect' shape, 'r' must indicate the 2 dimensions " \
+                                                   "of the rectangle"
+
+            positions = np.array([self.x, self.y, self.z]).T
+            probe_info = {'pos': positions, 'description': 'custom', 'size': self.r, 'shape': self.contact_shape,
+                          'type': 'wire'}  # add mea type
+            self.probe = mu.return_mea(info=probe_info)
         else:
-            self.N = N
+            assert isinstance(probe, mu.MEA), "'mea' should be a MEAutility MEA object"
+            self.probe = probe
+            self.x = probe.positions[:, 0]
+            self.y = probe.positions[:, 1]
+            self.z = probe.positions[:, 2]
+            self.N = np.array([el.normal for el in self.probe.electrodes])
+            self.r = self.probe.size
+            self.contact_shape = self.probe.shape
+            self.n = n
 
-        self.r = r
-        self.n = n
-
-        if contact_shape is None:
-            self.contact_shape = 'circle'
-        elif contact_shape in ['circle', 'square']:
-            self.contact_shape = contact_shape
-        else:
-            raise ValueError('The contact_shape argument must be either: '
-                             'None, \'circle\', \'square\'')
-
-        self.r_z = r_z
         self.perCellLFP = perCellLFP
 
         self.method = method
@@ -394,7 +462,6 @@ class RecExtElectrode(object):
         self.LFP = np.dot(self.mapping, currmem)
         # del self.mapping
 
-
     def _loop_over_contacts(self, **kwargs):
         """Loop over electrode contacts, and return LFPs across channels"""
 
@@ -407,7 +474,6 @@ class RecExtElectrode(object):
                                              r_limit = self.r_limit,
                                              **kwargs)
 
-
     def _lfp_el_pos_calc_dist(self, **kwargs):
 
         """
@@ -415,141 +481,43 @@ class RecExtElectrode(object):
         electrode surface: circle of radius r or square of side r. The
         locations of these n points on the electrode surface are random,
         within the given surface. """
-        # lfp_el_pos = np.zeros(self.LFP.shape)
-        self.offsets = {}
-        self.circle_circ = {}
 
-        def create_crcl(i):
-            """make circumsize of contact point"""
-            crcl = np.zeros((self.n, 3))
-            for j in range(self.n):
-                B = [(np.random.rand()-0.5),
-                    (np.random.rand()-0.5),
-                    (np.random.rand()-0.5)]
-                crcl[j, ] = np.cross(self.N[i, ], B)
-                crcl[j, ] = crcl[j, ]/np.sqrt(crcl[j, 0]**2 +
-                                           crcl[j, 1]**2 +
-                                           crcl[j, 2]**2)*self.r
-
-            crclx = crcl[:, 0] + self.x[i]
-            crcly = crcl[:, 1] + self.y[i]
-            crclz = crcl[:, 2] + self.z[i]
-
-            return crclx, crcly, crclz
-
-        def create_sqr(i):
-            """make circle in which square contact is circumscribed"""
-            sqr = np.zeros((self.n, 3))
-            for j in range(self.n):
-                B = [(np.random.rand() - 0.5),
-                     (np.random.rand() - 0.5),
-                     (np.random.rand() - 0.5)]
-                sqr[j,] = np.cross(self.N[i,], B)/np.linalg.norm(np.cross(self.N[i,], B)) * self.r * np.sqrt(2)/2
-
-            sqrx = sqr[:, 0] + self.x[i]
-            sqry = sqr[:, 1] + self.y[i]
-            sqrz = sqr[:, 2] + self.z[i]
-
-            return sqrx, sqry, sqrz
-
-        def calc_xyz_n(i):
-            """calculate some offsets"""
-            #offsets and radii init
-            offs = np.zeros((self.n, 3))
-            r2 = np.zeros(self.n)
-
-            #assert the same random numbers are drawn every time
-            if self.seedvalue is not None:
-                np.random.seed(self.seedvalue)
-
-            if self.contact_shape is 'circle':
-                for j in range(self.n):
-                    A = [(np.random.rand()-0.5)*self.r*2,
-                        (np.random.rand()-0.5)*self.r*2,
-                        (np.random.rand()-0.5)*self.r*2]
-                    offs[j, ] = np.cross(self.N[i, ], A)
-                    r2[j] = offs[j, 0]**2 + offs[j, 1]**2 + offs[j, 2]**2
-                    while r2[j] > self.r**2:
-                        A = [(np.random.rand()-0.5)*self.r*2,
-                            (np.random.rand()-0.5)*self.r*2,
-                            (np.random.rand()-0.5)*self.r*2]
-                        offs[j, ] = np.cross(self.N[i, ], A)
-                        r2[j] = offs[j, 0]**2 + offs[j, 1]**2 + offs[j, 2]**2
-            elif self.contact_shape is 'square':
-                for j in range(self.n):
-                    A = [(np.random.rand()-0.5),
-                        (np.random.rand()-0.5),
-                        (np.random.rand()-0.5)]
-                    offs[j, ] = np.cross(self.N[i, ], A)*self.r
-                    r2[j] = offs[j, 0]**2 + offs[j, 1]**2 + offs[j, 2]**2
-
-            x_n = offs[:, 0] + self.x[i]
-            y_n = offs[:, 1] + self.y[i]
-            z_n = offs[:, 2] + self.z[i]
-
-            return x_n, y_n, z_n
-
-        def loop_over_points(x_n, y_n, z_n):
+        def loop_over_points(points):
 
             #loop over points on contact
+            lfp_e = 0
             for j in range(self.n):
                 tmp = self.lfp_method(self.cell,
-                                              x = x_n[j],
-                                              y = y_n[j],
-                                              z = z_n[j],
+                                              x = points[j, 0],
+                                              y = points[j, 1],
+                                              z = points[j, 2],
                                               r_limit = self.r_limit,
                                               sigma = self.sigma,
                                               **kwargs
                                               )
 
-                if j == 0:
-                    lfp_e = tmp
-                else:
-                    lfp_e += tmp
-
+                lfp_e += tmp
                 #no longer needed
                 del tmp
 
             return lfp_e / self.n
 
-        #loop over contacts
-        for i in range(len(self.x)):
-            if self.n > 1:
-
-                #fetch offsets:
-                x_n, y_n, z_n = calc_xyz_n(i)
-
+        # extract random points for each electrode
+        if self.n > 1:
+            points = self.probe.get_random_points_inside(self.n, seed=self.seedvalue)
+            for i, p in enumerate(points):
                 #fill in with contact average
-                self.mapping[i] = loop_over_points(x_n, y_n, z_n) #lfp_e.mean(axis=0)
-
-            else:
+                self.mapping[i] = loop_over_points(p) #lfp_e.mean(axis=0)
+        else:
+            for i, (x, y, z) in enumerate(zip(self.x, self.y, self.z)):
                 self.mapping[i] = self.lfp_method(self.cell,
-                                              x=self.x[i],
-                                              y=self.y[i],
-                                              z=self.z[i],
-                                              r_limit = self.r_limit,
-                                              sigma=self.sigma,
-                                              **kwargs)
+                                                  x=x,
+                                                  y=y,
+                                                  z=z,
+                                                  r_limit = self.r_limit,
+                                                  sigma=self.sigma,
+                                                  **kwargs)
 
-            self.offsets[i] = {'x_n' : x_n,
-                               'y_n' : y_n,
-                               'z_n' : z_n}
-
-            #fetch circumscribed circle around contact
-            if self.contact_shape is 'circle':
-                crcl = create_crcl(i)
-                self.circle_circ[i] = {
-                    'x' : crcl[0],
-                    'y' : crcl[1],
-                    'z' : crcl[2],
-                }
-            elif self.contact_shape is 'square':
-                sqr = create_sqr(i)
-                self.circle_circ[i] = {
-                    'x': sqr[0],
-                    'y': sqr[1],
-                    'z': sqr[2],
-                }
 
 
 class RecMEAElectrode(RecExtElectrode):
@@ -597,6 +565,8 @@ class RecMEAElectrode(RecExtElectrode):
         of the cell is allowed to be outside the slice. The squeeze is done
         after the neural simulation, and therefore does not affect neuronal
         simulation, only calculation of extracellular potentials.
+    probe : MEAutility MEA object or None
+        MEAutility probe object
     x, y, z : np.ndarray
         coordinates or arrays of coordinates in units of (um).
         Must be same length
@@ -677,7 +647,7 @@ class RecMEAElectrode(RecExtElectrode):
     >>> plt.show()
     """
     def __init__(self, cell=None, sigma_T=0.3, sigma_S=1.5, sigma_G=0.0,
-                 h=300., z_shift=0., steps=20,
+                 h=300., z_shift=0., steps=20, probe=None,
                  x=np.array([0]), y=np.array([0]), z=np.array([0]),
                  N=None, r=None, n=None, r_z=None,
                  perCellLFP=False, method='linesource',
@@ -685,7 +655,7 @@ class RecMEAElectrode(RecExtElectrode):
                  seedvalue=None, squeeze_cell_factor=None, **kwargs):
 
         RecExtElectrode.__init__(self, cell=cell,
-                     x=x, y=y, z=z,
+                     x=x, y=y, z=z, probe=probe,
                      N=N, r=r, n=n, r_z=r_z,
                      perCellLFP=perCellLFP, method=method,
                      from_file=from_file, cellfile=cellfile, verbose=verbose,
