@@ -101,7 +101,7 @@ setup(
         'Cython>=0.20',
         'h5py>=2.5',
         'mpi4py>=1.2',
-        'MEAutility>=1.4.0'
+        'MEAutility>=1.4.1'
         ],
     extras_require={'tests': ['pytest'],
                     'docs': ['sphinx', 'numpydoc', 'sphinx_rtd_theme']

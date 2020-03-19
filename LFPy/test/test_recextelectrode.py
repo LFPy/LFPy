@@ -22,7 +22,7 @@ import unittest
 import numpy as np
 import LFPy
 import neuron
-from .common import *
+from LFPy.test.common import *
 
 # for nosetests to run load the SinSyn sinusoid synapse currrent mechanism
 if "win32" in sys.platform:
@@ -40,7 +40,7 @@ class testRecExtElectrode(unittest.TestCase):
     """
 
     def test_method_pointsource(self):
-        print('Test RecExtElectrode')
+        print('Test RecExtElectrode 1')
         #create LFPs using LFPy-model
         LFP_LFPy = stickSimulation(method='pointsource')
     
@@ -57,6 +57,7 @@ class testRecExtElectrode(unittest.TestCase):
                                    atol=abs(LFP_analytic).max() / 10.)
     
     def test_method_linesource(self):
+        print('Test RecExtElectrode 2')
         #create LFPs using LFPy-model
         LFP_LFPy = stickSimulation(method='linesource')
     
@@ -74,6 +75,7 @@ class testRecExtElectrode(unittest.TestCase):
 
     
     def test_method_soma_as_point(self):
+        print('Test RecExtElectrode 3')
         #create LFPs using LFPy-model
         LFP_LFPy = stickSimulation(method='soma_as_point')
     
@@ -92,6 +94,7 @@ class testRecExtElectrode(unittest.TestCase):
     
     
     def test_method_pointsource_dotprodcoeffs(self):
+        print('Test RecExtElectrode 4')
         #create LFPs using LFPy-model
         LFP_LFPy = stickSimulationDotprodcoeffs(method='pointsource')
     
@@ -109,6 +112,7 @@ class testRecExtElectrode(unittest.TestCase):
 
     
     def test_method_linesource_dotprodcoeffs(self):
+        print('Test RecExtElectrode 5')
         #create LFPs using LFPy-model
         LFP_LFPy = stickSimulationDotprodcoeffs(method='linesource')
     
@@ -126,6 +130,7 @@ class testRecExtElectrode(unittest.TestCase):
 
     
     def test_method_soma_as_point_dotprodcoeffs(self):
+        print('Test RecExtElectrode 6')
         #create LFPs using LFPy-model
         LFP_LFPy = stickSimulationDotprodcoeffs(method='soma_as_point')
     
@@ -143,6 +148,7 @@ class testRecExtElectrode(unittest.TestCase):
 
     
     def test_method_pointsource_contact_average_r10n100(self):
+        print('Test RecExtElectrode 7')
         #create LFPs using LFPy-model
         LFP_LFPy = stickSimulationAveragingElectrode(
             contactRadius=10, contactNPoints=100, method='soma_as_point')
@@ -161,15 +167,16 @@ class testRecExtElectrode(unittest.TestCase):
 
     
     def test_method_linesource_contact_average_r10n100(self):
+        print('Test RecExtElectrode 8')
         #create LFPs using LFPy-model
         LFP_LFPy = stickSimulationAveragingElectrode(
             contactRadius=10, contactNPoints=100, method='linesource')
-    
+
         #create LFPs using the analytical approach
         time = np.linspace(0, 100, 100*2**6+1)
         R = np.ones(11)*100
         Z = np.linspace(1000, 0, 11)
-    
+
         LFP_analytic = np.empty((R.size, time.size))
         for i in range(R.size):
             LFP_analytic[i, ] = analytical_LFP(time, electrodeR=R[i],
@@ -179,6 +186,7 @@ class testRecExtElectrode(unittest.TestCase):
 
     
     def test_method_soma_as_point_contact_average_r10n100(self):
+        print('Test RecExtElectrode 9')
         #create LFPs using LFPy-model
         LFP_LFPy = stickSimulationAveragingElectrode(
             contactRadius=10, contactNPoints=100, method='soma_as_point')
@@ -196,7 +204,7 @@ class testRecExtElectrode(unittest.TestCase):
                                    atol=abs(LFP_analytic).max() / 10.)
 
     def test_sigma_inputs(self):
-
+        print('Test RecExtElectrode 10')
         stickParams = {
             'morphology' : os.path.join(LFPy.__path__[0], 'test', 'stick.hoc'),
             'passive_parameters' : {'g_pas' : 1./30000, 'e_pas' : -65},
@@ -220,6 +228,7 @@ class testRecExtElectrode(unittest.TestCase):
         np.testing.assert_raises(ValueError, LFPy.RecExtElectrode, **electrodeParams)
 
     def test_bad_cell_position_in_slice(self):
+        print('Test RecExtElectrode 11')
 
         electrodeParams = {
             'sigma_T' : 0.3,
@@ -256,6 +265,7 @@ class testRecExtElectrode(unittest.TestCase):
         np.testing.assert_raises(RuntimeError, MEA.calc_lfp)
 
     def test_sqeeze_cell_and_bad_position(self):
+        print('Test RecExtElectrode 12')
 
         electrodeParams = {
             'sigma_T' : 0.3,
@@ -314,6 +324,7 @@ class testRecExtElectrode(unittest.TestCase):
 
 
     def test_return_comp_outside_slice(self):
+        print('Test RecExtElectrode 13')
 
         electrodeParams = {
             'sigma_T' : 0.3,
@@ -371,6 +382,7 @@ class testRecExtElectrode(unittest.TestCase):
         stick.zend[true_bad_comp] = 100
 
     def test_position_shifted_slice(self):
+        print('Test RecExtElectrode 14')
 
         electrodeParams = {
             'sigma_T' : 0.3,
@@ -403,6 +415,7 @@ class testRecExtElectrode(unittest.TestCase):
         MEA.test_cell_extent()
 
     def test_slice_shift_invariance_pointsource(self):
+        print('Test RecExtElectrode 15')
         h = 200
         z_shift_1 = 0
         z_shift_2 = -352
@@ -477,6 +490,7 @@ class testRecExtElectrode(unittest.TestCase):
                                        MEA_shift_2.LFP, rtol=1E-7)
 
     def test_isotropic_version_of_anisotropic_methods(self):
+        print('Test RecExtElectrode 16')
 
         stickParams = {
             'morphology' : os.path.join(LFPy.__path__[0], 'test', 'stick.hoc'),
@@ -531,6 +545,7 @@ class testRecExtElectrode(unittest.TestCase):
                                        anisotropic_electrode.LFP, rtol=1E-7)
 
     def test_compare_anisotropic_lfp_methods(self):
+        print('Test RecExtElectrode 17')
 
         stickParams = {
             'morphology' : os.path.join(LFPy.__path__[0], 'test', 'stick.hoc'),
@@ -597,5 +612,7 @@ class testRecExtElectrode(unittest.TestCase):
                                  electrode_ps.LFP[0,:], electrode_sap.LFP[0,:])
 
 
-    
+if __name__ == '__main__':
+    testRecExtElectrode.test_method_linesource_contact_average_r10n100()
+
 
