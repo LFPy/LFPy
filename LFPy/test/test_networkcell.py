@@ -40,6 +40,7 @@ class testNetworkCell(unittest.TestCase):
 
     """
     def test_cell_tvec_00(self):
+        print('Test network cell')
         stickParams = {
             'dt' : 2**-3,
             'tstart' : 0.,

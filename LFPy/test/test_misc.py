@@ -26,6 +26,7 @@ class testMisc(unittest.TestCase):
     """
 
     def test_neuron_record_i_membrane_methods_00(self):
+        print('Test misc')
         '''not a test of LFPy per se, but we're using this method for
         calculating with the i_membrane_ attribute on each time step'''
         # sections

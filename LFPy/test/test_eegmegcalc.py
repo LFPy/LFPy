@@ -28,6 +28,7 @@ class testMEG(unittest.TestCase):
     """
 
     def test_MEG_00(self):
+        print('Test EEG-MEG')
         '''test LFPy.MEG.calculate_H()'''
         current_dipole_moment = np.zeros((11, 3))
         current_dipole_moment[:, 0] += 1.

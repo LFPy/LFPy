@@ -26,6 +26,7 @@ class testInputGenerators(unittest.TestCase):
     test LFPy.inputgenerators module
     """
     def test_get_activation_times_from_distribution(self):
+        print('Test input generators')
         """test LFPy.inputgenerators.get_activation_times_from_distribution
         """
         n = 10

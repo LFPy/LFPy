@@ -40,6 +40,7 @@ class testRecExtElectrode(unittest.TestCase):
     """
 
     def test_method_pointsource(self):
+        print('Test RecExtElectrode')
         #create LFPs using LFPy-model
         LFP_LFPy = stickSimulation(method='pointsource')
     

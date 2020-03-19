@@ -42,6 +42,7 @@ class testCell(unittest.TestCase):
     """
 
     def test_cell_tvec_00(self):
+        print('Test cell')
         stickParams = {
             'dt' : 2**-3,
             'tstart' : 0.,

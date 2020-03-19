@@ -28,6 +28,7 @@ class testAliasMethod(unittest.TestCase):
 
 
     def test_alias_method_00(self):
+        print('Test alias method')
         """deterministic probabilities 0.0 and 1.0"""
         idx = np.arange(2)
         probs = np.arange(2).astype(float)

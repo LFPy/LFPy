@@ -40,6 +40,7 @@ class testTemplateCell(unittest.TestCase):
     test class LFPy.TemplateCell
     """
     def test_cell_tvec_00(self):
+        print('Test template cell')
         stickParams = {
             'dt' : 2**-3,
             'tstart' : 0.,
