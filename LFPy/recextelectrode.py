@@ -169,7 +169,7 @@ class RecExtElectrode(object):
 
     def __init__(self, cell=None, sigma=0.3,
                  x=np.array([0]), y=np.array([0]), z=np.array([0]),
-                 N=None, r=None, n=None, contact_shape='circle', r_z=None,
+                 N=None, r=None, n=None, contact_shape='circle',
                  perCellLFP=False, method='linesource',
                  from_file=False, cellfile=None, verbose=False,
                  seedvalue=None, **kwargs):
@@ -234,7 +234,6 @@ class RecExtElectrode(object):
             raise ValueError('The contact_shape argument must be either: '
                              'None, \'circle\', \'square\'')
 
-        self.r_z = r_z
         self.perCellLFP = perCellLFP
 
         self.method = method
@@ -679,14 +678,14 @@ class RecMEAElectrode(RecExtElectrode):
     def __init__(self, cell=None, sigma_T=0.3, sigma_S=1.5, sigma_G=0.0,
                  h=300., z_shift=0., steps=20,
                  x=np.array([0]), y=np.array([0]), z=np.array([0]),
-                 N=None, r=None, n=None, r_z=None,
+                 N=None, r=None, n=None,
                  perCellLFP=False, method='linesource',
                  from_file=False, cellfile=None, verbose=False,
                  seedvalue=None, squeeze_cell_factor=None, **kwargs):
 
         RecExtElectrode.__init__(self, cell=cell,
                      x=x, y=y, z=z,
-                     N=N, r=r, n=n, r_z=r_z,
+                     N=N, r=r, n=n,
                      perCellLFP=perCellLFP, method=method,
                      from_file=from_file, cellfile=cellfile, verbose=verbose,
                      seedvalue=seedvalue, **kwargs)
