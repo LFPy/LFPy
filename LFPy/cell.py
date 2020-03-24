@@ -29,7 +29,7 @@ from .alias_method import alias_method
 try:
     try:
         assert(neuron.version >= '7.6.4')
-    except AttributeError:
+    except:
         warn('LFPy could not read NEURON version info. v7.6.4 or newer required')
 except AssertionError:
     warn('LFPy requires NEURON v7.6.4 or newer. Found v{}'.format(neuron.version))

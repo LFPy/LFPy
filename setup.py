@@ -73,7 +73,7 @@ setup(
     cmdclass=cmdclass,
     ext_modules=ext_modules,
     url='http://LFPy.readthedocs.io',
-    download_url='https://github.com/LFPy/LFPy/tarball/v2.0.4',
+    download_url='https://github.com/LFPy/LFPy/tarball/v2.0.5',
     license='LICENSE',
     description='A module for modeling extracellular potentials of multicompartment neuron models built on NEURON',
     long_description=long_description,
