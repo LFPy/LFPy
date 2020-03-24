@@ -113,9 +113,9 @@ class NetworkCell(TemplateCell):
     >>> import LFPy
     >>> cellParameters = {
     >>>     'morphology' : '<path to morphology.hoc>',
-    >>>     'templatefile' :  '<path to template_file.hoc>'
-    >>>     'templatename' :  'templatename'
-    >>>     'templateargs' :  None
+    >>>     'templatefile' :  '<path to template_file.hoc>',
+    >>>     'templatename' :  'templatename',
+    >>>     'templateargs' :  None,
     >>>     'v_init' : -65,
     >>>     'cm' : 1.0,
     >>>     'Ra' : 150,
@@ -853,6 +853,8 @@ class Network(object):
 
         return COMM.bcast([conncount, syncount])
 
+    def enable_extracellular_stimulation(self, electrode, t_ext=None, n=1, seed=None):
+        raise NotImplementedError()
 
     def simulate(self, electrode=None, rec_imem=False, rec_vmem=False,
                  rec_ipas=False, rec_icap=False,

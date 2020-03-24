@@ -611,8 +611,51 @@ class testRecExtElectrode(unittest.TestCase):
         np.testing.assert_raises(AssertionError, np.testing.assert_array_equal,
                                  electrode_ps.LFP[0,:], electrode_sap.LFP[0,:])
 
+    def test_elextrical_stimulation(self):
+        print('Test RecExtElectrode 17')
 
-if __name__ == '__main__':
-    testRecExtElectrode.test_method_linesource_contact_average_r10n100()
+        stickParams = {
+            'morphology' : os.path.join(LFPy.__path__[0], 'test', 'stick.hoc'),
+            'passive_parameters' : {'g_pas' : 1./30000, 'e_pas' : -65},
+            'passive': True,
+            'tstart' : 0,
+            'tstop' : 20,
+            'dt' : 2**-4,
+            'nsegs_method' : 'lambda_f',
+            'lambda_f' : 1000,
 
+        }
 
+        electrodeParams = {
+            'sigma' : 0.3,
+            'x' : np.array([0, 1000]),
+            'y' : np.zeros(2),
+            'z' : np.zeros(2),
+        }
+
+        electrode1 = LFPy.RecExtElectrode(**electrodeParams)
+        stick1 = LFPy.Cell(**stickParams)
+        stick1.set_pos(z=-stick1.zstart[0])
+        v1, t_ext1 = electrode1.probe.set_current_pulses(0, phase1=0.1, amp1=10000, dt=stick1.dt,
+                                                         t_stop=stick1.tstop, interpulse=0.2)
+        stick1.enable_extracellular_stimulation(electrode1, t_ext=t_ext1)
+        stick1.simulate(electrode=electrode1,
+                        rec_imem=True, rec_vmem=True)
+
+        electrode2 = LFPy.RecExtElectrode(**electrodeParams)
+        stick2 = LFPy.Cell(**stickParams)
+        stick2.set_pos(z=-stick2.zstart[0])
+        v2, t_ext2 = electrode2.probe.set_current_pulses(0, phase1=0.1, amp1=10000, dt=stick1.dt,
+                                                         t_stop=stick2.tstop, interpulse=0.2)
+        stick2.enable_extracellular_stimulation(electrode2, t_ext=t_ext2, n=10)
+        stick2.simulate(electrode=electrode2,
+                        rec_imem=True, rec_vmem=True)
+
+        # Test that distant electrode is independent of choice of method
+        np.testing.assert_almost_equal(v1, v2)
+
+        np.testing.assert_almost_equal(electrode1.LFP,
+                                       electrode1.LFP)
+
+        np.testing.assert_almost_equal(stick1.vmem,
+                                       stick2.vmem)

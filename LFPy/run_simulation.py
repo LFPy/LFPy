@@ -69,6 +69,7 @@ def _run_simulation(cell, cvode, variable_dt=False, atol=0.001):
             t0 = time()
             ti = neuron.h.t
 
+
 def _run_simulation_with_electrode(cell, cvode, electrode=None,
                                    variable_dt=False,
                                    atol=0.001,
@@ -115,8 +116,7 @@ def _run_simulation_with_electrode(cell, cvode, electrode=None,
         for el in electrodes:
             el.calc_mapping(cell)
             dotprodcoeffs.append(el.mapping)
-
-    elif electrode is None:
+    else:
         electrodes = None
    
 
@@ -197,7 +197,6 @@ def _run_simulation_with_electrode(cell, cvode, electrode=None,
                                 ][:, tstep] = np.dot(coeffs, imem)
             
             tstep += 1
-
         neuron.h.fadvance()
         counter += 1.
         if counter % interval == 0.:

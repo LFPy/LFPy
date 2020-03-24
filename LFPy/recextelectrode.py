@@ -293,7 +293,7 @@ class RecExtElectrode(object):
                           'type': 'wire'}  # add mea type
             self.probe = mu.MEA(positions=positions, info=probe_info, normal=self.N, sigma=self.sigma)
         else:
-            assert isinstance(probe, mu.MEA), "'mea' should be a MEAutility MEA object"
+            assert isinstance(probe, mu.core.MEA), "'probe' should be a MEAutility MEA object"
             self.probe = probe
             self.x = probe.positions[:, 0]
             self.y = probe.positions[:, 1]
@@ -484,20 +484,20 @@ class RecExtElectrode(object):
 
         def loop_over_points(points):
 
-            #loop over points on contact
+            # loop over points on contact
             lfp_e = 0
             for j in range(self.n):
                 tmp = self.lfp_method(self.cell,
-                                              x = points[j, 0],
-                                              y = points[j, 1],
-                                              z = points[j, 2],
-                                              r_limit = self.r_limit,
-                                              sigma = self.sigma,
-                                              **kwargs
-                                              )
+                                      x=points[j, 0],
+                                      y=points[j, 1],
+                                      z=points[j, 2],
+                                      r_limit=self.r_limit,
+                                      sigma=self.sigma,
+                                      **kwargs
+                                      )
 
                 lfp_e += tmp
-                #no longer needed
+                # no longer needed
                 del tmp
 
             return lfp_e / self.n

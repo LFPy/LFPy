@@ -543,6 +543,7 @@ class Cell(object):
 
         for sec in self.allseclist:
             sec.insert('extracellular')
+        self.extracellular = True
 
     def set_synapse(self, idx, syntype,
                     record_current=False,
@@ -924,6 +925,69 @@ class Cell(object):
             p /= p.sum()
             return alias_method(poss_idx, p, nidx)
 
+    def enable_extracellular_stimulation(self, electrode, t_ext=None, n=1, seed=None):
+        """
+        Enable extracellular stimulation with 'extracellular' mechanism.
+
+        Parameters
+        ----------
+        electrode: RecExtElectrode
+            Electrode object with stimulating currents
+        t_ext: np.ndarray or list
+            Time im ms corrisponding to step changes in the provided currents. If None, currents are assumed to have
+            the same time steps as neuron simulation.
+        n: int
+            Points per electrode to compute spatial averaging
+        seed: int
+            Random seed. If None, a seed is randomly generated.
+
+        Returns
+        -------
+        v_ext: np.ndarray
+            Computed extracellular potentials at cell mid points
+
+        """
+        # access electrode object and append mapping
+        if electrode is not None:
+            # put electrode argument in list if needed
+            if type(electrode) == list:
+                electrodes = electrode
+            else:
+                electrodes = [electrode]
+        else:
+            print("'electrode' is None")
+            return
+        # extracellular stimulation
+        if np.any([np.any(el.probe.currents != 0) for el in electrodes]):
+            cell_mid_points = np.array([self.xmid, self.ymid, self.zmid]).T
+            n_tsteps = int(self.tstop / self.dt + 1)
+            t_cell = np.arange(n_tsteps) * self.dt
+
+            if t_ext is None:
+                # TODO deal with constant currents (t_ext = t_start)
+                print("Assuming t_ext is the same as simulation time")
+                t_ext = t_cell
+                for electrode in electrodes:
+                    assert electrode.probe.currents.shape[1] == len(t_cell), \
+                        "Discrepancy between t_ext and cell simulation time steps. Provide the 't_ext' argument"
+            else:
+                assert len(t_ext) < len(t_cell), "Stimulation time steps are greater than cell simulation steps"
+
+            v_ext = np.zeros((self.totnsegs, len(t_ext)))
+            for electrode in electrodes:
+                if np.any(np.any(electrode.probe.currents != 0)):
+                    electrode.probe.points_per_electrode = int(n)
+                    ve = electrode.probe.compute_field(cell_mid_points, seed=seed)
+                    if len(electrode.probe.currents.shape) == 1:
+                        ve = ve[:, np.newaxis]
+                    v_ext += ve
+
+            self._set_extracellular()
+            self.insert_v_ext(v_ext, np.array(t_ext))
+        else:
+            v_ext = None
+
+        return v_ext
 
     def simulate(self, electrode=None, rec_imem=False, rec_vmem=False,
                  rec_ipas=False, rec_icap=False,
@@ -1995,7 +2059,7 @@ class Cell(object):
         v_ext : ndarray
             Numpy array of size cell.totnsegs x t_ext.size, unit mV
         t_ext : ndarray
-            Time vector of v_ext
+            Time vector of v_ext in ms
         Examples
         --------
         >>> import LFPy
