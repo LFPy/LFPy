@@ -636,7 +636,7 @@ class testRecExtElectrode(unittest.TestCase):
         electrode1 = LFPy.RecExtElectrode(**electrodeParams)
         stick1 = LFPy.Cell(**stickParams)
         stick1.set_pos(z=-stick1.zstart[0])
-        v1, t_ext1 = electrode1.probe.set_current_pulses(0, phase1=0.1, amp1=10000, dt=stick1.dt,
+        v1, t_ext1 = electrode1.probe.set_current_pulses(0, width1=0.1, amp1=10000, dt=stick1.dt,
                                                          t_stop=stick1.tstop, interpulse=0.2)
         stick1.enable_extracellular_stimulation(electrode1, t_ext=t_ext1)
         stick1.simulate(electrode=electrode1,

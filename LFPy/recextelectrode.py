@@ -656,7 +656,7 @@ class RecMEAElectrode(RecExtElectrode):
 
         RecExtElectrode.__init__(self, cell=cell,
                      x=x, y=y, z=z, probe=probe,
-                     N=N, r=r, n=n, 
+                     N=N, r=r, n=n,
                      perCellLFP=perCellLFP, method=method,
                      from_file=from_file, cellfile=cellfile, verbose=verbose,
                      seedvalue=seedvalue, **kwargs)
