@@ -1,7 +1,18 @@
+version: 2
+
+sphinx:
+  configuration: doc/conf.py
+
+formats: all
+
+build:
+  image: latest
+
 conda:
-  file: doc/environment.yml
+  environment: doc/environment.yml
+
 python:
-  version: 3.6
-  setup_py_install: true
-requirements_file: doc/requirements.txt
-system_packages: false
+    version: 3
+    install:
+        - method: pip
+          path: .
