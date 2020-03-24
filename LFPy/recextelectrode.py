@@ -213,7 +213,7 @@ class RecExtElectrode(object):
 
     def __init__(self, cell=None, sigma=0.3, probe=None,
                  x=None, y=None, z=None,
-                 N=None, r=None, n=None, contact_shape='circle', r_z=None,
+                 N=None, r=None, n=None, contact_shape='circle',
                  perCellLFP=False, method='linesource',
                  from_file=False, cellfile=None, verbose=False,
                  seedvalue=None, **kwargs):
@@ -656,7 +656,7 @@ class RecMEAElectrode(RecExtElectrode):
 
         RecExtElectrode.__init__(self, cell=cell,
                      x=x, y=y, z=z, probe=probe,
-                     N=N, r=r, n=n, r_z=r_z,
+                     N=N, r=r, n=n, 
                      perCellLFP=perCellLFP, method=method,
                      from_file=from_file, cellfile=cellfile, verbose=verbose,
                      seedvalue=seedvalue, **kwargs)
