@@ -51,7 +51,7 @@ with open('README.md') as file:
 
 setup(
     name="LFPy",
-    version="2.0.7.rc1",
+    version="2.0.7",
     maintainer="LFPy-team",
     maintainer_email='lfpy@users.noreply.github.com',
     packages=['LFPy'],
@@ -64,7 +64,7 @@ setup(
     cmdclass=cmdclass,
     ext_modules=ext_modules,
     url='http://LFPy.readthedocs.io',
-    download_url='https://github.com/LFPy/LFPy/tarball/v2.0.7.rc1',
+    download_url='https://github.com/LFPy/LFPy/tarball/v2.0.7',
     license='LICENSE',
     description='A module for modeling extracellular potentials of multicompartment neuron models built on NEURON',
     long_description=long_description,
