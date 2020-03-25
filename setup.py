@@ -21,7 +21,7 @@ try:
                    Extension('LFPy.alias_method',
                    [os.path.join('LFPy', 'alias_method.pyx')],
                    include_dirs=[numpy.get_include()]),
-                    ]
+                   ]
 except ImportError:
     print("'from Cython.Distutils import build_ext' or 'import numpy' failed!")
     print("Cython extensions will not be compiled, and")
@@ -36,7 +36,7 @@ from distutils.spawn import find_executable, spawn
 if not any(arg in sys.argv for arg in ['sdist', 'upload']):
     if find_executable('nrnivmodl') is not None:
         os.chdir(os.path.join('LFPy', 'test'))
-        for path in ['x86_64', 'i686', 'powerpc']:
+        for path in ['x86_64']:
             if os.path.isdir(path):
                 shutil.rmtree(path)
         spawn([find_executable('nrnivmodl')])
@@ -44,6 +44,7 @@ if not any(arg in sys.argv for arg in ['sdist', 'upload']):
     else:
         print("nrnivmodl script not found in PATH, thus NEURON .mod files" +
               "could not be compiled, and LFPy.test() functions will fail")
+
 
 with open('README.md') as file:
     long_description = file.read()
