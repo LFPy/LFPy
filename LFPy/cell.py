@@ -968,6 +968,9 @@ class Cell(object):
         else:
             print("'electrode' is None")
             return
+
+        assert model in ['inf', 'semi'], "'model' can be 'inf' or 'semi'"
+
         # extracellular stimulation
         if np.any([np.any(el.probe.currents != 0) for el in electrodes]):
             cell_mid_points = np.array([self.xmid, self.ymid, self.zmid]).T
@@ -987,7 +990,8 @@ class Cell(object):
             for electrode in electrodes:
                 if np.any(np.any(electrode.probe.currents != 0)):
                     electrode.probe.points_per_electrode = int(n)
-                    ve = electrode.probe.compute_field(cell_mid_points, model=model)
+                    electrode.probe.model = model
+                    ve = electrode.probe.compute_field(cell_mid_points)
                     if len(electrode.probe.currents.shape) == 1:
                         ve = ve[:, np.newaxis]
                     v_ext += ve
