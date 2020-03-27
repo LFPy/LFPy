@@ -103,14 +103,18 @@ def plot_ex2(cell, electrode):
         else:
             if cell.zmid[i] < 100 and cell.zmid[i] > -100 and \
                     cell.xmid[i] < 100 and cell.xmid[i] > -100:
-                xcoords = np.r_[xcoords, np.linspace(cell.xstart[i],
-                                            cell.xend[i], cell.length[i]*3)]   
-                ycoords = np.r_[ycoords, np.linspace(cell.ystart[i],
-                                            cell.yend[i], cell.length[i]*3)]   
-                zcoords = np.r_[zcoords, np.linspace(cell.zstart[i],
-                                            cell.zend[i], cell.length[i]*3)]   
-                diams = np.r_[diams, np.linspace(cell.diam[i], cell.diam[i],
-                                            cell.length[i]*3)]
+                xcoords = np.r_[xcoords,
+                                np.linspace(cell.xstart[i],
+                                            cell.xend[i], int(cell.length[i]*3))]   
+                ycoords = np.r_[ycoords,
+                                np.linspace(cell.ystart[i],
+                                            cell.yend[i], int(cell.length[i]*3))]   
+                zcoords = np.r_[zcoords,
+                                np.linspace(cell.zstart[i],
+                                            cell.zend[i], int(cell.length[i]*3))]   
+                diams = np.r_[diams,
+                              np.linspace(cell.diam[i], cell.diam[i],
+                                          int(cell.length[i]*3))]
     
     #sort along depth-axis
     argsort = np.argsort(ycoords)
