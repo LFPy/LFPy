@@ -927,11 +927,16 @@ class Cell(object):
         """
         Enable extracellular stimulation with 'extracellular' mechanism.
         Extracellular potentials are computed from the electrode currents using the pointsource approximation.
-        If 'model' is 'inf' (default), potentials are computed as ():
+        If 'model' is 'inf' (default), potentials are computed as (:math:`r_i` is the position of a comparment i,
+        :math:`r_e` is the position of an elextrode e, :math:`sigma` is the conductivity of the medium):
 
-            $V_e(r_i) = \sum_n \frac{I_n}{4 \pi \sigma |r_i - r_n|}$
+        .. math::
+            V_e(r_i) = \sum_n \frac{I_n}{4 \pi \sigma |r_i - r_n|}
 
-        If
+        If model is 'semi', the method of images is used:
+
+        .. math::
+            V_e(r_i) = \sum_n \frac{I_n}{2 \pi \sigma |r_i - r_n|}
 
 
         Parameters
@@ -943,8 +948,9 @@ class Cell(object):
             the same time steps as NEURON simulation.
         n: int
             Points per electrode to compute spatial averaging
-        model: int
-            Random seed. If None, a seed is randomly generated.
+        model: str
+            'inf' or 'semi'. If 'inf' the medium is assumed to be infinite and homogeneous. If 'semi', the method of
+            images is used.
 
         Returns
         -------
@@ -969,7 +975,6 @@ class Cell(object):
             t_cell = np.arange(n_tsteps) * self.dt
 
             if t_ext is None:
-                # TODO deal with constant currents (t_ext = t_start)
                 print("Assuming t_ext is the same as simulation time")
                 t_ext = t_cell
                 for electrode in electrodes:
@@ -982,7 +987,7 @@ class Cell(object):
             for electrode in electrodes:
                 if np.any(np.any(electrode.probe.currents != 0)):
                     electrode.probe.points_per_electrode = int(n)
-                    ve = electrode.probe.compute_field(cell_mid_points)
+                    ve = electrode.probe.compute_field(cell_mid_points, model=model)
                     if len(electrode.probe.currents.shape) == 1:
                         ve = ve[:, np.newaxis]
                     v_ext += ve
