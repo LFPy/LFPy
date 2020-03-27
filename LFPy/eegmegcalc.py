@@ -12,7 +12,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 """
 
-from __future__ import division
+
 from scipy.special import eval_legendre, lpmv, legendre
 import numpy as np
 from warnings import warn

@@ -12,7 +12,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 """
 
-from __future__ import division
+
 import os
 import neuron
 import numpy as np
@@ -462,8 +462,6 @@ class Cell(object):
             if sec.name().find('soma') >= 0:
                 self.somalist.append(sec=sec)
                 self.nsomasec += 1
-
-
 
     def _get_idx(self, seclist):
         """Return boolean vector which indexes where segments in seclist
@@ -925,9 +923,16 @@ class Cell(object):
             p /= p.sum()
             return alias_method(poss_idx, p, nidx)
 
-    def enable_extracellular_stimulation(self, electrode, t_ext=None, n=1, seed=None):
+    def enable_extracellular_stimulation(self, electrode, t_ext=None, n=1, model='inf'):
         """
         Enable extracellular stimulation with 'extracellular' mechanism.
+        Extracellular potentials are computed from the electrode currents using the pointsource approximation.
+        If 'model' is 'inf' (default), potentials are computed as ():
+
+            $V_e(r_i) = \sum_n \frac{I_n}{4 \pi \sigma |r_i - r_n|}$
+
+        If
+
 
         Parameters
         ----------
@@ -935,10 +940,10 @@ class Cell(object):
             Electrode object with stimulating currents
         t_ext: np.ndarray or list
             Time im ms corrisponding to step changes in the provided currents. If None, currents are assumed to have
-            the same time steps as neuron simulation.
+            the same time steps as NEURON simulation.
         n: int
             Points per electrode to compute spatial averaging
-        seed: int
+        model: int
             Random seed. If None, a seed is randomly generated.
 
         Returns
@@ -977,7 +982,7 @@ class Cell(object):
             for electrode in electrodes:
                 if np.any(np.any(electrode.probe.currents != 0)):
                     electrode.probe.points_per_electrode = int(n)
-                    ve = electrode.probe.compute_field(cell_mid_points, seed=seed)
+                    ve = electrode.probe.compute_field(cell_mid_points)
                     if len(electrode.probe.currents.shape) == 1:
                         ve = ve[:, np.newaxis]
                     v_ext += ve

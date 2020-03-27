@@ -13,7 +13,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 """
-from __future__ import division
+
 import unittest
 import numpy as np
 from LFPy import lfpcalc
@@ -23,7 +23,6 @@ class testLfpCalc(unittest.TestCase):
     test class LFPy.lfpcalc
     """
     def test_return_dist_from_segment(self):
-        print('Test LFPcalc')
         cell = DummyCell()
         dist, clostest_point = lfpcalc.return_dist_from_segments(
                                            cell.xstart, cell.ystart,

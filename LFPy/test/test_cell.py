@@ -15,7 +15,6 @@ GNU General Public License for more details.
 
 """
 
-from __future__ import division
 import os
 import posixpath
 import sys
@@ -42,7 +41,6 @@ class testCell(unittest.TestCase):
     """
 
     def test_cell_tvec_00(self):
-        print('Test cell')
         stickParams = {
             'dt' : 2**-3,
             'tstart' : 0.,

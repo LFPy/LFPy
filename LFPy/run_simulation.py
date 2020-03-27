@@ -14,7 +14,7 @@ GNU General Public License for more details.
 
 '''
 
-from __future__ import division
+
 from time import time
 import numpy as np
 import neuron

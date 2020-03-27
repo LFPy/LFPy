@@ -14,7 +14,7 @@ GNU General Public License for more details.
 
 """
 
-from __future__ import division
+
 import sys
 import warnings
 import numpy as np
@@ -233,12 +233,8 @@ class RecExtElectrode(object):
             self.anisotropic = False
 
         if probe is None:
-            if x is None:
-                x = np.array([0])
-            if y is None:
-                y = np.array([0])
-            if z is None:
-                z = np.array([0])
+            assert x is not None and y is not None and z is not None, "Provide either a 'probe' or the " \
+                                                                      "'x', 'y', and 'z'"
             if type(x) in [float, int]:
                 self.x = np.array([x])
             else:
@@ -504,7 +500,7 @@ class RecExtElectrode(object):
 
         # extract random points for each electrode
         if self.n > 1:
-            points = self.probe.get_random_points_inside(self.n, seed=self.seedvalue)
+            points = self.probe.get_random_points_inside(self.n)
             for i, p in enumerate(points):
                 #fill in with contact average
                 self.mapping[i] = loop_over_points(p) #lfp_e.mean(axis=0)

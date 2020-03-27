@@ -14,7 +14,6 @@ GNU General Public License for more details.
 
 """
 
-from __future__ import division
 import sys
 import os
 import posixpath
@@ -38,7 +37,6 @@ class testPointProcess(unittest.TestCase):
     test class LFPy.PointProcess
     """
     def test_PointProcess_00(self):
-        print('Test point process')
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
                                                  'ball_and_sticks.hoc'))
         pp = LFPy.PointProcess(cell=cell, idx=0)
@@ -51,7 +49,6 @@ class testSynapse(unittest.TestCase):
     test class LFPy.Synapse
     """
     def test_Synapse_00(self):
-        print('Test synapse')
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
                                                  'ball_and_sticks.hoc'))
         syn = LFPy.Synapse(cell=cell, idx=0, syntype='ExpSynI',
@@ -242,7 +239,6 @@ class testStimIntElectrode(unittest.TestCase):
     test class LFPy.StimIntElectrode
     """
     def test_StimIntElectrode_00(self):
-        print('Test stim intracellular electrode')
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
                                                  'ball_and_sticks.hoc'))
         stim = LFPy.StimIntElectrode(cell=cell, idx=0, pptype='IClamp',

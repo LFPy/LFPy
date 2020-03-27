@@ -14,7 +14,7 @@ GNU General Public License for more details.
 
 """
 
-from __future__ import division
+
 import os
 import unittest
 import numpy as np
@@ -26,7 +26,6 @@ class testTools(unittest.TestCase):
     test LFPy.tools methods
     """
     def test_tools_load_00(self):
-        print('Test tools')
         filename = 'test.cpickle'
         x = object()
         f = open(filename, 'wb')

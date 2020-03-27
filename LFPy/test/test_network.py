@@ -14,7 +14,7 @@ GNU General Public License for more details.
 
 """
 
-from __future__ import division
+
 import os
 import unittest
 import numpy as np
@@ -28,7 +28,6 @@ class testNetworkPopulation(unittest.TestCase):
     class LFPy.NetworkPopulation test suite
     """
     def test_NetworkPopulation_00(self):
-        print('Test network')
         cellParameters = dict(
             morphology=os.path.join(LFPy.__path__[0], 'test', 'ball_and_sticks_w_lists.hoc'),
             templatefile=os.path.join(LFPy.__path__[0], 'test', 'ball_and_stick_template.hoc'),

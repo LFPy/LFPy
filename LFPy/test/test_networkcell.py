@@ -14,7 +14,7 @@ GNU General Public License for more details.
 
 """
 
-from __future__ import division
+
 import sys
 import os
 import posixpath
@@ -40,7 +40,6 @@ class testNetworkCell(unittest.TestCase):
 
     """
     def test_cell_tvec_00(self):
-        print('Test network cell')
         stickParams = {
             'dt' : 2**-3,
             'tstart' : 0.,
