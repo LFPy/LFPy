@@ -286,7 +286,7 @@ class RecExtElectrode(object):
 
             positions = np.array([self.x, self.y, self.z]).T
             probe_info = {'pos': positions, 'description': 'custom', 'size': self.r, 'shape': self.contact_shape,
-                          'type': 'wire'}  # add mea type
+                          'type': 'wire', 'center': False}  # add mea type
             self.probe = mu.MEA(positions=positions, info=probe_info, normal=self.N, sigma=self.sigma)
         else:
             assert isinstance(probe, mu.core.MEA), "'probe' should be a MEAutility MEA object"
