@@ -19,6 +19,7 @@ import sys
 import warnings
 import numpy as np
 import MEAutility as mu
+from copy import deepcopy
 from . import lfpcalc, tools
 
 
@@ -290,7 +291,7 @@ class RecExtElectrode(object):
             self.probe = mu.MEA(positions=positions, info=probe_info, normal=self.N, sigma=self.sigma)
         else:
             assert isinstance(probe, mu.core.MEA), "'probe' should be a MEAutility MEA object"
-            self.probe = probe
+            self.probe = deepcopy(probe)
             self.x = probe.positions[:, 0]
             self.y = probe.positions[:, 1]
             self.z = probe.positions[:, 2]
@@ -503,7 +504,8 @@ class RecExtElectrode(object):
             points = self.probe.get_random_points_inside(self.n)
             for i, p in enumerate(points):
                 #fill in with contact average
-                self.mapping[i] = loop_over_points(p) #lfp_e.mean(axis=0)
+                self.mapping[i] = loop_over_points(p)
+            self.recorded_points = points
         else:
             for i, (x, y, z) in enumerate(zip(self.x, self.y, self.z)):
                 self.mapping[i] = self.lfp_method(self.cell,
@@ -513,7 +515,7 @@ class RecExtElectrode(object):
                                                   r_limit = self.r_limit,
                                                   sigma=self.sigma,
                                                   **kwargs)
-
+            self.recorded_points = np.array([self.x, self.y, self.z]).T
 
 
 class RecMEAElectrode(RecExtElectrode):
