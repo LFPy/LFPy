@@ -924,11 +924,14 @@ class Cell(object):
             return alias_method(poss_idx, p, nidx)
 
     def enable_extracellular_stimulation(self, electrode, t_ext=None, n=1, model='inf'):
-        """
+        r"""
         Enable extracellular stimulation with 'extracellular' mechanism.
-        Extracellular potentials are computed from the electrode currents using the pointsource approximation.
-        If 'model' is 'inf' (default), potentials are computed as (:math:`r_i` is the position of a comparment i,
-        :math:`r_e` is the position of an elextrode e, :math:`sigma` is the conductivity of the medium):
+        Extracellular potentials are computed from the electrode currents
+        using the pointsource approximation.
+        If 'model' is 'inf' (default), potentials are computed as
+        (:math:`r_i` is the position of a comparment i,
+        :math:`r_e` is the position of an elextrode e, :math:`\sigma` is the
+        conductivity of the medium):
 
         .. math::
             V_e(r_i) = \sum_n \frac{I_n}{4 \pi \sigma |r_i - r_n|}

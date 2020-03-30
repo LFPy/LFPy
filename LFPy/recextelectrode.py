@@ -517,7 +517,7 @@ class RecExtElectrode(object):
 
 
 class RecMEAElectrode(RecExtElectrode):
-    """class RecMEAElectrode
+    r"""class RecMEAElectrode
 
     Electrode class that represents an extracellular in vitro slice recording
     as a Microelectrode Array (MEA). Inherits RecExtElectrode class
@@ -552,8 +552,8 @@ class RecMEAElectrode(RecExtElectrode):
         Thickness in um of neural tissue layer containing current
         the current sources (i.e., in vitro slice or cortex)
     z_shift : float, int
-        Height in um of neural tissue layer bottom. If e.g., top of neural tissue
-        layer should be z=0, use z_shift=-h. Defaults to z_shift = 0, so
+        Height in um of neural tissue layer bottom. If e.g., top of neural
+        tissue layer should be z=0, use z_shift=-h. Defaults to z_shift = 0, so
         that the neural tissue layer extends from z=0 to z=h.
     squeeze_cell_factor : float or None
         Factor to squeeze the cell in the z-direction. This is

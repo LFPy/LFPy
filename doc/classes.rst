@@ -4,7 +4,7 @@ Module :mod:`LFPy`
     :members:
     :show-inheritance:
     :undoc-members:
-    
+
     class :class:`Cell`
     ===================
     .. autoclass:: Cell
@@ -53,6 +53,13 @@ Module :mod:`LFPy`
         :members:
         :show-inheritance:
         :undoc-members:
+
+        class :class:`RecMEAElectrode`
+        ==============================
+        .. autoclass:: RecMEAElectrode
+            :members:
+            :show-inheritance:
+            :undoc-members:
 
     class :class:`Network`
     ======================

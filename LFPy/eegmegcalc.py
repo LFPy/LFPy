@@ -1244,16 +1244,16 @@ class MEG(object):
     under the assumption of negligible magnetic induction effects (Nunez and
     Srinivasan, Oxford University Press, 2006):
 
-    .. math:: \mathbf{H} = \\frac{\\mathbf{p} \\times \\mathbf{R}}{4 \pi R^3}
+    .. math:: \\mathbf{H} = \\frac{\\mathbf{p} \\times \\mathbf{R}}{4 \\pi R^3}
 
-    where :math:`\mathbf{p}` is the current dipole moment, :math:`\mathbf{R}`
+    where :math:`\mathbf{p}` is the current dipole moment, :math:`\\mathbf{R}`
     the vector between dipole source location and measurement location, and
-    :math:`R=|\mathbf{R}|`
+    :math:`R=|\\mathbf{R}|`
 
-    Note that the magnetic field :math:`\mathbf{H}` is related to the magnetic
-    field :math:`\mathbf{B}` as :math:`\mu_0 \mathbf{H} = \mathbf{B}-\mathbf{M}`
-    where :math:`\mu_0` is the permeability of free space (very close to
-    permebility of biological tissues). :math:`\mathbf{M}` denotes material
+    Note that the magnetic field :math:`\\mathbf{H}` is related to the magnetic
+    field :math:`\\mathbf{B}` as :math:`\\mu_0 \\mathbf{H} = \\mathbf{B}-\\mathbf{M}`
+    where :math:`\\mu_0` is the permeability of free space (very close to
+    permebility of biological tissues). :math:`\\mathbf{M}` denotes material
     magnetization (also ignored)
 
 
@@ -1264,7 +1264,7 @@ class MEG(object):
         devices where magnetic field of current dipole moments is calculated.
         In unit of (µm)
     mu : float
-        Permeability. Default is permeability of vacuum (mu_0 = 4*pi*1E-7 T*m/A)
+        Permeability. Default is permeability of vacuum (:math:`\\mu_0 = 4*\\pi*10^{-7}` T*m/A)
 
 
     Examples
