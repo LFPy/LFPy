@@ -41,28 +41,28 @@ class testRecExtElectrode(unittest.TestCase):
     def test_method_pointsource(self):
         #create LFPs using LFPy-model
         LFP_LFPy = stickSimulation(method='pointsource')
-    
+
         #create LFPs using the analytical approach
         time = np.linspace(0, 100, 100*2**6+1)
         R = np.ones(11)*100
         Z = np.linspace(1000, 0, 11)
-    
+
         LFP_analytic = np.empty((R.size, time.size))
         for i in range(R.size):
             LFP_analytic[i, ] = analytical_LFP(time, electrodeR=R[i],
                                                     electrodeZ=Z[i])
         np.testing.assert_allclose(LFP_analytic, LFP_LFPy, rtol=0,
                                    atol=abs(LFP_analytic).max() / 10.)
-    
+
     def test_method_linesource(self):
         #create LFPs using LFPy-model
         LFP_LFPy = stickSimulation(method='linesource')
-    
+
         #create LFPs using the analytical approach
         time = np.linspace(0, 100, 100*2**6+1)
         R = np.ones(11)*100
         Z = np.linspace(1000, 0, 11)
-    
+
         LFP_analytic = np.empty((R.size, time.size))
         for i in range(R.size):
             LFP_analytic[i, ] = analytical_LFP(time, electrodeR=R[i],
@@ -70,16 +70,16 @@ class testRecExtElectrode(unittest.TestCase):
         np.testing.assert_allclose(LFP_analytic, LFP_LFPy, rtol=0,
                                    atol=abs(LFP_analytic).max() / 10.)
 
-    
+
     def test_method_soma_as_point(self):
         #create LFPs using LFPy-model
         LFP_LFPy = stickSimulation(method='soma_as_point')
-    
+
         #create LFPs using the analytical approach
         time = np.linspace(0, 100, 100*2**6+1)
         R = np.ones(11)*100
         Z = np.linspace(1000, 0, 11)
-    
+
         LFP_analytic = np.empty((R.size, time.size))
         for i in range(R.size):
             LFP_analytic[i, ] = analytical_LFP(time, electrodeR=R[i],
@@ -87,17 +87,17 @@ class testRecExtElectrode(unittest.TestCase):
         np.testing.assert_allclose(LFP_analytic, LFP_LFPy, rtol=0,
                                    atol=abs(LFP_analytic).max() / 10.)
 
-    
-    
+
+
     def test_method_pointsource_dotprodcoeffs(self):
         #create LFPs using LFPy-model
         LFP_LFPy = stickSimulationDotprodcoeffs(method='pointsource')
-    
+
         #create LFPs using the analytical approach
         time = np.linspace(0, 100, 100*2**6+1)
         R = np.ones(11)*100
         Z = np.linspace(1000, 0, 11)
-    
+
         LFP_analytic = np.empty((R.size, time.size))
         for i in range(R.size):
             LFP_analytic[i, ] = analytical_LFP(time, electrodeR=R[i],
@@ -105,16 +105,16 @@ class testRecExtElectrode(unittest.TestCase):
         np.testing.assert_allclose(LFP_analytic, LFP_LFPy, rtol=0,
                                    atol=abs(LFP_analytic).max() / 10.)
 
-    
+
     def test_method_linesource_dotprodcoeffs(self):
         #create LFPs using LFPy-model
         LFP_LFPy = stickSimulationDotprodcoeffs(method='linesource')
-    
+
         #create LFPs using the analytical approach
         time = np.linspace(0, 100, 100*2**6+1)
         R = np.ones(11)*100
         Z = np.linspace(1000, 0, 11)
-    
+
         LFP_analytic = np.empty((R.size, time.size))
         for i in range(R.size):
             LFP_analytic[i, ] = analytical_LFP(time, electrodeR=R[i],
@@ -122,16 +122,16 @@ class testRecExtElectrode(unittest.TestCase):
         np.testing.assert_allclose(LFP_analytic, LFP_LFPy, rtol=0,
                                    atol=abs(LFP_analytic).max() / 10.)
 
-    
+
     def test_method_soma_as_point_dotprodcoeffs(self):
         #create LFPs using LFPy-model
         LFP_LFPy = stickSimulationDotprodcoeffs(method='soma_as_point')
-    
+
         #create LFPs using the analytical approach
         time = np.linspace(0, 100, 100*2**6+1)
         R = np.ones(11)*100
         Z = np.linspace(1000, 0, 11)
-    
+
         LFP_analytic = np.empty((R.size, time.size))
         for i in range(R.size):
             LFP_analytic[i, ] = analytical_LFP(time, electrodeR=R[i],
@@ -139,17 +139,17 @@ class testRecExtElectrode(unittest.TestCase):
         np.testing.assert_allclose(LFP_analytic, LFP_LFPy, rtol=0,
                                    atol=abs(LFP_analytic).max() / 10.)
 
-    
+
     def test_method_pointsource_contact_average_r10n100(self):
         #create LFPs using LFPy-model
         LFP_LFPy = stickSimulationAveragingElectrode(
             contactRadius=10, contactNPoints=100, method='soma_as_point')
-    
+
         #create LFPs using the analytical approach
         time = np.linspace(0, 100, 100*2**6+1)
         R = np.ones(11)*100
         Z = np.linspace(1000, 0, 11)
-    
+
         LFP_analytic = np.empty((R.size, time.size))
         for i in range(R.size):
             LFP_analytic[i, ] = analytical_LFP(time, electrodeR=R[i],
@@ -157,7 +157,7 @@ class testRecExtElectrode(unittest.TestCase):
         np.testing.assert_allclose(LFP_analytic, LFP_LFPy, rtol=0,
                                    atol=abs(LFP_analytic).max() / 10.)
 
-    
+
     def test_method_linesource_contact_average_r10n100(self):
         #create LFPs using LFPy-model
         LFP_LFPy = stickSimulationAveragingElectrode(
@@ -175,17 +175,17 @@ class testRecExtElectrode(unittest.TestCase):
         np.testing.assert_allclose(LFP_analytic, LFP_LFPy, rtol=0,
                                    atol=abs(LFP_analytic).max() / 10.)
 
-    
+
     def test_method_soma_as_point_contact_average_r10n100(self):
         #create LFPs using LFPy-model
         LFP_LFPy = stickSimulationAveragingElectrode(
             contactRadius=10, contactNPoints=100, method='soma_as_point')
-    
+
         #create LFPs using the analytical approach
         time = np.linspace(0, 100, 100*2**6+1)
         R = np.ones(11)*100
         Z = np.linspace(1000, 0, 11)
-    
+
         LFP_analytic = np.empty((R.size, time.size))
         for i in range(R.size):
             LFP_analytic[i, ] = analytical_LFP(time, electrodeR=R[i],
@@ -607,29 +607,42 @@ class testRecExtElectrode(unittest.TestCase):
             'z' : np.zeros(2),
         }
 
-        electrode1 = LFPy.RecExtElectrode(**electrodeParams)
-        stick1 = LFPy.Cell(**stickParams)
-        stick1.set_pos(z=-stick1.zstart[0])
-        v1, t_ext1 = electrode1.probe.set_current_pulses(0, width1=0.1, amp1=10000, dt=stick1.dt,
-                                                         t_stop=stick1.tstop, interpulse=0.2)
-        stick1.enable_extracellular_stimulation(electrode1, t_ext=t_ext1)
-        stick1.simulate(electrode=electrode1,
-                        rec_imem=True, rec_vmem=True)
+        def sim1():
+            electrode1 = LFPy.RecExtElectrode(**electrodeParams)
+            stick1 = LFPy.Cell(**stickParams)
+            stick1.set_pos(z=-stick1.zstart[0])
+            v1, t_ext1 = electrode1.probe.set_current_pulses(0, width1=0.1,
+                                                             amp1=10000,
+                                                             dt=stickParams['dt'],
+                                                             t_stop=stick1.tstop,
+                                                             interpulse=0.2)
+            stick1.enable_extracellular_stimulation(electrode1, t_ext=t_ext1)
+            stick1.simulate(electrode=electrode1,
+                            rec_imem=True, rec_vmem=True)
+            neuron.h('forall delete_section()')
+            return v1, electrode1.LFP, stick1.vmem
 
-        electrode2 = LFPy.RecExtElectrode(**electrodeParams)
-        stick2 = LFPy.Cell(**stickParams)
-        stick2.set_pos(z=-stick2.zstart[0])
-        v2, t_ext2 = electrode2.probe.set_current_pulses(0, width1=0.1, amp1=10000, dt=stick1.dt,
-                                                         t_stop=stick2.tstop, interpulse=0.2)
-        stick2.enable_extracellular_stimulation(electrode2, t_ext=t_ext2, n=10)
-        stick2.simulate(electrode=electrode2,
-                        rec_imem=True, rec_vmem=True)
+        def sim2():
+            electrode2 = LFPy.RecExtElectrode(**electrodeParams)
+            stick2 = LFPy.Cell(**stickParams)
+            stick2.set_pos(z=-stick2.zstart[0])
+            v2, t_ext2 = electrode2.probe.set_current_pulses(0, width1=0.1,
+                                                             amp1=10000,
+                                                             dt=stickParams['dt'],
+                                                             t_stop=stick2.tstop,
+                                                             interpulse=0.2)
+            stick2.enable_extracellular_stimulation(electrode2, t_ext=t_ext2, n=10)
+            stick2.simulate(electrode=electrode2,
+                            rec_imem=True, rec_vmem=True)
+            neuron.h('forall delete_section()')
+            return v2, electrode2.LFP, stick2.vmem
+
+        v1, LFP1, vmem1 = sim1()
+        v2, LFP2, vmem2 = sim2()
 
         # Test that distant electrode is independent of choice of method
         np.testing.assert_almost_equal(v1, v2)
 
-        np.testing.assert_almost_equal(electrode1.LFP,
-                                       electrode1.LFP)
+        np.testing.assert_almost_equal(LFP1, LFP2)
 
-        np.testing.assert_almost_equal(stick1.vmem,
-                                       stick2.vmem)
+        np.testing.assert_almost_equal(vmem1, vmem2)
