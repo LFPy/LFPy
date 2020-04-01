@@ -887,8 +887,8 @@ class Cell(object):
         >>> cell = LFPy.Cell(morphology=join('cells', 'cells', 'j4a.hoc'))
         >>> cell.set_rotation(x=4.99, y=-4.33, z=3.14)
         >>> idx = cell.get_rand_idx_area_and_distribution_norm(nidx=10000,
-                                                           fun=ss.norm,
-                                                           funargs=dict(loc=0, scale=200))
+                                                               fun=ss.norm,
+                                                               funargs=dict(loc=0, scale=200))
         >>> bins = np.arange(-30, 120)*10
         >>> plt.hist(cell.zmid[idx], bins=bins, alpha=0.5)
         >>> plt.show()
@@ -947,12 +947,14 @@ class Cell(object):
         electrode: RecExtElectrode
             Electrode object with stimulating currents
         t_ext: np.ndarray or list
-            Time im ms corrisponding to step changes in the provided currents. If None, currents are assumed to have
+            Time im ms corrisponding to step changes in the provided currents.
+            If None, currents are assumed to have
             the same time steps as NEURON simulation.
         n: int
             Points per electrode to compute spatial averaging
         model: str
-            'inf' or 'semi'. If 'inf' the medium is assumed to be infinite and homogeneous. If 'semi', the method of
+            'inf' or 'semi'. If 'inf' the medium is assumed to be infinite and
+            homogeneous. If 'semi', the method of
             images is used.
 
         Returns
