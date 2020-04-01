@@ -51,7 +51,7 @@ def plot_EEG_sphere(fig, eeg, x_eeg, y_eeg, z_eeg):
                            rstride=1, cstride=1, facecolors=clrs,
                            linewidth=0, antialiased=False)
 
-    ax.set_aspect('equal')
+    #ax.set_aspect('equal') # Raises NotImplementedError in MPL currently
     ax.axis('off')
     ax.set_xlim3d(-65000, 65000)
     ax.set_ylim3d(-65000, 65000)

@@ -14,7 +14,7 @@ GNU General Public License for more details.
 
 """
 
-from __future__ import division
+
 import os
 import unittest
 import numpy as np

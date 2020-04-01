@@ -13,7 +13,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 """
-from __future__ import division
+
 import unittest
 import numpy as np
 from LFPy import lfpcalc

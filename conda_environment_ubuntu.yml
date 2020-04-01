@@ -13,3 +13,5 @@ dependencies:
   - neuron=*=mpi_*
   - pytest
   - mpi4py
+  - MEAutility>=1.4.2
+

@@ -14,7 +14,7 @@ GNU General Public License for more details.
 
 """
 
-from __future__ import division
+
 import unittest
 import numpy as np
 import scipy.stats as st
@@ -39,5 +39,3 @@ class testInputGenerators(unittest.TestCase):
         self.assertTrue(len(times) == n)
         for t in times:
             self.assertTrue((t.min() >= tstart) & (t.max() <= tstop))
-        
-        

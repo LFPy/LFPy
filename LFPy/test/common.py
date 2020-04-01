@@ -16,7 +16,7 @@ GNU General Public License for more details.
 import os
 import numpy as np
 from scipy.integrate import quad
-from scipy import real, imag
+from numpy import real, imag
 import LFPy
 import neuron
 
@@ -114,7 +114,7 @@ def stickSimulationAveragingElectrode(contactRadius, contactNPoints, method):
 
     stick = LFPy.Cell(**stickParams)
     stick.set_pos(z=-stick.zstart[0])
-    
+
     synapse = LFPy.StimIntElectrode(stick, stick.get_closest_idx(0, 0, 1000),
                            **stimParams)
     stick.simulate(electrode, rec_imem=True, rec_vmem=True)
@@ -160,7 +160,7 @@ def stickSimulationDotprodcoeffs(method):
 
     stick = LFPy.Cell(**stickParams)
     stick.set_pos(z=-stick.zstart[0])
-    
+
     #dummy variables for mapping
     stick.imem = np.eye(stick.totnsegs)
     stick.tvec = np.arange(stick.totnsegs)*stick.dt
@@ -279,4 +279,3 @@ def complex_quadrature(func, a, b, **kwargs):
     real_integral = quad(real_func, a, b, **kwargs)
     imag_integral = quad(imag_func, a, b, **kwargs)
     return real_integral[0] + 1j*imag_integral[0]
-
