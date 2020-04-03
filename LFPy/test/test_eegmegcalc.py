@@ -165,7 +165,6 @@ class testFourSphereVolumeConductor(unittest.TestCase):
         radii3 = [1., 2., 1.1, 8.]
         radii4 = [1., 2., 4., 1.]
         sigmas = [1., 2., 4., 8.]
-        # rz1 = np.array([0., 0., .9])
         r_el = np.array([[0., 0., 1.5]])
         with np.testing.assert_raises(RuntimeError):
             LFPy.FourSphereVolumeConductor(radii1, sigmas, r_el)
@@ -183,7 +182,6 @@ class testFourSphereVolumeConductor(unittest.TestCase):
         sigmas2 = [-1., 2., 4., 8.]
         sigmas3 = [1., 2., -4., 8.]
         sigmas4 = [1., 2., 4., -8.]
-        # rz1 = np.array([0., 0., .9])
         r_el = np.array([[0., 0., 1.5]])
         with np.testing.assert_raises(ValueError):
             LFPy.FourSphereVolumeConductor(radii, sigmas1, r_el)
@@ -198,7 +196,6 @@ class testFourSphereVolumeConductor(unittest.TestCase):
         '''Test that ValueError is raised if electrode outside head'''
         radii = [1., 2., 4., 10.]
         sigmas = [1., 2., 4., 8.]
-        # rz1 = np.array([0., 0., .9])
         r_el1 = np.array([[0., 0., 15.]])
         r_el2 = np.array([[0., 0., 1.5], [12., 0., 0.]])
         with np.testing.assert_raises(ValueError):
