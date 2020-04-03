@@ -1246,7 +1246,7 @@ class MEG(object):
 
     .. math:: \\mathbf{H} = \\frac{\\mathbf{p} \\times \\mathbf{R}}{4 \\pi R^3}
 
-    where :math:`\mathbf{p}` is the current dipole moment, :math:`\\mathbf{R}`
+    where :math:`\\mathbf{p}` is the current dipole moment, :math:`\\mathbf{R}`
     the vector between dipole source location and measurement location, and
     :math:`R=|\\mathbf{R}|`
 

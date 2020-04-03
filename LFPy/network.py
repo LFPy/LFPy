@@ -947,6 +947,10 @@ class Network(object):
         except AssertionError:
             raise AssertionError('rec_pop_contributions can not be True when electrode is None')
 
+        # raise an Exception if variable_dt == True and dt > 1E-8
+        if (variable_dt == True) and (self.dt > 1E-8):
+            raise Exception('dt must be less <=1E-8 for variable timestep methods (variable_dt=True)')
+
         for name in self.population_names:
             for cell in self.populations[name].cells:
                 cell._set_soma_volt_recorder()
@@ -1154,7 +1158,7 @@ def _run_simulation(network, cvode, variable_dt=False, atol=0.001):
     # time resolution
     neuron.h.dt = network.dt
 
-    #don't know if this is the way to do, but needed for variable dt method
+    # needed for variable dt method
     if variable_dt:
         cvode.active(1)
         cvode.atol(atol)
@@ -1326,8 +1330,8 @@ def _run_simulation_with_electrode(network, cvode,
     # Initialize NEURON simulations of cell object
     neuron.h.dt = network.dt
 
-    #needed for variable dt method
-    if network.dt <= 1E-8:
+    # needed for variable dt method
+    if variable_dt:
         cvode.active(1)
         cvode.atol(atol)
     else:

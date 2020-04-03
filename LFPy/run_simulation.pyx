@@ -149,8 +149,8 @@ def _run_simulation_with_electrode(cell, cvode, electrode=None,
     # Initialize NEURON simulations of cell object
     neuron.h.dt = dt
 
-    #don't know if this is the way to do, but needed for variable dt method
-    if cell.dt <= 1E-8:
+    # needed for variable dt method
+    if variable_dt:
         cvode.active(1)
         cvode.atol(atol)
 
