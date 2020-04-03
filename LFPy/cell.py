@@ -1087,8 +1087,11 @@ class Cell(object):
         if len(rec_variables) > 0:
             self._set_variable_recorders(rec_variables)
 
+        # raise an Exception if variable_dt == True and dt > 1E-8
+        if (variable_dt == True) and (self.dt > 1E-8):
+            raise Exception('dt must be less <=1E-8 for variable timestep methods (variable_dt=True)')
 
-        #run fadvance until t >= tstop, and calculate LFP if asked for
+        # run fadvance until t >= tstop, and calculate LFP if asked for
         if electrode is None and dotprodcoeffs is None and not rec_current_dipole_moment:
             if not rec_imem and self.verbose:
                 print("rec_imem = %s, membrane currents will not be recorded!"
