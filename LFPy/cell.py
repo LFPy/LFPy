@@ -215,7 +215,7 @@ class Cell(object):
                 raise Exception("Could not recognize Cell keyword argument morphology as neuron.h.SectionList instance")
 
             # instantiate 3D geometry of all sections
-            neuron.h.define_shape()
+            # neuron.h.define_shape()
             # set some additional attributes
             self._create_sectionlists_from_morphology_value()
 
@@ -1062,7 +1062,6 @@ class Cell(object):
             if key in ['rec_isyn', 'rec_vmemsyn', 'rec_istim', 'rec_vmemstim']:
                 raise DeprecationWarning('Cell.simulate parameter {} is deprecated.'.format(key))
 
-
         self._set_soma_volt_recorder()
         self._collect_tvec()
 
@@ -1088,8 +1087,8 @@ class Cell(object):
             self._set_variable_recorders(rec_variables)
 
         # raise an Exception if variable_dt == True and dt > 1E-8
-        if (variable_dt == True) and (self.dt > 1E-8):
-            raise Exception('dt must be less <=1E-8 for variable timestep methods (variable_dt=True)')
+        # if (variable_dt == True) and (self.dt > 1E-8):
+        #     raise Exception('dt must be less <=1E-8 for variable timestep methods (variable_dt=True)')
 
         # run fadvance until t >= tstop, and calculate LFP if asked for
         if electrode is None and dotprodcoeffs is None and not rec_current_dipole_moment:

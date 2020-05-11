@@ -30,6 +30,7 @@ def _run_simulation(cell, cvode, variable_dt=False, atol=0.001):
     # variable dt method
     if variable_dt:
         cvode.active(1)
+        # neuron.h.cvode_active(True)
         cvode.atol(atol)
     else:
         cvode.active(0)    
@@ -46,7 +47,7 @@ def _run_simulation(cell, cvode, variable_dt=False, atol=0.001):
     
     # Starting simulation at tstart
     neuron.h.t = cell.tstart
-    
+
     cell._loadspikes()
     
     #print sim.time and realtime factor at intervals
@@ -57,7 +58,8 @@ def _run_simulation(cell, cvode, variable_dt=False, atol=0.001):
         interval = 1000. / cell.dt
     else:
         interval = 100. / cell.dt
-    
+
+
     while neuron.h.t < cell.tstop:
         neuron.h.fadvance()
         counter += 1.
@@ -127,15 +129,26 @@ def _run_simulation_with_electrode(cell, cvode, electrode=None,
     if variable_dt:
         cvode.active(1)
         cvode.atol(atol)
+    else:
+        cvode.active(0)
+
+    # re-initialize state
+    neuron.h.finitialize(cell.v_init)
+
+    # initialize current- and record
+    if cvode.active():
+        cvode.re_init()
+    else:
+        neuron.h.fcurrent()
     
     #re-initialize state
-    neuron.h.finitialize(cell.v_init)
-    neuron.h.frecord_init() # wrong voltages t=0 for tstart < 0 otherwise
-    neuron.h.fcurrent()
+    #neuron.h.finitialize(cell.v_init)
+    neuron.h.frecord_init()  # wrong voltages t=0 for tstart < 0 otherwise
+    #neuron.h.fcurrent()
     
     #Starting simulation at tstart (which may be < 0)
     neuron.h.t = cell.tstart
-    
+
     #load spike times from NetCon
     cell._loadspikes()
     
@@ -152,22 +165,29 @@ def _run_simulation_with_electrode(cell, cvode, electrode=None,
     #temp vector to store membrane currents at each timestep
     imem = np.zeros(cell.totnsegs)
     #LFPs for each electrode will be put here during simulation
+
+    # this will fail with cvode!
     if to_memory:
         electrodesLFP = []
         for coeffs in dotprodcoeffs:
-            electrodesLFP.append(np.zeros((coeffs.shape[0],
-                                int(cell.tstop / cell.dt) + 1)))
+            if not cvode.active():
+                electrodesLFP.append(np.zeros((coeffs.shape[0],
+                                    int(cell.tstop / cell.dt) + 1)))
+            else:
+                electrodesLFP.append([])
+
     #LFPs for each electrode will be put here during simulations
     if to_file:
         #ensure right ending:
         if file_name.split('.')[-1] != 'h5':
             file_name += '.h5'
-        el_LFP_file = h5py.File(file_name, 'w')
-        i = 0
-        for coeffs in dotprodcoeffs:
-            el_LFP_file['electrode{:03d}'.format(i)] = np.zeros((coeffs.shape[0],
-                                    int(cell.tstop / cell.dt + 1)))
-            i += 1
+        if not cvode.active():
+            el_LFP_file = h5py.File(file_name, 'w')
+            i = 0
+            for coeffs in dotprodcoeffs:
+                el_LFP_file['electrode{:03d}'.format(i)] = np.zeros((coeffs.shape[0],
+                                        int(cell.tstop / cell.dt + 1)))
+                i += 1
 
     # create a 2D array representation of segment midpoints for dot product
     # with transmembrane currents when computing dipole moment
@@ -189,7 +209,13 @@ def _run_simulation_with_electrode(cell, cvode, electrode=None,
             
             if to_memory:
                 for j, coeffs in enumerate(dotprodcoeffs):
-                    electrodesLFP[j][:, tstep] = np.dot(coeffs, imem)
+                    if not cvode.active():
+                        electrodesLFP[j][:, tstep] = np.dot(coeffs, imem)
+                    else:
+                        if tstep == 0:
+                            electrodesLFP.append(np.dot(coeffs, imem))
+                        else:
+                            electrodesLFP[j] = np.vstack((electrodesLFP[j], np.dot(coeffs, imem)))
                     
             if to_file:
                 for j, coeffs in enumerate(dotprodcoeffs):
