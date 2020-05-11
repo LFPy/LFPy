@@ -59,8 +59,7 @@ def _run_simulation(cell, cvode, variable_dt=False, atol=0.001):
     else:
         interval = 100. / cell.dt
 
-
-    while neuron.h.t < cell.tstop:
+    while neuron.h.t <= cell.tstop:
         neuron.h.fadvance()
         counter += 1.
         if counter % interval == 0:
@@ -196,7 +195,7 @@ def _run_simulation_with_electrode(cell, cvode, electrode=None,
 
     
     #run fadvance until time limit, and calculate LFPs for each timestep
-    while neuron.h.t < cell.tstop:
+    while neuron.h.t <= cell.tstop:
         if neuron.h.t >= 0:
             i = 0
             for sec in cell.allseclist:
