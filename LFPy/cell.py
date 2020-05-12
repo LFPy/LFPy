@@ -308,6 +308,7 @@ class Cell(object):
 
         # initialize membrane voltage in all segments.
         neuron.h.finitialize(self.v_init)
+        self.neuron_tvec = None
 
 
     def _load_geometry(self):
@@ -1063,7 +1064,6 @@ class Cell(object):
                 raise DeprecationWarning('Cell.simulate parameter {} is deprecated.'.format(key))
 
         self._set_soma_volt_recorder()
-        self._collect_tvec()
 
         # set up integrator, use the CVode().fast_imem method by default
         # as it doesn't hurt sim speeds much if at all.
@@ -1098,11 +1098,17 @@ class Cell(object):
             _run_simulation(self, cvode, variable_dt, atol)
 
         else:
+            if variable_dt:
+                # with cvode use tvec from neuron
+                self._set_time_recorders()
             #allow using both electrode and additional coefficients:
             _run_simulation_with_electrode(self, cvode, electrode, variable_dt, atol,
                                            to_memory, to_file, file_name,
                                            dotprodcoeffs,
                                            rec_current_dipole_moment)
+
+        self._collect_tvec()
+
         # somatic trace
         if self.nsomasec >= 1:
             self.somav = np.array(self.somav)
@@ -1128,7 +1134,10 @@ class Cell(object):
         """
         Set the tvec to be a monotonically increasing numpy array after sim.
         """
-        self.tvec = np.arange(self.tstop / self.dt + 1) * self.dt
+        if self.neuron_tvec is None:
+            self.tvec = np.arange(self.tstop / self.dt + 1) * self.dt
+        else:
+            self.tvec = self.neuron_tvec
 
     def _calc_imem(self):
         """
@@ -1268,6 +1277,14 @@ class Cell(object):
                 memirec = neuron.h.Vector(int(self.tstop / self.dt+1))
                 memirec.record(seg._ref_i_membrane_, self.dt)
                 self.memireclist.append(memirec)
+
+
+    def _set_time_recorders(self):
+        """
+        Record time of simulation
+        """
+        self.neuron_tvec = neuron.h.Vector()
+        self.neuron_tvec.record(neuron.h._ref_t)
 
 
     def _set_ipas_recorders(self):

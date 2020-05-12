@@ -59,6 +59,7 @@ def _run_simulation(cell, cvode, variable_dt=False, atol=0.001):
     else:
         interval = 100. / cell.dt
 
+    tstep = 0
     while neuron.h.t <= cell.tstop:
         neuron.h.fadvance()
         counter += 1.
@@ -69,6 +70,8 @@ def _run_simulation(cell, cvode, variable_dt=False, atol=0.001):
                                                                    rtfactor))
             t0 = time()
             ti = neuron.h.t
+        tstep += 1
+    print(tstep)
 
 
 def _run_simulation_with_electrode(cell, cvode, electrode=None,
@@ -171,9 +174,7 @@ def _run_simulation_with_electrode(cell, cvode, electrode=None,
         for coeffs in dotprodcoeffs:
             if not cvode.active():
                 electrodesLFP.append(np.zeros((coeffs.shape[0],
-                                    int(cell.tstop / cell.dt) + 1)))
-            else:
-                electrodesLFP.append([])
+                                     int(cell.tstop / cell.dt) + 1)))
 
     #LFPs for each electrode will be put here during simulations
     if to_file:
@@ -202,20 +203,19 @@ def _run_simulation_with_electrode(cell, cvode, electrode=None,
                 for seg in sec:
                     imem[i] = seg.i_membrane_
                     i += 1
-
             if rec_current_dipole_moment:
                 cell.current_dipole_moment[tstep, ] = np.dot(imem, midpoints)
-            
+
             if to_memory:
                 for j, coeffs in enumerate(dotprodcoeffs):
                     if not cvode.active():
                         electrodesLFP[j][:, tstep] = np.dot(coeffs, imem)
                     else:
                         if tstep == 0:
-                            electrodesLFP.append(np.dot(coeffs, imem))
+                            electrodesLFP.append(np.dot(coeffs, imem)[:, np.newaxis])
                         else:
-                            electrodesLFP[j] = np.vstack((electrodesLFP[j], np.dot(coeffs, imem)))
-                    
+                            electrodesLFP[j] = np.hstack((electrodesLFP[j], np.dot(coeffs, imem)[:, np.newaxis]))
+
             if to_file:
                 for j, coeffs in enumerate(dotprodcoeffs):
                     el_LFP_file['electrode{:03d}'.format(j)
@@ -231,7 +231,8 @@ def _run_simulation_with_electrode(cell, cvode, electrode=None,
                                                                    rtfactor))
             t0 = time()
             ti = neuron.h.t
-    
+
+
     try:
         #calculate LFP after final fadvance()
         i = 0
