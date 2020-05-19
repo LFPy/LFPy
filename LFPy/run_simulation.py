@@ -226,7 +226,6 @@ def _run_simulation_with_electrode(cell, cvode, electrode=None,
                 for j, coeffs in enumerate(dotprodcoeffs):
                     if not cvode.active():
                         el_LFP_file['electrode{:03d}'.format(j)][:, tstep] = np.dot(coeffs, imem)
-            
             tstep += 1
         neuron.h.fadvance()
         counter += 1.
@@ -239,33 +238,29 @@ def _run_simulation_with_electrode(cell, cvode, electrode=None,
             ti = neuron.h.t
 
     # AB: this is not needed IMO: if this is run the length of LFP is one extra...
-    # try:
-    #     #calculate LFP after final fadvance()
-    #     i = 0
-    #     for sec in cell.allseclist:
-    #         for seg in sec:
-    #             imem[i] = seg.i_membrane_
-    #             i += 1
-    #
-    #     if rec_current_dipole_moment:
-    #         cell.current_dipole_moment[tstep, ] = np.dot(imem, midpoints)
-    #
-    #     if to_memory:
-    #         for j, coeffs in enumerate(dotprodcoeffs):
-    #             if not cvode.active():
-    #                 if len(electrodesLFP[j]) == tstep + 1:
-    #                     electrodesLFP[j][:, tstep] = np.dot(coeffs, imem)
-    #                 else:
-    #                     electrodesLFP[j] = np.hstack((electrodesLFP[j], np.dot(coeffs, imem)[:, np.newaxis]))
-    #             else:
-    #                 electrodesLFP[j] = np.hstack((electrodesLFP[j], np.dot(coeffs, imem)[:, np.newaxis]))
-    #     if to_file:
-    #         for j, coeffs in enumerate(dotprodcoeffs):
-    #             el_LFP_file['electrode{:03d}'.format(j)][:, tstep] = np.dot(coeffs, imem)
-    #
-    # except Exception as e:
-    #     print('error', e)
-    #     pass
+    try:
+        if not cvode.active():
+            #calculate LFP after final fadvance()
+            i = 0
+            for sec in cell.allseclist:
+                for seg in sec:
+                    imem[i] = seg.i_membrane_
+                    i += 1
+
+            if rec_current_dipole_moment:
+                cell.current_dipole_moment[tstep, ] = np.dot(imem, midpoints)
+
+            if to_memory:
+                for j, coeffs in enumerate(dotprodcoeffs):
+                    electrodesLFP[j][:, tstep] = np.dot(coeffs, imem)
+
+            if to_file:
+                for j, coeffs in enumerate(dotprodcoeffs):
+                    el_LFP_file['electrode{:03d}'.format(j)][:, tstep] = np.dot(coeffs, imem)
+
+    except Exception as e:
+        print('error', e)
+        pass
 
     # if variable_dt:
     #     if len(timesteps) > len(cell._neuron_tvec.to_python()):
