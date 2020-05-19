@@ -181,9 +181,10 @@ class Cell(object):
                     print('%s existing sections deleted from memory' % numsec)
                 neuron.h('forall delete_section()')
             else:
-                mssg = "%s sections detected! " % numsec + \
-                       "Consider setting 'delete_sections=True'"
-                warn(mssg)
+                if not isinstance(morphology, type(neuron.h.SectionList)):
+                    mssg = "%s sections detected! " % numsec + \
+                           "Consider setting 'delete_sections=True'"
+                    warn(mssg)
 
         #load morphology
         try:
@@ -1063,7 +1064,7 @@ class Cell(object):
             self._set_vpp_recorders(dt)
 
         # set time recorder from NEURON
-        self._set_time_recorders(self, dt)
+        self._set_time_recorders(dt)
 
         # run fadvance until t >= tstop, and calculate LFP if asked for
         if electrode is None and dotprodcoeffs is None and not rec_current_dipole_moment:
@@ -1284,6 +1285,7 @@ class Cell(object):
         else:
             self._neuron_tvec = neuron.h.Vector()
             self._neuron_tvec.record(neuron.h._ref_t)
+
 
     def _set_ipas_recorders(self, dt):
         """
