@@ -201,7 +201,6 @@ def _run_simulation_with_electrode(cell, cvode, electrode=None,
     #run fadvance until time limit, and calculate LFPs for each timestep
     while neuron.h.t < cell.tstop:
         if neuron.h.t >= 0:
-            timesteps.append(float(neuron.h.t))
             i = 0
             for sec in cell.allseclist:
                 for seg in sec:
@@ -238,8 +237,6 @@ def _run_simulation_with_electrode(cell, cvode, electrode=None,
                                                                    rtfactor))
             t0 = time()
             ti = neuron.h.t
-
-    timesteps = np.array(timesteps)
 
     # AB: this is not needed IMO: if this is run the length of LFP is one extra...
     # try:

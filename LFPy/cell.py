@@ -168,27 +168,22 @@ class Cell(object):
                 except AssertionError:
                     raise AssertionError('key {} not found in passive_parameters'.format(key))
 
-
         if not hasattr(neuron.h, 'd_lambda'):
             neuron.h.load_file('stdlib.hoc')    #NEURON std. library
             neuron.h.load_file('import3d.hoc')  #import 3D morphology lib
 
-        if delete_sections:
-            numsec = 0
-            for numsec, sec in enumerate(neuron.h.allsec()):
-                pass
-            if numsec > 0 and self.verbose:
-                print('%s existing sections deleted from memory' % numsec)
-            neuron.h('forall delete_section()')
-
-        #print a warning if neuron have existing sections
         numsec = 0
         for numsec, sec in enumerate(neuron.h.allsec()):
             pass
-        if numsec > 0 and self.verbose:
-            mssg = "%s sections detected! " % numsec + \
-                   "Consider setting 'delete_sections=True'"
-            warn(mssg)
+        if numsec > 0:
+            if delete_sections:
+                if self.verbose:
+                    print('%s existing sections deleted from memory' % numsec)
+                neuron.h('forall delete_section()')
+            else:
+                mssg = "%s sections detected! " % numsec + \
+                       "Consider setting 'delete_sections=True'"
+                warn(mssg)
 
         #load morphology
         try:
@@ -306,7 +301,6 @@ class Cell(object):
         # initialize membrane voltage in all segments.
         neuron.h.finitialize(self.v_init)
         self._neuron_tvec = None
-
 
     def _load_geometry(self):
         """Load the morphology-file in NEURON"""
@@ -1113,6 +1107,7 @@ class Cell(object):
         Set the tvec to be a monotonically increasing numpy array after sim.
         """
         self.tvec = self._neuron_tvec.to_python()
+        del self._neuron_tvec
 
     def _calc_imem(self):
         """
@@ -1348,6 +1343,7 @@ class Cell(object):
                 stimvrec = neuron.h.Vector()
                 stimvrec.record(seg._ref_v)
             self.stimvreclist.append(stimvrec)
+        del self._stimitorecord
 
     def _set_voltage_recorders(self, dt):
         """
@@ -1363,6 +1359,7 @@ class Cell(object):
                     memvrec = neuron.h.Vector()
                     memvrec.record(seg._ref_v)
                 self.memvreclist.append(memvrec)
+        del self._stimvtorecord
 
     def _set_current_dipole_moment_array(self, dt):
         """
