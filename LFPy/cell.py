@@ -632,6 +632,7 @@ class Cell(object):
         if not hasattr(self, 'stimvreclist'):
             self._stimvtorecord = neuron.h.List()
 
+
         i = 0
         cmd1 = 'stim = neuron.h.'
         cmd2 = '(seg.x, sec=sec)'
@@ -1108,6 +1109,7 @@ class Cell(object):
         Set the tvec to be a monotonically increasing numpy array after sim.
         """
         self.tvec = self._neuron_tvec.to_python()
+        self._neuron_tvec = None
         del self._neuron_tvec
 
     def _calc_imem(self):
@@ -1330,6 +1332,8 @@ class Cell(object):
                 stimirec = neuron.h.Vector()
                 stimirec.record(stim._ref_i)
             self.stimireclist.append(stimirec)
+        self._stimitorecord = None
+        del self._stimitorecord
 
     def _set_vpp_recorders(self, dt):
         """
@@ -1345,7 +1349,8 @@ class Cell(object):
                 stimvrec = neuron.h.Vector()
                 stimvrec.record(seg._ref_v)
             self.stimvreclist.append(stimvrec)
-        del self._stimitorecord
+        self._stimvtorecord = None
+        del self._stimvtorecord
 
     def _set_voltage_recorders(self, dt):
         """
@@ -1361,7 +1366,6 @@ class Cell(object):
                     memvrec = neuron.h.Vector()
                     memvrec.record(seg._ref_v)
                 self.memvreclist.append(memvrec)
-        del self._stimvtorecord
 
     def _set_current_dipole_moment_array(self, dt):
         """
