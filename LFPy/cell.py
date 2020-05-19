@@ -627,11 +627,10 @@ class Cell(object):
 
         if not hasattr(self, 'stimlist'):
             self.stimlist = neuron.h.List()
-        if not hasattr(self, 'stimireclist'):
+        if not hasattr(self, '_stimitorecord'):
             self._stimitorecord = neuron.h.List()
-        if not hasattr(self, 'stimvreclist'):
+        if not hasattr(self, '_stimvtorecord'):
             self._stimvtorecord = neuron.h.List()
-
 
         i = 0
         cmd1 = 'stim = neuron.h.'
