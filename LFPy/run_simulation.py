@@ -18,6 +18,7 @@ GNU General Public License for more details.
 from time import time
 import numpy as np
 import neuron
+from pathlib import Path
 
 
 def _run_simulation(cell, cvode, variable_dt=False, atol=0.001):
@@ -60,7 +61,7 @@ def _run_simulation(cell, cvode, variable_dt=False, atol=0.001):
         interval = 100. / cell.dt
 
     tstep = 0
-    while neuron.h.t <= cell.tstop:
+    while neuron.h.t < cell.tstop:
         neuron.h.fadvance()
         counter += 1.
         if counter % interval == 0:
@@ -71,7 +72,6 @@ def _run_simulation(cell, cvode, variable_dt=False, atol=0.001):
             t0 = time()
             ti = neuron.h.t
         tstep += 1
-    print(tstep)
 
 
 def _run_simulation_with_electrode(cell, cvode, electrode=None,
@@ -89,6 +89,11 @@ def _run_simulation_with_electrode(cell, cvode, electrode=None,
         import h5py
     except:
         print('h5py not found, LFP to file not possible')
+        to_file = False
+        file_name = None
+
+    if variable_dt and to_file:
+        print('LFP to file with variable_dt is not supported')
         to_file = False
         file_name = None
 
@@ -142,12 +147,9 @@ def _run_simulation_with_electrode(cell, cvode, electrode=None,
         cvode.re_init()
     else:
         neuron.h.fcurrent()
-    
-    #re-initialize state
-    #neuron.h.finitialize(cell.v_init)
+
     neuron.h.frecord_init()  # wrong voltages t=0 for tstart < 0 otherwise
-    #neuron.h.fcurrent()
-    
+
     #Starting simulation at tstart (which may be < 0)
     neuron.h.t = cell.tstart
 
@@ -173,20 +175,21 @@ def _run_simulation_with_electrode(cell, cvode, electrode=None,
         electrodesLFP = []
         for coeffs in dotprodcoeffs:
             if not cvode.active():
+                # if cvode is on lists are created on-the-fly
                 electrodesLFP.append(np.zeros((coeffs.shape[0],
                                      int(cell.tstop / cell.dt) + 1)))
 
     #LFPs for each electrode will be put here during simulations
     if to_file:
         #ensure right ending:
-        if file_name.split('.')[-1] != 'h5':
-            file_name += '.h5'
+        file_name = Path(file_name)
+        if file_name.suffix != '.h5':
+            file_name = file_name.parent / (file_name.name + '.h5')
         if not cvode.active():
             el_LFP_file = h5py.File(file_name, 'w')
             i = 0
             for coeffs in dotprodcoeffs:
-                el_LFP_file['electrode{:03d}'.format(i)] = np.zeros((coeffs.shape[0],
-                                        int(cell.tstop / cell.dt + 1)))
+                el_LFP_file['electrode{:03d}'.format(i)] = np.zeros((coeffs.shape[0], int(cell.tstop / cell.dt + 1)))
                 i += 1
 
     # create a 2D array representation of segment midpoints for dot product
@@ -194,17 +197,21 @@ def _run_simulation_with_electrode(cell, cvode, electrode=None,
     if rec_current_dipole_moment:
         midpoints = np.c_[cell.xmid, cell.ymid, cell.zmid]
 
-    
+    timesteps = []
     #run fadvance until time limit, and calculate LFPs for each timestep
-    while neuron.h.t <= cell.tstop:
+    while neuron.h.t < cell.tstop:
         if neuron.h.t >= 0:
+            timesteps.append(float(neuron.h.t))
             i = 0
             for sec in cell.allseclist:
                 for seg in sec:
                     imem[i] = seg.i_membrane_
                     i += 1
             if rec_current_dipole_moment:
-                cell.current_dipole_moment[tstep, ] = np.dot(imem, midpoints)
+                if not cvode.active():
+                    cell.current_dipole_moment[tstep, ] = np.dot(imem, midpoints)
+                else:
+                    cell.current_dipole_moment.append(np.dot(imem, midpoints))
 
             if to_memory:
                 for j, coeffs in enumerate(dotprodcoeffs):
@@ -218,8 +225,8 @@ def _run_simulation_with_electrode(cell, cvode, electrode=None,
 
             if to_file:
                 for j, coeffs in enumerate(dotprodcoeffs):
-                    el_LFP_file['electrode{:03d}'.format(j)
-                                ][:, tstep] = np.dot(coeffs, imem)
+                    if not cvode.active():
+                        el_LFP_file['electrode{:03d}'.format(j)][:, tstep] = np.dot(coeffs, imem)
             
             tstep += 1
         neuron.h.fadvance()
@@ -232,28 +239,41 @@ def _run_simulation_with_electrode(cell, cvode, electrode=None,
             t0 = time()
             ti = neuron.h.t
 
+    timesteps = np.array(timesteps)
 
-    try:
-        #calculate LFP after final fadvance()
-        i = 0
-        for sec in cell.allseclist:
-            for seg in sec:
-                imem[i] = seg.i_membrane_
-                i += 1
+    # AB: this is not needed IMO: if this is run the length of LFP is one extra...
+    # try:
+    #     #calculate LFP after final fadvance()
+    #     i = 0
+    #     for sec in cell.allseclist:
+    #         for seg in sec:
+    #             imem[i] = seg.i_membrane_
+    #             i += 1
+    #
+    #     if rec_current_dipole_moment:
+    #         cell.current_dipole_moment[tstep, ] = np.dot(imem, midpoints)
+    #
+    #     if to_memory:
+    #         for j, coeffs in enumerate(dotprodcoeffs):
+    #             if not cvode.active():
+    #                 if len(electrodesLFP[j]) == tstep + 1:
+    #                     electrodesLFP[j][:, tstep] = np.dot(coeffs, imem)
+    #                 else:
+    #                     electrodesLFP[j] = np.hstack((electrodesLFP[j], np.dot(coeffs, imem)[:, np.newaxis]))
+    #             else:
+    #                 electrodesLFP[j] = np.hstack((electrodesLFP[j], np.dot(coeffs, imem)[:, np.newaxis]))
+    #     if to_file:
+    #         for j, coeffs in enumerate(dotprodcoeffs):
+    #             el_LFP_file['electrode{:03d}'.format(j)][:, tstep] = np.dot(coeffs, imem)
+    #
+    # except Exception as e:
+    #     print('error', e)
+    #     pass
 
-        if rec_current_dipole_moment:
-            cell.current_dipole_moment[tstep, ] = np.dot(imem, midpoints)
-            
-        if to_memory:
-            for j, coeffs in enumerate(dotprodcoeffs):
-                electrodesLFP[j][:, tstep] = np.dot(coeffs, imem)
-        if to_file:
-            for j, coeffs in enumerate(dotprodcoeffs):
-                el_LFP_file['electrode{:03d}'.format(j)
-                            ][:, tstep] = np.dot(coeffs, imem)
-
-    except:
-        pass
+    # if variable_dt:
+    #     if len(timesteps) > len(cell._neuron_tvec.to_python()):
+    #         # downsample LFP
+    #         raise Exception
     
     # Final step, put LFPs in the electrode object, superimpose if necessary
     # If electrode.perCellLFP, store individual LFPs

@@ -210,16 +210,13 @@ class Cell(object):
                 # #will try to import top level cell and create sectionlist,
                 # #in case there were no morphology file loaded
                 # neuron.h.define_shape()
-                # self._create_sectionlists()
             except AssertionError:
                 raise Exception("Could not recognize Cell keyword argument morphology as neuron.h.SectionList instance")
 
             # instantiate 3D geometry of all sections
-            # neuron.h.define_shape()
+            neuron.h.define_shape()
             # set some additional attributes
-            self._create_sectionlists_from_morphology_value()
-
-
+            self._create_sectionlists()
 
         #Some parameters and lists initialised
         try:
@@ -308,7 +305,7 @@ class Cell(object):
 
         # initialize membrane voltage in all segments.
         neuron.h.finitialize(self.v_init)
-        self.neuron_tvec = None
+        self._neuron_tvec = None
 
 
     def _load_geometry(self):
@@ -355,7 +352,6 @@ class Cell(object):
 
         neuron.h.define_shape()
         self._create_sectionlists()
-
 
     def _run_custom_codes(self, custom_code, custom_fun, custom_fun_args):
         """Execute custom model code and functions with arguments"""
@@ -433,33 +429,20 @@ class Cell(object):
         """Create section lists for different kinds of sections"""
         #list with all sections
         self.allsecnames = []
-        self.allseclist = neuron.h.SectionList()
-        for sec in neuron.h.allsec():
-            self.allsecnames.append(sec.name())
-            self.allseclist.append(sec=sec)
-
-
-        #list of soma sections, assuming it is named on the format "soma*"
-        self.nsomasec = 0
-        self.somalist = neuron.h.SectionList()
-        for sec in neuron.h.allsec():
-            if sec.name().find('soma') >= 0:
-                self.somalist.append(sec=sec)
-                self.nsomasec += 1
-
-    def _create_sectionlists_from_morphology_value(self):
-        """Variant of Cell._create_sectionlists() used if keyword argument
-        morphology is a neuron.h.SectionList instance"""
-        #list with all sections
-        self.allsecnames = []
-        self.allseclist = self.morphology
-        for sec in self.allseclist:
-            self.allsecnames.append(sec.name())
+        if not isinstance(self.morphology, type(neuron.h.SectionList)):
+            self.allseclist = neuron.h.SectionList()
+            for sec in neuron.h.allsec():
+                self.allsecnames.append(sec.name())
+                self.allseclist.append(sec=sec)
+        else:
+            self.allseclist = self.morphology
+            for sec in neuron.h.allsec():
+                self.allsecnames.append(sec.name())
 
         #list of soma sections, assuming it is named on the format "soma*"
         self.nsomasec = 0
         self.somalist = neuron.h.SectionList()
-        for sec in self.allseclist:
+        for sec in neuron.h.allsec():
             if sec.name().find('soma') >= 0:
                 self.somalist.append(sec=sec)
                 self.nsomasec += 1
@@ -650,13 +633,14 @@ class Cell(object):
         if not hasattr(self, 'stimlist'):
             self.stimlist = neuron.h.List()
         if not hasattr(self, 'stimireclist'):
-            self.stimireclist = neuron.h.List()
+            self._stimitorecord = neuron.h.List()
         if not hasattr(self, 'stimvreclist'):
-            self.stimvreclist = neuron.h.List()
+            self._stimvtorecord = neuron.h.List()
 
         i = 0
         cmd1 = 'stim = neuron.h.'
         cmd2 = '(seg.x, sec=sec)'
+        ppset = False
         for sec in self.allseclist:
             for seg in sec:
                 if i == idx:
@@ -681,29 +665,18 @@ class Cell(object):
                             raise Exception(ERRMSG)
                     self.stimlist.append(stim)
 
-                    #record current
+                    # record current
                     if record_current:
-                        stimirec = neuron.h.Vector(int(self.tstop /
-                                                       self.dt+1))
-                        stimirec.record(stim._ref_i, self.dt)
-                        self.stimireclist.append(stimirec)
-                    else:
-                        stimirec = neuron.h.Vector(0)
-                        self.stimireclist.append(stimirec)
-
+                        self._stimitorecord.append(stim)
 
                     # record potential
                     if record_potential:
-                        stimvrec = neuron.h.Vector(int(self.tstop /
-                                                      self.dt+1))
-                        stimvrec.record(seg._ref_v, self.dt)
-                        self.stimvreclist.append(stimvrec)
-                    else:
-                        stimvrec = neuron.h.Vector(0)
-                        self.stimvreclist.append(stimvrec)
-
-
+                        self._stimvtorecord.append(stim)
+                    ppset = True
+                    break
                 i += 1
+            if ppset:
+                break
 
         return self.stimlist.count() - 1
 
@@ -1063,32 +1036,40 @@ class Cell(object):
             if key in ['rec_isyn', 'rec_vmemsyn', 'rec_istim', 'rec_vmemstim']:
                 raise DeprecationWarning('Cell.simulate parameter {} is deprecated.'.format(key))
 
-        self._set_soma_volt_recorder()
 
         # set up integrator, use the CVode().fast_imem method by default
         # as it doesn't hurt sim speeds much if at all.
         cvode = neuron.h.CVode()
         try:
             cvode.use_fast_imem(1)
-        except AttributeError as ae:
+        except AttributeError:
             raise Exception('neuron.h.CVode().use_fast_imem() method not found. Please update NEURON to v.7.4 or newer')
 
-        if rec_imem:
-            self._set_imem_recorders()
-        if rec_vmem:
-            self._set_voltage_recorders()
-        if rec_ipas:
-            self._set_ipas_recorders()
-        if rec_icap:
-            self._set_icap_recorders()
-        if rec_current_dipole_moment:
-            self._set_current_dipole_moment_array()
-        if len(rec_variables) > 0:
-            self._set_variable_recorders(rec_variables)
+        if not variable_dt:
+            dt = self.dt
+        else:
+            dt = None
+        self._set_soma_volt_recorder(dt)
 
-        # raise an Exception if variable_dt == True and dt > 1E-8
-        # if (variable_dt == True) and (self.dt > 1E-8):
-        #     raise Exception('dt must be less <=1E-8 for variable timestep methods (variable_dt=True)')
+        if rec_imem:
+            self._set_imem_recorders(dt)
+        if rec_vmem:
+            self._set_voltage_recorders(dt)
+        if rec_ipas:
+            self._set_ipas_recorders(dt)
+        if rec_icap:
+            self._set_icap_recorders(dt)
+        if rec_current_dipole_moment:
+            self._set_current_dipole_moment_array(dt)
+        if len(rec_variables) > 0:
+            self._set_variable_recorders(rec_variables, dt)
+        if len(self._stimitorecord) > 0:
+            self._set_ipp_recorders(dt)
+        if len(self._stimvtorecord) > 0:
+            self._set_vpp_recorders(dt)
+
+        # set time recorder from NEURON
+        self._set_time_recorders(self, dt)
 
         # run fadvance until t >= tstop, and calculate LFP if asked for
         if electrode is None and dotprodcoeffs is None and not rec_current_dipole_moment:
@@ -1098,20 +1079,16 @@ class Cell(object):
             _run_simulation(self, cvode, variable_dt, atol)
 
         else:
-            if variable_dt:
-                # with cvode use tvec from neuron
-                self._set_time_recorders()
             #allow using both electrode and additional coefficients:
             _run_simulation_with_electrode(self, cvode, electrode, variable_dt, atol,
                                            to_memory, to_file, file_name,
-                                           dotprodcoeffs,
-                                           rec_current_dipole_moment)
-
-        self._collect_tvec()
+                                           dotprodcoeffs, rec_current_dipole_moment)
 
         # somatic trace
         if self.nsomasec >= 1:
             self.somav = np.array(self.somav)
+
+        self._collect_tvec()
 
         if rec_imem:
             self._calc_imem()
@@ -1121,6 +1098,7 @@ class Cell(object):
             self._calc_icap()
         if rec_vmem:
             self._collect_vmem()
+
         self._collect_isyn()
         self._collect_vsyn()
         self._collect_istim()
@@ -1134,10 +1112,7 @@ class Cell(object):
         """
         Set the tvec to be a monotonically increasing numpy array after sim.
         """
-        if self.neuron_tvec is None:
-            self.tvec = np.arange(self.tstop / self.dt + 1) * self.dt
-        else:
-            self.tvec = self.neuron_tvec
+        self.tvec = self._neuron_tvec.to_python()
 
     def _calc_imem(self):
         """
@@ -1240,7 +1215,7 @@ class Cell(object):
                     for ii in range(int(self.sptimeslist.o(i).size)):
                         self.netconlist.o(i).event(float(self.sptimeslist.o(i)[ii]))
 
-    def _set_soma_volt_recorder(self):
+    def _set_soma_volt_recorder(self, dt):
         """Record somatic membrane potential"""
 
         if self.nsomasec == 0:
@@ -1248,87 +1223,159 @@ class Cell(object):
                 warn('Cell instance appears to have no somatic section. '
                      'No somav attribute will be set.')
         elif self.nsomasec == 1:
-            self.somav = neuron.h.Vector(int(self.tstop / self.dt+1))
-            for sec in self.somalist:
-                self.somav.record(sec(0.5)._ref_v, self.dt)
+            if dt is not None:
+                self.somav = neuron.h.Vector(int(self.tstop / self.dt+1))
+                for sec in self.somalist:
+                    self.somav.record(sec(0.5)._ref_v, self.dt)
+            else:
+                self.somav = neuron.h.Vector()
+                for sec in self.somalist:
+                    self.somav.record(sec(0.5)._ref_v)
         elif self.nsomasec > 1:
-            self.somav = neuron.h.Vector(int(self.tstop / self.dt+1))
-            nseg = self.get_idx('soma').size
-            i, j = divmod(nseg, 2)
-            k = 1
-            for sec in self.somalist:
-                for seg in sec:
-                    if nseg==2 and k == 1:
-                        #if 2 segments, record from the first one:
-                        self.somav.record(seg._ref_v, self.dt)
-                    else:
-                        if k == i*2:
-                            #record from one of the middle segments:
+            if dt is not None:
+                self.somav = neuron.h.Vector(int(self.tstop / self.dt+1))
+                nseg = self.get_idx('soma').size
+                i, j = divmod(nseg, 2)
+                k = 1
+                for sec in self.somalist:
+                    for seg in sec:
+                        if nseg==2 and k == 1:
+                            #if 2 segments, record from the first one:
                             self.somav.record(seg._ref_v, self.dt)
-                    k += 1
+                        else:
+                            if k == i*2:
+                                #record from one of the middle segments:
+                                self.somav.record(seg._ref_v, self.dt)
+                        k += 1
+            else:
+                self.somav = neuron.h.Vector()
+                nseg = self.get_idx('soma').size
+                i, j = divmod(nseg, 2)
+                k = 1
+                for sec in self.somalist:
+                    for seg in sec:
+                        if nseg == 2 and k == 1:
+                            # if 2 segments, record from the first one:
+                            self.somav.record(seg._ref_v)
+                        else:
+                            if k == i * 2:
+                                # record from one of the middle segments:
+                                self.somav.record(seg._ref_v)
+                        k += 1
 
-    def _set_imem_recorders(self):
+    def _set_imem_recorders(self, dt):
         """
         Record membrane currents for all segments
         """
         self.memireclist = neuron.h.List()
         for sec in self.allseclist:
             for seg in sec:
-                memirec = neuron.h.Vector(int(self.tstop / self.dt+1))
-                memirec.record(seg._ref_i_membrane_, self.dt)
+                if dt is not None:
+                    memirec = neuron.h.Vector(int(self.tstop / self.dt+1))
+                    memirec.record(seg._ref_i_membrane_, self.dt)
+                else:
+                    memirec = neuron.h.Vector()
+                    memirec.record(seg._ref_i_membrane_)
                 self.memireclist.append(memirec)
 
 
-    def _set_time_recorders(self):
+    def _set_time_recorders(self, dt):
         """
         Record time of simulation
         """
-        self.neuron_tvec = neuron.h.Vector()
-        self.neuron_tvec.record(neuron.h._ref_t)
+        if dt is not None:
+            self._neuron_tvec = neuron.h.Vector(int(self.tstop / self.dt + 1))
+            self._neuron_tvec.record(neuron.h._ref_t, self.dt)
+        else:
+            self._neuron_tvec = neuron.h.Vector()
+            self._neuron_tvec.record(neuron.h._ref_t)
 
-
-    def _set_ipas_recorders(self):
+    def _set_ipas_recorders(self, dt):
         """
         Record passive membrane currents for all segments
         """
         self.memipasreclist = neuron.h.List()
         for sec in self.allseclist:
             for seg in sec:
-                memipasrec = neuron.h.Vector(int(self.tstop / self.dt+1))
-                memipasrec.record(seg._ref_i_pas, self.dt)
+                if dt is not None:
+                    memipasrec = neuron.h.Vector(int(self.tstop / self.dt+1))
+                    memipasrec.record(seg._ref_i_pas, self.dt)
+                else:
+                    memipasrec = neuron.h.Vector()
+                    memipasrec.record(seg._ref_i_pas)
                 self.memipasreclist.append(memipasrec)
 
-    def _set_icap_recorders(self):
+    def _set_icap_recorders(self, dt):
         """
         Record capacitive membrane currents for all segments
         """
         self.memicapreclist = neuron.h.List()
         for sec in self.allseclist:
             for seg in sec:
-                memicaprec = neuron.h.Vector(int(self.tstop / self.dt+1))
-                memicaprec.record(seg._ref_i_cap, self.dt)
+                if dt is not None:
+                    memicaprec = neuron.h.Vector(int(self.tstop / self.dt+1))
+                    memicaprec.record(seg._ref_i_cap, self.dt)
+                else:
+                    memicaprec = neuron.h.Vector()
+                    memicaprec.record(seg._ref_i_cap)
                 self.memicapreclist.append(memicaprec)
 
-    def _set_voltage_recorders(self):
+    def _set_ipp_recorders(self, dt):
+        """
+        Record point process current
+        """
+        self.stimireclist = neuron.h.List()
+        for stim in self._stimitorecord:
+            if dt is not None:
+                stimirec = neuron.h.Vector(int(self.tstop / self.dt + 1))
+                stimirec.record(stim._ref_i, self.dt)
+            else:
+                stimirec = neuron.h.Vector()
+                stimirec.record(stim._ref_i)
+            self.stimireclist.append(stimirec)
+
+    def _set_vpp_recorders(self, dt):
+        """
+        Record point process membrane
+        """
+        self.stimvreclist = neuron.h.List()
+        for stim in self._stimvtorecord:
+            seg = stim.get_segment()
+            if dt is not None:
+                stimvrec = neuron.h.Vector(int(self.tstop / self.dt+1))
+                stimvrec.record(seg._ref_v, self.dt)
+            else:
+                stimvrec = neuron.h.Vector()
+                stimvrec.record(seg._ref_v)
+            self.stimvreclist.append(stimvrec)
+
+    def _set_voltage_recorders(self, dt):
         """
         Record membrane potentials for all segments
         """
         self.memvreclist = neuron.h.List()
         for sec in self.allseclist:
             for seg in sec:
-                memvrec = neuron.h.Vector(int(self.tstop / self.dt+1))
-                memvrec.record(seg._ref_v, self.dt)
+                if dt is not None:
+                    memvrec = neuron.h.Vector(int(self.tstop / self.dt+1))
+                    memvrec.record(seg._ref_v, self.dt)
+                else:
+                    memvrec = neuron.h.Vector()
+                    memvrec.record(seg._ref_v)
                 self.memvreclist.append(memvrec)
 
-    def _set_current_dipole_moment_array(self):
+    def _set_current_dipole_moment_array(self, dt):
         """
         Creates container for current dipole moment, an empty
         n_timesteps x 3 `numpy.ndarray` that will be filled with values during
         the course of each simulation
         """
-        self.current_dipole_moment = np.zeros((self.tvec.size, 3))
+        if dt is not None:
+            self.current_dipole_moment = np.zeros((int(self.tstop / self.dt+1), 3))
+        else:
+            self.current_dipole_moment = []
 
-    def _set_variable_recorders(self, rec_variables):
+    def _set_variable_recorders(self, rec_variables, dt):
         """
         Create a recorder for each variable name in list
         rec_variables
@@ -1340,10 +1387,16 @@ class Cell(object):
             self.recvariablesreclist.append(variablereclist)
             for sec in self.allseclist:
                 for seg in sec:
-                    recvector = neuron.h.Vector(int(self.tstop / self.dt + 1))
+                    if dt is not None:
+                        recvector = neuron.h.Vector(int(self.tstop / self.dt + 1))
+                    else:
+                        recvector = neuron.h.Vector()
                     try:
-                        recvector.record(getattr(seg, '_ref_%s' % variable),
-                                         self.dt)
+                        if dt is not None:
+                            recvector.record(getattr(seg, '_ref_%s' % variable),
+                                             self.dt)
+                        else:
+                            recvector.record(getattr(seg, '_ref_%s' % variable))
                     except(NameError, AttributeError):
                         print('non-existing variable %s, section %s.%f' %
                                 (variable, sec.name(), seg.x))
