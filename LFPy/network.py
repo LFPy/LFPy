@@ -947,21 +947,22 @@ class Network(object):
         except AssertionError:
             raise AssertionError('rec_pop_contributions can not be True when electrode is None')
 
-        # raise an Exception if variable_dt == True and dt > 1E-8
-        if (variable_dt == True) and (self.dt > 1E-8):
-            raise Exception('dt must be less <=1E-8 for variable timestep methods (variable_dt=True)')
+        if not variable_dt:
+            dt = self.dt
+        else:
+            dt = None
 
         for name in self.population_names:
             for cell in self.populations[name].cells:
-                cell._set_soma_volt_recorder()
+                cell._set_soma_volt_recorder(dt)
                 if rec_imem:
-                    cell._set_imem_recorders()
+                    cell._set_imem_recorders(dt)
                 if rec_vmem:
-                    cell._set_voltage_recorders()
+                    cell._set_voltage_recorders(dt)
                 if rec_ipas:
-                    cell._set_ipas_recorders()
+                    cell._set_ipas_recorders(dt)
                 if rec_icap:
-                    cell._set_icap_recorders()
+                    cell._set_icap_recorders(dt)
                 # if rec_current_dipole_moment:
                 #     self._set_current_dipole_moment_array()
                 if len(rec_variables) > 0:

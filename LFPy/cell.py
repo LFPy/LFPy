@@ -205,7 +205,6 @@ class Cell(object):
                 assert(type(self.morphology) is type(neuron.h.SectionList))
                 # #will try to import top level cell and create sectionlist,
                 # #in case there were no morphology file loaded
-                # neuron.h.define_shape()
             except AssertionError:
                 raise Exception("Could not recognize Cell keyword argument morphology as neuron.h.SectionList instance")
 
@@ -1058,10 +1057,12 @@ class Cell(object):
             self._set_current_dipole_moment_array(dt)
         if len(rec_variables) > 0:
             self._set_variable_recorders(rec_variables, dt)
-        if len(self._stimitorecord) > 0:
-            self._set_ipp_recorders(dt)
-        if len(self._stimvtorecord) > 0:
-            self._set_vpp_recorders(dt)
+        if hasattr(self, '_stimirecord'):
+            if len(self._stimitorecord) > 0:
+                self._set_ipp_recorders(dt)
+        if hasattr(self, '_stimvrecord'):
+            if len(self._stimvtorecord) > 0:
+                self._set_vpp_recorders(dt)
 
         # set time recorder from NEURON
         self._set_time_recorders(dt)
@@ -1096,18 +1097,21 @@ class Cell(object):
 
         self._collect_isyn()
         self._collect_vsyn()
-        self._collect_istim()
-        self._collect_vstim()
+        if hasattr(self, 'stimireclist'):
+            self._collect_istim()
+        if hasattr(self, 'stimvreclist'):
+            self._collect_vstim()
         if len(rec_variables) > 0:
             self._collect_rec_variables(rec_variables)
         if hasattr(self, 'netstimlist'):
+            self.netstimlist = None
             del self.netstimlist
 
     def _collect_tvec(self):
         """
         Set the tvec to be a monotonically increasing numpy array after sim.
         """
-        self.tvec = self._neuron_tvec.to_python()
+        self.tvec = np.array(self._neuron_tvec.to_python())
         self._neuron_tvec = None
         del self._neuron_tvec
 

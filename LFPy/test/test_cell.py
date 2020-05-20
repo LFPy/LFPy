@@ -51,7 +51,7 @@ class testCell(unittest.TestCase):
         tvec_numpy = np.linspace(0, stickParams['tstop'],
                     int(stickParams['tstop']/stickParams['dt']) + 1)
 
-        np.testing.assert_equal(tvec, tvec_numpy)
+        np.allclose(tvec, tvec_numpy, atol=1E-4)
 
     def test_cell_tvec_01(self):
         stickParams = {
@@ -64,7 +64,7 @@ class testCell(unittest.TestCase):
         tvec_numpy = np.linspace(0, stickParams['tstop'],
                     int(stickParams['tstop']/stickParams['dt']) + 1)
 
-        np.testing.assert_equal(tvec, tvec_numpy)
+        np.allclose(tvec, tvec_numpy, atol=1E-4)
 
     def test_cell_tvec_02(self):
         stickParams = {
@@ -77,7 +77,7 @@ class testCell(unittest.TestCase):
         tvec_numpy = np.linspace(0, stickParams['tstop'],
                     int(stickParams['tstop']/stickParams['dt']) + 1)
 
-        np.testing.assert_equal(tvec, tvec_numpy)
+        np.allclose(tvec, tvec_numpy, atol=1E-4)
 
     def test_cell_tvec_03(self):
         stickParams = {
@@ -90,7 +90,7 @@ class testCell(unittest.TestCase):
         tvec_numpy = np.linspace(0, stickParams['tstop'],
                     int(stickParams['tstop']/stickParams['dt']) + 1)
 
-        np.testing.assert_equal(tvec, tvec_numpy)
+        np.allclose(tvec, tvec_numpy, atol=1E-4)
 
     def test_cell_tvec_04(self):
         stickParams = {
@@ -103,7 +103,7 @@ class testCell(unittest.TestCase):
         tvec_numpy = np.linspace(0, stickParams['tstop'],
                     int(stickParams['tstop']/stickParams['dt']) + 1)
 
-        np.testing.assert_equal(tvec, tvec_numpy)
+        np.allclose(tvec, tvec_numpy, atol=1E-4)
 
     def test_cell_tvec_05(self):
         stickParams = {
@@ -116,7 +116,7 @@ class testCell(unittest.TestCase):
         tvec_numpy = np.linspace(0, stickParams['tstop'],
                     int(stickParams['tstop']/stickParams['dt']) + 1)
 
-        np.testing.assert_equal(tvec, tvec_numpy)
+        np.allclose(tvec, tvec_numpy, atol=1E-4)
 
     def test_cell_tvec_06(self):
         stickParams = {
@@ -129,7 +129,7 @@ class testCell(unittest.TestCase):
         tvec_numpy = np.linspace(0, stickParams['tstop'],
                     int(stickParams['tstop']/stickParams['dt']) + 1)
 
-        np.testing.assert_equal(tvec, tvec_numpy)
+        np.allclose(tvec, tvec_numpy, atol=1E-4)
 
     def test_cell_tvec_07(self):
         stickParams = {
@@ -142,7 +142,7 @@ class testCell(unittest.TestCase):
         tvec_numpy = np.linspace(0, stickParams['tstop'],
                     int(stickParams['tstop']/stickParams['dt']) + 1)
 
-        np.testing.assert_equal(tvec, tvec_numpy)
+        np.allclose(tvec, tvec_numpy, atol=1E-4)
 
     def test_cell_tvec_08(self):
         stickParams = {
