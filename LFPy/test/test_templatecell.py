@@ -795,7 +795,7 @@ class testTemplateCell(unittest.TestCase):
         self.assertTrue(np.all(stick.vmem == stick.v_init))
         self.assertTrue(np.all(stick.imem == 0.))
         self.assertTrue(np.all(stick.current_dipole_moment == 0.))
-        
+
 
     def test_cell_simulate_recorder_01(self):
         stickParams = {
@@ -881,7 +881,7 @@ class testTemplateCell(unittest.TestCase):
         self.assertTrue(np.all(stick.vmem == stick.v_init))
         self.assertTrue(np.all(stick.imem == 0.))
         self.assertTrue(np.all(stick.current_dipole_moment == 0.))
-        
+
 
     def test_cell_simulate_recorder_04(self):
         stickParams = {
@@ -938,7 +938,7 @@ class testTemplateCell(unittest.TestCase):
         self.assertTrue(np.all(stick.vmem == stick.v_init))
         self.assertTrue(np.all(stick.imem == 0.))
         self.assertTrue(np.all(stick.current_dipole_moment == 0.))
-        
+
     def test_cell_simulate_current_dipole_moment_00(self):
         stickParams = {
             'morphology' : os.path.join(LFPy.__path__[0], 'test', 'stick.hoc'),
