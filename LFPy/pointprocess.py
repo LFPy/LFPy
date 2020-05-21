@@ -289,6 +289,10 @@ class StimIntElectrode(PointProcess):
         cell.pointprocesses.append(self)
         cell.pointprocess_idx.append(idx)
 
+    def __del__(self):
+        self.stim = None
+        del self.stim
+
     def set_stimirec(self, dt, cell):
         if dt is not None:
             self.stimirec = neuron.h.Vector(int(cell.tstop / cell.dt + 1))

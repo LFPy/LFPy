@@ -1057,7 +1057,6 @@ class Cell(object):
                 print("rec_imem = %s, membrane currents will not be recorded!"
                                   % str(rec_imem))
             _run_simulation(self, cvode, variable_dt, atol)
-
         else:
             #allow using both electrode and additional coefficients:
             _run_simulation_with_electrode(self, cvode, electrode, variable_dt, atol,
@@ -1250,7 +1249,7 @@ class Cell(object):
         for sec in self.allseclist:
             for seg in sec:
                 if dt is not None:
-                    memirec = neuron.h.Vector(int(self.tstop / self.dt+1))
+                    memirec = neuron.h.Vector(int(self.tstop / self.dt + 1))
                     memirec.record(seg._ref_i_membrane_, self.dt)
                 else:
                     memirec = neuron.h.Vector()
