@@ -280,17 +280,43 @@ class StimIntElectrode(PointProcess):
                               record_current=record_current,
                               record_potential=record_potential)
         self.pptype = pptype
-        self.hocidx = int(cell.set_point_process(idx, pptype,
-                                                 record_current=record_current,
-                                                 record_potential=record_potential,
-                                                 **kwargs))
+        self.stim = cell.set_point_process(idx, pptype,
+                                           record_current=record_current,
+                                           record_potential=record_potential,
+                                           **kwargs)
+        self.stimirec = None
+        self.stimvrec = None
         cell.pointprocesses.append(self)
         cell.pointprocess_idx.append(idx)
 
-    def collect_current(self, cell):
+    def set_stimirec(self, dt, cell):
+        if dt is not None:
+            self.stimirec = neuron.h.Vector(int(cell.tstop / cell.dt + 1))
+            self.stimirec.record(self.stim._ref_i, cell.dt)
+        else:
+            self.stimirec = neuron.h.Vector()
+            self.stimirec.record(self.stim._ref_i)
+
+    def set_stimvrec(self, dt, cell):
+        seg = self.stim.get_segment()
+        if dt is not None:
+            self.stimvrec = neuron.h.Vector(int(cell.tstop / cell.dt + 1))
+            self.stimvrec.record(seg._ref_v, cell.dt)
+        else:
+            self.stimvrec = neuron.h.Vector()
+            self.stimvrec.record(seg._ref_v)
+
+    def collect_current(self):
         """Fetch electrode current from recorder list"""
-        self.i = np.array(cell.stimireclist.o(self.hocidx))
-    
-    def collect_potential(self, cell):
+        if self.stimirec is not None:
+            self.i = np.array(self.stimirec.to_python())
+        else:
+            self.i = None
+
+    def collect_potential(self):
         """Collect membrane potential of segment with PointProcess"""
-        self.v = np.array(cell.stimvreclist.o(self.hocidx))
+        if self.stimvrec is not None:
+            self.v = np.array(self.stimvrec.to_python())
+        else:
+            self.v = None
+

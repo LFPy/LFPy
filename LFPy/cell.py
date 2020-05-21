@@ -626,10 +626,6 @@ class Cell(object):
 
         if not hasattr(self, 'stimlist'):
             self.stimlist = neuron.h.List()
-        if not hasattr(self, '_stimitorecord'):
-            self._stimitorecord = neuron.h.List()
-        if not hasattr(self, '_stimvtorecord'):
-            self._stimvtorecord = neuron.h.List()
 
         i = 0
         cmd1 = 'stim = neuron.h.'
@@ -658,21 +654,13 @@ class Cell(object):
                                 'Check for misspellings'])
                             raise Exception(ERRMSG)
                     self.stimlist.append(stim)
-
-                    # record current
-                    if record_current:
-                        self._stimitorecord.append(stim)
-
-                    # record potential
-                    if record_potential:
-                        self._stimvtorecord.append(stim)
                     ppset = True
                     break
                 i += 1
             if ppset:
                 break
 
-        return self.stimlist.count() - 1
+        return stim
 
     def _collect_geometry(self):
         """Collects x, y, z-coordinates from NEURON"""
@@ -1057,12 +1045,8 @@ class Cell(object):
             self._set_current_dipole_moment_array(dt)
         if len(rec_variables) > 0:
             self._set_variable_recorders(rec_variables, dt)
-        if hasattr(self, '_stimirecord'):
-            if len(self._stimitorecord) > 0:
-                self._set_ipp_recorders(dt)
-        if hasattr(self, '_stimvrecord'):
-            if len(self._stimvtorecord) > 0:
-                self._set_vpp_recorders(dt)
+        self._set_ipp_recorders(dt)
+        self._set_vpp_recorders(dt)
 
         # set time recorder from NEURON
         self._set_time_recorders(dt)
@@ -1097,10 +1081,8 @@ class Cell(object):
 
         self._collect_isyn()
         self._collect_vsyn()
-        if hasattr(self, 'stimireclist'):
-            self._collect_istim()
-        if hasattr(self, 'stimvreclist'):
-            self._collect_vstim()
+        self._collect_istim()
+        self._collect_vstim()
         if len(rec_variables) > 0:
             self._collect_rec_variables(rec_variables)
         if hasattr(self, 'netstimlist'):
@@ -1178,9 +1160,7 @@ class Cell(object):
         """
         for pp in self.pointprocesses:
             if pp.record_current:
-                pp.collect_current(self)
-        self.stimireclist = None
-        del self.stimireclist
+                pp.collect_current()
 
     def _collect_vstim(self):
         """
@@ -1188,9 +1168,7 @@ class Cell(object):
         """
         for pp in self.pointprocesses:
             if pp.record_potential:
-                pp.collect_potential(self)
-        self.stimvreclist = None
-        del self.stimvreclist
+                pp.collect_potential()
 
     def _collect_rec_variables(self, rec_variables):
         """
@@ -1279,7 +1257,6 @@ class Cell(object):
                     memirec.record(seg._ref_i_membrane_)
                 self.memireclist.append(memirec)
 
-
     def _set_time_recorders(self, dt):
         """
         Record time of simulation
@@ -1290,7 +1267,6 @@ class Cell(object):
         else:
             self._neuron_tvec = neuron.h.Vector()
             self._neuron_tvec.record(neuron.h._ref_t)
-
 
     def _set_ipas_recorders(self, dt):
         """
@@ -1326,34 +1302,17 @@ class Cell(object):
         """
         Record point process current
         """
-        self.stimireclist = neuron.h.List()
-        for stim in self._stimitorecord:
-            if dt is not None:
-                stimirec = neuron.h.Vector(int(self.tstop / self.dt + 1))
-                stimirec.record(stim._ref_i, self.dt)
-            else:
-                stimirec = neuron.h.Vector()
-                stimirec.record(stim._ref_i)
-            self.stimireclist.append(stimirec)
-        self._stimitorecord = None
-        del self._stimitorecord
+        for i, pp in enumerate(self.pointprocesses):
+            if pp.record_current:
+                pp.set_stimirec(dt, self)
 
     def _set_vpp_recorders(self, dt):
         """
         Record point process membrane
         """
-        self.stimvreclist = neuron.h.List()
-        for stim in self._stimvtorecord:
-            seg = stim.get_segment()
-            if dt is not None:
-                stimvrec = neuron.h.Vector(int(self.tstop / self.dt+1))
-                stimvrec.record(seg._ref_v, self.dt)
-            else:
-                stimvrec = neuron.h.Vector()
-                stimvrec.record(seg._ref_v)
-            self.stimvreclist.append(stimvrec)
-        self._stimvtorecord = None
-        del self._stimvtorecord
+        for i, pp in enumerate(self.pointprocesses):
+            if pp.record_potential:
+                pp.set_stimvrec(dt, self)
 
     def _set_voltage_recorders(self, dt):
         """
