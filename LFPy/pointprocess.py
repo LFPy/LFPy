@@ -280,47 +280,18 @@ class StimIntElectrode(PointProcess):
                               record_current=record_current,
                               record_potential=record_potential)
         self.pptype = pptype
-        self.stim = cell.set_point_process(idx, pptype,
-                                           record_current=record_current,
-                                           record_potential=record_potential,
-                                           **kwargs)
-        self.stimirec = None
-        self.stimvrec = None
+        self.hocidx = int(cell.set_point_process(idx, pptype,
+                                                 record_current=record_current,
+                                                 record_potential=record_potential,
+                                                 **kwargs))
         cell.pointprocesses.append(self)
         cell.pointprocess_idx.append(idx)
 
-    def __del__(self):
-        self.stim = None
-        del self.stim
-
-    def set_stimirec(self, dt, cell):
-        if dt is not None:
-            self.stimirec = neuron.h.Vector(int(cell.tstop / cell.dt + 1))
-            self.stimirec.record(self.stim._ref_i, cell.dt)
-        else:
-            self.stimirec = neuron.h.Vector()
-            self.stimirec.record(self.stim._ref_i)
-
-    def set_stimvrec(self, dt, cell):
-        seg = self.stim.get_segment()
-        if dt is not None:
-            self.stimvrec = neuron.h.Vector(int(cell.tstop / cell.dt + 1))
-            self.stimvrec.record(seg._ref_v, cell.dt)
-        else:
-            self.stimvrec = neuron.h.Vector()
-            self.stimvrec.record(seg._ref_v)
-
-    def collect_current(self):
+    def collect_current(self, cell):
         """Fetch electrode current from recorder list"""
-        if self.stimirec is not None:
-            self.i = np.array(self.stimirec.to_python())
-        else:
-            self.i = None
+        self.i = np.array(cell.stimireclist.o(self.hocidx))
 
-    def collect_potential(self):
+    def collect_potential(self, cell):
         """Collect membrane potential of segment with PointProcess"""
-        if self.stimvrec is not None:
-            self.v = np.array(self.stimvrec.to_python())
-        else:
-            self.v = None
+        self.v = np.array(cell.stimvreclist.o(self.hocidx))
 
