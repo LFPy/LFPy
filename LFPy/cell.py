@@ -302,6 +302,11 @@ class Cell(object):
         neuron.h.finitialize(self.v_init)
         self._neuron_tvec = None
 
+    def __del__(self):
+        if hasattr(self, 'stimlist'):
+            self.stimlist = False
+            del self.stimlist
+
     def _load_geometry(self):
         """Load the morphology-file in NEURON"""
         try:
