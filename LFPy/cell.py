@@ -172,6 +172,9 @@ class Cell(object):
             neuron.h.load_file('stdlib.hoc')    #NEURON std. library
             neuron.h.load_file('import3d.hoc')  #import 3D morphology lib
 
+        if delete_sections:
+            neuron.h('forall delete_section()')
+
         numsec = 0
         for numsec, sec in enumerate(neuron.h.allsec()):
             pass
@@ -480,9 +483,9 @@ class Cell(object):
             frequency at which AC length constant is computed
         d_lambda : float
         """
+        neuron.h.pop_section() # dirty fix: https://www.neuron.yale.edu/neuron/static/py_doc/modelspec/programmatic/topology/secspec.html#default-section
         for sec in self.allseclist:
-            sec.nseg = int((sec.L / (d_lambda*neuron.h.lambda_f(frequency,
-                                                sec=sec)) + .9) / 2)*2 + 1
+            sec.nseg = int((sec.L / (d_lambda*neuron.h.lambda_f(frequency, sec=sec)) + .9) / 2)*2 + 1
         if self.verbose:
             print("set nsegs using lambda-rule with frequency %i." % frequency)
 
