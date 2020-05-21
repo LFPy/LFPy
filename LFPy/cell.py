@@ -175,16 +175,17 @@ class Cell(object):
         numsec = 0
         for numsec, sec in enumerate(neuron.h.allsec()):
             pass
-        if numsec > 0:
-            if delete_sections:
+
+        if delete_sections:
+            if not isinstance(morphology, type(neuron.h.SectionList)):
                 if self.verbose:
                     print('%s existing sections deleted from memory' % numsec)
                 neuron.h('forall delete_section()')
-            else:
-                if not isinstance(morphology, type(neuron.h.SectionList)):
-                    mssg = "%s sections detected! " % numsec + \
-                           "Consider setting 'delete_sections=True'"
-                    warn(mssg)
+        else:
+            if not isinstance(morphology, type(neuron.h.SectionList)):
+                mssg = "%s sections detected! " % numsec + \
+                       "Consider setting 'delete_sections=True'"
+                warn(mssg)
 
         #load morphology
         try:

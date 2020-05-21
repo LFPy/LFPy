@@ -969,11 +969,9 @@ class testNetworkCell(unittest.TestCase):
         }
         for idx in range(31): #31 segments
             if idx != 15: # no net dipole moment because of stick symmetry
-                neuron.h('forall delete_section()')
                 stick = LFPy.NetworkCell(**stickParams)
                 synapse = LFPy.StimIntElectrode(stick, idx=idx,
                                        **stimParams)
-                # print(neuron.h.psection('soma'))
                 stick.simulate(rec_imem=True, rec_current_dipole_moment=True)
                 p = np.dot(stick.imem.T, np.c_[stick.xmid, stick.ymid, stick.zmid])
                 np.testing.assert_allclose(p, stick.current_dipole_moment)
@@ -1010,7 +1008,6 @@ class testNetworkCell(unittest.TestCase):
     
         for idx in range(31): #31 segments
             if idx != 15: # no net dipole moment because of stick symmetry
-                neuron.h('forall delete_section()')
                 stick = LFPy.NetworkCell(**stickParams)
                 synapse = LFPy.StimIntElectrode(stick, idx=idx,
                                        **stimParams)
@@ -1046,7 +1043,6 @@ class testNetworkCell(unittest.TestCase):
     
         for idx in range(31): #31 segments
             if idx != 15: # no net dipole moment because of stick symmetry
-                neuron.h('forall delete_section()')
                 stick = LFPy.NetworkCell(**stickParams)
                 synapse = LFPy.Synapse(stick, idx=idx,
                                        **stimParams)

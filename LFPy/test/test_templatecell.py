@@ -969,7 +969,6 @@ class testTemplateCell(unittest.TestCase):
         }
         for idx in range(31): #31 segments
             if idx != 15: # no net dipole moment because of stick symmetry
-                neuron.h('forall delete_section()')
                 stick = LFPy.TemplateCell(**stickParams)
                 synapse = LFPy.StimIntElectrode(stick, idx=idx,
                                        **stimParams)
