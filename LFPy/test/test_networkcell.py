@@ -972,7 +972,7 @@ class testNetworkCell(unittest.TestCase):
                 stick = LFPy.NetworkCell(**stickParams)
                 synapse = LFPy.StimIntElectrode(stick, idx=idx,
                                        **stimParams)
-                print(neuron.h.psection('soma'))
+                # print(neuron.h.psection('soma'))
                 stick.simulate(rec_imem=True, rec_current_dipole_moment=True)
                 p = np.dot(stick.imem.T, np.c_[stick.xmid, stick.ymid, stick.zmid])
                 np.testing.assert_allclose(p, stick.current_dipole_moment)
@@ -1012,7 +1012,7 @@ class testNetworkCell(unittest.TestCase):
                 stick = LFPy.NetworkCell(**stickParams)
                 synapse = LFPy.StimIntElectrode(stick, idx=idx,
                                        **stimParams)
-                print(neuron.h.psection('soma'))
+                # print(neuron.h.psection('soma'))
                 stick.simulate(rec_imem=True, rec_current_dipole_moment=True)
                 p = np.dot(stick.imem.T, np.c_[stick.xmid, stick.ymid, stick.zmid])
                 np.testing.assert_allclose(p, stick.current_dipole_moment)

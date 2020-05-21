@@ -973,7 +973,7 @@ class testTemplateCell(unittest.TestCase):
                 stick = LFPy.TemplateCell(**stickParams)
                 synapse = LFPy.StimIntElectrode(stick, idx=idx,
                                        **stimParams)
-                print(neuron.h.psection('soma'))
+                # print(neuron.h.psection('soma'))
                 stick.simulate(rec_imem=True, rec_current_dipole_moment=True)
                 p = np.dot(stick.imem.T, np.c_[stick.xmid, stick.ymid, stick.zmid])
                 np.testing.assert_allclose(p, stick.current_dipole_moment)
@@ -1013,7 +1013,7 @@ class testTemplateCell(unittest.TestCase):
                 stick = LFPy.TemplateCell(**stickParams)
                 synapse = LFPy.StimIntElectrode(stick, idx=idx,
                                                 **stimParams)
-                print(neuron.h.psection('soma'))
+                # print(neuron.h.psection('soma'))
                 stick.simulate(rec_imem=True, rec_current_dipole_moment=True)
                 p = np.dot(stick.imem.T, np.c_[stick.xmid, stick.ymid, stick.zmid])
                 np.testing.assert_allclose(p, stick.current_dipole_moment)
@@ -1309,7 +1309,7 @@ class testTemplateCell(unittest.TestCase):
         self.assertTrue(stick.tvec.size == stick.imem.shape[1] ==
                         electrode.LFP.shape[1] == electrode1.LFP.shape[1] ==
                         int(stick.tstop/stick.dt)+1)
-        
+
     def test_cell_distort_geometry_01(self):
         cell0 = LFPy.TemplateCell(morphology=os.path.join(LFPy.__path__[0], 'test',
                                                   'ball_and_sticks_w_lists.hoc' ),
