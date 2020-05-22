@@ -967,6 +967,7 @@ class testTemplateCell(unittest.TestCase):
             'bias' : 0.,
             'record_current' : False
         }
+
         for idx in range(31): #31 segments
             if idx != 15: # no net dipole moment because of stick symmetry
                 stick = LFPy.TemplateCell(**stickParams)

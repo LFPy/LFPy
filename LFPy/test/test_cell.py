@@ -1149,6 +1149,45 @@ class testCell(unittest.TestCase):
         self.assertTrue(np.all(stick.imem == 0.))
         self.assertTrue(np.all(stick.current_dipole_moment == 0.))
 
+    def test_cell_simulate_cvode_00(self):
+        stickParams = {
+            'morphology' : os.path.join(LFPy.__path__[0], 'test', 'stick.hoc'),
+            'cm' : 1,
+            'Ra' : 150,
+            'v_init' : -65,
+            'passive' : True,
+            'passive_parameters' : {'g_pas' : 1./30000, 'e_pas' : -65},
+            'tstart' : 0,
+            'tstop' : 10000,
+            'dt' : 0.2,
+            'nsegs_method' : 'lambda_f',
+            'lambda_f' : 100,
+        }
+
+        stimParams = {
+            'pptype': 'SinSyn',
+            'delay': 0.,
+            'dur': 1000.,
+            'pkamp': 1.,
+            'freq': 100.,
+            'phase': 0,
+            'bias': 0.,
+            'record_current': True,
+            'record_potential': True
+        }
+
+
+        stick = LFPy.Cell(**stickParams)
+        synapse = LFPy.StimIntElectrode(stick, idx=0,
+                                        **stimParams)
+        stick.simulate(rec_vmem=True, rec_imem=True,
+                       rec_current_dipole_moment=True, variable_dt=True)
+        self.assertTrue(stick.tvec.size ==
+                        stick.vmem.shape[1] ==
+                        stick.imem.shape[1] ==
+                        stick.current_dipole_moment.shape[0] ==
+                        synapse.i.size == synapse.v.size)
+
 
     def test_cell_simulate_current_dipole_moment_00(self):
         stickParams = {
@@ -1493,6 +1532,51 @@ class testCell(unittest.TestCase):
         self.assertTrue(stick.tvec.size == stick.imem.shape[1] ==
                         electrode.LFP.shape[1] == electrode1.LFP.shape[1] ==
                         int(stick.tstop/stick.dt)+1)
+
+    def test_cell_with_recextelectrode_and_cvode_00(self):
+        stickParams = {
+            'morphology' : os.path.join(LFPy.__path__[0], 'test', 'stick.hoc'),
+            'cm' : 1,
+            'Ra' : 150,
+            'v_init' : -65,
+            'passive' : True,
+            'passive_parameters' : {'g_pas' : 1./30000, 'e_pas' : -65},
+            'tstart' : -100,
+            'tstop' : 100,
+            'dt' : 2**-4,
+            'nsegs_method' : 'lambda_f',
+            'lambda_f' : 100,
+
+        }
+
+        electrodeParams = {
+            'sigma' : 0.3,
+            'x' : np.ones(11) * 100.,
+            'y' : np.zeros(11),
+            'z' : np.linspace(1000, 0, 11),
+            'method' : 'pointsource'
+        }
+
+        stimParams = {
+            'pptype' : 'SinSyn',
+            'delay' : 0.,
+            'dur' : 1000.,
+            'pkamp' : 1.,
+            'freq' : 100.,
+            'phase' : 0,
+            'bias' : 0.,
+            'record_current' : True,
+            'record_potential': True
+        }
+
+        stick = LFPy.Cell(**stickParams)
+        synapse = LFPy.StimIntElectrode(stick, stick.get_closest_idx(0, 0, 1000),
+                               **stimParams)
+        electrode = LFPy.RecExtElectrode(**electrodeParams)
+        stick.simulate(electrode, rec_imem=True, rec_vmem=True, variable_dt=True)
+
+        self.assertTrue(stick.tvec.size == stick.imem.shape[1] == synapse.i.size == synapse.v.size
+                        == electrode.LFP.shape[1])
 
     def test_get_multi_current_dipole_moments00(self):
         neuron.h('forall delete_section()')
