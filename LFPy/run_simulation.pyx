@@ -20,6 +20,7 @@ from time import time
 import numpy as np
 cimport numpy as np
 import neuron
+from pathlib import Path
 
 DTYPE = np.float64
 ctypedef np.float64_t DTYPE_t
@@ -200,14 +201,15 @@ def _run_simulation_with_electrode(cell, cvode, electrode=None,
     #LFPs for each electrode will be put here during simulations
     if to_file:
         #ensure right ending:
-        if file_name.split('.')[-1] != 'h5':
-            file_name += '.h5'
-        el_LFP_file = h5py.File(file_name, 'w')
-        i = 0
-        for coeffs in dotprodcoeffs:
-            el_LFP_file['electrode{:03d}'.format(i)] = np.zeros((coeffs.shape[0],
-                                            int(tstop / dt + 1)))
-            i += 1
+        file_name = Path(file_name)
+        if file_name.suffix != '.h5':
+            file_name = file_name.parent / (file_name.name + '.h5')
+        if not cvode.active():
+            el_LFP_file = h5py.File(file_name, 'w')
+            i = 0
+            for coeffs in dotprodcoeffs:
+                el_LFP_file['electrode{:03d}'.format(i)] = np.zeros((coeffs.shape[0], int(cell.tstop / cell.dt + 1)))
+                i += 1
 
     # create a 2D array representation of segment midpoints for dot product
     # with transmembrane currents when computing dipole moment
@@ -268,7 +270,7 @@ def _run_simulation_with_electrode(cell, cvode, electrode=None,
 
             if rec_current_dipole_moment:
                 if not cvode.active():
-                    cell.current_dipole_moment[tstep, ] = np.dot(imem, midpoints)
+                    current_dipole_moment[tstep, ] = np.dot(imem, midpoints)
                 else:
                     cell.current_dipole_moment.append(np.dot(imem, midpoints))
 
@@ -290,7 +292,10 @@ def _run_simulation_with_electrode(cell, cvode, electrode=None,
 
     # update current dipole moment values
     if rec_current_dipole_moment:
-        cell.current_dipole_moment = np.array(current_dipole_moment)
+        if not cvode.active():
+            cell.current_dipole_moment = np.array(current_dipole_moment)
+        else:
+            cell.current_dipole_moment = np.array(cell.current_dipole_moment)
 
     # Final step, put LFPs in the electrode object, superimpose if necessary
     # If electrode.perCellLFP, store individual LFPs
