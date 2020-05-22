@@ -1180,14 +1180,11 @@ class testCell(unittest.TestCase):
         stick = LFPy.Cell(**stickParams)
         synapse = LFPy.StimIntElectrode(stick, idx=0,
                                         **stimParams)
-        stick.simulate(rec_vmem=True, rec_imem=True,
-                       rec_current_dipole_moment=True, variable_dt=True)
+        stick.simulate(rec_vmem=True, rec_imem=True, variable_dt=True)
         self.assertTrue(stick.tvec.size ==
                         stick.vmem.shape[1] ==
                         stick.imem.shape[1] ==
-                        stick.current_dipole_moment.shape[0] ==
                         synapse.i.size == synapse.v.size)
-
 
     def test_cell_simulate_current_dipole_moment_00(self):
         stickParams = {

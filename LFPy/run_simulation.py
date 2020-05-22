@@ -31,7 +31,6 @@ def _run_simulation(cell, cvode, variable_dt=False, atol=0.001):
     # variable dt method
     if variable_dt:
         cvode.active(1)
-        # neuron.h.cvode_active(True)
         cvode.atol(atol)
     else:
         cvode.active(0)    
@@ -60,7 +59,6 @@ def _run_simulation(cell, cvode, variable_dt=False, atol=0.001):
     else:
         interval = 100. / cell.dt
 
-    tstep = 0
     while neuron.h.t < cell.tstop:
         neuron.h.fadvance()
         counter += 1.
@@ -71,12 +69,10 @@ def _run_simulation(cell, cvode, variable_dt=False, atol=0.001):
                                                                    rtfactor))
             t0 = time()
             ti = neuron.h.t
-        tstep += 1
 
 
 def _run_simulation_with_electrode(cell, cvode, electrode=None,
-                                   variable_dt=False,
-                                   atol=0.001,
+                                   variable_dt=False, atol=0.001,
                                    to_memory=True, to_file=False,
                                    file_name=None, dotprodcoeffs=None,
                                    rec_current_dipole_moment=False):
@@ -206,6 +202,7 @@ def _run_simulation_with_electrode(cell, cvode, electrode=None,
                 for seg in sec:
                     imem[i] = seg.i_membrane_
                     i += 1
+
             if rec_current_dipole_moment:
                 if not cvode.active():
                     cell.current_dipole_moment[tstep, ] = np.dot(imem, midpoints)
@@ -237,10 +234,9 @@ def _run_simulation_with_electrode(cell, cvode, electrode=None,
             t0 = time()
             ti = neuron.h.t
 
-    # AB: this is not needed IMO: if this is run the length of LFP is one extra...
-    try:
-        if not cvode.active():
-            #calculate LFP after final fadvance()
+    # calculate LFP after final fadvance() if needed
+    if tstep < len(cell._neuron_tvec):
+        try:
             i = 0
             for sec in cell.allseclist:
                 for seg in sec:
@@ -248,25 +244,29 @@ def _run_simulation_with_electrode(cell, cvode, electrode=None,
                     i += 1
 
             if rec_current_dipole_moment:
-                cell.current_dipole_moment[tstep, ] = np.dot(imem, midpoints)
+                if not cvode.active():
+                    cell.current_dipole_moment[tstep, ] = np.dot(imem, midpoints)
+                else:
+                    cell.current_dipole_moment.append(np.dot(imem, midpoints))
 
             if to_memory:
                 for j, coeffs in enumerate(dotprodcoeffs):
-                    electrodesLFP[j][:, tstep] = np.dot(coeffs, imem)
+                    if not cvode.active():
+                        electrodesLFP[j][:, tstep] = np.dot(coeffs, imem)
+                    else:
+                        electrodesLFP[j] = np.hstack((electrodesLFP[j], np.dot(coeffs, imem)[:, np.newaxis]))
 
             if to_file:
                 for j, coeffs in enumerate(dotprodcoeffs):
                     el_LFP_file['electrode{:03d}'.format(j)][:, tstep] = np.dot(coeffs, imem)
 
-    except Exception as e:
-        print('error', e)
-        pass
+        except Exception as e:
+            print('error', e)
+            pass
 
-    # if variable_dt:
-    #     if len(timesteps) > len(cell._neuron_tvec.to_python()):
-    #         # downsample LFP
-    #         raise Exception
-    
+    if rec_current_dipole_moment:
+        cell.current_dipole_moment = np.array(cell.current_dipole_moment)
+
     # Final step, put LFPs in the electrode object, superimpose if necessary
     # If electrode.perCellLFP, store individual LFPs
     if to_memory:
