@@ -260,35 +260,31 @@ def _run_simulation_with_electrode(cell, cvode, electrode=None,
             ti = neuron.h.t
 
     if tstep < len(cell._neuron_tvec):
-        try:
-            #calculate LFP after final fadvance()
-            i = 0
-            for sec in cell.allseclist:
-                for seg in sec:
-                    imem[i] = seg.i_membrane_
-                    i += 1
+        #calculate LFP after final fadvance()
+        i = 0
+        for sec in cell.allseclist:
+            for seg in sec:
+                imem[i] = seg.i_membrane_
+                i += 1
 
-            if rec_current_dipole_moment:
+        if rec_current_dipole_moment:
+            if not cvode.active():
+                current_dipole_moment[tstep, ] = np.dot(imem, midpoints)
+            else:
+                cell.current_dipole_moment.append(np.dot(imem, midpoints))
+
+
+        if to_memory:
+            for j, coeffs in enumerate(dotprodcoeffs):
                 if not cvode.active():
-                    current_dipole_moment[tstep, ] = np.dot(imem, midpoints)
+                    electrodesLFP[j][:, tstep] = np.dot(coeffs, imem)
                 else:
-                    cell.current_dipole_moment.append(np.dot(imem, midpoints))
+                    electrodesLFP[j] = np.hstack((electrodesLFP[j], np.dot(coeffs, imem)[:, np.newaxis]))
 
-
-            if to_memory:
-                for j, coeffs in enumerate(dotprodcoeffs):
-                    if not cvode.active():
-                        electrodesLFP[j][:, tstep] = np.dot(coeffs, imem)
-                    else:
-                        electrodesLFP[j] = np.hstack((electrodesLFP[j], np.dot(coeffs, imem)[:, np.newaxis]))
-
-            if to_file:
-                for j, coeffs in enumerate(dotprodcoeffs):
-                    el_LFP_file['electrode{:03d}'.format(j)
-                                ][:, tstep] = np.dot(coeffs, imem)
-
-        except:
-            pass
+        if to_file:
+            for j, coeffs in enumerate(dotprodcoeffs):
+                el_LFP_file['electrode{:03d}'.format(j)
+                            ][:, tstep] = np.dot(coeffs, imem)
 
     # update current dipole moment values
     if rec_current_dipole_moment:

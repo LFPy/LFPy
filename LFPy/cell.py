@@ -1066,10 +1066,10 @@ class Cell(object):
             self._set_variable_recorders(rec_variables, dt)
         if hasattr(self, '_stimitorecord'):
             if len(self._stimitorecord) > 0:
-                self._set_ipp_recorders(dt)
+                self._set_ipointprocess_recorders(dt)
         if hasattr(self, '_stimvtorecord'):
             if len(self._stimvtorecord) > 0:
-                self._set_vpp_recorders(dt)
+                self._set_vpointprocess_recorders(dt)
 
         # set time recorder from NEURON
         self._set_time_recorders(dt)
@@ -1327,7 +1327,7 @@ class Cell(object):
                     memicaprec.record(seg._ref_i_cap)
                 self.memicapreclist.append(memicaprec)
 
-    def _set_ipp_recorders(self, dt):
+    def _set_ipointprocess_recorders(self, dt):
         """
         Record point process current
         """
@@ -1345,7 +1345,7 @@ class Cell(object):
                 stimirec = neuron.h.Vector(0)
             self.stimireclist.append(stimirec)
 
-    def _set_vpp_recorders(self, dt):
+    def _set_vpointprocess_recorders(self, dt):
         """
         Record point process membrane
         """
