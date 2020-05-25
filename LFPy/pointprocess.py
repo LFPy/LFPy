@@ -290,7 +290,8 @@ class StimIntElectrode(PointProcess):
     def collect_current(self, cell):
         """Fetch electrode current from recorder list"""
         self.i = np.array(cell.stimireclist.o(self.hocidx))
-    
+
     def collect_potential(self, cell):
         """Collect membrane potential of segment with PointProcess"""
         self.v = np.array(cell.stimvreclist.o(self.hocidx))
+

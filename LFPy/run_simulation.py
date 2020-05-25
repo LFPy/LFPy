@@ -18,6 +18,7 @@ GNU General Public License for more details.
 from time import time
 import numpy as np
 import neuron
+from pathlib import Path
 
 
 def _run_simulation(cell, cvode, variable_dt=False, atol=0.001):
@@ -26,29 +27,29 @@ def _run_simulation(cell, cvode, variable_dt=False, atol=0.001):
     are now interruptable.
     '''
     neuron.h.dt = cell.dt
-        
+
     # variable dt method
     if variable_dt:
         cvode.active(1)
         cvode.atol(atol)
     else:
-        cvode.active(0)    
-    
+        cvode.active(0)
+
     # re-initialize state
     neuron.h.finitialize(cell.v_init)
-    
+
     # initialize current- and record
     if cvode.active():
         cvode.re_init()
     else:
         neuron.h.fcurrent()
     neuron.h.frecord_init()
-    
+
     # Starting simulation at tstart
     neuron.h.t = cell.tstart
-    
+
     cell._loadspikes()
-    
+
     #print sim.time and realtime factor at intervals
     counter = 0.
     t0 = time()
@@ -57,7 +58,7 @@ def _run_simulation(cell, cvode, variable_dt=False, atol=0.001):
         interval = 1000. / cell.dt
     else:
         interval = 100. / cell.dt
-    
+
     while neuron.h.t < cell.tstop:
         neuron.h.fadvance()
         counter += 1.
@@ -71,8 +72,7 @@ def _run_simulation(cell, cvode, variable_dt=False, atol=0.001):
 
 
 def _run_simulation_with_electrode(cell, cvode, electrode=None,
-                                   variable_dt=False,
-                                   atol=0.001,
+                                   variable_dt=False, atol=0.001,
                                    to_memory=True, to_file=False,
                                    file_name=None, dotprodcoeffs=None,
                                    rec_current_dipole_moment=False):
@@ -88,11 +88,16 @@ def _run_simulation_with_electrode(cell, cvode, electrode=None,
         to_file = False
         file_name = None
 
+    if variable_dt and to_file:
+        print('LFP to file with variable_dt is not supported')
+        to_file = False
+        file_name = None
+
     # Use electrode object(s) to calculate coefficient matrices for LFP
     # calculations. If electrode is a list, then
     if cell.verbose:
         print('precalculating geometry - LFP mapping')
-        
+
     #put electrodecoeff in a list, if it isn't already
     if dotprodcoeffs is not None:
         if type(dotprodcoeffs) != list:
@@ -101,10 +106,10 @@ def _run_simulation_with_electrode(cell, cvode, electrode=None,
     else:
         #create empty list if no dotprodcoeffs are supplied
         dotprodcoeffs = []
-    
+
     #just for safekeeping
     lendotprodcoeffs0 = len(dotprodcoeffs)
-    
+
     #access electrode object and append mapping
     if electrode is not None:
         #put electrode argument in list if needed
@@ -112,33 +117,41 @@ def _run_simulation_with_electrode(cell, cvode, electrode=None,
             electrodes = electrode
         else:
             electrodes = [electrode]
-        
+
         for el in electrodes:
             el.calc_mapping(cell)
             dotprodcoeffs.append(el.mapping)
     else:
         electrodes = None
-   
 
-    # Initialize NEURON simulations of cell object    
+
+    # Initialize NEURON simulations of cell object
     neuron.h.dt = cell.dt
-    
+
     # needed for variable dt method
     if variable_dt:
         cvode.active(1)
         cvode.atol(atol)
-    
-    #re-initialize state
+    else:
+        cvode.active(0)
+
+    # re-initialize state
     neuron.h.finitialize(cell.v_init)
-    neuron.h.frecord_init() # wrong voltages t=0 for tstart < 0 otherwise
-    neuron.h.fcurrent()
-    
+
+    # initialize current- and record
+    if cvode.active():
+        cvode.re_init()
+    else:
+        neuron.h.fcurrent()
+
+    neuron.h.frecord_init()  # wrong voltages t=0 for tstart < 0 otherwise
+
     #Starting simulation at tstart (which may be < 0)
     neuron.h.t = cell.tstart
-    
+
     #load spike times from NetCon
     cell._loadspikes()
-    
+
     #print sim.time at intervals
     counter = 0.
     tstep = 0
@@ -148,33 +161,39 @@ def _run_simulation_with_electrode(cell, cvode, electrode=None,
         interval = 1000. / cell.dt
     else:
         interval = 100. / cell.dt
-    
+
     #temp vector to store membrane currents at each timestep
     imem = np.zeros(cell.totnsegs)
     #LFPs for each electrode will be put here during simulation
+
+    # this will fail with cvode!
     if to_memory:
         electrodesLFP = []
         for coeffs in dotprodcoeffs:
-            electrodesLFP.append(np.zeros((coeffs.shape[0],
-                                int(cell.tstop / cell.dt) + 1)))
+            if not cvode.active():
+                # if cvode is on lists are created on-the-fly
+                electrodesLFP.append(np.zeros((coeffs.shape[0],
+                                     int(cell.tstop / cell.dt) + 1)))
+
     #LFPs for each electrode will be put here during simulations
     if to_file:
         #ensure right ending:
-        if file_name.split('.')[-1] != 'h5':
-            file_name += '.h5'
-        el_LFP_file = h5py.File(file_name, 'w')
-        i = 0
-        for coeffs in dotprodcoeffs:
-            el_LFP_file['electrode{:03d}'.format(i)] = np.zeros((coeffs.shape[0],
-                                    int(cell.tstop / cell.dt + 1)))
-            i += 1
+        file_name = Path(file_name)
+        if file_name.suffix != '.h5':
+            file_name = file_name.parent / (file_name.name + '.h5')
+        if not cvode.active():
+            el_LFP_file = h5py.File(file_name, 'w')
+            i = 0
+            for coeffs in dotprodcoeffs:
+                el_LFP_file['electrode{:03d}'.format(i)] = np.zeros((coeffs.shape[0], int(cell.tstop / cell.dt + 1)))
+                i += 1
 
     # create a 2D array representation of segment midpoints for dot product
     # with transmembrane currents when computing dipole moment
     if rec_current_dipole_moment:
         midpoints = np.c_[cell.xmid, cell.ymid, cell.zmid]
 
-    
+    timesteps = []
     #run fadvance until time limit, and calculate LFPs for each timestep
     while neuron.h.t < cell.tstop:
         if neuron.h.t >= 0:
@@ -185,17 +204,25 @@ def _run_simulation_with_electrode(cell, cvode, electrode=None,
                     i += 1
 
             if rec_current_dipole_moment:
-                cell.current_dipole_moment[tstep, ] = np.dot(imem, midpoints)
-            
+                if not cvode.active():
+                    cell.current_dipole_moment[tstep, ] = np.dot(imem, midpoints)
+                else:
+                    cell.current_dipole_moment.append(np.dot(imem, midpoints))
+
             if to_memory:
                 for j, coeffs in enumerate(dotprodcoeffs):
-                    electrodesLFP[j][:, tstep] = np.dot(coeffs, imem)
-                    
+                    if not cvode.active():
+                        electrodesLFP[j][:, tstep] = np.dot(coeffs, imem)
+                    else:
+                        if tstep == 0:
+                            electrodesLFP.append(np.dot(coeffs, imem)[:, np.newaxis])
+                        else:
+                            electrodesLFP[j] = np.hstack((electrodesLFP[j], np.dot(coeffs, imem)[:, np.newaxis]))
+
             if to_file:
                 for j, coeffs in enumerate(dotprodcoeffs):
-                    el_LFP_file['electrode{:03d}'.format(j)
-                                ][:, tstep] = np.dot(coeffs, imem)
-            
+                    if not cvode.active():
+                        el_LFP_file['electrode{:03d}'.format(j)][:, tstep] = np.dot(coeffs, imem)
             tstep += 1
         neuron.h.fadvance()
         counter += 1.
@@ -206,9 +233,9 @@ def _run_simulation_with_electrode(cell, cvode, electrode=None,
                                                                    rtfactor))
             t0 = time()
             ti = neuron.h.t
-    
-    try:
-        #calculate LFP after final fadvance()
+
+    # calculate LFP after final fadvance() if needed
+    if tstep < len(cell._neuron_tvec):
         i = 0
         for sec in cell.allseclist:
             for seg in sec:
@@ -216,19 +243,25 @@ def _run_simulation_with_electrode(cell, cvode, electrode=None,
                 i += 1
 
         if rec_current_dipole_moment:
-            cell.current_dipole_moment[tstep, ] = np.dot(imem, midpoints)
-            
+            if not cvode.active():
+                cell.current_dipole_moment[tstep, ] = np.dot(imem, midpoints)
+            else:
+                cell.current_dipole_moment.append(np.dot(imem, midpoints))
+
         if to_memory:
             for j, coeffs in enumerate(dotprodcoeffs):
-                electrodesLFP[j][:, tstep] = np.dot(coeffs, imem)
+                if not cvode.active():
+                    electrodesLFP[j][:, tstep] = np.dot(coeffs, imem)
+                else:
+                    electrodesLFP[j] = np.hstack((electrodesLFP[j], np.dot(coeffs, imem)[:, np.newaxis]))
+
         if to_file:
             for j, coeffs in enumerate(dotprodcoeffs):
-                el_LFP_file['electrode{:03d}'.format(j)
-                            ][:, tstep] = np.dot(coeffs, imem)
+                el_LFP_file['electrode{:03d}'.format(j)][:, tstep] = np.dot(coeffs, imem)
 
-    except:
-        pass
-    
+    if rec_current_dipole_moment:
+        cell.current_dipole_moment = np.array(cell.current_dipole_moment)
+
     # Final step, put LFPs in the electrode object, superimpose if necessary
     # If electrode.perCellLFP, store individual LFPs
     if to_memory:
@@ -256,21 +289,21 @@ def _run_simulation_with_electrode(cell, cvode, electrode=None,
 def _collect_geometry_neuron(cell):
     '''Loop over allseclist to determine area, diam, xyz-start- and
     endpoints, embed geometry to cell object'''
-    
-    
+
+
     areavec = np.zeros(cell.totnsegs)
     diamvec = np.zeros(cell.totnsegs)
     lengthvec = np.zeros(cell.totnsegs)
-    
+
     xstartvec = np.zeros(cell.totnsegs)
     xendvec = np.zeros(cell.totnsegs)
     ystartvec = np.zeros(cell.totnsegs)
     yendvec = np.zeros(cell.totnsegs)
     zstartvec = np.zeros(cell.totnsegs)
     zendvec = np.zeros(cell.totnsegs)
-    
+
     counter = 0
-    
+
     #loop over all segments
     for sec in cell.allseclist:
         n3d = int(neuron.h.n3d())
@@ -287,47 +320,46 @@ def _collect_geometry_neuron(cell):
                 x[i] = neuron.h.x3d(i)
                 y[i] = neuron.h.y3d(i)
                 z[i] = neuron.h.z3d(i)
-            
+
             #normalize as seg.x [0, 1]
             L /= sec.L
-                        
+
             #temporary store position of segment midpoints
             segx = np.zeros(nseg)
             for i, seg in enumerate(sec):
                 segx[i] = seg.x
-            
+
             #can't be >0 which may happen due to NEURON->Python float transfer:
             segx0 = (segx - gsen2).round(decimals=6)
             segx1 = (segx + gsen2).round(decimals=6)
-            
+
             #fill vectors with interpolated coordinates of start and end points
             xstartvec[counter:counter+nseg] = np.interp(segx0, L, x)
             xendvec[counter:counter+nseg] = np.interp(segx1, L, x)
-            
+
             ystartvec[counter:counter+nseg] = np.interp(segx0, L, y)
             yendvec[counter:counter+nseg] = np.interp(segx1, L, y)
-            
+
             zstartvec[counter:counter+nseg] = np.interp(segx0, L, z)
             zendvec[counter:counter+nseg] = np.interp(segx1, L, z)
-                        
+
             #fill in values area, diam, length
-            for i, seg in enumerate(sec):
+            for seg in sec:
                 areavec[counter] = neuron.h.area(seg.x)
                 diamvec[counter] = seg.diam
                 lengthvec[counter] = sec.L/nseg
 
                 counter += 1
-    
+
     #set cell attributes
     cell.xstart = xstartvec
     cell.ystart = ystartvec
     cell.zstart = zstartvec
-    
+
     cell.xend = xendvec
     cell.yend = yendvec
     cell.zend = zendvec
-    
+
     cell.area = areavec
     cell.diam = diamvec
     cell.length = lengthvec
-

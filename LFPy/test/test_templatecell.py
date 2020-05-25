@@ -50,7 +50,7 @@ class testTemplateCell(unittest.TestCase):
         tvec_numpy = np.linspace(0, stickParams['tstop'],
                     int(stickParams['tstop']/stickParams['dt']) + 1)
 
-        np.testing.assert_equal(tvec, tvec_numpy)
+        np.testing.assert_allclose(tvec, tvec_numpy, atol=1E-9)
 
     def test_cell_tvec_01(self):
         stickParams = {
@@ -63,7 +63,7 @@ class testTemplateCell(unittest.TestCase):
         tvec_numpy = np.linspace(0, stickParams['tstop'],
                     int(stickParams['tstop']/stickParams['dt']) + 1)
 
-        np.testing.assert_equal(tvec, tvec_numpy)
+        np.testing.assert_allclose(tvec, tvec_numpy, atol=1E-9)
 
     def test_cell_tvec_02(self):
         stickParams = {
@@ -76,7 +76,7 @@ class testTemplateCell(unittest.TestCase):
         tvec_numpy = np.linspace(0, stickParams['tstop'],
                     int(stickParams['tstop']/stickParams['dt']) + 1)
 
-        np.testing.assert_equal(tvec, tvec_numpy)
+        np.testing.assert_allclose(tvec, tvec_numpy, atol=1E-9)
 
     def test_cell_tvec_03(self):
         stickParams = {
@@ -89,7 +89,7 @@ class testTemplateCell(unittest.TestCase):
         tvec_numpy = np.linspace(0, stickParams['tstop'],
                     int(stickParams['tstop']/stickParams['dt']) + 1)
 
-        np.testing.assert_equal(tvec, tvec_numpy)
+        np.testing.assert_allclose(tvec, tvec_numpy, atol=1E-9)
 
     def test_cell_tvec_04(self):
         stickParams = {
@@ -102,7 +102,7 @@ class testTemplateCell(unittest.TestCase):
         tvec_numpy = np.linspace(0, stickParams['tstop'],
                     int(stickParams['tstop']/stickParams['dt']) + 1)
 
-        np.testing.assert_equal(tvec, tvec_numpy)
+        np.testing.assert_allclose(tvec, tvec_numpy, atol=1E-9)
 
     def test_cell_tvec_05(self):
         stickParams = {
@@ -115,7 +115,7 @@ class testTemplateCell(unittest.TestCase):
         tvec_numpy = np.linspace(0, stickParams['tstop'],
                     int(stickParams['tstop']/stickParams['dt']) + 1)
 
-        np.testing.assert_equal(tvec, tvec_numpy)
+        np.testing.assert_allclose(tvec, tvec_numpy, atol=1E-9)
 
     def test_cell_tvec_06(self):
         stickParams = {
@@ -128,7 +128,7 @@ class testTemplateCell(unittest.TestCase):
         tvec_numpy = np.linspace(0, stickParams['tstop'],
                     int(stickParams['tstop']/stickParams['dt']) + 1)
 
-        np.testing.assert_equal(tvec, tvec_numpy)
+        np.testing.assert_allclose(tvec, tvec_numpy, atol=1E-9)
 
     def test_cell_tvec_07(self):
         stickParams = {
@@ -141,7 +141,7 @@ class testTemplateCell(unittest.TestCase):
         tvec_numpy = np.linspace(0, stickParams['tstop'],
                     int(stickParams['tstop']/stickParams['dt']) + 1)
 
-        np.testing.assert_equal(tvec, tvec_numpy)
+        np.testing.assert_allclose(tvec, tvec_numpy, atol=1E-9)
 
     def test_cell_tvec_08(self):
         stickParams = {
@@ -795,7 +795,7 @@ class testTemplateCell(unittest.TestCase):
         self.assertTrue(np.all(stick.vmem == stick.v_init))
         self.assertTrue(np.all(stick.imem == 0.))
         self.assertTrue(np.all(stick.current_dipole_moment == 0.))
-        
+
 
     def test_cell_simulate_recorder_01(self):
         stickParams = {
@@ -881,7 +881,7 @@ class testTemplateCell(unittest.TestCase):
         self.assertTrue(np.all(stick.vmem == stick.v_init))
         self.assertTrue(np.all(stick.imem == 0.))
         self.assertTrue(np.all(stick.current_dipole_moment == 0.))
-        
+
 
     def test_cell_simulate_recorder_04(self):
         stickParams = {
@@ -938,7 +938,7 @@ class testTemplateCell(unittest.TestCase):
         self.assertTrue(np.all(stick.vmem == stick.v_init))
         self.assertTrue(np.all(stick.imem == 0.))
         self.assertTrue(np.all(stick.current_dipole_moment == 0.))
-        
+
     def test_cell_simulate_current_dipole_moment_00(self):
         stickParams = {
             'morphology' : os.path.join(LFPy.__path__[0], 'test', 'stick.hoc'),
@@ -967,6 +967,7 @@ class testTemplateCell(unittest.TestCase):
             'bias' : 0.,
             'record_current' : False
         }
+
         for idx in range(31): #31 segments
             if idx != 15: # no net dipole moment because of stick symmetry
                 stick = LFPy.TemplateCell(**stickParams)
@@ -1008,9 +1009,10 @@ class testTemplateCell(unittest.TestCase):
 
         for idx in range(31): #31 segments
             if idx != 15: # no net dipole moment because of stick symmetry
+                # neuron.h('forall delete_section()')
                 stick = LFPy.TemplateCell(**stickParams)
                 synapse = LFPy.StimIntElectrode(stick, idx=idx,
-                                       **stimParams)
+                                                **stimParams)
                 stick.simulate(rec_imem=True, rec_current_dipole_moment=True)
                 p = np.dot(stick.imem.T, np.c_[stick.xmid, stick.ymid, stick.zmid])
                 np.testing.assert_allclose(p, stick.current_dipole_moment)
@@ -1306,7 +1308,7 @@ class testTemplateCell(unittest.TestCase):
         self.assertTrue(stick.tvec.size == stick.imem.shape[1] ==
                         electrode.LFP.shape[1] == electrode1.LFP.shape[1] ==
                         int(stick.tstop/stick.dt)+1)
-        
+
     def test_cell_distort_geometry_01(self):
         cell0 = LFPy.TemplateCell(morphology=os.path.join(LFPy.__path__[0], 'test',
                                                   'ball_and_sticks_w_lists.hoc' ),
