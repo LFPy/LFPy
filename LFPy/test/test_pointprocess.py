@@ -56,7 +56,7 @@ class testSynapse(unittest.TestCase):
                            record_potential=True)
         syn.set_spike_times(np.array([10.]))
         cell.simulate()
-        
+
         i = np.zeros(cell.tvec.size)
         i[cell.tvec > 10.] = -np.exp(-np.arange((cell.tvec > 10.).sum())*cell.dt / 5.)
 

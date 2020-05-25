@@ -1096,8 +1096,6 @@ class Cell(object):
         if rec_vmem:
             self._collect_vmem()
 
-        self._collect_isyn()
-        self._collect_vsyn()
         if hasattr(self, 'stimireclist'):
             self._collect_istim()
         if hasattr(self, 'stimvreclist'):
@@ -1385,7 +1383,7 @@ class Cell(object):
         Record point process membrane
         """
         self.synvreclist = neuron.h.List()
-        for idx, pp in enumerate(self.pointprocesses):
+        for idx, pp in enumerate(self.synapses):
             if idx in self._synvtorecord:
                 syn = self.synlist[idx]
                 seg = syn.get_segment()
