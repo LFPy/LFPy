@@ -549,10 +549,10 @@ class Cell(object):
         """
         if not hasattr(self, 'synlist'):
             self.synlist = neuron.h.List()
-        if not hasattr(self, 'synireclist'):
-            self.synireclist = neuron.h.List()
-        if not hasattr(self, 'synvreclist'):
-            self.synvreclist = neuron.h.List()
+        if not hasattr(self, '_synitorecord'):
+            self._synitorecord = []
+        if not hasattr(self, '_synvtorecord'):
+            self._synvtorecord = []
         if not hasattr(self, 'netstimlist'):
            self.netstimlist = neuron.h.List()
         if not hasattr(self, 'netconlist'):
@@ -589,25 +589,13 @@ class Cell(object):
                     nc.weight[0] = weight
                     self.netconlist.append(nc)
 
-                    #record currents
+                    # record current
                     if record_current:
-                        synirec = neuron.h.Vector(int(self.tstop //
-                                                      self.dt+1))
-                        synirec.record(syn._ref_i, self.dt)
-                        self.synireclist.append(synirec)
-                    else:
-                        synirec = neuron.h.Vector(0)
-                        self.synireclist.append(synirec)
+                        self._synitorecord.append(self.stimlist.count() - 1)
 
-                    #record potential
+                    # record potential
                     if record_potential:
-                        synvrec = neuron.h.Vector(int(self.tstop //
-                                                      self.dt+1))
-                        synvrec.record(seg._ref_v, self.dt)
-                        self.synvreclist.append(synvrec)
-                    else:
-                        synvrec = neuron.h.Vector(0)
-                        self.synvreclist.append(synvrec)
+                        self._synvtorecord.append(self.stimlist.count() - 1)
 
                 i += 1
 
@@ -1070,6 +1058,12 @@ class Cell(object):
         if hasattr(self, '_stimvtorecord'):
             if len(self._stimvtorecord) > 0:
                 self._set_vpointprocess_recorders(dt)
+        if hasattr(self, '_synitorecord'):
+            if len(self._synitorecord) > 0:
+                self._set_isyn_recorders(dt)
+        if hasattr(self, '_synvtorecord'):
+            if len(self._synvtorecord) > 0:
+                self._set_vsyn_recorders(dt)
 
         # set time recorder from NEURON
         self._set_time_recorders(dt)
@@ -1108,6 +1102,10 @@ class Cell(object):
             self._collect_istim()
         if hasattr(self, 'stimvreclist'):
             self._collect_vstim()
+        if hasattr(self, 'synireclist'):
+            self._collect_isyn()
+        if hasattr(self, 'synvreclist'):
+            self._collect_vsyn()
         if len(rec_variables) > 0:
             self._collect_rec_variables(rec_variables)
         if hasattr(self, 'netstimlist'):
@@ -1363,6 +1361,43 @@ class Cell(object):
             else:
                 stimvrec = neuron.h.Vector(0)
             self.stimvreclist.append(stimvrec)
+
+    def _set_isyn_recorders(self, dt):
+        """
+        Record point process current
+        """
+        self.synireclist = neuron.h.List()
+        for idx, pp in enumerate(self.synapses):
+            if idx in self._synitorecord:
+                syn = self.synlist[idx]
+                if dt is not None:
+                    synirec = neuron.h.Vector(int(self.tstop / self.dt + 1))
+                    synirec.record(syn._ref_i, self.dt)
+                else:
+                    synirec = neuron.h.Vector()
+                    synirec.record(syn._ref_i)
+            else:
+                synirec = neuron.h.Vector(0)
+            self.synireclist.append(synirec)
+
+    def _set_vsyn_recorders(self, dt):
+        """
+        Record point process membrane
+        """
+        self.synvreclist = neuron.h.List()
+        for idx, pp in enumerate(self.pointprocesses):
+            if idx in self._synvtorecord:
+                syn = self.synlist[idx]
+                seg = syn.get_segment()
+                if dt is not None:
+                    synvrec = neuron.h.Vector(int(self.tstop / self.dt + 1))
+                    synvrec.record(seg._ref_v, self.dt)
+                else:
+                    synvrec = neuron.h.Vector()
+                    synvrec.record(seg._ref_v)
+            else:
+                synvrec = neuron.h.Vector(0)
+            self.synvreclist.append(synvrec)
 
     def _set_voltage_recorders(self, dt):
         """
