@@ -249,11 +249,13 @@ class Cell(object):
             self.Ra = Ra
             self.cm = cm
             self.passive_parameters = passive_parameters
+            self._set_ra_and_cm()
             self._set_passive()
         else:
             self.Ra = Ra
             self.cm = cm
             self.passive_parameters = passive_parameters
+            self._set_ra_and_cm()
             if self.verbose:
                 print('No passive properties added')
 
@@ -509,12 +511,16 @@ class Cell(object):
         segments is sufficiently close to zero"""
         raise NotImplementedError('this function need to be written')
 
+    def _set_ra_and_cm(self):
+        """Insert ra and cm on all segments"""
+        for sec in self.allseclist:
+            sec.Ra = self.Ra
+            sec.cm = self.cm
+
     def _set_passive(self):
         """Insert passive mechanism on all segments"""
         for sec in self.allseclist:
             sec.insert('pas')
-            sec.Ra = self.Ra
-            sec.cm = self.cm
             sec.g_pas = self.passive_parameters['g_pas']
             sec.e_pas = self.passive_parameters['e_pas']
 
