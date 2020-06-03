@@ -244,18 +244,16 @@ class Cell(object):
 
         self.default_rotation = self._get_rotation()
 
+        # Set axial resistance and membrane capacitance
+        self.Ra = Ra
+        self.cm = cm
+        self._set_ra_and_cm()
+
+        # Set passive properties, insert passive on all segments
+        self.passive_parameters = passive_parameters
         if passive:
-            #Set passive properties, insert passive on all segments
-            self.Ra = Ra
-            self.cm = cm
-            self.passive_parameters = passive_parameters
-            self._set_ra_and_cm()
             self._set_passive()
         else:
-            self.Ra = Ra
-            self.cm = cm
-            self.passive_parameters = passive_parameters
-            self._set_ra_and_cm()
             if self.verbose:
                 print('No passive properties added')
 
