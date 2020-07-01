@@ -9,7 +9,7 @@ import sys
 import shutil
 
 d = {}
-exec(open("LFPy/version.py").read(), None, d)
+exec(open(os.path.join('LFPy', 'version.py')).read(), None, d)
 version = d['version']
 
 try:
@@ -69,7 +69,7 @@ setup(
     cmdclass=cmdclass,
     ext_modules=ext_modules,
     url='http://LFPy.readthedocs.io',
-    download_url='https://github.com/LFPy/LFPy/tarball/v2.0.7',
+    download_url='https://github.com/LFPy/LFPy/tarball/v{}'.format(version),
     license='LICENSE',
     description='A module for modeling extracellular potentials of multicompartment neuron models built on NEURON',
     long_description=long_description,
