@@ -172,9 +172,7 @@ class Cell(object):
             neuron.h.load_file('stdlib.hoc')    #NEURON std. library
             neuron.h.load_file('import3d.hoc')  #import 3D morphology lib
 
-        numsec = 0
-        for numsec, sec in enumerate(neuron.h.allsec()):
-            pass
+        numsec = sum(1 for sec in neuron.h.allsec())
 
         if delete_sections:
             if not isinstance(morphology, type(neuron.h.SectionList)):
