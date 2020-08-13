@@ -13,7 +13,7 @@ GNU General Public License for more details.
 """
 
 
-from scipy.special import eval_legendre, lpmv, legendre
+from scipy.special import lpmv
 import numpy as np
 from warnings import warn
 
@@ -309,6 +309,12 @@ class FourSphereVolumeConductor(object):
 
     Parameters
     ----------
+    r_electrodes : ndarray, dtype=float
+        Shape (n_contacts, 3) array containing n_contacts electrode locations
+        in cartesian coordinates in units of (µm).
+        All ``r_el`` in ``r_electrodes`` must be less than or equal to scalp
+        radius and larger than the distance between dipole and sphere
+        center: ``|rz| < r_el <= radii[3]``.
     radii : list, dtype=float
         Len 4 list with the outer radii in units of (µm) for the 4
         concentric shells in the four-sphere model: brain, csf, skull and
@@ -317,12 +323,8 @@ class FourSphereVolumeConductor(object):
         Len 4 list with the electrical conductivity in units of (S/m) of
         the four shells in the four-sphere model: brain, csf, skull and
         scalp, respectively.
-    r_electrodes : ndarray, dtype=float
-        Shape (n_contacts, 3) array containing n_contacts electrode locations
-        in cartesian coordinates in units of (µm).
-        All ``r_el`` in ``r_electrodes`` must be less than or equal to scalp
-        radius and larger than the distance between dipole and sphere
-        center: ``|rz| < r_el <= radii[3]``.
+    iter_factor : float
+        iteration-stop factor
 
     Examples
     --------
@@ -333,9 +335,9 @@ class FourSphereVolumeConductor(object):
     >>> import numpy as np
     >>> radii = [79000., 80000., 85000., 90000.]
     >>> sigmas = [0.3, 1.5, 0.015, 0.3]
-    >>> r = np.array([[0., 0., 90000.], [0., 85000., 0.]])
+    >>> r_electrodes = np.array([[0., 0., 90000.], [0., 85000., 0.]])
     >>> rz = np.array([0., 0., 78000.])
-    >>> sphere_model = LFPy.FourSphereVolumeConductor(radii, sigmas, r)
+    >>> sphere_model = LFPy.FourSphereVolumeConductor(r_electrodes, radii, sigmas)
     >>> # current dipole moment
     >>> p = np.array([[10., 10., 10.]]*10) # 10 timesteps
     >>> # compute potential
@@ -343,7 +345,11 @@ class FourSphereVolumeConductor(object):
 
     """
 
-    def __init__(self, radii, sigmas, r_electrodes, iter_factor = 2./99.*1e-6):
+    def __init__(self,
+                 r_electrodes,
+                 radii=[79000., 80000., 85000., 90000.],
+                 sigmas=[0.3, 1.5, 0.015, 0.3],
+                 iter_factor=2./99.*1e-6):
         """Initialize class FourSphereVolumeConductor"""
         self.r1 = float(radii[0])
         self.r2 = float(radii[1])
@@ -735,14 +741,13 @@ class FourSphereVolumeConductor(object):
         const = 1.
         coeff_sum = 0.
         consts = []
-        # while const > self.iteration_stop_factor*coeff_sum:
-        while const > 2./99.*1e-12*coeff_sum:
+        while const > self.iteration_stop_factor * 1e-6 * coeff_sum:
             c1n = self._calc_c1n(n)
             const = n*(c1n * (r / self.r1) ** n + (self._rz / r) ** (n + 1))
             coeff_sum += const
             consts.append(const)
             n += 1
-        consts = np.insert(consts, 0, 0) # since the legendre function starts with P0
+        consts = np.insert(consts, 0, 0)  # legendre function starts with P0
         leg_consts = np.polynomial.legendre.Legendre(consts)
         pot_sum = leg_consts(np.cos(theta))
         return pot_sum
@@ -769,8 +774,7 @@ class FourSphereVolumeConductor(object):
         const = 1.
         coeff_sum = 0.
         consts = []
-        # while const > self.iteration_stop_factor*coeff_sum:
-        while const > 2./99.*1e-6*coeff_sum:
+        while const > self.iteration_stop_factor * coeff_sum:
             term1 = self._calc_csf_term1(n,r)
             term2 = self._calc_csf_term2(n,r)
             const = n*(term1 + term2)
@@ -804,8 +808,7 @@ class FourSphereVolumeConductor(object):
         const = 1.
         coeff_sum = 0.
         consts = []
-        # while const > self.iteration_stop_factor*coeff_sum:
-        while const > 2./99.*1e-6*coeff_sum:
+        while const > self.iteration_stop_factor * coeff_sum:
             c3n = self._calc_c3n(n)
             d3n = self._calc_d3n(n, c3n)
             const = n*(c3n * (r / self.r3) ** n + d3n * (self.r3 / r) ** (n + 1))
@@ -839,8 +842,7 @@ class FourSphereVolumeConductor(object):
         const = 1.
         coeff_sum = 0.
         consts = []
-        # while const > self.iteration_stop_factor*coeff_sum:
-        while const > 2./99.*1e-6*coeff_sum:
+        while const > self.iteration_stop_factor * coeff_sum:
             c4n = self._calc_c4n(n)
             d4n = self._calc_d4n(n, c4n)
             const = n*(c4n * (r / self.r4) ** n + d4n * (self.r4 / r) ** (n + 1))
