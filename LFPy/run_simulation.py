@@ -21,7 +21,7 @@ import neuron
 from pathlib import Path
 
 
-def _run_simulation(cell, cvode, variable_dt=False, atol=0.001):
+def _run_simulation(cell, cvode, variable_dt=False, atol=0.001, rtol=0.):
     '''
     Running the actual simulation in NEURON, simulations in NEURON
     are now interruptable.
@@ -32,6 +32,7 @@ def _run_simulation(cell, cvode, variable_dt=False, atol=0.001):
     if variable_dt:
         cvode.active(1)
         cvode.atol(atol)
+        cvode.rtol(rtol)
     else:
         cvode.active(0)
 
@@ -72,7 +73,7 @@ def _run_simulation(cell, cvode, variable_dt=False, atol=0.001):
 
 
 def _run_simulation_with_electrode(cell, cvode, electrode=None,
-                                   variable_dt=False, atol=0.001,
+                                   variable_dt=False, atol=0.001, rtol=0.,
                                    to_memory=True, to_file=False,
                                    file_name=None, dotprodcoeffs=None,
                                    rec_current_dipole_moment=False):
@@ -132,6 +133,7 @@ def _run_simulation_with_electrode(cell, cvode, electrode=None,
     if variable_dt:
         cvode.active(1)
         cvode.atol(atol)
+        cvode.rtol(rtol)
     else:
         cvode.active(0)
 
