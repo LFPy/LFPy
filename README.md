@@ -109,13 +109,21 @@ There are few options to install LFPy:
         (sudo) pip install -r requirements.txt (--user) # install dependencies
         (sudo) python setup.py develop (--user)
 
-5. Anaconda Python (macos/linux):
+5. Anaconda Python (https://www.anaconda.com, macos/linux only):
 
-        conda install lfpy neuron=*=mpi* # installs LFPy and Neuron in the current conda environment
+    Add the conda-forge (https://conda-forge.org) as channel:
+
+        conda config --add channels conda-forge
+        conda config --set channel_priority strict  # suggested
+
+    Install LFPy either issuing
+
+        conda install lfpy  # installs LFPy and its dependencies in the current conda environment
 
     or
 
-        conda create -n lfpy lfpy neuron=*=mpi* # creates new conda environment with LFPy and Neuron
+        conda create -n lfpy lfpy  # creates new conda environment named lfpy with LFPy and its dependencies
+        conda activate lfpy        # activate the lfpy environment
 
 Uninstall
 =========
@@ -124,6 +132,9 @@ To remove installed LFPy files it should suffice to issue (repeat until no more 
 
     (sudo) pip uninstall LFPy
 
+In case LFPy was installed using conda in an environment, it can be uninstalled by issuing:
+
+    conda uninstall lfpy
 
 Docker
 ======
