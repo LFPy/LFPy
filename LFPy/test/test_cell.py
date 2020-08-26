@@ -1289,6 +1289,75 @@ class testCell(unittest.TestCase):
                 p = np.dot(stick.imem.T, np.c_[stick.xmid, stick.ymid, stick.zmid])
                 np.testing.assert_allclose(p, stick.current_dipole_moment)
 
+    def test_cell_simulate_dotprodcoeffs_00(self):
+        stickParams = {
+            'morphology' : os.path.join(LFPy.__path__[0], 'test', 'stick.hoc'),
+            'cm' : 1,
+            'Ra' : 150,
+            'v_init' : -65,
+            'passive' : True,
+            'passive_parameters' : {'g_pas' : 1./30000, 'e_pas' : -65},
+            'tstart' : 0,
+            'tstop' : 10000,
+            'dt' : 0.2,
+            'nsegs_method' : 'lambda_f',
+            'lambda_f' : 100,
+        }
+
+        stimParams = {
+            'pptype': 'SinSyn',
+            'delay': 0.,
+            'dur': 1000.,
+            'pkamp': 1.,
+            'freq': 100.,
+            'phase': 0,
+            'bias': 0.,
+            'record_current': True,
+            'record_potential': True
+        }
+
+
+        stick = LFPy.Cell(**stickParams)
+        synapse = LFPy.StimIntElectrode(stick, idx=0,
+                                        **stimParams)
+        M = np.eye(stick.totnsegs)
+        stick.simulate(rec_imem=True, dotprodcoeffs=[M], variable_dt=False)
+        np.testing.assert_allclose(stick.imem, stick.dotprodresults[0])
+
+    def test_cell_simulate_dotprodcoeffs_01(self):
+        stickParams = {
+            'morphology' : os.path.join(LFPy.__path__[0], 'test', 'stick.hoc'),
+            'cm' : 1,
+            'Ra' : 150,
+            'v_init' : -65,
+            'passive' : True,
+            'passive_parameters' : {'g_pas' : 1./30000, 'e_pas' : -65},
+            'tstart' : 0,
+            'tstop' : 10000,
+            'dt' : 0.2,
+            'nsegs_method' : 'lambda_f',
+            'lambda_f' : 100,
+        }
+
+        stimParams = {
+            'pptype': 'SinSyn',
+            'delay': 0.,
+            'dur': 1000.,
+            'pkamp': 1.,
+            'freq': 100.,
+            'phase': 0,
+            'bias': 0.,
+            'record_current': True,
+            'record_potential': True
+        }
+
+        stick = LFPy.Cell(**stickParams)
+        synapse = LFPy.StimIntElectrode(stick, idx=0,
+                                        **stimParams)
+        M = np.eye(stick.totnsegs)
+        stick.simulate(rec_imem=True, dotprodcoeffs=[M], variable_dt=True)
+        np.testing.assert_allclose(stick.imem, stick.dotprodresults[0])
+
     def test_cell_tstart_00(self):
         stickParams = {
             'morphology' : os.path.join(LFPy.__path__[0], 'test', 'stick.hoc'),
