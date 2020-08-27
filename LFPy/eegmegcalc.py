@@ -79,15 +79,15 @@ class OneSphereVolumeConductor(object):
         try:
             assert(r.shape[0] == 3)
             assert(r.ndim == 2)
-        except AssertionError as ae:
+        except AssertionError:
             raise AssertionError('r must be a shape (3, n_points) ndarray')
         try:
             assert((type(R) is float) or (type(R) is int))
-        except AssertionError as ae:
+        except AssertionError:
             raise AssertionError('sphere radius R must be a float value')
         try:
             assert((sigma_i > 0) & (sigma_o > 0))
-        except AssertionError as ae:
+        except AssertionError:
             raise AssertionError('sigma_i and sigma_o must both be positive values')
 
         self.r = r
@@ -124,7 +124,7 @@ class OneSphereVolumeConductor(object):
         try:
             assert(type(rs) in [int, float, np.float64])
             assert(abs(rs) < self.R)
-        except AssertionError as ae:
+        except AssertionError:
             raise AssertionError('source location rs must be a float value and |rs| must be less than sphere radius R')
         try:
             assert((min_distance is None) or (type(min_distance) in [float, int, np.float64]))
