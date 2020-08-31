@@ -976,7 +976,7 @@ class Cell(object):
     def simulate(self, electrode=None, rec_imem=False, rec_vmem=False,
                  rec_ipas=False, rec_icap=False,
                  rec_current_dipole_moment=False,
-                 rec_variables=[], variable_dt=False, atol=0.001,
+                 rec_variables=[], variable_dt=False, atol=0.001, rtol=0.,
                  to_memory=True, to_file=False, file_name=None,
                  dotprodcoeffs=None, **kwargs):
         """
@@ -1011,7 +1011,9 @@ class Cell(object):
         variable_dt : bool
             Use variable timestep in NEURON
         atol : float
-            Absolute tolerance used with NEURON variable timestep
+            Absolute local error tolerance for NEURON variable timestep method
+        rtol : float
+            Relative local error tolerance for NEURON variable timestep method
         to_memory : bool
             Only valid with electrode, store lfp in -> electrode.LFP
         to_file : bool
@@ -1075,13 +1077,15 @@ class Cell(object):
             if not rec_imem and self.verbose:
                 print("rec_imem = %s, membrane currents will not be recorded!"
                                   % str(rec_imem))
-            _run_simulation(self, cvode, variable_dt, atol)
+            _run_simulation(self, cvode, variable_dt, atol, rtol)
 
         else:
             #allow using both electrode and additional coefficients:
-            _run_simulation_with_electrode(self, cvode, electrode, variable_dt, atol,
+            _run_simulation_with_electrode(self, cvode, electrode, variable_dt,
+                                           atol, rtol,
                                            to_memory, to_file, file_name,
-                                           dotprodcoeffs, rec_current_dipole_moment)
+                                           dotprodcoeffs,
+                                           rec_current_dipole_moment)
 
         # somatic trace
         if self.nsomasec >= 1:
