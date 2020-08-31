@@ -19,8 +19,10 @@ install:
 
   # Replace dep1 dep2 ... with your dependencies
   - conda config --add channels conda-forge
-  - conda create -n test-environment python=$TRAVIS_PYTHON_VERSION pytest numpy scipy matplotlib Cython h5py neuron=*=mpi_* mpi4py MEAutility>=1.4.2 coveralls pytest-cov
+  - conda create -n test-environment python=$TRAVIS_PYTHON_VERSION pytest numpy scipy matplotlib Cython h5py neuron=*=mpi_mpich* mpi4py MEAutility coveralls pytest-cov
   - conda activate test-environment
+  - conda list
+  - which gcc
   - python setup.py install
 
 script:
