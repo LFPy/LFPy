@@ -1,25 +1,31 @@
 language: python
 python:
+  # We don't actually use the Travis Python, but this keeps it organized.
   - "3.6"
   - "3.7"
   - "3.8"
-addons:
-   apt:
-      packages:
-      - liblapack-dev
-      - libopenmpi-dev
-      - openmpi-bin 
-      - libhdf5-serial-dev
-      - gfortran
 install:
-  - travis_wait 30 pip install scipy -q
-  - pip install setuptools cython coveralls h5py matplotlib mpi4py -q
-  - pip install -r requirements.txt
-  - pip install -I pytest-cov==2.5.1
-  - pip install pytest codecov
-  - source continuous_integration/install.sh
-script:
-  - bash continuous_integration/test_script.sh
-after_success:
-  coveralls
+  - sudo apt update
+  # We do this conditionally because it saves us some downloading if the
+  # version is the same.
+  - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
+  - bash miniconda.sh -b -p $HOME/miniconda
+  - source "$HOME/miniconda/etc/profile.d/conda.sh"
+  - hash -r
+  - conda config --set always_yes yes --set changeps1 no
+  - conda update -q conda
+  # Useful for debugging any issues with conda
+  - conda info -a
 
+  # Replace dep1 dep2 ... with your dependencies
+  - conda config --add channels conda-forge
+  - conda create -n test-environment python=$TRAVIS_PYTHON_VERSION pytest numpy scipy matplotlib Cython h5py neuron=*=mpi_mpich* mpi4py MEAutility coveralls pytest-cov
+  - conda activate test-environment
+  - conda list
+  - which gcc
+  - python setup.py install
+
+script:
+  - bash .travisci/test_script.sh
+after_success:
+  - coveralls

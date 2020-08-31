@@ -27,7 +27,7 @@ Developing LFPy
 ===============
 
 As development of LFPy is now moved onto GitHub (https://github.com/LFPy), one can now fully benefit on working with forks of LFPy, implement new features, and share code improvements through pull requests.
-We hope that LFPy can be improved continously through such a collaborative effort.
+We hope that LFPy can be improved continuously through such a collaborative effort.
 
 A list of various LFPy issues, bugs, feature requests etc. is found `here <https://github.com/LFPy/LFPy/issues>`_.
 If you want to contribute code fixes or new features in LFPy, send us a `pull request <https://github.com/LFPy/LFPy/pulls>`_.
@@ -41,7 +41,7 @@ Dependencies
 
 To install LFPy you will need the following:
 
-1.  Python. LFPy's unit-test suite is integrated with and continuously tested using `Travis-CI <https://travis-ci.org>`_. Tests are run using NEURON 7.4 and Python 2.7, 3.4, 3.5 and 3.6, as well as other Python dependencies listed next.
+1.  Python. LFPy's unit-test suite is integrated with and continuously tested using `Travis-CI <https://travis-ci.org>`_. Tests are run using NEURON >7.6.4 and Python 3.6, 3.7 and 3.8, as well as other Python dependencies listed next.
     The code build testing status, results of the last test, test coverage test using `Coveralls <https://coveralls.io>`_ and documentation status can be seen here:
 
     .. image:: https://travis-ci.org/LFPy/LFPy.svg?branch=master
@@ -56,8 +56,7 @@ To install LFPy you will need the following:
         :target: http://lfpy.readthedocs.io/en/latest/?badge=latest
         :alt: Documentation Status
 
-
-2.  Python modules setuptools, numpy, scipy, matplotlib, Cython, h5py, mpi4py, csa
+2.  Python modules setuptools, numpy, scipy, matplotlib, h5py, mpi4py as well as Cython
 
     Depending on how LFPy is obtained, missing dependencies will be installed automatically (using ``pip``). Manual installation of dependencies can be done using ``pip`` and the  ``requirements.txt`` file which is supplied with the LFPy source codes (since v2.0).
     See next section for details.
@@ -81,7 +80,7 @@ To install LFPy you will need the following:
 
     If this step fails, see the next section.
 
-    LFPy now requires NEURON 7.4 or newer, and should be compiled with MPI in order to support new parallel functionality in LFPy, i.e., execution of networks in parallel.
+    LFPy now requires NEURON 7.6.4 or newer, and should be compiled with MPI in order to support new parallel functionality in LFPy, i.e., execution of networks in parallel.
 
 5.  `Cython <http://cython.org>`_ (C-extensions for python) to speed up simulations of extracellular fields. Tested with version > 0.14,
     and known to fail with version 0.11. LFPy works without Cython, but simulations may run slower and is therefore not recommended.
@@ -197,7 +196,7 @@ In order to install LFPy in the current (e.g., `base`) environment, issue in the
 ::
 
     conda config --add channels conda-forge
-    conda install lfpy neuron=*=mpi*
+    conda install lfpy
 
 
 Complete LFPy environments can be created using the `conda_environment_ubuntu.yml` or `conda_environment_macos.yml` files found in the root of the LFPy source code tree:
@@ -207,8 +206,9 @@ Complete LFPy environments can be created using the `conda_environment_ubuntu.ym
     cd LFPy
     conda env create -f conda_environment_macos.yml
     conda activate lfpy
+    python setup.py install  # install development version in the current environment
 
-Note that other useful packages like `ipython`, `pandas` etc. must be installed separately, as:
+Note that other useful packages like ``ipython``, ``pandas``, ``jupyter`` etc. must be installed separately, as:
 ::
 
     conda install <package-name>
@@ -217,8 +217,8 @@ Note that other useful packages like `ipython`, `pandas` etc. must be installed 
 Ubuntu 18.04.1 LTS 64-bit with Anaconda Scientific Python distribution
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Probably the simplest solution relying on no source code compilation.
-This recipe is tested on a clean installation of Ubuntu 18.04.1 running in VirtualBox (https://www.virtualbox.org).
+Another solution avoiding source code compilation.
+This recipe was tested on a clean installation of Ubuntu 18.04.1 running in VirtualBox (https://www.virtualbox.org).
 The VirtualBox guest additions were installed.
 
 1.  Download and install Anaconda using the 64-bit Linux installer script from https://www.anaconda.com/download (https://repo.anaconda.com/archive/Anaconda3-5.3.1-Linux-x86_64.sh)
@@ -282,18 +282,6 @@ The VirtualBox guest additions were installed.
     which will run through the LFPy test suite. Hopefully without errors.
 
 
-Python 2.7
-""""""""""
-
-1.  Follow the above steps up until point 6. Then in the terminal create a new environment based on Python 2.7
-    (assuming that the Python 3 version of Anaconda was installed):
-    ::
-
-        conda create -n py27 python=2.7 anaconda
-        conda activate py27
-
-2.  Continue with step 7 above.
-
 
 Ubuntu 18.04.1 LTS w. system Python 3.6
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -345,7 +333,7 @@ Make sure that nothing in ``$PATH`` points to an Anaconda-installed version of P
 OSX 10.12.x with Anaconda Scientific Python distribution
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-By far the simplest solution relying on no source code compilation.
+Another option avoiding source code compilation.
 
 1.  Download and install Anaconda using the 64-bit graphical installer from http://continuum.io/downloads
 2.  Download and install the 64-bit Mac ``.pkg`` file with NEURON from http://www.neuron.yale.edu/neuron/download.
@@ -408,8 +396,8 @@ Windows 10 Pro/Education (64-bit) install instructions:
         conda create -n LFPy python=3.6 mpi4py numpy scipy matplotlib h5py Cython jupyter
         conda activate LFPy
 
-    For every future session, the LFPy environment needs to be used by issuing `conda activate LFPy`. From hereon, skip to step 9.
-8.  Install additional LFPy dependencies listed in `requirements.txt` using ``conda`` (to avoid package clashes with i.e., ``pip install <package_name>``)
+    For every future session, the LFPy environment needs to be used by issuing ``conda activate LFPy``. From hereon, skip to step 9.
+8.  Install additional LFPy dependencies listed in ``requirements.txt`` using ``conda`` (to avoid package clashes with i.e., ``pip install <package_name>``)
     ::
 
         conda install mpi4py
