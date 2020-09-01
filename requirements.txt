@@ -7,4 +7,4 @@ h5py>=2.5
 mpi4py>=1.2
 matplotlib>=2.0
 MEAutility>=1.4.2
-neuron>=7.8.1
+neuron>=7.7
