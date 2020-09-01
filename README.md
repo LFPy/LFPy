@@ -57,7 +57,7 @@ Requirements
 
 To install LFPy you will need the following:
 
-- Python modules numpy, scipy, matplotlib, h5py, mpi4py, Cython
+- Python modules numpy, scipy, matplotlib, h5py, mpi4py, Cython, neuron
 - NEURON (from http://www.neuron.yale.edu, v7.6.4 or newer) and corresponding Python module. The following should execute without error in a Python console:
 
         import neuron
@@ -122,7 +122,7 @@ There are few options to install LFPy:
 
     or
 
-        conda create -n lfpy lfpy  # creates new conda environment named lfpy with LFPy and its dependencies
+        conda create -n lfpy python=3 lfpy  # creates new Python 3.x conda environment named lfpy with LFPy and its dependencies
         conda activate lfpy        # activate the lfpy environment
 
 Uninstall
