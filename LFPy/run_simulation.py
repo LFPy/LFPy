@@ -318,10 +318,10 @@ def _collect_geometry_neuron(cell):
             y = np.zeros(n3d)
             z = np.zeros(n3d)
             for i in range(n3d):
-                L[i] = neuron.h.arc3d(i)
-                x[i] = neuron.h.x3d(i)
-                y[i] = neuron.h.y3d(i)
-                z[i] = neuron.h.z3d(i)
+                L[i] = neuron.h.arc3d(i, sec=sec)
+                x[i] = neuron.h.x3d(i, sec=sec)
+                y[i] = neuron.h.y3d(i, sec=sec)
+                z[i] = neuron.h.z3d(i, sec=sec)
 
             #normalize as seg.x [0, 1]
             L /= sec.L

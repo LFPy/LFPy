@@ -1,0 +1,43 @@
+proc celldef() {
+  topol()
+  subsets()
+  geom()
+  biophys()
+  geom_nseg()
+}
+
+create soma, dend[4], apic
+
+proc topol() { local i
+  for i = 0, 1 connect dend[i](0), soma(1)
+  for i = 2, 3 connect dend[i](0), soma(0)
+  connect apic(0), soma(1)
+  basic_shape()
+}
+proc basic_shape() {
+  soma {pt3dclear() pt3dadd(0, 0, -10, 20) pt3dadd(0, 0, 10, 20)}
+  dend {pt3dclear() pt3dadd(0, 0, 10, 3) pt3dadd(100, -100, 100, 3)}
+  dend[1] {pt3dclear() pt3dadd(0, 0, 10, 3) pt3dadd(-100, 100, 100, 3)}
+  dend[2] {pt3dclear() pt3dadd(0, 0, -10, 3) pt3dadd(100, 100, -100, 3)}
+  dend[3] {pt3dclear() pt3dadd(0, 0, -10, 3) pt3dadd(-100, -100, -100, 3)}
+  apic {pt3dclear() pt3dadd(0, 0, 10, 3) pt3dadd(0, 0, 324, 3)}
+}
+
+objref all
+proc subsets() { local i
+  objref all
+  all = new SectionList()
+    soma all.append()
+    for i=0, 3 dend[i] all.append()
+    apic all.append()
+
+}
+proc geom() {
+}
+proc geom_nseg() {
+}
+proc biophys() {
+}
+access soma
+
+celldef()
