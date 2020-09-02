@@ -172,16 +172,15 @@ class Cell(object):
             neuron.h.load_file('stdlib.hoc')    #NEURON std. library
             neuron.h.load_file('import3d.hoc')  #import 3D morphology lib
 
-        numsec = sum(1 for sec in neuron.h.allsec())
-
         if delete_sections:
             if not isinstance(morphology, type(neuron.h.SectionList)):
                 if self.verbose:
-                    print('%s existing sections deleted from memory' % numsec)
+                    print('%s existing sections deleted from memory' %
+                        sum(1 for sec in neuron.h.allsec()))
                 neuron.h('forall delete_section()')
         else:
             if not isinstance(morphology, type(neuron.h.SectionList)):
-                mssg = "%s sections detected! " % numsec + \
+                mssg = "%s sections detected! " % sum(1 for sec in neuron.h.allsec()) + \
                        "Consider setting 'delete_sections=True'"
                 warn(mssg)
 
@@ -308,11 +307,6 @@ class Cell(object):
 
     def _load_geometry(self):
         """Load the morphology-file in NEURON"""
-        try:
-            neuron.h.sec_counted = 0
-        except LookupError:
-            neuron.h('sec_counted = 0')
-
         #import the morphology, try and determine format
         fileEnding = self.morphology.split('.')[-1]
         if fileEnding == 'hoc' or fileEnding == 'HOC':
@@ -2476,7 +2470,7 @@ class Cell(object):
         connection_dict = {}
         for i, sec in enumerate(self.allseclist):
             connection_dict[sec.name()] = neuron.h.parent_connection(sec=sec)
-        
+
         return connection_dict
 
     def _parent_and_segment_current(self, seg_idx, parent_idx, bottom_seg,

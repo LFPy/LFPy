@@ -34,10 +34,12 @@ except ImportError:
     cmdclass = {}
     ext_modules = []
 
-# try and locate the nrnivmodl script of NEURON in PATH so that the
-# NEURON extension file LFPy/sinsyn.mod can be compiled in place and be copied
-# as part of the package_data, allowing unit tests to run
 from distutils.spawn import find_executable, spawn
+
+
+# try and locate the nrnivmodl script of NEURON in PATH so that the
+# NEURON NMODL files LFPy/test/*.mod can be compiled in place and be copied
+# as part of the package_data, allowing unit tests to run
 if not any(arg in sys.argv for arg in ['sdist', 'upload']):
     if find_executable('nrnivmodl') is not None:
         os.chdir(os.path.join('LFPy', 'test'))

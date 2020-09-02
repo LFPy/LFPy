@@ -27,12 +27,12 @@ class TemplateCell(Cell):
 
     """
     class LFPy.TemplateCell
-    
+
     This class allow using NEURON templates with some limitations.
 
     This takes all the same parameters as the Cell class, but requires three
     more template related parameters
-    
+
     Parameters
     ----------
     morphology : str
@@ -127,11 +127,11 @@ class TemplateCell(Cell):
         self.templatename = templatename
         self.templateargs = templateargs
         self.verbose = verbose
-        
+
         if not hasattr(neuron.h, 'd_lambda'):
             neuron.h.load_file('stdlib.hoc', 'String')    #NEURON std. library
             neuron.h.load_file('import3d.hoc')  #import 3D morphology lib
-                
+
         #load the cell template specification
         #check if templatename exist in neuron.h namespace:
         if hasattr(neuron.h, self.templatename):
@@ -145,20 +145,15 @@ class TemplateCell(Cell):
                     if "win32" in sys.platform:
                         template = template.replace(os.sep, posixpath.sep)
                     neuron.h.load_file(template)
-        
+
         #initialize the cell object
         Cell.__init__(self, **kwargs)
 
     def _load_geometry(self):
         """Load the morphology-file in NEURON""" 
-        try: 
-            neuron.h.sec_counted = 0
-        except LookupError:
-            neuron.h('sec_counted = 0')
-                
         #the python cell object we are loading the morphology into:
         self.template = getattr(neuron.h, self.templatename)(self.templateargs)
-        
+
         #perform a test if the morphology is already loaded:
         seccount = 0
         for sec in self.template.all:
@@ -166,8 +161,8 @@ class TemplateCell(Cell):
         if seccount == 0:
             #import the morphology, try and determine format
             fileEnding = self.morphology.split('.')[-1]
-        
-            if not fileEnding == 'hoc' or fileEnding == 'HOC':            
+
+            if not fileEnding == 'hoc' or fileEnding == 'HOC':
                 #create objects for importing morphologies of different formats
                 if fileEnding == 'asc' or fileEnding == 'ASC':
                     Import = neuron.h.Import3d_Neurolucida3()
@@ -180,7 +175,7 @@ class TemplateCell(Cell):
                 else:
                     raise ValueError('%s is not a recognised morphology file format! ').with_traceback('Should be either .hoc, .asc, .swc, .xml!' \
                          % self.morphology)
-                
+
                 #assuming now that morphology file is the correct format
                 try:
                     Import.input(self.morphology)
@@ -195,7 +190,7 @@ class TemplateCell(Cell):
                     imprt = neuron.h.Import3d_GUI(Import, 0)
                 except:
                     raise Exception('See output, try to correct the file')
-                
+
                 #instantiate the cell object
                 if fileEnding == 'xml' or fileEnding ==  'XML':
                     #can not currently assign xml to cell template
@@ -205,23 +200,23 @@ class TemplateCell(Cell):
                         raise Exception("this xml file is not supported")
                 else:
                     imprt.instantiate(self.template)
-                
+
             else:
                 neuron.h.execute("xopen(\"%s\")" % self.morphology, self.template)
-        
+
         #set shapes and create sectionlists
         neuron.h.define_shape()
         self._create_sectionlists()
 
     def _create_sectionlists(self):
         """Create section lists for different kinds of sections"""
-        
+
         self.allsecnames = []
         for sec in self.template.all:
             self.allsecnames.append(sec.name())
-        
+
         self.allseclist = self.template.all
-        
+
         #list of soma sections, assuming it is named on the format "soma*"
         self.nsomasec = 0
         self.somalist = neuron.h.SectionList()
@@ -229,5 +224,3 @@ class TemplateCell(Cell):
             if 'soma' in sec.name():
                 self.somalist.append(sec=sec)
                 self.nsomasec += 1
-
-
