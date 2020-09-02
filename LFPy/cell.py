@@ -1781,7 +1781,6 @@ class Cell(object):
             #filling list of children section-names
             for sec in self.allseclist:
                 if sec.name() == parent:
-                    print(sec.name(), parent)
                     sref = neuron.h.SectionRef(sec=sec)
                     break
             assert(sec.name() == parent == sref.sec.name())
@@ -1863,14 +1862,14 @@ class Cell(object):
         d = []
 
         for sec in self.allseclist:
-            n3d = int(neuron.h.n3d())
+            n3d = int(neuron.h.n3d(sec=sec))
             x_i, y_i, z_i = np.zeros(n3d), np.zeros(n3d), np.zeros(n3d),
             d_i = np.zeros(n3d)
             for i in range(n3d):
-                x_i[i] = neuron.h.x3d(i)
-                y_i[i] = neuron.h.y3d(i)
-                z_i[i] = neuron.h.z3d(i)
-                d_i[i] = neuron.h.diam3d(i)
+                x_i[i] = neuron.h.x3d(i, sec=sec)
+                y_i[i] = neuron.h.y3d(i, sec=sec)
+                z_i[i] = neuron.h.z3d(i, sec=sec)
+                d_i[i] = neuron.h.diam3d(i, sec=sec)
 
 
             x.append(x_i)
@@ -1895,13 +1894,13 @@ class Cell(object):
         update the locations in neuron.hoc.space using neuron.h.pt3dchange()
         """
         for i, sec in enumerate(self.allseclist):
-            n3d = int(neuron.h.n3d())
+            n3d = int(neuron.h.n3d(sec=sec))
             for n in range(n3d):
                 neuron.h.pt3dchange(n,
                                 self.x3d[i][n],
                                 self.y3d[i][n],
                                 self.z3d[i][n],
-                                self.diam3d[i][n])
+                                self.diam3d[i][n], sec=sec)
             #let NEURON know about the changes we just did:
             neuron.h.define_shape()
         #must recollect the geometry, otherwise we get roundoff errors!
@@ -2477,8 +2476,7 @@ class Cell(object):
         connection_dict = {}
         for i, sec in enumerate(self.allseclist):
             connection_dict[sec.name()] = neuron.h.parent_connection(sec=sec)
-        print(connection_dict)
-
+        
         return connection_dict
 
     def _parent_and_segment_current(self, seg_idx, parent_idx, bottom_seg,
