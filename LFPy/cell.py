@@ -550,29 +550,22 @@ class Cell(object):
         if not hasattr(self, '_synvtorecord'):
             self._synvtorecord = []
         if not hasattr(self, 'netstimlist'):
-           self.netstimlist = neuron.h.List()
+            self.netstimlist = neuron.h.List()
         if not hasattr(self, 'netconlist'):
             self.netconlist = neuron.h.List()
         if not hasattr(self, 'sptimeslist'):
             self.sptimeslist = neuron.h.List()
 
         i = 0
-        cmd = 'syn = neuron.h.{}(seg.x, sec=sec)'
+        cmd = 'neuron.h.{}(seg.x, sec=sec)'
         for sec in self.allseclist:
             for seg in sec:
                 if i == idx:
                     command = cmd.format(syntype)
-                    if sys.version >= "3.4":
-                        exec(command, locals(), globals())
-                    else:
-                        exec(command)
+                    syn = eval(command, locals(), globals())
                     for param in list(kwargs.keys()):
                         try:
-                            if sys.version >= "3.4":
-                                exec('syn.' + param + '=' + str(kwargs[param]),
-                                     locals(), globals())
-                            else:
-                                exec('syn.' + param + '=' + str(kwargs[param]))
+                            setattr(syn, param, kwargs[param])
                         except:
                             pass
                     self.synlist.append(syn)
@@ -622,24 +615,17 @@ class Cell(object):
             self._stimvtorecord = []
 
         i = 0
-        cmd1 = 'stim = neuron.h.'
+        cmd1 = 'neuron.h.'
         cmd2 = '(seg.x, sec=sec)'
         ppset = False
         for sec in self.allseclist:
             for seg in sec:
                 if i == idx:
                     command = cmd1 + pptype + cmd2
-                    if sys.version >= "3.4":
-                        exec(command, locals(), globals())
-                    else:
-                        exec(command)
+                    stim = eval(command, locals(), globals())
                     for param in list(kwargs.keys()):
                         try:
-                            if sys.version >= "3.4":
-                                exec('stim.' + param + '=' + str(kwargs[param]),
-                                     locals(), globals())
-                            else:
-                                exec('stim.' + param + '=' + str(kwargs[param]))
+                            exec('stim.{} = {}'.format(param, kwargs[param]))
                         except SyntaxError:
                             ERRMSG = ''.join(['',
                                 'Point process type "{0}" might not '.format(
