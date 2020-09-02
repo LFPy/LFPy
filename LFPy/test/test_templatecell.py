@@ -652,8 +652,8 @@ class testTemplateCell(unittest.TestCase):
                         templateargs=None,
                         )
 
-        np.testing.assert_array_equal(cell.get_idx_children(parent='soma[0]'),
-                                      cell.get_idx(section='dend[0]'))
+        np.testing.assert_array_equal(cell.get_idx_children(parent='ball_and_stick_template[0].soma[0]'),
+                                      cell.get_idx(section='ball_and_stick_template[0].dend[0]'))
 
 
     def test_cell_get_idx_parent_children_00(self):
@@ -663,9 +663,9 @@ class testTemplateCell(unittest.TestCase):
                         templatename='ball_and_stick_template',
                         templateargs=None,
                         )
-        np.testing.assert_array_equal(cell.get_idx_parent_children(parent='soma[0]'),
-                                      cell.get_idx(section=['soma[0]',
-                                                            'dend[0]']))
+        np.testing.assert_array_equal(cell.get_idx_parent_children(parent='ball_and_stick_template[0].soma[0]'),
+                                      cell.get_idx(section=['ball_and_stick_template[0].soma[0]',
+                                                            'ball_and_stick_template[0].dend[0]']))
 
 
     def test_cell_get_idx_name_00(self):
