@@ -2436,7 +2436,7 @@ class Cell(object):
         comp = 0
         for sec in self.allseclist:
             for seg in sec:
-                ri_list[comp] = neuron.h.ri(seg.x)
+                ri_list[comp] = neuron.h.ri(seg.x, sec=sec)
                 comp += 1
 
         return ri_list
@@ -2474,8 +2474,10 @@ class Cell(object):
             The dictionary is needed for computing axial currents.
         """
         connection_dict = {}
-        for sec in self.allseclist:
-            connection_dict[sec.name()] = neuron.h.parent_connection()
+        for i, sec in enumerate(self.allseclist):
+            connection_dict[sec.name()] = neuron.h.parent_connection(sec=sec)
+        print(connection_dict)
+
         return connection_dict
 
     def _parent_and_segment_current(self, seg_idx, parent_idx, bottom_seg,
