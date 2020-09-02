@@ -2313,6 +2313,7 @@ class Cell(object):
         """
         if not hasattr(self, 'vmem'):
             raise AttributeError('no vmem, run cell.simulate(rec_vmem=True)')
+        self._ri_list = self.get_axial_resistance()
         i_axial = []
         d_vectors = []
         pos_vectors = []
@@ -2511,10 +2512,8 @@ class Cell(object):
             Axial current in units of (nA)
             from parent segment end point to parent segment mid point.
         """
-        # list of axial resistance between segments
-        ri_list = self.get_axial_resistance()
         # axial resistance between segment mid and parent node
-        seg_ri = ri_list[seg_idx]
+        seg_ri = self._ri_list[seg_idx]
         vmem = self.vmem
         if timepoints is not None:
             vmem = self.vmem[:,timepoints]
@@ -2524,7 +2523,7 @@ class Cell(object):
         # top or bottom of parent section, we need to find parent_ri explicitly
         if bottom_seg and (conn_point == 0 or conn_point == 1):
             if conn_point == 0:
-                parent_ri = ri_list[parent_idx]
+                parent_ri = self._ri_list[parent_idx]
             else:
                 parent_ri = neuron.h.ri(0)
             if not branch:
@@ -2543,8 +2542,8 @@ class Cell(object):
                 for sib_idx, sib in zip(sib_idcs, sibs):
                     sib_conn_point = connection_dict[sib]
                     if sib_conn_point == conn_point:
-                        v_branch_num += vmem[sib_idx]/ri_list[sib_idx]
-                        v_branch_denom += 1./ ri_list[sib_idx]
+                        v_branch_num += vmem[sib_idx]/self._ri_list[sib_idx]
+                        v_branch_denom += 1./ self._ri_list[sib_idx]
                 v_branch = v_branch_num/v_branch_denom
                 iseg = (v_branch - vseg)/seg_ri
                 # set ipar=iseg
