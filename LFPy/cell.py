@@ -2411,7 +2411,7 @@ class Cell(object):
                 seg_idx += 1
                 branch = False
                 bottom_seg = False
-                parent_ri = 0
+
         return np.array(i_axial), np.array(d_vectors), np.array(pos_vectors)
 
     def get_axial_resistance(self):
