@@ -68,6 +68,8 @@ class testNetworkPopulation(unittest.TestCase):
 
 
         os.system('rm -r tmp_testNetworkPopulation')
+        for cell in population.cells:
+            cell.strip_hoc_objects()
         neuron.h('forall delete_section()')
 
 
@@ -139,6 +141,9 @@ class testNetwork(unittest.TestCase):
 
         network.pc.gid_clear()
         os.system('rm -r tmp_testNetworkPopulation')
+        for population in network.populations.values():
+            for cell in population.cells:
+                cell.strip_hoc_objects()
         neuron.h('forall delete_section()')
 
 
@@ -195,6 +200,9 @@ class testNetwork(unittest.TestCase):
 
         network.pc.gid_clear()
         os.system('rm -r tmp_testNetworkPopulation')
+        for population in network.populations.values():
+            for cell in population.cells:
+                cell.strip_hoc_objects()
         neuron.h('forall delete_section()')
 
 
@@ -270,6 +278,9 @@ class testNetwork(unittest.TestCase):
 
         network.pc.gid_clear()
         os.system('rm -r tmp_testNetworkPopulation')
+        for population in network.populations.values():
+            for cell in population.cells:
+                cell.strip_hoc_objects()
         neuron.h('forall delete_section()')
 
 
@@ -352,6 +363,9 @@ class testNetwork(unittest.TestCase):
 
         network.pc.gid_clear()
         os.system('rm -r tmp_testNetworkPopulation')
+        for population in network.populations.values():
+            for cell in population.cells:
+                cell.strip_hoc_objects()
         neuron.h('forall delete_section()')
 
 
@@ -412,6 +426,9 @@ class testNetwork(unittest.TestCase):
         # clean up
         network.pc.gid_clear()
         os.system('rm -r tmp_testNetworkPopulation')
+        for population in network.populations.values():
+            for cell in population.cells:
+                cell.strip_hoc_objects()
         neuron.h('forall delete_section()')
 
 
@@ -499,4 +516,7 @@ class testNetwork(unittest.TestCase):
 
         network.pc.gid_clear()
         os.system('rm -r tmp_testNetworkPopulation')
+        for population in network.populations.values():
+            for cell in population.cells:
+                cell.strip_hoc_objects()
         neuron.h('forall delete_section()')
