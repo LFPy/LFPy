@@ -440,6 +440,14 @@ class testFourSphereVolumeConductor(unittest.TestCase):
         np.testing.assert_almost_equal(pot_MD, pot_sum)
         np.testing.assert_allclose(pot_MD, pot_sum, rtol=1E-4)
 
+        # some cleanup of Python-created section references
+        cell = None
+        morphology = None
+        dend2 = None
+        dend1 = None
+        soma = None
+
+
     def test_calc_potential_from_multi_dipoles01(self):
         """test comparison between multi-dipoles and single dipole approach"""
         neuron.h('forall delete_section()')
@@ -479,6 +487,15 @@ class testFourSphereVolumeConductor(unittest.TestCase):
         np.testing.assert_almost_equal(pot_MD, pot_sum)
         np.testing.assert_allclose(pot_MD, pot_sum, rtol=1E-4)
 
+        # some cleanup of Python-created section references
+        cell = None
+        morphology = None
+        dend3 = None
+        dend2 = None
+        dend1 = None
+        soma = None
+
+
 class testInfiniteVolumeConductor(unittest.TestCase):
     """
     test class InfiniteVolumeConductor
@@ -507,9 +524,9 @@ class testInfiniteVolumeConductor(unittest.TestCase):
         morphology = neuron.h.SectionList()
         morphology.wholetree()
         electrode_locs = np.array([[0., 0., 10000.]])
-        cell, electrode = cell_w_synapse_from_sections_w_electrode(morphology, electrode_locs)
+        cell, electrode = cell_w_synapse_from_sections_w_electrode(morphology,
+            electrode_locs)
         sigma = 0.3
-        t_point = 0
 
         MD_inf = LFPy.InfiniteVolumeConductor(sigma)
         pot_MD = MD_inf.get_multi_dipole_potential(cell, electrode_locs)
@@ -517,6 +534,16 @@ class testInfiniteVolumeConductor(unittest.TestCase):
 
         np.testing.assert_almost_equal(pot_MD, pot_cb)
         np.testing.assert_allclose(pot_MD, pot_cb, rtol=1E-4)
+
+        # some cleanup of Python-created section references
+        cell = None
+        morphology = None
+        dend5 = None
+        dend4 = None
+        dend3 = None
+        dend2 = None
+        dend1 = None
+        soma = None
 
     def test_get_multi_dipole_potential01(self):
         morphology = os.path.join(LFPy.__path__[0], 'test', 'ball_and_sticks.hoc')

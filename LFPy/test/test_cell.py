@@ -24,6 +24,7 @@ import LFPy
 import neuron
 import pickle
 import random
+from copy import copy
 
 # for nosetests to run load mechanisms
 if "win32" in sys.platform:
@@ -670,10 +671,19 @@ class testCell(unittest.TestCase):
         morphology.wholetree()
         cell = cell_w_synapse_from_sections(morphology)
         iaxial, d_list, pos_list = cell.get_axial_currents_from_vmem()
-        np.testing.assert_almost_equal(-iaxial[0], cell.imem[0], decimal=9)
-        np.testing.assert_allclose(-iaxial[0], cell.imem[0], rtol=1E-5)
-        np.testing.assert_almost_equal(iaxial[1], cell.imem[1], decimal=9)
-        np.testing.assert_allclose(iaxial[1], cell.imem[1], rtol=1E-5)
+        imem = copy(cell.imem)
+
+        # some cleanup of Python-created section references
+        cell = None
+        morphology = None
+        dend2 = None
+        dend1 = None
+        neuron.h('forall delete_section()')
+
+        np.testing.assert_almost_equal(-iaxial[0], imem[0], decimal=9)
+        np.testing.assert_allclose(-iaxial[0], imem[0], rtol=1E-5)
+        np.testing.assert_almost_equal(iaxial[1], imem[1], decimal=9)
+        np.testing.assert_allclose(iaxial[1], imem[1], rtol=1E-5)
 
     def test_cell_get_axial_currents_from_vmem_01(self):
         '''
@@ -687,15 +697,26 @@ class testCell(unittest.TestCase):
         morphology.wholetree()
         cell = cell_w_synapse_from_sections(morphology)
         iaxial, d_list, pos_list = cell.get_axial_currents_from_vmem()
-        np.testing.assert_almost_equal(-iaxial[0], cell.imem[0], decimal=9)
-        np.testing.assert_almost_equal(-iaxial[1], cell.imem[0], decimal=9)
-        np.testing.assert_allclose(-iaxial[0], cell.imem[0], rtol=1E-4)
-        np.testing.assert_allclose(-iaxial[1], cell.imem[0], rtol=1E-4)
+
+        imem = copy(cell.imem)
+        # some cleanup of Python-created section references
+        cell = None
+        morphology = None
+        dend = None
+        soma = None
+        neuron.h('forall delete_section()')
+
+        np.testing.assert_almost_equal(-iaxial[0], imem[0], decimal=9)
+        np.testing.assert_almost_equal(-iaxial[1], imem[0], decimal=9)
+        np.testing.assert_allclose(-iaxial[0], imem[0], rtol=1E-4)
+        np.testing.assert_allclose(-iaxial[1], imem[0], rtol=1E-4)
+
 
     def test_cell_get_axial_currents_from_vmem_02(self):
         '''
         Check Kirchhoff in soma when single dend connected to soma end.
         '''
+        neuron.h.topology()
         neuron.h('forall delete_section()')
         soma = neuron.h.Section(name='soma')
         dend = neuron.h.Section(name='dend')
@@ -704,10 +725,19 @@ class testCell(unittest.TestCase):
         morphology.wholetree()
         cell = cell_w_synapse_from_sections(morphology)
         iaxial, d_list, pos_list = cell.get_axial_currents_from_vmem()
-        np.testing.assert_almost_equal(-iaxial[0], cell.imem[0], decimal=9)
-        np.testing.assert_allclose(-iaxial[0], cell.imem[0], rtol=1E-4)
-        np.testing.assert_almost_equal(iaxial[1], cell.imem[1], decimal=9)
-        np.testing.assert_allclose(iaxial[1], cell.imem[1], rtol=1E-4)
+        imem = copy(cell.imem)
+
+        # some cleanup of Python-created section references
+        cell = None
+        morphology = None
+        dend2 = None
+        dend1 = None
+        neuron.h('forall delete_section()')
+
+        np.testing.assert_almost_equal(-iaxial[0], imem[0], decimal=9)
+        np.testing.assert_allclose(-iaxial[0], imem[0], rtol=1E-4)
+        np.testing.assert_almost_equal(iaxial[1], imem[1], decimal=9)
+        np.testing.assert_allclose(iaxial[1], imem[1], rtol=1E-4)
         np.testing.assert_almost_equal(iaxial[0], iaxial[1], decimal=9)
         np.testing.assert_allclose(iaxial[0], iaxial[1], rtol=1E-4)
 
@@ -723,10 +753,18 @@ class testCell(unittest.TestCase):
         morphology.wholetree()
         cell = cell_w_synapse_from_sections(morphology)
         iaxial, d_list, pos_list = cell.get_axial_currents_from_vmem()
-        np.testing.assert_almost_equal(-iaxial[0], cell.imem[0], decimal=9)
-        np.testing.assert_allclose(-iaxial[0], cell.imem[0], rtol=1E-4)
-        np.testing.assert_almost_equal(iaxial[1], cell.imem[1], decimal=9)
-        np.testing.assert_allclose(iaxial[1], cell.imem[1], rtol=1E-4)
+        imem = copy(cell.imem)
+
+        # some cleanup of Python-created section references
+        cell = None
+        morphology = None
+        dend = None
+        soma = None
+
+        np.testing.assert_almost_equal(-iaxial[0], imem[0], decimal=9)
+        np.testing.assert_allclose(-iaxial[0], imem[0], rtol=1E-4)
+        np.testing.assert_almost_equal(iaxial[1], imem[1], decimal=9)
+        np.testing.assert_allclose(iaxial[1], imem[1], rtol=1E-4)
         np.testing.assert_almost_equal(iaxial[0], iaxial[1], decimal=9)
         np.testing.assert_allclose(iaxial[0], iaxial[1], rtol=1E-4)
 
@@ -745,12 +783,23 @@ class testCell(unittest.TestCase):
         morphology.wholetree()
         cell = cell_w_synapse_from_sections(morphology)
         iaxial, d_list, pos_list = cell.get_axial_currents_from_vmem()
-        np.testing.assert_almost_equal(-iaxial[1]-iaxial[3], cell.imem[0], decimal=9)
-        np.testing.assert_allclose(-iaxial[1]-iaxial[3], cell.imem[0], rtol=1E-4)
+        imem = copy(cell.imem)
+
+        # some cleanup of Python-created section references
+        cell = None
+        morphology = None
+        dend2 = None
+        dend1 = None
+        soma = None
+
+        np.testing.assert_almost_equal(-iaxial[1]-iaxial[3], imem[0], decimal=9)
+        np.testing.assert_allclose(-iaxial[1]-iaxial[3], imem[0], rtol=1E-4)
         np.testing.assert_almost_equal(iaxial[0], iaxial[1], decimal=9)
         np.testing.assert_allclose(iaxial[0], iaxial[1], rtol=1E-4)
         np.testing.assert_almost_equal(iaxial[2], iaxial[3], decimal=9)
         np.testing.assert_allclose(iaxial[2], iaxial[3], rtol=1E-4)
+
+
 
     def test_cell_get_axial_currents_from_vmem_05(self):
         '''
@@ -766,10 +815,20 @@ class testCell(unittest.TestCase):
         morphology.wholetree()
         cell = cell_w_synapse_from_sections(morphology)
         iaxial, d_list, pos_list = cell.get_axial_currents_from_vmem()
-        np.testing.assert_almost_equal(-iaxial[0]-iaxial[2], cell.imem[0], decimal=9)
-        np.testing.assert_allclose(-iaxial[0]-iaxial[2], cell.imem[0], rtol=1E-4)
+
+        imem = copy(cell.imem)
+        # some cleanup of Python-created section references
+        cell = None
+        morphology = None
+        dend2 = None
+        dend1 = None
+        soma = None
+
+        np.testing.assert_almost_equal(-iaxial[0]-iaxial[2], imem[0], decimal=9)
+        np.testing.assert_allclose(-iaxial[0]-iaxial[2], imem[0], rtol=1E-4)
         np.testing.assert_almost_equal(iaxial[0]+iaxial[2], iaxial[1] + iaxial[3], decimal=9)
         np.testing.assert_allclose(iaxial[0]+iaxial[2], iaxial[1] + iaxial[3], rtol=1E-4)
+
 
     def test_cell_get_axial_currents_from_vmem_06(self):
         '''
@@ -785,8 +844,17 @@ class testCell(unittest.TestCase):
         morphology.wholetree()
         cell = cell_w_synapse_from_sections(morphology)
         iaxial, d_list, pos_list = cell.get_axial_currents_from_vmem()
-        np.testing.assert_almost_equal(-iaxial[0]-iaxial[2], cell.imem[0], decimal=9)
-        np.testing.assert_allclose(-iaxial[0]-iaxial[2], cell.imem[0], rtol=1E-4)
+        imem = copy(cell.imem)
+
+        # some cleanup of Python-created section references
+        cell = None
+        morphology = None
+        dend2 = None
+        dend1 = None
+        soma = None
+
+        np.testing.assert_almost_equal(-iaxial[0]-iaxial[2], imem[0], decimal=9)
+        np.testing.assert_allclose(-iaxial[0]-iaxial[2], imem[0], rtol=1E-4)
         np.testing.assert_almost_equal(iaxial[0], iaxial[1], decimal=9)
         np.testing.assert_allclose(iaxial[0], iaxial[1], rtol=1E-4)
         np.testing.assert_almost_equal(iaxial[2], iaxial[3], decimal=9)
@@ -808,10 +876,21 @@ class testCell(unittest.TestCase):
         morphology.wholetree()
         cell = cell_w_synapse_from_sections(morphology)
         iaxial, d_list, pos_list = cell.get_axial_currents_from_vmem()
+        imem = copy(cell.imem)
+
+        # some cleanup of Python-created section references
+        cell = None
+        morphology = None
+        dend3 = None
+        dend2 = None
+        dend1 = None
+        soma = None
+
         np.testing.assert_almost_equal(iaxial[0]+iaxial[4], iaxial[1] + iaxial[5], decimal=9)
         np.testing.assert_allclose(iaxial[0]+iaxial[4], iaxial[1] + iaxial[5], rtol=1E-4)
-        np.testing.assert_almost_equal(-iaxial[1]+iaxial[2]+iaxial[4], -cell.imem[1], decimal=9)
-        np.testing.assert_allclose(-iaxial[1]+iaxial[2]+iaxial[4], -cell.imem[1], rtol=1E-4)
+        np.testing.assert_almost_equal(-iaxial[1]+iaxial[2]+iaxial[4], -imem[1], decimal=9)
+        np.testing.assert_allclose(-iaxial[1]+iaxial[2]+iaxial[4], -imem[1], rtol=1E-4)
+
 
     def test_cell_get_axial_currents_from_vmem_08(self):
         '''
@@ -829,8 +908,18 @@ class testCell(unittest.TestCase):
         morphology.wholetree()
         cell = cell_w_synapse_from_sections(morphology)
         iaxial, d_list, pos_list = cell.get_axial_currents_from_vmem()
-        np.testing.assert_almost_equal(-iaxial[0]-iaxial[2]-iaxial[4], cell.imem[0], decimal=9)
-        np.testing.assert_allclose(-iaxial[0]-iaxial[2]-iaxial[4], cell.imem[0], rtol=1E-3)
+        imem = copy(cell.imem)
+
+        # some cleanup of Python-created section references
+        cell = None
+        morphology = None
+        dend3 = None
+        dend2 = None
+        dend1 = None
+        soma = None
+
+        np.testing.assert_almost_equal(-iaxial[0]-iaxial[2]-iaxial[4], imem[0], decimal=9)
+        np.testing.assert_allclose(-iaxial[0]-iaxial[2]-iaxial[4], imem[0], rtol=1E-3)
 
     def test_cell_get_axial_currents_from_vmem_09(self):
         '''
@@ -844,10 +933,18 @@ class testCell(unittest.TestCase):
         morphology.wholetree()
         cell = cell_w_synapse_from_sections(morphology)
         iaxial, d_list, pos_list = cell.get_axial_currents_from_vmem()
-        np.testing.assert_almost_equal(iaxial[0], -cell.imem[0], decimal=9)
-        np.testing.assert_almost_equal(iaxial[0], cell.imem[1], decimal=9)
-        np.testing.assert_allclose(iaxial[0], -cell.imem[0], rtol=1E-3)
-        np.testing.assert_allclose(iaxial[0], cell.imem[1], rtol=1E-3)
+
+        imem = cell.imem
+        # some cleanup of Python-created section references
+        cell = None
+        morphology = None
+        dend1 = None
+        soma = None
+
+        np.testing.assert_almost_equal(iaxial[0], -imem[0], decimal=9)
+        np.testing.assert_almost_equal(iaxial[0], imem[1], decimal=9)
+        np.testing.assert_allclose(iaxial[0], -imem[0], rtol=1E-3)
+        np.testing.assert_allclose(iaxial[0], imem[1], rtol=1E-3)
 
     def test_cell_get_axial_currents_from_vmem_10(self):
         '''
@@ -864,7 +961,17 @@ class testCell(unittest.TestCase):
         morphology.wholetree()
         cell = cell_w_synapse_from_sections(morphology)
         iaxial, d_list, pos_list = cell.get_axial_currents_from_vmem()
-        self.assertEqual(iaxial.shape[0], (cell.totnsegs - 1)*2)
+        totnsegs = cell.totnsegs
+        # some cleanup of Python-created section references
+        cell = None
+        morphology = None
+        dend3 = None
+        dend2 = None
+        dend1 = None
+        soma = None
+
+        self.assertEqual(iaxial.shape[0], (totnsegs - 1)*2)
+
 
     def test_cell_get_axial_currents_from_vmem_11(self):
         '''
@@ -882,8 +989,18 @@ class testCell(unittest.TestCase):
         morphology.wholetree()
         cell = cell_w_synapse_from_sections(morphology)
         iaxial, d_list, pos_list = cell.get_axial_currents_from_vmem()
-        np.testing.assert_almost_equal(-iaxial[0]-iaxial[2]-iaxial[4], cell.imem[0], decimal=9)
-        np.testing.assert_allclose(-iaxial[0]-iaxial[2]-iaxial[4], cell.imem[0], rtol=1E-3)
+        imem = copy(cell.imem)
+        # some cleanup of Python-created section references
+        cell = None
+        morphology = None
+        dend3 = None
+        dend2 = None
+        dend1 = None
+        soma = None
+
+        np.testing.assert_almost_equal(-iaxial[0]-iaxial[2]-iaxial[4], imem[0], decimal=9)
+        np.testing.assert_allclose(-iaxial[0]-iaxial[2]-iaxial[4], imem[0], rtol=1E-3)
+
 
     def test_cell_get_axial_currents_from_vmem_12(self):
         '''
@@ -892,8 +1009,13 @@ class testCell(unittest.TestCase):
         morphology = os.path.join(LFPy.__path__[0], 'test', 'sticks_not_connected_head_to_toe.hoc')
         cell = cell_w_synapse_from_sections(morphology)
         iaxial, d_list, pos_list = cell.get_axial_currents_from_vmem()
-        np.testing.assert_almost_equal(iaxial[6]+iaxial[10]+cell.imem[3], iaxial[5], decimal=9)
-        np.testing.assert_allclose(iaxial[6]+iaxial[10]+cell.imem[3], iaxial[5], rtol=1E-5)
+
+        # some cleanup of Python-created section references
+        imem = copy(cell.imem)
+        cell = None
+
+        np.testing.assert_almost_equal(iaxial[6]+iaxial[10]+imem[3], iaxial[5], decimal=9)
+        np.testing.assert_allclose(iaxial[6]+iaxial[10]+imem[3], iaxial[5], rtol=1E-5)
 
     def test_cell_get_axial_currents_from_vmem_13(self):
         '''
@@ -902,8 +1024,13 @@ class testCell(unittest.TestCase):
         morphology = os.path.join(LFPy.__path__[0], 'test', 'sticks_not_connected_head_to_toe.hoc')
         cell = cell_w_synapse_from_sections(morphology)
         iaxial, d_list, pos_list = cell.get_axial_currents_from_vmem()
-        np.testing.assert_almost_equal(iaxial[8]+iaxial[20]+cell.imem[4], iaxial[7], decimal=9)
-        np.testing.assert_allclose(iaxial[8]+iaxial[20]+cell.imem[4], iaxial[7], rtol=1E-5)
+        imem = copy(cell.imem)
+
+        # some cleanup of Python-created section references
+        cell = None
+
+        np.testing.assert_almost_equal(iaxial[8]+iaxial[20]+imem[4], iaxial[7], decimal=9)
+        np.testing.assert_allclose(iaxial[8]+iaxial[20]+imem[4], iaxial[7], rtol=1E-5)
 
 
     def test_cell_get_axial_currents_from_vmem_14(self):
@@ -935,9 +1062,19 @@ class testCell(unittest.TestCase):
         cell._collect_geometry()
         cell2 = cell_w_synapse_from_sections(morphology)
         iaxial2, d_list2, pos_list2 = cell2.get_axial_currents_from_vmem()
+
+        # some cleanup of Python-created section references
+        cell = None
+        cell2 = None
+        morphology = None
+        dend2 = None
+        dend1 = None
+        soma = None
+
         mid_current_positions = np.array([[0., 0., 5], [0., 0., 20], [0., 0., 5.], [0., 0., 12.5]])
         np.testing.assert_almost_equal(mid_current_positions, pos_list2, decimal=9)
         np.testing.assert_allclose(mid_current_positions, pos_list2, rtol=1E-4)
+
 
     def test_cell_get_axial_currents_from_vmem_15(self):
         '''
@@ -973,6 +1110,16 @@ class testCell(unittest.TestCase):
         mid_current_positions = np.array([[0., 0., 5.], [0., 0., 12.5],
                                           [0., 0., 15.], [2.5, 0., 15.],
                                           [0., 0., 17.5], [0, 0., 25.]])
+
+        # some cleanup of Python-created section references
+        cell = None
+        cell2 = None
+        morphology = None
+        dend3 = None
+        dend2 = None
+        dend1 = None
+        soma = None
+
         np.testing.assert_almost_equal(mid_current_positions, pos_list2, decimal=9)
         np.testing.assert_allclose(mid_current_positions, pos_list2, rtol=1E-4)
 
@@ -992,8 +1139,19 @@ class testCell(unittest.TestCase):
         morphology.wholetree()
         cell = cell_w_synapse_from_sections(morphology)
         iaxial, d_list, pos_list = cell.get_axial_currents_from_vmem()
-        np.testing.assert_almost_equal(-cell.imem[0], iaxial[1] + iaxial[3] + iaxial[5], decimal=9)
-        np.testing.assert_allclose(-cell.imem[0], iaxial[1] + iaxial[3] + iaxial[5], rtol=1E-3)
+        imem = copy(cell.imem)
+
+        # some cleanup of Python-created section references
+        cell = None
+        morphology = None
+        dend3 = None
+        dend2 = None
+        dend1 = None
+        soma = None
+
+        np.testing.assert_almost_equal(-imem[0], iaxial[1] + iaxial[3] + iaxial[5], decimal=9)
+        np.testing.assert_allclose(-imem[0], iaxial[1] + iaxial[3] + iaxial[5], rtol=1E-3)
+
 
     def test_cell_simulate_recorder_00(self):
         stickParams = {
@@ -1315,7 +1473,6 @@ class testCell(unittest.TestCase):
             'record_current': True,
             'record_potential': True
         }
-
 
         stick = LFPy.Cell(**stickParams)
         synapse = LFPy.StimIntElectrode(stick, idx=0,
@@ -1661,6 +1818,13 @@ class testCell(unittest.TestCase):
         np.testing.assert_almost_equal(P, P_from_multi_dipoles)
         np.testing.assert_allclose(P, P_from_multi_dipoles, rtol=1E-5)
 
+        # some cleanup of Python-created section references
+        cell = None
+        morphology = None
+        dend2 = None
+        dend1 = None
+        soma = None
+
     def test_get_multi_current_dipole_moments01(self):
         neuron.h('forall delete_section()')
         soma = neuron.h.Section(name='soma')
@@ -1679,6 +1843,14 @@ class testCell(unittest.TestCase):
         P = cell.current_dipole_moment[t_point]
         np.testing.assert_almost_equal(P, P_from_multi_dipoles)
 
+        # some cleanup of Python-created section references
+        cell = None
+        morphology = None
+        dend3 = None
+        dend2 = None
+        dend1 = None
+        soma = None
+
     def test_get_multi_current_dipole_moments02(self):
         neuron.h('forall delete_section()')
         dend1 = neuron.h.Section(name='dend1')
@@ -1694,6 +1866,14 @@ class testCell(unittest.TestCase):
         P_from_multi_dipoles = np.sum(dipoles[:,t_point,:],axis=0)
         P = cell.current_dipole_moment[t_point]
         np.testing.assert_almost_equal(P, P_from_multi_dipoles)
+
+        # some cleanup of Python-created section references
+        cell = None
+        morphology = None
+        dend3 = None
+        dend2 = None
+        dend1 = None
+        soma = None
 
     def test_get_multi_current_dipole_moments03(self):
         neuron.h('forall delete_section()')
@@ -1716,6 +1896,16 @@ class testCell(unittest.TestCase):
         P_from_multi_dipoles = np.sum(dipoles[:,t_point,:],axis=0)
         P = cell.current_dipole_moment[t_point]
         np.testing.assert_almost_equal(P, P_from_multi_dipoles)
+
+        # some cleanup of Python-created section references
+        cell = None
+        morphology = None
+        dend5 = None
+        dend4 = None
+        dend3 = None
+        dend2 = None
+        dend1 = None
+        soma = None
 
     def test_get_multi_current_dipole_moments04(self):
         morphology = os.path.join(LFPy.__path__[0], 'test', 'ball_and_sticks.hoc')
@@ -1746,7 +1936,8 @@ class testCell(unittest.TestCase):
                         np.testing.assert_allclose(getattr(cell0, axis+attr)*(1-factor),
                                                    getattr(cell1, axis+attr))
 
-    ######## Functions used by tests: ##########################################
+
+######## Functions used by tests: ##########################################
 def stickSimulationTesttvec(**kwargs):
     stick = LFPy.Cell(morphology = os.path.join(LFPy.__path__[0], 'test',
                                                 'stick.hoc'), verbose=False,
