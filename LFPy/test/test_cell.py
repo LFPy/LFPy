@@ -730,8 +730,8 @@ class testCell(unittest.TestCase):
         # some cleanup of Python-created section references
         cell = None
         morphology = None
-        dend2 = None
-        dend1 = None
+        soma = None
+        dend = None
         neuron.h('forall delete_section()')
 
         np.testing.assert_almost_equal(-iaxial[0], imem[0], decimal=9)
