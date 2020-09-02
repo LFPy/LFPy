@@ -390,7 +390,7 @@ cpdef _collect_geometry_neuron(cell):
 
             #fill in values area, diam, length
             for seg in sec:
-                areavec[counter] = neuron.h.area(seg.x)
+                areavec[counter] = neuron.h.area(seg.x, sec=sec)
                 diamvec[counter] = seg.diam
                 lengthvec[counter] = secL/nseg
 
