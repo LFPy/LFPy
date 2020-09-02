@@ -674,6 +674,7 @@ class testCell(unittest.TestCase):
         imem = copy(cell.imem)
 
         # some cleanup of Python-created section references
+        cell.strip_hoc_objects()
         cell = None
         morphology = None
         dend2 = None
@@ -700,6 +701,7 @@ class testCell(unittest.TestCase):
 
         imem = copy(cell.imem)
         # some cleanup of Python-created section references
+        cell.strip_hoc_objects()
         cell = None
         morphology = None
         dend = None
@@ -728,6 +730,7 @@ class testCell(unittest.TestCase):
         imem = copy(cell.imem)
 
         # some cleanup of Python-created section references
+        cell.strip_hoc_objects()
         cell = None
         morphology = None
         soma = None
@@ -756,6 +759,7 @@ class testCell(unittest.TestCase):
         imem = copy(cell.imem)
 
         # some cleanup of Python-created section references
+        cell.strip_hoc_objects()
         cell = None
         morphology = None
         dend = None
@@ -786,6 +790,7 @@ class testCell(unittest.TestCase):
         imem = copy(cell.imem)
 
         # some cleanup of Python-created section references
+        cell.strip_hoc_objects()
         cell = None
         morphology = None
         dend2 = None
@@ -818,6 +823,7 @@ class testCell(unittest.TestCase):
 
         imem = copy(cell.imem)
         # some cleanup of Python-created section references
+        cell.strip_hoc_objects()
         cell = None
         morphology = None
         dend2 = None
@@ -847,6 +853,7 @@ class testCell(unittest.TestCase):
         imem = copy(cell.imem)
 
         # some cleanup of Python-created section references
+        cell.strip_hoc_objects()
         cell = None
         morphology = None
         dend2 = None
@@ -879,6 +886,7 @@ class testCell(unittest.TestCase):
         imem = copy(cell.imem)
 
         # some cleanup of Python-created section references
+        cell.strip_hoc_objects()
         cell = None
         morphology = None
         dend3 = None
@@ -911,6 +919,7 @@ class testCell(unittest.TestCase):
         imem = copy(cell.imem)
 
         # some cleanup of Python-created section references
+        cell.strip_hoc_objects()
         cell = None
         morphology = None
         dend3 = None
@@ -936,6 +945,7 @@ class testCell(unittest.TestCase):
 
         imem = cell.imem
         # some cleanup of Python-created section references
+        cell.strip_hoc_objects()
         cell = None
         morphology = None
         dend1 = None
@@ -963,6 +973,7 @@ class testCell(unittest.TestCase):
         iaxial, d_list, pos_list = cell.get_axial_currents_from_vmem()
         totnsegs = cell.totnsegs
         # some cleanup of Python-created section references
+        cell.strip_hoc_objects()
         cell = None
         morphology = None
         dend3 = None
@@ -991,6 +1002,7 @@ class testCell(unittest.TestCase):
         iaxial, d_list, pos_list = cell.get_axial_currents_from_vmem()
         imem = copy(cell.imem)
         # some cleanup of Python-created section references
+        cell.strip_hoc_objects()
         cell = None
         morphology = None
         dend3 = None
@@ -1012,6 +1024,7 @@ class testCell(unittest.TestCase):
 
         # some cleanup of Python-created section references
         imem = copy(cell.imem)
+        cell.strip_hoc_objects()
         cell = None
 
         np.testing.assert_almost_equal(iaxial[6]+iaxial[10]+imem[3], iaxial[5], decimal=9)
@@ -1027,6 +1040,7 @@ class testCell(unittest.TestCase):
         imem = copy(cell.imem)
 
         # some cleanup of Python-created section references
+        cell.strip_hoc_objects()
         cell = None
 
         np.testing.assert_almost_equal(iaxial[8]+iaxial[20]+imem[4], iaxial[7], decimal=9)
@@ -1064,7 +1078,9 @@ class testCell(unittest.TestCase):
         iaxial2, d_list2, pos_list2 = cell2.get_axial_currents_from_vmem()
 
         # some cleanup of Python-created section references
+        cell.strip_hoc_objects()
         cell = None
+        cell2.strip_hoc_objects()
         cell2 = None
         morphology = None
         dend2 = None
@@ -1112,7 +1128,9 @@ class testCell(unittest.TestCase):
                                           [0., 0., 17.5], [0, 0., 25.]])
 
         # some cleanup of Python-created section references
+        cell.strip_hoc_objects()
         cell = None
+        cell2.strip_hoc_objects()
         cell2 = None
         morphology = None
         dend3 = None
@@ -1142,6 +1160,7 @@ class testCell(unittest.TestCase):
         imem = copy(cell.imem)
 
         # some cleanup of Python-created section references
+        cell.strip_hoc_objects()
         cell = None
         morphology = None
         dend3 = None
@@ -1378,6 +1397,8 @@ class testCell(unittest.TestCase):
                 p = np.dot(stick.imem.T, np.c_[stick.xmid, stick.ymid, stick.zmid])
                 np.testing.assert_allclose(p, stick.current_dipole_moment)
 
+                stick.strip_hoc_objects()
+
 
     def test_cell_simulate_current_dipole_moment_01(self):
         stickParams = {
@@ -1414,6 +1435,8 @@ class testCell(unittest.TestCase):
                 p = np.dot(stick.imem.T, np.c_[stick.xmid, stick.ymid, stick.zmid])
                 np.testing.assert_allclose(p, stick.current_dipole_moment)
 
+                stick.strip_hoc_objects()
+
     def test_cell_simulate_current_dipole_moment_02(self):
         stickParams = {
             'morphology' : os.path.join(LFPy.__path__[0], 'test', 'stick.hoc'),
@@ -1446,6 +1469,8 @@ class testCell(unittest.TestCase):
                 stick.simulate(rec_imem=True, rec_current_dipole_moment=True)
                 p = np.dot(stick.imem.T, np.c_[stick.xmid, stick.ymid, stick.zmid])
                 np.testing.assert_allclose(p, stick.current_dipole_moment)
+
+                stick.strip_hoc_objects()
 
     def test_cell_simulate_dotprodcoeffs_00(self):
         stickParams = {
@@ -1801,7 +1826,9 @@ class testCell(unittest.TestCase):
         self.assertTrue(stick.tvec.size == stick.imem.shape[1] == synapse.i.size == synapse.v.size
                         == electrode.LFP.shape[1])
 
-    def test_get_multi_current_dipole_moments00(self):
+        stick.strip_hoc_objects()
+
+    def test_get_multi_current_dipole_moments_00(self):
         neuron.h('forall delete_section()')
         soma = neuron.h.Section(name='soma')
         dend1 = neuron.h.Section(name='dend1')
@@ -1815,17 +1842,19 @@ class testCell(unittest.TestCase):
         t_point = -1
         P_from_multi_dipoles = np.sum(dipoles[:,t_point,:],axis=0)
         P = cell.current_dipole_moment[t_point]
-        np.testing.assert_almost_equal(P, P_from_multi_dipoles)
-        np.testing.assert_allclose(P, P_from_multi_dipoles, rtol=1E-5)
 
         # some cleanup of Python-created section references
+        cell.strip_hoc_objects()
         cell = None
         morphology = None
         dend2 = None
         dend1 = None
         soma = None
 
-    def test_get_multi_current_dipole_moments01(self):
+        np.testing.assert_almost_equal(P, P_from_multi_dipoles)
+        np.testing.assert_allclose(P, P_from_multi_dipoles, rtol=1E-5)
+
+    def test_get_multi_current_dipole_moments_01(self):
         neuron.h('forall delete_section()')
         soma = neuron.h.Section(name='soma')
         dend1 = neuron.h.Section(name='dend1')
@@ -1841,9 +1870,9 @@ class testCell(unittest.TestCase):
         t_point = -1
         P_from_multi_dipoles = np.sum(dipoles[:,t_point,:],axis=0)
         P = cell.current_dipole_moment[t_point]
-        np.testing.assert_almost_equal(P, P_from_multi_dipoles)
 
         # some cleanup of Python-created section references
+        cell.strip_hoc_objects()
         cell = None
         morphology = None
         dend3 = None
@@ -1851,7 +1880,9 @@ class testCell(unittest.TestCase):
         dend1 = None
         soma = None
 
-    def test_get_multi_current_dipole_moments02(self):
+        np.testing.assert_almost_equal(P, P_from_multi_dipoles)
+
+    def test_get_multi_current_dipole_moments_02(self):
         neuron.h('forall delete_section()')
         dend1 = neuron.h.Section(name='dend1')
         dend2 = neuron.h.Section(name='dend2')
@@ -1865,9 +1896,9 @@ class testCell(unittest.TestCase):
         t_point = -1
         P_from_multi_dipoles = np.sum(dipoles[:,t_point,:],axis=0)
         P = cell.current_dipole_moment[t_point]
-        np.testing.assert_almost_equal(P, P_from_multi_dipoles)
 
         # some cleanup of Python-created section references
+        cell.strip_hoc_objects()
         cell = None
         morphology = None
         dend3 = None
@@ -1875,7 +1906,9 @@ class testCell(unittest.TestCase):
         dend1 = None
         soma = None
 
-    def test_get_multi_current_dipole_moments03(self):
+        np.testing.assert_almost_equal(P, P_from_multi_dipoles)
+
+    def test_get_multi_current_dipole_moments_03(self):
         neuron.h('forall delete_section()')
         soma = neuron.h.Section(name='soma')
         dend1 = neuron.h.Section(name='dend1')
@@ -1895,9 +1928,9 @@ class testCell(unittest.TestCase):
         t_point = -1
         P_from_multi_dipoles = np.sum(dipoles[:,t_point,:],axis=0)
         P = cell.current_dipole_moment[t_point]
-        np.testing.assert_almost_equal(P, P_from_multi_dipoles)
 
         # some cleanup of Python-created section references
+        cell.strip_hoc_objects()
         cell = None
         morphology = None
         dend5 = None
@@ -1907,15 +1940,19 @@ class testCell(unittest.TestCase):
         dend1 = None
         soma = None
 
-    def test_get_multi_current_dipole_moments04(self):
+        np.testing.assert_almost_equal(P, P_from_multi_dipoles)
+
+    def test_get_multi_current_dipole_moments_04(self):
         morphology = os.path.join(LFPy.__path__[0], 'test', 'ball_and_sticks.hoc')
         cell = cell_w_synapse_from_sections(morphology)
         dipoles, dipole_locs = cell.get_multi_current_dipole_moments()
         t_point = -1
         P_from_multi_dipoles = np.sum(dipoles[:,t_point,:],axis=0)
         P = cell.current_dipole_moment[t_point]
-        np.testing.assert_almost_equal(P, P_from_multi_dipoles)
 
+        cell.strip_hoc_objects()
+
+        np.testing.assert_almost_equal(P, P_from_multi_dipoles)
 
     def test_cell_distort_geometry_01(self):
         cell0 = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
