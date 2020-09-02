@@ -1777,20 +1777,28 @@ class Cell(object):
         for sec in self.allseclist:
             for seg in sec:
                 secnamelist.append(sec.name())
-        #filling list of children section-names
-        sref = neuron.h.SectionRef(parent)
-        for sec in sref.child:
-            childseclist.append(sec.name())
-        #idxvec=1 where both coincide
-        i = 0
-        for sec in secnamelist:
-            for childsec in childseclist:
-                if sec == childsec:
-                    idxvec[i] += 1
-            i += 1
+        if parent in secnamelist:
+            #filling list of children section-names
+            for sec in self.allseclist:
+                if sec.name() == parent:
+                    print(sec.name(), parent)
+                    sref = neuron.h.SectionRef(sec=sec)
+                    break
+            assert(sec.name() == parent == sref.sec.name())
+            for sec in sref.child:
+                childseclist.append(sec.name())
+            # idxvec=1 where both coincide
+            i = 0
+            for sec in secnamelist:
+                for childsec in childseclist:
+                    if sec == childsec:
+                        idxvec[i] += 1
+                i += 1
 
-        [idx] = np.where(idxvec)
-        return idx
+            [idx] = np.where(idxvec)
+            return idx
+        else:
+            return np.array([])
 
     def get_idx_parent_children(self, parent="soma[0]"):
         """
@@ -1803,7 +1811,11 @@ class Cell(object):
             name-pattern matching a sectionname. Defaults to "soma[0]"
         """
         seclist = [parent]
-        sref = neuron.h.SectionRef(parent)
+        for sec in self.allseclist:
+            if sec.name() == parent:
+                sref = neuron.h.SectionRef(sec=sec)
+                break
+        assert(sref.sec.name() == parent)
         for sec in sref.child:
             seclist.append(sec.name())
 
@@ -2313,7 +2325,7 @@ class Cell(object):
 
         children_dict = self.get_dict_of_children_idx()
         for sec in self.allseclist:
-            if not neuron.h.SectionRef(sec.name()).has_parent():
+            if not neuron.h.SectionRef(sec=sec).has_parent():
                 if sec.nseg == 1:
                     # skip soma, since soma is an orphan
                     continue
@@ -2333,7 +2345,7 @@ class Cell(object):
                 # section has parent section
                 first_sec = False
                 bottom_seg = True
-                secref = neuron.h.SectionRef(sec.name())
+                secref = neuron.h.SectionRef(sec=sec)
                 parentseg = secref.parent()
                 parentsec = parentseg.sec
                 children_dict = self.get_dict_of_children_idx()
@@ -2443,7 +2455,7 @@ class Cell(object):
         children_dict = {}
         for sec in self.allseclist:
             children_dict[sec.name()] = []
-            for child in neuron.h.SectionRef(sec.name()).child:
+            for child in neuron.h.SectionRef(sec=sec).child:
                 # add index of first segment of each child
                 children_dict[sec.name()].append(int(self.get_idx(
                     section=child.name())[0]))
