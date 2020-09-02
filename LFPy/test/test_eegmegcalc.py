@@ -403,7 +403,7 @@ class testFourSphereVolumeConductor(unittest.TestCase):
                 np.testing.assert_equal(phi0, phi[0][0])
 
 
-    def test_calc_potential_from_multi_dipoles00(self):
+    def test_calc_potential_from_multi_dipoles_00(self):
         """test comparison between multi-dipoles and single dipole approach"""
         neuron.h('forall delete_section()')
         soma = neuron.h.Section(name='soma')
@@ -441,6 +441,7 @@ class testFourSphereVolumeConductor(unittest.TestCase):
         np.testing.assert_allclose(pot_MD, pot_sum, rtol=1E-4)
 
         # some cleanup of Python-created section references
+        cell.strip_hoc_objects()
         cell = None
         morphology = None
         dend2 = None
@@ -448,7 +449,7 @@ class testFourSphereVolumeConductor(unittest.TestCase):
         soma = None
 
 
-    def test_calc_potential_from_multi_dipoles01(self):
+    def test_calc_potential_from_multi_dipoles_01(self):
         """test comparison between multi-dipoles and single dipole approach"""
         neuron.h('forall delete_section()')
         soma = neuron.h.Section(name='soma')
@@ -488,6 +489,7 @@ class testFourSphereVolumeConductor(unittest.TestCase):
         np.testing.assert_allclose(pot_MD, pot_sum, rtol=1E-4)
 
         # some cleanup of Python-created section references
+        cell.strip_hoc_objects()
         cell = None
         morphology = None
         dend3 = None
@@ -508,7 +510,7 @@ class testInfiniteVolumeConductor(unittest.TestCase):
         phi = inf_model.get_dipole_potential(p, r)
         np.testing.assert_allclose(phi, np.array([[1., 0.], [0., 1.]]))
 
-    def test_get_multi_dipole_potential00(self):
+    def test_get_multi_dipole_potential_00(self):
         neuron.h('forall delete_section()')
         soma = neuron.h.Section(name='soma')
         dend1 = neuron.h.Section(name='dend1')
@@ -532,10 +534,8 @@ class testInfiniteVolumeConductor(unittest.TestCase):
         pot_MD = MD_inf.get_multi_dipole_potential(cell, electrode_locs)
         pot_cb = electrode.LFP
 
-        np.testing.assert_almost_equal(pot_MD, pot_cb)
-        np.testing.assert_allclose(pot_MD, pot_cb, rtol=1E-4)
-
         # some cleanup of Python-created section references
+        cell.strip_hoc_objects()
         cell = None
         morphology = None
         dend5 = None
@@ -545,21 +545,25 @@ class testInfiniteVolumeConductor(unittest.TestCase):
         dend1 = None
         soma = None
 
-    def test_get_multi_dipole_potential01(self):
+        np.testing.assert_almost_equal(pot_MD, pot_cb)
+        np.testing.assert_allclose(pot_MD, pot_cb, rtol=1E-4)
+
+    def test_get_multi_dipole_potential_01(self):
         morphology = os.path.join(LFPy.__path__[0], 'test', 'ball_and_sticks.hoc')
         electrode_locs = np.array([[0., 0., 10000.]])
         cell, electrode = cell_w_synapse_from_sections_w_electrode(morphology, electrode_locs)
         sigma = 0.3
-        t_point = 0
 
         MD_inf = LFPy.InfiniteVolumeConductor(sigma)
         pot_MD = MD_inf.get_multi_dipole_potential(cell, electrode_locs)
         pot_cb = electrode.LFP
 
+        cell.strip_hoc_objects()
+
         np.testing.assert_almost_equal(pot_MD, pot_cb)
         np.testing.assert_allclose(pot_MD, pot_cb, rtol=1E-3)
 
-    def test_get_multi_dipole_potential02(self):
+    def test_get_multi_dipole_potential_02(self):
         morphology = os.path.join(LFPy.__path__[0], 'test', 'ball_and_sticks.hoc')
         electrode_locs = np.array([[0., 0., 10000.]])
         cell, electrode = cell_w_synapse_from_sections_w_electrode(morphology, electrode_locs)
@@ -569,6 +573,8 @@ class testInfiniteVolumeConductor(unittest.TestCase):
         MD_inf = LFPy.InfiniteVolumeConductor(sigma)
         pot_MD = MD_inf.get_multi_dipole_potential(cell, electrode_locs, t_point)
         pot_cb = electrode.LFP[:,t_point]
+
+        cell.strip_hoc_objects()
 
         np.testing.assert_almost_equal(pot_MD, pot_cb)
         np.testing.assert_allclose(pot_MD, pot_cb, rtol=1E-3)
