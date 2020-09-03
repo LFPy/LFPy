@@ -1060,7 +1060,7 @@ class testCell(unittest.TestCase):
         morphology = neuron.h.SectionList()
         morphology.wholetree(sec=soma)
         cell = cell_w_synapse_from_sections(morphology)
-        iaxial, d_list, pos_list = cell.get_axial_currents_from_vmem()
+        # iaxial, d_list, pos_list = cell.get_axial_currents_from_vmem()
         new_x = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
         new_y = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
         new_z = [[-10, 0, 10], [10, 15, 20], [20, 30, 50]]
@@ -1071,7 +1071,8 @@ class testCell(unittest.TestCase):
                                 new_x[j][n],
                                 new_y[j][n],
                                 new_z[j][n],
-                                new_d[j][n])
+                                new_d[j][n],
+                                    sec=sec)
                 neuron.h.define_shape()
         cell._collect_geometry()
         cell2 = cell_w_synapse_from_sections(morphology)
@@ -1118,7 +1119,8 @@ class testCell(unittest.TestCase):
                                 new_x[j][n],
                                 new_y[j][n],
                                 new_z[j][n],
-                                new_d[j][n])
+                                new_d[j][n],
+                                    sec=sec)
                 neuron.h.define_shape()
         cell._collect_geometry()
         cell2 = cell_w_synapse_from_sections(morphology)

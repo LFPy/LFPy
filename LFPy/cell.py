@@ -2303,7 +2303,7 @@ class Cell(object):
                      self.yend - self.ymid,
                      self.zend - self.zmid]
 
-        children_dict = self.get_dict_of_children_idx()
+        # children_dict = self.get_dict_of_children_idx()
         for sec in self.allseclist:
             if not neuron.h.SectionRef(sec=sec).has_parent():
                 if sec.nseg == 1:
@@ -2356,7 +2356,8 @@ class Cell(object):
                                                               children_dict,
                                                               connection_dict,
                                                               conn_point,
-                                                              timepoints
+                                                              timepoints,
+                                                              sec
                                                               )
 
                 if bottom_seg:
@@ -2462,7 +2463,7 @@ class Cell(object):
     def _parent_and_segment_current(self, seg_idx, parent_idx, bottom_seg,
                                     branch=False, parentsec=None,
                                     children_dict=None, connection_dict=None,
-                                    conn_point=1, timepoints=None):
+                                    conn_point=1, timepoints=None, sec=None):
         """
         Return axial current from segment (seg_idx) mid to segment start,
         and current from parent segment (parent_idx) end to parent segment mid.
@@ -2480,7 +2481,9 @@ class Cell(object):
         timepoints : ndarray, dtype=int
             array of timepoints in simulation at which you want to compute
             the axial currents. Defaults to None. If not given,
+            the axial currents. Defaults to None. If not given,
             all simulation timesteps will be included.
+        sec : (QUICKFIX!) section is needed in new NEURON version
         Returns
         -------
         iseg : dtype=float
@@ -2503,7 +2506,7 @@ class Cell(object):
             if conn_point == 0:
                 parent_ri = self._ri_list[parent_idx]
             else:
-                parent_ri = neuron.h.ri(0)
+                parent_ri = neuron.h.ri(0, sec=sec)
             if not branch:
                 ri = parent_ri + seg_ri
                 iseg = (vpar - vseg) / ri
