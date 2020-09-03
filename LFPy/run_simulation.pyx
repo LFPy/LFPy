@@ -346,7 +346,7 @@ cpdef _collect_geometry_neuron(cell):
 
     #loop over all segments
     for sec in cell.allseclist:
-        n3d = int(neuron.h.n3d())
+        n3d = int(neuron.h.n3d(sec=sec))
         nseg = sec.nseg
         gsen2 = 1./2/nseg
         secL = sec.L
