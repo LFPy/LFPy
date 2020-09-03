@@ -143,3 +143,5 @@ ax.legend([l_cell, l_curved, l_syn, l_isyn, l_elec],
 
 plt.savefig(join('example_potential_through_head.pdf'))
 plt.show()
+
+cell.__del__()
