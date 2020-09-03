@@ -745,7 +745,7 @@ class testTemplateCell(unittest.TestCase):
                         templatename='ball_and_stick_template',
                         templateargs=None,
                         )
-        cell.strip_hoc_objects()
+        cell.__del__()
         for attribute in dir(cell):
             self.assertNotEqual(str(type(getattr(cell, attribute))),
                                 'hoc.HocObject')
@@ -977,7 +977,7 @@ class testTemplateCell(unittest.TestCase):
                 p = np.dot(stick.imem.T, np.c_[stick.xmid, stick.ymid, stick.zmid])
                 np.testing.assert_allclose(p, stick.current_dipole_moment)
 
-                stick.strip_hoc_objects()
+                stick.__del__()
 
 
     def test_cell_simulate_current_dipole_moment_01(self):
@@ -1019,7 +1019,7 @@ class testTemplateCell(unittest.TestCase):
                 p = np.dot(stick.imem.T, np.c_[stick.xmid, stick.ymid, stick.zmid])
                 np.testing.assert_allclose(p, stick.current_dipole_moment)
 
-                stick.strip_hoc_objects()
+                stick.__del__()
 
     def test_cell_simulate_current_dipole_moment_02(self):
         stickParams = {
@@ -1057,7 +1057,7 @@ class testTemplateCell(unittest.TestCase):
                 p = np.dot(stick.imem.T, np.c_[stick.xmid, stick.ymid, stick.zmid])
                 np.testing.assert_allclose(p, stick.current_dipole_moment)
 
-                stick.strip_hoc_objects()
+                stick.__del__()
 
     def test_cell_tstart_00(self):
         stickParams = {

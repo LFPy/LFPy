@@ -64,11 +64,7 @@ class testSynapse(unittest.TestCase):
         np.testing.assert_allclose(i, syn.i, rtol=1E-1)
         np.testing.assert_equal(cell.somav, syn.v)
 
-        '''for attr in syn.__dict__.keys():
-            setattr(syn, attr, None)'''
-        '''for attr in cell.__dict__.keys():
-            setattr(cell, attr, None)'''
-        cell.strip_hoc_objects()
+        cell.__del__()
 
     def test_Synapse_01(self):
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
@@ -113,15 +109,7 @@ class testSynapse(unittest.TestCase):
         self.assertFalse(hasattr(syn3, 'i'))
         self.assertFalse(hasattr(syn3, 'v'))
 
-        '''for attr in syn1.__dict__.keys():
-            setattr(syn1, attr, None)
-        for attr in syn2.__dict__.keys():
-            setattr(syn2, attr, None)
-        for attr in syn3.__dict__.keys():
-            setattr(syn3, attr, None)'''
-        '''for attr in cell.__dict__.keys():
-            setattr(cell, attr, None)'''
-        cell.strip_hoc_objects()
+        cell.__del__()
 
     def test_Synapse_02(self):
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
@@ -153,9 +141,7 @@ class testSynapse(unittest.TestCase):
         np.testing.assert_allclose(i1, syn1.i, rtol=1E-1)
         np.testing.assert_equal(cell.somav, syn1.v)
 
-        cell.strip_hoc_objects()
-        '''for attr in cell.__dict__.keys():
-            setattr(cell, attr, None)'''
+        cell.__del__()
 
     def test_Synapse_03(self):
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
@@ -187,7 +173,7 @@ class testSynapse(unittest.TestCase):
         np.testing.assert_allclose(i1, syn1.i, rtol=1E-1)
         np.testing.assert_equal(cell.somav, syn1.v)
 
-        cell.strip_hoc_objects()
+        cell.__del__()
         '''for attr in cell.__dict__.keys():
             setattr(cell, attr, None)'''
 
@@ -222,9 +208,7 @@ class testSynapse(unittest.TestCase):
         np.testing.assert_allclose(i1, syn1.i, rtol=1E-1)
         np.testing.assert_equal(cell.somav, syn1.v)
 
-        cell.strip_hoc_objects()
-        '''for attr in cell.__dict__.keys():
-            setattr(cell, attr, None)'''
+        cell.__del__()
 
     def test_Synapse_05(self):
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
@@ -257,7 +241,7 @@ class testSynapse(unittest.TestCase):
         np.testing.assert_allclose(i1, syn1.i, rtol=1E-1)
         np.testing.assert_equal(cell.somav, syn1.v)
 
-        cell.strip_hoc_objects()
+        cell.__del__()
         '''for attr in cell.__dict__.keys():
             setattr(cell, attr, None)'''
 

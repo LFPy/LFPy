@@ -441,13 +441,7 @@ class testFourSphereVolumeConductor(unittest.TestCase):
         np.testing.assert_allclose(pot_MD, pot_sum, rtol=1E-4)
 
         # some cleanup of Python-created section references
-        cell.strip_hoc_objects()
-        cell = None
-        morphology = None
-        dend2 = None
-        dend1 = None
-        soma = None
-
+        cell.__del__()
 
     def test_calc_potential_from_multi_dipoles_01(self):
         """test comparison between multi-dipoles and single dipole approach"""
@@ -489,7 +483,7 @@ class testFourSphereVolumeConductor(unittest.TestCase):
         np.testing.assert_allclose(pot_MD, pot_sum, rtol=1E-4)
 
         # some cleanup of Python-created section references
-        cell.strip_hoc_objects()
+        cell.__del__()
         cell = None
         morphology = None
         dend3 = None
@@ -535,15 +529,7 @@ class testInfiniteVolumeConductor(unittest.TestCase):
         pot_cb = electrode.LFP
 
         # some cleanup of Python-created section references
-        cell.strip_hoc_objects()
-        cell = None
-        morphology = None
-        dend5 = None
-        dend4 = None
-        dend3 = None
-        dend2 = None
-        dend1 = None
-        soma = None
+        cell.__del__()
 
         np.testing.assert_almost_equal(pot_MD, pot_cb)
         np.testing.assert_allclose(pot_MD, pot_cb, rtol=1E-4)
@@ -558,7 +544,7 @@ class testInfiniteVolumeConductor(unittest.TestCase):
         pot_MD = MD_inf.get_multi_dipole_potential(cell, electrode_locs)
         pot_cb = electrode.LFP
 
-        cell.strip_hoc_objects()
+        cell.__del__()
 
         np.testing.assert_almost_equal(pot_MD, pot_cb)
         np.testing.assert_allclose(pot_MD, pot_cb, rtol=1E-3)
@@ -574,7 +560,7 @@ class testInfiniteVolumeConductor(unittest.TestCase):
         pot_MD = MD_inf.get_multi_dipole_potential(cell, electrode_locs, t_point)
         pot_cb = electrode.LFP[:,t_point]
 
-        cell.strip_hoc_objects()
+        cell.__del__()
 
         np.testing.assert_almost_equal(pot_MD, pot_cb)
         np.testing.assert_allclose(pot_MD, pot_cb, rtol=1E-3)
