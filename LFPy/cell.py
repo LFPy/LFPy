@@ -301,9 +301,18 @@ class Cell(object):
         self._neuron_tvec = None
 
     def __del__(self):
-        if hasattr(self, 'stimlist'):
-            self.stimlist = False
-            del self.stimlist
+        """Cell Destructor"""
+        self.strip_hoc_objects()
+
+    def strip_hoc_objects(self):
+        """Destroy any NEURON hoc objects in the cell object"""
+        for key in self.__dict__.keys():
+            nrntypes = (neuron.nrn.Segment, neuron.nrn.Section,
+                        neuron.nrn.Mechanism, type(neuron.h.List()))
+            if isinstance(getattr(self, key), nrntypes):
+                setattr(self, key, None)
+                if self.verbose:
+                    print('{}.{} = None'.format(self.__name__, key))
 
     def _load_geometry(self):
         """Load the morphology-file in NEURON"""
@@ -1472,14 +1481,6 @@ class Cell(object):
 
         self._calc_midpoints()
         self._update_synapse_positions()
-
-    def strip_hoc_objects(self):
-        """Destroy any NEURON hoc objects in the cell object"""
-        for varname in dir(self):
-            if type(getattr(self, varname)) == type(neuron.h.List()):
-                setattr(self, varname, None)
-                if self.verbose:
-                    print('None-typed %s in cell instance' % varname)
 
     def cellpickler(self, filename, pickler=pickle.dump):
         """Save data in cell to filename, using cPickle. It will however destroy
