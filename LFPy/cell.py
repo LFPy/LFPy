@@ -46,10 +46,10 @@ class Cell(object):
         filled with references to neuron.h.Section instances.
     v_init : float
         Initial membrane potential. Defaults to -70 mV.
-    Ra : float
-        Axial resistance. Defaults to 35.4 Ohm*cm
+    Ra : float or None
+        Axial resistance. Defaults to None (unit Ohm*cm)
     cm : float
-        Membrane capacitance. Defaults to 1.0 uF/cm2.
+        Membrane capacitance. Defaults to None (unit uF/cm2)
     passive : bool
         Passive mechanisms are initialized if True. Defaults to False
     passive_parameters : dict
@@ -112,8 +112,8 @@ class Cell(object):
     """
     def __init__(self, morphology,
                     v_init=-70.,
-                    Ra=35.4,
-                    cm=1.0,
+                    Ra=None,
+                    cm=None,
                     passive=False,
                     passive_parameters = dict(
                         g_pas=0.001,
@@ -513,8 +513,10 @@ class Cell(object):
     def _set_ra_and_cm(self):
         """Insert ra and cm on all segments"""
         for sec in self.allseclist:
-            sec.Ra = self.Ra
-            sec.cm = self.cm
+            if self.Ra is not None:
+                sec.Ra = self.Ra
+            if self.cm is not None:
+                sec.cm = self.cm
 
     def _set_passive(self):
         """Insert passive mechanism on all segments"""
