@@ -26,11 +26,12 @@ import neuron
 if "win32" in sys.platform:
     pth = os.path.join(LFPy.__path__[0], 'test', 'nrnmech.dll')
     pth = pth.replace(os.sep, posixpath.sep)
-    if not pth in neuron.nrn_dll_loaded:
+    if pth not in neuron.nrn_dll_loaded:
         neuron.h.nrn_load_dll(pth)
         neuron.nrn_dll_loaded.append(pth)
 else:
     neuron.load_mechanisms(os.path.join(LFPy.__path__[0], 'test'))
+
 
 class testPointProcess(unittest.TestCase):
     """
@@ -42,7 +43,7 @@ class testPointProcess(unittest.TestCase):
         pp = LFPy.PointProcess(cell=cell, idx=0)
         self.assertTrue(np.alltrue(np.array([pp.x, pp.y, pp.z])==cell.somapos))
         self.assertEqual(pp.idx, 0)
-    
+
 
 class testSynapse(unittest.TestCase):
     """
@@ -62,7 +63,8 @@ class testSynapse(unittest.TestCase):
 
         np.testing.assert_allclose(i, syn.i, rtol=1E-1)
         np.testing.assert_equal(cell.somav, syn.v)
-        
+
+        cell.__del__()
 
     def test_Synapse_01(self):
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
@@ -88,7 +90,7 @@ class testSynapse(unittest.TestCase):
         syn3.set_spike_times(np.array([40.]))
 
         cell.simulate()
-        
+
         i = np.zeros(cell.tvec.size)
         i[cell.tvec > 10.] = -np.exp(-np.arange((cell.tvec > 10.).sum())*cell.dt / 5.)
 
@@ -100,13 +102,14 @@ class testSynapse(unittest.TestCase):
         i[cell.tvec > 20.] = -np.exp(-np.arange((cell.tvec > 20.).sum())*cell.dt / 5.)
         self.assertFalse(hasattr(syn1, 'v'))
         np.testing.assert_allclose(i, syn1.i, rtol=1E-1)
-        
+
         self.assertFalse(hasattr(syn2, 'i'))
         self.assertTrue(hasattr(syn2, 'v'))
-        
+
         self.assertFalse(hasattr(syn3, 'i'))
         self.assertFalse(hasattr(syn3, 'v'))
 
+        cell.__del__()
 
     def test_Synapse_02(self):
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
@@ -125,7 +128,7 @@ class testSynapse(unittest.TestCase):
         syn1.set_spike_times(np.array([t1]))
 
         cell.simulate()
-        
+
         i0 = np.zeros(cell.tvec.size)
         i0[cell.tvec > t0] = -np.exp(-np.arange((cell.tvec > t0).sum())*cell.dt / tau)
 
@@ -138,6 +141,7 @@ class testSynapse(unittest.TestCase):
         np.testing.assert_allclose(i1, syn1.i, rtol=1E-1)
         np.testing.assert_equal(cell.somav, syn1.v)
 
+        cell.__del__()
 
     def test_Synapse_03(self):
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
@@ -156,7 +160,7 @@ class testSynapse(unittest.TestCase):
         syn1.set_spike_times_w_netstim(noise=0., start=t1-1, number=1) # -1 to acct for delay
 
         cell.simulate()
-        
+
         i0 = np.zeros(cell.tvec.size)
         i0[cell.tvec > t0] = -np.exp(-np.arange((cell.tvec > t0).sum())*cell.dt / tau)
 
@@ -169,6 +173,9 @@ class testSynapse(unittest.TestCase):
         np.testing.assert_allclose(i1, syn1.i, rtol=1E-1)
         np.testing.assert_equal(cell.somav, syn1.v)
 
+        cell.__del__()
+        '''for attr in cell.__dict__.keys():
+            setattr(cell, attr, None)'''
 
     def test_Synapse_04(self):
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
@@ -188,7 +195,7 @@ class testSynapse(unittest.TestCase):
         syn1.set_spike_times(np.array([t1]))
 
         cell.simulate()
-        
+
         i0 = np.zeros(cell.tvec.size)
         i0[cell.tvec > t0] = -np.exp(-np.arange((cell.tvec > t0).sum())*cell.dt / tau)
 
@@ -200,8 +207,9 @@ class testSynapse(unittest.TestCase):
 
         np.testing.assert_allclose(i1, syn1.i, rtol=1E-1)
         np.testing.assert_equal(cell.somav, syn1.v)
-        
-        
+
+        cell.__del__()
+
     def test_Synapse_05(self):
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
                                                  'ball_and_sticks.hoc'))
@@ -220,7 +228,7 @@ class testSynapse(unittest.TestCase):
         syn0.set_spike_times_w_netstim(noise=0., start=t0-1, number=1) # -1 to acct for delay
 
         cell.simulate()
-        
+
         i0 = np.zeros(cell.tvec.size)
         i0[cell.tvec > t0] = -np.exp(-np.arange((cell.tvec > t0).sum())*cell.dt / tau)
 
@@ -233,6 +241,9 @@ class testSynapse(unittest.TestCase):
         np.testing.assert_allclose(i1, syn1.i, rtol=1E-1)
         np.testing.assert_equal(cell.somav, syn1.v)
 
+        cell.__del__()
+        '''for attr in cell.__dict__.keys():
+            setattr(cell, attr, None)'''
 
 class testStimIntElectrode(unittest.TestCase):
     """
@@ -333,15 +344,12 @@ class testStimIntElectrode(unittest.TestCase):
         gt[(cell.tvec > 10.) & (cell.tvec <= 30.)] = 1.
         np.testing.assert_equal(gt, stim0.i)
         np.testing.assert_equal(cell.somav, stim0.v)
-        
+
         self.assertTrue(hasattr(stim1, 'v'))
         self.assertTrue(cell.tvec.shape == stim1.v.shape)
         self.assertFalse(hasattr(stim2, 'v'))
         self.assertFalse(hasattr(stim3, 'v'))
         self.assertFalse(hasattr(stim1, 'i'))
         self.assertTrue(hasattr(stim2, 'i'))
-        self.assertTrue(cell.tvec.shape == stim2.i.shape)        
+        self.assertTrue(cell.tvec.shape == stim2.i.shape)
         self.assertFalse(hasattr(stim3, 'i'))
-        
-  
-    

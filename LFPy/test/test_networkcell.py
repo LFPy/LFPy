@@ -652,8 +652,8 @@ class testNetworkCell(unittest.TestCase):
                         templateargs=None,
                         )
 
-        np.testing.assert_array_equal(cell.get_idx_children(parent='soma[0]'),
-                                      cell.get_idx(section='dend[0]'))
+        np.testing.assert_array_equal(cell.get_idx_children(parent='ball_and_stick_template[0].soma[0]'),
+                                      cell.get_idx(section='ball_and_stick_template[0].dend[0]'))
 
 
     def test_cell_get_idx_parent_children_00(self):
@@ -663,9 +663,9 @@ class testNetworkCell(unittest.TestCase):
                         templatename='ball_and_stick_template',
                         templateargs=None,
                         )
-        np.testing.assert_array_equal(cell.get_idx_parent_children(parent='soma[0]'),
-                                      cell.get_idx(section=['soma[0]',
-                                                            'dend[0]']))
+        np.testing.assert_array_equal(cell.get_idx_parent_children(parent='ball_and_stick_template[0].soma[0]'),
+                                      cell.get_idx(section=['ball_and_stick_template[0].soma[0]',
+                                                            'ball_and_stick_template[0].dend[0]']))
 
 
     def test_cell_get_idx_name_00(self):
@@ -976,6 +976,8 @@ class testNetworkCell(unittest.TestCase):
                 p = np.dot(stick.imem.T, np.c_[stick.xmid, stick.ymid, stick.zmid])
                 np.testing.assert_allclose(p, stick.current_dipole_moment)
 
+                stick.__del__()
+
 
     def test_cell_simulate_current_dipole_moment_01(self):
         stickParams = {
@@ -1015,6 +1017,9 @@ class testNetworkCell(unittest.TestCase):
                 p = np.dot(stick.imem.T, np.c_[stick.xmid, stick.ymid, stick.zmid])
                 np.testing.assert_allclose(p, stick.current_dipole_moment)
 
+                stick.__del__()
+
+
     def test_cell_simulate_current_dipole_moment_02(self):
         stickParams = {
             'morphology' : os.path.join(LFPy.__path__[0], 'test', 'stick.hoc'),
@@ -1050,6 +1055,8 @@ class testNetworkCell(unittest.TestCase):
                 stick.simulate(rec_imem=True, rec_current_dipole_moment=True)
                 p = np.dot(stick.imem.T, np.c_[stick.xmid, stick.ymid, stick.zmid])
                 np.testing.assert_allclose(p, stick.current_dipole_moment)
+
+                stick.__del__()
 
     def test_cell_tstart_00(self):
         stickParams = {

@@ -68,6 +68,8 @@ class testNetworkPopulation(unittest.TestCase):
 
 
         os.system('rm -r tmp_testNetworkPopulation')
+        for cell in population.cells:
+            cell.strip_hoc_objects()
         neuron.h('forall delete_section()')
 
 
@@ -139,6 +141,9 @@ class testNetwork(unittest.TestCase):
 
         network.pc.gid_clear()
         os.system('rm -r tmp_testNetworkPopulation')
+        for population in network.populations.values():
+            for cell in population.cells:
+                cell.strip_hoc_objects()
         neuron.h('forall delete_section()')
 
 
@@ -195,6 +200,9 @@ class testNetwork(unittest.TestCase):
 
         network.pc.gid_clear()
         os.system('rm -r tmp_testNetworkPopulation')
+        for population in network.populations.values():
+            for cell in population.cells:
+                cell.strip_hoc_objects()
         neuron.h('forall delete_section()')
 
 
@@ -270,6 +278,9 @@ class testNetwork(unittest.TestCase):
 
         network.pc.gid_clear()
         os.system('rm -r tmp_testNetworkPopulation')
+        for population in network.populations.values():
+            for cell in population.cells:
+                cell.strip_hoc_objects()
         neuron.h('forall delete_section()')
 
 
@@ -344,14 +355,17 @@ class testNetwork(unittest.TestCase):
         for population in network.populations.values():
             for cell in population.cells:
                 self.assertTrue(np.all(cell.somav == network.v_init))
-            
-        f = h5py.File(os.path.join(network.OUTPUTPATH, 'OUTPUT.h5'), 'r')        
+
+        f = h5py.File(os.path.join(network.OUTPUTPATH, 'OUTPUT.h5'), 'r')
         np.testing.assert_equal(f['OUTPUT[0]'][()], np.zeros_like(f['OUTPUT[0]'][()]))
         f.close()
 
 
         network.pc.gid_clear()
         os.system('rm -r tmp_testNetworkPopulation')
+        for population in network.populations.values():
+            for cell in population.cells:
+                cell.strip_hoc_objects()
         neuron.h('forall delete_section()')
 
 
@@ -366,10 +380,10 @@ class testNetwork(unittest.TestCase):
             tstop=100,
             delete_sections=False,
         )
-        
+
         synapseParameters = dict(idx=0, syntype='Exp2Syn', weight=0.002,
                                  tau1=0.1, tau2=0.1, e=0)
-        
+
         populationParameters = dict(
             CWD=None,
             CELLPATH=None,
@@ -394,24 +408,27 @@ class testNetwork(unittest.TestCase):
         # set up
         network = LFPy.Network(**networkParameters)
         network.create_population(**populationParameters)
-        
+
         cell = network.populations['test'].cells[0]
-        
+
         # create synapses
         synlist = []
         numsynapses = 2
         for i in range(numsynapses):
             synlist.append(LFPy.Synapse(cell=cell, **synapseParameters))
             synlist[-1].set_spike_times(np.array([10+(i*10)]))
-        
+
         network.simulate()
-        
+
         # test that the input results in the correct amount of PSPs
         np.testing.assert_equal(ss.argrelextrema(cell.somav, np.greater)[0].size, numsynapses)
 
         # clean up
         network.pc.gid_clear()
         os.system('rm -r tmp_testNetworkPopulation')
+        for population in network.populations.values():
+            for cell in population.cells:
+                cell.strip_hoc_objects()
         neuron.h('forall delete_section()')
 
 
@@ -491,13 +508,15 @@ class testNetwork(unittest.TestCase):
         for population in network.populations.values():
             for cell in population.cells:
                 self.assertTrue(np.all(cell.somav == network.v_init))
-            
-        f = h5py.File(os.path.join(network.OUTPUTPATH, 'OUTPUT.h5'), 'r')        
+
+        f = h5py.File(os.path.join(network.OUTPUTPATH, 'OUTPUT.h5'), 'r')
         np.testing.assert_equal(f['OUTPUT[0]'][()], RESULTS[0])
         f.close()
 
 
         network.pc.gid_clear()
         os.system('rm -r tmp_testNetworkPopulation')
+        for population in network.populations.values():
+            for cell in population.cells:
+                cell.strip_hoc_objects()
         neuron.h('forall delete_section()')
-

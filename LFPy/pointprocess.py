@@ -16,13 +16,12 @@ GNU General Public License for more details.
 
 
 import numpy as np
-import neuron
 
 class PointProcess(object):
     """
     Superclass on top of Synapse, StimIntElectrode, just to import and set
     some shared variables and extracts Cartesian coordinates of a segment
-    
+
     Parameters
     ----------
     cell : obj
@@ -51,7 +50,7 @@ class PointProcess(object):
 
     def update_pos(self, cell):
         """
-        Extract coordinates of point-process 
+        Extract coordinates of point-process
         """
         self.x = cell.xmid[self.idx]
         self.y = cell.ymid[self.idx]
@@ -63,9 +62,9 @@ class Synapse(PointProcess):
     The synapse class, pointprocesses that spawn membrane currents.
     See http://www.neuron.yale.edu/neuron/static/docs/help/neuron/neuron/mech.html#pointprocesses
     for details, or corresponding mod-files.
-    
+
     This class is meant to be used with synaptic mechanisms, giving rise to
-    currents that will be part of the membrane currents. 
+    currents that will be part of the membrane currents.
 
     Parameters
     ----------
@@ -120,7 +119,7 @@ class Synapse(PointProcess):
         Initialization of class Synapse
         """
         PointProcess.__init__(self, cell, idx, record_current, record_potential, **kwargs)
-            
+
         self.syntype = syntype
         self.cell = cell
         self.hocidx = int(cell.set_synapse(idx=idx, syntype=syntype,
@@ -140,13 +139,13 @@ class Synapse(PointProcess):
             raise AssertionError('synapse activation times must be a np.ndarray, not type({})'.format(type(sptimes)))
         self.cell.sptimeslist.insrt(self._ns_index, sptimes)
         self.cell.sptimeslist.remove(self._ns_index + 1)
-    
+
     def set_spike_times_w_netstim(self, noise=1., start=0., number=1E3,
                                   interval=10., seed=1234.):
         """
         Generate a train of pre-synaptic stimulus times by setting up the
         neuron NetStim object associated with this synapse
-        
+
         Parameters
         ----------
         noise : float in range [0, 1]
@@ -164,7 +163,7 @@ class Synapse(PointProcess):
         self.cell.netstimlist[self._ns_index].noise = noise
         self.cell.netstimlist[self._ns_index].start = start
         self.cell.netstimlist[self._ns_index].number = number
-        self.cell.netstimlist[self._ns_index].interval = interval        
+        self.cell.netstimlist[self._ns_index].interval = interval
         self.cell.netstimlist[self._ns_index].seed(seed)
 
     def collect_current(self, cell):
@@ -173,7 +172,7 @@ class Synapse(PointProcess):
             self.i = np.array(cell.synireclist.o(self.hocidx))
         except:
             raise Exception('cell.synireclist deleted from consequtive runs')
-    
+
     def collect_potential(self, cell):
         """Collect membrane potential of segment with synapse"""
         try:
@@ -185,17 +184,17 @@ class Synapse(PointProcess):
 class StimIntElectrode(PointProcess):
     """Class for NEURON point processes representing electrode currents,
     such as VClamp, SEClamp and ICLamp.
-    
+
     Membrane currents will no longer sum to zero if these mechanisms are used,
     as the equivalent circuit is akin to a current input to the compartment
     from a far away extracellular location ("ground"), not immediately from
     the surface to the inside of the compartment as with transmembrane currents.
-    
-    Refer to NEURON documentation @ neuron.yale.edu for keyword arguments or 
+
+    Refer to NEURON documentation @ neuron.yale.edu for keyword arguments or
     class documentation in Python issuing e.g.
-        
+
         help(neuron.h.VClamp)
-    
+
     Will insert pptype on cell-instance, pass the corresponding kwargs onto
     cell.set_point_process.
 
@@ -271,7 +270,7 @@ class StimIntElectrode(PointProcess):
     >>>      pl.legend(loc='best')
     >>>      pl.title('Somatic potential (mV)')
 
-    """    
+    """
     def __init__(self, cell, idx, pptype='SEClamp',
                  record_current=False,
                  record_potential=False, **kwargs):
@@ -294,4 +293,3 @@ class StimIntElectrode(PointProcess):
     def collect_potential(self, cell):
         """Collect membrane potential of segment with PointProcess"""
         self.v = np.array(cell.stimvreclist.o(self.hocidx))
-

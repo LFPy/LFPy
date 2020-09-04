@@ -172,16 +172,15 @@ class Cell(object):
             neuron.h.load_file('stdlib.hoc')    #NEURON std. library
             neuron.h.load_file('import3d.hoc')  #import 3D morphology lib
 
-        numsec = sum(1 for sec in neuron.h.allsec())
-
         if delete_sections:
             if not isinstance(morphology, type(neuron.h.SectionList)):
                 if self.verbose:
-                    print('%s existing sections deleted from memory' % numsec)
+                    print('%s existing sections deleted from memory' %
+                        sum(1 for sec in neuron.h.allsec()))
                 neuron.h('forall delete_section()')
         else:
             if not isinstance(morphology, type(neuron.h.SectionList)):
-                mssg = "%s sections detected! " % numsec + \
+                mssg = "%s sections detected! " % sum(1 for sec in neuron.h.allsec()) + \
                        "Consider setting 'delete_sections=True'"
                 warn(mssg)
 
@@ -302,17 +301,21 @@ class Cell(object):
         self._neuron_tvec = None
 
     def __del__(self):
-        if hasattr(self, 'stimlist'):
-            self.stimlist = False
-            del self.stimlist
+        """Cell Destructor"""
+        self.strip_hoc_objects()
+
+    def strip_hoc_objects(self):
+        """Destroy any NEURON hoc objects in the cell object"""
+        for key in self.__dict__.keys():
+            nrntypes = (neuron.nrn.Segment, neuron.nrn.Section,
+                        neuron.nrn.Mechanism, type(neuron.h.List()))
+            if isinstance(getattr(self, key), nrntypes):
+                setattr(self, key, None)
+                if self.verbose:
+                    print('{}.{} = None'.format(self.__name__, key))
 
     def _load_geometry(self):
         """Load the morphology-file in NEURON"""
-        try:
-            neuron.h.sec_counted = 0
-        except LookupError:
-            neuron.h('sec_counted = 0')
-
         #import the morphology, try and determine format
         fileEnding = self.morphology.split('.')[-1]
         if fileEnding == 'hoc' or fileEnding == 'HOC':
@@ -558,29 +561,22 @@ class Cell(object):
         if not hasattr(self, '_synvtorecord'):
             self._synvtorecord = []
         if not hasattr(self, 'netstimlist'):
-           self.netstimlist = neuron.h.List()
+            self.netstimlist = neuron.h.List()
         if not hasattr(self, 'netconlist'):
             self.netconlist = neuron.h.List()
         if not hasattr(self, 'sptimeslist'):
             self.sptimeslist = neuron.h.List()
 
         i = 0
-        cmd = 'syn = neuron.h.{}(seg.x, sec=sec)'
+        cmd = 'neuron.h.{}(seg.x, sec=sec)'
         for sec in self.allseclist:
             for seg in sec:
                 if i == idx:
                     command = cmd.format(syntype)
-                    if sys.version >= "3.4":
-                        exec(command, locals(), globals())
-                    else:
-                        exec(command)
+                    syn = eval(command, locals(), globals())
                     for param in list(kwargs.keys()):
                         try:
-                            if sys.version >= "3.4":
-                                exec('syn.' + param + '=' + str(kwargs[param]),
-                                     locals(), globals())
-                            else:
-                                exec('syn.' + param + '=' + str(kwargs[param]))
+                            setattr(syn, param, kwargs[param])
                         except:
                             pass
                     self.synlist.append(syn)
@@ -630,24 +626,17 @@ class Cell(object):
             self._stimvtorecord = []
 
         i = 0
-        cmd1 = 'stim = neuron.h.'
+        cmd1 = 'neuron.h.'
         cmd2 = '(seg.x, sec=sec)'
         ppset = False
         for sec in self.allseclist:
             for seg in sec:
                 if i == idx:
                     command = cmd1 + pptype + cmd2
-                    if sys.version >= "3.4":
-                        exec(command, locals(), globals())
-                    else:
-                        exec(command)
+                    stim = eval(command, locals(), globals())
                     for param in list(kwargs.keys()):
                         try:
-                            if sys.version >= "3.4":
-                                exec('stim.' + param + '=' + str(kwargs[param]),
-                                     locals(), globals())
-                            else:
-                                exec('stim.' + param + '=' + str(kwargs[param]))
+                            exec('stim.{} = {}'.format(param, kwargs[param]))
                         except SyntaxError:
                             ERRMSG = ''.join(['',
                                 'Point process type "{0}" might not '.format(
@@ -1495,14 +1484,6 @@ class Cell(object):
         self._calc_midpoints()
         self._update_synapse_positions()
 
-    def strip_hoc_objects(self):
-        """Destroy any NEURON hoc objects in the cell object"""
-        for varname in dir(self):
-            if type(getattr(self, varname)) == type(neuron.h.List()):
-                setattr(self, varname, None)
-                if self.verbose:
-                    print('None-typed %s in cell instance' % varname)
-
     def cellpickler(self, filename, pickler=pickle.dump):
         """Save data in cell to filename, using cPickle. It will however destroy
         any neuron.h objects upon saving, as c-objects cannot be pickled
@@ -1779,20 +1760,27 @@ class Cell(object):
         for sec in self.allseclist:
             for seg in sec:
                 secnamelist.append(sec.name())
-        #filling list of children section-names
-        sref = neuron.h.SectionRef(parent)
-        for sec in sref.child:
-            childseclist.append(sec.name())
-        #idxvec=1 where both coincide
-        i = 0
-        for sec in secnamelist:
-            for childsec in childseclist:
-                if sec == childsec:
-                    idxvec[i] += 1
-            i += 1
+        if parent in secnamelist:
+            #filling list of children section-names
+            for sec in self.allseclist:
+                if sec.name() == parent:
+                    sref = neuron.h.SectionRef(sec=sec)
+                    break
+            assert(sec.name() == parent == sref.sec.name())
+            for sec in sref.child:
+                childseclist.append(sec.name())
+            # idxvec=1 where both coincide
+            i = 0
+            for sec in secnamelist:
+                for childsec in childseclist:
+                    if sec == childsec:
+                        idxvec[i] += 1
+                i += 1
 
-        [idx] = np.where(idxvec)
-        return idx
+            [idx] = np.where(idxvec)
+            return idx
+        else:
+            return np.array([])
 
     def get_idx_parent_children(self, parent="soma[0]"):
         """
@@ -1805,7 +1793,11 @@ class Cell(object):
             name-pattern matching a sectionname. Defaults to "soma[0]"
         """
         seclist = [parent]
-        sref = neuron.h.SectionRef(parent)
+        for sec in self.allseclist:
+            if sec.name() == parent:
+                sref = neuron.h.SectionRef(sec=sec)
+                break
+        assert(sref.sec.name() == parent)
         for sec in sref.child:
             seclist.append(sec.name())
 
@@ -1853,14 +1845,14 @@ class Cell(object):
         d = []
 
         for sec in self.allseclist:
-            n3d = int(neuron.h.n3d())
+            n3d = int(neuron.h.n3d(sec=sec))
             x_i, y_i, z_i = np.zeros(n3d), np.zeros(n3d), np.zeros(n3d),
             d_i = np.zeros(n3d)
             for i in range(n3d):
-                x_i[i] = neuron.h.x3d(i)
-                y_i[i] = neuron.h.y3d(i)
-                z_i[i] = neuron.h.z3d(i)
-                d_i[i] = neuron.h.diam3d(i)
+                x_i[i] = neuron.h.x3d(i, sec=sec)
+                y_i[i] = neuron.h.y3d(i, sec=sec)
+                z_i[i] = neuron.h.z3d(i, sec=sec)
+                d_i[i] = neuron.h.diam3d(i, sec=sec)
 
 
             x.append(x_i)
@@ -1885,13 +1877,13 @@ class Cell(object):
         update the locations in neuron.hoc.space using neuron.h.pt3dchange()
         """
         for i, sec in enumerate(self.allseclist):
-            n3d = int(neuron.h.n3d())
+            n3d = int(neuron.h.n3d(sec=sec))
             for n in range(n3d):
                 neuron.h.pt3dchange(n,
                                 self.x3d[i][n],
                                 self.y3d[i][n],
                                 self.z3d[i][n],
-                                self.diam3d[i][n])
+                                self.diam3d[i][n], sec=sec)
             #let NEURON know about the changes we just did:
             neuron.h.define_shape()
         #must recollect the geometry, otherwise we get roundoff errors!
@@ -2303,6 +2295,7 @@ class Cell(object):
         """
         if not hasattr(self, 'vmem'):
             raise AttributeError('no vmem, run cell.simulate(rec_vmem=True)')
+        self._ri_list = self.get_axial_resistance()
         i_axial = []
         d_vectors = []
         pos_vectors = []
@@ -2313,9 +2306,9 @@ class Cell(object):
                      self.yend - self.ymid,
                      self.zend - self.zmid]
 
-        children_dict = self.get_dict_of_children_idx()
+        # children_dict = self.get_dict_of_children_idx()
         for sec in self.allseclist:
-            if not neuron.h.SectionRef(sec.name()).has_parent():
+            if not neuron.h.SectionRef(sec=sec).has_parent():
                 if sec.nseg == 1:
                     # skip soma, since soma is an orphan
                     continue
@@ -2335,7 +2328,7 @@ class Cell(object):
                 # section has parent section
                 first_sec = False
                 bottom_seg = True
-                secref = neuron.h.SectionRef(sec.name())
+                secref = neuron.h.SectionRef(sec=sec)
                 parentseg = secref.parent()
                 parentsec = parentseg.sec
                 children_dict = self.get_dict_of_children_idx()
@@ -2366,7 +2359,8 @@ class Cell(object):
                                                               children_dict,
                                                               connection_dict,
                                                               conn_point,
-                                                              timepoints
+                                                              timepoints,
+                                                              sec
                                                               )
 
                 if bottom_seg:
@@ -2401,7 +2395,7 @@ class Cell(object):
                 seg_idx += 1
                 branch = False
                 bottom_seg = False
-                parent_ri = 0
+
         return np.array(i_axial), np.array(d_vectors), np.array(pos_vectors)
 
     def get_axial_resistance(self):
@@ -2426,7 +2420,7 @@ class Cell(object):
         comp = 0
         for sec in self.allseclist:
             for seg in sec:
-                ri_list[comp] = neuron.h.ri(seg.x)
+                ri_list[comp] = neuron.h.ri(seg.x, sec=sec)
                 comp += 1
 
         return ri_list
@@ -2445,7 +2439,7 @@ class Cell(object):
         children_dict = {}
         for sec in self.allseclist:
             children_dict[sec.name()] = []
-            for child in neuron.h.SectionRef(sec.name()).child:
+            for child in neuron.h.SectionRef(sec=sec).child:
                 # add index of first segment of each child
                 children_dict[sec.name()].append(int(self.get_idx(
                     section=child.name())[0]))
@@ -2464,14 +2458,15 @@ class Cell(object):
             The dictionary is needed for computing axial currents.
         """
         connection_dict = {}
-        for sec in self.allseclist:
-            connection_dict[sec.name()] = neuron.h.parent_connection()
+        for i, sec in enumerate(self.allseclist):
+            connection_dict[sec.name()] = neuron.h.parent_connection(sec=sec)
+
         return connection_dict
 
     def _parent_and_segment_current(self, seg_idx, parent_idx, bottom_seg,
                                     branch=False, parentsec=None,
                                     children_dict=None, connection_dict=None,
-                                    conn_point=1, timepoints=None):
+                                    conn_point=1, timepoints=None, sec=None):
         """
         Return axial current from segment (seg_idx) mid to segment start,
         and current from parent segment (parent_idx) end to parent segment mid.
@@ -2489,7 +2484,9 @@ class Cell(object):
         timepoints : ndarray, dtype=int
             array of timepoints in simulation at which you want to compute
             the axial currents. Defaults to None. If not given,
+            the axial currents. Defaults to None. If not given,
             all simulation timesteps will be included.
+        sec : (QUICKFIX!) section is needed in new NEURON version
         Returns
         -------
         iseg : dtype=float
@@ -2499,10 +2496,8 @@ class Cell(object):
             Axial current in units of (nA)
             from parent segment end point to parent segment mid point.
         """
-        # list of axial resistance between segments
-        ri_list = self.get_axial_resistance()
         # axial resistance between segment mid and parent node
-        seg_ri = ri_list[seg_idx]
+        seg_ri = self._ri_list[seg_idx]
         vmem = self.vmem
         if timepoints is not None:
             vmem = self.vmem[:,timepoints]
@@ -2512,9 +2507,9 @@ class Cell(object):
         # top or bottom of parent section, we need to find parent_ri explicitly
         if bottom_seg and (conn_point == 0 or conn_point == 1):
             if conn_point == 0:
-                parent_ri = ri_list[parent_idx]
+                parent_ri = self._ri_list[parent_idx]
             else:
-                parent_ri = neuron.h.ri(0)
+                parent_ri = neuron.h.ri(0, sec=sec)
             if not branch:
                 ri = parent_ri + seg_ri
                 iseg = (vpar - vseg) / ri
@@ -2531,8 +2526,8 @@ class Cell(object):
                 for sib_idx, sib in zip(sib_idcs, sibs):
                     sib_conn_point = connection_dict[sib]
                     if sib_conn_point == conn_point:
-                        v_branch_num += vmem[sib_idx]/ri_list[sib_idx]
-                        v_branch_denom += 1./ ri_list[sib_idx]
+                        v_branch_num += vmem[sib_idx]/self._ri_list[sib_idx]
+                        v_branch_denom += 1./ self._ri_list[sib_idx]
                 v_branch = v_branch_num/v_branch_denom
                 iseg = (v_branch - vseg)/seg_ri
                 # set ipar=iseg

@@ -16,7 +16,7 @@ which introduces strong spatial averaging.
 Execution:
 
     python example_ECoG.py
-    
+
 Copyright (C) 2017 Computational Neuroscience Group, NMBU.
 
 This program is free software: you can redistribute it and/or modify
@@ -183,7 +183,7 @@ def insert_synapses(synparams, section, n, spTimesFun, args):
 
         # Some input spike train using the function call
         [spiketimes] = spTimesFun(**args)
-        
+
         # Create synapse(s) and setting times using the Synapse class in LFPy
         s = LFPy.Synapse(cell, **synparams)
         s.set_spike_times(spiketimes)
@@ -234,7 +234,7 @@ synapseParameters_AMPA = {
     'record_current' : True,    #record synaptic currents
 }
 # Excitatory synapse parameters
-synapseParameters_NMDA = {         
+synapseParameters_NMDA = {
     'e' : 0,
     'syntype' : 'Exp2Syn',
     'tau1' : 10.,
@@ -243,7 +243,7 @@ synapseParameters_NMDA = {
     'record_current' : True,
 }
 # Inhibitory synapse parameters
-synapseParameters_GABA_A = {         
+synapseParameters_GABA_A = {
     'e' : -80,
     'syntype' : 'Exp2Syn',
     'tau1' : 1.,
@@ -367,3 +367,6 @@ ecog_electrode.LFP -= np.average(ecog_electrode.LFP, axis=1)[:, None]
 fig = plot_LFP_and_ECoG(cell, electrode, electrode_MoI, ecog_electrode)
 fig.savefig('example_ECoG.pdf', dpi=300)
 plt.show()
+
+# clean up
+cell.__del__()
