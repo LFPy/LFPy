@@ -21,7 +21,7 @@ import sys
 import posixpath
 from warnings import warn
 import pickle
-from .run_simulation import _run_simulation, _run_simulation_with_electrode
+from .run_simulation import _run_simulation_with_electrode
 from .run_simulation import _collect_geometry_neuron
 from .alias_method import alias_method
 
@@ -1068,7 +1068,7 @@ class Cell(object):
             if not rec_imem and self.verbose:
                 print("rec_imem = %s, membrane currents will not be recorded!"
                                   % str(rec_imem))
-            _run_simulation(self, cvode, variable_dt, atol, rtol)
+            self._run_simulation(cvode, variable_dt, atol, rtol)
 
         else:
             #allow using both electrode and additional coefficients:
@@ -1106,6 +1106,43 @@ class Cell(object):
         if hasattr(self, 'netstimlist'):
             self.netstimlist = None
             del self.netstimlist
+
+    def _run_simulation(self, cvode, variable_dt=False, atol=0.001, rtol=0.):
+        """
+        Running the actual simulation in NEURON, simulations in NEURON
+        is now interruptable.
+        """
+        neuron.h.dt = self.dt
+
+        # variable dt method
+        if variable_dt:
+            cvode.active(1)
+            cvode.atol(atol)
+            cvode.rtol(rtol)
+        else:
+            cvode.active(0)
+
+        # re-initialize state
+        neuron.h.finitialize(self.v_init)
+
+        # initialize current- and record
+        if cvode.active():
+            cvode.re_init()
+        else:
+            neuron.h.fcurrent()
+        neuron.h.frecord_init()
+
+        # Starting simulation at t != 0
+        neuron.h.t = self.tstart
+
+        self._loadspikes()
+
+        # advance simulation until tstop
+        neuron.run(self.tstop)
+
+        # for consistency with 'old' behaviour where tstop is included in tvec:
+        if neuron.h.t < self.tstop:
+            neuron.h.fadvance()
 
     def _collect_tvec(self):
         """
