@@ -21,57 +21,6 @@ import neuron
 from pathlib import Path
 
 
-def _run_simulation(cell, cvode, variable_dt=False, atol=0.001, rtol=0.):
-    '''
-    Running the actual simulation in NEURON, simulations in NEURON
-    are now interruptable.
-    '''
-    neuron.h.dt = cell.dt
-
-    # variable dt method
-    if variable_dt:
-        cvode.active(1)
-        cvode.atol(atol)
-        cvode.rtol(rtol)
-    else:
-        cvode.active(0)
-
-    # re-initialize state
-    neuron.h.finitialize(cell.v_init)
-
-    # initialize current- and record
-    if cvode.active():
-        cvode.re_init()
-    else:
-        neuron.h.fcurrent()
-    neuron.h.frecord_init()
-
-    # Starting simulation at tstart
-    neuron.h.t = cell.tstart
-
-    cell._loadspikes()
-
-    #print sim.time and realtime factor at intervals
-    counter = 0.
-    t0 = time()
-    ti = neuron.h.t
-    if cell.tstop >= 10000:
-        interval = 1000. / cell.dt
-    else:
-        interval = 100. / cell.dt
-
-    while neuron.h.t < cell.tstop:
-        neuron.h.fadvance()
-        counter += 1.
-        if counter % interval == 0:
-            rtfactor = (neuron.h.t - ti) * 1E-3 / (time() - t0)
-            if cell.verbose:
-                print('t = {:.0f}, realtime factor: {:.3f}'.format(neuron.h.t,
-                                                                   rtfactor))
-            t0 = time()
-            ti = neuron.h.t
-
-
 def _run_simulation_with_electrode(cell, cvode, electrode=None,
                                    variable_dt=False, atol=0.001, rtol=0.,
                                    to_memory=True, to_file=False,

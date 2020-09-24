@@ -17,11 +17,9 @@ GNU General Public License for more details.
 import os
 import posixpath
 import sys
-import pickle
-import numpy as np
 import neuron
-from LFPy import Cell, RecExtElectrode
-from LFPy.run_simulation import _run_simulation, _run_simulation_with_electrode
+from LFPy import Cell
+
 
 class TemplateCell(Cell):
 
@@ -150,7 +148,7 @@ class TemplateCell(Cell):
         Cell.__init__(self, **kwargs)
 
     def _load_geometry(self):
-        """Load the morphology-file in NEURON""" 
+        """Load the morphology-file in NEURON"""
         #the python cell object we are loading the morphology into:
         self.template = getattr(neuron.h, self.templatename)(self.templateargs)
 

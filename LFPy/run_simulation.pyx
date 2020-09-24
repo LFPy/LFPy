@@ -27,60 +27,6 @@ ctypedef np.float64_t DTYPE_t
 ctypedef Py_ssize_t   LTYPE_t
 
 
-def _run_simulation(cell, cvode, variable_dt=False, atol=0.001, rtol=0.):
-    """
-    Running the actual simulation in NEURON, simulations in NEURON
-    is now interruptable.
-    """
-    neuron.h.dt = cell.dt
-
-    # variable dt method
-    if variable_dt:
-        cvode.active(1)
-        cvode.atol(atol)
-        cvode.rtol(rtol)
-    else:
-        cvode.active(0)
-
-    #re-initialize state
-    neuron.h.finitialize(cell.v_init)
-
-    #initialize current- and record
-    if cvode.active():
-        cvode.re_init()
-    else:
-        neuron.h.fcurrent()
-    neuron.h.frecord_init()
-
-    #Starting simulation at t != 0
-    neuron.h.t = cell.tstart
-
-    cell._loadspikes()
-
-    #print sim.time at intervals
-    cdef int counter = 0
-    cdef double interval
-    cdef double tstop = cell.tstop
-    cdef double t0 = time()
-    cdef double ti = neuron.h.t
-    cdef double rtfactor
-    if tstop >= 10000:
-        interval = 1000. / cell.dt
-    else:
-        interval = 100. / cell.dt
-
-    while neuron.h.t < tstop:
-        neuron.h.fadvance()
-        counter += 1
-        if counter % interval == 0:
-            rtfactor = (neuron.h.t - ti)  * 1E-3 / (time() - t0 + 1E-9)
-            if cell.verbose:
-                print('t = {:.0f}, realtime factor: {:.3f}'.format(neuron.h.t,
-                                                                   rtfactor))
-            t0 = time()
-            ti = neuron.h.t
-
-
 def _run_simulation_with_electrode(cell, cvode, electrode=None,
                                    variable_dt=False, atol=0.001, rtol=0.,
                                    to_memory=True, to_file=False,
