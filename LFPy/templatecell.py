@@ -17,11 +17,9 @@ GNU General Public License for more details.
 import os
 import posixpath
 import sys
-import pickle
-import numpy as np
 import neuron
-from LFPy import Cell, RecExtElectrode
-from LFPy.run_simulation import _run_simulation_with_electrode
+from LFPy import Cell
+
 
 class TemplateCell(Cell):
 
