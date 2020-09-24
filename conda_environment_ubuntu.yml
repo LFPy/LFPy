@@ -14,4 +14,6 @@ dependencies:
   - pytest
   - mpi4py
   - MEAutility>=1.4.2
-
+  - pip
+  - pip:
+    - '--editable=git+https://github.com/LFPy/LFPykit.git@master#egg=LFPykit'
