@@ -142,7 +142,9 @@ def _run_simulation_with_electrode(cell, cvode, electrode=None,
     # create a 2D array representation of segment midpoints for dot product
     # with transmembrane currents when computing dipole moment
     if rec_current_dipole_moment:
-        midpoints = np.c_[cell.xmid, cell.ymid, cell.zmid]
+        midpoints = np.c_[cell.x.mean(axis=-1),
+                          cell.y.mean(axis=-1),
+                          cell.z.mean(axis=-1)]
 
     timesteps = []
     #run fadvance until time limit, and calculate LFPs for each timestep
@@ -240,12 +242,9 @@ def _run_simulation_with_electrode(cell, cvode, electrode=None,
 def _collect_geometry_neuron(cell):
     '''Loop over allseclist to determine area, diam, xyz-start- and
     endpoints, embed geometry to cell object'''
-
-
     areavec = np.zeros(cell.totnsegs)
     diamvec = np.zeros(cell.totnsegs)
     lengthvec = np.zeros(cell.totnsegs)
-
     xstartvec = np.zeros(cell.totnsegs)
     xendvec = np.zeros(cell.totnsegs)
     ystartvec = np.zeros(cell.totnsegs)
@@ -302,15 +301,11 @@ def _collect_geometry_neuron(cell):
 
                 counter += 1
 
-    #set cell attributes
-    cell.xstart = xstartvec
-    cell.ystart = ystartvec
-    cell.zstart = zstartvec
-
-    cell.xend = xendvec
-    cell.yend = yendvec
-    cell.zend = zendvec
+    # set cell attributes
+    cell.x = np.c_[xstartvec, xendvec]
+    cell.y = np.c_[ystartvec, yendvec]
+    cell.z = np.c_[zstartvec, zendvec]
 
     cell.area = areavec
-    cell.diam = diamvec
+    cell.d = diamvec
     cell.length = lengthvec

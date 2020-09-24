@@ -20,7 +20,8 @@ import warnings
 import numpy as np
 import MEAutility as mu
 from copy import deepcopy
-from . import lfpcalc, tools
+from lfpykit import lfpcalc
+from . import tools
 
 
 class RecExtElectrode(object):
@@ -364,8 +365,8 @@ class RecExtElectrode(object):
         """
         self.cell = cell
         if self.cell is not None:
-            self.r_limit = self.cell.diam/2
-            self.mapping = np.zeros((self.x.size, len(cell.xmid)))
+            self.r_limit = self.cell.d / 2
+            self.mapping = np.zeros((self.x.size, len(cell.x.mean(axis=-1))))
 
 
     def _test_imem_sum(self, tolerance=1E-8):

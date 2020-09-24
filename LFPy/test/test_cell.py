@@ -215,8 +215,9 @@ class testCell(unittest.TestCase):
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
                                                   'ball_and_sticks.hoc' ))
         np.testing.assert_allclose(cell.somapos,
-                                   [cell.xmid[0], cell.ymid[0], cell.zmid[0]])
-
+                                   [cell.x[0].mean(axis=-1),
+                                    cell.y[0].mean(axis=-1),
+                                    cell.z[0].mean(axis=-1)])
 
     def test_cell_set_pos_06(self):
         '''test LFPy.Cell.set_pos'''
@@ -224,30 +225,31 @@ class testCell(unittest.TestCase):
                                                   'ball_and_sticks.hoc' ),
                          pt3d=True)
         np.testing.assert_allclose(cell.somapos,
-                                   [cell.xmid[0], cell.ymid[0], cell.zmid[0]])
-
+                                   [cell.x[0].mean(axis=-1),
+                                    cell.y[0].mean(axis=-1),
+                                    cell.z[0].mean(axis=-1)])
 
     def test_cell_set_rotation_00(self):
         '''test LFPy.Cell.set_rotation()'''
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
                                                   'ball_and_sticks.hoc' ))
 
-        ystarts = cell.ystart.copy()
-        ymids = cell.ymid.copy()
-        yends = cell.yend.copy()
-        zstarts = cell.zstart.copy()
-        zmids = cell.zmid.copy()
-        zends = cell.zend.copy()
+        ystarts = cell.y[:, 0].copy()
+        ymids = cell.y.mean(axis=-1).copy()
+        yends = cell.y[:, -1].copy()
+        zstarts = cell.z[:, 0].copy()
+        zmids = cell.z.mean(axis=-1).copy()
+        zends = cell.z[:, -1].copy()
         # test rotation 180 deg around x-axis
         cell.set_rotation(x=np.pi)
         # assert that y- and z-coordinates are inverted, using absolute
         # tolerances
-        np.testing.assert_allclose(cell.ystart, -ystarts, atol=1e-07)
-        np.testing.assert_allclose(cell.ymid, -ymids, atol=1e-07)
-        np.testing.assert_allclose(cell.yend, -yends, atol=1e-07)
-        np.testing.assert_allclose(cell.zstart, -zstarts, atol=1e-07)
-        np.testing.assert_allclose(cell.zmid, -zmids, atol=1e-07)
-        np.testing.assert_allclose(cell.zend, -zends, atol=1e-07)
+        np.testing.assert_allclose(cell.y[:, 0], -ystarts, atol=1e-07)
+        np.testing.assert_allclose(cell.y.mean(axis=-1), -ymids, atol=1e-07)
+        np.testing.assert_allclose(cell.y[:, -1], -yends, atol=1e-07)
+        np.testing.assert_allclose(cell.z[:, 0], -zstarts, atol=1e-07)
+        np.testing.assert_allclose(cell.z.mean(axis=-1), -zmids, atol=1e-07)
+        np.testing.assert_allclose(cell.z[:, -1], -zends, atol=1e-07)
 
 
     def test_cell_set_rotation_01(self):
@@ -255,44 +257,44 @@ class testCell(unittest.TestCase):
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
                                                   'ball_and_sticks.hoc' ))
 
-        xstarts = cell.xstart.copy()
-        xmids = cell.xmid.copy()
-        xends = cell.xend.copy()
-        zstarts = cell.zstart.copy()
-        zmids = cell.zmid.copy()
-        zends = cell.zend.copy()
+        xstarts = cell.x[:, 0].copy()
+        xmids = cell.x.mean(axis=-1).copy()
+        xends = cell.x[:, -1].copy()
+        zstarts = cell.z[:, 0].copy()
+        zmids = cell.z.mean(axis=-1).copy()
+        zends = cell.z[:, -1].copy()
         # test rotation 180 deg around y-axis
         cell.set_rotation(y=np.pi)
         # assert that y- and z-coordinates are inverted, using absolute
         # tolerances
-        np.testing.assert_allclose(cell.xstart, -xstarts, atol=1e-07)
-        np.testing.assert_allclose(cell.xmid, -xmids, atol=1e-07)
-        np.testing.assert_allclose(cell.xend, -xends, atol=1e-07)
-        np.testing.assert_allclose(cell.zstart, -zstarts, atol=1e-07)
-        np.testing.assert_allclose(cell.zmid, -zmids, atol=1e-07)
-        np.testing.assert_allclose(cell.zend, -zends, atol=1e-07)
+        np.testing.assert_allclose(cell.x[:, 0], -xstarts, atol=1e-07)
+        np.testing.assert_allclose(cell.x.mean(axis=-1), -xmids, atol=1e-07)
+        np.testing.assert_allclose(cell.x[:, -1], -xends, atol=1e-07)
+        np.testing.assert_allclose(cell.z[:, 0], -zstarts, atol=1e-07)
+        np.testing.assert_allclose(cell.z.mean(axis=-1), -zmids, atol=1e-07)
+        np.testing.assert_allclose(cell.z[:, -1], -zends, atol=1e-07)
 
 
     def test_cell_set_rotation_02(self):
         '''test LFPy.Cell.set_rotation()'''
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
                                                   'ball_and_sticks.hoc' ))
-        xstarts = cell.xstart.copy()
-        xmids = cell.xmid.copy()
-        xends = cell.xend.copy()
-        ystarts = cell.ystart.copy()
-        ymids = cell.ymid.copy()
-        yends = cell.yend.copy()
+        xstarts = cell.x[:, 0].copy()
+        xmids = cell.x.mean(axis=-1).copy()
+        xends = cell.x[:, -1].copy()
+        ystarts = cell.y[:, 0].copy()
+        ymids = cell.y.mean(axis=-1).copy()
+        yends = cell.y[:, -1].copy()
         # test rotation 180 deg around z-axis
         cell.set_rotation(z=np.pi)
         # assert that y- and z-coordinates are inverted, using absolute
         # tolerances
-        np.testing.assert_allclose(cell.xstart, -xstarts, atol=1e-07)
-        np.testing.assert_allclose(cell.xmid, -xmids, atol=1e-07)
-        np.testing.assert_allclose(cell.xend, -xends, atol=1e-07)
-        np.testing.assert_allclose(cell.ystart, -ystarts, atol=1e-07)
-        np.testing.assert_allclose(cell.ymid, -ymids, atol=1e-07)
-        np.testing.assert_allclose(cell.yend, -yends, atol=1e-07)
+        np.testing.assert_allclose(cell.x[:, 0], -xstarts, atol=1e-07)
+        np.testing.assert_allclose(cell.x.mean(axis=-1), -xmids, atol=1e-07)
+        np.testing.assert_allclose(cell.x[:, -1], -xends, atol=1e-07)
+        np.testing.assert_allclose(cell.y[:, 0], -ystarts, atol=1e-07)
+        np.testing.assert_allclose(cell.y.mean(axis=-1), -ymids, atol=1e-07)
+        np.testing.assert_allclose(cell.y[:, -1], -yends, atol=1e-07)
 
     def test_cell_set_rotation_03(self):
         '''test LFPy.Cell.set_rotation()'''
@@ -300,22 +302,22 @@ class testCell(unittest.TestCase):
                                                   'ball_and_sticks.hoc' ),
                          pt3d=True)
 
-        ystarts = cell.ystart.copy()
-        ymids = cell.ymid.copy()
-        yends = cell.yend.copy()
-        zstarts = cell.zstart.copy()
-        zmids = cell.zmid.copy()
-        zends = cell.zend.copy()
+        ystarts = cell.y[:, 0].copy()
+        ymids = cell.y.mean(axis=-1).copy()
+        yends = cell.y[:, -1].copy()
+        zstarts = cell.z[:, 0].copy()
+        zmids = cell.z.mean(axis=-1).copy()
+        zends = cell.z[:, -1].copy()
         # test rotation 180 deg around x-axis
         cell.set_rotation(x=np.pi)
         # assert that y- and z-coordinates are inverted, using absolute
         # tolerances
-        np.testing.assert_allclose(cell.ystart, -ystarts, atol=1e-07)
-        np.testing.assert_allclose(cell.ymid, -ymids, atol=1e-07)
-        np.testing.assert_allclose(cell.yend, -yends, atol=1e-07)
-        np.testing.assert_allclose(cell.zstart, -zstarts, atol=1e-07)
-        np.testing.assert_allclose(cell.zmid, -zmids, atol=1e-07)
-        np.testing.assert_allclose(cell.zend, -zends, atol=1e-07)
+        np.testing.assert_allclose(cell.y[:, 0], -ystarts, atol=1e-07)
+        np.testing.assert_allclose(cell.y.mean(axis=-1), -ymids, atol=1e-07)
+        np.testing.assert_allclose(cell.y[:, -1], -yends, atol=1e-07)
+        np.testing.assert_allclose(cell.z[:, 0], -zstarts, atol=1e-07)
+        np.testing.assert_allclose(cell.z.mean(axis=-1), -zmids, atol=1e-07)
+        np.testing.assert_allclose(cell.z[:, -1], -zends, atol=1e-07)
 
 
     def test_cell_set_rotation_04(self):
@@ -324,22 +326,22 @@ class testCell(unittest.TestCase):
                                                   'ball_and_sticks.hoc' ),
                          pt3d=True)
 
-        xstarts = cell.xstart.copy()
-        xmids = cell.xmid.copy()
-        xends = cell.xend.copy()
-        zstarts = cell.zstart.copy()
-        zmids = cell.zmid.copy()
-        zends = cell.zend.copy()
+        xstarts = cell.x[:, 0].copy()
+        xmids = cell.x.mean(axis=-1).copy()
+        xends = cell.x[:, -1].copy()
+        zstarts = cell.z[:, 0].copy()
+        zmids = cell.z.mean(axis=-1).copy()
+        zends = cell.z[:, -1].copy()
         # test rotation 180 deg around y-axis
         cell.set_rotation(y=np.pi)
         # assert that y- and z-coordinates are inverted, using absolute
         # tolerances
-        np.testing.assert_allclose(cell.xstart, -xstarts, atol=1e-07)
-        np.testing.assert_allclose(cell.xmid, -xmids, atol=1e-07)
-        np.testing.assert_allclose(cell.xend, -xends, atol=1e-07)
-        np.testing.assert_allclose(cell.zstart, -zstarts, atol=1e-07)
-        np.testing.assert_allclose(cell.zmid, -zmids, atol=1e-07)
-        np.testing.assert_allclose(cell.zend, -zends, atol=1e-07)
+        np.testing.assert_allclose(cell.x[:, 0], -xstarts, atol=1e-07)
+        np.testing.assert_allclose(cell.x.mean(axis=-1), -xmids, atol=1e-07)
+        np.testing.assert_allclose(cell.x[:, -1], -xends, atol=1e-07)
+        np.testing.assert_allclose(cell.z[:, 0], -zstarts, atol=1e-07)
+        np.testing.assert_allclose(cell.z.mean(axis=-1), -zmids, atol=1e-07)
+        np.testing.assert_allclose(cell.z[:, -1], -zends, atol=1e-07)
 
 
     def test_cell_set_rotation_05(self):
@@ -348,136 +350,136 @@ class testCell(unittest.TestCase):
                                                   'ball_and_sticks.hoc' ),
                          pt3d=True)
 
-        xstarts = cell.xstart.copy()
-        xmids = cell.xmid.copy()
-        xends = cell.xend.copy()
-        ystarts = cell.ystart.copy()
-        ymids = cell.ymid.copy()
-        yends = cell.yend.copy()
+        xstarts = cell.x[:, 0].copy()
+        xmids = cell.x.mean(axis=-1).copy()
+        xends = cell.x[:, -1].copy()
+        ystarts = cell.y[:, 0].copy()
+        ymids = cell.y.mean(axis=-1).copy()
+        yends = cell.y[:, -1].copy()
         # test rotation 180 deg around z-axis
         cell.set_rotation(z=np.pi)
         # assert that y- and z-coordinates are inverted, using absolute
         # tolerances
-        np.testing.assert_allclose(cell.xstart, -xstarts, atol=1e-07)
-        np.testing.assert_allclose(cell.xmid, -xmids, atol=1e-07)
-        np.testing.assert_allclose(cell.xend, -xends, atol=1e-07)
-        np.testing.assert_allclose(cell.ystart, -ystarts, atol=1e-07)
-        np.testing.assert_allclose(cell.ymid, -ymids, atol=1e-07)
-        np.testing.assert_allclose(cell.yend, -yends, atol=1e-07)
+        np.testing.assert_allclose(cell.x[:, 0], -xstarts, atol=1e-07)
+        np.testing.assert_allclose(cell.x.mean(axis=-1), -xmids, atol=1e-07)
+        np.testing.assert_allclose(cell.x[:, -1], -xends, atol=1e-07)
+        np.testing.assert_allclose(cell.y[:, 0], -ystarts, atol=1e-07)
+        np.testing.assert_allclose(cell.y.mean(axis=-1), -ymids, atol=1e-07)
+        np.testing.assert_allclose(cell.y[:, -1], -yends, atol=1e-07)
 
     def test_cell_set_rotation_06(self):
         '''test LFPy.Cell.set_rotation()'''
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test', 'stick.hoc'))
 
-        xstarts = cell.xstart.copy()
-        xmids = cell.xmid.copy()
-        xends = cell.xend.copy()
-        ystarts = cell.ystart.copy()
-        ymids = cell.ymid.copy()
-        yends = cell.yend.copy()
-        zstarts = cell.zstart.copy()
-        zmids = cell.zmid.copy()
-        zends = cell.zend.copy()
+        xstarts = cell.x[:, 0].copy()
+        xmids = cell.x.mean(axis=-1).copy()
+        xends = cell.x[:, -1].copy()
+        ystarts = cell.y[:, 0].copy()
+        ymids = cell.y.mean(axis=-1).copy()
+        yends = cell.y[:, -1].copy()
+        zstarts = cell.z[:, 0].copy()
+        zmids = cell.z.mean(axis=-1).copy()
+        zends = cell.z[:, -1].copy()
         # test rotation: 90 deg around x-axis, 90 deg around y-axis, 90 deg around z-axis
         cell.set_rotation(x=np.pi / 2., y=np.pi, z=np.pi / 4.)
         # revert rotation: -90 deg around x-axis, -90 deg around y-axis, -90 deg around z-axis, rotation_order='zyx'
         cell.set_rotation(x=-np.pi / 2., y=-np.pi, z=-np.pi / 4., rotation_order='zyx')
         # assert that x-, y- and z-coordinates are same as beginning, using absolute
         # tolerances
-        np.testing.assert_allclose(cell.xstart, xstarts, atol=1e-07)
-        np.testing.assert_allclose(cell.xmid, xmids, atol=1e-07)
-        np.testing.assert_allclose(cell.xend, xends, atol=1e-07)
-        np.testing.assert_allclose(cell.ystart, ystarts, atol=1e-07)
-        np.testing.assert_allclose(cell.ymid, ymids, atol=1e-07)
-        np.testing.assert_allclose(cell.yend, yends, atol=1e-07)
-        np.testing.assert_allclose(cell.zstart, zstarts, atol=1e-07)
-        np.testing.assert_allclose(cell.zmid, zmids, atol=1e-07)
-        np.testing.assert_allclose(cell.zend, zends, atol=1e-07)
+        np.testing.assert_allclose(cell.x[:, 0], xstarts, atol=1e-07)
+        np.testing.assert_allclose(cell.x.mean(axis=-1), xmids, atol=1e-07)
+        np.testing.assert_allclose(cell.x[:, -1], xends, atol=1e-07)
+        np.testing.assert_allclose(cell.y[:, 0], ystarts, atol=1e-07)
+        np.testing.assert_allclose(cell.y.mean(axis=-1), ymids, atol=1e-07)
+        np.testing.assert_allclose(cell.y[:, -1], yends, atol=1e-07)
+        np.testing.assert_allclose(cell.z[:, 0], zstarts, atol=1e-07)
+        np.testing.assert_allclose(cell.z.mean(axis=-1), zmids, atol=1e-07)
+        np.testing.assert_allclose(cell.z[:, -1], zends, atol=1e-07)
 
     def test_cell_chiral_morphology_00(self):
         '''test LFPy.Cell.chiral_morphology()'''
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
                                                   'ball_and_sticks.hoc' ))
 
-        xstarts = cell.xstart.copy()
-        xmids = cell.xmid.copy()
-        xends = cell.xend.copy()
-        ystarts = cell.ystart.copy()
-        ymids = cell.ymid.copy()
-        yends = cell.yend.copy()
-        zstarts = cell.zstart.copy()
-        zmids = cell.zmid.copy()
-        zends = cell.zend.copy()
+        xstarts = cell.x[:, 0].copy()
+        xmids = cell.x.mean(axis=-1).copy()
+        xends = cell.x[:, -1].copy()
+        ystarts = cell.y[:, 0].copy()
+        ymids = cell.y.mean(axis=-1).copy()
+        yends = cell.y[:, -1].copy()
+        zstarts = cell.z[:, 0].copy()
+        zmids = cell.z.mean(axis=-1).copy()
+        zends = cell.z[:, -1].copy()
         # test rotation 180 deg around x-axis
         cell.chiral_morphology(axis='x')
         # assert that y- and z-coordinates are inverted, using absolute
         # tolerances
-        np.testing.assert_allclose(cell.xstart, -xstarts, atol=1e-07)
-        np.testing.assert_allclose(cell.xmid, -xmids, atol=1e-07)
-        np.testing.assert_allclose(cell.xend, -xends, atol=1e-07)
-        np.testing.assert_allclose(cell.ystart, ystarts, atol=1e-07)
-        np.testing.assert_allclose(cell.ymid, ymids, atol=1e-07)
-        np.testing.assert_allclose(cell.yend, yends, atol=1e-07)
-        np.testing.assert_allclose(cell.zstart, zstarts, atol=1e-07)
-        np.testing.assert_allclose(cell.zmid, zmids, atol=1e-07)
-        np.testing.assert_allclose(cell.zend, zends, atol=1e-07)
+        np.testing.assert_allclose(cell.x[:, 0], -xstarts, atol=1e-07)
+        np.testing.assert_allclose(cell.x.mean(axis=-1), -xmids, atol=1e-07)
+        np.testing.assert_allclose(cell.x[:, -1], -xends, atol=1e-07)
+        np.testing.assert_allclose(cell.y[:, 0], ystarts, atol=1e-07)
+        np.testing.assert_allclose(cell.y.mean(axis=-1), ymids, atol=1e-07)
+        np.testing.assert_allclose(cell.y[:, -1], yends, atol=1e-07)
+        np.testing.assert_allclose(cell.z[:, 0], zstarts, atol=1e-07)
+        np.testing.assert_allclose(cell.z.mean(axis=-1), zmids, atol=1e-07)
+        np.testing.assert_allclose(cell.z[:, -1], zends, atol=1e-07)
 
 
     def test_cell_chiral_morphology_01(self):
         '''test LFPy.Cell.chiral_morphology()'''
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
-                                                  'ball_and_sticks.hoc' ))
+                                                 'ball_and_sticks.hoc' ))
 
-        xstarts = cell.xstart.copy()
-        xmids = cell.xmid.copy()
-        xends = cell.xend.copy()
-        ystarts = cell.ystart.copy()
-        ymids = cell.ymid.copy()
-        yends = cell.yend.copy()
-        zstarts = cell.zstart.copy()
-        zmids = cell.zmid.copy()
-        zends = cell.zend.copy()
+        xstarts = cell.x[:, 0].copy()
+        xmids = cell.x.mean(axis=-1).copy()
+        xends = cell.x[:, -1].copy()
+        ystarts = cell.y[:, 0].copy()
+        ymids = cell.y.mean(axis=-1).copy()
+        yends = cell.y[:, -1].copy()
+        zstarts = cell.z[:, 0].copy()
+        zmids = cell.z.mean(axis=-1).copy()
+        zends = cell.z[:, -1]
         # test rotation 180 deg around y-axis
         cell.chiral_morphology(axis='y')
         # assert that y- and z-coordinates are inverted, using absolute
         # tolerances
-        np.testing.assert_allclose(cell.xstart, xstarts, atol=1e-07)
-        np.testing.assert_allclose(cell.xmid, xmids, atol=1e-07)
-        np.testing.assert_allclose(cell.xend, xends, atol=1e-07)
-        np.testing.assert_allclose(cell.ystart, -ystarts, atol=1e-07)
-        np.testing.assert_allclose(cell.ymid, -ymids, atol=1e-07)
-        np.testing.assert_allclose(cell.yend, -yends, atol=1e-07)
-        np.testing.assert_allclose(cell.zstart, zstarts, atol=1e-07)
-        np.testing.assert_allclose(cell.zmid, zmids, atol=1e-07)
-        np.testing.assert_allclose(cell.zend, zends, atol=1e-07)
+        np.testing.assert_allclose(cell.x[:, 0], xstarts, atol=1e-07)
+        np.testing.assert_allclose(cell.x.mean(axis=-1), xmids, atol=1e-07)
+        np.testing.assert_allclose(cell.x[:, -1], xends, atol=1e-07)
+        np.testing.assert_allclose(cell.y[:, 0], -ystarts, atol=1e-07)
+        np.testing.assert_allclose(cell.y.mean(axis=-1), -ymids, atol=1e-07)
+        np.testing.assert_allclose(cell.y[:, -1], -yends, atol=1e-07)
+        np.testing.assert_allclose(cell.z[:, 0], zstarts, atol=1e-07)
+        np.testing.assert_allclose(cell.z.mean(axis=-1), zmids, atol=1e-07)
+        np.testing.assert_allclose(cell.z[:, -1], zends, atol=1e-07)
 
     def test_cell_chiral_morphology_02(self):
         '''test LFPy.Cell.chiral_morphology()'''
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
                                                   'ball_and_sticks.hoc' ))
 
-        xstarts = cell.xstart.copy()
-        xmids = cell.xmid.copy()
-        xends = cell.xend.copy()
-        ystarts = cell.ystart.copy()
-        ymids = cell.ymid.copy()
-        yends = cell.yend.copy()
-        zstarts = cell.zstart.copy()
-        zmids = cell.zmid.copy()
-        zends = cell.zend.copy()
+        xstarts = cell.x[:, 0].copy()
+        xmids = cell.x.mean(axis=-1).copy()
+        xends = cell.x[:, -1].copy()
+        ystarts = cell.y[:, 0].copy()
+        ymids = cell.y.mean(axis=-1).copy()
+        yends = cell.y[:, -1].copy()
+        zstarts = cell.z[:, 0].copy()
+        zmids = cell.z.mean(axis=-1).copy()
+        zends = cell.z[:, -1].copy()
         # test rotation 180 deg around z-axis
         cell.chiral_morphology(axis='z')
         # assert that y- and z-coordinates are inverted, using absolute
         # tolerances
-        np.testing.assert_allclose(cell.xstart, xstarts, atol=1e-07)
-        np.testing.assert_allclose(cell.xmid, xmids, atol=1e-07)
-        np.testing.assert_allclose(cell.xend, xends, atol=1e-07)
-        np.testing.assert_allclose(cell.ystart, ystarts, atol=1e-07)
-        np.testing.assert_allclose(cell.ymid, ymids, atol=1e-07)
-        np.testing.assert_allclose(cell.yend, yends, atol=1e-07)
-        np.testing.assert_allclose(cell.zstart, -zstarts, atol=1e-07)
-        np.testing.assert_allclose(cell.zmid, -zmids, atol=1e-07)
-        np.testing.assert_allclose(cell.zend, -zends, atol=1e-07)
+        np.testing.assert_allclose(cell.x[:, 0], xstarts, atol=1e-07)
+        np.testing.assert_allclose(cell.x.mean(axis=-1), xmids, atol=1e-07)
+        np.testing.assert_allclose(cell.x[:, -1], xends, atol=1e-07)
+        np.testing.assert_allclose(cell.y[:, 0], ystarts, atol=1e-07)
+        np.testing.assert_allclose(cell.y.mean(axis=-1), ymids, atol=1e-07)
+        np.testing.assert_allclose(cell.y[:, -1], yends, atol=1e-07)
+        np.testing.assert_allclose(cell.z[:, 0], -zstarts, atol=1e-07)
+        np.testing.assert_allclose(cell.z.mean(axis=-1), -zmids, atol=1e-07)
+        np.testing.assert_allclose(cell.z[:, -1], -zends, atol=1e-07)
 
 
     def test_cell_get_rand_prob_area_norm_00(self):
@@ -513,9 +515,9 @@ class testCell(unittest.TestCase):
         vector = cell.get_intersegment_vector(idx0=idx0, idx1=idx1)
 
         self.assertListEqual(vector,
-                            [cell.xmid[idx1] - cell.xmid[idx0],
-                             cell.ymid[idx1] - cell.ymid[idx0],
-                             cell.zmid[idx1] - cell.zmid[idx0]])
+                             [cell.x[idx1].mean(axis=-1) - cell.x[idx0].mean(axis=-1),
+                              cell.y[idx1].mean(axis=-1) - cell.y[idx0].mean(axis=-1),
+                              cell.z[idx1].mean(axis=-1) - cell.z[idx0].mean(axis=-1)])
 
 
     def test_cell_get_intersegment_distance_00(self):
@@ -1314,7 +1316,7 @@ class testCell(unittest.TestCase):
                 synapse = LFPy.StimIntElectrode(stick, idx=idx,
                                        **stimParams)
                 stick.simulate(rec_imem=True, rec_current_dipole_moment=True)
-                p = np.dot(stick.imem.T, np.c_[stick.xmid, stick.ymid, stick.zmid])
+                p = np.dot(stick.imem.T, np.c_[stick.x.mean(axis=-1), stick.y.mean(axis=-1), stick.z.mean(axis=-1)])
                 np.testing.assert_allclose(p, stick.current_dipole_moment)
 
                 stick.__del__()
@@ -1352,7 +1354,7 @@ class testCell(unittest.TestCase):
                 synapse = LFPy.StimIntElectrode(stick, idx=idx,
                                        **stimParams)
                 stick.simulate(rec_imem=True, rec_current_dipole_moment=True)
-                p = np.dot(stick.imem.T, np.c_[stick.xmid, stick.ymid, stick.zmid])
+                p = np.dot(stick.imem.T, np.c_[stick.x.mean(axis=-1), stick.y.mean(axis=-1), stick.z.mean(axis=-1)])
                 np.testing.assert_allclose(p, stick.current_dipole_moment)
 
                 stick.__del__()
@@ -1387,7 +1389,7 @@ class testCell(unittest.TestCase):
                                        **stimParams)
                 synapse.set_spike_times(np.array([10., 20., 30., 40., 50.]))
                 stick.simulate(rec_imem=True, rec_current_dipole_moment=True)
-                p = np.dot(stick.imem.T, np.c_[stick.xmid, stick.ymid, stick.zmid])
+                p = np.dot(stick.imem.T, np.c_[stick.x.mean(axis=-1), stick.y.mean(axis=-1), stick.z.mean(axis=-1)])
                 np.testing.assert_allclose(p, stick.current_dipole_moment)
 
                 stick.__del__()
@@ -1861,12 +1863,12 @@ class testCell(unittest.TestCase):
                                                       'test',
                                                       'ball_and_sticks.hoc' ))
                     cell1.distort_geometry(factor=factor, nu=nu, axis=axis)
-                    for attr in ['start', 'mid', 'end']:
-                        for ax in 'xyz'.replace(axis, ''):
-                            np.testing.assert_allclose(getattr(cell0, ax+attr)*(1+factor*nu),
-                                                       getattr(cell1, ax+attr))
-                        np.testing.assert_allclose(getattr(cell0, axis+attr)*(1-factor),
-                                                   getattr(cell1, axis+attr))
+                    # for attr in ['start', 'mid', 'end']:
+                    for ax in 'xyz'.replace(axis, ''):
+                        np.testing.assert_allclose(getattr(cell0, ax)*(1+factor*nu),
+                                                   getattr(cell1, ax))
+                    np.testing.assert_allclose(getattr(cell0, axis)*(1-factor),
+                                               getattr(cell1, axis))
 
 
 ######## Functions used by tests: ##########################################

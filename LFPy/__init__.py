@@ -50,7 +50,7 @@ from .templatecell import TemplateCell
 from .network import NetworkCell, NetworkPopulation, Network
 from .test import _test as run_tests
 from .eegmegcalc import OneSphereVolumeConductor, FourSphereVolumeConductor, InfiniteVolumeConductor, get_current_dipole_moment, MEG
-from . import lfpcalc
+from lfpykit import lfpcalc
 from . import tools
 from . import inputgenerators
 from . import run_simulation

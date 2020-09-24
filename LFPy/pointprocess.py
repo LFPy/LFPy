@@ -17,6 +17,7 @@ GNU General Public License for more details.
 
 import numpy as np
 
+
 class PointProcess(object):
     """
     Superclass on top of Synapse, StimIntElectrode, just to import and set
@@ -52,9 +53,9 @@ class PointProcess(object):
         """
         Extract coordinates of point-process
         """
-        self.x = cell.xmid[self.idx]
-        self.y = cell.ymid[self.idx]
-        self.z = cell.zmid[self.idx]
+        self.x = cell.x[self.idx].mean()
+        self.y = cell.y[self.idx].mean()
+        self.z = cell.z[self.idx].mean()
 
 
 class Synapse(PointProcess):

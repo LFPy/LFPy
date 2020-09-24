@@ -165,7 +165,9 @@ def _run_simulation_with_electrode(cell, cvode, electrode=None,
         if not cvode.active():
             current_dipole_moment = cell.current_dipole_moment.copy()
             cell.current_dipole_moment = np.array([[]])
-        midpoints = np.c_[cell.xmid, cell.ymid, cell.zmid]
+        midpoints = np.c_[cell.x.mean(axis=-1),
+                          cell.y.mean(axis=-1),
+                          cell.z.mean(axis=-1)]
 
     #run fadvance until time limit, and calculate LFPs for each timestep
     while neuron.h.t < tstop:
@@ -342,16 +344,11 @@ cpdef _collect_geometry_neuron(cell):
 
                 counter += 1
 
-
-    #set cell attributes
-    cell.xstart = xstartvec
-    cell.ystart = ystartvec
-    cell.zstart = zstartvec
-
-    cell.xend = xendvec
-    cell.yend = yendvec
-    cell.zend = zendvec
+    # set cell attributes
+    cell.x = np.c_[xstartvec, xendvec]
+    cell.y = np.c_[ystartvec, yendvec]
+    cell.z = np.c_[zstartvec, zendvec]
 
     cell.area = areavec
-    cell.diam = diamvec
+    cell.d = diamvec
     cell.length = lengthvec

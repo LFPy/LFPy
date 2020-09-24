@@ -664,53 +664,43 @@ class Cell(object):
 
     def _collect_geometry(self):
         """Collects x, y, z-coordinates from NEURON"""
-        #None-type some attributes if they do not exis:
-        if not hasattr(self, 'xstart'):
-            self.xstart = None
-            self.ystart = None
-            self.zstart = None
-            self.xend = None
-            self.yend = None
-            self.zend = None
+        # None-type some attributes if they do not exist:
+        if not hasattr(self, 'x'):
+            self.x = None
+            self.y = None
+            self.z = None
             self.area = None
-            self.diam = None
+            self.d = None
             self.length = None
 
         _collect_geometry_neuron(self)
-        self._calc_midpoints()
 
         self.somaidx = self.get_idx(section='soma')
 
         if self.somaidx.size > 1:
-            xmids = self.xmid[self.somaidx]
-            ymids = self.ymid[self.somaidx]
-            zmids = self.zmid[self.somaidx]
+            xmids = self.x[self.somaidx].mean(axis=-1)
+            ymids = self.y[self.somaidx].mean(axis=-1)
+            zmids = self.z[self.somaidx].mean(axis=-1)
             self.somapos = np.zeros(3)
             self.somapos[0] = xmids.mean()
             self.somapos[1] = ymids.mean()
             self.somapos[2] = zmids.mean()
         elif self.somaidx.size == 1:
             self.somapos = np.zeros(3)
-            self.somapos[0] = self.xmid[self.somaidx]
-            self.somapos[1] = self.ymid[self.somaidx]
-            self.somapos[2] = self.zmid[self.somaidx]
+            self.somapos[0] = self.x[self.somaidx].mean()
+            self.somapos[1] = self.y[self.somaidx].mean()
+            self.somapos[2] = self.z[self.somaidx].mean()
         elif self.somaidx.size == 0:
             if self.verbose:
                 print('There is no soma!')
                 print('using first segment as root point')
             self.somaidx = np.array([0])
             self.somapos = np.zeros(3)
-            self.somapos[0] = self.xmid[self.somaidx]
-            self.somapos[1] = self.ymid[self.somaidx]
-            self.somapos[2] = self.zmid[self.somaidx]
+            self.somapos[0] = self.x[self.somaidx].mean()
+            self.somapos[1] = self.y[self.somaidx].mean()
+            self.somapos[2] = self.z[self.somaidx].mean()
         else:
             raise Exception('Huh?!')
-
-    def _calc_midpoints(self):
-        """Calculate midpoints of each segment"""
-        self.xmid = .5*(self.xstart+self.xend).flatten()
-        self.ymid = .5*(self.ystart+self.yend).flatten()
-        self.zmid = .5*(self.zstart+self.zend).flatten()
 
     def get_idx(self, section='allsec', z_min=-np.inf, z_max=np.inf):
         """Returns compartment idx of segments from sections with names that match
@@ -749,7 +739,7 @@ class Cell(object):
                     print('%s did not match any section name' % str(section))
 
         idx = self._get_idx(seclist)
-        sel_z_idx = (self.zmid[idx] > z_min) & (self.zmid[idx] < z_max)
+        sel_z_idx = (self.z[idx].mean(axis=-1) > z_min) & (self.z[idx].mean(axis=-1) < z_max)
         return np.arange(self.totnsegs)[idx][sel_z_idx]
 
     def get_closest_idx(self, x=0., y=0., z=0., section='allsec'):
@@ -767,9 +757,9 @@ class Cell(object):
             String matching a section-name. Defaults to 'allsec'.
         """
         idx = self.get_idx(section)
-        dist = ((self.xmid[idx] - x)**2 +
-                (self.ymid[idx] - y)**2 +
-                (self.zmid[idx] - z)**2)
+        dist = ((self.x[idx].mean(axis=-1) - x)**2 +
+                (self.y[idx].mean(axis=-1) - y)**2 +
+                (self.z[idx].mean(axis=-1) - z)**2)
         return idx[np.argmin(dist)]
 
     def get_rand_idx_area_norm(self, section='allsec', nidx=1,
@@ -868,13 +858,13 @@ class Cell(object):
                     if type(f) is str and f in dir(scipy.stats):
                         f = getattr(scipy.stats, f)
                     df = f(**args)
-                    mod += df.pdf(x=self.zmid[poss_idx])*scl
+                    mod += df.pdf(x=self.z[poss_idx].mean(axis=-1))*scl
                 p *= mod
             else:
                 if type(fun) is str and fun in dir(scipy.stats):
                     fun = getattr(scipy.stats, fun)
                 df = fun(**funargs)
-                p *= df.pdf(x=self.zmid[poss_idx])
+                p *= df.pdf(x=self.z[poss_idx].mean(axis=-1))
             # normalize
             p /= p.sum()
             return alias_method(poss_idx, p, nidx)
@@ -934,7 +924,7 @@ class Cell(object):
 
         # extracellular stimulation
         if np.any([np.any(el.probe.currents != 0) for el in electrodes]):
-            cell_mid_points = np.array([self.xmid, self.ymid, self.zmid]).T
+            cell_mid_points = np.array([self.x.mean(axis=-1), self.y.mean(axis=-1), self.z.mean(axis=-1)]).T
             n_tsteps = int(self.tstop / self.dt + 1)
             t_cell = np.arange(n_tsteps) * self.dt
 
@@ -1510,15 +1500,14 @@ class Cell(object):
             self.somapos[1] = y
             self.somapos[2] = z
 
-            self.xstart += diffx
-            self.ystart += diffy
-            self.zstart += diffz
+            self.x[:, 0] += diffx
+            self.y[:, 0] += diffy
+            self.z[:, 0] += diffz
 
-            self.xend += diffx
-            self.yend += diffy
-            self.zend += diffz
+            self.x[:, -1] += diffx
+            self.y[:, -1] += diffy
+            self.z[:, -1] += diffz
 
-        self._calc_midpoints()
         self._update_synapse_positions()
 
     def cellpickler(self, filename, pickler=pickle.dump):
@@ -1665,32 +1654,19 @@ class Cell(object):
         if self.verbose:
             print('morphology mirrored across %s-axis' % axis)
 
-        #set the proper 3D positions
+        # set the proper 3D positions
         self._real_positions(rel_start, rel_end)
-
-    def _squeeze_me_macaroni(self):
-        """
-        Reducing the dimensions of the morphology matrices from 3D->1D
-        """
-        self.xstart = np.array(self.xstart).flatten()
-        self.xend = np.array(self.xend).flatten()
-
-        self.ystart = np.array(self.ystart).flatten()
-        self.yend = np.array(self.yend).flatten()
-
-        self.zstart = np.array(self.zstart).flatten()
-        self.zend = np.array(self.zend).flatten()
 
     def _rel_positions(self):
         """
         Morphology relative to soma position
         """
-        rel_start = np.array([self.xstart-self.somapos[0],
-                              self.ystart-self.somapos[1],
-                              self.zstart-self.somapos[2]]).T
-        rel_end = np.array([self.xend-self.somapos[0],
-                            self.yend-self.somapos[1],
-                            self.zend-self.somapos[2]]).T
+        rel_start = np.array([self.x[:, 0]-self.somapos[0],
+                              self.y[:, 0]-self.somapos[1],
+                              self.z[:, 0]-self.somapos[2]]).T
+        rel_end = np.array([self.x[:, -1]-self.somapos[0],
+                            self.y[:, -1]-self.somapos[1],
+                            self.z[:, -1]-self.somapos[2]]).T
 
         return rel_start, rel_end
 
@@ -1698,16 +1674,14 @@ class Cell(object):
         """
         Morphology coordinates relative to Origo
         """
-        self.xstart = rel_start[:, 0] + self.somapos[0]
-        self.ystart = rel_start[:, 1] + self.somapos[1]
-        self.zstart = rel_start[:, 2] + self.somapos[2]
+        self.x[:, 0] = rel_start[:, 0] + self.somapos[0]
+        self.y[:, 0] = rel_start[:, 1] + self.somapos[1]
+        self.z[:, 0] = rel_start[:, 2] + self.somapos[2]
 
-        self.xend = rel_end[:, 0] + self.somapos[0]
-        self.yend = rel_end[:, 1] + self.somapos[1]
-        self.zend = rel_end[:, 2] + self.somapos[2]
+        self.x[:, -1] = rel_end[:, 0] + self.somapos[0]
+        self.y[:, -1] = rel_end[:, 1] + self.somapos[1]
+        self.z[:, -1] = rel_end[:, 2] + self.somapos[2]
 
-        self._squeeze_me_macaroni()
-        self._calc_midpoints()
         self._update_synapse_positions()
 
     def get_rand_prob_area_norm(self, section='allsec',
@@ -1745,7 +1719,7 @@ class Cell(object):
     def get_intersegment_vector(self, idx0=0, idx1=0):
         """Return the distance between midpoints of two segments with index
         idx0 and idx1. The argument returned is a vector [x, y, z], where
-        x = self.xmid[idx1] - self.xmid[idx0] etc.
+        x = self.x[idx1].mean(axis=-1) - self.x[idx0].mean(axis=-1) etc.
         Parameters
         ----------
         idx0 : int
@@ -1755,9 +1729,9 @@ class Cell(object):
         try:
             if idx1 < 0 or idx0 < 0:
                 raise Exception('idx0 < 0 or idx1 < 0')
-            vector.append(self.xmid[idx1] - self.xmid[idx0])
-            vector.append(self.ymid[idx1] - self.ymid[idx0])
-            vector.append(self.zmid[idx1] - self.zmid[idx0])
+            vector.append(self.x[idx1].mean(axis=-1) - self.x[idx0].mean(axis=-1))
+            vector.append(self.y[idx1].mean(axis=-1) - self.y[idx0].mean(axis=-1))
+            vector.append(self.z[idx1].mean(axis=-1) - self.z[idx0].mean(axis=-1))
             return vector
         except:
             ERRMSG = 'idx0 and idx1 must be ints on [0, %i]' % self.totnsegs
@@ -2138,9 +2112,7 @@ class Cell(object):
              getattr(self, projection[0]+'end')[i]]
         z = [getattr(self, projection[1]+'start')[i],
              getattr(self, projection[1]+'end')[i]]
-        #x = [self.xstart[i], self.xend[i]]
-        #z = [self.zstart[i], self.zend[i]]
-        d = self.diam[i]
+        d = self.d[i]
 
         #calculate angles
         dx = np.diff(x)
@@ -2336,12 +2308,12 @@ class Cell(object):
         i_axial = []
         d_vectors = []
         pos_vectors = []
-        dseg = np.c_[self.xmid - self.xstart,
-                     self.ymid - self.ystart,
-                     self.zmid - self.zstart]
-        dpar = np.c_[self.xend - self.xmid,
-                     self.yend - self.ymid,
-                     self.zend - self.zmid]
+        dseg = np.c_[self.x.mean(axis=-1) - self.x[:, 0],
+                     self.y.mean(axis=-1) - self.y[:, 0],
+                     self.z.mean(axis=-1) - self.z[:, 0]]
+        dpar = np.c_[self.x[:, -1] - self.x.mean(axis=-1),
+                     self.y[:, -1] - self.y.mean(axis=-1),
+                     self.z[:, -1] - self.z.mean(axis=-1)]
 
         # children_dict = self.get_dict_of_children_idx()
         for sec in self.allseclist:
@@ -2404,12 +2376,12 @@ class Cell(object):
                     # if a seg is connected to soma, it is
                     # connected to the middle of soma,
                     # and dpar needs to be altered.
-                    par_dist = np.array([(self.xstart[seg_idx] -
-                                        self.xmid[parent_idx]),
-                                        (self.ystart[seg_idx] -
-                                        self.ymid[parent_idx]),
-                                        (self.zstart[seg_idx] -
-                                        self.zmid[parent_idx])])
+                    par_dist = np.array([(self.x[seg_idx, 0] -
+                                        self.x[parent_idx].mean(axis=-1)),
+                                        (self.y[seg_idx, 0] -
+                                        self.y[parent_idx].mean(axis=-1)),
+                                        (self.z[seg_idx, 0] -
+                                        self.z[parent_idx].mean(axis=-1))])
 
                 else:
                     par_dist = dpar[parent_idx]
@@ -2418,13 +2390,13 @@ class Cell(object):
                 i_axial.append(ipar)
                 i_axial.append(iseg)
 
-                pos_par = np.array([self.xstart[seg_idx],
-                                    self.ystart[seg_idx],
-                                    self.zstart[seg_idx]]) - 0.5*par_dist
+                pos_par = np.array([self.x[seg_idx, 0],
+                                    self.y[seg_idx, 0],
+                                    self.z[seg_idx, 0]]) - 0.5 * par_dist
 
-                pos_seg = np.array([self.xmid[seg_idx],
-                                    self.ymid[seg_idx],
-                                    self.zmid[seg_idx]]) - 0.5*dseg[seg_idx]
+                pos_seg = np.array([self.x[seg_idx].mean(axis=-1),
+                                    self.y[seg_idx].mean(axis=-1),
+                                    self.z[seg_idx].mean(axis=-1)]) - 0.5*dseg[seg_idx]
                 pos_vectors.append(pos_par)
                 pos_vectors.append(pos_seg)
 
@@ -2607,9 +2579,9 @@ class Cell(object):
             raise AssertionError('axis={} not "x", "y" or "z"'.format(axis))
 
         for pos, dir_ in zip(self.somapos, 'xyz'):
-            geometry = np.c_[getattr(self, dir_+'start'),
-                             getattr(self, dir_+'mid'),
-                             getattr(self, dir_+'end')]
+            geometry = np.c_[getattr(self, dir_)[:, 0],
+                             #getattr(self, dir_).mean(axis=-1),
+                             getattr(self, dir_)[:, -1]]
             if dir_ == axis:
                 geometry -= pos
                 geometry *= (1. - factor)
@@ -2619,14 +2591,15 @@ class Cell(object):
                 geometry *= (1. + factor*nu)
                 geometry += pos
 
-            setattr(self, dir_+'start', geometry[:, 0])
-            setattr(self, dir_+'mid', geometry[:, 1])
-            setattr(self, dir_+'end', geometry[:, 2])
+            setattr(self, dir_, geometry)
+            #setattr(self, dir_+'start', geometry[:, 0])
+            #setattr(self, dir_+'mid', geometry[:, 1])
+            #setattr(self, dir_+'end', geometry[:, 2])
 
         # recompute length of each segment
-        self.length = np.sqrt((self.xend - self.xstart)**2 +
-                              (self.yend - self.ystart)**2 +
-                              (self.zend - self.zstart)**2)
+        self.length = np.sqrt((self.x[:, -1] - self.x[:, 0])**2 +
+                              (self.y[:, -1] - self.y[:, 0])**2 +
+                              (self.z[:, -1] - self.z[:, 0])**2)
 
     def get_multi_current_dipole_moments(self, timepoints=None):
         '''
