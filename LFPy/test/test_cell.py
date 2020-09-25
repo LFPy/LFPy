@@ -1111,15 +1111,12 @@ class testCell(unittest.TestCase):
         }
 
         stick = LFPy.Cell(**stickParams)
-        stick.simulate(rec_vmem=True, rec_imem=True,
-                       rec_current_dipole_moment=True)
+        stick.simulate(rec_vmem=True, rec_imem=True)
         self.assertTrue(stick.tvec.size ==
                         stick.vmem.shape[1] ==
-                        stick.imem.shape[1] ==
-                        stick.current_dipole_moment.shape[0])
+                        stick.imem.shape[1])
         self.assertTrue(np.all(stick.vmem == stick.v_init))
         self.assertTrue(np.all(stick.imem == 0.))
-        self.assertTrue(np.all(stick.current_dipole_moment == 0.))
 
 
     def test_cell_simulate_recorder_01(self):
@@ -1137,15 +1134,12 @@ class testCell(unittest.TestCase):
             'lambda_f' : 100,
         }
         stick = LFPy.Cell(**stickParams)
-        stick.simulate(rec_vmem=True, rec_imem=True,
-                       rec_current_dipole_moment=True)
+        stick.simulate(rec_vmem=True, rec_imem=True)
         self.assertTrue(stick.tvec.size ==
                         stick.vmem.shape[1] ==
-                        stick.imem.shape[1] ==
-                        stick.current_dipole_moment.shape[0])
+                        stick.imem.shape[1])
         self.assertTrue(np.all(stick.vmem == stick.v_init))
         self.assertTrue(np.all(stick.imem == 0.))
-        self.assertTrue(np.all(stick.current_dipole_moment == 0.))
 
     def test_cell_simulate_recorder_02(self):
         stickParams = {
@@ -1162,15 +1156,12 @@ class testCell(unittest.TestCase):
             'lambda_f' : 100,
         }
         stick = LFPy.Cell(**stickParams)
-        stick.simulate(rec_vmem=True, rec_imem=True,
-                       rec_current_dipole_moment=True)
+        stick.simulate(rec_vmem=True, rec_imem=True)
         self.assertTrue(stick.tvec.size ==
                         stick.vmem.shape[1] ==
-                        stick.imem.shape[1] ==
-                        stick.current_dipole_moment.shape[0])
+                        stick.imem.shape[1])
         self.assertTrue(np.all(stick.vmem == stick.v_init))
         self.assertTrue(np.all(stick.imem == 0.))
-        self.assertTrue(np.all(stick.current_dipole_moment == 0.))
 
     def test_cell_simulate_recorder_03(self):
         stickParams = {
@@ -1188,15 +1179,12 @@ class testCell(unittest.TestCase):
         }
 
         stick = LFPy.Cell(**stickParams)
-        stick.simulate(rec_vmem=True, rec_imem=True,
-                       rec_current_dipole_moment=True)
+        stick.simulate(rec_vmem=True, rec_imem=True)
         self.assertTrue(stick.tvec.size ==
                         stick.vmem.shape[1] ==
-                        stick.imem.shape[1] ==
-                        stick.current_dipole_moment.shape[0])
+                        stick.imem.shape[1])
         self.assertTrue(np.all(stick.vmem == stick.v_init))
         self.assertTrue(np.all(stick.imem == 0.))
-        self.assertTrue(np.all(stick.current_dipole_moment == 0.))
 
 
     def test_cell_simulate_recorder_04(self):
@@ -1214,15 +1202,12 @@ class testCell(unittest.TestCase):
             'lambda_f' : 100,
         }
         stick = LFPy.Cell(**stickParams)
-        stick.simulate(rec_vmem=True, rec_imem=True,
-                       rec_current_dipole_moment=True)
+        stick.simulate(rec_vmem=True, rec_imem=True)
         self.assertTrue(stick.tvec.size ==
                         stick.vmem.shape[1] ==
-                        stick.imem.shape[1] ==
-                        stick.current_dipole_moment.shape[0])
+                        stick.imem.shape[1])
         self.assertTrue(np.all(stick.vmem == stick.v_init))
         self.assertTrue(np.all(stick.imem == 0.))
-        self.assertTrue(np.all(stick.current_dipole_moment == 0.))
 
     def test_cell_simulate_recorder_05(self):
         stickParams = {
@@ -1239,15 +1224,12 @@ class testCell(unittest.TestCase):
             'lambda_f' : 100,
         }
         stick = LFPy.Cell(**stickParams)
-        stick.simulate(rec_vmem=True, rec_imem=True,
-                       rec_current_dipole_moment=True)
+        stick.simulate(rec_vmem=True, rec_imem=True)
         self.assertTrue(stick.tvec.size ==
                         stick.vmem.shape[1] ==
-                        stick.imem.shape[1] ==
-                        stick.current_dipole_moment.shape[0])
+                        stick.imem.shape[1])
         self.assertTrue(np.all(stick.vmem == stick.v_init))
         self.assertTrue(np.all(stick.imem == 0.))
-        self.assertTrue(np.all(stick.current_dipole_moment == 0.))
 
     def test_cell_simulate_cvode_00(self):
         stickParams = {
@@ -1313,11 +1295,13 @@ class testCell(unittest.TestCase):
         for idx in range(31): #31 segments
             if idx != 15: # no net dipole moment because of stick symmetry
                 stick = LFPy.Cell(**stickParams)
-                synapse = LFPy.StimIntElectrode(stick, idx=idx,
-                                       **stimParams)
-                stick.simulate(rec_imem=True, rec_current_dipole_moment=True)
-                p = np.dot(stick.imem.T, np.c_[stick.x.mean(axis=-1), stick.y.mean(axis=-1), stick.z.mean(axis=-1)])
-                np.testing.assert_allclose(p, stick.current_dipole_moment)
+                LFPy.StimIntElectrode(stick, idx=idx, **stimParams)
+                probes = [LFPy.CurrentDipoleMoment(stick)]
+                stick.simulate(probes=probes, rec_imem=True)
+                p = np.c_[stick.x.mean(axis=-1),
+                          stick.y.mean(axis=-1),
+                          stick.z.mean(axis=-1)].T @ stick.imem
+                np.testing.assert_allclose(p, probes[0].data)
 
                 stick.__del__()
 
@@ -1351,11 +1335,13 @@ class testCell(unittest.TestCase):
         for idx in range(31): #31 segments
             if idx != 15: # no net dipole moment because of stick symmetry
                 stick = LFPy.Cell(**stickParams)
-                synapse = LFPy.StimIntElectrode(stick, idx=idx,
-                                       **stimParams)
-                stick.simulate(rec_imem=True, rec_current_dipole_moment=True)
-                p = np.dot(stick.imem.T, np.c_[stick.x.mean(axis=-1), stick.y.mean(axis=-1), stick.z.mean(axis=-1)])
-                np.testing.assert_allclose(p, stick.current_dipole_moment)
+                LFPy.StimIntElectrode(stick, idx=idx, **stimParams)
+                probes = [LFPy.CurrentDipoleMoment(stick)]
+                stick.simulate(probes=probes, rec_imem=True)
+                p = np.c_[stick.x.mean(axis=-1),
+                          stick.y.mean(axis=-1),
+                          stick.z.mean(axis=-1)].T @ stick.imem
+                np.testing.assert_allclose(p, probes[0].data)
 
                 stick.__del__()
 
@@ -1388,79 +1374,14 @@ class testCell(unittest.TestCase):
                 synapse = LFPy.Synapse(stick, idx=idx,
                                        **stimParams)
                 synapse.set_spike_times(np.array([10., 20., 30., 40., 50.]))
-                stick.simulate(rec_imem=True, rec_current_dipole_moment=True)
-                p = np.dot(stick.imem.T, np.c_[stick.x.mean(axis=-1), stick.y.mean(axis=-1), stick.z.mean(axis=-1)])
-                np.testing.assert_allclose(p, stick.current_dipole_moment)
+                probes = [LFPy.CurrentDipoleMoment(stick)]
+                stick.simulate(probes=probes, rec_imem=True)
+                p = np.c_[stick.x.mean(axis=-1),
+                          stick.y.mean(axis=-1),
+                          stick.z.mean(axis=-1)].T @ stick.imem
+                np.testing.assert_allclose(p, probes[0].data)
 
                 stick.__del__()
-
-    def test_cell_simulate_dotprodcoeffs_00(self):
-        stickParams = {
-            'morphology' : os.path.join(LFPy.__path__[0], 'test', 'stick.hoc'),
-            'cm' : 1,
-            'Ra' : 150,
-            'v_init' : -65,
-            'passive' : True,
-            'passive_parameters' : {'g_pas' : 1./30000, 'e_pas' : -65},
-            'tstart' : 0,
-            'tstop' : 10000,
-            'dt' : 0.2,
-            'nsegs_method' : 'lambda_f',
-            'lambda_f' : 100,
-        }
-
-        stimParams = {
-            'pptype': 'SinSyn',
-            'delay': 0.,
-            'dur': 1000.,
-            'pkamp': 1.,
-            'freq': 100.,
-            'phase': 0,
-            'bias': 0.,
-            'record_current': True,
-            'record_potential': True
-        }
-
-        stick = LFPy.Cell(**stickParams)
-        synapse = LFPy.StimIntElectrode(stick, idx=0,
-                                        **stimParams)
-        M = np.eye(stick.totnsegs)
-        stick.simulate(rec_imem=True, dotprodcoeffs=[M], variable_dt=False)
-        np.testing.assert_allclose(stick.imem, stick.dotprodresults[0])
-
-    def test_cell_simulate_dotprodcoeffs_01(self):
-        stickParams = {
-            'morphology' : os.path.join(LFPy.__path__[0], 'test', 'stick.hoc'),
-            'cm' : 1,
-            'Ra' : 150,
-            'v_init' : -65,
-            'passive' : True,
-            'passive_parameters' : {'g_pas' : 1./30000, 'e_pas' : -65},
-            'tstart' : 0,
-            'tstop' : 10000,
-            'dt' : 0.2,
-            'nsegs_method' : 'lambda_f',
-            'lambda_f' : 100,
-        }
-
-        stimParams = {
-            'pptype': 'SinSyn',
-            'delay': 0.,
-            'dur': 1000.,
-            'pkamp': 1.,
-            'freq': 100.,
-            'phase': 0,
-            'bias': 0.,
-            'record_current': True,
-            'record_potential': True
-        }
-
-        stick = LFPy.Cell(**stickParams)
-        synapse = LFPy.StimIntElectrode(stick, idx=0,
-                                        **stimParams)
-        M = np.eye(stick.totnsegs)
-        stick.simulate(rec_imem=True, dotprodcoeffs=[M], variable_dt=True)
-        np.testing.assert_allclose(stick.imem, stick.dotprodresults[0])
 
     def test_cell_tstart_00(self):
         stickParams = {
@@ -1489,21 +1410,18 @@ class testCell(unittest.TestCase):
                                          stick0.get_closest_idx(0, 0, 1000),
                                          delay=0, phase=0.,
                                          **stimParams)
-        stick0.simulate(rec_imem=True, rec_vmem=True, rec_current_dipole_moment=True)
-
+        stick0.simulate(rec_imem=True, rec_vmem=True)
 
         stick1 = LFPy.Cell(tstart=-100, tstop=100, **stickParams)
         synapse1 = LFPy.StimIntElectrode(stick1,
                                          stick1.get_closest_idx(0, 0, 1000),
                                          delay=-100, phase=0.,
                                          **stimParams)
-        stick1.simulate(rec_imem=True, rec_vmem=True, rec_current_dipole_moment=True)
+        stick1.simulate(rec_imem=True, rec_vmem=True)
 
         inds = stick0.tvec >= 100
         np.testing.assert_allclose(stick0.vmem[:, inds], stick1.vmem)
         np.testing.assert_allclose(stick0.imem[:, inds], stick1.imem)
-        np.testing.assert_allclose(stick0.current_dipole_moment[inds, :],
-                                   stick1.current_dipole_moment)
 
 
     def test_cell_with_recextelectrode_00(self):
@@ -1542,18 +1460,17 @@ class testCell(unittest.TestCase):
         }
 
         stick = LFPy.Cell(**stickParams)
-        synapse = LFPy.StimIntElectrode(stick, stick.get_closest_idx(0, 0, 1000),
-                               **stimParams)
-        electrode = LFPy.RecExtElectrode(**electrodeParams)
-        stick.simulate(electrode, rec_imem=True)
+        LFPy.StimIntElectrode(stick, stick.get_closest_idx(0, 0, 1000),
+                              **stimParams)
+        electrode = LFPy.RecExtElectrode(stick, **electrodeParams)
+        stick.simulate(probes=[electrode], rec_imem=True)
 
-        electrode1 = LFPy.RecExtElectrode(cell=stick, **electrodeParams)
-        electrode1.calc_lfp()
-
-        np.testing.assert_allclose(electrode.LFP, electrode1.LFP)
+        M = electrode.get_transformation_matrix()
+        LFP = M @ stick.imem
+        np.testing.assert_allclose(electrode.data, LFP)
         self.assertTrue(stick.tvec.size == stick.imem.shape[1] ==
-                        electrode.LFP.shape[1] == electrode1.LFP.shape[1] ==
-                        int(stick.tstop/stick.dt)+1)
+                        electrode.data.shape[1] == LFP.shape[1] ==
+                        int(stick.tstop / stick.dt) + 1)
 
 
     def test_cell_with_recextelectrode_01(self):
@@ -1592,18 +1509,17 @@ class testCell(unittest.TestCase):
         }
 
         stick = LFPy.Cell(**stickParams)
-        synapse = LFPy.StimIntElectrode(stick, stick.get_closest_idx(0, 0, 1000),
-                               **stimParams)
-        electrode = LFPy.RecExtElectrode(**electrodeParams)
-        stick.simulate(electrode, rec_imem=True)
+        LFPy.StimIntElectrode(stick, stick.get_closest_idx(0, 0, 1000),
+                              **stimParams)
+        electrode = LFPy.RecExtElectrode(stick, **electrodeParams)
+        stick.simulate(probes=[electrode], rec_imem=True)
 
-        electrode1 = LFPy.RecExtElectrode(cell=stick, **electrodeParams)
-        electrode1.calc_lfp()
-
-        np.testing.assert_allclose(electrode.LFP, electrode1.LFP)
+        M = electrode.get_transformation_matrix()
+        LFP = M @ stick.imem
+        np.testing.assert_allclose(electrode.data, LFP)
         self.assertTrue(stick.tvec.size == stick.imem.shape[1] ==
-                        electrode.LFP.shape[1] == electrode1.LFP.shape[1] ==
-                        int(stick.tstop/stick.dt)+1)
+                        electrode.data.shape[1] == LFP.shape[1] ==
+                        int(stick.tstop / stick.dt) + 1)
 
     def test_cell_with_recextelectrode_02(self):
         stickParams = {
@@ -1641,18 +1557,17 @@ class testCell(unittest.TestCase):
         }
 
         stick = LFPy.Cell(**stickParams)
-        synapse = LFPy.StimIntElectrode(stick, stick.get_closest_idx(0, 0, 1000),
-                               **stimParams)
-        electrode = LFPy.RecExtElectrode(**electrodeParams)
-        stick.simulate(electrode, rec_imem=True)
+        LFPy.StimIntElectrode(stick, stick.get_closest_idx(0, 0, 1000),
+                              **stimParams)
+        electrode = LFPy.RecExtElectrode(stick, **electrodeParams)
+        stick.simulate(probes=[electrode], rec_imem=True)
 
-        electrode1 = LFPy.RecExtElectrode(cell=stick, **electrodeParams)
-        electrode1.calc_lfp()
-
-        np.testing.assert_allclose(electrode.LFP, electrode1.LFP)
+        M = electrode.get_transformation_matrix()
+        LFP = M @ stick.imem
+        np.testing.assert_allclose(electrode.data, LFP)
         self.assertTrue(stick.tvec.size == stick.imem.shape[1] ==
-                        electrode.LFP.shape[1] == electrode1.LFP.shape[1] ==
-                        int(stick.tstop/stick.dt)+1)
+                        electrode.data.shape[1] == LFP.shape[1] ==
+                        int(stick.tstop / stick.dt) + 1)
 
     def test_cell_with_recextelectrode_03(self):
         stickParams = {
@@ -1690,18 +1605,17 @@ class testCell(unittest.TestCase):
         }
 
         stick = LFPy.Cell(**stickParams)
-        synapse = LFPy.StimIntElectrode(stick, stick.get_closest_idx(0, 0, 1000),
-                               **stimParams)
-        electrode = LFPy.RecExtElectrode(**electrodeParams)
-        stick.simulate(electrode, rec_imem=True)
+        LFPy.StimIntElectrode(stick, stick.get_closest_idx(0, 0, 1000),
+                              **stimParams)
+        electrode = LFPy.RecExtElectrode(stick, **electrodeParams)
+        stick.simulate(probes=[electrode], rec_imem=True)
 
-        electrode1 = LFPy.RecExtElectrode(cell=stick, **electrodeParams)
-        electrode1.calc_lfp()
-
-        np.testing.assert_allclose(electrode.LFP, electrode1.LFP)
+        M = electrode.get_transformation_matrix()
+        LFP = M @ stick.imem
+        np.testing.assert_allclose(electrode.data, LFP)
         self.assertTrue(stick.tvec.size == stick.imem.shape[1] ==
-                        electrode.LFP.shape[1] == electrode1.LFP.shape[1] ==
-                        int(stick.tstop/stick.dt)+1)
+                        electrode.data.shape[1] == LFP.shape[1] ==
+                        int(stick.tstop / stick.dt) + 1)
 
     def test_cell_with_recextelectrode_and_cvode_00(self):
         stickParams = {
@@ -1742,11 +1656,16 @@ class testCell(unittest.TestCase):
         stick = LFPy.Cell(**stickParams)
         synapse = LFPy.StimIntElectrode(stick, stick.get_closest_idx(0, 0, 1000),
                                **stimParams)
-        electrode = LFPy.RecExtElectrode(**electrodeParams)
-        stick.simulate(electrode, rec_imem=True, rec_vmem=True, variable_dt=True)
+        electrode = LFPy.RecExtElectrode(stick, **electrodeParams)
+        stick.simulate(probes=[electrode],
+                       rec_imem=True, rec_vmem=True,
+                       variable_dt=True)
 
-        self.assertTrue(stick.tvec.size == stick.imem.shape[1] == synapse.i.size == synapse.v.size
-                        == electrode.LFP.shape[1])
+        self.assertTrue(stick.tvec.size
+                        == stick.imem.shape[1]
+                        == synapse.i.size
+                        == synapse.v.size
+                        == electrode.data.shape[1])
 
         stick.__del__()
 
@@ -1759,11 +1678,12 @@ class testCell(unittest.TestCase):
         dend2.connect(dend1(1.0), 0)
         morphology = neuron.h.SectionList()
         morphology.wholetree()
-        cell = cell_w_synapse_from_sections(morphology)
+        cell = cell_w_synapse_from_sections(morphology,
+                                            rec_current_dipole_moment=True)
         dipoles, dipole_locs = cell.get_multi_current_dipole_moments()
         t_point = -1
-        P_from_multi_dipoles = np.sum(dipoles[:,t_point,:],axis=0)
-        P = cell.current_dipole_moment[t_point]
+        P_from_multi_dipoles = np.sum(dipoles[:, t_point, :], axis=0)
+        P = cell.current_dipole_moment[:, t_point]
 
         # some cleanup of Python-created section references
         cell.__del__()
@@ -1782,11 +1702,12 @@ class testCell(unittest.TestCase):
         dend3.connect(soma(1.), 0)
         morphology = neuron.h.SectionList()
         morphology.wholetree()
-        cell = cell_w_synapse_from_sections(morphology)
+        cell = cell_w_synapse_from_sections(morphology,
+                                            rec_current_dipole_moment=True)
         dipoles, dipole_locs = cell.get_multi_current_dipole_moments()
         t_point = -1
-        P_from_multi_dipoles = np.sum(dipoles[:,t_point,:],axis=0)
-        P = cell.current_dipole_moment[t_point]
+        P_from_multi_dipoles = np.sum(dipoles[:, t_point, :], axis=0)
+        P = cell.current_dipole_moment[:, t_point]
 
         # some cleanup of Python-created section references
         cell.__del__()
@@ -1802,11 +1723,12 @@ class testCell(unittest.TestCase):
         dend3.connect(dend2(.5), 0)
         morphology = neuron.h.SectionList()
         morphology.wholetree()
-        cell = cell_w_synapse_from_sections(morphology)
+        cell = cell_w_synapse_from_sections(morphology,
+                                            rec_current_dipole_moment=True)
         dipoles, dipole_locs = cell.get_multi_current_dipole_moments()
         t_point = -1
-        P_from_multi_dipoles = np.sum(dipoles[:,t_point,:],axis=0)
-        P = cell.current_dipole_moment[t_point]
+        P_from_multi_dipoles = np.sum(dipoles[:, t_point, :], axis=0)
+        P = cell.current_dipole_moment[:, t_point]
 
         # some cleanup of Python-created section references
         cell.__del__()
@@ -1828,11 +1750,12 @@ class testCell(unittest.TestCase):
         dend5.connect(soma(0.432), 0)
         morphology = neuron.h.SectionList()
         morphology.wholetree()
-        cell = cell_w_synapse_from_sections(morphology)
+        cell = cell_w_synapse_from_sections(morphology,
+                                            rec_current_dipole_moment=True)
         dipoles, dipole_locs = cell.get_multi_current_dipole_moments()
         t_point = -1
-        P_from_multi_dipoles = np.sum(dipoles[:,t_point,:],axis=0)
-        P = cell.current_dipole_moment[t_point]
+        P_from_multi_dipoles = np.sum(dipoles[:, t_point, :], axis=0)
+        P = cell.current_dipole_moment[:, t_point]
 
         # some cleanup of Python-created section references
         cell.__del__()
@@ -1841,11 +1764,12 @@ class testCell(unittest.TestCase):
 
     def test_get_multi_current_dipole_moments_04(self):
         morphology = os.path.join(LFPy.__path__[0], 'test', 'ball_and_sticks.hoc')
-        cell = cell_w_synapse_from_sections(morphology)
+        cell = cell_w_synapse_from_sections(morphology,
+                                            rec_current_dipole_moment=True)
         dipoles, dipole_locs = cell.get_multi_current_dipole_moments()
         t_point = -1
-        P_from_multi_dipoles = np.sum(dipoles[:,t_point,:],axis=0)
-        P = cell.current_dipole_moment[t_point]
+        P_from_multi_dipoles = np.sum(dipoles[:, t_point, :], axis=0)
+        P = cell.current_dipole_moment[:, t_point]
 
         cell.__del__()
 
@@ -1853,7 +1777,7 @@ class testCell(unittest.TestCase):
 
     def test_cell_distort_geometry_01(self):
         cell0 = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
-                                          'ball_and_sticks.hoc' ))
+                                          'ball_and_sticks.hoc'))
         factors = [-0.2, 0.1, 0., 0.1, 0.2]
         nus = [-0.5, 0., 0.5]
         for factor in factors:
@@ -1880,7 +1804,7 @@ def stickSimulationTesttvec(**kwargs):
     return stick.tvec
 
 
-def cell_w_synapse_from_sections(morphology):
+def cell_w_synapse_from_sections(morphology, rec_current_dipole_moment=False):
     '''
     Make cell and synapse objects, set spike, simulate and return cell
     '''
@@ -1907,5 +1831,16 @@ def cell_w_synapse_from_sections(morphology):
     cell = LFPy.Cell(**cellParams)
     synapse = LFPy.Synapse(cell, **synapse_parameters)
     synapse.set_spike_times(np.array([1.]))
-    cell.simulate(rec_imem=True, rec_vmem=True, rec_current_dipole_moment=True)
+
+    if rec_current_dipole_moment:
+        cdm = LFPy.CurrentDipoleMoment(cell)
+        probes = [cdm]
+    else:
+        probes = []
+
+    cell.simulate(probes=probes, rec_imem=True, rec_vmem=True)
+
+    if rec_current_dipole_moment:
+        cell.current_dipole_moment = cdm.data
+
     return cell

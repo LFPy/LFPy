@@ -21,7 +21,8 @@ import sys
 import posixpath
 from warnings import warn
 import pickle
-from .run_simulation import _run_simulation_with_electrode
+from .run_simulation import _run_simulation_with_probes, \
+                            _run_simulation_with_electrode
 from .run_simulation import _collect_geometry_neuron
 from .alias_method import alias_method
 
@@ -954,12 +955,149 @@ class Cell(object):
 
         return v_ext
 
-    def simulate(self, electrode=None, rec_imem=False, rec_vmem=False,
+    def simulate(self, probes=None,
+                 rec_imem=False, rec_vmem=False,
                  rec_ipas=False, rec_icap=False,
-                 rec_current_dipole_moment=False,
-                 rec_variables=[], variable_dt=False, atol=0.001, rtol=0.,
-                 to_memory=True, to_file=False, file_name=None,
-                 dotprodcoeffs=None, **kwargs):
+                 rec_variables=[],
+                 variable_dt=False, atol=0.001, rtol=0.,
+                 to_memory=True,
+                 to_file=False, file_name=None,
+                 **kwargs):
+        """
+        This is the main function running the simulation of the NEURON model.
+        Start NEURON simulation and record variables specified by arguments.
+        Parameters
+        ----------
+        probes: list of :obj:, optional
+            None or list of LFPykit.RecExtElectrode like object instances that
+            each have a public method `get_transformation_matrix` returning
+            a matrix that linearly maps each compartments' transmembrane
+            current to corresponding measurement as
+
+            .. math:: \\mathbf{P} = \\mathbf{M} \\mathbf{I}
+
+        rec_imem : bool
+            If true, segment membrane currents will be recorded
+            If no electrode argument is given, it is necessary to
+            set rec_imem=True in order to make predictions later on.
+            Units of (nA).
+        rec_vmem : bool
+            Record segment membrane voltages (mV)
+        rec_ipas : bool
+            Record passive segment membrane currents (nA)
+        rec_icap : bool
+            Record capacitive segment membrane currents (nA)
+        rec_variables : list
+            List of segment state variables to record, e.g. arg=['cai', ]
+        variable_dt : bool
+            Use NEURON's variable timestep method
+        atol : float
+            Absolute local error tolerance for NEURON variable timestep method
+        rtol : float
+            Relative local error tolerance for NEURON variable timestep method
+        to_memory : bool
+            Only valid with probes=[:obj:], store measurements as `:obj:.data`
+        to_file : bool
+            Only valid with probes, save simulated data in hdf5 file format
+        file_name : str
+            Name of hdf5 file, '.h5' is appended if it doesnt exist
+        """
+        for key in kwargs.keys():
+            if key in ['electrode', 'rec_current_dipole_moment',
+                       'dotprodcoeffs', 'rec_isyn', 'rec_vmemsyn',
+                       'rec_istim', 'rec_vmemstim']:
+                raise DeprecationWarning('Cell.simulate parameter '
+                                         '{} is deprecated.'.format(key))
+
+        # set up integrator, use the CVode().fast_imem method by default
+        # as it doesn't hurt sim speeds much if at all.
+        cvode = neuron.h.CVode()
+        try:
+            cvode.use_fast_imem(1)
+        except AttributeError:
+            raise Exception('neuron.h.CVode().use_fast_imem() method not '
+                            'found. Update NEURON to v.7.4 or newer')
+
+        if not variable_dt:
+            dt = self.dt
+        else:
+            dt = None
+        self._set_soma_volt_recorder(dt)
+
+        if rec_imem:
+            self._set_imem_recorders(dt)
+        if rec_vmem:
+            self._set_voltage_recorders(dt)
+        if rec_ipas:
+            self._set_ipas_recorders(dt)
+        if rec_icap:
+            self._set_icap_recorders(dt)
+        if len(rec_variables) > 0:
+            self._set_variable_recorders(rec_variables, dt)
+        if hasattr(self, '_stimitorecord'):
+            if len(self._stimitorecord) > 0:
+                self._set_ipointprocess_recorders(dt)
+        if hasattr(self, '_stimvtorecord'):
+            if len(self._stimvtorecord) > 0:
+                self._set_vpointprocess_recorders(dt)
+        if hasattr(self, '_synitorecord'):
+            if len(self._synitorecord) > 0:
+                self._set_isyn_recorders(dt)
+        if hasattr(self, '_synvtorecord'):
+            if len(self._synvtorecord) > 0:
+                self._set_vsyn_recorders(dt)
+
+        # set time recorder from NEURON
+        self._set_time_recorders(dt)
+
+        # run fadvance until t >= tstop, and calculate LFP if asked for
+        if probes is None or len(probes) == 0:
+            if not rec_imem and self.verbose:
+                print("rec_imem = %s, membrane currents will not be recorded!"
+                      % str(rec_imem))
+            self._run_simulation(cvode, variable_dt, atol, rtol)
+
+        else:
+            # simulate with probes saving to memory and/or file:
+            _run_simulation_with_probes(self, cvode, probes,
+                                        variable_dt, atol, rtol,
+                                        to_memory, to_file, file_name)
+
+        # somatic trace
+        if self.nsomasec >= 1:
+            self.somav = np.array(self.somav)
+
+        self._collect_tvec()
+
+        if rec_imem:
+            self._calc_imem()
+        if rec_ipas:
+            self._calc_ipas()
+        if rec_icap:
+            self._calc_icap()
+        if rec_vmem:
+            self._collect_vmem()
+
+        if hasattr(self, 'stimireclist'):
+            self._collect_istim()
+        if hasattr(self, 'stimvreclist'):
+            self._collect_vstim()
+        if hasattr(self, 'synireclist'):
+            self._collect_isyn()
+        if hasattr(self, 'synvreclist'):
+            self._collect_vsyn()
+        if len(rec_variables) > 0:
+            self._collect_rec_variables(rec_variables)
+        if hasattr(self, 'netstimlist'):
+            self.netstimlist = None
+            del self.netstimlist
+
+    def simulate_OLD(self, electrode=None, rec_imem=False, rec_vmem=False,
+                     rec_ipas=False, rec_icap=False,
+                     rec_current_dipole_moment=False,
+                     rec_variables=[], variable_dt=False, atol=0.001, rtol=0.,
+                     to_memory=True, to_file=False, file_name=None,
+                     dotprodcoeffs=None, **kwargs):
         """
         This is the main function running the simulation of the NEURON model.
         Start NEURON simulation and record variables specified by arguments.
@@ -2580,7 +2718,6 @@ class Cell(object):
 
         for pos, dir_ in zip(self.somapos, 'xyz'):
             geometry = np.c_[getattr(self, dir_)[:, 0],
-                             #getattr(self, dir_).mean(axis=-1),
                              getattr(self, dir_)[:, -1]]
             if dir_ == axis:
                 geometry -= pos
@@ -2592,9 +2729,6 @@ class Cell(object):
                 geometry += pos
 
             setattr(self, dir_, geometry)
-            #setattr(self, dir_+'start', geometry[:, 0])
-            #setattr(self, dir_+'mid', geometry[:, 1])
-            #setattr(self, dir_+'end', geometry[:, 2])
 
         # recompute length of each segment
         self.length = np.sqrt((self.x[:, -1] - self.x[:, 0])**2 +
