@@ -1763,7 +1763,8 @@ class testCell(unittest.TestCase):
         np.testing.assert_almost_equal(P, P_from_multi_dipoles)
 
     def test_get_multi_current_dipole_moments_04(self):
-        morphology = os.path.join(LFPy.__path__[0], 'test', 'ball_and_sticks.hoc')
+        morphology = os.path.join(LFPy.__path__[0], 'test',
+                                  'ball_and_sticks.hoc')
         cell = cell_w_synapse_from_sections(morphology,
                                             rec_current_dipole_moment=True)
         dipoles, dipole_locs = cell.get_multi_current_dipole_moments()
@@ -1777,7 +1778,7 @@ class testCell(unittest.TestCase):
 
     def test_cell_distort_geometry_01(self):
         cell0 = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
-                                          'ball_and_sticks.hoc'))
+                                                  'ball_and_sticks.hoc'))
         factors = [-0.2, 0.1, 0., 0.1, 0.2]
         nus = [-0.5, 0., 0.5]
         for factor in factors:

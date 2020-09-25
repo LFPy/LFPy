@@ -23,6 +23,7 @@ import neuron
 import h5py
 import scipy.signal as ss
 
+
 class testNetworkPopulation(unittest.TestCase):
     """
     class LFPy.NetworkPopulation test suite
@@ -319,14 +320,15 @@ class testNetwork(unittest.TestCase):
             )
         electrodeParameters = dict(
             sigma=0.3,
-            x = np.arange(10)*100,
-            y = np.arange(10)*100,
-            z = np.arange(10)*100
+            x=np.arange(10)*100,
+            y=np.arange(10)*100,
+            z=np.arange(10)*100
         )
         # set up
         network = LFPy.Network(**networkParameters)
         network.create_population(**populationParameters)
-        connectivity = network.get_connectivity_rand(pre='test', post='test', connprob=0.5)
+        connectivity = network.get_connectivity_rand(pre='test', post='test',
+                                                     connprob=0.5)
 
         # test set up
         for population in network.populations.values():

@@ -27,7 +27,142 @@ ctypedef np.float64_t DTYPE_t
 ctypedef Py_ssize_t   LTYPE_t
 
 
-def _run_simulation_with_electrode(cell, cvode, electrode=None,
+def _run_simulation_with_probes(cell, cvode, probes=[],
+                                variable_dt=False, atol=0.001, rtol=0.,
+                                to_memory=True,
+                                to_file=False, file_name=None):
+    '''Initialize and run simulation in NEURON,
+    repeatedly calling neuron.h.fadvance() until cell.tstop is reached.
+
+    Parameters
+    ----------
+    cell: LFPy.Cell like object
+    cvode: neuron.h.CVode object
+    probes: list of objects
+    variable_dt: bool
+    atol: float
+    rtol: float
+    to_memory: bool
+    to_file: bool
+    file_name: str
+
+    Returns
+    -------
+
+    '''
+    if variable_dt and to_file:
+        raise NotImplementedError('to_file=True with variable_dt=True '
+                                  'not supported')
+    # Initialize NEURON simulations of cell object
+    neuron.h.dt = cell.dt
+
+    # needed for variable dt method
+    if variable_dt:
+        cvode.active(1)
+        cvode.atol(atol)
+        cvode.rtol(rtol)
+    else:
+        cvode.active(0)
+
+    # re-initialize state
+    neuron.h.finitialize(cell.v_init)
+
+    # initialize current- and record
+    if cvode.active():
+        cvode.re_init()
+    else:
+        neuron.h.fcurrent()
+
+    neuron.h.frecord_init()  # wrong voltages t=0 for tstart < 0 otherwise
+
+    # Start simulation at tstart (which may be < 0)
+    neuron.h.t = cell.tstart
+
+    # load spike times from NetCon
+    cell._loadspikes()
+
+    # temporary vector to store membrane currents at each timestep
+    imem = np.zeros(cell.totnsegs)
+
+    # precompute linear transformation matrices for each probe
+    transforms = []  # container
+    for probe in probes:
+        M = probe.get_transformation_matrix()
+        try:
+            assert(M.shape[-1] == cell.totnsegs)
+        except AssertionError:
+            raise AssertionError('Linear transformation shape mismatch')
+        transforms.append(M)
+        if not variable_dt:
+            probe.data = np.zeros((M.shape[0], int(cell.tstop / cell.dt) + 1))
+        else:
+            # for variable_dt, data will be added to last axis each time step
+            probe.data = np.zeros((M.shape[0], 0))
+
+    if to_file:
+        # ensure right file extension:
+        file_name = Path(file_name)
+        if file_name.suffix != '.h5':
+            file_name = file_name.parent / (file_name.name + '.h5')
+        if not cvode.active():
+            print('creating output file {}'.format(file_name))
+            f = h5py.File(file_name, 'w')
+            # create empty data arrays for data storage of output
+            # corresponding to each probe. The naming scheme is
+            # probe.__class__.__name__+'0', probe.__class__.__name__+'1' etc.
+            names = []
+            for probe, M in zip(probes, transforms):
+                name = probe.__class__.__name__
+                i = 0
+                while True:
+                    if name + '{}'.format(i) not in names:
+                        names.append(name)
+                        break
+                    i += 1
+                #
+                probe.data = f.create_dataset(
+                    name=name,
+                    shape=(M.shape[0],
+                           int(cell.tstop / cell.dt) + 1),
+                    dtype=np.float)
+
+    def get_imem(imem):
+        i = 0
+        for sec in cell.allseclist:
+            for seg in sec:
+                imem[i] = seg.i_membrane_
+                i += 1
+        return imem
+
+    tstep = 0
+    # run fadvance until time limit, and calculate LFPs for each timestep
+    while neuron.h.t < cell.tstop:
+        if neuron.h.t >= 0:
+            imem = get_imem(imem)
+            for j, (probe, transform) in enumerate(zip(probes, transforms)):
+                if not variable_dt:
+                    probe.data[:, tstep] = transform @ imem
+                else:
+                    probe.data = np.c_[probes[j].data, transform @ imem]
+
+            tstep += 1
+        neuron.h.fadvance()
+
+    # calculate LFP after final fadvance() if needed
+    # (may occur for certain values for dt)
+    if tstep < len(cell._neuron_tvec):
+        imem = get_imem(imem)
+        for j, (probe, transform) in enumerate(zip(probes, transforms)):
+            if not variable_dt:
+                probe.data[:, tstep] = transform @ imem
+            else:
+                probe.data = np.c_[probes[j].data, transform @ imem]
+
+    if to_file:
+        f.close()
+
+
+'''def _run_simulation_with_electrode(cell, cvode, electrode=None,
                                    variable_dt=False, atol=0.001, rtol=0.,
                                    to_memory=True, to_file=False,
                                    file_name=None, dotprodcoeffs=None,
@@ -265,6 +400,7 @@ def _run_simulation_with_electrode(cell, cvode, electrode=None,
 
     if to_file:
         el_LFP_file.close()
+'''
 
 
 cpdef _collect_geometry_neuron(cell):
