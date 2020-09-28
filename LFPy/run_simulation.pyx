@@ -14,11 +14,10 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 """
-
-
 from time import time
 import numpy as np
 cimport numpy as np
+import h5py
 import neuron
 from pathlib import Path
 
