@@ -10,16 +10,16 @@ def alias_method(idx, probs, nsyn):
 
     Parameters
     ----------
-    idx : np.ndarray
+    idx: np.ndarray
         compartment indices as array of ints
-    probs : np.ndarray
+    probs: np.ndarray
         compartment areas as array of floats
-    nsyn : int
+    nsyn: int
         number of randomized compartment indices
 
     Returns
     -------
-    out : np.ndarray
+    out: np.ndarray
         integer array of randomly drawn compartment indices
 
     """
@@ -55,14 +55,14 @@ def alias_setup(probs):
 
     Parameters
     ----------
-    probs : np.ndarray
+    probs: np.ndarray
         float array of compartment areas
 
     Returns
     -------
-    J : np.ndarray
+    J: np.ndarray
         array of ints
-    q : np.ndarray
+    q: np.ndarray
         array of floats
 
     """

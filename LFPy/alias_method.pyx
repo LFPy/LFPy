@@ -26,16 +26,16 @@ cpdef np.ndarray[long, ndim=1, negative_indices=False] alias_method(
 
     Parameters
     ----------
-    idx : np.ndarray
+    idx: np.ndarray
         compartment indices as array of ints
-    probs : np.ndarray
+    probs: np.ndarray
         compartment areas as array of floats
-    nsyn : int
+    nsyn: int
         number of randomized compartment indices
 
     Returns
     -------
-    out : np.ndarray
+    out: np.ndarray
         integer array of randomly drawn compartment indices
 
     """
@@ -79,14 +79,14 @@ cpdef alias_setup(np.ndarray[DTYPE_t, ndim=1, negative_indices=False] probs):
 
     Parameters
     ----------
-    probs : np.ndarray
+    probs: np.ndarray
         float array of compartment areas
 
     Returns
     -------
-    J : np.ndarray
+    J: np.ndarray
         array of ints
-    q : np.ndarray
+    q: np.ndarray
         array of floats
 
     """
