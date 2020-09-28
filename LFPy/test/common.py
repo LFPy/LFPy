@@ -35,7 +35,6 @@ def stickSimulation(method):
         'dt' : 2**-6,
         'nsegs_method' : 'lambda_f',
         'lambda_f' : 1000,
-
     }
 
     electrodeParams = {
@@ -57,17 +56,18 @@ def stickSimulation(method):
         'record_current' : True
     }
 
-
-    electrode = LFPy.RecExtElectrode(**electrodeParams)
-
     stick = LFPy.Cell(**stickParams)
-    stick.set_pos(z=-stick.zstart[0])
+    stick.set_pos(z=-stick.z[0, 0])
 
-    synapse = LFPy.StimIntElectrode(stick, stick.get_closest_idx(0, 0, 1000),
-                           **stimParams)
-    stick.simulate(electrode, rec_imem=True, rec_vmem=True)
+    LFPy.StimIntElectrode(stick, stick.get_closest_idx(0, 0, 1000),
+                          **stimParams)
 
-    return electrode.LFP
+    electrode = LFPy.RecExtElectrode(stick, **electrodeParams)
+
+    stick.simulate(probes=[electrode])
+
+    return electrode.data
+
 
 def stickSimulationAveragingElectrode(contactRadius, contactNPoints, method):
     stickParams = {
@@ -82,7 +82,6 @@ def stickSimulationAveragingElectrode(contactRadius, contactNPoints, method):
         'dt' : 2**-6,
         'nsegs_method' : 'lambda_f',
         'lambda_f' : 1000,
-
     }
 
     N = np.empty((11, 3))
@@ -109,19 +108,20 @@ def stickSimulationAveragingElectrode(contactRadius, contactNPoints, method):
         'record_current' : True
     }
 
-
-    electrode = LFPy.RecExtElectrode(**electrodeParams)
-
     stick = LFPy.Cell(**stickParams)
-    stick.set_pos(z=-stick.zstart[0])
+    stick.set_pos(z=-stick.z[0, 0])
 
-    synapse = LFPy.StimIntElectrode(stick, stick.get_closest_idx(0, 0, 1000),
-                           **stimParams)
-    stick.simulate(electrode, rec_imem=True, rec_vmem=True)
+    LFPy.StimIntElectrode(stick, stick.get_closest_idx(0, 0, 1000),
+                          **stimParams)
 
-    return electrode.LFP
+    electrode = LFPy.RecExtElectrode(stick, **electrodeParams)
 
-def stickSimulationDotprodcoeffs(method):
+    stick.simulate(probes=[electrode])
+
+    return electrode.data
+
+
+'''def stickSimulationDotprodcoeffs(method):
     stickParams = {
         'morphology' : os.path.join(LFPy.__path__[0], 'test', 'stick.hoc'),
         'cm' : 1,
@@ -134,7 +134,6 @@ def stickSimulationDotprodcoeffs(method):
         'dt' : 2**-6,
         'nsegs_method' : 'lambda_f',
         'lambda_f' : 1000,
-
     }
 
     electrodeParams = {
@@ -156,8 +155,6 @@ def stickSimulationDotprodcoeffs(method):
         'record_current' : True
     }
 
-
-
     stick = LFPy.Cell(**stickParams)
     stick.set_pos(z=-stick.zstart[0])
 
@@ -167,7 +164,7 @@ def stickSimulationDotprodcoeffs(method):
 
     electrode = LFPy.RecExtElectrode(stick, **electrodeParams)
     electrode.calc_lfp()
-    #not needed anymore:
+    # not needed anymore:
     del stick.imem, stick.tvec
 
     synapse = LFPy.StimIntElectrode(stick, stick.get_closest_idx(0, 0, 1000),
@@ -175,7 +172,7 @@ def stickSimulationDotprodcoeffs(method):
     stick.simulate(dotprodcoeffs=electrode.LFP,
                    rec_imem=True, rec_vmem=True)
 
-    return stick.dotprodresults[0]
+    return stick.dotprodresults[0]'''
 
 
 def analytical_LFP(time=np.linspace(0, 100, 1001),
