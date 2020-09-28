@@ -445,11 +445,12 @@ class testNetwork(unittest.TestCase):
                 cell.strip_hoc_objects()
         neuron.h('forall delete_section()')
 
-
     def test_Network_05(self):
         cellParameters = dict(
-            morphology=os.path.join(LFPy.__path__[0], 'test', 'ball_and_sticks_w_lists.hoc'),
-            templatefile=os.path.join(LFPy.__path__[0], 'test', 'ball_and_stick_template.hoc'),
+            morphology=os.path.join(LFPy.__path__[0], 'test',
+                                    'ball_and_sticks_w_lists.hoc'),
+            templatefile=os.path.join(LFPy.__path__[0], 'test',
+                                      'ball_and_stick_template.hoc'),
             templatename='ball_and_stick_template',
             templateargs=None,
             passive=False,

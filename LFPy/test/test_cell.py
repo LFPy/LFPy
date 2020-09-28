@@ -232,7 +232,7 @@ class testCell(unittest.TestCase):
     def test_cell_set_rotation_00(self):
         '''test LFPy.Cell.set_rotation()'''
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
-                                                  'ball_and_sticks.hoc' ))
+                                                 'ball_and_sticks.hoc' ))
 
         ystarts = cell.y[:, 0].copy()
         ymids = cell.y.mean(axis=-1).copy()
@@ -399,7 +399,7 @@ class testCell(unittest.TestCase):
     def test_cell_chiral_morphology_00(self):
         '''test LFPy.Cell.chiral_morphology()'''
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
-                                                  'ball_and_sticks.hoc' ))
+                                                 'ball_and_sticks.hoc' ))
 
         xstarts = cell.x[:, 0].copy()
         xmids = cell.x.mean(axis=-1).copy()
@@ -1423,7 +1423,6 @@ class testCell(unittest.TestCase):
         np.testing.assert_allclose(stick0.vmem[:, inds], stick1.vmem)
         np.testing.assert_allclose(stick0.imem[:, inds], stick1.imem)
 
-
     def test_cell_with_recextelectrode_00(self):
         stickParams = {
             'morphology' : os.path.join(LFPy.__path__[0], 'test', 'stick.hoc'),
@@ -1776,7 +1775,7 @@ class testCell(unittest.TestCase):
 
         np.testing.assert_almost_equal(P, P_from_multi_dipoles)
 
-    def test_cell_distort_geometry_01(self):
+    def test_cell_distort_geometry_00(self):
         cell0 = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
                                                   'ball_and_sticks.hoc'))
         factors = [-0.2, 0.1, 0., 0.1, 0.2]

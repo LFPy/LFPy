@@ -235,8 +235,9 @@ class testNetworkCell(unittest.TestCase):
                         templateargs=None,
                         )
         np.testing.assert_allclose(cell.somapos,
-                                   [cell.xmid[0], cell.ymid[0], cell.zmid[0]])
-
+                                   [cell.x[0].mean(axis=-1),
+                                    cell.y[0].mean(axis=-1),
+                                    cell.z[0].mean(axis=-1)])
 
     def test_cell_set_pos_06(self):
         '''test LFPy.NetworkCell.set_pos'''
@@ -247,7 +248,9 @@ class testNetworkCell(unittest.TestCase):
                         templateargs=None,
                         pt3d=True)
         np.testing.assert_allclose(cell.somapos,
-                                   [cell.xmid[0], cell.ymid[0], cell.zmid[0]])
+                                   [cell.x[0].mean(axis=-1),
+                                    cell.y[0].mean(axis=-1),
+                                    cell.z[0].mean(axis=-1)])
 
 
     def test_cell_set_rotation_00(self):
@@ -259,22 +262,22 @@ class testNetworkCell(unittest.TestCase):
                         templateargs=None,
                         )
 
-        ystarts = cell.ystart.copy()
-        ymids = cell.ymid.copy()
-        yends = cell.yend.copy()
-        zstarts = cell.zstart.copy()
-        zmids = cell.zmid.copy()
-        zends = cell.zend.copy()
+        ystarts = cell.y[:, 0].copy()
+        ymids = cell.y.mean(axis=-1).copy()
+        yends = cell.y[:, -1].copy()
+        zstarts = cell.z[:, 0].copy()
+        zmids = cell.z.mean(axis=-1).copy()
+        zends = cell.z[:, -1].copy()
         # test rotation 180 deg around x-axis
         cell.set_rotation(x=np.pi)
         # assert that y- and z-coordinates are inverted, using absolute
         # tolerances
-        np.testing.assert_allclose(cell.ystart, -ystarts, atol=1e-07)
-        np.testing.assert_allclose(cell.ymid, -ymids, atol=1e-07)
-        np.testing.assert_allclose(cell.yend, -yends, atol=1e-07)
-        np.testing.assert_allclose(cell.zstart, -zstarts, atol=1e-07)
-        np.testing.assert_allclose(cell.zmid, -zmids, atol=1e-07)
-        np.testing.assert_allclose(cell.zend, -zends, atol=1e-07)
+        np.testing.assert_allclose(cell.y[:, 0], -ystarts, atol=1e-07)
+        np.testing.assert_allclose(cell.y.mean(axis=-1), -ymids, atol=1e-07)
+        np.testing.assert_allclose(cell.y[:, -1], -yends, atol=1e-07)
+        np.testing.assert_allclose(cell.z[:, 0], -zstarts, atol=1e-07)
+        np.testing.assert_allclose(cell.z.mean(axis=-1), -zmids, atol=1e-07)
+        np.testing.assert_allclose(cell.z[:, -1], -zends, atol=1e-07)
 
 
     def test_cell_set_rotation_01(self):
@@ -286,22 +289,22 @@ class testNetworkCell(unittest.TestCase):
                         templateargs=None,
                         )
 
-        xstarts = cell.xstart.copy()
-        xmids = cell.xmid.copy()
-        xends = cell.xend.copy()
-        zstarts = cell.zstart.copy()
-        zmids = cell.zmid.copy()
-        zends = cell.zend.copy()
+        xstarts = cell.x[:, 0].copy()
+        xmids = cell.x.mean(axis=-1).copy()
+        xends = cell.x[:, -1].copy()
+        zstarts = cell.z[:, 0].copy()
+        zmids = cell.z.mean(axis=-1).copy()
+        zends = cell.z[:, -1].copy()
         # test rotation 180 deg around y-axis
         cell.set_rotation(y=np.pi)
         # assert that y- and z-coordinates are inverted, using absolute
         # tolerances
-        np.testing.assert_allclose(cell.xstart, -xstarts, atol=1e-07)
-        np.testing.assert_allclose(cell.xmid, -xmids, atol=1e-07)
-        np.testing.assert_allclose(cell.xend, -xends, atol=1e-07)
-        np.testing.assert_allclose(cell.zstart, -zstarts, atol=1e-07)
-        np.testing.assert_allclose(cell.zmid, -zmids, atol=1e-07)
-        np.testing.assert_allclose(cell.zend, -zends, atol=1e-07)
+        np.testing.assert_allclose(cell.x[:, 0], -xstarts, atol=1e-07)
+        np.testing.assert_allclose(cell.x.mean(axis=-1), -xmids, atol=1e-07)
+        np.testing.assert_allclose(cell.x[:, -1], -xends, atol=1e-07)
+        np.testing.assert_allclose(cell.z[:, 0], -zstarts, atol=1e-07)
+        np.testing.assert_allclose(cell.z.mean(axis=-1), -zmids, atol=1e-07)
+        np.testing.assert_allclose(cell.z[:, -1], -zends, atol=1e-07)
 
 
     def test_cell_set_rotation_02(self):
@@ -312,22 +315,22 @@ class testNetworkCell(unittest.TestCase):
                         templatename='ball_and_stick_template',
                         templateargs=None,
                         )
-        xstarts = cell.xstart.copy()
-        xmids = cell.xmid.copy()
-        xends = cell.xend.copy()
-        ystarts = cell.ystart.copy()
-        ymids = cell.ymid.copy()
-        yends = cell.yend.copy()
+        xstarts = cell.x[:, 0].copy()
+        xmids = cell.x.mean(axis=-1).copy()
+        xends = cell.x[:, -1].copy()
+        ystarts = cell.y[:, 0].copy()
+        ymids = cell.y.mean(axis=-1).copy()
+        yends = cell.y[:, -1].copy()
         # test rotation 180 deg around z-axis
         cell.set_rotation(z=np.pi)
         # assert that y- and z-coordinates are inverted, using absolute
         # tolerances
-        np.testing.assert_allclose(cell.xstart, -xstarts, atol=1e-07)
-        np.testing.assert_allclose(cell.xmid, -xmids, atol=1e-07)
-        np.testing.assert_allclose(cell.xend, -xends, atol=1e-07)
-        np.testing.assert_allclose(cell.ystart, -ystarts, atol=1e-07)
-        np.testing.assert_allclose(cell.ymid, -ymids, atol=1e-07)
-        np.testing.assert_allclose(cell.yend, -yends, atol=1e-07)
+        np.testing.assert_allclose(cell.x[:, 0], -xstarts, atol=1e-07)
+        np.testing.assert_allclose(cell.x.mean(axis=-1), -xmids, atol=1e-07)
+        np.testing.assert_allclose(cell.x[:, -1], -xends, atol=1e-07)
+        np.testing.assert_allclose(cell.y[:, 0], -ystarts, atol=1e-07)
+        np.testing.assert_allclose(cell.y.mean(axis=-1), -ymids, atol=1e-07)
+        np.testing.assert_allclose(cell.y[:, -1], -yends, atol=1e-07)
 
     def test_cell_set_rotation_03(self):
         '''test LFPy.NetworkCell.set_rotation()'''
@@ -338,23 +341,22 @@ class testNetworkCell(unittest.TestCase):
                         templateargs=None,
                         pt3d=True)
 
-        ystarts = cell.ystart.copy()
-        ymids = cell.ymid.copy()
-        yends = cell.yend.copy()
-        zstarts = cell.zstart.copy()
-        zmids = cell.zmid.copy()
-        zends = cell.zend.copy()
+        ystarts = cell.y[:, 0].copy()
+        ymids = cell.y.mean(axis=-1).copy()
+        yends = cell.y[:, -1].copy()
+        zstarts = cell.z[:, 0].copy()
+        zmids = cell.z.mean(axis=-1).copy()
+        zends = cell.z[:, -1].copy()
         # test rotation 180 deg around x-axis
         cell.set_rotation(x=np.pi)
         # assert that y- and z-coordinates are inverted, using absolute
         # tolerances
-        np.testing.assert_allclose(cell.ystart, -ystarts, atol=1e-07)
-        np.testing.assert_allclose(cell.ymid, -ymids, atol=1e-07)
-        np.testing.assert_allclose(cell.yend, -yends, atol=1e-07)
-        np.testing.assert_allclose(cell.zstart, -zstarts, atol=1e-07)
-        np.testing.assert_allclose(cell.zmid, -zmids, atol=1e-07)
-        np.testing.assert_allclose(cell.zend, -zends, atol=1e-07)
-
+        np.testing.assert_allclose(cell.y[:, 0], -ystarts, atol=1e-07)
+        np.testing.assert_allclose(cell.y.mean(axis=-1), -ymids, atol=1e-07)
+        np.testing.assert_allclose(cell.y[:, -1], -yends, atol=1e-07)
+        np.testing.assert_allclose(cell.z[:, 0], -zstarts, atol=1e-07)
+        np.testing.assert_allclose(cell.z.mean(axis=-1), -zmids, atol=1e-07)
+        np.testing.assert_allclose(cell.z[:, -1], -zends, atol=1e-07)
 
     def test_cell_set_rotation_04(self):
         '''test LFPy.NetworkCell.set_rotation()'''
@@ -365,23 +367,22 @@ class testNetworkCell(unittest.TestCase):
                         templateargs=None,
                         pt3d=True)
 
-        xstarts = cell.xstart.copy()
-        xmids = cell.xmid.copy()
-        xends = cell.xend.copy()
-        zstarts = cell.zstart.copy()
-        zmids = cell.zmid.copy()
-        zends = cell.zend.copy()
+        xstarts = cell.x[:, 0].copy()
+        xmids = cell.x.mean(axis=-1).copy()
+        xends = cell.x[:, -1].copy()
+        zstarts = cell.z[:, 0].copy()
+        zmids = cell.z.mean(axis=-1).copy()
+        zends = cell.z[:, -1].copy()
         # test rotation 180 deg around y-axis
         cell.set_rotation(y=np.pi)
         # assert that y- and z-coordinates are inverted, using absolute
         # tolerances
-        np.testing.assert_allclose(cell.xstart, -xstarts, atol=1e-07)
-        np.testing.assert_allclose(cell.xmid, -xmids, atol=1e-07)
-        np.testing.assert_allclose(cell.xend, -xends, atol=1e-07)
-        np.testing.assert_allclose(cell.zstart, -zstarts, atol=1e-07)
-        np.testing.assert_allclose(cell.zmid, -zmids, atol=1e-07)
-        np.testing.assert_allclose(cell.zend, -zends, atol=1e-07)
-
+        np.testing.assert_allclose(cell.x[:, 0], -xstarts, atol=1e-07)
+        np.testing.assert_allclose(cell.x.mean(axis=-1), -xmids, atol=1e-07)
+        np.testing.assert_allclose(cell.x[:, -1], -xends, atol=1e-07)
+        np.testing.assert_allclose(cell.z[:, 0], -zstarts, atol=1e-07)
+        np.testing.assert_allclose(cell.z.mean(axis=-1), -zmids, atol=1e-07)
+        np.testing.assert_allclose(cell.z[:, -1], -zends, atol=1e-07)
 
     def test_cell_set_rotation_05(self):
         '''test LFPy.NetworkCell.set_rotation()'''
@@ -392,22 +393,22 @@ class testNetworkCell(unittest.TestCase):
                         templateargs=None,
                         pt3d=True)
 
-        xstarts = cell.xstart.copy()
-        xmids = cell.xmid.copy()
-        xends = cell.xend.copy()
-        ystarts = cell.ystart.copy()
-        ymids = cell.ymid.copy()
-        yends = cell.yend.copy()
+        xstarts = cell.x[:, 0].copy()
+        xmids = cell.x.mean(axis=-1).copy()
+        xends = cell.x[:, -1].copy()
+        ystarts = cell.y[:, 0].copy()
+        ymids = cell.y.mean(axis=-1).copy()
+        yends = cell.y[:, -1].copy()
         # test rotation 180 deg around z-axis
         cell.set_rotation(z=np.pi)
         # assert that y- and z-coordinates are inverted, using absolute
         # tolerances
-        np.testing.assert_allclose(cell.xstart, -xstarts, atol=1e-07)
-        np.testing.assert_allclose(cell.xmid, -xmids, atol=1e-07)
-        np.testing.assert_allclose(cell.xend, -xends, atol=1e-07)
-        np.testing.assert_allclose(cell.ystart, -ystarts, atol=1e-07)
-        np.testing.assert_allclose(cell.ymid, -ymids, atol=1e-07)
-        np.testing.assert_allclose(cell.yend, -yends, atol=1e-07)
+        np.testing.assert_allclose(cell.x[:, 0], -xstarts, atol=1e-07)
+        np.testing.assert_allclose(cell.x.mean(axis=-1), -xmids, atol=1e-07)
+        np.testing.assert_allclose(cell.x[:, -1], -xends, atol=1e-07)
+        np.testing.assert_allclose(cell.y[:, 0], -ystarts, atol=1e-07)
+        np.testing.assert_allclose(cell.y.mean(axis=-1), -ymids, atol=1e-07)
+        np.testing.assert_allclose(cell.y[:, -1], -yends, atol=1e-07)
 
     def test_cell_set_rotation_06(self):
         '''test LFPy.NetworkCell.set_rotation()'''
@@ -417,30 +418,30 @@ class testNetworkCell(unittest.TestCase):
                         templateargs=None,
                         )
 
-        xstarts = cell.xstart.copy()
-        xmids = cell.xmid.copy()
-        xends = cell.xend.copy()
-        ystarts = cell.ystart.copy()
-        ymids = cell.ymid.copy()
-        yends = cell.yend.copy()
-        zstarts = cell.zstart.copy()
-        zmids = cell.zmid.copy()
-        zends = cell.zend.copy()
+        xstarts = cell.x[:, 0].copy()
+        xmids = cell.x.mean(axis=-1).copy()
+        xends = cell.x[:, -1].copy()
+        ystarts = cell.y[:, 0].copy()
+        ymids = cell.y.mean(axis=-1).copy()
+        yends = cell.y[:, -1].copy()
+        zstarts = cell.z[:, 0].copy()
+        zmids = cell.z.mean(axis=-1).copy()
+        zends = cell.z[:, -1].copy()
         # test rotation: 90 deg around x-axis, 90 deg around y-axis, 90 deg around z-axis
         cell.set_rotation(x=np.pi / 2., y=np.pi, z=np.pi / 4.)
         # revert rotation: -90 deg around x-axis, -90 deg around y-axis, -90 deg around z-axis, rotation_order='zyx'
         cell.set_rotation(x=-np.pi / 2., y=-np.pi, z=-np.pi / 4., rotation_order='zyx')
         # assert that x-, y- and z-coordinates are same as beginning, using absolute
         # tolerances
-        np.testing.assert_allclose(cell.xstart, xstarts, atol=1e-07)
-        np.testing.assert_allclose(cell.xmid, xmids, atol=1e-07)
-        np.testing.assert_allclose(cell.xend, xends, atol=1e-07)
-        np.testing.assert_allclose(cell.ystart, ystarts, atol=1e-07)
-        np.testing.assert_allclose(cell.ymid, ymids, atol=1e-07)
-        np.testing.assert_allclose(cell.yend, yends, atol=1e-07)
-        np.testing.assert_allclose(cell.zstart, zstarts, atol=1e-07)
-        np.testing.assert_allclose(cell.zmid, zmids, atol=1e-07)
-        np.testing.assert_allclose(cell.zend, zends, atol=1e-07)
+        np.testing.assert_allclose(cell.x[:, 0], xstarts, atol=1e-07)
+        np.testing.assert_allclose(cell.x.mean(axis=-1), xmids, atol=1e-07)
+        np.testing.assert_allclose(cell.x[:, -1], xends, atol=1e-07)
+        np.testing.assert_allclose(cell.y[:, 0], ystarts, atol=1e-07)
+        np.testing.assert_allclose(cell.y.mean(axis=-1), ymids, atol=1e-07)
+        np.testing.assert_allclose(cell.y[:, -1], yends, atol=1e-07)
+        np.testing.assert_allclose(cell.z[:, 0], zstarts, atol=1e-07)
+        np.testing.assert_allclose(cell.z.mean(axis=-1), zmids, atol=1e-07)
+        np.testing.assert_allclose(cell.z[:, -1], zends, atol=1e-07)
 
     def test_cell_chiral_morphology_00(self):
         '''test LFPy.NetworkCell.chiral_morphology()'''
@@ -451,28 +452,28 @@ class testNetworkCell(unittest.TestCase):
                         templateargs=None,
                          )
 
-        xstarts = cell.xstart.copy()
-        xmids = cell.xmid.copy()
-        xends = cell.xend.copy()
-        ystarts = cell.ystart.copy()
-        ymids = cell.ymid.copy()
-        yends = cell.yend.copy()
-        zstarts = cell.zstart.copy()
-        zmids = cell.zmid.copy()
-        zends = cell.zend.copy()
+        xstarts = cell.x[:, 0].copy()
+        xmids = cell.x.mean(axis=-1).copy()
+        xends = cell.x[:, -1].copy()
+        ystarts = cell.y[:, 0].copy()
+        ymids = cell.y.mean(axis=-1).copy()
+        yends = cell.y[:, -1].copy()
+        zstarts = cell.z[:, 0].copy()
+        zmids = cell.z.mean(axis=-1).copy()
+        zends = cell.z[:, -1].copy()
         # test rotation 180 deg around x-axis
         cell.chiral_morphology(axis='x')
         # assert that y- and z-coordinates are inverted, using absolute
         # tolerances
-        np.testing.assert_allclose(cell.xstart, -xstarts, atol=1e-07)
-        np.testing.assert_allclose(cell.xmid, -xmids, atol=1e-07)
-        np.testing.assert_allclose(cell.xend, -xends, atol=1e-07)
-        np.testing.assert_allclose(cell.ystart, ystarts, atol=1e-07)
-        np.testing.assert_allclose(cell.ymid, ymids, atol=1e-07)
-        np.testing.assert_allclose(cell.yend, yends, atol=1e-07)
-        np.testing.assert_allclose(cell.zstart, zstarts, atol=1e-07)
-        np.testing.assert_allclose(cell.zmid, zmids, atol=1e-07)
-        np.testing.assert_allclose(cell.zend, zends, atol=1e-07)
+        np.testing.assert_allclose(cell.x[:, 0], -xstarts, atol=1e-07)
+        np.testing.assert_allclose(cell.x.mean(axis=-1), -xmids, atol=1e-07)
+        np.testing.assert_allclose(cell.x[:, -1], -xends, atol=1e-07)
+        np.testing.assert_allclose(cell.y[:, 0], ystarts, atol=1e-07)
+        np.testing.assert_allclose(cell.y.mean(axis=-1), ymids, atol=1e-07)
+        np.testing.assert_allclose(cell.y[:, -1], yends, atol=1e-07)
+        np.testing.assert_allclose(cell.z[:, 0], zstarts, atol=1e-07)
+        np.testing.assert_allclose(cell.z.mean(axis=-1), zmids, atol=1e-07)
+        np.testing.assert_allclose(cell.z[:, -1], zends, atol=1e-07)
 
 
     def test_cell_chiral_morphology_01(self):
@@ -484,28 +485,28 @@ class testNetworkCell(unittest.TestCase):
                         templateargs=None,
                         )
 
-        xstarts = cell.xstart.copy()
-        xmids = cell.xmid.copy()
-        xends = cell.xend.copy()
-        ystarts = cell.ystart.copy()
-        ymids = cell.ymid.copy()
-        yends = cell.yend.copy()
-        zstarts = cell.zstart.copy()
-        zmids = cell.zmid.copy()
-        zends = cell.zend.copy()
+        xstarts = cell.x[:, 0].copy()
+        xmids = cell.x.mean(axis=-1).copy()
+        xends = cell.x[:, -1].copy()
+        ystarts = cell.y[:, 0].copy()
+        ymids = cell.y.mean(axis=-1).copy()
+        yends = cell.y[:, -1].copy()
+        zstarts = cell.z[:, 0].copy()
+        zmids = cell.z.mean(axis=-1).copy()
+        zends = cell.z[:, -1]
         # test rotation 180 deg around y-axis
         cell.chiral_morphology(axis='y')
         # assert that y- and z-coordinates are inverted, using absolute
         # tolerances
-        np.testing.assert_allclose(cell.xstart, xstarts, atol=1e-07)
-        np.testing.assert_allclose(cell.xmid, xmids, atol=1e-07)
-        np.testing.assert_allclose(cell.xend, xends, atol=1e-07)
-        np.testing.assert_allclose(cell.ystart, -ystarts, atol=1e-07)
-        np.testing.assert_allclose(cell.ymid, -ymids, atol=1e-07)
-        np.testing.assert_allclose(cell.yend, -yends, atol=1e-07)
-        np.testing.assert_allclose(cell.zstart, zstarts, atol=1e-07)
-        np.testing.assert_allclose(cell.zmid, zmids, atol=1e-07)
-        np.testing.assert_allclose(cell.zend, zends, atol=1e-07)
+        np.testing.assert_allclose(cell.x[:, 0], xstarts, atol=1e-07)
+        np.testing.assert_allclose(cell.x.mean(axis=-1), xmids, atol=1e-07)
+        np.testing.assert_allclose(cell.x[:, -1], xends, atol=1e-07)
+        np.testing.assert_allclose(cell.y[:, 0], -ystarts, atol=1e-07)
+        np.testing.assert_allclose(cell.y.mean(axis=-1), -ymids, atol=1e-07)
+        np.testing.assert_allclose(cell.y[:, -1], -yends, atol=1e-07)
+        np.testing.assert_allclose(cell.z[:, 0], zstarts, atol=1e-07)
+        np.testing.assert_allclose(cell.z.mean(axis=-1), zmids, atol=1e-07)
+        np.testing.assert_allclose(cell.z[:, -1], zends, atol=1e-07)
 
     def test_cell_chiral_morphology_02(self):
         '''test LFPy.NetworkCell.chiral_morphology()'''
@@ -516,30 +517,28 @@ class testNetworkCell(unittest.TestCase):
                         templateargs=None,
                         )
 
-        xstarts = cell.xstart.copy()
-        xmids = cell.xmid.copy()
-        xends = cell.xend.copy()
-        ystarts = cell.ystart.copy()
-        ymids = cell.ymid.copy()
-        yends = cell.yend.copy()
-        zstarts = cell.zstart.copy()
-        zmids = cell.zmid.copy()
-        zends = cell.zend.copy()
+        xstarts = cell.x[:, 0].copy()
+        xmids = cell.x.mean(axis=-1).copy()
+        xends = cell.x[:, -1].copy()
+        ystarts = cell.y[:, 0].copy()
+        ymids = cell.y.mean(axis=-1).copy()
+        yends = cell.y[:, -1].copy()
+        zstarts = cell.z[:, 0].copy()
+        zmids = cell.z.mean(axis=-1).copy()
+        zends = cell.z[:, -1].copy()
         # test rotation 180 deg around z-axis
         cell.chiral_morphology(axis='z')
         # assert that y- and z-coordinates are inverted, using absolute
-
         # tolerances
-        np.testing.assert_allclose(cell.xstart, xstarts, atol=1e-07)
-        np.testing.assert_allclose(cell.xmid, xmids, atol=1e-07)
-        np.testing.assert_allclose(cell.xend, xends, atol=1e-07)
-        np.testing.assert_allclose(cell.ystart, ystarts, atol=1e-07)
-        np.testing.assert_allclose(cell.ymid, ymids, atol=1e-07)
-        np.testing.assert_allclose(cell.yend, yends, atol=1e-07)
-        np.testing.assert_allclose(cell.zstart, -zstarts, atol=1e-07)
-        np.testing.assert_allclose(cell.zmid, -zmids, atol=1e-07)
-        np.testing.assert_allclose(cell.zend, -zends, atol=1e-07)
-
+        np.testing.assert_allclose(cell.x[:, 0], xstarts, atol=1e-07)
+        np.testing.assert_allclose(cell.x.mean(axis=-1), xmids, atol=1e-07)
+        np.testing.assert_allclose(cell.x[:, -1], xends, atol=1e-07)
+        np.testing.assert_allclose(cell.y[:, 0], ystarts, atol=1e-07)
+        np.testing.assert_allclose(cell.y.mean(axis=-1), ymids, atol=1e-07)
+        np.testing.assert_allclose(cell.y[:, -1], yends, atol=1e-07)
+        np.testing.assert_allclose(cell.z[:, 0], -zstarts, atol=1e-07)
+        np.testing.assert_allclose(cell.z.mean(axis=-1), -zmids, atol=1e-07)
+        np.testing.assert_allclose(cell.z[:, -1], -zends, atol=1e-07)
 
     def test_cell_get_rand_prob_area_norm_00(self):
         '''test LFPy.NetworkCell.get_rand_prob_area_norm()'''
@@ -590,9 +589,9 @@ class testNetworkCell(unittest.TestCase):
         vector = cell.get_intersegment_vector(idx0=idx0, idx1=idx1)
 
         self.assertListEqual(vector,
-                            [cell.xmid[idx1] - cell.xmid[idx0],
-                             cell.ymid[idx1] - cell.ymid[idx0],
-                             cell.zmid[idx1] - cell.zmid[idx0]])
+                             [cell.x[idx1].mean(axis=-1) - cell.x[idx0].mean(axis=-1),
+                              cell.y[idx1].mean(axis=-1) - cell.y[idx0].mean(axis=-1),
+                              cell.z[idx1].mean(axis=-1) - cell.z[idx0].mean(axis=-1)])
 
 
     def test_cell_get_intersegment_distance_00(self):
@@ -786,16 +785,12 @@ class testNetworkCell(unittest.TestCase):
         }
 
         stick = LFPy.NetworkCell(**stickParams)
-        stick.simulate(rec_vmem=True, rec_imem=True,
-                       rec_current_dipole_moment=True)
+        stick.simulate(rec_vmem=True, rec_imem=True)
         self.assertTrue(stick.tvec.size ==
                         stick.vmem.shape[1] ==
-                        stick.imem.shape[1] ==
-                        stick.current_dipole_moment.shape[0])
+                        stick.imem.shape[1])
         self.assertTrue(np.all(stick.vmem == stick.v_init))
         self.assertTrue(np.all(stick.imem == 0.))
-        self.assertTrue(np.all(stick.current_dipole_moment == 0.))
-
 
     def test_cell_simulate_recorder_01(self):
         stickParams = {
@@ -815,15 +810,12 @@ class testNetworkCell(unittest.TestCase):
             'lambda_f' : 100,
         }
         stick = LFPy.NetworkCell(**stickParams)
-        stick.simulate(rec_vmem=True, rec_imem=True,
-                       rec_current_dipole_moment=True)
+        stick.simulate(rec_vmem=True, rec_imem=True)
         self.assertTrue(stick.tvec.size ==
                         stick.vmem.shape[1] ==
-                        stick.imem.shape[1] ==
-                        stick.current_dipole_moment.shape[0])
+                        stick.imem.shape[1])
         self.assertTrue(np.all(stick.vmem == stick.v_init))
         self.assertTrue(np.all(stick.imem == 0.))
-        self.assertTrue(np.all(stick.current_dipole_moment == 0.))
 
     def test_cell_simulate_recorder_02(self):
         stickParams = {
@@ -843,15 +835,12 @@ class testNetworkCell(unittest.TestCase):
             'lambda_f' : 100,
         }
         stick = LFPy.NetworkCell(**stickParams)
-        stick.simulate(rec_vmem=True, rec_imem=True,
-                       rec_current_dipole_moment=True)
+        stick.simulate(rec_vmem=True, rec_imem=True)
         self.assertTrue(stick.tvec.size ==
                         stick.vmem.shape[1] ==
-                        stick.imem.shape[1] ==
-                        stick.current_dipole_moment.shape[0])
+                        stick.imem.shape[1])
         self.assertTrue(np.all(stick.vmem == stick.v_init))
         self.assertTrue(np.all(stick.imem == 0.))
-        self.assertTrue(np.all(stick.current_dipole_moment == 0.))
 
     def test_cell_simulate_recorder_03(self):
         stickParams = {
@@ -872,15 +861,12 @@ class testNetworkCell(unittest.TestCase):
         }
 
         stick = LFPy.NetworkCell(**stickParams)
-        stick.simulate(rec_vmem=True, rec_imem=True,
-                       rec_current_dipole_moment=True)
+        stick.simulate(rec_vmem=True, rec_imem=True)
         self.assertTrue(stick.tvec.size ==
                         stick.vmem.shape[1] ==
-                        stick.imem.shape[1] ==
-                        stick.current_dipole_moment.shape[0])
+                        stick.imem.shape[1])
         self.assertTrue(np.all(stick.vmem == stick.v_init))
         self.assertTrue(np.all(stick.imem == 0.))
-        self.assertTrue(np.all(stick.current_dipole_moment == 0.))
 
 
     def test_cell_simulate_recorder_04(self):
@@ -901,15 +887,12 @@ class testNetworkCell(unittest.TestCase):
             'lambda_f' : 100,
         }
         stick = LFPy.NetworkCell(**stickParams)
-        stick.simulate(rec_vmem=True, rec_imem=True,
-                       rec_current_dipole_moment=True)
+        stick.simulate(rec_vmem=True, rec_imem=True)
         self.assertTrue(stick.tvec.size ==
                         stick.vmem.shape[1] ==
-                        stick.imem.shape[1] ==
-                        stick.current_dipole_moment.shape[0])
+                        stick.imem.shape[1])
         self.assertTrue(np.all(stick.vmem == stick.v_init))
         self.assertTrue(np.all(stick.imem == 0.))
-        self.assertTrue(np.all(stick.current_dipole_moment == 0.))
 
     def test_cell_simulate_recorder_05(self):
         stickParams = {
@@ -929,15 +912,12 @@ class testNetworkCell(unittest.TestCase):
             'lambda_f' : 100,
         }
         stick = LFPy.NetworkCell(**stickParams)
-        stick.simulate(rec_vmem=True, rec_imem=True,
-                       rec_current_dipole_moment=True)
+        stick.simulate(rec_vmem=True, rec_imem=True)
         self.assertTrue(stick.tvec.size ==
                         stick.vmem.shape[1] ==
-                        stick.imem.shape[1] ==
-                        stick.current_dipole_moment.shape[0])
+                        stick.imem.shape[1])
         self.assertTrue(np.all(stick.vmem == stick.v_init))
         self.assertTrue(np.all(stick.imem == 0.))
-        self.assertTrue(np.all(stick.current_dipole_moment == 0.))
 
     def test_cell_simulate_current_dipole_moment_00(self):
         stickParams = {
@@ -970,11 +950,13 @@ class testNetworkCell(unittest.TestCase):
         for idx in range(31): #31 segments
             if idx != 15: # no net dipole moment because of stick symmetry
                 stick = LFPy.NetworkCell(**stickParams)
-                synapse = LFPy.StimIntElectrode(stick, idx=idx,
-                                       **stimParams)
-                stick.simulate(rec_imem=True, rec_current_dipole_moment=True)
-                p = np.dot(stick.imem.T, np.c_[stick.xmid, stick.ymid, stick.zmid])
-                np.testing.assert_allclose(p, stick.current_dipole_moment)
+                LFPy.StimIntElectrode(stick, idx=idx, **stimParams)
+                probes = [LFPy.CurrentDipoleMoment(stick)]
+                stick.simulate(probes=probes, rec_imem=True)
+                p = np.c_[stick.x.mean(axis=-1),
+                          stick.y.mean(axis=-1),
+                          stick.z.mean(axis=-1)].T @ stick.imem
+                np.testing.assert_allclose(p, probes[0].data)
 
                 stick.__del__()
 
@@ -1011,11 +993,13 @@ class testNetworkCell(unittest.TestCase):
         for idx in range(31): #31 segments
             if idx != 15: # no net dipole moment because of stick symmetry
                 stick = LFPy.NetworkCell(**stickParams)
-                synapse = LFPy.StimIntElectrode(stick, idx=idx,
-                                       **stimParams)
-                stick.simulate(rec_imem=True, rec_current_dipole_moment=True)
-                p = np.dot(stick.imem.T, np.c_[stick.xmid, stick.ymid, stick.zmid])
-                np.testing.assert_allclose(p, stick.current_dipole_moment)
+                LFPy.StimIntElectrode(stick, idx=idx, **stimParams)
+                probes = [LFPy.CurrentDipoleMoment(stick)]
+                stick.simulate(probes=probes, rec_imem=True)
+                p = np.c_[stick.x.mean(axis=-1),
+                          stick.y.mean(axis=-1),
+                          stick.z.mean(axis=-1)].T @ stick.imem
+                np.testing.assert_allclose(p, probes[0].data)
 
                 stick.__del__()
 
@@ -1052,9 +1036,12 @@ class testNetworkCell(unittest.TestCase):
                 synapse = LFPy.Synapse(stick, idx=idx,
                                        **stimParams)
                 synapse.set_spike_times(np.array([10., 20., 30., 40., 50.]))
-                stick.simulate(rec_imem=True, rec_current_dipole_moment=True)
-                p = np.dot(stick.imem.T, np.c_[stick.xmid, stick.ymid, stick.zmid])
-                np.testing.assert_allclose(p, stick.current_dipole_moment)
+                probes = [LFPy.CurrentDipoleMoment(stick)]
+                stick.simulate(probes=probes, rec_imem=True)
+                p = np.c_[stick.x.mean(axis=-1),
+                          stick.y.mean(axis=-1),
+                          stick.z.mean(axis=-1)].T @ stick.imem
+                np.testing.assert_allclose(p, probes[0].data)
 
                 stick.__del__()
 
@@ -1088,22 +1075,18 @@ class testNetworkCell(unittest.TestCase):
                                          stick0.get_closest_idx(0, 0, 1000),
                                          delay=0, phase=0.,
                                          **stimParams)
-        stick0.simulate(rec_imem=True, rec_vmem=True, rec_current_dipole_moment=True)
-
+        stick0.simulate(rec_imem=True, rec_vmem=True)
 
         stick1 = LFPy.NetworkCell(tstart=-100, tstop=100, **stickParams)
         synapse1 = LFPy.StimIntElectrode(stick1,
                                          stick1.get_closest_idx(0, 0, 1000),
                                          delay=-100, phase=0.,
                                          **stimParams)
-        stick1.simulate(rec_imem=True, rec_vmem=True, rec_current_dipole_moment=True)
+        stick1.simulate(rec_imem=True, rec_vmem=True)
 
         inds = stick0.tvec >= 100
         np.testing.assert_allclose(stick0.vmem[:, inds], stick1.vmem)
         np.testing.assert_allclose(stick0.imem[:, inds], stick1.imem)
-        np.testing.assert_allclose(stick0.current_dipole_moment[inds, :],
-                                   stick1.current_dipole_moment)
-
 
     def test_cell_with_recextelectrode_00(self):
         stickParams = {
@@ -1121,7 +1104,6 @@ class testNetworkCell(unittest.TestCase):
             'dt' : 2**-4,
             'nsegs_method' : 'lambda_f',
             'lambda_f' : 100,
-
         }
 
         electrodeParams = {
@@ -1144,18 +1126,17 @@ class testNetworkCell(unittest.TestCase):
         }
 
         stick = LFPy.NetworkCell(**stickParams)
-        synapse = LFPy.StimIntElectrode(stick, stick.get_closest_idx(0, 0, 1000),
-                               **stimParams)
-        electrode = LFPy.RecExtElectrode(**electrodeParams)
-        stick.simulate(electrode, rec_imem=True)
+        LFPy.StimIntElectrode(stick, stick.get_closest_idx(0, 0, 1000),
+                              **stimParams)
+        electrode = LFPy.RecExtElectrode(stick, **electrodeParams)
+        stick.simulate(probes=[electrode], rec_imem=True)
 
-        electrode1 = LFPy.RecExtElectrode(cell=stick, **electrodeParams)
-        electrode1.calc_lfp()
-
-        np.testing.assert_allclose(electrode.LFP, electrode1.LFP)
+        M = electrode.get_transformation_matrix()
+        LFP = M @ stick.imem
+        np.testing.assert_allclose(electrode.data, LFP)
         self.assertTrue(stick.tvec.size == stick.imem.shape[1] ==
-                        electrode.LFP.shape[1] == electrode1.LFP.shape[1] ==
-                        int(stick.tstop/stick.dt)+1)
+                        electrode.data.shape[1] == LFP.shape[1] ==
+                        int(stick.tstop / stick.dt) + 1)
 
 
     def test_cell_with_recextelectrode_01(self):
@@ -1197,18 +1178,17 @@ class testNetworkCell(unittest.TestCase):
         }
 
         stick = LFPy.NetworkCell(**stickParams)
-        synapse = LFPy.StimIntElectrode(stick, stick.get_closest_idx(0, 0, 1000),
-                               **stimParams)
-        electrode = LFPy.RecExtElectrode(**electrodeParams)
-        stick.simulate(electrode, rec_imem=True)
+        LFPy.StimIntElectrode(stick, stick.get_closest_idx(0, 0, 1000),
+                              **stimParams)
+        electrode = LFPy.RecExtElectrode(stick, **electrodeParams)
+        stick.simulate(probes=[electrode], rec_imem=True)
 
-        electrode1 = LFPy.RecExtElectrode(cell=stick, **electrodeParams)
-        electrode1.calc_lfp()
-
-        np.testing.assert_allclose(electrode.LFP, electrode1.LFP)
+        M = electrode.get_transformation_matrix()
+        LFP = M @ stick.imem
+        np.testing.assert_allclose(electrode.data, LFP)
         self.assertTrue(stick.tvec.size == stick.imem.shape[1] ==
-                        electrode.LFP.shape[1] == electrode1.LFP.shape[1] ==
-                        int(stick.tstop/stick.dt)+1)
+                        electrode.data.shape[1] == LFP.shape[1] ==
+                        int(stick.tstop / stick.dt) + 1)
 
     def test_cell_with_recextelectrode_02(self):
         stickParams = {
@@ -1249,18 +1229,17 @@ class testNetworkCell(unittest.TestCase):
         }
 
         stick = LFPy.NetworkCell(**stickParams)
-        synapse = LFPy.StimIntElectrode(stick, stick.get_closest_idx(0, 0, 1000),
-                               **stimParams)
-        electrode = LFPy.RecExtElectrode(**electrodeParams)
-        stick.simulate(electrode, rec_imem=True)
+        LFPy.StimIntElectrode(stick, stick.get_closest_idx(0, 0, 1000),
+                              **stimParams)
+        electrode = LFPy.RecExtElectrode(stick, **electrodeParams)
+        stick.simulate(probes=[electrode], rec_imem=True)
 
-        electrode1 = LFPy.RecExtElectrode(cell=stick, **electrodeParams)
-        electrode1.calc_lfp()
-
-        np.testing.assert_allclose(electrode.LFP, electrode1.LFP)
+        M = electrode.get_transformation_matrix()
+        LFP = M @ stick.imem
+        np.testing.assert_allclose(electrode.data, LFP)
         self.assertTrue(stick.tvec.size == stick.imem.shape[1] ==
-                        electrode.LFP.shape[1] == electrode1.LFP.shape[1] ==
-                        int(stick.tstop/stick.dt)+1)
+                        electrode.data.shape[1] == LFP.shape[1] ==
+                        int(stick.tstop / stick.dt) + 1)
 
     def test_cell_with_recextelectrode_03(self):
         stickParams = {
@@ -1301,20 +1280,19 @@ class testNetworkCell(unittest.TestCase):
         }
 
         stick = LFPy.NetworkCell(**stickParams)
-        synapse = LFPy.StimIntElectrode(stick, stick.get_closest_idx(0, 0, 1000),
-                               **stimParams)
-        electrode = LFPy.RecExtElectrode(**electrodeParams)
-        stick.simulate(electrode, rec_imem=True)
+        LFPy.StimIntElectrode(stick, stick.get_closest_idx(0, 0, 1000),
+                              **stimParams)
+        electrode = LFPy.RecExtElectrode(stick, **electrodeParams)
+        stick.simulate(probes=[electrode], rec_imem=True)
 
-        electrode1 = LFPy.RecExtElectrode(cell=stick, **electrodeParams)
-        electrode1.calc_lfp()
-
-        np.testing.assert_allclose(electrode.LFP, electrode1.LFP)
+        M = electrode.get_transformation_matrix()
+        LFP = M @ stick.imem
+        np.testing.assert_allclose(electrode.data, LFP)
         self.assertTrue(stick.tvec.size == stick.imem.shape[1] ==
-                        electrode.LFP.shape[1] == electrode1.LFP.shape[1] ==
-                        int(stick.tstop/stick.dt)+1)
+                        electrode.data.shape[1] == LFP.shape[1] ==
+                        int(stick.tstop / stick.dt) + 1)
 
-    def test_cell_distort_geometry_01(self):
+    def test_cell_distort_geometry_00(self):
         cell0 = LFPy.NetworkCell(morphology=os.path.join(LFPy.__path__[0], 'test',
                                                   'ball_and_sticks_w_lists.hoc' ),
                         templatefile=os.path.join(LFPy.__path__[0], 'test', 'ball_and_stick_template.hoc'),
@@ -1333,12 +1311,13 @@ class testNetworkCell(unittest.TestCase):
                         templateargs=None,
                         )
                     cell1.distort_geometry(factor=factor, nu=nu, axis=axis)
-                    for attr in ['start', 'mid', 'end']:
-                        for ax in 'xyz'.replace(axis, ''):
-                            np.testing.assert_allclose(getattr(cell0, ax+attr)*(1+factor*nu),
-                                                       getattr(cell1, ax+attr))
-                        np.testing.assert_allclose(getattr(cell0, axis+attr)*(1-factor),
-                                                   getattr(cell1, axis+attr))
+                    # for attr in ['start', 'mid', 'end']:
+                    for ax in 'xyz'.replace(axis, ''):
+                        np.testing.assert_allclose(getattr(cell0, ax)*(1+factor*nu),
+                                                   getattr(cell1, ax))
+                    np.testing.assert_allclose(getattr(cell0, axis)*(1-factor),
+                                               getattr(cell1, axis))
+
 
 def stickSimulationTesttvec(**kwargs):
     stick = LFPy.NetworkCell(morphology = os.path.join(LFPy.__path__[0], 'test',
