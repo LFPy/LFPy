@@ -4,6 +4,7 @@
 
 """
 
+from distutils.spawn import find_executable, spawn
 import os
 import sys
 import shutil
@@ -21,11 +22,11 @@ try:
     from Cython.Distutils import build_ext
     cmdclass = {'build_ext': build_ext}
     ext_modules = [Extension('LFPy.run_simulation',
-                   [os.path.join('LFPy', 'run_simulation.pyx')],
-                   include_dirs=[numpy.get_include()]),
+                             [os.path.join('LFPy', 'run_simulation.pyx')],
+                             include_dirs=[numpy.get_include()]),
                    Extension('LFPy.alias_method',
-                   [os.path.join('LFPy', 'alias_method.pyx')],
-                   include_dirs=[numpy.get_include()]),
+                             [os.path.join('LFPy', 'alias_method.pyx')],
+                             include_dirs=[numpy.get_include()]),
                    ]
 except ImportError:
     print("'from Cython.Distutils import build_ext' or 'import numpy' failed!")
@@ -33,8 +34,6 @@ except ImportError:
     print("simulations in LFPy may run slower")
     cmdclass = {}
     ext_modules = []
-
-from distutils.spawn import find_executable, spawn
 
 
 # try and locate the nrnivmodl script of NEURON in PATH so that the
@@ -73,7 +72,8 @@ setup(
     url='http://LFPy.readthedocs.io',
     download_url='https://github.com/LFPy/LFPy/tarball/v{}'.format(version),
     license='LICENSE',
-    description='A module for modeling extracellular potentials of multicompartment neuron models built on NEURON',
+    description=('A module for modeling extracellular potentials of '
+                 'multicompartment neuron models built on NEURON'),
     long_description=long_description,
     classifiers=[
         'License :: OSI Approved :: GNU General Public License (GPL)',
@@ -87,7 +87,7 @@ setup(
         'Intended Audience :: Developers',
         'Intended Audience :: Science/Research',
         'Development Status :: 5 - Production/Stable',
-        ],
+    ],
     install_requires=[
         'neuron>=7.6.4',
         'numpy>=1.8',
@@ -97,10 +97,10 @@ setup(
         'mpi4py>=1.2',
         'MEAutility>=1.4.2',
         'LFPykit @ git+https://github.com/LFPy/LFPykit@master'
-        ],
+    ],
     extras_require={'tests': ['pytest'],
                     'docs': ['sphinx', 'numpydoc', 'sphinx_rtd_theme']
                     },
     dependency_links=[],
     provides=['LFPy'],
-    )
+)
