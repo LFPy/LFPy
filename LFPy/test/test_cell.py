@@ -398,8 +398,8 @@ class testCell(unittest.TestCase):
             y=-np.pi,
             z=-np.pi / 4.,
             rotation_order='zyx')
-        # assert that x-, y- and z-coordinates are same as beginning, using absolute
-        # tolerances
+        # assert that x-, y- and z-coordinates are same as beginning,
+        # using absolute tolerances
         np.testing.assert_allclose(cell.x[:, 0], xstarts, atol=1e-07)
         np.testing.assert_allclose(cell.x.mean(axis=-1), xmids, atol=1e-07)
         np.testing.assert_allclose(cell.x[:, -1], xends, atol=1e-07)
@@ -527,9 +527,12 @@ class testCell(unittest.TestCase):
         vector = cell.get_intersegment_vector(idx0=idx0, idx1=idx1)
 
         self.assertListEqual(vector,
-                             [cell.x[idx1].mean(axis=-1) - cell.x[idx0].mean(axis=-1),
-                              cell.y[idx1].mean(axis=-1) - cell.y[idx0].mean(axis=-1),
-                              cell.z[idx1].mean(axis=-1) - cell.z[idx0].mean(axis=-1)])
+                             [cell.x[idx1].mean(axis=-1)
+                              - cell.x[idx0].mean(axis=-1),
+                              cell.y[idx1].mean(axis=-1)
+                              - cell.y[idx0].mean(axis=-1),
+                              cell.z[idx1].mean(axis=-1)
+                              - cell.z[idx0].mean(axis=-1)])
 
     def test_cell_get_intersegment_distance_00(self):
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
@@ -739,7 +742,8 @@ class testCell(unittest.TestCase):
 
     def test_cell_get_axial_currents_from_vmem_03(self):
         '''
-        Check Kirchhoff in soma when single dend connected to random soma point.
+        Check Kirchhoff in soma when single dend connected to random
+        soma point.
         '''
         neuron.h('forall delete_section()')
         soma = neuron.h.Section(name='soma')
@@ -1447,17 +1451,17 @@ class testCell(unittest.TestCase):
         }
 
         stick0 = LFPy.Cell(tstart=0, tstop=200, **stickParams)
-        synapse0 = LFPy.StimIntElectrode(stick0,
-                                         stick0.get_closest_idx(0, 0, 1000),
-                                         delay=0, phase=0.,
-                                         **stimParams)
+        LFPy.StimIntElectrode(stick0,
+                              stick0.get_closest_idx(0, 0, 1000),
+                              delay=0, phase=0.,
+                              **stimParams)
         stick0.simulate(rec_imem=True, rec_vmem=True)
 
         stick1 = LFPy.Cell(tstart=-100, tstop=100, **stickParams)
-        synapse1 = LFPy.StimIntElectrode(stick1,
-                                         stick1.get_closest_idx(0, 0, 1000),
-                                         delay=-100, phase=0.,
-                                         **stimParams)
+        LFPy.StimIntElectrode(stick1,
+                              stick1.get_closest_idx(0, 0, 1000),
+                              delay=-100, phase=0.,
+                              **stimParams)
         stick1.simulate(rec_imem=True, rec_vmem=True)
 
         inds = stick0.tvec >= 100

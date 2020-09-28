@@ -572,6 +572,7 @@ class testInfiniteVolumeConductor(unittest.TestCase):
     """
     test class InfiniteVolumeConductor
     """
+
     def test_get_dipole_potential_00(self):
         sigma = 0.3
         r = np.array([[0., 0., 1.], [0., 1., 0.]])
@@ -791,23 +792,23 @@ def cell_w_synapse_from_sections(morphology, rec_current_dipole_moment=False):
     '''
     cellParams = {
         'morphology': morphology,
-        'cm' : 1,
-        'Ra' : 150,
-        'v_init' : -65,
-        'passive' : True,
-        'passive_parameters' : {'g_pas' : 1./30000, 'e_pas' : -65},
-        'dt' : 2**-6,
-        'tstart' : -50,
-        'tstop' : 50,
-        'delete_sections' : False
+        'cm': 1,
+        'Ra': 150,
+        'v_init': -65,
+        'passive': True,
+        'passive_parameters': {'g_pas': 1. / 30000, 'e_pas': -65},
+        'dt': 2**-6,
+        'tstart': -50,
+        'tstop': 50,
+        'delete_sections': False
     }
 
     synapse_parameters = {'e': 0.,
-                      'syntype': 'ExpSyn',
-                      'tau': 5.,
-                      'weight': .001,
-                      'record_current': True,
-                      'idx': 1}
+                          'syntype': 'ExpSyn',
+                          'tau': 5.,
+                          'weight': .001,
+                          'record_current': True,
+                          'idx': 1}
 
     cell = LFPy.Cell(**cellParams)
     synapse = LFPy.Synapse(cell, **synapse_parameters)
@@ -828,32 +829,32 @@ def cell_w_synapse_from_sections_w_electrode(morphology, electrode_locs):
     '''
     cellParams = {
         'morphology': morphology,
-        'cm' : 1,
-        'Ra' : 150,
-        'v_init' : -65,
-        'passive' : True,
-        'passive_parameters' : {'g_pas' : 1./30000, 'e_pas' : -65},
-        'dt' : 2**-6,
-        'tstart' : -50,
-        'tstop' : 50,
-        'delete_sections' : False
+        'cm': 1,
+        'Ra': 150,
+        'v_init': -65,
+        'passive': True,
+        'passive_parameters': {'g_pas': 1. / 30000, 'e_pas': -65},
+        'dt': 2**-6,
+        'tstart': -50,
+        'tstop': 50,
+        'delete_sections': False
     }
 
     electrodeParams = {'sigma': 0.3,
-                        'x': electrode_locs[:,0],
-                        'y': electrode_locs[:,1],
-                        'z': electrode_locs[:,2],
-                        }
+                       'x': electrode_locs[:, 0],
+                       'y': electrode_locs[:, 1],
+                       'z': electrode_locs[:, 2],
+                       }
     cell = LFPy.Cell(**cellParams)
     electrode = LFPy.RecExtElectrode(cell, **electrodeParams)
     cdm = LFPy.CurrentDipoleMoment(cell)
 
     synapse_parameters = {'e': 0.,
-                      'syntype': 'ExpSyn',
-                      'tau': 5.,
-                      'weight': .1,
-                      'record_current': True,
-                      'idx': cell.totnsegs-1}
+                          'syntype': 'ExpSyn',
+                          'tau': 5.,
+                          'weight': .1,
+                          'record_current': True,
+                          'idx': cell.totnsegs - 1}
 
     synapse = LFPy.Synapse(cell, **synapse_parameters)
     synapse.set_spike_times(np.array([1.]))

@@ -28,7 +28,7 @@ import pickle
 if "win32" in sys.platform:
     pth = os.path.join(LFPy.__path__[0], 'test', 'nrnmech.dll')
     pth = pth.replace(os.sep, posixpath.sep)
-    if not pth in neuron.nrn_dll_loaded:
+    if pth not in neuron.nrn_dll_loaded:
         neuron.h.nrn_load_dll(pth)
         neuron.nrn_dll_loaded.append(pth)
 else:
@@ -39,115 +39,124 @@ class testNetworkCell(unittest.TestCase):
     """
 
     """
+
     def test_cell_tvec_00(self):
         stickParams = {
-            'dt' : 2**-3,
-            'tstart' : 0.,
-            'tstop' : 100.,
+            'dt': 2**-3,
+            'tstart': 0.,
+            'tstop': 100.,
         }
 
         tvec = stickSimulationTesttvec(**stickParams)
-        tvec_numpy = np.linspace(0, stickParams['tstop'],
-                    int(stickParams['tstop']/stickParams['dt']) + 1)
+        tvec_numpy = np.linspace(
+            0, stickParams['tstop'], int(
+                stickParams['tstop'] / stickParams['dt']) + 1)
 
         np.testing.assert_allclose(tvec, tvec_numpy, atol=1E-9)
 
     def test_cell_tvec_01(self):
         stickParams = {
-            'dt' : 2**-3,
-            'tstart' : 0.,
-            'tstop' : 10000.,
+            'dt': 2**-3,
+            'tstart': 0.,
+            'tstop': 10000.,
         }
 
         tvec = stickSimulationTesttvec(**stickParams)
-        tvec_numpy = np.linspace(0, stickParams['tstop'],
-                    int(stickParams['tstop']/stickParams['dt']) + 1)
+        tvec_numpy = np.linspace(
+            0, stickParams['tstop'], int(
+                stickParams['tstop'] / stickParams['dt']) + 1)
 
         np.testing.assert_allclose(tvec, tvec_numpy, atol=1E-9)
 
     def test_cell_tvec_02(self):
         stickParams = {
-            'dt' : 0.1,
-            'tstart' : 0,
-            'tstop' : 100,
+            'dt': 0.1,
+            'tstart': 0,
+            'tstop': 100,
         }
 
         tvec = stickSimulationTesttvec(**stickParams)
-        tvec_numpy = np.linspace(0, stickParams['tstop'],
-                    int(stickParams['tstop']/stickParams['dt']) + 1)
+        tvec_numpy = np.linspace(
+            0, stickParams['tstop'], int(
+                stickParams['tstop'] / stickParams['dt']) + 1)
 
         np.testing.assert_allclose(tvec, tvec_numpy, atol=1E-9)
 
     def test_cell_tvec_03(self):
         stickParams = {
-            'dt' : 0.1,
-            'tstart' : 0,
-            'tstop' : 10000,
+            'dt': 0.1,
+            'tstart': 0,
+            'tstop': 10000,
         }
 
         tvec = stickSimulationTesttvec(**stickParams)
-        tvec_numpy = np.linspace(0, stickParams['tstop'],
-                    int(stickParams['tstop']/stickParams['dt']) + 1)
+        tvec_numpy = np.linspace(
+            0, stickParams['tstop'], int(
+                stickParams['tstop'] / stickParams['dt']) + 1)
 
         np.testing.assert_allclose(tvec, tvec_numpy, atol=1E-9)
 
     def test_cell_tvec_04(self):
         stickParams = {
-            'dt' : 0.2,
-            'tstart' : 0,
-            'tstop' : 100,
+            'dt': 0.2,
+            'tstart': 0,
+            'tstop': 100,
         }
 
         tvec = stickSimulationTesttvec(**stickParams)
-        tvec_numpy = np.linspace(0, stickParams['tstop'],
-                    int(stickParams['tstop']/stickParams['dt']) + 1)
+        tvec_numpy = np.linspace(
+            0, stickParams['tstop'], int(
+                stickParams['tstop'] / stickParams['dt']) + 1)
 
         np.testing.assert_allclose(tvec, tvec_numpy, atol=1E-9)
 
     def test_cell_tvec_05(self):
         stickParams = {
-            'dt' : 0.2,
-            'tstart' : 0,
-            'tstop' : 10000,
+            'dt': 0.2,
+            'tstart': 0,
+            'tstop': 10000,
         }
 
         tvec = stickSimulationTesttvec(**stickParams)
-        tvec_numpy = np.linspace(0, stickParams['tstop'],
-                    int(stickParams['tstop']/stickParams['dt']) + 1)
+        tvec_numpy = np.linspace(
+            0, stickParams['tstop'], int(
+                stickParams['tstop'] / stickParams['dt']) + 1)
 
         np.testing.assert_allclose(tvec, tvec_numpy, atol=1E-9)
 
     def test_cell_tvec_06(self):
         stickParams = {
-            'dt' : 2**-3,
-            'tstart' : -100,
-            'tstop' : 100,
+            'dt': 2**-3,
+            'tstart': -100,
+            'tstop': 100,
         }
 
         tvec = stickSimulationTesttvec(**stickParams)
-        tvec_numpy = np.linspace(0, stickParams['tstop'],
-                    int(stickParams['tstop']/stickParams['dt']) + 1)
+        tvec_numpy = np.linspace(
+            0, stickParams['tstop'], int(
+                stickParams['tstop'] / stickParams['dt']) + 1)
 
         np.testing.assert_allclose(tvec, tvec_numpy, atol=1E-9)
 
     def test_cell_tvec_07(self):
         stickParams = {
-            'dt' : 2**-3,
-            'tstart' : -100,
-            'tstop' : 10000,
+            'dt': 2**-3,
+            'tstart': -100,
+            'tstop': 10000,
         }
 
         tvec = stickSimulationTesttvec(**stickParams)
-        tvec_numpy = np.linspace(0, stickParams['tstop'],
-                    int(stickParams['tstop']/stickParams['dt']) + 1)
+        tvec_numpy = np.linspace(
+            0, stickParams['tstop'], int(
+                stickParams['tstop'] / stickParams['dt']) + 1)
 
         np.testing.assert_allclose(tvec, tvec_numpy, atol=1E-9)
 
     def test_cell_tvec_08(self):
         stickParams = {
-            'dt' : 0.1,
-            'tstart' : -100,
-            'tstop' : 10000,
+            'dt': 0.1,
+            'tstart': -100,
+            'tstop': 10000,
         }
 
         try:
@@ -157,9 +166,9 @@ class testNetworkCell(unittest.TestCase):
 
     def test_cell_tvec_09(self):
         stickParams = {
-            'dt' : 0.2,
-            'tstart' : -100,
-            'tstop' : 10000,
+            'dt': 0.2,
+            'tstart': -100,
+            'tstop': 10000,
         }
 
         try:
@@ -169,44 +178,68 @@ class testNetworkCell(unittest.TestCase):
 
     def test_cell_set_pos_00(self):
         '''test LFPy.NetworkCell.set_pos'''
-        cell = LFPy.NetworkCell(morphology=os.path.join(LFPy.__path__[0], 'test',
-                                                  'ball_and_sticks_w_lists.hoc' ),
-                        templatefile=os.path.join(LFPy.__path__[0], 'test', 'ball_and_stick_template.hoc'),
-                        templatename='ball_and_stick_template',
-                        templateargs=None,
-                         )
+        cell = LFPy.NetworkCell(
+            morphology=os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'ball_and_sticks_w_lists.hoc'),
+            templatefile=os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'ball_and_stick_template.hoc'),
+            templatename='ball_and_stick_template',
+            templateargs=None,
+        )
         np.testing.assert_allclose(cell.somapos, [0, 0, 0])
 
     def test_cell_set_pos_01(self):
         '''test LFPy.NetworkCell.set_pos'''
-        cell = LFPy.NetworkCell(morphology=os.path.join(LFPy.__path__[0], 'test',
-                                                  'ball_and_sticks_w_lists.hoc' ),
-                        templatefile=os.path.join(LFPy.__path__[0], 'test', 'ball_and_stick_template.hoc'),
-                        templatename='ball_and_stick_template',
-                        templateargs=None,
-                        )
+        cell = LFPy.NetworkCell(
+            morphology=os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'ball_and_sticks_w_lists.hoc'),
+            templatefile=os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'ball_and_stick_template.hoc'),
+            templatename='ball_and_stick_template',
+            templateargs=None,
+        )
         cell.set_pos(10., 20., -30.)
         np.testing.assert_allclose(cell.somapos, [10., 20., -30.])
 
     def test_cell_set_pos_02(self):
         '''test LFPy.NetworkCell.set_pos'''
-        cell = LFPy.NetworkCell(morphology=os.path.join(LFPy.__path__[0], 'test',
-                                                  'ball_and_sticks_w_lists.hoc' ),
-                        templatefile=os.path.join(LFPy.__path__[0], 'test', 'ball_and_stick_template.hoc'),
-                        templatename='ball_and_stick_template',
-                        templateargs=None,
-                          pt3d=True)
+        cell = LFPy.NetworkCell(
+            morphology=os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'ball_and_sticks_w_lists.hoc'),
+            templatefile=os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'ball_and_stick_template.hoc'),
+            templatename='ball_and_stick_template',
+            templateargs=None,
+            pt3d=True)
         cell.set_pos(10., 20., -30.)
         np.testing.assert_allclose(cell.somapos, [10., 20., -30.])
 
     def test_cell_set_pos_03(self):
         '''test LFPy.NetworkCell.set_pos'''
-        cell = LFPy.NetworkCell(morphology=os.path.join(LFPy.__path__[0], 'test',
-                                                  'ball_and_sticks_w_lists.hoc' ),
-                        templatefile=os.path.join(LFPy.__path__[0], 'test', 'ball_and_stick_template.hoc'),
-                        templatename='ball_and_stick_template',
-                        templateargs=None,
-                         )
+        cell = LFPy.NetworkCell(
+            morphology=os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'ball_and_sticks_w_lists.hoc'),
+            templatefile=os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'ball_and_stick_template.hoc'),
+            templatename='ball_and_stick_template',
+            templateargs=None,
+        )
         cell.set_pos(10., 20., -30.)
         cell.set_pos(10., 20., -30.)
         cell.set_pos(10., 20., -30.)
@@ -214,26 +247,37 @@ class testNetworkCell(unittest.TestCase):
 
     def test_cell_set_pos_04(self):
         '''test LFPy.NetworkCell.set_pos'''
-        cell = LFPy.NetworkCell(morphology=os.path.join(LFPy.__path__[0], 'test',
-                                                  'ball_and_sticks_w_lists.hoc'),
-                        templatefile=os.path.join(LFPy.__path__[0], 'test', 'ball_and_stick_template.hoc'),
-                        templatename='ball_and_stick_template',
-                        templateargs=None,
-                        pt3d=True)
+        cell = LFPy.NetworkCell(
+            morphology=os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'ball_and_sticks_w_lists.hoc'),
+            templatefile=os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'ball_and_stick_template.hoc'),
+            templatename='ball_and_stick_template',
+            templateargs=None,
+            pt3d=True)
         cell.set_pos(10., 20., -30.)
         cell.set_pos(10., 20., -30.)
         cell.set_pos(10., 20., -30.)
         np.testing.assert_allclose(cell.somapos, [10., 20., -30.])
 
-
     def test_cell_set_pos_05(self):
         '''test LFPy.NetworkCell.set_pos'''
-        cell = LFPy.NetworkCell(morphology=os.path.join(LFPy.__path__[0], 'test',
-                                                  'ball_and_sticks_w_lists.hoc' ),
-                        templatefile=os.path.join(LFPy.__path__[0], 'test', 'ball_and_stick_template.hoc'),
-                        templatename='ball_and_stick_template',
-                        templateargs=None,
-                        )
+        cell = LFPy.NetworkCell(
+            morphology=os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'ball_and_sticks_w_lists.hoc'),
+            templatefile=os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'ball_and_stick_template.hoc'),
+            templatename='ball_and_stick_template',
+            templateargs=None,
+        )
         np.testing.assert_allclose(cell.somapos,
                                    [cell.x[0].mean(axis=-1),
                                     cell.y[0].mean(axis=-1),
@@ -241,26 +285,37 @@ class testNetworkCell(unittest.TestCase):
 
     def test_cell_set_pos_06(self):
         '''test LFPy.NetworkCell.set_pos'''
-        cell = LFPy.NetworkCell(morphology=os.path.join(LFPy.__path__[0], 'test',
-                                                  'ball_and_sticks_w_lists.hoc' ),
-                        templatefile=os.path.join(LFPy.__path__[0], 'test', 'ball_and_stick_template.hoc'),
-                        templatename='ball_and_stick_template',
-                        templateargs=None,
-                        pt3d=True)
+        cell = LFPy.NetworkCell(
+            morphology=os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'ball_and_sticks_w_lists.hoc'),
+            templatefile=os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'ball_and_stick_template.hoc'),
+            templatename='ball_and_stick_template',
+            templateargs=None,
+            pt3d=True)
         np.testing.assert_allclose(cell.somapos,
                                    [cell.x[0].mean(axis=-1),
                                     cell.y[0].mean(axis=-1),
                                     cell.z[0].mean(axis=-1)])
 
-
     def test_cell_set_rotation_00(self):
         '''test LFPy.NetworkCell.set_rotation()'''
-        cell = LFPy.NetworkCell(morphology=os.path.join(LFPy.__path__[0], 'test',
-                                                  'ball_and_sticks_w_lists.hoc' ),
-                        templatefile=os.path.join(LFPy.__path__[0], 'test', 'ball_and_stick_template.hoc'),
-                        templatename='ball_and_stick_template',
-                        templateargs=None,
-                        )
+        cell = LFPy.NetworkCell(
+            morphology=os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'ball_and_sticks_w_lists.hoc'),
+            templatefile=os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'ball_and_stick_template.hoc'),
+            templatename='ball_and_stick_template',
+            templateargs=None,
+        )
 
         ystarts = cell.y[:, 0].copy()
         ymids = cell.y.mean(axis=-1).copy()
@@ -279,15 +334,20 @@ class testNetworkCell(unittest.TestCase):
         np.testing.assert_allclose(cell.z.mean(axis=-1), -zmids, atol=1e-07)
         np.testing.assert_allclose(cell.z[:, -1], -zends, atol=1e-07)
 
-
     def test_cell_set_rotation_01(self):
         '''test LFPy.NetworkCell.set_rotation()'''
-        cell = LFPy.NetworkCell(morphology=os.path.join(LFPy.__path__[0], 'test',
-                                                  'ball_and_sticks_w_lists.hoc' ),
-                        templatefile=os.path.join(LFPy.__path__[0], 'test', 'ball_and_stick_template.hoc'),
-                        templatename='ball_and_stick_template',
-                        templateargs=None,
-                        )
+        cell = LFPy.NetworkCell(
+            morphology=os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'ball_and_sticks_w_lists.hoc'),
+            templatefile=os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'ball_and_stick_template.hoc'),
+            templatename='ball_and_stick_template',
+            templateargs=None,
+        )
 
         xstarts = cell.x[:, 0].copy()
         xmids = cell.x.mean(axis=-1).copy()
@@ -306,15 +366,20 @@ class testNetworkCell(unittest.TestCase):
         np.testing.assert_allclose(cell.z.mean(axis=-1), -zmids, atol=1e-07)
         np.testing.assert_allclose(cell.z[:, -1], -zends, atol=1e-07)
 
-
     def test_cell_set_rotation_02(self):
         '''test LFPy.NetworkCell.set_rotation()'''
-        cell = LFPy.NetworkCell(morphology=os.path.join(LFPy.__path__[0], 'test',
-                                                  'ball_and_sticks_w_lists.hoc' ),
-                        templatefile=os.path.join(LFPy.__path__[0], 'test', 'ball_and_stick_template.hoc'),
-                        templatename='ball_and_stick_template',
-                        templateargs=None,
-                        )
+        cell = LFPy.NetworkCell(
+            morphology=os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'ball_and_sticks_w_lists.hoc'),
+            templatefile=os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'ball_and_stick_template.hoc'),
+            templatename='ball_and_stick_template',
+            templateargs=None,
+        )
         xstarts = cell.x[:, 0].copy()
         xmids = cell.x.mean(axis=-1).copy()
         xends = cell.x[:, -1].copy()
@@ -334,12 +399,18 @@ class testNetworkCell(unittest.TestCase):
 
     def test_cell_set_rotation_03(self):
         '''test LFPy.NetworkCell.set_rotation()'''
-        cell = LFPy.NetworkCell(morphology=os.path.join(LFPy.__path__[0], 'test',
-                                                  'ball_and_sticks_w_lists.hoc' ),
-                        templatefile=os.path.join(LFPy.__path__[0], 'test', 'ball_and_stick_template.hoc'),
-                        templatename='ball_and_stick_template',
-                        templateargs=None,
-                        pt3d=True)
+        cell = LFPy.NetworkCell(
+            morphology=os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'ball_and_sticks_w_lists.hoc'),
+            templatefile=os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'ball_and_stick_template.hoc'),
+            templatename='ball_and_stick_template',
+            templateargs=None,
+            pt3d=True)
 
         ystarts = cell.y[:, 0].copy()
         ymids = cell.y.mean(axis=-1).copy()
@@ -360,12 +431,18 @@ class testNetworkCell(unittest.TestCase):
 
     def test_cell_set_rotation_04(self):
         '''test LFPy.NetworkCell.set_rotation()'''
-        cell = LFPy.NetworkCell(morphology=os.path.join(LFPy.__path__[0], 'test',
-                                                  'ball_and_sticks_w_lists.hoc' ),
-                        templatefile=os.path.join(LFPy.__path__[0], 'test', 'ball_and_stick_template.hoc'),
-                        templatename='ball_and_stick_template',
-                        templateargs=None,
-                        pt3d=True)
+        cell = LFPy.NetworkCell(
+            morphology=os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'ball_and_sticks_w_lists.hoc'),
+            templatefile=os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'ball_and_stick_template.hoc'),
+            templatename='ball_and_stick_template',
+            templateargs=None,
+            pt3d=True)
 
         xstarts = cell.x[:, 0].copy()
         xmids = cell.x.mean(axis=-1).copy()
@@ -386,12 +463,18 @@ class testNetworkCell(unittest.TestCase):
 
     def test_cell_set_rotation_05(self):
         '''test LFPy.NetworkCell.set_rotation()'''
-        cell = LFPy.NetworkCell(morphology=os.path.join(LFPy.__path__[0], 'test',
-                                                  'ball_and_sticks_w_lists.hoc' ),
-                        templatefile=os.path.join(LFPy.__path__[0], 'test', 'ball_and_stick_template.hoc'),
-                        templatename='ball_and_stick_template',
-                        templateargs=None,
-                        pt3d=True)
+        cell = LFPy.NetworkCell(
+            morphology=os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'ball_and_sticks_w_lists.hoc'),
+            templatefile=os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'ball_and_stick_template.hoc'),
+            templatename='ball_and_stick_template',
+            templateargs=None,
+            pt3d=True)
 
         xstarts = cell.x[:, 0].copy()
         xmids = cell.x.mean(axis=-1).copy()
@@ -412,11 +495,18 @@ class testNetworkCell(unittest.TestCase):
 
     def test_cell_set_rotation_06(self):
         '''test LFPy.NetworkCell.set_rotation()'''
-        cell = LFPy.NetworkCell(morphology=os.path.join(LFPy.__path__[0], 'test', 'stick.hoc'),
-                        templatefile=os.path.join(LFPy.__path__[0], 'test', 'ball_and_stick_template.hoc'),
-                        templatename='ball_and_stick_template',
-                        templateargs=None,
-                        )
+        cell = LFPy.NetworkCell(
+            morphology=os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'stick.hoc'),
+            templatefile=os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'ball_and_stick_template.hoc'),
+            templatename='ball_and_stick_template',
+            templateargs=None,
+        )
 
         xstarts = cell.x[:, 0].copy()
         xmids = cell.x.mean(axis=-1).copy()
@@ -427,12 +517,18 @@ class testNetworkCell(unittest.TestCase):
         zstarts = cell.z[:, 0].copy()
         zmids = cell.z.mean(axis=-1).copy()
         zends = cell.z[:, -1].copy()
-        # test rotation: 90 deg around x-axis, 90 deg around y-axis, 90 deg around z-axis
+        # test rotation: 90 deg around x-axis, 90 deg around y-axis, 90 deg
+        # around z-axis
         cell.set_rotation(x=np.pi / 2., y=np.pi, z=np.pi / 4.)
-        # revert rotation: -90 deg around x-axis, -90 deg around y-axis, -90 deg around z-axis, rotation_order='zyx'
-        cell.set_rotation(x=-np.pi / 2., y=-np.pi, z=-np.pi / 4., rotation_order='zyx')
-        # assert that x-, y- and z-coordinates are same as beginning, using absolute
-        # tolerances
+        # revert rotation: -90 deg around x-axis, -90 deg around y-axis, -90
+        # deg around z-axis, rotation_order='zyx'
+        cell.set_rotation(
+            x=-np.pi / 2.,
+            y=-np.pi,
+            z=-np.pi / 4.,
+            rotation_order='zyx')
+        # assert that x-, y- and z-coordinates are same as beginning, using
+        # absolute tolerances
         np.testing.assert_allclose(cell.x[:, 0], xstarts, atol=1e-07)
         np.testing.assert_allclose(cell.x.mean(axis=-1), xmids, atol=1e-07)
         np.testing.assert_allclose(cell.x[:, -1], xends, atol=1e-07)
@@ -445,12 +541,18 @@ class testNetworkCell(unittest.TestCase):
 
     def test_cell_chiral_morphology_00(self):
         '''test LFPy.NetworkCell.chiral_morphology()'''
-        cell = LFPy.NetworkCell(morphology=os.path.join(LFPy.__path__[0], 'test',
-                                                  'ball_and_sticks_w_lists.hoc' ),
-                        templatefile=os.path.join(LFPy.__path__[0], 'test', 'ball_and_stick_template.hoc'),
-                        templatename='ball_and_stick_template',
-                        templateargs=None,
-                         )
+        cell = LFPy.NetworkCell(
+            morphology=os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'ball_and_sticks_w_lists.hoc'),
+            templatefile=os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'ball_and_stick_template.hoc'),
+            templatename='ball_and_stick_template',
+            templateargs=None,
+        )
 
         xstarts = cell.x[:, 0].copy()
         xmids = cell.x.mean(axis=-1).copy()
@@ -475,15 +577,20 @@ class testNetworkCell(unittest.TestCase):
         np.testing.assert_allclose(cell.z.mean(axis=-1), zmids, atol=1e-07)
         np.testing.assert_allclose(cell.z[:, -1], zends, atol=1e-07)
 
-
     def test_cell_chiral_morphology_01(self):
         '''test LFPy.NetworkCell.chiral_morphology()'''
-        cell = LFPy.NetworkCell(morphology=os.path.join(LFPy.__path__[0], 'test',
-                                                  'ball_and_sticks_w_lists.hoc' ),
-                        templatefile=os.path.join(LFPy.__path__[0], 'test', 'ball_and_stick_template.hoc'),
-                        templatename='ball_and_stick_template',
-                        templateargs=None,
-                        )
+        cell = LFPy.NetworkCell(
+            morphology=os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'ball_and_sticks_w_lists.hoc'),
+            templatefile=os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'ball_and_stick_template.hoc'),
+            templatename='ball_and_stick_template',
+            templateargs=None,
+        )
 
         xstarts = cell.x[:, 0].copy()
         xmids = cell.x.mean(axis=-1).copy()
@@ -510,12 +617,18 @@ class testNetworkCell(unittest.TestCase):
 
     def test_cell_chiral_morphology_02(self):
         '''test LFPy.NetworkCell.chiral_morphology()'''
-        cell = LFPy.NetworkCell(morphology=os.path.join(LFPy.__path__[0], 'test',
-                                                  'ball_and_sticks_w_lists.hoc' ),
-                        templatefile=os.path.join(LFPy.__path__[0], 'test', 'ball_and_stick_template.hoc'),
-                        templatename='ball_and_stick_template',
-                        templateargs=None,
-                        )
+        cell = LFPy.NetworkCell(
+            morphology=os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'ball_and_sticks_w_lists.hoc'),
+            templatefile=os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'ball_and_stick_template.hoc'),
+            templatename='ball_and_stick_template',
+            templateargs=None,
+        )
 
         xstarts = cell.x[:, 0].copy()
         xmids = cell.x.mean(axis=-1).copy()
@@ -542,65 +655,97 @@ class testNetworkCell(unittest.TestCase):
 
     def test_cell_get_rand_prob_area_norm_00(self):
         '''test LFPy.NetworkCell.get_rand_prob_area_norm()'''
-        cell = LFPy.NetworkCell(morphology=os.path.join(LFPy.__path__[0], 'test',
-                                                 'ball_and_sticks_w_lists.hoc' ),
-                        templatefile=os.path.join(LFPy.__path__[0], 'test', 'ball_and_stick_template.hoc'),
-                        templatename='ball_and_stick_template',
-                        templateargs=None,
-                        )
+        cell = LFPy.NetworkCell(
+            morphology=os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'ball_and_sticks_w_lists.hoc'),
+            templatefile=os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'ball_and_stick_template.hoc'),
+            templatename='ball_and_stick_template',
+            templateargs=None,
+        )
         p = cell.get_rand_prob_area_norm()
         self.assertAlmostEqual(p.sum(), 1.)
         self.assertTrue(p.min() >= 0.)
         self.assertTrue(p.max() <= 1.)
 
-
     def test_cell_get_rand_prob_area_norm_from_idx(self):
-        cell = LFPy.NetworkCell(morphology=os.path.join(LFPy.__path__[0], 'test',
-                                                 'ball_and_sticks_w_lists.hoc' ),
-                        templatefile=os.path.join(LFPy.__path__[0], 'test', 'ball_and_stick_template.hoc'),
-                        templatename='ball_and_stick_template',
-                        templateargs=None,
-                        )
-        p = cell.get_rand_prob_area_norm_from_idx(idx=cell.get_idx(section='allsec'))
-        self.assertListEqual(cell.get_rand_prob_area_norm().tolist(), p.tolist())
-
+        cell = LFPy.NetworkCell(
+            morphology=os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'ball_and_sticks_w_lists.hoc'),
+            templatefile=os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'ball_and_stick_template.hoc'),
+            templatename='ball_and_stick_template',
+            templateargs=None,
+        )
+        p = cell.get_rand_prob_area_norm_from_idx(
+            idx=cell.get_idx(section='allsec'))
+        self.assertListEqual(
+            cell.get_rand_prob_area_norm().tolist(),
+            p.tolist())
 
     def test_cell_get_rand_prob_area_norm_from_idx_00(self):
         '''test LFPy.NetworkCell.get_rand_prob_area_norm()'''
-        cell = LFPy.NetworkCell(morphology=os.path.join(LFPy.__path__[0], 'test',
-                                                  'ball_and_sticks_w_lists.hoc' ),
-                        templatefile=os.path.join(LFPy.__path__[0], 'test', 'ball_and_stick_template.hoc'),
-                        templatename='ball_and_stick_template',
-                        templateargs=None,
-                        )
+        cell = LFPy.NetworkCell(
+            morphology=os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'ball_and_sticks_w_lists.hoc'),
+            templatefile=os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'ball_and_stick_template.hoc'),
+            templatename='ball_and_stick_template',
+            templateargs=None,
+        )
         p = cell.get_rand_prob_area_norm_from_idx(idx=np.array([0]))
         np.testing.assert_equal(p, np.array([1.]))
 
-
     def test_cell_get_intersegment_vector_00(self):
-        cell = LFPy.NetworkCell(morphology=os.path.join(LFPy.__path__[0], 'test',
-                                                  'ball_and_sticks_w_lists.hoc' ),
-                        templatefile=os.path.join(LFPy.__path__[0], 'test', 'ball_and_stick_template.hoc'),
-                        templatename='ball_and_stick_template',
-                        templateargs=None,
-                        )
+        cell = LFPy.NetworkCell(
+            morphology=os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'ball_and_sticks_w_lists.hoc'),
+            templatefile=os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'ball_and_stick_template.hoc'),
+            templatename='ball_and_stick_template',
+            templateargs=None,
+        )
         idx0 = 0
         idx1 = 1
         vector = cell.get_intersegment_vector(idx0=idx0, idx1=idx1)
 
         self.assertListEqual(vector,
-                             [cell.x[idx1].mean(axis=-1) - cell.x[idx0].mean(axis=-1),
-                              cell.y[idx1].mean(axis=-1) - cell.y[idx0].mean(axis=-1),
-                              cell.z[idx1].mean(axis=-1) - cell.z[idx0].mean(axis=-1)])
-
+                             [cell.x[idx1].mean(axis=-1)
+                              - cell.x[idx0].mean(axis=-1),
+                              cell.y[idx1].mean(axis=-1)
+                              - cell.y[idx0].mean(axis=-1),
+                              cell.z[idx1].mean(axis=-1)
+                              - cell.z[idx0].mean(axis=-1)])
 
     def test_cell_get_intersegment_distance_00(self):
-        cell = LFPy.NetworkCell(morphology=os.path.join(LFPy.__path__[0], 'test',
-                                                  'ball_and_sticks_w_lists.hoc' ),
-                        templatefile=os.path.join(LFPy.__path__[0], 'test', 'ball_and_stick_template.hoc'),
-                        templatename='ball_and_stick_template',
-                        templateargs=None,
-                        )
+        cell = LFPy.NetworkCell(
+            morphology=os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'ball_and_sticks_w_lists.hoc'),
+            templatefile=os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'ball_and_stick_template.hoc'),
+            templatename='ball_and_stick_template',
+            templateargs=None,
+        )
         idx0 = 0
         idx1 = 1
         distance = cell.get_intersegment_distance(idx0=idx0, idx1=idx1)
@@ -608,14 +753,19 @@ class testNetworkCell(unittest.TestCase):
 
         self.assertEqual(np.sqrt(np.array(vector)**2).sum(), distance)
 
-
     def test_cell_get_idx_00(self):
-        cell = LFPy.NetworkCell(morphology=os.path.join(LFPy.__path__[0], 'test',
-                                                  'ball_and_sticks_w_lists.hoc' ),
-                        templatefile=os.path.join(LFPy.__path__[0], 'test', 'ball_and_stick_template.hoc'),
-                        templatename='ball_and_stick_template',
-                        templateargs=None,
-                        nsegs_method=None)
+        cell = LFPy.NetworkCell(
+            morphology=os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'ball_and_sticks_w_lists.hoc'),
+            templatefile=os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'ball_and_stick_template.hoc'),
+            templatename='ball_and_stick_template',
+            templateargs=None,
+            nsegs_method=None)
         self.assertListEqual(cell.get_idx(section='soma').tolist(), [0])
         self.assertListEqual(cell.get_idx(section='soma[0]').tolist(), [0])
         self.assertListEqual(cell.get_idx(section='dend[0]').tolist(), [1])
@@ -628,87 +778,126 @@ class testNetworkCell(unittest.TestCase):
                              [0, 1, 2, 3])
         self.assertListEqual(cell.get_idx(section='apic').tolist(), [])
 
-
     def test_cell_get_closest_idx_00(self):
-        cell = LFPy.NetworkCell(morphology=os.path.join(LFPy.__path__[0], 'test',
-                                                  'ball_and_sticks_w_lists.hoc' ),
-                        templatefile=os.path.join(LFPy.__path__[0], 'test', 'ball_and_stick_template.hoc'),
-                        templatename='ball_and_stick_template',
-                        templateargs=None,
-                        nsegs_method=None)
+        cell = LFPy.NetworkCell(
+            morphology=os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'ball_and_sticks_w_lists.hoc'),
+            templatefile=os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'ball_and_stick_template.hoc'),
+            templatename='ball_and_stick_template',
+            templateargs=None,
+            nsegs_method=None)
         self.assertEqual(cell.get_closest_idx(x=0, y=0, z=0),
-                             cell.get_idx(section='soma')[0])
+                         cell.get_idx(section='soma')[0])
 
         self.assertEqual(cell.get_closest_idx(x=-25, y=0, z=175),
-                             cell.get_idx(section='dend[1]')[0])
-
+                         cell.get_idx(section='dend[1]')[0])
 
     def test_cell_get_idx_children_00(self):
-        cell = LFPy.NetworkCell(morphology=os.path.join(LFPy.__path__[0], 'test',
-                                                  'ball_and_sticks_w_lists.hoc' ),
-                        templatefile=os.path.join(LFPy.__path__[0], 'test', 'ball_and_stick_template.hoc'),
-                        templatename='ball_and_stick_template',
-                        templateargs=None,
-                        )
+        cell = LFPy.NetworkCell(
+            morphology=os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'ball_and_sticks_w_lists.hoc'),
+            templatefile=os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'ball_and_stick_template.hoc'),
+            templatename='ball_and_stick_template',
+            templateargs=None,
+        )
 
-        np.testing.assert_array_equal(cell.get_idx_children(parent='ball_and_stick_template[0].soma[0]'),
-                                      cell.get_idx(section='ball_and_stick_template[0].dend[0]'))
-
+        np.testing.assert_array_equal(
+            cell.get_idx_children(
+                parent='ball_and_stick_template[0].soma[0]'), cell.get_idx(
+                section='ball_and_stick_template[0].dend[0]'))
 
     def test_cell_get_idx_parent_children_00(self):
-        cell = LFPy.NetworkCell(morphology=os.path.join(LFPy.__path__[0], 'test',
-                                                  'ball_and_sticks_w_lists.hoc' ),
-                        templatefile=os.path.join(LFPy.__path__[0], 'test', 'ball_and_stick_template.hoc'),
-                        templatename='ball_and_stick_template',
-                        templateargs=None,
-                        )
-        np.testing.assert_array_equal(cell.get_idx_parent_children(parent='ball_and_stick_template[0].soma[0]'),
-                                      cell.get_idx(section=['ball_and_stick_template[0].soma[0]',
-                                                            'ball_and_stick_template[0].dend[0]']))
-
+        cell = LFPy.NetworkCell(
+            morphology=os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'ball_and_sticks_w_lists.hoc'),
+            templatefile=os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'ball_and_stick_template.hoc'),
+            templatename='ball_and_stick_template',
+            templateargs=None,
+        )
+        np.testing.assert_array_equal(
+            cell.get_idx_parent_children(
+                parent='ball_and_stick_template[0].soma[0]'),
+            cell.get_idx(
+                section=[
+                    'ball_and_stick_template[0].soma[0]',
+                    'ball_and_stick_template[0].dend[0]']))
 
     def test_cell_get_idx_name_00(self):
-        cell = LFPy.NetworkCell(morphology=os.path.join(LFPy.__path__[0], 'test',
-                                                  'ball_and_sticks_w_lists.hoc' ),
-                        templatefile=os.path.join(LFPy.__path__[0], 'test', 'ball_and_stick_template.hoc'),
-                        templatename='ball_and_stick_template',
-                        templateargs=None,
-                        )
-        np.testing.assert_array_equal(cell.get_idx_name(idx=np.array([0])),
-                                                np.array([[0, 'ball_and_stick_template[0].soma[0]', 0.5]],
-                                                         dtype=object))
-
+        cell = LFPy.NetworkCell(
+            morphology=os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'ball_and_sticks_w_lists.hoc'),
+            templatefile=os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'ball_and_stick_template.hoc'),
+            templatename='ball_and_stick_template',
+            templateargs=None,
+        )
+        np.testing.assert_array_equal(
+            cell.get_idx_name(idx=np.array([0])),
+            np.array([[0, 'ball_and_stick_template[0].soma[0]', 0.5]],
+                     dtype=object))
 
     def test_cell_get_rand_idx_area_norm_00(self):
-        cell = LFPy.NetworkCell(morphology=os.path.join(LFPy.__path__[0], 'test',
-                                                  'ball_and_sticks_w_lists.hoc' ),
-                        templatefile=os.path.join(LFPy.__path__[0], 'test', 'ball_and_stick_template.hoc'),
-                        templatename='ball_and_stick_template',
-                        templateargs=None,
-                        )
+        cell = LFPy.NetworkCell(
+            morphology=os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'ball_and_sticks_w_lists.hoc'),
+            templatefile=os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'ball_and_stick_template.hoc'),
+            templatename='ball_and_stick_template',
+            templateargs=None,
+        )
         idx = cell.get_rand_idx_area_norm(nidx=1000000)
 
-
         # compute histogram and correlate with segment area
-        bins = np.arange(cell.totnsegs+1)
+        bins = np.arange(cell.totnsegs + 1)
         hist, bin_edges = np.histogram(idx, bins=bins)
 
         # compute Pearson correlation coefficients between area and histogram
         # reporting success if within 4 decimal places
-        self.assertAlmostEqual(np.corrcoef(cell.area, hist)[0, 1], 1., places=4)
+        self.assertAlmostEqual(
+            np.corrcoef(
+                cell.area, hist)[
+                0, 1], 1., places=4)
 
         # check if min and max is in the range of segment indices
         self.assertEqual(idx.min(), 0)
-        self.assertEqual(idx.max(), cell.totnsegs-1)
-
+        self.assertEqual(idx.max(), cell.totnsegs - 1)
 
     def test_cell_set_synapse_00(self):
-        cell = LFPy.NetworkCell(morphology=os.path.join(LFPy.__path__[0], 'test',
-                                                  'ball_and_sticks_w_lists.hoc' ),
-                        templatefile=os.path.join(LFPy.__path__[0], 'test', 'ball_and_stick_template.hoc'),
-                        templatename='ball_and_stick_template',
-                        templateargs=None,
-                        )
+        cell = LFPy.NetworkCell(
+            morphology=os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'ball_and_sticks_w_lists.hoc'),
+            templatefile=os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'ball_and_stick_template.hoc'),
+            templatename='ball_and_stick_template',
+            templateargs=None,
+        )
         cell.set_synapse(idx=0, syntype='ExpSyn', record_curret=False,
                          record_potential=False, weight=1.,
                          **dict(e=10., tau=2.))
@@ -721,14 +910,19 @@ class testNetworkCell(unittest.TestCase):
         self.assertEqual(cell.synlist[0].tau, 2.)
         self.assertEqual(cell.netconlist[0].weight[0], 1.)
 
-
     def test_cell_set_point_process_00(self):
-        cell = LFPy.NetworkCell(morphology=os.path.join(LFPy.__path__[0], 'test',
-                                                  'ball_and_sticks_w_lists.hoc' ),
-                        templatefile=os.path.join(LFPy.__path__[0], 'test', 'ball_and_stick_template.hoc'),
-                        templatename='ball_and_stick_template',
-                        templateargs=None,
-                        )
+        cell = LFPy.NetworkCell(
+            morphology=os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'ball_and_sticks_w_lists.hoc'),
+            templatefile=os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'ball_and_stick_template.hoc'),
+            templatename='ball_and_stick_template',
+            templateargs=None,
+        )
         cell.set_point_process(idx=0, pptype='IClamp', record_current=False,
                                **dict(delay=1., amp=1.))
         self.assertEqual(cell.stimlist[0].hname(), 'IClamp[0]')
@@ -736,26 +930,37 @@ class testNetworkCell(unittest.TestCase):
         self.assertEqual(cell.stimlist[0].delay, 1.)
         self.assertEqual(cell.stimlist[0].amp, 1.)
 
-
     def test_cell_strip_hoc_objects_00(self):
-        cell = LFPy.NetworkCell(morphology=os.path.join(LFPy.__path__[0], 'test',
-                                                  'ball_and_sticks_w_lists.hoc' ),
-                        templatefile=os.path.join(LFPy.__path__[0], 'test', 'ball_and_stick_template.hoc'),
-                        templatename='ball_and_stick_template',
-                        templateargs=None,
-                        )
+        cell = LFPy.NetworkCell(
+            morphology=os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'ball_and_sticks_w_lists.hoc'),
+            templatefile=os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'ball_and_stick_template.hoc'),
+            templatename='ball_and_stick_template',
+            templateargs=None,
+        )
         cell.strip_hoc_objects()
         for attribute in dir(cell):
             self.assertNotEqual(str(type(getattr(cell, attribute))),
                                 'hoc.HocObject')
 
     def test_cell_cellpickler_00(self):
-        cell = LFPy.NetworkCell(morphology=os.path.join(LFPy.__path__[0], 'test',
-                                                  'ball_and_sticks_w_lists.hoc' ),
-                        templatefile=os.path.join(LFPy.__path__[0], 'test', 'ball_and_stick_template.hoc'),
-                        templatename='ball_and_stick_template',
-                        templateargs=None,
-                        )
+        cell = LFPy.NetworkCell(
+            morphology=os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'ball_and_sticks_w_lists.hoc'),
+            templatefile=os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'ball_and_stick_template.hoc'),
+            templatename='ball_and_stick_template',
+            templateargs=None,
+        )
         cell_pickle = cell.cellpickler(filename=None, pickler=pickle.dumps)
         pickled_cell = pickle.loads(cell_pickle)
 
@@ -768,20 +973,28 @@ class testNetworkCell(unittest.TestCase):
 
     def test_cell_simulate_recorder_00(self):
         stickParams = {
-            'morphology' : os.path.join(LFPy.__path__[0], 'test', 'stick.hoc'),
-            'templatefile' : os.path.join(LFPy.__path__[0], 'test', 'stick_template.hoc'),
-            'templatename' : 'stick_template',
-            'templateargs' : None,
-            'cm' : 1,
-            'Ra' : 150,
-            'v_init' : -65,
-            'passive' : True,
-            'passive_parameters' : {'g_pas' : 1./30000, 'e_pas' : -65},
-            'tstart' : 0,
-            'tstop' : 100,
-            'dt' : 2**-4,
-            'nsegs_method' : 'lambda_f',
-            'lambda_f' : 100,
+            'morphology': os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'stick.hoc'),
+            'templatefile': os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'stick_template.hoc'),
+            'templatename': 'stick_template',
+            'templateargs': None,
+            'cm': 1,
+            'Ra': 150,
+            'v_init': -65,
+            'passive': True,
+            'passive_parameters': {
+                'g_pas': 1. / 30000,
+                'e_pas': -65},
+            'tstart': 0,
+            'tstop': 100,
+            'dt': 2**-4,
+            'nsegs_method': 'lambda_f',
+            'lambda_f': 100,
         }
 
         stick = LFPy.NetworkCell(**stickParams)
@@ -794,20 +1007,28 @@ class testNetworkCell(unittest.TestCase):
 
     def test_cell_simulate_recorder_01(self):
         stickParams = {
-            'morphology' : os.path.join(LFPy.__path__[0], 'test', 'stick.hoc'),
-            'templatefile' : os.path.join(LFPy.__path__[0], 'test', 'stick_template.hoc'),
-            'templatename' : 'stick_template',
-            'templateargs' : None,
-            'cm' : 1,
-            'Ra' : 150,
-            'v_init' : -65,
-            'passive' : True,
-            'passive_parameters' : {'g_pas' : 1./30000, 'e_pas' : -65},
-            'tstart' : 0,
-            'tstop' : 100,
-            'dt' : 0.1,
-            'nsegs_method' : 'lambda_f',
-            'lambda_f' : 100,
+            'morphology': os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'stick.hoc'),
+            'templatefile': os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'stick_template.hoc'),
+            'templatename': 'stick_template',
+            'templateargs': None,
+            'cm': 1,
+            'Ra': 150,
+            'v_init': -65,
+            'passive': True,
+            'passive_parameters': {
+                'g_pas': 1. / 30000,
+                'e_pas': -65},
+            'tstart': 0,
+            'tstop': 100,
+            'dt': 0.1,
+            'nsegs_method': 'lambda_f',
+            'lambda_f': 100,
         }
         stick = LFPy.NetworkCell(**stickParams)
         stick.simulate(rec_vmem=True, rec_imem=True)
@@ -819,20 +1040,28 @@ class testNetworkCell(unittest.TestCase):
 
     def test_cell_simulate_recorder_02(self):
         stickParams = {
-            'morphology' : os.path.join(LFPy.__path__[0], 'test', 'stick.hoc'),
-            'templatefile' : os.path.join(LFPy.__path__[0], 'test', 'stick_template.hoc'),
-            'templatename' : 'stick_template',
-            'templateargs' : None,
-            'cm' : 1,
-            'Ra' : 150,
-            'v_init' : -65,
-            'passive' : True,
-            'passive_parameters' : {'g_pas' : 1./30000, 'e_pas' : -65},
-            'tstart' : 0,
-            'tstop' : 100,
-            'dt' : 0.2,
-            'nsegs_method' : 'lambda_f',
-            'lambda_f' : 100,
+            'morphology': os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'stick.hoc'),
+            'templatefile': os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'stick_template.hoc'),
+            'templatename': 'stick_template',
+            'templateargs': None,
+            'cm': 1,
+            'Ra': 150,
+            'v_init': -65,
+            'passive': True,
+            'passive_parameters': {
+                'g_pas': 1. / 30000,
+                'e_pas': -65},
+            'tstart': 0,
+            'tstop': 100,
+            'dt': 0.2,
+            'nsegs_method': 'lambda_f',
+            'lambda_f': 100,
         }
         stick = LFPy.NetworkCell(**stickParams)
         stick.simulate(rec_vmem=True, rec_imem=True)
@@ -844,20 +1073,28 @@ class testNetworkCell(unittest.TestCase):
 
     def test_cell_simulate_recorder_03(self):
         stickParams = {
-            'morphology' : os.path.join(LFPy.__path__[0], 'test', 'stick.hoc'),
-            'templatefile' : os.path.join(LFPy.__path__[0], 'test', 'stick_template.hoc'),
-            'templatename' : 'stick_template',
-            'templateargs' : None,
-            'cm' : 1,
-            'Ra' : 150,
-            'v_init' : -65,
-            'passive' : True,
-            'passive_parameters' : {'g_pas' : 1./30000, 'e_pas' : -65},
-            'tstart' : 0,
-            'tstop' : 10000,
-            'dt' : 2**-4,
-            'nsegs_method' : 'lambda_f',
-            'lambda_f' : 100,
+            'morphology': os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'stick.hoc'),
+            'templatefile': os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'stick_template.hoc'),
+            'templatename': 'stick_template',
+            'templateargs': None,
+            'cm': 1,
+            'Ra': 150,
+            'v_init': -65,
+            'passive': True,
+            'passive_parameters': {
+                'g_pas': 1. / 30000,
+                'e_pas': -65},
+            'tstart': 0,
+            'tstop': 10000,
+            'dt': 2**-4,
+            'nsegs_method': 'lambda_f',
+            'lambda_f': 100,
         }
 
         stick = LFPy.NetworkCell(**stickParams)
@@ -868,23 +1105,30 @@ class testNetworkCell(unittest.TestCase):
         self.assertTrue(np.all(stick.vmem == stick.v_init))
         self.assertTrue(np.all(stick.imem == 0.))
 
-
     def test_cell_simulate_recorder_04(self):
         stickParams = {
-            'morphology' : os.path.join(LFPy.__path__[0], 'test', 'stick.hoc'),
-            'templatefile' : os.path.join(LFPy.__path__[0], 'test', 'stick_template.hoc'),
-            'templatename' : 'stick_template',
-            'templateargs' : None,
-            'cm' : 1,
-            'Ra' : 150,
-            'v_init' : -65,
-            'passive' : True,
-            'passive_parameters' : {'g_pas' : 1./30000, 'e_pas' : -65},
-            'tstart' : 0,
-            'tstop' : 10000,
-            'dt' : 0.1,
-            'nsegs_method' : 'lambda_f',
-            'lambda_f' : 100,
+            'morphology': os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'stick.hoc'),
+            'templatefile': os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'stick_template.hoc'),
+            'templatename': 'stick_template',
+            'templateargs': None,
+            'cm': 1,
+            'Ra': 150,
+            'v_init': -65,
+            'passive': True,
+            'passive_parameters': {
+                'g_pas': 1. / 30000,
+                'e_pas': -65},
+            'tstart': 0,
+            'tstop': 10000,
+            'dt': 0.1,
+            'nsegs_method': 'lambda_f',
+            'lambda_f': 100,
         }
         stick = LFPy.NetworkCell(**stickParams)
         stick.simulate(rec_vmem=True, rec_imem=True)
@@ -896,20 +1140,28 @@ class testNetworkCell(unittest.TestCase):
 
     def test_cell_simulate_recorder_05(self):
         stickParams = {
-            'morphology' : os.path.join(LFPy.__path__[0], 'test', 'stick.hoc'),
-            'templatefile' : os.path.join(LFPy.__path__[0], 'test', 'stick_template.hoc'),
-            'templatename' : 'stick_template',
-            'templateargs' : None,
-            'cm' : 1,
-            'Ra' : 150,
-            'v_init' : -65,
-            'passive' : True,
-            'passive_parameters' : {'g_pas' : 1./30000, 'e_pas' : -65},
-            'tstart' : 0,
-            'tstop' : 10000,
-            'dt' : 0.2,
-            'nsegs_method' : 'lambda_f',
-            'lambda_f' : 100,
+            'morphology': os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'stick.hoc'),
+            'templatefile': os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'stick_template.hoc'),
+            'templatename': 'stick_template',
+            'templateargs': None,
+            'cm': 1,
+            'Ra': 150,
+            'v_init': -65,
+            'passive': True,
+            'passive_parameters': {
+                'g_pas': 1. / 30000,
+                'e_pas': -65},
+            'tstart': 0,
+            'tstop': 10000,
+            'dt': 0.2,
+            'nsegs_method': 'lambda_f',
+            'lambda_f': 100,
         }
         stick = LFPy.NetworkCell(**stickParams)
         stick.simulate(rec_vmem=True, rec_imem=True)
@@ -921,34 +1173,42 @@ class testNetworkCell(unittest.TestCase):
 
     def test_cell_simulate_current_dipole_moment_00(self):
         stickParams = {
-            'morphology' : os.path.join(LFPy.__path__[0], 'test', 'stick.hoc'),
-            'templatefile' : os.path.join(LFPy.__path__[0], 'test', 'stick_template.hoc'),
-            'templatename' : 'stick_template',
-            'templateargs' : None,
-            'cm' : 1,
-            'Ra' : 150,
-            'v_init' : -65,
-            'passive' : True,
-            'passive_parameters' : {'g_pas' : 1./30000, 'e_pas' : -65},
-            'tstart' : 0,
-            'tstop' : 100,
-            'dt' : 0.1,
-            'nsegs_method' : 'lambda_f',
-            'lambda_f' : 100,
+            'morphology': os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'stick.hoc'),
+            'templatefile': os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'stick_template.hoc'),
+            'templatename': 'stick_template',
+            'templateargs': None,
+            'cm': 1,
+            'Ra': 150,
+            'v_init': -65,
+            'passive': True,
+            'passive_parameters': {
+                'g_pas': 1. / 30000,
+                'e_pas': -65},
+            'tstart': 0,
+            'tstop': 100,
+            'dt': 0.1,
+            'nsegs_method': 'lambda_f',
+            'lambda_f': 100,
         }
 
         stimParams = {
-            'pptype' : 'SinSyn',
-            'delay' : 0.,
-            'dur' : 1000.,
-            'pkamp' : 1.,
-            'freq' : 100.,
-            'phase' : 0,
-            'bias' : 0.,
-            'record_current' : False
+            'pptype': 'SinSyn',
+            'delay': 0.,
+            'dur': 1000.,
+            'pkamp': 1.,
+            'freq': 100.,
+            'phase': 0,
+            'bias': 0.,
+            'record_current': False
         }
-        for idx in range(31): #31 segments
-            if idx != 15: # no net dipole moment because of stick symmetry
+        for idx in range(31):  # 31 segments
+            if idx != 15:  # no net dipole moment because of stick symmetry
                 stick = LFPy.NetworkCell(**stickParams)
                 LFPy.StimIntElectrode(stick, idx=idx, **stimParams)
                 probes = [LFPy.CurrentDipoleMoment(stick)]
@@ -959,39 +1219,46 @@ class testNetworkCell(unittest.TestCase):
                 np.testing.assert_allclose(p, probes[0].data)
 
                 stick.__del__()
-
 
     def test_cell_simulate_current_dipole_moment_01(self):
         stickParams = {
-            'morphology' : os.path.join(LFPy.__path__[0], 'test', 'stick.hoc'),
-            'templatefile' : os.path.join(LFPy.__path__[0], 'test', 'stick_template.hoc'),
-            'templatename' : 'stick_template',
-            'templateargs' : None,
-            'cm' : 1,
-            'Ra' : 150,
-            'v_init' : -65,
-            'passive' : True,
-            'passive_parameters' : {'g_pas' : 1./30000, 'e_pas' : -65},
-            'tstart' : -100,
-            'tstop' : 100,
-            'dt' : 2**-4,
-            'nsegs_method' : 'lambda_f',
-            'lambda_f' : 100,
+            'morphology': os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'stick.hoc'),
+            'templatefile': os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'stick_template.hoc'),
+            'templatename': 'stick_template',
+            'templateargs': None,
+            'cm': 1,
+            'Ra': 150,
+            'v_init': -65,
+            'passive': True,
+            'passive_parameters': {
+                'g_pas': 1. / 30000,
+                'e_pas': -65},
+            'tstart': -100,
+            'tstop': 100,
+            'dt': 2**-4,
+            'nsegs_method': 'lambda_f',
+            'lambda_f': 100,
         }
 
         stimParams = {
-            'pptype' : 'SinSyn',
-            'delay' : 0.,
-            'dur' : 1000.,
-            'pkamp' : 1.,
-            'freq' : 100.,
-            'phase' : 0,
-            'bias' : 0.,
-            'record_current' : False
+            'pptype': 'SinSyn',
+            'delay': 0.,
+            'dur': 1000.,
+            'pkamp': 1.,
+            'freq': 100.,
+            'phase': 0,
+            'bias': 0.,
+            'record_current': False
         }
 
-        for idx in range(31): #31 segments
-            if idx != 15: # no net dipole moment because of stick symmetry
+        for idx in range(31):  # 31 segments
+            if idx != 15:  # no net dipole moment because of stick symmetry
                 stick = LFPy.NetworkCell(**stickParams)
                 LFPy.StimIntElectrode(stick, idx=idx, **stimParams)
                 probes = [LFPy.CurrentDipoleMoment(stick)]
@@ -1003,35 +1270,42 @@ class testNetworkCell(unittest.TestCase):
 
                 stick.__del__()
 
-
     def test_cell_simulate_current_dipole_moment_02(self):
         stickParams = {
-            'morphology' : os.path.join(LFPy.__path__[0], 'test', 'stick.hoc'),
-            'templatefile' : os.path.join(LFPy.__path__[0], 'test', 'stick_template.hoc'),
-            'templatename' : 'stick_template',
-            'templateargs' : None,
-            'cm' : 1,
-            'Ra' : 150,
-            'v_init' : -65,
-            'passive' : True,
-            'passive_parameters' : {'g_pas' : 1./30000, 'e_pas' : -65},
-            'tstart' : -100,
-            'tstop' : 100,
-            'dt' : 2**-4,
-            'nsegs_method' : 'lambda_f',
-            'lambda_f' : 100,
+            'morphology': os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'stick.hoc'),
+            'templatefile': os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'stick_template.hoc'),
+            'templatename': 'stick_template',
+            'templateargs': None,
+            'cm': 1,
+            'Ra': 150,
+            'v_init': -65,
+            'passive': True,
+            'passive_parameters': {
+                'g_pas': 1. / 30000,
+                'e_pas': -65},
+            'tstart': -100,
+            'tstop': 100,
+            'dt': 2**-4,
+            'nsegs_method': 'lambda_f',
+            'lambda_f': 100,
         }
 
         stimParams = {
-            'e' : 0,                                # reversal potential
-            'syntype' : 'Exp2Syn',                   # synapse type
-            'tau1' : 0.1,                              # syn. time constant
-            'tau2' : 2.,                              # syn. time constant
-            'weight' : 0.01,
+            'e': 0,                                # reversal potential
+            'syntype': 'Exp2Syn',                   # synapse type
+            'tau1': 0.1,                              # syn. time constant
+            'tau2': 2.,                              # syn. time constant
+            'weight': 0.01,
         }
 
-        for idx in range(31): #31 segments
-            if idx != 15: # no net dipole moment because of stick symmetry
+        for idx in range(31):  # 31 segments
+            if idx != 15:  # no net dipole moment because of stick symmetry
                 stick = LFPy.NetworkCell(**stickParams)
                 synapse = LFPy.Synapse(stick, idx=idx,
                                        **stimParams)
@@ -1047,27 +1321,35 @@ class testNetworkCell(unittest.TestCase):
 
     def test_cell_tstart_00(self):
         stickParams = {
-            'morphology' : os.path.join(LFPy.__path__[0], 'test', 'stick.hoc'),
-            'templatefile' : os.path.join(LFPy.__path__[0], 'test', 'stick_template.hoc'),
-            'templatename' : 'stick_template',
-            'templateargs' : None,
-            'cm' : 1,
-            'Ra' : 150,
-            'v_init' : -65,
-            'passive' : True,
-            'passive_parameters' : {'g_pas' : 1./30000, 'e_pas' : -65},
-            'dt' : 2**-4,
-            'nsegs_method' : 'lambda_f',
-            'lambda_f' : 100,
+            'morphology': os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'stick.hoc'),
+            'templatefile': os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'stick_template.hoc'),
+            'templatename': 'stick_template',
+            'templateargs': None,
+            'cm': 1,
+            'Ra': 150,
+            'v_init': -65,
+            'passive': True,
+            'passive_parameters': {
+                'g_pas': 1. / 30000,
+                'e_pas': -65},
+            'dt': 2**-4,
+            'nsegs_method': 'lambda_f',
+            'lambda_f': 100,
         }
 
         stimParams = {
-            'pptype' : 'SinSyn',
-            'dur' : 1000.,
-            'pkamp' : 1.,
-            'freq' : 100.,
-            'bias' : 0.,
-            'record_current' : False
+            'pptype': 'SinSyn',
+            'dur': 1000.,
+            'pkamp': 1.,
+            'freq': 100.,
+            'bias': 0.,
+            'record_current': False
         }
 
         stick0 = LFPy.NetworkCell(tstart=0, tstop=200, **stickParams)
@@ -1090,39 +1372,47 @@ class testNetworkCell(unittest.TestCase):
 
     def test_cell_with_recextelectrode_00(self):
         stickParams = {
-            'morphology' : os.path.join(LFPy.__path__[0], 'test', 'stick.hoc'),
-            'templatefile' : os.path.join(LFPy.__path__[0], 'test', 'stick_template.hoc'),
-            'templatename' : 'stick_template',
-            'templateargs' : None,
-            'cm' : 1,
-            'Ra' : 150,
-            'v_init' : -65,
-            'passive' : True,
-            'passive_parameters' : {'g_pas' : 1./30000, 'e_pas' : -65},
-            'tstart' : 0,
-            'tstop' : 100,
-            'dt' : 2**-4,
-            'nsegs_method' : 'lambda_f',
-            'lambda_f' : 100,
+            'morphology': os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'stick.hoc'),
+            'templatefile': os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'stick_template.hoc'),
+            'templatename': 'stick_template',
+            'templateargs': None,
+            'cm': 1,
+            'Ra': 150,
+            'v_init': -65,
+            'passive': True,
+            'passive_parameters': {
+                'g_pas': 1. / 30000,
+                'e_pas': -65},
+            'tstart': 0,
+            'tstop': 100,
+            'dt': 2**-4,
+            'nsegs_method': 'lambda_f',
+            'lambda_f': 100,
         }
 
         electrodeParams = {
-            'sigma' : 0.3,
-            'x' : np.ones(11) * 100.,
-            'y' : np.zeros(11),
-            'z' : np.linspace(1000, 0, 11),
-            'method' : 'pointsource'
+            'sigma': 0.3,
+            'x': np.ones(11) * 100.,
+            'y': np.zeros(11),
+            'z': np.linspace(1000, 0, 11),
+            'method': 'pointsource'
         }
 
         stimParams = {
-            'pptype' : 'SinSyn',
-            'delay' : 0.,
-            'dur' : 1000.,
-            'pkamp' : 1.,
-            'freq' : 100.,
-            'phase' : 0,
-            'bias' : 0.,
-            'record_current' : False
+            'pptype': 'SinSyn',
+            'delay': 0.,
+            'dur': 1000.,
+            'pkamp': 1.,
+            'freq': 100.,
+            'phase': 0,
+            'bias': 0.,
+            'record_current': False
         }
 
         stick = LFPy.NetworkCell(**stickParams)
@@ -1140,40 +1430,47 @@ class testNetworkCell(unittest.TestCase):
 
     def test_cell_with_recextelectrode_01(self):
         stickParams = {
-            'morphology' : os.path.join(LFPy.__path__[0], 'test', 'stick.hoc'),
-            'templatefile' : os.path.join(LFPy.__path__[0], 'test', 'stick_template.hoc'),
-            'templatename' : 'stick_template',
-            'templateargs' : None,
-            'cm' : 1,
-            'Ra' : 150,
-            'v_init' : -65,
-            'passive' : True,
-            'passive_parameters' : {'g_pas' : 1./30000, 'e_pas' : -65},
-            'tstart' : -100,
-            'tstop' : 100,
-            'dt' : 2**-4,
-            'nsegs_method' : 'lambda_f',
-            'lambda_f' : 100,
-
+            'morphology': os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'stick.hoc'),
+            'templatefile': os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'stick_template.hoc'),
+            'templatename': 'stick_template',
+            'templateargs': None,
+            'cm': 1,
+            'Ra': 150,
+            'v_init': -65,
+            'passive': True,
+            'passive_parameters': {
+                'g_pas': 1. / 30000,
+                'e_pas': -65},
+            'tstart': -100,
+            'tstop': 100,
+            'dt': 2**-4,
+            'nsegs_method': 'lambda_f',
+            'lambda_f': 100,
         }
 
         electrodeParams = {
-            'sigma' : 0.3,
-            'x' : np.ones(11) * 100.,
-            'y' : np.zeros(11),
-            'z' : np.linspace(1000, 0, 11),
-            'method' : 'pointsource'
+            'sigma': 0.3,
+            'x': np.ones(11) * 100.,
+            'y': np.zeros(11),
+            'z': np.linspace(1000, 0, 11),
+            'method': 'pointsource'
         }
 
         stimParams = {
-            'pptype' : 'SinSyn',
-            'delay' : 0.,
-            'dur' : 1000.,
-            'pkamp' : 1.,
-            'freq' : 100.,
-            'phase' : 0,
-            'bias' : 0.,
-            'record_current' : False
+            'pptype': 'SinSyn',
+            'delay': 0.,
+            'dur': 1000.,
+            'pkamp': 1.,
+            'freq': 100.,
+            'phase': 0,
+            'bias': 0.,
+            'record_current': False
         }
 
         stick = LFPy.NetworkCell(**stickParams)
@@ -1191,40 +1488,47 @@ class testNetworkCell(unittest.TestCase):
 
     def test_cell_with_recextelectrode_02(self):
         stickParams = {
-            'morphology' : os.path.join(LFPy.__path__[0], 'test', 'stick.hoc'),
-            'templatefile' : os.path.join(LFPy.__path__[0], 'test', 'stick_template.hoc'),
-            'templatename' : 'stick_template',
-            'templateargs' : None,
-            'cm' : 1,
-            'Ra' : 150,
-            'v_init' : -65,
-            'passive' : True,
-            'passive_parameters' : {'g_pas' : 1./30000, 'e_pas' : -65},
-            'tstart' : 0,
-            'tstop' : 100,
-            'dt' : 0.1,
-            'nsegs_method' : 'lambda_f',
-            'lambda_f' : 100,
-
+            'morphology': os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'stick.hoc'),
+            'templatefile': os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'stick_template.hoc'),
+            'templatename': 'stick_template',
+            'templateargs': None,
+            'cm': 1,
+            'Ra': 150,
+            'v_init': -65,
+            'passive': True,
+            'passive_parameters': {
+                'g_pas': 1. / 30000,
+                'e_pas': -65},
+            'tstart': 0,
+            'tstop': 100,
+            'dt': 0.1,
+            'nsegs_method': 'lambda_f',
+            'lambda_f': 100,
         }
 
         electrodeParams = {
-            'sigma' : 0.3,
-            'x' : np.ones(11) * 100.,
-            'y' : np.zeros(11),
-            'z' : np.linspace(1000, 0, 11),
-            'method' : 'pointsource'
+            'sigma': 0.3,
+            'x': np.ones(11) * 100.,
+            'y': np.zeros(11),
+            'z': np.linspace(1000, 0, 11),
+            'method': 'pointsource'
         }
 
         stimParams = {
-            'pptype' : 'SinSyn',
-            'delay' : 0.,
-            'dur' : 1000.,
-            'pkamp' : 1.,
-            'freq' : 100.,
-            'phase' : 0,
-            'bias' : 0.,
-            'record_current' : False
+            'pptype': 'SinSyn',
+            'delay': 0.,
+            'dur': 1000.,
+            'pkamp': 1.,
+            'freq': 100.,
+            'phase': 0,
+            'bias': 0.,
+            'record_current': False
         }
 
         stick = LFPy.NetworkCell(**stickParams)
@@ -1242,40 +1546,47 @@ class testNetworkCell(unittest.TestCase):
 
     def test_cell_with_recextelectrode_03(self):
         stickParams = {
-            'morphology' : os.path.join(LFPy.__path__[0], 'test', 'stick.hoc'),
-            'templatefile' : os.path.join(LFPy.__path__[0], 'test', 'stick_template.hoc'),
-            'templatename' : 'stick_template',
-            'templateargs' : None,
-            'cm' : 1,
-            'Ra' : 150,
-            'v_init' : -65,
-            'passive' : True,
-            'passive_parameters' : {'g_pas' : 1./30000, 'e_pas' : -65},
-            'tstart' : 0,
-            'tstop' : 100,
-            'dt' : 0.2,
-            'nsegs_method' : 'lambda_f',
-            'lambda_f' : 100,
-
+            'morphology': os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'stick.hoc'),
+            'templatefile': os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'stick_template.hoc'),
+            'templatename': 'stick_template',
+            'templateargs': None,
+            'cm': 1,
+            'Ra': 150,
+            'v_init': -65,
+            'passive': True,
+            'passive_parameters': {
+                'g_pas': 1. / 30000,
+                'e_pas': -65},
+            'tstart': 0,
+            'tstop': 100,
+            'dt': 0.2,
+            'nsegs_method': 'lambda_f',
+            'lambda_f': 100,
         }
 
         electrodeParams = {
-            'sigma' : 0.3,
-            'x' : np.ones(11) * 100.,
-            'y' : np.zeros(11),
-            'z' : np.linspace(1000, 0, 11),
-            'method' : 'pointsource'
+            'sigma': 0.3,
+            'x': np.ones(11) * 100.,
+            'y': np.zeros(11),
+            'z': np.linspace(1000, 0, 11),
+            'method': 'pointsource'
         }
 
         stimParams = {
-            'pptype' : 'SinSyn',
-            'delay' : 0.,
-            'dur' : 1000.,
-            'pkamp' : 1.,
-            'freq' : 100.,
-            'phase' : 0,
-            'bias' : 0.,
-            'record_current' : False
+            'pptype': 'SinSyn',
+            'delay': 0.,
+            'dur': 1000.,
+            'pkamp': 1.,
+            'freq': 100.,
+            'phase': 0,
+            'bias': 0.,
+            'record_current': False
         }
 
         stick = LFPy.NetworkCell(**stickParams)
@@ -1292,37 +1603,58 @@ class testNetworkCell(unittest.TestCase):
                         int(stick.tstop / stick.dt) + 1)
 
     def test_cell_distort_geometry_00(self):
-        cell0 = LFPy.NetworkCell(morphology=os.path.join(LFPy.__path__[0], 'test',
-                                                  'ball_and_sticks_w_lists.hoc' ),
-                        templatefile=os.path.join(LFPy.__path__[0], 'test', 'ball_and_stick_template.hoc'),
-                        templatename='ball_and_stick_template',
-                        templateargs=None,
-                        )
+        cell0 = LFPy.NetworkCell(
+            morphology=os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'ball_and_sticks_w_lists.hoc'),
+            templatefile=os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'ball_and_stick_template.hoc'),
+            templatename='ball_and_stick_template',
+            templateargs=None,
+        )
         factors = [-0.2, 0.1, 0., 0.1, 0.2]
         nus = [-0.5, 0., 0.5]
         for factor in factors:
             for nu in nus:
                 for axis in 'xyz':
-                    cell1 = LFPy.NetworkCell(morphology=os.path.join(LFPy.__path__[0], 'test',
-                                                  'ball_and_sticks_w_lists.hoc' ),
-                        templatefile=os.path.join(LFPy.__path__[0], 'test', 'ball_and_stick_template.hoc'),
+                    cell1 = LFPy.NetworkCell(
+                        morphology=os.path.join(
+                            LFPy.__path__[0],
+                            'test',
+                            'ball_and_sticks_w_lists.hoc'),
+                        templatefile=os.path.join(
+                            LFPy.__path__[0],
+                            'test',
+                            'ball_and_stick_template.hoc'),
                         templatename='ball_and_stick_template',
                         templateargs=None,
-                        )
+                    )
                     cell1.distort_geometry(factor=factor, nu=nu, axis=axis)
                     for ax in 'xyz'.replace(axis, ''):
-                        np.testing.assert_allclose(getattr(cell0, ax)*(1+factor*nu),
-                                                   getattr(cell1, ax))
-                    np.testing.assert_allclose(getattr(cell0, axis)*(1-factor),
-                                               getattr(cell1, axis))
+                        np.testing.assert_allclose(
+                            getattr(cell0, ax) * (1 + factor * nu),
+                            getattr(cell1, ax))
+                    np.testing.assert_allclose(
+                        getattr(cell0, axis) * (1 - factor),
+                        getattr(cell1, axis))
 
 
 def stickSimulationTesttvec(**kwargs):
-    stick = LFPy.NetworkCell(morphology = os.path.join(LFPy.__path__[0], 'test',
-                                                'stick.hoc'), verbose=False,
-                              templatefile=os.path.join(LFPy.__path__[0], 'test', 'stick_template.hoc'),
-                              templatename='stick_template',
-                              templateargs=None,
-                              **kwargs)
+    stick = LFPy.NetworkCell(
+        morphology=os.path.join(
+            LFPy.__path__[0],
+            'test',
+            'stick.hoc'),
+        verbose=False,
+        templatefile=os.path.join(
+            LFPy.__path__[0],
+            'test',
+            'stick_template.hoc'),
+        templatename='stick_template',
+        templateargs=None,
+        **kwargs)
     stick.simulate(rec_imem=False)
     return stick.tvec

@@ -18,7 +18,6 @@ import numpy as np
 from scipy.integrate import quad
 from numpy import real, imag
 import LFPy
-import neuron
 
 
 # ####### Functions used by tests: ########################################
@@ -184,13 +183,13 @@ def analytical_LFP(time=np.linspace(0, 100, 1001),
                    Ri=150.,
                    stimFrequency=100.,
                    stimAmplitude=1.,
-                   # stimPos=1.,
                    sigma=0.3,
                    electrodeR=100.,
                    electrodeZ=0.,
                    ):
     """
-    Will calculate the analytical LFP from a dendrite stick aligned with z-axis.
+    Will calculate the analytical LFP from a dendrite stick aligned
+    with z-axis.
     The synaptic current is always assumed to be at the end of the stick, i.e.
     Zin = stickLength.
 
@@ -221,7 +220,6 @@ def analytical_LFP(time=np.linspace(0, 100, 1001),
     electrodeZ : float
         Longitudal distance along stick(mum)
     """
-    Gm = 1. / Rm            # specific membrane conductivity (S/cm2)
     # absolute membrane conductance (muS / mum)
     gm = 1E2 * np.pi * stickDiam / Rm
     # intracellular resistance  (Mohm/mum)

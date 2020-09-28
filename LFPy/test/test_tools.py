@@ -21,10 +21,12 @@ import numpy as np
 import LFPy
 import pickle
 
+
 class testTools(unittest.TestCase):
     """
     test LFPy.tools methods
     """
+
     def test_tools_load_00(self):
         filename = 'test.cpickle'
         x = object()
@@ -33,9 +35,10 @@ class testTools(unittest.TestCase):
         f.close()
         self.assertTrue(isinstance(LFPy.tools.load(filename), object))
         os.remove(filename)
-        
-    
+
     def test_tools_noise_brown(self):
-        ncols=3
-        nrows=2
-        self.assertEqual(LFPy.tools.noise_brown(ncols, nrows).shape, (nrows, ncols))
+        ncols = 3
+        nrows = 2
+        self.assertEqual(
+            LFPy.tools.noise_brown(
+                ncols, nrows).shape, (nrows, ncols))

@@ -16,7 +16,6 @@ GNU General Public License for more details.
 
 
 import unittest
-import numpy as np
 import scipy.stats as st
 import LFPy
 
@@ -25,6 +24,7 @@ class testInputGenerators(unittest.TestCase):
     """
     test LFPy.inputgenerators module
     """
+
     def test_get_activation_times_from_distribution(self):
         """test LFPy.inputgenerators.get_activation_times_from_distribution
         """
@@ -34,7 +34,8 @@ class testInputGenerators(unittest.TestCase):
         distribution = st.expon
         rvs_args = dict(loc=0, scale=100.)
         times = LFPy.inputgenerators.get_activation_times_from_distribution(
-            n=n, tstart=tstart, tstop=tstop, rvs_args=rvs_args, maxiter=1E6
+            n=n, tstart=tstart, tstop=tstop, distribution=distribution,
+            rvs_args=rvs_args, maxiter=1E6
         )
         self.assertTrue(len(times) == n)
         for t in times:
