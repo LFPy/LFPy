@@ -7,7 +7,7 @@ def alias_method(idx, probs, nsyn):
     """
     Alias method for drawing random numbers from a discrete probability
     distribution. See http://www.keithschwarz.com/darts-dice-coins/
-    
+
     Parameters
     ----------
     idx : np.ndarray
@@ -30,14 +30,14 @@ def alias_method(idx, probs, nsyn):
 
     # Construct the table.
     J, q = alias_setup(probs)
-     
-    #output array
+
+    # output array
     spc = np.zeros(nsyn, dtype=int)
-    
-    #prefetch random numbers, alias_draw needs nsyn x 2 numbers
+
+    # prefetch random numbers, alias_draw needs nsyn x 2 numbers
     rands = np.random.rand(nsyn, 2)
-    
-    K = J.size 
+
+    K = J.size
     # Generate variates using alias draw method
     for nn in range(nsyn):
         kk = np.floor(rands[nn, 0]*K).astype(int)
@@ -45,14 +45,14 @@ def alias_method(idx, probs, nsyn):
             spc[nn] = idx[kk]
         else:
             spc[nn] = idx[J[kk]]
-        
+
     return spc
 
 
 def alias_setup(probs):
     """Set up function for alias method.
     See http://www.keithschwarz.com/darts-dice-coins/
-    
+
     Parameters
     ----------
     probs : np.ndarray
@@ -65,7 +65,7 @@ def alias_setup(probs):
     q : np.ndarray
         array of floats
 
-    """        
+    """
     K = probs.size
     q = probs*K
     J = np.zeros(K, dtype=int)
@@ -86,23 +86,22 @@ def alias_setup(probs):
 
     s_i -= 1
     l_i -= 1
-    
+
     # Loop though and create little binary mixtures that
     # appropriately allocate the larger outcomes over the
     # overall uniform mixture.
     while s_i >= 0 and l_i >= 0:
         small = smaller[s_i]
         large = larger[l_i]
-        
+
         J[small] = large
         q[large] = q[large] + q[small] - 1
 
         s_i -= 1
-    
+
         if q[large] < 1:
             s_i += 1
             l_i -= 1
             smaller[s_i] = large
- 
-    return J, q
 
+    return J, q

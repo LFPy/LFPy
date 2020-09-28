@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 # cython: language_level=2
 
-
 import numpy as np
 cimport numpy as np
 cimport cython
@@ -17,9 +16,10 @@ cdef extern from "math.h":
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
-cpdef np.ndarray[long, ndim=1, negative_indices=False] alias_method(np.ndarray[long, ndim=1, negative_indices=False] idx,
-                 np.ndarray[DTYPE_t, ndim=1, negative_indices=False] probs,
-                 int nsyn):
+cpdef np.ndarray[long, ndim=1, negative_indices=False] alias_method(
+    np.ndarray[long, ndim=1, negative_indices=False] idx,
+    np.ndarray[DTYPE_t, ndim=1, negative_indices=False] probs,
+    int nsyn):
     """
     Alias method for drawing random numbers from a discrete probability
     distribution. See http://www.keithschwarz.com/darts-dice-coins/
@@ -44,7 +44,7 @@ cpdef np.ndarray[long, ndim=1, negative_indices=False] alias_method(np.ndarray[l
     except AssertionError as ae:
         raise ae('length of idx and probs arrays must be equal')
 
-    #C-declare variables
+    # C-declare variables
     cdef np.ndarray[long, ndim=1, negative_indices=False] J, spc
     cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] q
     cdef np.ndarray[DTYPE_t, ndim=2, negative_indices=False] rands
@@ -53,10 +53,10 @@ cpdef np.ndarray[long, ndim=1, negative_indices=False] alias_method(np.ndarray[l
     # Construct the table.
     J, q = alias_setup(probs)
 
-    #output array
+    # output array
     spc = np.zeros(nsyn, dtype=int)
 
-    #prefetch random numbers, alias_draw needs nsyn x 2 numbers
+    # prefetch random numbers, alias_draw needs nsyn x 2 numbers
     rands = np.random.rand(nsyn, 2)
 
     K = J.size
@@ -90,7 +90,7 @@ cpdef alias_setup(np.ndarray[DTYPE_t, ndim=1, negative_indices=False] probs):
         array of floats
 
     """
-    #C-declare variables
+    # C-declare variables
     cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] q
     cdef np.ndarray[long, ndim=1, negative_indices=False] J, smaller, larger
     cdef long K
