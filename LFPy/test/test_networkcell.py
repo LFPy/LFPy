@@ -1071,17 +1071,17 @@ class testNetworkCell(unittest.TestCase):
         }
 
         stick0 = LFPy.NetworkCell(tstart=0, tstop=200, **stickParams)
-        synapse0 = LFPy.StimIntElectrode(stick0,
-                                         stick0.get_closest_idx(0, 0, 1000),
-                                         delay=0, phase=0.,
-                                         **stimParams)
+        LFPy.StimIntElectrode(stick0,
+                              stick0.get_closest_idx(0, 0, 1000),
+                              delay=0, phase=0.,
+                              **stimParams)
         stick0.simulate(rec_imem=True, rec_vmem=True)
 
         stick1 = LFPy.NetworkCell(tstart=-100, tstop=100, **stickParams)
-        synapse1 = LFPy.StimIntElectrode(stick1,
-                                         stick1.get_closest_idx(0, 0, 1000),
-                                         delay=-100, phase=0.,
-                                         **stimParams)
+        LFPy.StimIntElectrode(stick1,
+                              stick1.get_closest_idx(0, 0, 1000),
+                              delay=-100, phase=0.,
+                              **stimParams)
         stick1.simulate(rec_imem=True, rec_vmem=True)
 
         inds = stick0.tvec >= 100
@@ -1137,7 +1137,6 @@ class testNetworkCell(unittest.TestCase):
         self.assertTrue(stick.tvec.size == stick.imem.shape[1] ==
                         electrode.data.shape[1] == LFP.shape[1] ==
                         int(stick.tstop / stick.dt) + 1)
-
 
     def test_cell_with_recextelectrode_01(self):
         stickParams = {
@@ -1311,7 +1310,6 @@ class testNetworkCell(unittest.TestCase):
                         templateargs=None,
                         )
                     cell1.distort_geometry(factor=factor, nu=nu, axis=axis)
-                    # for attr in ['start', 'mid', 'end']:
                     for ax in 'xyz'.replace(axis, ''):
                         np.testing.assert_allclose(getattr(cell0, ax)*(1+factor*nu),
                                                    getattr(cell1, ax))
