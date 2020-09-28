@@ -2057,8 +2057,8 @@ class Cell(object):
         """create a polygon to fill for each section"""
         x = getattr(self, projection[0] + '3d')[i]
         y = getattr(self, projection[1] + '3d')[i]
-        #x = self.x3d[i]
-        #z = self.z3d[i]
+        # x = self.x3d[i]
+        # z = self.z3d[i]
         d = self.diam3d[i]
 
         # calculate angles
@@ -2667,7 +2667,8 @@ class Cell(object):
             Shape (n_axial_currents, n_timepoints, 3) array
             containing the x-,y-,z-components of the current dipole moment
             from each axial current in cell, at all timepoints.
-            The number of axial currents, n_axial_currents = (cell.totnsegs-1)*2
+            The number of axial currents,
+            n_axial_currents = (cell.totnsegs-1) * 2
             and the number of timepoints, n_timepoints = cell.tvec.size.
             The current dipole moments are given in units of (nA µm).
         pos_axial: ndarray, dtype = float
