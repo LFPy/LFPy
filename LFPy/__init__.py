@@ -44,15 +44,13 @@ GNU General Public License for more details.
 from .version import version as __version__
 
 from .pointprocess import Synapse, PointProcess, StimIntElectrode
-#from .recextelectrode import RecExtElectrode, RecMEAElectrode
 from lfpykit import RecExtElectrode, RecMEAElectrode, CurrentDipoleMoment, PointSourcePotential, LineSourcePotential, OneSphereVolumeConductor
 from .cell import Cell
 from .templatecell import TemplateCell
 from .network import NetworkCell, NetworkPopulation, Network
 from .test import _test as run_tests
-#from .eegmegcalc import OneSphereVolumeConductor, FourSphereVolumeConductor, InfiniteVolumeConductor, get_current_dipole_moment, MEG
 from lfpykit.eegmegcalc import FourSphereVolumeConductor, InfiniteVolumeConductor, MEG
-#from lfpykit import lfpcalc
+from lfpykit import lfpcalc
 from . import tools
 from . import inputgenerators
 from . import run_simulation
