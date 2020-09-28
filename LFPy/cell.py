@@ -21,8 +21,7 @@ import sys
 import posixpath
 from warnings import warn
 import pickle
-from .run_simulation import _run_simulation_with_probes, \
-                            _run_simulation_with_electrode
+from .run_simulation import _run_simulation_with_probes
 from .run_simulation import _collect_geometry_neuron
 from .alias_method import alias_method
 
