@@ -17,7 +17,6 @@ GNU General Public License for more details.
 
 import os
 import unittest
-import numpy as np
 import LFPy
 import pickle
 
