@@ -113,7 +113,10 @@ ax.text(-550, radii[0] - 290, r"500 $\mu$m")
 # Plotting the potential at different positions
 y_norm = 200
 x_norm = 500
-def elec_clr(elec_idx): return plt.cm.viridis(elec_idx / (len(elec_z) - 1))
+
+
+def elec_clr(elec_idx):
+    return plt.cm.viridis(elec_idx / (len(elec_z) - 1))
 
 
 for elec_idx in range(len(elec_z)):

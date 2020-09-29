@@ -144,7 +144,6 @@ but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 '''
-from __future__ import division
 from example_parallel_network_plotting import decimate
 import LFPy
 from time import time
@@ -580,11 +579,11 @@ if __name__ == '__main__':
                 j += 1  # counter
 
         # save figure output
-        fig.savefig(os.path.join(
-                        PSET.OUTPUTPATH,
-                        'example_parallel_network_populations_'
-                        + 'RANK_{}.pdf'.format(RANK)),
-                    bbox_inches='tight')
+        fig.savefig(
+            os.path.join(PSET.OUTPUTPATH,
+                         'example_parallel_network_populations_'
+                         + 'RANK_{}.pdf'.format(RANK)),
+            bbox_inches='tight')
         plt.close(fig)
 
     ##########################################################################
