@@ -131,7 +131,8 @@ def plot_LFP_and_ECoG(cell, electrode, electrode_MoI, ecog_electrode):
     for i in range(electrode.x.size):
 
         ax.plot(cell.tvec,
-                electrode.data[i] * 0.5 * dz / np.max(np.abs(electrode.data[i]))
+                electrode.data[i] * 0.5 * dz / np.max(np.abs(electrode.data[i])
+                                                      )
                 + electrode.z[i],
                 c="gray", lw=2)
         ax.plot(cell.tvec,
@@ -150,7 +151,8 @@ def plot_LFP_and_ECoG(cell, electrode, electrode_MoI, ecog_electrode):
 
     for i in range(ecog_electrode.x.size):
         ax.plot(cell.tvec,
-                ecog_electrode.data[i] / np.max(np.abs(ecog_electrode.data[i])),
+                ecog_electrode.data[i] / np.max(np.abs(ecog_electrode.data[i])
+                                                ),
                 c=ecog_clr, lw=2)
 
     ax.axis(ax.axis('tight'))
