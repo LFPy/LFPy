@@ -3,7 +3,8 @@
 '''
 Simulation and plotting script reproducing figure 2 of:
 
-Multimodal modeling of neural network activity: computing LFP, ECoG, EEG and MEG signals with LFPy2.0
+Multimodal modeling of neural network activity: computing LFP, ECoG, EEG and
+MEG signals with LFPy2.0
 Espen Hagen, Solveig Næss, Torbjørn V Ness, Gaute T Einevoll
 bioRxiv 281717; doi: https://doi.org/10.1101/281717
 '''
@@ -14,6 +15,7 @@ import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
 from mpl_toolkits.axisartist.axislines import SubplotZero
 from matplotlib.collections import PolyCollection
+import scipy.signal as ss
 import neuron
 
 # set some plotting parameters
@@ -115,8 +117,9 @@ Y_p = np.zeros(X_p.shape)
 R = np.c_[X_p.flatten(), Y_p.flatten(), Z_p.flatten()]
 R_rel = R - R_cell
 R_scalar = np.sqrt((R_rel**2).sum(axis=1))
-phi_p = 1. / (4 * np.pi * electrode.sigma) * np.dot(cell.current_dipole_moment,
-                                                    R_rel.T) / R_scalar**3  # (omega*m*nA*µm/µm^3=mV)
+phi_p = 1. / (4 * np.pi * electrode.sigma)
+* np.dot(cell.current_dipole_moment,
+         R_rel.T) / R_scalar**3  # (omega*m*nA*µm/µm^3=mV)
 # mask out values in spatial locations in vicinity of the cell:
 mask = np.zeros(phi_p.shape).astype(bool)
 mask[:, R_scalar < 500.] = True
@@ -133,7 +136,7 @@ electrodeParameters_p = {
 }
 electrode_p = LFPy.RecExtElectrode(cell=cell, **electrodeParameters_p)
 electrode_p.calc_lfp()
-LFP_p = np.ma.masked_array(electrode_p.LFP, mask=mask.T == False)
+LFP_p = np.ma.masked_array(electrode_p.LFP, mask=(mask.T == False))
 
 
 # Compute the magnetic field strengt |\mathbf{H}| at locations corresponding
@@ -231,8 +234,10 @@ def draw_lineplot(
 
     if scalebar:
         if scalebarbasis == 'log2':
-            ax.plot([tvec[tinds][-1], tvec[tinds][-1]],
-                    [-1 - scalebarpos, -2 - scalebarpos], lw=2, color=color, clip_on=False)
+            ax.plot([tvec[tinds][-1],
+                     tvec[tinds][-1]],
+                    [-1 - scalebarpos, - 2 - scalebarpos],
+                    lw=2, color=color, clip_on=False)
             ax.text(tvec[tinds][-1] + np.diff(T) * 0.03, -1.5 - scalebarpos,
                     '$2^{' + '{}'.format(int(np.log2(vlimround))) +
                     '}$ ' + '{0}'.format(unit),
@@ -302,7 +307,7 @@ ax1.set_title('extracellular potential')
 ax2 = fig.add_subplot(gs[:6, 2], aspect='equal')  # dipole moment ill.
 ax2.axis('off')
 ax2.set_title('magnetic field')
-# ax3 = fig.add_subplot(gs[0, 3], aspect='equal')             # spherical shell model ill.
+# ax3 = fig.add_subplot(gs[0, 3], aspect='equal')  # spherical shell model ill.
 # ax3.set_title('4-sphere volume conductor')
 # ax4 = fig.add_subplot(gs[1, 3],
 # aspect='equal'
@@ -375,8 +380,14 @@ polycol = PolyCollection(zips,
 ax0.add_collection(polycol)
 
 # some extracellular position and annotation
-ax0.plot(-80, 30, 'o',
-         markeredgecolor='none', markerfacecolor='b', markersize=5, zorder=0, clip_on=False)
+ax0.plot(-80,
+         30,
+         'o',
+         markeredgecolor='none',
+         markerfacecolor='b',
+         markersize=5,
+         zorder=0,
+         clip_on=False)
 ax0.text(-80, 40, r'$\phi({\bf r}, t)$', horizontalalignment='center')
 idx = cell.get_idx('apic')[2]
 ax0.plot([cell.xmid[idx], -80], [cell.zmid[idx], 30],
@@ -415,7 +426,8 @@ ax0.annotate("",  # r"$\mathbf{p}(I_n^{(\mathrm{m})}(t), \mathbf{r}_n)$",
              xy=(R_cell[0], R_cell[2]),
              xytext=(R_cell[0] + cell.current_dipole_moment[t_max][0, 0] * 5,
                      R_cell[2] + cell.current_dipole_moment[t_max][0, 2] * 5),
-             arrowprops=dict(arrowstyle="<-", lw=3, color='k', shrinkA=0, shrinkB=0
+             arrowprops=dict(arrowstyle="<-", lw=3, color='k',
+                             shrinkA=0, shrinkB=0
                              ),
              zorder=100)
 ax0.text(R_cell[0] + cell.current_dipole_moment[t_max][0, 0] * 5 / 2 + 1,
@@ -474,10 +486,14 @@ ax0.plot([60, 60], [-80, -70], 'k', lw=1, clip_on=False)
 ax0.text(62, -80, r'$10 \mu$m', fontsize=12)
 
 # axis cross
-ax0.annotate("", xy=(-90, -80), xycoords='data', xytext=(-70, -80), textcoords='data',
-             arrowprops=dict(arrowstyle="<|-", connectionstyle="arc3,rad=0", facecolor='black'))
-ax0.annotate("", xy=(-90, -80), xycoords='data', xytext=(-90, -60), textcoords='data',
-             arrowprops=dict(arrowstyle="<|-", connectionstyle="arc3,rad=0", facecolor='black'))
+ax0.annotate("", xy=(-90, -80),
+             xycoords='data', xytext=(-70, -80), textcoords='data',
+             arrowprops=dict(arrowstyle="<|-",
+                             connectionstyle="arc3,rad=0", facecolor='black'))
+ax0.annotate("", xy=(-90, -80),
+             xycoords='data', xytext=(-90, -60), textcoords='data',
+             arrowprops=dict(arrowstyle="<|-",
+                             connectionstyle="arc3,rad=0", facecolor='black'))
 ax0.text(-70, -90, 'x', ha='right')
 ax0.text(-100, -70, 'z')
 
@@ -529,10 +545,14 @@ ax1.plot([800, 800], [-1650, -1550], 'k', lw=1, clip_on=False)
 ax1.text(820, -1650, r'$100 \mu$m', fontsize=12)
 
 # axis cross
-ax1.annotate("", xy=(-1100, -1600), xycoords='data', xytext=(-900, -1600), textcoords='data',
-             arrowprops=dict(arrowstyle="<|-", connectionstyle="arc3,rad=0", facecolor='black'))
-ax1.annotate("", xy=(-1100, -1600), xycoords='data', xytext=(-1100, -1400), textcoords='data',
-             arrowprops=dict(arrowstyle="<|-", connectionstyle="arc3,rad=0", facecolor='black'))
+ax1.annotate("", xy=(-1100, -1600), xycoords='data',
+             xytext=(-900, -1600), textcoords='data',
+             arrowprops=dict(arrowstyle="<|-", connectionstyle="arc3,rad=0",
+                             facecolor='black'))
+ax1.annotate("", xy=(-1100, -1600), xycoords='data', xytext=(-1100, -1400),
+             textcoords='data',
+             arrowprops=dict(arrowstyle="<|-", connectionstyle="arc3,rad=0",
+                             facecolor='black'))
 ax1.text(-900, -1700, 'x', ha='right')
 ax1.text(-1200, -1500, 'z')
 
@@ -543,9 +563,12 @@ for ax in [ax1, ax2]:
     # plot arrow representing dipole moment magnitude and direction
     ax.annotate("",  # r"$\mathbf{p}(I_n(t), \mathbf{r}_n)$",
                 xy=(R_cell[0], R_cell[2]),
-                xytext=(R_cell[0] + cell.current_dipole_moment[t_max][0, 0] * 50,
-                        R_cell[2] + cell.current_dipole_moment[t_max][0, 2] * 50),
-                arrowprops=dict(arrowstyle="<-", lw=3, color='k', shrinkA=0, shrinkB=0
+                xytext=(R_cell[0]
+                        + cell.current_dipole_moment[t_max][0, 0] * 50,
+                        R_cell[2]
+                        + cell.current_dipole_moment[t_max][0, 2] * 50),
+                arrowprops=dict(arrowstyle="<-", lw=3, color='k',
+                                shrinkA=0, shrinkB=0
                                 ),
                 zorder=100)
     ax.text(R_cell[0] + cell.current_dipole_moment[t_max][0, 0] * 25 + 10,
@@ -567,7 +590,9 @@ for ax in [ax1, ax2]:
 # Plot scalar y-component of magnetic field H at t=|i_syn|_max
 vmax = 2.
 mu = 4 * np.pi * 1E-7
-im = ax2.pcolormesh(X_p, Z_p, H[t_max, :, 1].reshape(X_p.shape) * mu * 1E12,  # mT -> fT unit conversion
+im = ax2.pcolormesh(X_p, Z_p,
+                    # mT -> fT unit conversion
+                    H[t_max, :, 1].reshape(X_p.shape) * mu * 1E12,
                     cmap=plt.get_cmap('BrBG', 51), zorder=-10,
                     vmin=-vmax,
                     vmax=vmax,
@@ -593,9 +618,6 @@ ax2.text(
     va='top',
     color='k')
 
-#ax2.text(R_cell[0], r+R_cell[2]-10, r'$\phi(I_n^{(\mathrm{m})})$', ha='center', va='top', color='w')
-
-
 bbox = np.array(ax2.get_position())
 cax = fig.add_axes([bbox[0][0] + (bbox[1][0] - bbox[0][0]) / 4,
                     bbox[0][1], (bbox[1][0] - bbox[0][0]) / 2, 0.015])
@@ -609,17 +631,26 @@ ax2.plot([800, 800], [-1650, -1550], 'k', lw=1, clip_on=False)
 ax2.text(820, -1650, r'$100 \mu$m', fontsize=12)
 
 # axis cross
-ax2.annotate("", xy=(-1100, -1600), xycoords='data', xytext=(-900, -1600), textcoords='data',
-             arrowprops=dict(arrowstyle="<|-", connectionstyle="arc3,rad=0", facecolor='black'))
-ax2.annotate("", xy=(-1100, -1600), xycoords='data', xytext=(-1100, -1400), textcoords='data',
-             arrowprops=dict(arrowstyle="<|-", connectionstyle="arc3,rad=0", facecolor='black'))
+ax2.annotate("", xy=(-1100, -1600), xycoords='data', xytext=(-900, -1600),
+             textcoords='data',
+             arrowprops=dict(arrowstyle="<|-", connectionstyle="arc3,rad=0",
+                             facecolor='black'))
+ax2.annotate("", xy=(-1100, -1600), xycoords='data', xytext=(-1100, -1400),
+             textcoords='data',
+             arrowprops=dict(arrowstyle="<|-", connectionstyle="arc3,rad=0",
+                             facecolor='black'))
 ax2.text(-900, -1700, 'x', ha='right')
 ax2.text(-1200, -1500, 'z')
 
 
 # plot in insetaxes the dipole moment potential and magnetic field magnitude
-for i, (x, z) in enumerate(zip([R_cell[0], -750 + R_cell[0], R_cell[0], 750 +
-                                R_cell[0]], [750 + R_cell[2], R_cell[2], -750 + R_cell[2], R_cell[2]])):
+for i, (x, z) in enumerate(zip([R_cell[0], -
+                                750 +
+                                R_cell[0], R_cell[0], 750 +
+                                R_cell[0]], [750 +
+                                             R_cell[2], R_cell[2], -
+                                             750 +
+                                             R_cell[2], R_cell[2]])):
     # ind = ((X_p == x) & (Z_p==z)).flatten()
     ind = (((X_p - x)**2 == ((X_p - x)**2).min()) &
            ((Z_p - z)**2 == ((Z_p - z)**2).min())).flatten()
@@ -693,7 +724,9 @@ sphere = LFPy.FourSphereVolumeConductor(
 phi_p = sphere.calc_potential(cell.current_dipole_moment, rz=dipole_position)
 
 # import example_parallel_network_plotting as plotting
-vlimround = draw_lineplot(ax=ax4, data=phi_p * 1E9, unit=r'pV',  # mV -> pV unit conversion
+vlimround = draw_lineplot(ax=ax4,
+                          data=phi_p * 1E9,  # mV -> pV unit conversion
+                          unit=r'pV',
                           dt=cell.dt, ztransform=False,
                           T=(0, cell.tstop), color='k', scalebarbasis='log10')
 # ax4.set_xticklabels([])
@@ -719,7 +752,8 @@ phi_hat = np.array([-np.sin(phi), np.cos(phi), np.zeros(r_hat.shape[0])]).T
 
 
 ax5.set_title(
-    r"scalp magnetic field $\mathbf{B}_\mathbf{p}(\mathbf{r}) \cdot \hat{\mathbf{\varphi}}$")
+    r"scalp magnetic field "
+    + r"$\mathbf{B}_\mathbf{p}(\mathbf{r}) \cdot \hat{\mathbf{\varphi}}$")
 # radial component of H at squid locations
 # create MEG object and compute magnetic field
 meg = LFPy.MEG(sensor_locations=foursphereParams['r'])
@@ -730,11 +764,13 @@ for j, (h, u) in enumerate(zip(H, phi_hat)):
     H_phi[j, ] += np.dot(h, u)
 
 
-vlimround = draw_lineplot(ax=ax5, data=H_phi * meg.mu * 1E12,  # mT -> fT unit conversion
-                          dt=cell.dt, unit=r'fT',
-                          ztransform=False,
-                          label=r'$\mathbf{B}_\mathbf{p}(\mathbf{r}) \cdot \hat{\mathbf{\varphi}}$',
-                          T=(0, cell.tstop), color='k', scalebarbasis='log10')
+vlimround = draw_lineplot(
+    ax=ax5,
+    data=H_phi * meg.mu * 1E12,  # mT -> fT unit conv.
+    dt=cell.dt, unit=r'fT',
+    ztransform=False,
+    label=r'$\mathbf{B}_\mathbf{p}(\mathbf{r}) \cdot \hat{\mathbf{\varphi}}$',
+    T=(0, cell.tstop), color='k', scalebarbasis='log10')
 
 ax5.set_yticklabels([r'{}'.format(i + 1) for i in range(phi_p.shape[0])])
 ax5.set_xlabel('time (ms)', labelpad=0)

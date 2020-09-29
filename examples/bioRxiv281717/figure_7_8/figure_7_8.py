@@ -227,11 +227,12 @@ for (PS0, PS1), figname in zip(
         axis.set_major_formatter(ScalarFormatter())
     ax.set_xlabel(r'$N_\mathrm{MPI}$', labelpad=0)
     ax.set_ylabel('time (s)', labelpad=0)
-    ax.set_title(r'$N_\mathrm{%s}^{(1)}=%i, N_\mathrm{%s}^{(1)}=%i$' % (PSET.populationParameters['m_type'][0].replace('_', '\_'),
-                                                                        PSET.populationParameters['POP_SIZE'][0],
-                                                                        PSET.populationParameters['m_type'][1].replace(
-                                                                            '_', r'\_'),
-                                                                        PSET.populationParameters['POP_SIZE'][1]))
+    ax.set_title(r'$N_\mathrm{%s}^{(1)}=%i, N_\mathrm{%s}^{(1)}=%i$' %
+                 (PSET.populationParameters['m_type'][0].replace('_', '\\_'),
+                  PSET.populationParameters['POP_SIZE'][0],
+                  PSET.populationParameters['m_type'][1].replace(
+                     '_', r'\_'),
+                  PSET.populationParameters['POP_SIZE'][1]))
     ax.text(-0.05, 1.05, 'A',
             horizontalalignment='center',
             verticalalignment='center',
@@ -255,7 +256,8 @@ for (PS0, PS1), figname in zip(
             ps_ids = []
 
             for pset in ps.PSPACES[PS1].iter_inner():
-                if pset.COMPUTE_LFP == COMPUTE_LFP and pset.PRESERVE == PRESERVE:
+                if pset.COMPUTE_LFP == COMPUTE_LFP \
+                        and pset.PRESERVE == PRESERVE:
                     # get identifier
                     ps_id = ps.get_unique_id(pset)
 
@@ -398,12 +400,21 @@ for (PS0, PS1), figname in zip(
                 axis.set_major_formatter(ScalarFormatter())
 
             ax.set_xlabel(r'relative network size $b$', labelpad=10)
-            ax.set_title(r'$N_\mathrm{%s}^{(1)}=%i, N_\mathrm{%s}^{(1)}=%i$,' % (PSET.populationParameters['m_type'][0].replace('_', '\_'),
-                                                                                 PSET.populationParameters['POP_SIZE'][0],
-                                                                                 PSET.populationParameters['m_type'][1].replace(
-                                                                                     '_', r'\_'),
-                                                                                 PSET.populationParameters['POP_SIZE'][1],)
-                         + '\n' + r'$N_\mathrm{MPI}=%i$, $k_{YX}^{(b)}=%sK_{YX}^{(1)}/N_Y^{(1)}$' % (pset.MPISIZE, 'r' if PRESERVE == 'indegree' else ''))
+            ax.set_title(
+                r'$N_\mathrm{%s}^{(1)}=%i, N_\mathrm{%s}^{(1)}=%i$,' %
+                (PSET.populationParameters['m_type'][0].replace(
+                    '_',
+                    '\\_'),
+                    PSET.populationParameters['POP_SIZE'][0],
+                    PSET.populationParameters['m_type'][1].replace(
+                    '_',
+                    r'\_'),
+                    PSET.populationParameters['POP_SIZE'][1],
+                 ) +
+                '\n' +
+                r'$N_\mathrm{MPI}=%i$, ' % pset.MPISIZE
+                + '$k_{YX}^{(b)}=%sK_{YX}^{(1)}/N_Y^{(1)}$' %
+                'r' if PRESERVE == 'indegree' else '')
             ax.text(-0.05, 1.05, 'BC'[axindex - 1],
                     horizontalalignment='center',
                     verticalalignment='center',

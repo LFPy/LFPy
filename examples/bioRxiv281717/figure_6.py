@@ -15,7 +15,6 @@ but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 '''
-from __future__ import division
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
 import os
@@ -63,7 +62,8 @@ if __name__ == '__main__':
     alphabet = 'ABCDEFGHIJKLMNOPQ'
 
     for j, (m_type, me_type) in enumerate(
-            zip(PSET.populationParameters['m_type'], PSET.populationParameters['me_type'])):
+            zip(PSET.populationParameters['m_type'],
+                PSET.populationParameters['me_type'])):
         ax = fig.add_subplot(gs[:8, j])
         f = h5py.File(
             os.path.join(
@@ -75,10 +75,12 @@ if __name__ == '__main__':
             [m_type],
                 ['k']):
             ax.set_title(title)
-            vlimround = plotting.draw_lineplot(ax=ax, data=plotting.decimate(data, q=PSET.decimate_q),
-                                               dt=PSET.dt * PSET.decimate_q,
-                                               T=T, color=color,
-                                               scalebarbasis='log10')
+            vlimround = plotting.draw_lineplot(
+                ax=ax,
+                data=plotting.decimate(data, q=PSET.decimate_q),
+                dt=PSET.dt * PSET.decimate_q,
+                T=T, color=color,
+                scalebarbasis='log10')
 
         if j > 0:
             ax.set_yticklabels([])
@@ -92,11 +94,12 @@ if __name__ == '__main__':
 
         p = f['CURRENT_DIPOLE_MOMENT'][me_type] * \
             1E-3  # nA um -> 1E-3 nA m unit conversion
-        for i, (u, ls, lw, ylbl) in enumerate(zip(['x', 'y', 'z'], ['-', '-', '-'], [1, 1, 1],
-                                                  [r'$\mathbf{p \cdot \hat{x}}$' + '\n' + r'($10^{-3}$ nA m)',
-                                                   r'$\mathbf{p \cdot \hat{y}}$' +
-                                                   '\n' + r'($10^{-3}$ nA m)',
-                                                   r'$\mathbf{p \cdot \hat{z}}$' + '\n' + r'($10^{-3}$ nA m)'])):
+        for i, (u, ls, lw, ylbl) in enumerate(zip(
+            ['x', 'y', 'z'], ['-', '-', '-'], [1, 1, 1],
+            [r'$\mathbf{p \cdot \hat{x}}$' + '\n' + r'($10^{-3}$ nA m)',
+             r'$\mathbf{p \cdot \hat{y}}$' +
+             '\n' + r'($10^{-3}$ nA m)',
+             r'$\mathbf{p \cdot \hat{z}}$' + '\n' + r'($10^{-3}$ nA m)'])):
             ax = fig.add_subplot(gs[9 + i * 2:11 + i * 2, j])
             if i == 0:
                 ax.text(-0.1, 1.2, alphabet[j + 5],
@@ -130,8 +133,10 @@ if __name__ == '__main__':
             'example_parallel_network_output.h5'),
         'r')
 
-    for m_type, me_type, color in zip(list(PSET.populationParameters['m_type']) + [
-                                      'summed'], list(PSET.populationParameters['me_type']) + ['imem'], colors + ['k']):
+    for m_type, me_type, color in zip(
+        list(
+            PSET.populationParameters['m_type']) + ['summed'], list(
+            PSET.populationParameters['me_type']) + ['imem'], colors + ['k']):
         data = f['SUMMED_OUTPUT'][()][me_type]
         ax.semilogx(data[:, tind:].var(axis=1), y,
                     lw=2, label=m_type, color=color)

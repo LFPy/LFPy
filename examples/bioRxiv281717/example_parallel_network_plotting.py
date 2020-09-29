@@ -400,7 +400,7 @@ if __name__ == '__main__':
     fig, ax = plt.subplots(1, 1, figsize=(PSET.populationParameters.size, 10))
     plot_m_types(ax, PSET, colors, spacing=300.)
     fig.savefig(os.path.join(PSET.OUTPUTPATH,
-                'example_parallel_network_m_types.pdf'),
+                             'example_parallel_network_m_types.pdf'),
                 bbox_inches='tight')
     plt.close(fig)
 
@@ -409,7 +409,7 @@ if __name__ == '__main__':
     fig.subplots_adjust(top=0.85)
     plot_connectivity(ax, PSET)
     fig.savefig(os.path.join(PSET.OUTPUTPATH,
-                'example_parallel_network_connectivity.pdf'),
+                             'example_parallel_network_connectivity.pdf'),
                 bbox_inches='tight')
     plt.close(fig)
 
@@ -423,7 +423,7 @@ if __name__ == '__main__':
                       layers=PSET.layer_data['layer'],
                       label=r'$\mathcal{L}_{YXL}$')
     fig.savefig(os.path.join(PSET.OUTPUTPATH,
-                'example_parallel_network_L_YXL.pdf'),
+                             'example_parallel_network_L_YXL.pdf'),
                 bbox_inches='tight')
     plt.close(fig)
 
@@ -485,7 +485,7 @@ if __name__ == '__main__':
             fig.savefig(
                 os.path.join(PSET.OUTPUTPATH,
                              'example_parallel_network_summed_{}.pdf'.format(
-                                suffix)),
+                                 suffix)),
                 bbox_inches='tight')
             plt.close(fig)
         f.close()
@@ -656,9 +656,9 @@ if __name__ == '__main__':
 
         # save figure output
         fig.savefig(os.path.join(
-                        PSET.OUTPUTPATH,
-                        'example_parallel_network_spike_time_histogram.pdf'),
-                    bbox_inches='tight')
+            PSET.OUTPUTPATH,
+            'example_parallel_network_spike_time_histogram.pdf'),
+            bbox_inches='tight')
         plt.close(fig)
 
     # spike count histogram across populations from file
@@ -709,7 +709,7 @@ if __name__ == '__main__':
         f.close()
         # save figure output
         fig.savefig(os.path.join(
-                        PSET.OUTPUTPATH,
-                        'example_parallel_network_spike_count_hist.pdf'),
-                    bbox_inches='tight')
+            PSET.OUTPUTPATH,
+            'example_parallel_network_spike_count_hist.pdf'),
+            bbox_inches='tight')
         plt.close(fig)

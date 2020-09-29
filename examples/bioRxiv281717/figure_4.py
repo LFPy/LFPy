@@ -15,7 +15,6 @@ but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 '''
-from __future__ import division
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
 from matplotlib.collections import PolyCollection
@@ -24,6 +23,7 @@ import os
 import numpy as np
 import h5py
 from LFPy import NetworkCell
+import neuron
 import example_parallel_network_plotting as plotting
 from mpi4py import MPI
 
@@ -56,7 +56,8 @@ def plot_quantity_YXL(axes, PSET, quantity,
                       y=['p23', 'b23', 'nb23', 'p4', 'ss4(L23)', 'ss4(L4)',
                          'b4', 'nb4', 'p5(L23)', 'p5(L56)', 'b5', 'nb5',
                          'p6(L4)', 'p6(L56)', 'b6', 'nb6'],
-                      label=r'$\mathcal{L}_{YXL}$', layers=['L1', 'L2/3', 'L4', 'L5', 'L6'],
+                      label=r'$\mathcal{L}_{YXL}$',
+                      layers=['L1', 'L2/3', 'L4', 'L5', 'L6'],
                       cmap=plt.get_cmap('inferno')):
     '''make a bunch of image plots, each showing the spatial normalized
     connectivity of synapses'''
@@ -112,7 +113,8 @@ def plot_quantity_YXL(axes, PSET, quantity,
 
 
 def plot_multapseargs(ax, PSET, cmap=plt.get_cmap('inferno'),
-                      data='multapseargs', cbarlabel=r'$\overline{n}_\mathrm{syn}$',
+                      data='multapseargs',
+                      cbarlabel=r'$\overline{n}_\mathrm{syn}$',
                       key='loc'):
     '''make an imshow of connectivity parameters'''
     item = PSET.connParams[data]
@@ -183,10 +185,16 @@ if __name__ == '__main__':
     # # table data with population sizes etc.
     h_spacing = 300.
     v_spacing = 100.
-    keys = ['m_type', 'm_type', 'e_type', 'me_type', 'n_seg', 'POP_SIZE', 'F_y', 'extrinsic_input_density', 'extrinsic_input_frequency',
+    keys = ['m_type', 'm_type', 'e_type', 'me_type', 'n_seg', 'POP_SIZE',
+            'F_y', 'extrinsic_input_density', 'extrinsic_input_frequency',
             'pop_args[loc]', 'pop_args[scale]']
-    labels = ['population ($X/Y$):', 'morphology type (m):', 'electric type (e):', 'cell model #:', 'segment count $n_\mathrm{seg}$:', 'population count $N_X$:', r'Occurrence $F_X$:', r'$n_\mathrm{ext}$:', r'$\nu_\mathrm{ext}$ (s$^{-1}$):',
-              r'$\overline{z}_X^\mathrm{soma}$ ($\mu$m):', r'$\sigma_{\overline{z},X}^\mathrm{soma}$ ($\mu$m)']
+    labels = ['population ($X/Y$):', 'morphology type (m):',
+              'electric type (e):', 'cell model #:',
+              'segment count $n_\\mathrm{seg}$:', 'population count $N_X$:',
+              r'Occurrence $F_X$:', r'$n_\mathrm{ext}$:',
+              r'$\nu_\mathrm{ext}$ (s$^{-1}$):',
+              r'$\overline{z}_X^\mathrm{soma}$ ($\mu$m):',
+              r'$\sigma_{\overline{z},X}^\mathrm{soma}$ ($\mu$m)']
     # PSET.populationParameters
     z = -PSET.layer_data['thickness'].sum()
     ax.set_ylim(
@@ -215,7 +223,8 @@ if __name__ == '__main__':
                          1) *
                         v_spacing, popData[key].lstrip(popData['m_type'] +
                                                        '_' +
-                                                       popData['e_type']), ha='center', va='top')
+                                                       popData['e_type']),
+                        ha='center', va='top')
             elif key == 'n_seg':
                 ax.text(j * h_spacing, z - (i + 1) * v_spacing,
                         n_segs[j], ha='center', va='top')
@@ -372,8 +381,9 @@ if __name__ == '__main__':
                                'cell_positions_and_rotations.h5'), 'r')
     # spatial bins across depth
     bins = np.arange(0, -PSET.layer_data['thickness'].sum(), -50)[::-1]
-    for color, post, key in zip(
-            colors, PSET.populationParameters['m_type'], PSET.populationParameters['me_type']):
+    for color, post, key in zip(colors,
+                                PSET.populationParameters['m_type'],
+                                PSET.populationParameters['me_type']):
         ax.hist(
             f[key]['z'],
             bins=bins,
@@ -408,15 +418,17 @@ if __name__ == '__main__':
 
     # file output
     f = h5py.File(os.path.join(PSET.OUTPUTPATH, 'synapse_positions.h5'))
-    for i, (m_post, post) in enumerate(
-            zip(PSET.populationParameters['m_type'], PSET.populationParameters['me_type'])):
+    for i, (m_post, post) in enumerate(zip(PSET.populationParameters['m_type'],
+                                           PSET.populationParameters['me_type']
+                                           )):
         ax = axes[i]
         plotting.remove_axis_junk(ax)
         ax.set_xlabel('count ($10^3$)')
         ax.set_yticklabels([])
         ax.set_title(r'$Y=${}'.format(m_post))
-        for color, m_pre, pre in zip(
-                colors, PSET.populationParameters['m_type'], PSET.populationParameters['me_type']):
+        for color, m_pre, pre in zip(colors,
+                                     PSET.populationParameters['m_type'],
+                                     PSET.populationParameters['me_type']):
             key = '{}:{}'.format(pre, post)
             ax.hist(
                 f[key]['z'],

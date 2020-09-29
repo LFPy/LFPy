@@ -15,7 +15,6 @@ but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 '''
-from __future__ import division
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec, GridSpecFromSubplotSpec
 from mpl_toolkits.axisartist.axislines import SubplotZero
@@ -52,7 +51,8 @@ def plot_spike_raster(ax, PSET, T):
             'example_parallel_network_output.h5'),
         'r')
     for i, (m_name, name) in enumerate(
-            zip(PSET.populationParameters['m_type'], PSET.populationParameters['me_type'])):
+            zip(PSET.populationParameters['m_type'],
+                PSET.populationParameters['me_type'])):
         x = []
         y = []
         ax.hlines(f['SPIKES'][name]['gids'][()].min(),
@@ -66,7 +66,8 @@ def plot_spike_raster(ax, PSET, T):
         y = np.array(y)
         inds = (x >= T[0]) & (x <= T[1])
         ax.plot(x[inds], y[inds], '|',
-                color=colors[i], markersize=2, lw=2, clip_on=True, label=m_name)
+                color=colors[i], markersize=2,
+                lw=2, clip_on=True, label=m_name)
     f.close()
     ax.set_xlim(T[0], T[1])
     ax.set_ylim(-0.5, PSET.populationParameters['POP_SIZE'].sum() + 0.5)
@@ -133,7 +134,8 @@ if __name__ == '__main__':
     axes[0].set_title(r'spike-count histograms ($\Delta t={}$ ms)'.format(dt))
 
     for i, (m_name, name) in enumerate(
-            zip(PSET.populationParameters['m_type'], PSET.populationParameters['me_type'])):
+            zip(PSET.populationParameters['m_type'],
+                PSET.populationParameters['me_type'])):
         ax = axes[i]
         plotting.remove_axis_junk(ax)
         data = np.hstack(f['SPIKES'][name]['times'][()].flat)
@@ -166,9 +168,16 @@ if __name__ == '__main__':
         ['extracellular potentials, summed'],
             ['k']):
         ax.set_title(title)
-        vlimround = plotting.draw_lineplot(ax=ax, data=plotting.decimate(data, q=PSET.decimate_q),
-                                           dt=PSET.dt * PSET.decimate_q,
-                                           T=T, color=color, scalebarbasis='log10')
+        vlimround = plotting.draw_lineplot(
+            ax=ax,
+            data=plotting.decimate(
+                data,
+                q=PSET.decimate_q),
+            dt=PSET.dt *
+            PSET.decimate_q,
+            T=T,
+            color=color,
+            scalebarbasis='log10')
     f.close()
 
     ax.set_xticklabels([])
@@ -191,16 +200,19 @@ if __name__ == '__main__':
     title = 'ECoG potential, summed'
     color = 'k'
     ax.set_title(title)
-    vlimround = plotting.draw_lineplot(ax=ax,
-                                       data=plotting.decimate(f['SUMMED_OUTPUT'][()]['imem'][0, ].reshape((1, -1)),
-                                                              q=PSET.decimate_q),
-                                       dt=PSET.dt * PSET.decimate_q,
-                                       scalebar=False,
-                                       T=T, color='0.5', scalebarpos=-1.5, scalebarbasis='log10')
-    vlimround = plotting.draw_lineplot(ax=ax, data=plotting.decimate(data, q=PSET.decimate_q),
-                                       dt=PSET.dt * PSET.decimate_q,
-                                       vlimround=vlimround, scalebar=True,
-                                       T=T, color=color, scalebarpos=-1.5, scalebarbasis='log10')
+    vlimround = plotting.draw_lineplot(
+        ax=ax,
+        data=plotting.decimate(
+            f['SUMMED_OUTPUT'][()]['imem'][0, ].reshape((1, -1)),
+            q=PSET.decimate_q),
+        dt=PSET.dt * PSET.decimate_q,
+        scalebar=False,
+        T=T, color='0.5', scalebarpos=-1.5, scalebarbasis='log10')
+    vlimround = plotting.draw_lineplot(
+        ax=ax, data=plotting.decimate(data, q=PSET.decimate_q),
+        dt=PSET.dt * PSET.decimate_q,
+        vlimround=vlimround, scalebar=True,
+        T=T, color=color, scalebarpos=-1.5, scalebarbasis='log10')
 
     lines = ax.get_lines()
     ax.legend(('ch. 1', 'ECoG'), loc=8, ncol=2,
@@ -229,7 +241,9 @@ if __name__ == '__main__':
 
     gs0 = GridSpecFromSubplotSpec(3, 1, subplot_spec=gs[2, 0])
     for i, ylabel in enumerate(
-            [r'$\mathbf{p \cdot \hat{x}}$', r'$\mathbf{p \cdot \hat{y}}$', r'$\mathbf{p \cdot \hat{z}}$']):
+            [r'$\mathbf{p \cdot \hat{x}}$',
+             r'$\mathbf{p \cdot \hat{y}}$',
+             r'$\mathbf{p \cdot \hat{z}}$']):
         ax = fig.add_subplot(gs0[i])
         if i == 0:
             ax.set_title(r'current dipole moment ($10^{-3}$ nA m)')
@@ -325,12 +339,19 @@ if __name__ == '__main__':
         sphere = FourSphereVolumeConductor(
             **PSET.foursphereParams
         )
-        phi_p += sphere.calc_potential(p=p,
-                                       rz=np.array([0, 0, PSET.foursphereParams['radii'][0] + PSET.layer_data['center'][3:][i % 2]]),)
+        phi_p += sphere.calc_potential(p=p, rz=np.array(
+            [0, 0,
+             PSET.foursphereParams['radii'][0]
+             + PSET.layer_data['center'][3:][i % 2]]),)
 
-    vlimround = plotting.draw_lineplot(ax=ax, data=plotting.decimate(phi_p, q=PSET.decimate_q)[::-1, ] * 1E3, unit=r'$\mu$V',  # mV -> µV unit conversion
-                                       dt=PSET.dt * PSET.decimate_q,
-                                       T=T, color='k', scalebarbasis='log10')
+    vlimround = plotting.draw_lineplot(
+        ax=ax,
+        data=plotting.decimate(
+            phi_p,
+            q=PSET.decimate_q)[::-1, ] * 1E3,  # mV -> µV unit conversion
+        unit=r'$\mu$V',
+        dt=PSET.dt * PSET.decimate_q,
+        T=T, color='k', scalebarbasis='log10')
 
     ax.set_xticklabels([])
     ax.set_xlabel('')
@@ -357,19 +378,24 @@ if __name__ == '__main__':
                           -np.sin(phi)]).T
     phi_hat = np.array([-np.sin(phi), np.cos(phi), np.zeros(r_hat.shape[0])]).T
 
-    for j, (unitvector, akse) in enumerate(zip([theta_hat, phi_hat, r_hat],
-                                               [r'\hat{\mathbf{\theta}}', r'\hat{\mathbf{\varphi}}', r'\hat{\mathbf{r}}'])):
+    for j, (unitvector, akse) in enumerate(zip(
+        [theta_hat, phi_hat, r_hat],
+        [r'\hat{\mathbf{\theta}}',
+         r'\hat{\mathbf{\varphi}}',
+         r'\hat{\mathbf{r}}'])):
         ax = fig.add_subplot(gs[3, j])
         ax.set_title(
-            r'surface magn. field $\mathbf{B}_\mathbf{p}(\mathbf{r}) \cdot %s$' %
-            akse)
+            'surface magn. field '
+            + r'$\mathbf{B}_\mathbf{p}(\mathbf{r}) \cdot %s$' % akse)
 
         # radial/tangential component of H at squid locations
         H_rt = np.zeros(phi_p.shape)
         for i, name in enumerate(PSET.populationParameters['me_type']):
             # dipole position
             dipole_position = np.array(
-                [0, 0, PSET.foursphereParams['radii'][0] + PSET.layer_data['center'][3:][i % 2]])
+                [0, 0,
+                 PSET.foursphereParams['radii'][0]
+                 + PSET.layer_data['center'][3:][i % 2]])
             # create MEG object and compute magnetic field
             meg = MEG(sensor_locations=PSET.foursphereParams['r'])
             H = meg.calculate_H(
@@ -380,9 +406,12 @@ if __name__ == '__main__':
                 H_rt[k, ] += np.dot(h, u)
 
         B_rt = H_rt * meg.mu  # unit mT (from nA/µm * Tm/A)
-        vlimround = plotting.draw_lineplot(ax=ax, data=plotting.decimate(B_rt, q=PSET.decimate_q)[::-1, ] * 1E12,  # mT --> fT unit conversion
-                                           dt=PSET.dt * PSET.decimate_q, unit=r'fT',
-                                           T=T, color='k', scalebarbasis='log10')
+        vlimround = plotting.draw_lineplot(
+            ax=ax,
+            data=plotting.decimate(B_rt, q=PSET.decimate_q)[
+                ::-1, ] * 1E12,  # mT --> fT unit conversion
+            dt=PSET.dt * PSET.decimate_q, unit=r'fT',
+            T=T, color='k', scalebarbasis='log10')
 
         ax.set_yticklabels(['{}'.format(i + 1)
                             for i in range(sphere.rxyz.shape[0])])
@@ -399,19 +428,23 @@ if __name__ == '__main__':
             ax.set_yticklabels([])
             ax.set_ylabel('')
 
-        # PANEL I. tangential components of MEG signal (as recorded by squid outside scull)
+        # PANEL I. tangential components of MEG signal (as recorded by squid
+        # outside scull)
         # with dipole sources rotated 90 deg counterclockwise around x-axis
         ax = fig.add_subplot(gs[4, j])
         ax.set_title(
-            r'surface magn. field $\mathbf{B}_{R_x(\pi/2)\mathbf{p}}(\mathbf{r}) \cdot %s$' %
-            akse)
+            'surface magn. field '
+            + r'$\mathbf{B}_{R_x(\pi/2)\mathbf{p}}(\mathbf{r}) '
+            + r'\cdot %s$' % akse)
 
         # radial/tangential component of H at squid locations
         H_rt = np.zeros(phi_p.shape)
         for i, name in enumerate(PSET.populationParameters['me_type']):
             # dipole position
             dipole_position = np.array(
-                [0, 0, PSET.foursphereParams['radii'][0] + PSET.layer_data['center'][3:][i % 2]])
+                [0, 0,
+                 PSET.foursphereParams['radii'][0]
+                 + PSET.layer_data['center'][3:][i % 2]])
             # create MEG object and compute magnetic field
             meg = MEG(sensor_locations=PSET.foursphereParams['r'])
             H = meg.calculate_H(
@@ -419,16 +452,20 @@ if __name__ == '__main__':
                     Rx90,
                     f['CURRENT_DIPOLE_MOMENT'][name].T).T,
                 dipole_position)
-            # compute the radial unit vector from the center of the sphere to each
+            # compute the radial unit vector from the center of the sphere to
+            # each
             # measurement point
 
             for k, (h, u) in enumerate(zip(H, unitvector)):
                 H_rt[k, ] += np.dot(h, u)
 
         B_rt = H_rt * meg.mu  # unit mT (from nA/µm * Tm/A)
-        vlimround = plotting.draw_lineplot(ax=ax, data=plotting.decimate(B_rt, q=PSET.decimate_q)[::-1, ] * 1E12,  # mT --> fT unit conversion
-                                           dt=PSET.dt * PSET.decimate_q, unit=r'fT',
-                                           T=T, color='k', scalebarbasis='log10')
+        vlimround = plotting.draw_lineplot(
+            ax=ax,
+            data=plotting.decimate(B_rt, q=PSET.decimate_q)[
+                ::-1, ] * 1E12,  # mT --> fT unit conversion
+            dt=PSET.dt * PSET.decimate_q, unit=r'fT',
+            T=T, color='k', scalebarbasis='log10')
 
         ax.set_yticklabels(['{}'.format(i + 1)
                             for i in range(sphere.rxyz.shape[0])])
