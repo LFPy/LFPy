@@ -25,11 +25,7 @@ GNU General Public License for more details.
 """
 import os
 from os.path import join
-import sys
-if sys.version < '3':
-    from urllib2 import urlopen
-else:
-    from urllib.request import urlopen
+from urllib.request import urlopen
 import zipfile
 import ssl
 import LFPy
@@ -60,7 +56,8 @@ def plot_results(cell, synapse, MEA, electrode):
                        xlabel='ms', ylabel='mV',
                        ylim=[-70, -50], xlim=time_window)
 
-    def elec_clr(idx): return plt.cm.nipy_spectral(1. / (len(MEA.x) - 1) * idx)
+    def elec_clr(idx):
+        return plt.cm.nipy_spectral(1. / (len(MEA.x) - 1) * idx)
 
     l_elec, l_syn = plot_recording_set_up(cell, ax1, ax3, MEA, elec_clr,
                                           syn_idx, cell_plot_colors)

@@ -43,7 +43,10 @@ def plot_EEG_sphere(fig, eeg, x_eeg, y_eeg, z_eeg):
                          title="Max EEG potential\nat 4-sphere surface")
     vmax = 6
     vmin = -vmax
-    def clr(phi): return plt.cm.PRGn((phi - vmin) / (vmax - vmin))
+
+    def clr(phi):
+        return plt.cm.PRGn((phi - vmin) / (vmax - vmin))
+
     clrs = clr(eeg)
     ax.plot_surface(x_eeg.reshape(num_theta, num_phi),
                     y_eeg.reshape(num_theta, num_phi),

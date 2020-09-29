@@ -54,8 +54,10 @@ def plot_LFP_and_ECoG(cell, electrode, electrode_MoI, ecog_electrode):
     cortex_clr = "salmon"
     surface_clr = "lightblue"
 
+    def elec_clr(idx):
+        return plt.cm.rainbow(1.0 * idx / (len(electrode.x)))
+
     fig = plt.figure(figsize=[16, 8])
-    def elec_clr(idx): return plt.cm.rainbow(1.0 * idx / (len(electrode.x)))
 
     xlim = np.max([ecog_electrode.r, np.max(np.abs(cell.xend))]) + 50
 
