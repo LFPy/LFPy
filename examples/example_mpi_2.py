@@ -111,7 +111,7 @@ synapse_parameters = {
 }
 
 # Define electrode parameters
-point_electrode_parameters = {
+point_el_parameters = {
     'sigma': 0.3,      # extracellular conductivity
     'x': 0.,  # electrode requires 1d vector of positions
     'y': 0.,
@@ -192,18 +192,17 @@ for cell_id in range(n_cells):
         cell.simulate(rec_imem=True)
 
         # set up the extracellular device
-        point_electrode = LFPy.RecExtElectrode(cell,
-                                               **point_electrode_parameters)
-        point_electrode.calc_lfp()
+        point_el = LFPy.RecExtElectrode(cell, **point_el_parameters)
+        point_el.data = point_el.get_transformation_matrix() @ cell.imem
 
         # sum LFP on this RANK
-        summed_LFP += point_electrode.LFP[0]
+        summed_LFP += point_el.data[0]
 
         # send LFP of this cell to RANK 0
         if RANK != 0:
-            COMM.send(point_electrode.LFP[0], dest=0)
+            COMM.send(point_el.data[0], dest=0)
         else:
-            single_LFPs += [point_electrode.LFP[0]]
+            single_LFPs += [point_el.data[0]]
 
     # collect single LFP contributions on RANK 0
     if RANK == 0:
@@ -252,7 +251,7 @@ if RANK == 0:
     ax.axis(np.array(axis) / 1.15)
 
     # adding a blue dot:
-    ax.plot(point_electrode.x, point_electrode.z, 'o',
+    ax.plot(point_el.x, point_el.z, 'o',
             markeredgecolor='none', markerfacecolor='b', markersize=3,
             zorder=10, clip_on=False)
     plt.annotate("Electrode",
@@ -311,7 +310,7 @@ if RANK == 0:
     plt.xlim([0, cell_parameters['tstop']])
     plt.ylim([0, 10.])
 
-    tvec = np.arange(point_electrode.LFP.shape[1]) * cell.dt
+    tvec = np.arange(point_el.data.shape[1]) * cell.dt
 
     plt.xlabel('$t$ (ms)')
     plt.ylabel('Rate (spike/s)')

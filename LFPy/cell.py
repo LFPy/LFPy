@@ -2645,9 +2645,23 @@ class Cell(object):
             setattr(self, dir_, geometry)
 
         # recompute length of each segment
-        self.length = np.sqrt((self.x[:, -1] - self.x[:, 0])**2 +
-                              (self.y[:, -1] - self.y[:, 0])**2 +
-                              (self.z[:, -1] - self.z[:, 0])**2)
+        self._set_length()
+
+    def _set_length(self):
+        '''callable method to (re)set length attribute'''
+        self.length = np.sqrt(np.diff(self.x, axis=-1)**2 +
+                              np.diff(self.y, axis=-1)**2 +
+                              np.diff(self.z, axis=-1)**2).flatten()
+
+    def _set_area(self):
+        '''callable method to (re)set area attribute'''
+        if self.d.ndim == 1:
+            self.area = self.length * np.pi * self.d
+        else:
+            # Surface area of conical frusta
+            # A = pi*(r1+r2)*sqrt((r1-r2)^2 + h^2)
+            self.area = np.pi * self.d.sum(axis=-1) * \
+                np.sqrt(np.diff(self.d, axis=-1)**2 + self.length**2)
 
     def get_multi_current_dipole_moments(self, timepoints=None):
         '''
