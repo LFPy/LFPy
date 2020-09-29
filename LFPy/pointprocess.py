@@ -99,7 +99,8 @@ class Synapse(PointProcess):
     >>> import LFPy
     >>> import os
     >>> cellParameters = {
-    >>>     'morphology':  os.path.join('examples', 'morphologies', 'L5_Mainen96_LFPy.hoc'),
+    >>>     'morphology':  os.path.join('examples', 'morphologies',
+    >>>                                 'L5_Mainen96_LFPy.hoc'),
     >>>     'passive': True,
     >>>     'tstop':     50,
     >>> }

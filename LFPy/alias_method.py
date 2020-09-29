@@ -40,7 +40,7 @@ def alias_method(idx, probs, nsyn):
     K = J.size
     # Generate variates using alias draw method
     for nn in range(nsyn):
-        kk = np.floor(rands[nn, 0]*K).astype(int)
+        kk = np.floor(rands[nn, 0] * K).astype(int)
         if rands[nn, 1] < q[kk]:
             spc[nn] = idx[kk]
         else:
@@ -67,7 +67,7 @@ def alias_setup(probs):
 
     """
     K = probs.size
-    q = probs*K
+    q = probs * K
     J = np.zeros(K, dtype=int)
 
     # Sort the data into the outcomes with probabilities

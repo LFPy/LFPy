@@ -31,7 +31,8 @@ SIZE = COMM.Get_size()
 RANK = COMM.Get_rank()
 
 
-def flattenlist(lst): return [item for sublist in lst for item in sublist]
+def flattenlist(lst):
+    return [item for sublist in lst for item in sublist]
 
 
 ##########################################################################
@@ -299,8 +300,8 @@ class NetworkPopulation(object):
                  rotation_args=dict(),
                  OUTPUTPATH='example_parallel_network'):
         """
-        NetworkPopulation class representing a group of Cell objects distributed
-        across RANKs.
+        NetworkPopulation class representing a group of Cell objects
+        distributed across RANKs.
 
         Parameters
         ----------
@@ -556,8 +557,8 @@ class Network(object):
         """
         Create and append a distributed POP_SIZE-sized population of cells of
         type Cell with the corresponding name. Cell-object references, gids on
-        this RANK, population size POP_SIZE and names will be added to the lists
-        Network.gids, Network.cells, Network.sizes and Network.names,
+        this RANK, population size POP_SIZE and names will be added to the
+        lists Network.gids, Network.cells, Network.sizes and Network.names,
         respectively
 
         Parameters
@@ -672,10 +673,10 @@ class Network(object):
                 gids_pre += self.populations[pre].first_gid
                 gids_post *= SIZE  # asssume round-robin distribution of gids
                 gids_post += self.populations[post].gids[0]
-                inds = gids_pre == gids_post
-                gids_pre = gids_pre[inds == False]
+                inds = gids_pre != gids_post
+                gids_pre = gids_pre[inds]
                 gids_pre -= self.populations[pre].first_gid
-                gids_post = gids_post[inds == False]
+                gids_post = gids_post[inds]
                 gids_post -= self.populations[post].gids[0]
                 gids_post //= SIZE
                 c = np.c_[gids_pre, gids_post]

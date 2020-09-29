@@ -40,8 +40,8 @@ def simulate_cells_serially(stimolo,
     pre_cells['inh_exc'] = population_parameters['inh_ids']
     pre_cells['inh_inh'] = population_parameters['inh_ids']
 
-    n_thalamic_synapses = population_parameters['n_thalamic_synapses']
-    n_external_synapses = population_parameters['n_external_synapses']
+    # n_thalamic_synapses = population_parameters['n_thalamic_synapses']
+    # n_external_synapses = population_parameters['n_external_synapses']
 
     # setup data dictionary
 
@@ -91,20 +91,20 @@ def simulate_cells_serially(stimolo,
 
         if cell_id in population_parameters['exc_ids']:
             local_synapse_types = ['exc_exc', 'inh_exc']
-            thalamic_synapse_type = 'thalamic_exc'
-            external_synapse_type = 'external_exc'
+            # thalamic_synapse_type = 'thalamic_exc'
+            # external_synapse_type = 'external_exc'
 
         elif cell_id in population_parameters['inh_ids']:
             local_synapse_types = ['exc_inh', 'inh_inh']
-            thalamic_synapse_type = 'thalamic_inh'
-            external_synapse_type = 'external_inh'
+            # thalamic_synapse_type = 'thalamic_inh'
+            # external_synapse_type = 'external_inh'
 
         for synapse_type in local_synapse_types:
 
             print("Setting up local synapses: ", synapse_type)
 
             pre_ids = incoming_connections[cell_id]
-            n_synapses = len(pre_ids)
+            # n_synapses = len(pre_ids)
 
             for i_synapse, pre_id in enumerate(pre_ids):
                 if pre_id in pre_cells[synapse_type]:

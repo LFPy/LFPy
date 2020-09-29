@@ -172,9 +172,10 @@ class TemplateCell(Cell):
                 elif fileEnding == 'xml' or fileEnding == 'XML':
                     Import = neuron.h.Import3d_MorphML()
                 else:
-                    raise ValueError('%s not a recognised morphology format'
-                                     % self.morphology).with_traceback(
-                                     'Should be either .hoc, .asc, .swc, .xml')
+                    raise ValueError(
+                        '%s not a recognised morphology format'
+                        % self.morphology).with_traceback(
+                        'Should be either .hoc, .asc, .swc, .xml')
 
                 # assuming now that morphology file is the correct format
                 try:
