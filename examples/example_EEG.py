@@ -22,7 +22,6 @@ GNU General Public License for more details.
 import LFPy
 import numpy as np
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 
 
 def plot_cell_to_ax(cell, ax, synidxs):

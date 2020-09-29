@@ -26,7 +26,7 @@ GNU General Public License for more details.
 
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.collections import PolyCollection, LineCollection
+from matplotlib.collections import LineCollection
 import os
 from os.path import join
 import sys
@@ -35,82 +35,87 @@ if sys.version < '3':
 else:
     from urllib.request import urlopen
 import zipfile
+import ssl
 import LFPy
-import neuron
 from mpi4py import MPI
 
-#initialize the MPI interface
+# initialize the MPI interface
 COMM = MPI.COMM_WORLD
 SIZE = COMM.Get_size()
 RANK = COMM.Get_rank()
 
-#set the numpy random seeds
+# set the numpy random seeds
 global_seed = 1234
 np.random.seed(global_seed)
 
-def stationary_poisson(nsyn,lambd,tstart,tstop):
-    ''' Generates nsyn stationary possion processes with rate lambda between tstart and tstop'''
-    interval_s = (tstop-tstart)*.001
+
+def stationary_poisson(nsyn, lambd, tstart, tstop):
+    ''' Generates nsyn stationary possion processes with rate
+    lambda between tstart and tstop'''
+    interval_s = (tstop - tstart) * .001
     spiketimes = []
     for i in range(nsyn):
-        spikecount = np.random.poisson(interval_s*lambd)
+        spikecount = np.random.poisson(interval_s * lambd)
         spikevec = np.empty(spikecount)
-        if spikecount==0:
+        if spikecount == 0:
             spiketimes.append(spikevec)
         else:
-            spikevec = tstart + (tstop-tstart)*np.random.random(spikecount)
-            spiketimes.append(np.sort(spikevec)) #sort them too!
+            spikevec = tstart + (tstop - tstart) * np.random.random(spikecount)
+            spiketimes.append(np.sort(spikevec))  # sort them too!
 
     return spiketimes
 
 
-#Fetch Mainen&Sejnowski 1996 model files
-if not os.path.isfile(join('cells', 'cells', 'j4a.hoc')) and RANK==0:
-    #get the model files:
-    u = urlopen('http://senselab.med.yale.edu/ModelDB/eavBinDown.asp?o=2488&a=23&mime=application/zip')
+# Fetch Mainen&Sejnowski 1996 model files
+if not os.path.isfile(join('cells', 'cells', 'j4a.hoc')) and RANK == 0:
+    # get the model files:
+    url = '{}{}'.format('http://senselab.med.yale.edu/ModelDB/eavBinDown.asp',
+                        '?o=2488&a=23&mime=application/zip')
+    u = urlopen(url, context=ssl._create_unverified_context())
     localFile = open('patdemo.zip', 'w')
     localFile.write(u.read())
     localFile.close()
-    #unzip:
+    # unzip:
     myzip = zipfile.ZipFile('patdemo.zip', 'r')
     myzip.extractall('.')
     myzip.close()
 
-#resync MPI threads
+# resync MPI threads
 COMM.Barrier()
 
 # Define cell parameters
 cell_parameters = {          # various cell parameters,
-    'morphology' : join('cells', 'cells', 'j4a.hoc'), # Mainen&Sejnowski, 1996
-    'cm' : 1.0,         # membrane capacitance
-    'Ra' : 150,         # axial resistance
-    'v_init' : -65.,    # initial crossmembrane potential
-    'passive' : True,   # turn on passive mechanism for all sections
-    'passive_parameters' : {'g_pas' : 1./30000, 'e_pas' : -65}, # passive params
-    'nsegs_method' : 'lambda_f',
-    'lambda_f' : 100.,
-    'dt' : 2.**-3,      # simulation time step size
-    'tstart' :  0.,     # start time of simulation, recorders start at t=0
-    'tstop' : 300.,     # stop simulation at 200 ms. These can be overridden
-                        # by setting these arguments i cell.simulation()
+    'morphology': join('cells', 'cells', 'j4a.hoc'),  # Mainen&Sejnowski, 1996
+    'cm': 1.0,         # membrane capacitance
+    'Ra': 150,         # axial resistance
+    'v_init': -65.,    # initial crossmembrane potential
+    'passive': True,   # turn on passive mechanism for all sections
+    # passive params
+    'passive_parameters': {'g_pas': 1. / 30000, 'e_pas': -65},
+    'nsegs_method': 'lambda_f',
+    'lambda_f': 100.,
+    'dt': 2.**-3,      # simulation time step size
+    'tstart': 0.,     # start time of simulation, recorders start at t=0
+    'tstop': 300.,     # stop simulation at 200 ms. These can be overridden
+    # by setting these arguments i cell.simulation()
 }
 
 # Define synapse parameters
 synapse_parameters = {
-    'idx' : 0, # to be set later
-    'e' : 0.,                   # reversal potential
-    'syntype' : 'ExpSyn',       # synapse type
-    'tau' : 5.,                 # syn. time constant
-    'weight' : .001,            # syn. weight
-    'record_current' : True,
+    'idx': 0,  # to be set later
+    'e': 0.,                   # reversal potential
+    'syntype': 'ExpSyn',       # synapse type
+    'tau': 5.,                 # syn. time constant
+    'weight': .001,            # syn. weight
+    'record_current': True,
 }
 
 # Define electrode parameters
 point_electrode_parameters = {
-    'sigma' : 0.3,      # extracellular conductivity
-    'x' : 0.,  # electrode requires 1d vector of positions
-    'y' : 0.,
-    'z' : 0.,
+    'sigma': 0.3,      # extracellular conductivity
+    'x': 0.,  # electrode requires 1d vector of positions
+    'y': 0.,
+    'z': 0.,
 }
 
 # number of units
@@ -131,7 +136,7 @@ else:
     z_rotation = COMM.bcast(None, root=0)
 
 
-#synaptic spike times drawn on RANK 0 distributed to all processes
+# synaptic spike times drawn on RANK 0 distributed to all processes
 n_pre_syn = 1000
 if RANK == 0:
     pre_syn_sptimes = COMM.bcast(stationary_poisson(nsyn=n_pre_syn, lambd=5.,
@@ -147,17 +152,18 @@ n_synapses = 100
 # and scattered (for illustrating purposes, not efficiency)
 if RANK == 0:
     # set up len SIZE nested list for spike train IDs.
-    pre_syn_ids = [[]]*SIZE
+    pre_syn_ids = [[]] * SIZE
     for cell_id in range(n_cells):
         pre_syn_ids[cell_id % SIZE] += [np.random.permutation(np.arange(
-                                                    n_pre_syn))[0:n_synapses]]
+            n_pre_syn))[0:n_synapses]]
 else:
     pre_syn_ids = None
 pre_syn_ids = COMM.scatter(pre_syn_ids, root=0)
 
 # containers for per-cell LFP and summed LFPs
 single_LFPs = []
-summed_LFP = np.zeros(int(cell_parameters['tstop'] / cell_parameters['dt'] + 1))
+summed_LFP = np.zeros(
+    int(cell_parameters['tstop'] / cell_parameters['dt'] + 1))
 
 # get state of random seed generator
 state = np.random.get_state()
@@ -171,21 +177,21 @@ for cell_id in range(n_cells):
         # Create cell
         cell = LFPy.Cell(**cell_parameters)
 
-        #Have to position and rotate the cells!
+        # Have to position and rotate the cells!
         cell.set_rotation(z=z_rotation[cell_id], **xy_rotations)
         cell.set_pos(x=x_cell_pos[cell_id])
 
         for i_syn in range(n_synapses):
             syn_idx = cell.get_rand_idx_area_norm()
-            synapse_parameters.update({'idx' : syn_idx})
+            synapse_parameters.update({'idx': syn_idx})
             synapse = LFPy.Synapse(cell, **synapse_parameters)
             synapse.set_spike_times(pre_syn_sptimes[pre_syn_ids[
-                                                        cell_id % SIZE][i_syn]])
+                cell_id % SIZE][i_syn]])
 
-        #run the cell simulation
+        # run the cell simulation
         cell.simulate(rec_imem=True)
 
-        #set up the extracellular device
+        # set up the extracellular device
         point_electrode = LFPy.RecExtElectrode(cell,
                                                **point_electrode_parameters)
         point_electrode.calc_lfp()
@@ -211,11 +217,12 @@ summed_LFP = COMM.reduce(summed_LFP)
 np.random.set_state(state)
 
 # plot output on RANK 0.
-if RANK==0:
-    #assign color to each unit
-    color_vec = [plt.cm.rainbow(int(x*256./n_cells)) for x in range(n_cells)]
+if RANK == 0:
+    # assign color to each unit
+    color_vec = [plt.cm.rainbow(int(x * 256. / n_cells))
+                 for x in range(n_cells)]
 
-    #figure
+    # figure
     fig = plt.figure(figsize=(12, 8))
 
     # Morphologies axes:
@@ -233,10 +240,10 @@ if RANK==0:
         for x, z in cell.get_idx_polygons():
             zips.append(list(zip(x, z)))
         linecol = LineCollection(zips,
-                    edgecolor = 'none',
-                    facecolor = color_vec[i_cell],
-                    rasterized=False,
-                    )
+                                 edgecolor='none',
+                                 facecolor=color_vec[i_cell],
+                                 rasterized=False,
+                                 )
 
         ax = plt.gca()
         ax.add_collection(linecol)
@@ -244,28 +251,27 @@ if RANK==0:
     axis = ax.axis(ax.axis('equal'))
     ax.axis(np.array(axis) / 1.15)
 
-
-    #adding a blue dot:
+    # adding a blue dot:
     ax.plot(point_electrode.x, point_electrode.z, 'o',
             markeredgecolor='none', markerfacecolor='b', markersize=3,
             zorder=10, clip_on=False)
     plt.annotate("Electrode",
-            xy=(0., 0.), xycoords='data',
-            xytext=(-100., 1000.),
-            arrowprops=dict(arrowstyle='wedge',
-                            shrinkA=1,
-                            shrinkB=1,
-                            #lw=0.5,
-                            mutation_scale=20,
-                            fc="0.6", ec="none",
-                            edgecolor='k', facecolor='w'))
+                 xy=(0., 0.), xycoords='data',
+                 xytext=(-100., 1000.),
+                 arrowprops=dict(arrowstyle='wedge',
+                                 shrinkA=1,
+                                 shrinkB=1,
+                                 # lw=0.5,
+                                 mutation_scale=20,
+                                 fc="0.6", ec="none",
+                                 edgecolor='k', facecolor='w'))
 
     plt.xlim([-700., 700.])
 
     ax.plot([100, 200], [-250, -250], 'k', lw=1, clip_on=False)
     ax.text(150, -300, r'100$\mu$m', va='center', ha='center')
 
-    #presynaptic spike trains axes
+    # presynaptic spike trains axes
     plt.axes([.05, .35, .25, .55])
 
     pop_sptimes = []
@@ -276,11 +282,11 @@ if RANK==0:
 
     for i_pre in range(n_pre_syn):
         plt.scatter(pre_syn_sptimes[i_pre],
-                    i_pre*np.ones(len(pre_syn_sptimes[i_pre])),
+                    i_pre * np.ones(len(pre_syn_sptimes[i_pre])),
                     s=1, edgecolors='none', facecolors='k')
 
-    plt.ylim([0,n_pre_syn])
-    plt.xlim([0,cell_parameters['tstop']])
+    plt.ylim([0, n_pre_syn])
+    plt.xlim([0, cell_parameters['tstop']])
     plt.ylabel('train #', ha='left', labelpad=0)
     plt.title('Presynaptic spike times')
 
@@ -293,19 +299,19 @@ if RANK==0:
 
     ax.set_xticklabels([])
 
-    #spike rate axes
-    plt.axes([.05,.12,.25,.2])
+    # spike rate axes
+    plt.axes([.05, .12, .25, .2])
 
     binsize = 5
-    bins=np.arange(0, cell_parameters['tstop']+1., binsize)
-    count,b = np.histogram(pop_sptimes, bins=bins)
-    rate = count*(1000./binsize)*(1./n_pre_syn)
-    plt.plot(b[0:-1],rate,color='black',lw=1)
+    bins = np.arange(0, cell_parameters['tstop'] + 1., binsize)
+    count, b = np.histogram(pop_sptimes, bins=bins)
+    rate = count * (1000. / binsize) * (1. / n_pre_syn)
+    plt.plot(b[0:-1], rate, color='black', lw=1)
 
-    plt.xlim([0,cell_parameters['tstop']])
-    plt.ylim([0,10.])
+    plt.xlim([0, cell_parameters['tstop']])
+    plt.ylim([0, 10.])
 
-    tvec = np.arange(point_electrode.LFP.shape[1])*cell.dt
+    tvec = np.arange(point_electrode.LFP.shape[1]) * cell.dt
 
     plt.xlabel('$t$ (ms)')
     plt.ylabel('Rate (spike/s)')
@@ -317,28 +323,28 @@ if RANK==0:
     ax.xaxis.set_ticks_position('bottom')
     ax.yaxis.set_ticks_position('left')
 
-    #single neuron EPs axes
-    plt.axes([.7,.35,.25,.55])
+    # single neuron EPs axes
+    plt.axes([.7, .35, .25, .55])
 
     plt.title('Single neuron extracellular potentials')
     plt.axis('off')
 
     for cell_id in range(n_cells):
         plt.plot(tvec,
-                        cell_id+2.e3*single_LFPs[cell_id],
-                        color=color_vec[cell_id], lw=1,
-                        )
+                 cell_id + 2.e3 * single_LFPs[cell_id],
+                 color=color_vec[cell_id], lw=1,
+                 )
 
-    plt.ylim([-1,n_cells-.5])
+    plt.ylim([-1, n_cells - .5])
 
-    #Summed LFPs axes
-    plt.axes([.7,.12,.25,.2])
-    plt.plot(tvec, 1E3*summed_LFP, color='black', lw=1)
-    plt.ylim([-5.e-1,5e-1])
+    # Summed LFPs axes
+    plt.axes([.7, .12, .25, .2])
+    plt.plot(tvec, 1E3 * summed_LFP, color='black', lw=1)
+    plt.ylim([-5.e-1, 5e-1])
 
     plt.title('Summed extracellular potentials')
     plt.xlabel(r'$t$ (ms)')
-    plt.ylabel(r'$\mu$V',ha='left',rotation='horizontal')
+    plt.ylabel(r'$\mu$V', ha='left', rotation='horizontal')
 
     ax = plt.gca()
     for loc, spine in ax.spines.items():
@@ -346,7 +352,6 @@ if RANK==0:
             spine.set_color('none')
     ax.xaxis.set_ticks_position('bottom')
     ax.yaxis.set_ticks_position('left')
-
 
     fig.savefig('example_mpi_2.pdf', dpi=300)
     plt.show()
