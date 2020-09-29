@@ -103,7 +103,7 @@ grid_electrode_tensor.calc_lfp()
 fig = plt.figure(figsize=[10, 5])
 
 ax = fig.add_subplot(121, aspect='equal',
-                     xlabel='x ($\mu$m)', ylabel='z ($\mu$m)',
+                     xlabel='x ($\\mu$m)', ylabel='z ($\\mu$m)',
                      title="Sigma: %s S/m" % str(sigma),
                      ylim=[np.min(grid_electrode.z), np.max(grid_electrode.z)],
                      xlim=[np.min(grid_electrode.x), np.max(grid_electrode.x)])
@@ -137,13 +137,12 @@ ax.plot(cell.xmid[cell.synidx], cell.zmid[cell.synidx], 'o', ms=5,
         markeredgecolor='k',
         markerfacecolor='r')
 
-ax2 = fig.add_subplot(122, aspect='equal', xlabel='x ($\mu$m)',
+ax2 = fig.add_subplot(122, aspect='equal', xlabel='x ($\\mu$m)',
                       title="Sigma: %s S/m" % str(sigma_tensor),
-                      ylim=[
-    np.min(
-        grid_electrode.z), np.max(
-            grid_electrode.z)],
-    xlim=[np.min(grid_electrode.x), np.max(grid_electrode.x)])
+                      ylim=[np.min(grid_electrode.z),
+                            np.max(grid_electrode.z)],
+                      xlim=[np.min(grid_electrode.x),
+                            np.max(grid_electrode.x)])
 
 LFP = 1000 * grid_electrode_tensor.LFP[:, max_idx].reshape(X.shape)
 im = ax2.contourf(X, Z, LFP, 51,

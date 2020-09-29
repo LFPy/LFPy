@@ -236,7 +236,8 @@ class Population:
 
             ax = fig.add_axes([0.05, 0.0, 0.45, 1.0],
                               aspect='equal', frameon=False,
-                              xticks=[], xticklabels=[], yticks=[], yticklabels=[])
+                              xticks=[], xticklabels=[],
+                              yticks=[], yticklabels=[])
             for cellindex in range(self.POPULATION_SIZE):
                 cell = LFPy.Cell(**self.cellParameters)
                 cell.set_pos(x=self.cellPositions[cellindex, 0],
@@ -252,7 +253,8 @@ class Population:
                                          edgecolors='none',
                                          facecolors='bgrcmykbgrcmykbgrcmyk'[
                                              cellindex],
-                                         zorder=self.cellPositions[cellindex, 1])
+                                         zorder=self.cellPositions[cellindex,
+                                                                   1])
 
                 ax.add_collection(polycol)
 
