@@ -21,13 +21,14 @@ import unittest
 import numpy as np
 import LFPy
 import neuron
-from LFPy.test.common import stickSimulation, stickSimulationAveragingElectrode, analytical_LFP
+from LFPy.test.common import stickSimulation, \
+    stickSimulationAveragingElectrode, analytical_LFP
 
 # for nosetests to run load the SinSyn sinusoid synapse currrent mechanism
 if "win32" in sys.platform:
     pth = os.path.join(LFPy.__path__[0], 'test', 'nrnmech.dll')
     pth = pth.replace(os.sep, posixpath.sep)
-    if not pth in neuron.nrn_dll_loaded:
+    if pth not in neuron.nrn_dll_loaded:
         neuron.h.nrn_load_dll(pth)
         neuron.nrn_dll_loaded.append(pth)
 else:
@@ -40,18 +41,18 @@ class testRecExtElectrode(unittest.TestCase):
     """
 
     def test_method_pointsource(self):
-        #create LFPs using LFPy-model
+        # create LFPs using LFPy-model
         LFP_LFPy = stickSimulation(method='pointsource')
 
-        #create LFPs using the analytical approach
-        time = np.linspace(0, 100, 100*2**6+1)
-        R = np.ones(11)*100
+        # create LFPs using the analytical approach
+        time = np.linspace(0, 100, 100 * 2**6 + 1)
+        R = np.ones(11) * 100
         Z = np.linspace(1000, 0, 11)
 
         LFP_analytic = np.empty((R.size, time.size))
         for i in range(R.size):
             LFP_analytic[i, ] = analytical_LFP(time, electrodeR=R[i],
-                                                    electrodeZ=Z[i])
+                                               electrodeZ=Z[i])
         np.testing.assert_allclose(LFP_analytic, LFP_LFPy, rtol=0,
                                    atol=abs(LFP_analytic).max() / 10.)
 
@@ -60,104 +61,49 @@ class testRecExtElectrode(unittest.TestCase):
         LFP_LFPy = stickSimulation(method='linesource')
 
         # create LFPs using the analytical approach
-        time = np.linspace(0, 100, 100*2**6+1)
-        R = np.ones(11)*100
+        time = np.linspace(0, 100, 100 * 2**6 + 1)
+        R = np.ones(11) * 100
         Z = np.linspace(1000, 0, 11)
 
         LFP_analytic = np.empty((R.size, time.size))
         for i in range(R.size):
             LFP_analytic[i, ] = analytical_LFP(time, electrodeR=R[i],
-                                                    electrodeZ=Z[i])
+                                               electrodeZ=Z[i])
         np.testing.assert_allclose(LFP_analytic, LFP_LFPy, rtol=0,
                                    atol=abs(LFP_analytic).max() / 10.)
-
 
     def test_method_root_as_point(self):
-        #create LFPs using LFPy-model
+        # create LFPs using LFPy-model
         LFP_LFPy = stickSimulation(method='root_as_point')
 
-        #create LFPs using the analytical approach
-        time = np.linspace(0, 100, 100*2**6+1)
-        R = np.ones(11)*100
+        # create LFPs using the analytical approach
+        time = np.linspace(0, 100, 100 * 2**6 + 1)
+        R = np.ones(11) * 100
         Z = np.linspace(1000, 0, 11)
 
         LFP_analytic = np.empty((R.size, time.size))
         for i in range(R.size):
             LFP_analytic[i, ] = analytical_LFP(time, electrodeR=R[i],
-                                                    electrodeZ=Z[i])
+                                               electrodeZ=Z[i])
         np.testing.assert_allclose(LFP_analytic, LFP_LFPy, rtol=0,
                                    atol=abs(LFP_analytic).max() / 10.)
-
-
-
-    '''def test_method_pointsource_dotprodcoeffs(self):
-        #create LFPs using LFPy-model
-        LFP_LFPy = stickSimulationDotprodcoeffs(method='pointsource')
-
-        #create LFPs using the analytical approach
-        time = np.linspace(0, 100, 100*2**6+1)
-        R = np.ones(11)*100
-        Z = np.linspace(1000, 0, 11)
-
-        LFP_analytic = np.empty((R.size, time.size))
-        for i in range(R.size):
-            LFP_analytic[i, ] = analytical_LFP(time, electrodeR=R[i],
-                                                    electrodeZ=Z[i])
-        np.testing.assert_allclose(LFP_analytic, LFP_LFPy, rtol=0,
-                                   atol=abs(LFP_analytic).max() / 10.)'''
-
-
-    '''def test_method_linesource_dotprodcoeffs(self):
-        # create LFPs using LFPy-model
-        LFP_LFPy = stickSimulationDotprodcoeffs(method='linesource')
-
-        #create LFPs using the analytical approach
-        time = np.linspace(0, 100, 100*2**6+1)
-        R = np.ones(11)*100
-        Z = np.linspace(1000, 0, 11)
-
-        LFP_analytic = np.empty((R.size, time.size))
-        for i in range(R.size):
-            LFP_analytic[i, ] = analytical_LFP(time, electrodeR=R[i],
-                                                    electrodeZ=Z[i])
-        np.testing.assert_allclose(LFP_analytic, LFP_LFPy, rtol=0,
-                                   atol=abs(LFP_analytic).max() / 10.)
-
-
-    def test_method_root_as_point_dotprodcoeffs(self):
-        #create LFPs using LFPy-model
-        LFP_LFPy = stickSimulationDotprodcoeffs(method='root_as_point')
-
-        #create LFPs using the analytical approach
-        time = np.linspace(0, 100, 100*2**6+1)
-        R = np.ones(11)*100
-        Z = np.linspace(1000, 0, 11)
-
-        LFP_analytic = np.empty((R.size, time.size))
-        for i in range(R.size):
-            LFP_analytic[i, ] = analytical_LFP(time, electrodeR=R[i],
-                                                    electrodeZ=Z[i])
-        np.testing.assert_allclose(LFP_analytic, LFP_LFPy, rtol=0,
-                                   atol=abs(LFP_analytic).max() / 10.)'''
-
 
     def test_method_pointsource_contact_average_r10n100(self):
-        #create LFPs using LFPy-model
+        # create LFPs using LFPy-model
         LFP_LFPy = stickSimulationAveragingElectrode(
             contactRadius=10, contactNPoints=100, method='root_as_point')
 
-        #create LFPs using the analytical approach
-        time = np.linspace(0, 100, 100*2**6+1)
-        R = np.ones(11)*100
+        # create LFPs using the analytical approach
+        time = np.linspace(0, 100, 100 * 2**6 + 1)
+        R = np.ones(11) * 100
         Z = np.linspace(1000, 0, 11)
 
         LFP_analytic = np.empty((R.size, time.size))
         for i in range(R.size):
             LFP_analytic[i, ] = analytical_LFP(time, electrodeR=R[i],
-                                                    electrodeZ=Z[i])
+                                               electrodeZ=Z[i])
         np.testing.assert_allclose(LFP_analytic, LFP_LFPy, rtol=0,
                                    atol=abs(LFP_analytic).max() / 10.)
-
 
     def test_method_linesource_contact_average_r10n100(self):
         # create LFPs using LFPy-model
@@ -165,84 +111,86 @@ class testRecExtElectrode(unittest.TestCase):
             contactRadius=10, contactNPoints=100, method='linesource')
 
         # create LFPs using the analytical approach
-        time = np.linspace(0, 100, 100*2**6+1)
-        R = np.ones(11)*100
+        time = np.linspace(0, 100, 100 * 2**6 + 1)
+        R = np.ones(11) * 100
         Z = np.linspace(1000, 0, 11)
 
         LFP_analytic = np.empty((R.size, time.size))
         for i in range(R.size):
             LFP_analytic[i, ] = analytical_LFP(time, electrodeR=R[i],
-                                                    electrodeZ=Z[i])
+                                               electrodeZ=Z[i])
         np.testing.assert_allclose(LFP_analytic, LFP_LFPy, rtol=0,
                                    atol=abs(LFP_analytic).max() / 10.)
 
-
     def test_method_root_as_point_contact_average_r10n100(self):
-        #create LFPs using LFPy-model
+        # create LFPs using LFPy-model
         LFP_LFPy = stickSimulationAveragingElectrode(
             contactRadius=10, contactNPoints=100, method='root_as_point')
 
-        #create LFPs using the analytical approach
-        time = np.linspace(0, 100, 100*2**6+1)
-        R = np.ones(11)*100
+        # create LFPs using the analytical approach
+        time = np.linspace(0, 100, 100 * 2**6 + 1)
+        R = np.ones(11) * 100
         Z = np.linspace(1000, 0, 11)
 
         LFP_analytic = np.empty((R.size, time.size))
         for i in range(R.size):
             LFP_analytic[i, ] = analytical_LFP(time, electrodeR=R[i],
-                                                    electrodeZ=Z[i])
+                                               electrodeZ=Z[i])
         np.testing.assert_allclose(LFP_analytic, LFP_LFPy, rtol=0,
                                    atol=abs(LFP_analytic).max() / 10.)
 
     def test_sigma_inputs(self):
         stickParams = {
-            'morphology' : os.path.join(LFPy.__path__[0], 'test', 'stick.hoc'),
-            'passive_parameters' : {'g_pas' : 1./30000, 'e_pas' : -65},
+            'morphology': os.path.join(LFPy.__path__[0], 'test', 'stick.hoc'),
+            'passive_parameters': {'g_pas': 1. / 30000, 'e_pas': -65},
             'passive': True,
-            'tstart' : 0,
-            'tstop' : 20,
-            'dt' : 2**-4,
-            'nsegs_method' : 'lambda_f',
-            'lambda_f' : 1000,
+            'tstart': 0,
+            'tstop': 20,
+            'dt': 2**-4,
+            'nsegs_method': 'lambda_f',
+            'lambda_f': 1000,
 
         }
         stick = LFPy.Cell(**stickParams)
 
         electrodeParams = {
             'cell': stick,
-            'sigma' : [0.3, 0.3, 0.3, 0.3],
-            'x' : np.ones(11) * 100.,
-            'y' : np.zeros(11),
-            'z' : np.linspace(1000, 0, 11),
+            'sigma': [0.3, 0.3, 0.3, 0.3],
+            'x': np.ones(11) * 100.,
+            'y': np.zeros(11),
+            'z': np.linspace(1000, 0, 11),
         }
 
-        np.testing.assert_raises(ValueError, LFPy.RecExtElectrode, **electrodeParams)
+        np.testing.assert_raises(
+            ValueError,
+            LFPy.RecExtElectrode,
+            **electrodeParams)
 
     def test_bad_cell_position_in_slice(self):
         electrodeParams = {
-            'sigma_T' : 0.3,
-            'sigma_S' : 1.5,
-            'sigma_G' : 0.0,
+            'sigma_T': 0.3,
+            'sigma_S': 1.5,
+            'sigma_G': 0.0,
             'h': 200,
-            'x' : np.linspace(0, 1000, 11),
-            'y' : np.zeros(11),
-            'z' : np.zeros(11),
+            'x': np.linspace(0, 1000, 11),
+            'y': np.zeros(11),
+            'z': np.zeros(11),
             'method': "pointsource",
         }
 
         stickParams = {
-            'morphology' : os.path.join(LFPy.__path__[0], 'test', 'stick.hoc'),
-            'passive_parameters' : {'g_pas' : 1./30000, 'e_pas' : -65},
+            'morphology': os.path.join(LFPy.__path__[0], 'test', 'stick.hoc'),
+            'passive_parameters': {'g_pas': 1. / 30000, 'e_pas': -65},
             'passive': True,
-            'tstart' : -10,
-            'tstop' : 20,
-            'dt' : 2**-4,
-            'nsegs_method' : 'lambda_f',
-            'lambda_f' : 1000,
+            'tstart': -10,
+            'tstop': 20,
+            'dt': 2**-4,
+            'nsegs_method': 'lambda_f',
+            'lambda_f': 1000,
 
         }
         stick = LFPy.Cell(**stickParams)
-        stick.set_rotation(y=np.pi/2)
+        stick.set_rotation(y=np.pi / 2)
         stick.simulate(rec_imem=True)
 
         stick.set_pos(z=-100)
@@ -255,30 +203,34 @@ class testRecExtElectrode(unittest.TestCase):
 
     def test_sqeeze_cell_and_bad_position(self):
         electrodeParams = {
-            'sigma_T' : 0.3,
-            'sigma_S' : 1.5,
-            'sigma_G' : 0.0,
+            'sigma_T': 0.3,
+            'sigma_S': 1.5,
+            'sigma_G': 0.0,
             'h': 200,
-            'x' : np.linspace(0, 1000, 11),
-            'y' : np.zeros(11),
-            'z' : np.zeros(11),
+            'x': np.linspace(0, 1000, 11),
+            'y': np.zeros(11),
+            'z': np.zeros(11),
             'method': "pointsource",
             'squeeze_cell_factor': None,
         }
 
         stickParams = {
-            'morphology' : os.path.join(LFPy.__path__[0], 'test', 'ball_and_sticks.hoc'),
-            'passive_parameters' : {'g_pas' : 1./30000, 'e_pas' : -65},
+            'morphology': os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'ball_and_sticks.hoc'),
+            'passive_parameters': {
+                'g_pas': 1. / 30000,
+                'e_pas': -65},
             'passive': True,
-            'tstart' : -10,
-            'tstop' : 20,
-            'dt' : 2**-4,
-            'nsegs_method' : 'lambda_f',
-            'lambda_f' : 1000,
-
+            'tstart': -10,
+            'tstop': 20,
+            'dt': 2**-4,
+            'nsegs_method': 'lambda_f',
+            'lambda_f': 1000,
         }
         stick = LFPy.Cell(**stickParams)
-        stick.set_rotation(y=np.pi/2)
+        stick.set_rotation(y=np.pi / 2)
         stick.simulate(rec_imem=True)
 
         stick.set_pos(z=1)
@@ -290,13 +242,13 @@ class testRecExtElectrode(unittest.TestCase):
         np.testing.assert_raises(RuntimeError, MEA._test_cell_extent)
 
         electrodeParams = {
-            'sigma_T' : 0.3,
-            'sigma_S' : 1.5,
-            'sigma_G' : 0.0,
+            'sigma_T': 0.3,
+            'sigma_S': 1.5,
+            'sigma_G': 0.0,
             'h': 200,
-            'x' : np.linspace(0, 1000, 11),
-            'y' : np.zeros(11),
-            'z' : np.zeros(11),
+            'x': np.linspace(0, 1000, 11),
+            'y': np.zeros(11),
+            'z': np.zeros(11),
             'method': "pointsource",
             'squeeze_cell_factor': 0.1,
         }
@@ -309,33 +261,36 @@ class testRecExtElectrode(unittest.TestCase):
         MEA = LFPy.RecMEAElectrode(stick, **electrodeParams)
         np.testing.assert_raises(RuntimeError, MEA._test_cell_extent)
 
-
     def test_return_comp_outside_slice(self):
         electrodeParams = {
-            'sigma_T' : 0.3,
-            'sigma_S' : 1.5,
-            'sigma_G' : 0.0,
+            'sigma_T': 0.3,
+            'sigma_S': 1.5,
+            'sigma_G': 0.0,
             'h': 200,
-            'x' : np.linspace(0, 1000, 11),
-            'y' : np.zeros(11),
-            'z' : np.zeros(11),
+            'x': np.linspace(0, 1000, 11),
+            'y': np.zeros(11),
+            'z': np.zeros(11),
             'method': "pointsource",
             'squeeze_cell_factor': None,
         }
 
         stickParams = {
-            'morphology' : os.path.join(LFPy.__path__[0], 'test', 'ball_and_sticks.hoc'),
-            'passive_parameters' : {'g_pas' : 1./30000, 'e_pas' : -65},
+            'morphology': os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'ball_and_sticks.hoc'),
+            'passive_parameters': {
+                'g_pas': 1. / 30000,
+                'e_pas': -65},
             'passive': True,
-            'tstart' : -10,
-            'tstop' : 20,
-            'dt' : 2**-4,
-            'nsegs_method' : 'lambda_f',
-            'lambda_f' : 1000,
-
+            'tstart': -10,
+            'tstop': 20,
+            'dt': 2**-4,
+            'nsegs_method': 'lambda_f',
+            'lambda_f': 1000,
         }
         stick = LFPy.Cell(**stickParams)
-        stick.set_rotation(y=np.pi/2)
+        stick.set_rotation(y=np.pi / 2)
         stick.set_pos(z=100)
         stick.simulate(rec_imem=True)
         MEA = LFPy.RecMEAElectrode(stick, **electrodeParams)
@@ -368,30 +323,35 @@ class testRecExtElectrode(unittest.TestCase):
 
     def test_position_shifted_slice(self):
         electrodeParams = {
-            'sigma_T' : 0.3,
-            'sigma_S' : 1.5,
-            'sigma_G' : 0.0,
+            'sigma_T': 0.3,
+            'sigma_S': 1.5,
+            'sigma_G': 0.0,
             'h': 200,
             'z_shift': -200,
-            'x' : np.linspace(0, 1000, 11),
-            'y' : np.zeros(11),
-            'z' : np.zeros(11) - 100,
+            'x': np.linspace(0, 1000, 11),
+            'y': np.zeros(11),
+            'z': np.zeros(11) - 100,
             'method': "pointsource",
             'squeeze_cell_factor': None,
         }
 
         stickParams = {
-            'morphology' : os.path.join(LFPy.__path__[0], 'test', 'ball_and_sticks.hoc'),
-            'passive_parameters' : {'g_pas' : 1./30000, 'e_pas' : -65},
+            'morphology': os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'ball_and_sticks.hoc'),
+            'passive_parameters': {
+                'g_pas': 1. / 30000,
+                'e_pas': -65},
             'passive': True,
-            'tstart' : -10,
-            'tstop' : 20,
-            'dt' : 2**-4,
-            'nsegs_method' : 'lambda_f',
-            'lambda_f' : 100,
+            'tstart': -10,
+            'tstop': 20,
+            'dt': 2**-4,
+            'nsegs_method': 'lambda_f',
+            'lambda_f': 100,
         }
         stick = LFPy.Cell(**stickParams)
-        stick.set_rotation(y=np.pi/2)
+        stick.set_rotation(y=np.pi / 2)
         stick.set_pos(z=-100)
 
         MEA = LFPy.RecMEAElectrode(stick, **electrodeParams)
@@ -403,53 +363,58 @@ class testRecExtElectrode(unittest.TestCase):
         z_shift_2 = -352
 
         electrodeParams_1 = {
-            'sigma_T' : 0.3,
-            'sigma_S' : 1.5,
-            'sigma_G' : 0.0,
+            'sigma_T': 0.3,
+            'sigma_S': 1.5,
+            'sigma_G': 0.0,
             'h': h,
             'z_shift': z_shift_1,
-            'x' : np.linspace(0, 1000, 11),
-            'y' : np.zeros(11),
-            'z' : np.zeros(11) + z_shift_1,
+            'x': np.linspace(0, 1000, 11),
+            'y': np.zeros(11),
+            'z': np.zeros(11) + z_shift_1,
             'squeeze_cell_factor': None,
         }
 
         electrodeParams_2 = {
-            'sigma_T' : 0.3,
-            'sigma_S' : 1.5,
-            'sigma_G' : 0.0,
+            'sigma_T': 0.3,
+            'sigma_S': 1.5,
+            'sigma_G': 0.0,
             'h': h,
             'z_shift': z_shift_2,
-            'x' : np.linspace(0, 1000, 11),
-            'y' : np.zeros(11),
-            'z' : np.zeros(11) + z_shift_2,
+            'x': np.linspace(0, 1000, 11),
+            'y': np.zeros(11),
+            'z': np.zeros(11) + z_shift_2,
             'squeeze_cell_factor': None,
         }
         stimParams = {
-            'pptype' : 'SinSyn',
-            'delay' : -100.,
-            'dur' : 1000.,
-            'pkamp' : 1.,
-            'freq' : 100.,
-            'phase' : -np.pi/2,
-            'bias' : 0.,
-            'record_current' : True
+            'pptype': 'SinSyn',
+            'delay': -100.,
+            'dur': 1000.,
+            'pkamp': 1.,
+            'freq': 100.,
+            'phase': -np.pi / 2,
+            'bias': 0.,
+            'record_current': True
         }
         stickParams = {
-            'morphology' : os.path.join(LFPy.__path__[0], 'test', 'ball_and_sticks.hoc'),
-            'passive_parameters' : {'g_pas' : 1./30000, 'e_pas' : -65},
+            'morphology': os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'ball_and_sticks.hoc'),
+            'passive_parameters': {
+                'g_pas': 1. / 30000,
+                'e_pas': -65},
             'passive': True,
-            'tstart' : -10,
-            'tstop' : 20,
-            'dt' : 2**-4,
-            'nsegs_method' : 'lambda_f',
-            'lambda_f' : 100,
+            'tstart': -10,
+            'tstop': 20,
+            'dt': 2**-4,
+            'nsegs_method': 'lambda_f',
+            'lambda_f': 100,
         }
         stick = LFPy.Cell(**stickParams)
-        stick.set_rotation(y=np.pi/2)
+        stick.set_rotation(y=np.pi / 2)
 
-        synapse = LFPy.StimIntElectrode(stick, stick.get_closest_idx(0, 0, 0),
-                                        **stimParams)
+        LFPy.StimIntElectrode(stick, stick.get_closest_idx(0, 0, 0),
+                              **stimParams)
 
         stick.simulate(rec_imem=True)
 
@@ -459,11 +424,11 @@ class testRecExtElectrode(unittest.TestCase):
             electrodeParams_1["method"] = method
             electrodeParams_2["method"] = method
 
-            stick.set_pos(z=z_shift_1 + h/2)
+            stick.set_pos(z=z_shift_1 + h / 2)
             MEA_shift_1 = LFPy.RecMEAElectrode(stick, **electrodeParams_1)
             M_1 = MEA_shift_1.get_transformation_matrix()
 
-            stick.set_pos(z=z_shift_2 + h/2)
+            stick.set_pos(z=z_shift_2 + h / 2)
             MEA_shift_2 = LFPy.RecMEAElectrode(stick, **electrodeParams_2)
             M_2 = MEA_shift_2.get_transformation_matrix()
 
@@ -472,32 +437,32 @@ class testRecExtElectrode(unittest.TestCase):
 
     def test_isotropic_version_of_anisotropic_methods(self):
         stickParams = {
-            'morphology' : os.path.join(LFPy.__path__[0], 'test', 'stick.hoc'),
-            'passive_parameters' : {'g_pas' : 1./30000, 'e_pas' : -65},
+            'morphology': os.path.join(LFPy.__path__[0], 'test', 'stick.hoc'),
+            'passive_parameters': {'g_pas': 1. / 30000, 'e_pas': -65},
             'passive': True,
-            'tstart' : 0,
-            'tstop' : 20,
-            'dt' : 2**-4,
-            'nsegs_method' : 'lambda_f',
-            'lambda_f' : 1000,
+            'tstart': 0,
+            'tstop': 20,
+            'dt': 2**-4,
+            'nsegs_method': 'lambda_f',
+            'lambda_f': 1000,
         }
 
         stimParams = {
-            'pptype' : 'SinSyn',
-            'delay' : -100.,
-            'dur' : 1000.,
-            'pkamp' : 1.,
-            'freq' : 100.,
-            'phase' : -np.pi/2,
-            'bias' : 0.,
-            'record_current' : True
+            'pptype': 'SinSyn',
+            'delay': -100.,
+            'dur': 1000.,
+            'pkamp': 1.,
+            'freq': 100.,
+            'phase': -np.pi / 2,
+            'bias': 0.,
+            'record_current': True
         }
 
         isotropic_electrodeParams = {
-            'sigma' : 0.3,
-            'x' : np.ones(11) * 100.,
-            'y' : np.zeros(11),
-            'z' : np.linspace(1000, 0, 11),
+            'sigma': 0.3,
+            'x': np.ones(11) * 100.,
+            'y': np.zeros(11),
+            'z': np.linspace(1000, 0, 11),
         }
         anisotropic_electrodeParams = isotropic_electrodeParams.copy()
         anisotropic_electrodeParams["sigma"] = \
@@ -508,17 +473,16 @@ class testRecExtElectrode(unittest.TestCase):
         for method in methods:
             stick = LFPy.Cell(**stickParams)
             stick.set_pos(z=-stick.z[0, 0])
-            synapse = LFPy.StimIntElectrode(stick,
-                                            stick.get_closest_idx(0, 0, 1000),
-                                            **stimParams)
+            LFPy.StimIntElectrode(stick, stick.get_closest_idx(0, 0, 1000),
+                                  **stimParams)
 
             isotropic_electrodeParams["method"] = method
             anisotropic_electrodeParams["method"] = method
 
-            isotropic_electrode = LFPy.RecExtElectrode(stick,
-                **isotropic_electrodeParams)
-            anisotropic_electrode = LFPy.RecExtElectrode(stick,
-                **anisotropic_electrodeParams)
+            isotropic_electrode = LFPy.RecExtElectrode(
+                stick, **isotropic_electrodeParams)
+            anisotropic_electrode = LFPy.RecExtElectrode(
+                stick, **anisotropic_electrodeParams)
 
             stick.simulate(probes=[isotropic_electrode, anisotropic_electrode],
                            rec_imem=True, rec_vmem=True)
@@ -528,40 +492,39 @@ class testRecExtElectrode(unittest.TestCase):
 
     def test_compare_anisotropic_lfp_methods(self):
         stickParams = {
-            'morphology' : os.path.join(LFPy.__path__[0], 'test', 'stick.hoc'),
-            'passive_parameters' : {'g_pas' : 1./30000, 'e_pas' : -65},
+            'morphology': os.path.join(LFPy.__path__[0], 'test', 'stick.hoc'),
+            'passive_parameters': {'g_pas': 1. / 30000, 'e_pas': -65},
             'passive': True,
-            'tstart' : 0,
-            'tstop' : 20,
-            'dt' : 2**-4,
-            'nsegs_method' : 'lambda_f',
-            'lambda_f' : 1000,
+            'tstart': 0,
+            'tstop': 20,
+            'dt': 2**-4,
+            'nsegs_method': 'lambda_f',
+            'lambda_f': 1000,
 
         }
         stimParams = {
-            'pptype' : 'SinSyn',
-            'delay' : -100.,
-            'dur' : 1000.,
-            'pkamp' : 1.,
-            'freq' : 100.,
-            'phase' : -np.pi/2,
-            'bias' : 0.,
-            'record_current' : True
+            'pptype': 'SinSyn',
+            'delay': -100.,
+            'dur': 1000.,
+            'pkamp': 1.,
+            'freq': 100.,
+            'phase': -np.pi / 2,
+            'bias': 0.,
+            'record_current': True
         }
 
         electrodeParams = {
-            'sigma' : [0.3, 0.3, 0.45],
-            'x' : np.array([0, 1000]),
-            'y' : np.zeros(2),
-            'z' : np.zeros(2),
+            'sigma': [0.3, 0.3, 0.45],
+            'x': np.array([0, 1000]),
+            'y': np.zeros(2),
+            'z': np.zeros(2),
         }
 
         stick = LFPy.Cell(**stickParams)
         stick.set_pos(z=-stick.z[0, 0])
 
-        synapse = LFPy.StimIntElectrode(stick,
-                                        stick.get_closest_idx(0, 0, 1000),
-                                        **stimParams)
+        LFPy.StimIntElectrode(stick, stick.get_closest_idx(0, 0, 1000),
+                              **stimParams)
 
         ps_electrodeParams = electrodeParams.copy()
         ls_electrodeParams = electrodeParams.copy()
@@ -596,33 +559,34 @@ class testRecExtElectrode(unittest.TestCase):
 
     def test_electrical_stimulation(self):
         stickParams = {
-            'morphology' : os.path.join(LFPy.__path__[0], 'test', 'stick.hoc'),
-            'passive_parameters' : {'g_pas' : 1./30000, 'e_pas' : -65},
+            'morphology': os.path.join(LFPy.__path__[0], 'test', 'stick.hoc'),
+            'passive_parameters': {'g_pas': 1. / 30000, 'e_pas': -65},
             'passive': True,
-            'tstart' : 0,
-            'tstop' : 20,
-            'dt' : 2**-4,
-            'nsegs_method' : 'lambda_f',
-            'lambda_f' : 1000,
+            'tstart': 0,
+            'tstop': 20,
+            'dt': 2**-4,
+            'nsegs_method': 'lambda_f',
+            'lambda_f': 1000,
         }
 
         electrodeParams = {
-            'sigma' : 0.3,
-            'x' : np.array([0, 1000]),
-            'y' : np.zeros(2),
-            'z' : np.zeros(2),
+            'sigma': 0.3,
+            'x': np.array([0, 1000]),
+            'y': np.zeros(2),
+            'z': np.zeros(2),
         }
 
         def sim1():
             stick1 = LFPy.Cell(**stickParams)
             stick1.set_pos(z=-stick1.z[0, 0])
             electrode1 = LFPy.RecExtElectrode(stick1, **electrodeParams)
-            v1, t_ext1 = electrode1.probe.set_current_pulses(0,
-                                                             width1=0.1,
-                                                             amp1=10000,
-                                                             dt=stickParams['dt'],
-                                                             t_stop=stick1.tstop,
-                                                             interpulse=0.2)
+            v1, t_ext1 = electrode1.probe.set_current_pulses(
+                0,
+                width1=0.1,
+                amp1=10000,
+                dt=stickParams['dt'],
+                t_stop=stick1.tstop,
+                interpulse=0.2)
             stick1.enable_extracellular_stimulation(electrode1, t_ext=t_ext1)
             stick1.simulate(probes=[electrode1],
                             rec_imem=True, rec_vmem=True)
@@ -633,12 +597,14 @@ class testRecExtElectrode(unittest.TestCase):
             stick2 = LFPy.Cell(**stickParams)
             stick2.set_pos(z=-stick2.z[0, 0])
             electrode2 = LFPy.RecExtElectrode(stick2, **electrodeParams)
-            v2, t_ext2 = electrode2.probe.set_current_pulses(0, width1=0.1,
-                                                             amp1=10000,
-                                                             dt=stickParams['dt'],
-                                                             t_stop=stick2.tstop,
-                                                             interpulse=0.2)
-            stick2.enable_extracellular_stimulation(electrode2, t_ext=t_ext2, n=10)
+            v2, t_ext2 = electrode2.probe.set_current_pulses(
+                0, width1=0.1,
+                amp1=10000,
+                dt=stickParams['dt'],
+                t_stop=stick2.tstop,
+                interpulse=0.2)
+            stick2.enable_extracellular_stimulation(
+                electrode2, t_ext=t_ext2, n=10)
             stick2.simulate(probes=[electrode2],
                             rec_imem=True, rec_vmem=True)
             neuron.h('forall delete_section()')

@@ -9,7 +9,7 @@ BallAndStickTemplate.hoc.
 Execution:
 
     python example_network_population.py
-    
+
 Copyright (C) 2017 Computational Neuroscience Group, NMBU.
 
 This program is free software: you can redistribute it and/or modify
@@ -26,6 +26,7 @@ GNU General Public License for more details.
 # import modules
 from mpi4py.MPI import COMM_WORLD as COMM
 from LFPy import NetworkPopulation, NetworkCell
+
 # class NetworkCell parameters:
 cellParameters = dict(
     morphology='BallAndStick.hoc',

@@ -169,13 +169,13 @@ def _collect_geometry_neuron(cell):
 
     counter = 0
 
-    #loop over all segments
+    # loop over all segments
     for sec in cell.allseclist:
         n3d = int(neuron.h.n3d(sec=sec))
         nseg = sec.nseg
-        gsen2 = 1./2/nseg
+        gsen2 = 1. / 2 / nseg
         if n3d > 0:
-            #create interpolation objects for the xyz pt3d info:
+            # create interpolation objects for the xyz pt3d info:
             L = np.zeros(n3d)
             x = np.zeros(n3d)
             y = np.zeros(n3d)
@@ -186,33 +186,35 @@ def _collect_geometry_neuron(cell):
                 y[i] = neuron.h.y3d(i, sec=sec)
                 z[i] = neuron.h.z3d(i, sec=sec)
 
-            #normalize as seg.x [0, 1]
+            # normalize as seg.x [0, 1]
             L /= sec.L
 
-            #temporary store position of segment midpoints
+            # temporary store position of segment midpoints
             segx = np.zeros(nseg)
             for i, seg in enumerate(sec):
                 segx[i] = seg.x
 
-            #can't be >0 which may happen due to NEURON->Python float transfer:
+            # can't be >0 which may happen due to NEURON->Python float
+            # transfer:
             segx0 = (segx - gsen2).round(decimals=6)
             segx1 = (segx + gsen2).round(decimals=6)
 
-            #fill vectors with interpolated coordinates of start and end points
-            xstartvec[counter:counter+nseg] = np.interp(segx0, L, x)
-            xendvec[counter:counter+nseg] = np.interp(segx1, L, x)
+            # fill vectors with interpolated coordinates of start and end
+            # points
+            xstartvec[counter:counter + nseg] = np.interp(segx0, L, x)
+            xendvec[counter:counter + nseg] = np.interp(segx1, L, x)
 
-            ystartvec[counter:counter+nseg] = np.interp(segx0, L, y)
-            yendvec[counter:counter+nseg] = np.interp(segx1, L, y)
+            ystartvec[counter:counter + nseg] = np.interp(segx0, L, y)
+            yendvec[counter:counter + nseg] = np.interp(segx1, L, y)
 
-            zstartvec[counter:counter+nseg] = np.interp(segx0, L, z)
-            zendvec[counter:counter+nseg] = np.interp(segx1, L, z)
+            zstartvec[counter:counter + nseg] = np.interp(segx0, L, z)
+            zendvec[counter:counter + nseg] = np.interp(segx1, L, z)
 
-            #fill in values area, diam, length
+            # fill in values area, diam, length
             for seg in sec:
                 areavec[counter] = neuron.h.area(seg.x, sec=sec)
                 diamvec[counter] = seg.diam
-                lengthvec[counter] = sec.L/nseg
+                lengthvec[counter] = sec.L / nseg
 
                 counter += 1
 

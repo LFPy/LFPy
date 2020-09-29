@@ -5,12 +5,12 @@ Example plot for LFPy: In vitro MEA slice set-up. It serves to demonstrate
 class LFPy.RecMEAElectrode which incorporates discontinous extracellular
 conductivity (MEA chip, slice, saline) in comparison to LFPy.RecExtElectrode
 which incorporates an infinite homogeneous isotropic/anisotropic extracellular
-conductivity. 
+conductivity.
 
 Execution:
 
     python example_MEA.py
-    
+
 Copyright (C) 2017 Computational Neuroscience Group, NMBU.
 
 This program is free software: you can redistribute it and/or modify
@@ -25,12 +25,9 @@ GNU General Public License for more details.
 """
 import os
 from os.path import join
-import sys
-if sys.version < '3':
-    from urllib2 import urlopen
-else:
-    from urllib.request import urlopen
+from urllib.request import urlopen
 import zipfile
+import ssl
 import LFPy
 import numpy as np
 import matplotlib.pyplot as plt
@@ -53,16 +50,17 @@ def plot_results(cell, synapse, MEA, electrode):
                        xticks=[], yticks=[], title='Side view')
 
     ax_ec = fig.add_subplot(1, num_cols, 3, xlim=time_window,
-                            xlabel='ms', ylabel='$\mu$V',
+                            xlabel='ms', ylabel=r'$\mu$V',
                             title='Extracellular\npotential')
     ax_v = plt.subplot(1, num_cols, 4, title='Somatic potential',
                        xlabel='ms', ylabel='mV',
                        ylim=[-70, -50], xlim=time_window)
 
-    elec_clr = lambda idx: plt.cm.nipy_spectral(1./(len(MEA.x) - 1) * idx)
+    def elec_clr(idx):
+        return plt.cm.nipy_spectral(1. / (len(MEA.x) - 1) * idx)
 
     l_elec, l_syn = plot_recording_set_up(cell, ax1, ax3, MEA, elec_clr,
-                                              syn_idx, cell_plot_colors)
+                                          syn_idx, cell_plot_colors)
     [ax_v.plot(cell.tvec, cell.vmem[idx, :], c=cell_plot_colors[idx], lw=2)
         for idx in cell_plot_idxs]
     for elec in range(len(MEA.x)):
@@ -74,7 +72,8 @@ def plot_results(cell, synapse, MEA, electrode):
     l_MEA, = ax_ec.plot(0, 0, lw=1, c="k")
     l_invivo, = ax_ec.plot(0, 0, lw=2, c="k", ls=":")
 
-    fig.legend([l_syn, l_elec, l_MEA, l_invivo], ["Synapse", "Electrode", "Slice", "In vivo"],
+    fig.legend([l_syn, l_elec, l_MEA, l_invivo],
+               ["Synapse", "Electrode", "Slice", "In vivo"],
                frameon=False, numpoints=1, ncol=4, loc=3)
     simplify_axes([ax_v, ax_ec])
     mark_subplots([ax1, ax3, ax_ec, ax_v], ypos=1.05, xpos=-0.1)
@@ -83,29 +82,32 @@ def plot_results(cell, synapse, MEA, electrode):
 
 
 def plot_recording_set_up(cell, ax_neur, ax_side, MEA, elec_clr,
-                           syn_idx, cell_plot_colors):
+                          syn_idx, cell_plot_colors):
 
     for comp in range(len(cell.xmid)):
         if comp == 0:
-            ax_neur.scatter(cell.xmid[comp], cell.ymid[comp], s=cell.diam[comp],
+            ax_neur.scatter(cell.xmid[comp], cell.ymid[comp],
+                            s=cell.diam[comp],
                             edgecolor='none', color='gray', zorder=1)
         else:
             ax_neur.plot([cell.xstart[comp], cell.xend[comp]],
                          [cell.ystart[comp], cell.yend[comp]],
-                         lw=cell.diam[comp]/2, color='gray', zorder=1)
+                         lw=cell.diam[comp] / 2, color='gray', zorder=1)
 
     for comp in range(len(cell.xmid)):
         if comp == 0:
-            ax_side.scatter(cell.xmid[comp], cell.zmid[comp], s=cell.diam[comp],
+            ax_side.scatter(cell.xmid[comp], cell.zmid[comp],
+                            s=cell.diam[comp],
                             edgecolor='none', color='gray', zorder=1)
         else:
             ax_side.plot([cell.xstart[comp], cell.xend[comp]],
                          [cell.zstart[comp], cell.zend[comp]],
-                         lw=cell.diam[comp]/2, color='gray', zorder=1)
+                         lw=cell.diam[comp] / 2, color='gray', zorder=1)
     for idx in range(len(MEA.x)):
         ax_side.plot(MEA.x[idx], MEA.z[idx] - 10, 's', clip_on=False,
                      c=elec_clr(idx), zorder=10, mec='none')
-        ax_side.plot([MEA.x[idx], MEA.x[idx]], [MEA.z[idx] - 10, MEA.z[idx] - 150],
+        ax_side.plot([MEA.x[idx], MEA.x[idx]],
+                     [MEA.z[idx] - 10, MEA.z[idx] - 150],
                      c=elec_clr(idx), zorder=10, lw=2)
         ax_neur.plot(MEA.x[idx], MEA.y[idx], 's', c=elec_clr(idx), zorder=10)
 
@@ -117,19 +119,25 @@ def plot_recording_set_up(cell, ax_neur, ax_side, MEA, elec_clr,
     l_elec, = ax_neur.plot(MEA.x[0], MEA.y[0], 's', c=elec_clr(0), zorder=0)
 
     l_syn, = ax_neur.plot(cell.xmid[syn_idx], cell.ymid[syn_idx], '*',
-                           c=cell_plot_colors[syn_idx], ms=15)
+                          c=cell_plot_colors[syn_idx], ms=15)
 
     ax_side.plot(cell.xmid[syn_idx], cell.zmid[syn_idx], '*',
                  c=cell_plot_colors[syn_idx], ms=15)
 
-    ax_neur.arrow(-220, -100, 30, 0, lw=1, head_width=12, color='k', clip_on=False)
-    ax_neur.arrow(-220, -100, 0, 30, lw=1, head_width=12, color='k', clip_on=False)
-    ax_neur.text(-150, -100, 'x', size=10, ha='center', va='center', clip_on=False)
-    ax_neur.text(-220, -20, 'y', size=10, ha='center', va='center', clip_on=False)
+    ax_neur.arrow(-220, -100, 30, 0, lw=1, head_width=12,
+                  color='k', clip_on=False)
+    ax_neur.arrow(-220, -100, 0, 30, lw=1, head_width=12,
+                  color='k', clip_on=False)
+    ax_neur.text(-150, -100, 'x', size=10, ha='center',
+                 va='center', clip_on=False)
+    ax_neur.text(-220, -20, 'y', size=10, ha='center',
+                 va='center', clip_on=False)
 
-    ax_side.arrow(-220, 20, 30, 0, lw=1, head_width=12, color='k', clip_on=False)
+    ax_side.arrow(-220, 20, 30, 0, lw=1, head_width=12,
+                  color='k', clip_on=False)
     ax_side.text(-140, 25, 'x', size=10, ha='center', va='center')
-    ax_side.arrow(-220, 20, 0, 30, lw=1, head_width=12, color='k', clip_on=False)
+    ax_side.arrow(-220, 20, 0, 30, lw=1, head_width=12,
+                  color='k', clip_on=False)
     ax_side.text(-220, 100, 'z', size=10, ha='center', va='center')
 
     ax_side.plot([-500, 1250], [MEA.h, MEA.h], color='k')
@@ -137,7 +145,7 @@ def plot_recording_set_up(cell, ax_neur, ax_side, MEA, elec_clr,
 
     ax_side.plot([1280, 1280], [0, MEA.h], '_-',
                  color='k', lw=2, clip_on=False, solid_capstyle='butt')
-    ax_side.text(1300, MEA.h / 2, '%g $\mu$m' % MEA.h, size=8, va='center')
+    ax_side.text(1300, MEA.h / 2, r'%g $\mu$m' % MEA.h, size=8, va='center')
 
     ax_side.text(1200, -10, 'MEA', va='top', ha='right')
     ax_side.text(1200, MEA.h, 'Saline', va='bottom', ha='right')
@@ -154,7 +162,7 @@ def simplify_axes(axes):
     Right and top axis line is removed from axes or list of axes
 
     """
-    if not type(axes) is list:
+    if not isinstance(axes, list):
         axes = [axes]
 
     for ax in axes:
@@ -164,10 +172,12 @@ def simplify_axes(axes):
         ax.get_yaxis().tick_left()
 
 
-def mark_subplots(axes, letters='ABCDEFGHIJKLMNOPQRSTUVWXYZ', xpos=-0.12, ypos=1.15):
-    """ Marks subplots in axes (should be list or axes object) with capital letters
+def mark_subplots(axes, letters='ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+                  xpos=-0.12, ypos=1.15):
+    """ Marks subplots in axes (should be list or axes object)
+    with capital letters
     """
-    if not type(axes) is list:
+    if not isinstance(axes, list):
         axes = [axes]
 
     for idx, ax in enumerate(axes):
@@ -179,51 +189,54 @@ def mark_subplots(axes, letters='ABCDEFGHIJKLMNOPQRSTUVWXYZ', xpos=-0.12, ypos=1
                 transform=ax.transAxes)
 
 
-#Fetch Mainen&Sejnowski 1996 model files
+# Fetch Mainen&Sejnowski 1996 model files
 if not os.path.isfile(join('cells', 'cells', 'j4a.hoc')):
-    #get the model files:
-    u = urlopen('http://senselab.med.yale.edu/ModelDB/eavBinDown.asp?o=2488&a=23&mime=application/zip')
+    # get the model files:
+    url = '{}{}'.format('http://senselab.med.yale.edu/ModelDB/eavBinDown.asp',
+                        '?o=2488&a=23&mime=application/zip')
+    u = urlopen(url, context=ssl._create_unverified_context())
     localFile = open('patdemo.zip', 'wb')
     localFile.write(u.read())
     localFile.close()
-    #unzip:
+    # unzip:
     myzip = zipfile.ZipFile('patdemo.zip', 'r')
     myzip.extractall('.')
     myzip.close()
 
-################################################################################
+##########################################################################
 # Main script, set parameters and create cell, synapse and electrode objects
-################################################################################
+##########################################################################
 
 # Define cell parameters
 cell_parameters = {
-    'morphology' : join('cells', 'cells', 'j4a.hoc'), # from Mainen & Sejnowski, J Comput Neurosci, 1996
-    'cm' : 1.0,         # membrane capacitance
-    'Ra' : 150.,        # axial resistance
-    'v_init' : -65.,    # initial crossmembrane potential
-    'passive' : True,   # turn on NEURONs passive mechanism for all sections
-    'passive_parameters' : {'g_pas' : 1./30000, 'e_pas' : -65},
-    'nsegs_method' : 'lambda_f', # spatial discretization method
-    'lambda_f' : 10.,           # frequency where length constants are computed
-    'dt' : 2.**-4,      # simulation time step size
-    'tstart' : 0.,      # start time of simulation, recorders start at t=0
-    'tstop' : 50.,     # stop simulation at 100 ms.
+    # from Mainen & Sejnowski, J Comput Neurosci, 1996
+    'morphology': join('cells', 'cells', 'j4a.hoc'),
+    'cm': 1.0,         # membrane capacitance
+    'Ra': 150.,        # axial resistance
+    'v_init': -65.,    # initial crossmembrane potential
+    'passive': True,   # turn on NEURONs passive mechanism for all sections
+    'passive_parameters': {'g_pas': 1. / 30000, 'e_pas': -65},
+    'nsegs_method': 'lambda_f',  # spatial discretization method
+    'lambda_f': 10.,           # frequency where length constants are computed
+    'dt': 2.**-4,      # simulation time step size
+    'tstart': 0.,      # start time of simulation, recorders start at t=0
+    'tstop': 50.,     # stop simulation at 100 ms.
 }
 
 # Create cell
 cell = LFPy.Cell(**cell_parameters)
 # Align cell
-cell.set_rotation(z=np.pi/0.9, x=0.3)
+cell.set_rotation(z=np.pi / 0.9, x=0.3)
 cell.set_pos(z=100)
 
 # Define synapse parameters
 synapse_parameters = {
-    'idx' : cell.get_closest_idx(x=800., y=0., z=150.),
-    'e' : 0.,                   # reversal potential
-    'syntype' : 'ExpSyn',       # synapse type
-    'tau' : 5.,                 # synaptic time constant
-    'weight' : .001,            # synaptic weight
-    'record_current' : True,    # record synapse current
+    'idx': cell.get_closest_idx(x=800., y=0., z=150.),
+    'e': 0.,                   # reversal potential
+    'syntype': 'ExpSyn',       # synapse type
+    'tau': 5.,                 # synaptic time constant
+    'weight': .001,            # synaptic weight
+    'record_current': True,    # record synapse current
 }
 
 # Create synapse and set time of synaptic input
@@ -237,29 +250,29 @@ Z = np.zeros(X.shape) + 0
 
 # Define electrode parameters
 grid_electrode_parameters = {
-    'sigma' : 0.3,      # extracellular conductivity
-    'x' : X.flatten(),  # electrode requires 1d vector of positions
-    'y' : Y.flatten(),
-    'z' : Z.flatten(),
+    'sigma': 0.3,      # extracellular conductivity
+    'x': X.flatten(),  # electrode requires 1d vector of positions
+    'y': Y.flatten(),
+    'z': Z.flatten(),
     "method": "soma_as_point",
-    'N' : np.array([[0, 0, 1]]*X.size), #surface normals
-    'r' : 50,              # contact site radius
-    'n' : 100,               # datapoints for averaging
+    'N': np.array([[0, 0, 1]] * X.size),  # surface normals
+    'r': 50,              # contact site radius
+    'n': 100,               # datapoints for averaging
     "seedvalue": 12,
 }
 
 # Define electrode parameters
 MEA_electrode_parameters = {
-    'sigma_T' : 0.3,      # extracellular conductivity
-    'sigma_G' : 0.0,      # MEA glass electrode plate conductivity
-    'sigma_S' : 1.5,      # Saline bath conductivity
-    'x' : X.flatten(),  # electrode requires 1d vector of positions
-    'y' : Y.flatten(),
-    'z' : Z.flatten(),
+    'sigma_T': 0.3,      # extracellular conductivity
+    'sigma_G': 0.0,      # MEA glass electrode plate conductivity
+    'sigma_S': 1.5,      # Saline bath conductivity
+    'x': X.flatten(),  # electrode requires 1d vector of positions
+    'y': Y.flatten(),
+    'z': Z.flatten(),
     "method": "soma_as_point",
-    'N' : np.array([[0, 0, 1]]*X.size), #surface normals
-    'r' : 50,              # contact site radius
-    'n' : 100,               # datapoints for averaging,
+    'N': np.array([[0, 0, 1]] * X.size),  # surface normals
+    'r': 50,              # contact site radius
+    'n': 100,               # datapoints for averaging,
     'h': 300,
     "seedvalue": 12,
     "squeeze_cell_factor": 0.6,

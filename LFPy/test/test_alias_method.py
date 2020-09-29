@@ -15,7 +15,6 @@ GNU General Public License for more details.
 """
 
 
-import os
 import unittest
 import numpy as np
 import LFPy
@@ -26,7 +25,6 @@ class testAliasMethod(unittest.TestCase):
     test LFPy.alias_method methods
     """
 
-
     def test_alias_method_00(self):
         """deterministic probabilities 0.0 and 1.0"""
         idx = np.arange(2)
@@ -34,8 +32,9 @@ class testAliasMethod(unittest.TestCase):
         nidx = 1000000
         bins = np.arange(3)
 
-        hist, _ = np.histogram(LFPy.alias_method.alias_method(idx, probs, nidx),
-                               bins)
+        hist, _ = np.histogram(
+            LFPy.alias_method.alias_method(
+                idx, probs, nidx), bins)
 
         self.assertEqual(nidx, hist[1])
 
@@ -46,12 +45,16 @@ class testAliasMethod(unittest.TestCase):
         nidx = 1000000
         bins = np.arange(3)
 
-        hist, _ = np.histogram(LFPy.alias_method.alias_method(idx, probs, nidx),
-                               bins)
+        hist, _ = np.histogram(
+            LFPy.alias_method.alias_method(
+                idx, probs, nidx), bins)
 
         # compute Pearson correlation coefficients between area and histogram
         # reporting success if within 7 decimal places
-        self.assertAlmostEqual(np.corrcoef(probs, hist.astype(float))[0, 1], 1., places=7)
+        self.assertAlmostEqual(
+            np.corrcoef(
+                probs, hist.astype(float))[
+                0, 1], 1., places=7)
 
     def test_alias_method_02(self):
         """probabilities 0.75 and 0.25"""
@@ -60,12 +63,16 @@ class testAliasMethod(unittest.TestCase):
         nidx = 1000000
         bins = np.arange(3)
 
-        hist, _ = np.histogram(LFPy.alias_method.alias_method(idx, probs, nidx),
-                               bins)
+        hist, _ = np.histogram(
+            LFPy.alias_method.alias_method(
+                idx, probs, nidx), bins)
 
         # compute Pearson correlation coefficients between area and histogram
         # reporting success if within 7 decimal places
-        self.assertAlmostEqual(np.corrcoef(probs, hist.astype(float))[0, 1], 1., places=7)
+        self.assertAlmostEqual(
+            np.corrcoef(
+                probs, hist.astype(float))[
+                0, 1], 1., places=7)
 
     def test_alias_method_03(self):
         '''over range of normalized probabilities'''
@@ -76,13 +83,16 @@ class testAliasMethod(unittest.TestCase):
         nidx = 1000000
         bins = np.arange(probs.size + 1)
 
-        hist, _ = np.histogram(LFPy.alias_method.alias_method(idx, probs, nidx),
-                               bins)
+        hist, _ = np.histogram(
+            LFPy.alias_method.alias_method(
+                idx, probs, nidx), bins)
 
         # compute Pearson correlation coefficients between area and histogram
         # reporting success if within 5 decimal places
-        self.assertAlmostEqual(np.corrcoef(probs, hist.astype(float))[0, 1], 1., places=4)
-
+        self.assertAlmostEqual(
+            np.corrcoef(
+                probs, hist.astype(float))[
+                0, 1], 1., places=4)
 
     def test_alias_method_04(self):
         """deterministic probabilities 1.0 and 0.0"""
@@ -91,7 +101,8 @@ class testAliasMethod(unittest.TestCase):
         nidx = 1000000
         bins = np.arange(3)
 
-        hist, _ = np.histogram(LFPy.alias_method.alias_method(idx, probs, nidx),
-                               bins)
+        hist, _ = np.histogram(
+            LFPy.alias_method.alias_method(
+                idx, probs, nidx), bins)
 
         self.assertEqual(nidx, hist[0])

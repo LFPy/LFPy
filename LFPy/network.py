@@ -23,7 +23,6 @@ import h5py
 from mpi4py import MPI
 import neuron
 from .templatecell import TemplateCell
-from lfpykit import CurrentDipoleMoment
 import scipy.sparse as ss
 
 # set up MPI environment
@@ -32,15 +31,16 @@ SIZE = COMM.Get_size()
 RANK = COMM.Get_rank()
 
 
-flattenlist = lambda lst: [item for sublist in lst for item in sublist]
+def flattenlist(lst):
+    return [item for sublist in lst for item in sublist]
 
 
-################################################################################
+##########################################################################
 # NetworkCell class that has a create_synapse method that
 # creates a synapse on the target cell, and a create_spike_detector method that
 # allows for connecting to a synapse on a target cell. All other methods and
 # attributes are inherited from the standard LFPy.TemplateCell class
-################################################################################
+##########################################################################
 class NetworkCell(TemplateCell):
     """
     class NetworkCell
@@ -55,57 +55,57 @@ class NetworkCell(TemplateCell):
 
     Parameters
     ----------
-    morphology : str
+    morphology: str
         path to morphology file
-    templatefile : str
+    templatefile: str
         File with cell template definition(s)
-    templatename : str
+    templatename: str
         Cell template-name used for this cell object
-    templateargs : str
+    templateargs: str
         Parameters provided to template-definition
-    v_init : float
+    v_init: float
         Initial membrane potential. Default to -65.
-    Ra : float
+    Ra: float
         axial resistance. Defaults to 150.
-    cm : float
+    cm: float
         membrane capacitance. Defaults to 1.0
-    passive : bool
+    passive: bool
         Passive mechanisms are initialized if True. Defaults to True
-    passive_parameters : dict
+    passive_parameters: dict
         parameter dictionary with values for the passive membrane mechanism in
         NEURON ('pas'). The dictionary must contain keys 'g_pas' and 'e_pas',
         like the default: passive_parameters=dict(g_pas=0.001, e_pas=-70)
-    extracellular : bool
+    extracellular: bool
         switch for NEURON's extracellular mechanism. Defaults to False
     dt: float
         Simulation time step. Defaults to 2**-4
-    tstart : float
+    tstart: float
         initialization time for simulation <= 0 ms. Defaults to 0.
-    tstop : float
+    tstop: float
         stop time for simulation > 0 ms. Defaults to 100.
-    nsegs_method : 'lambda100' or 'lambda_f' or 'fixed_length' or None
+    nsegs_method: 'lambda100' or 'lambda_f' or 'fixed_length' or None
         nseg rule, used by NEURON to determine number of compartments.
         Defaults to 'lambda100'
-    max_nsegs_length : float or None
+    max_nsegs_length: float or None
         max segment length for method 'fixed_length'. Defaults to None
-    lambda_f : int
+    lambda_f: int
         AC frequency for method 'lambda_f'. Defaults to 100
-    d_lambda : float
+    d_lambda: float
         parameter for d_lambda rule. Defaults to 0.1
-    delete_sections : bool
+    delete_sections: bool
         delete pre-existing section-references. Defaults to True
-    custom_code : list or None
+    custom_code: list or None
         list of model-specific code files ([.py/.hoc]). Defaults to None
-    custom_fun : list or None
+    custom_fun: list or None
         list of model-specific functions with args. Defaults to None
-    custom_fun_args : list or None
+    custom_fun_args: list or None
         list of args passed to custom_fun functions. Defaults to None
-    pt3d : bool
+    pt3d: bool
         use pt3d-info of the cell geometries switch. Defaults to False
-    celsius : float or None
+    celsius: float or None
         Temperature in celsius. If nothing is specified here
         or in custom code it is 6.3 celcius
-    verbose : bool
+    verbose: bool
         verbose output switch. Defaults to False
 
     Examples
@@ -113,24 +113,25 @@ class NetworkCell(TemplateCell):
 
     >>> import LFPy
     >>> cellParameters = {
-    >>>     'morphology' : '<path to morphology.hoc>',
-    >>>     'templatefile' :  '<path to template_file.hoc>',
-    >>>     'templatename' :  'templatename',
-    >>>     'templateargs' :  None,
-    >>>     'v_init' : -65,
-    >>>     'cm' : 1.0,
-    >>>     'Ra' : 150,
-    >>>     'passive' : True,
-    >>>     'passive_parameters' : {'g_pas' : 0.001, 'e_pas' : -65.},
-    >>>     'dt' : 2**-3,
-    >>>     'tstart' : 0,
-    >>>     'tstop' : 50,
+    >>>     'morphology': '<path to morphology.hoc>',
+    >>>     'templatefile':  '<path to template_file.hoc>',
+    >>>     'templatename':  'templatename',
+    >>>     'templateargs':  None,
+    >>>     'v_init': -65,
+    >>>     'cm': 1.0,
+    >>>     'Ra': 150,
+    >>>     'passive': True,
+    >>>     'passive_parameters': {'g_pas': 0.001, 'e_pas': -65.},
+    >>>     'dt': 2**-3,
+    >>>     'tstart': 0,
+    >>>     'tstop': 50,
     >>> }
     >>> cell = LFPy.NetworkCell(**cellParameters)
     >>> cell.simulate()
 
 
     """
+
     def __init__(self, **args):
         """
         Initialization of class LFPy.NetworkCell.
@@ -153,7 +154,6 @@ class NetworkCell(TemplateCell):
         for sec in self.somalist:
             self.somav.record(sec(0.5)._ref_v)
 
-
     def create_synapse(self, cell, sec, x=0.5, syntype=neuron.h.ExpSyn,
                        synparams=dict(tau=2., e=0.),
                        assert_syn_values=False):
@@ -165,19 +165,19 @@ class NetworkCell(TemplateCell):
 
         Parameters
         ----------
-        cell : object
+        cell: object
             instantiation of class NetworkCell or similar
-        sec : neuron.h.Section object,
+        sec: neuron.h.Section object,
             section reference on cell
-        x : float in [0, 1],
+        x: float in [0, 1],
             relative position along section
-        syntype : hoc.HocObject
+        syntype: hoc.HocObject
             NEURON synapse model reference, e.g., neuron.h.ExpSyn
-        synparams : dict
+        synparams: dict
             parameters for syntype, e.g., for neuron.h.ExpSyn we have:
-                tau : float, synapse time constant
-                e : float, synapse reversal potential
-        assert_syn_values : bool
+                tau: float, synapse time constant
+                e: float, synapse reversal potential
+        assert_syn_values: bool
             if True, raise AssertionError if synapse attribute values do not
             match the values in the synparams dictionary
 
@@ -191,10 +191,18 @@ class NetworkCell(TemplateCell):
             # Create the random number generator for the synapse
             rng = neuron.h.Random()
             # not sure if this is how it is supposed to be set up...
-            rng.MCellRan4(np.random.randint(0, 2**32-1), np.random.randint(0, 2**32-1))
+            rng.MCellRan4(
+                np.random.randint(
+                    0,
+                    2**32 - 1),
+                np.random.randint(
+                    0,
+                    2**32 - 1))
             rng.uniform(0, 1)
-            syn.setRNG(rng) # used for e.g., stochastic synapse mechanisms (cf. BBP microcircuit portal files)
-            cell.rng_list.append(rng) # must store ref to rng object
+            # used for e.g., stochastic synapse mechanisms (cf. BBP
+            # microcircuit portal files)
+            syn.setRNG(rng)
+            cell.rng_list.append(rng)  # must store ref to rng object
         cell.netconsynapses.append(syntype(x, sec=sec))
 
         for key, value in synparams.items():
@@ -202,39 +210,38 @@ class NetworkCell(TemplateCell):
             # check that synapses are parameterized correctly
             if assert_syn_values:
                 try:
-                    np.testing.assert_almost_equal(getattr(cell.netconsynapses[-1], key), value)
+                    np.testing.assert_almost_equal(
+                        getattr(cell.netconsynapses[-1], key), value)
                 except AssertionError:
-                    raise AssertionError('{} = {} != {}'.format(key,
-                                                                getattr(cell.netconsynapses[-1], key),
-                                                                value))
-
+                    raise AssertionError('{} = {} != {}'.format(
+                        key, getattr(cell.netconsynapses[-1], key), value))
 
     def create_spike_detector(self, target=None, threshold=-10.,
-                     weight=0.0, delay=0.0):
+                              weight=0.0, delay=0.0):
         """
         Create spike-detecting NetCon object attached to the cell's soma
         midpoint, but this could be extended to having multiple spike-detection
-        sites. The NetCon object created is attached to the cell's sd_netconlist
-        attribute, and will be used by the Network class when creating
-        connections between all presynaptic cells and postsynaptic cells on
-        each local RANK.
+        sites. The NetCon object created is attached to the cell's
+        sd_netconlist attribute, and will be used by the Network class when
+        creating connections between all presynaptic cells and postsynaptic
+        cells on each local RANK.
 
         Parameters
         ----------
-        target : None (default) or a NEURON point process
-        threshold : float
+        target: None (default) or a NEURON point process
+        threshold: float
             spike detection threshold
-        weight : float
+        weight: float
             connection weight (not used unless target is a point process)
-        delay : float
+        delay: float
             connection delay (not used unless target is a point process)
         """
         # create new NetCon objects for the connections. Activation times will
         # be triggered on the somatic voltage with a given threshold.
         for sec in self.somalist:
             self.sd_netconlist.append(neuron.h.NetCon(sec(0.5)._ref_v,
-                                                target,
-                                                sec=sec))
+                                                      target,
+                                                      sec=sec))
             self.sd_netconlist[-1].threshold = threshold
             self.sd_netconlist[-1].weight[0] = weight
             self.sd_netconlist[-1].delay = delay
@@ -257,16 +264,16 @@ class DummyCell(object):
 
         Parameters
         ----------
-        totnsegs : int
+        totnsegs: int
             total number of segments
-        imem : ndarray
+        imem: ndarray
             totnsegs x ntimesteps array with transmembrane currents in nA
-        x, y, z : ndarray
+        x, y, z: ndarray
             arrays of shape (totnsegs, 2) with (x,y,z) coordinates of start
             and end points of segments in units of (um)
-        diam : ndarray
+        diam: ndarray
             array of length totnsegs with segment diameters
-        area : ndarray
+        area: ndarray
             array of segment surface areas
         """
         # set attributes
@@ -280,7 +287,7 @@ class DummyCell(object):
         self.somainds = somainds
 
     def get_idx(self, section="soma"):
-        if section=="soma":
+        if section == "soma":
             return self.somainds
         else:
             raise ValueError('section argument must be "soma"')
@@ -293,35 +300,36 @@ class NetworkPopulation(object):
                  rotation_args=dict(),
                  OUTPUTPATH='example_parallel_network'):
         """
-        NetworkPopulation class representing a group of Cell objects distributed
-        across RANKs.
+        NetworkPopulation class representing a group of Cell objects
+        distributed across RANKs.
 
         Parameters
         ----------
-        CWD : path or None
+        CWD: path or None
             Current working directory
         CELLPATH: path or None
-            Relative path from CWD to source files for cell model (morphology, hoc routines etc.)
-        first_gid : int
+            Relative path from CWD to source files for cell model
+            (morphology, hoc routines etc.)
+        first_gid: int
             The global identifier of the first cell created in this population
             instance. The first_gid in the first population created should be 0
             and cannot exist in previously created NetworkPopulation instances
-        Cell : class
+        Cell: class
             class defining a Cell object, see class NetworkCell above
-        POP_SIZE : int
+        POP_SIZE: int
             number of cells in population
-        name : str
+        name: str
             population name reference
-        cell_args : dict
+        cell_args: dict
             keys and values for Cell object
-        pop_args : dict
+        pop_args: dict
             keys and values for Network.draw_rand_pos assigning cell positions
-        rotation_arg : dict
+        rotation_arg: dict
             default cell rotations around x and y axis on the form
-            { 'x' : np.pi/2, 'y' : 0 }. Can only have the keys 'x' and 'y'.
-            Cells are randomly rotated around z-axis using the Cell.set_rotation
-            method.
-        OUTPUTPATH : str
+            { 'x': np.pi/2, 'y': 0 }. Can only have the keys 'x' and 'y'.
+            Cells are randomly rotated around z-axis using the
+            Cell.set_rotation() method.
+        OUTPUTPATH: str
             path to output file destination
         """
         # set class attributes
@@ -346,7 +354,12 @@ class NetworkPopulation(object):
         self.spike_vectors = []
 
         # set up population of cells on this RANK
-        self.gids = [(i+first_gid) for i in range(POP_SIZE) if (i+first_gid) % SIZE == RANK]
+        self.gids = [
+            (i +
+             first_gid) for i in range(POP_SIZE) if (
+                i +
+                first_gid) %
+            SIZE == RANK]
 
         # we have to enter the cell's corresponding file directory to
         # create cell because how EPFL set their code up
@@ -362,7 +375,7 @@ class NetworkPopulation(object):
             cell.set_pos(**self.soma_pos[i])
 
         # assign a random rotation around the z-axis of each cell
-        self.rotations = np.random.uniform(0, np.pi*2, len(self.gids))
+        self.rotations = np.random.uniform(0, np.pi * 2, len(self.gids))
         assert('z' not in self.rotation_args.keys())
         for i, cell in enumerate(self.cells):
             cell.set_rotation(z=self.rotations[i], **self.rotation_args)
@@ -371,11 +384,11 @@ class NetworkPopulation(object):
         for gid, cell in zip(self.gids, self.cells):
             cell.gid = gid
 
-
         # gather gids, soma positions and cell rotations to RANK 0, and write
         # as structured array.
         if RANK == 0:
-            populationData = flattenlist(COMM.gather(zip(self.gids, self.soma_pos, self.rotations)))
+            populationData = flattenlist(COMM.gather(
+                zip(self.gids, self.soma_pos, self.rotations)))
 
             # create structured array for storing data
             dtype = [('gid', 'i8'), ('x', float), ('y', float), ('z', float),
@@ -386,7 +399,7 @@ class NetworkPopulation(object):
                 popDataArray[i]['x'] = pos['x']
                 popDataArray[i]['y'] = pos['y']
                 popDataArray[i]['z'] = pos['z']
-                popDataArray[i]['x_rot'] = np.pi/2
+                popDataArray[i]['x_rot'] = np.pi / 2
                 popDataArray[i]['y_rot'] = 0.
                 popDataArray[i]['z_rot'] = z_rot
 
@@ -408,7 +421,6 @@ class NetworkPopulation(object):
         # sync
         COMM.Barrier()
 
-
     def draw_rand_pos(self, POP_SIZE, radius, loc, scale, cap=None):
         """
         Draw some random location for POP_SIZE cells within radius radius,
@@ -419,22 +431,22 @@ class NetworkPopulation(object):
 
         Parameters
         ----------
-        POP_SIZE : int
+        POP_SIZE: int
             Population size
-        radius : float
+        radius: float
             Radius of population.
-        loc : float
+        loc: float
             expected mean depth of somas of population.
-        scale : float
+        scale: float
             expected standard deviation of depth of somas of population.
-        cap : None, float or length to list of floats
+        cap: None, float or length to list of floats
             if float, cap distribution between [loc-cap, loc+cap),
             if list, cap distribution between [loc-cap[0], loc+cap[1]]
 
 
         Returns
         -------
-        soma_pos : list
+        soma_pos: list
             List of dicts of len POP_SIZE
             where dict have keys x, y, z specifying
             xyz-coordinates of cell at list entry `i`.
@@ -446,41 +458,49 @@ class NetworkPopulation(object):
         y = np.empty(POP_SIZE)
         z = np.empty(POP_SIZE)
         for i in range(POP_SIZE):
-            x[i] = (np.random.rand()-0.5) * radius*2
-            y[i] = (np.random.rand()-0.5) * radius*2
+            x[i] = (np.random.rand() - 0.5) * radius * 2
+            y[i] = (np.random.rand() - 0.5) * radius * 2
             while np.sqrt(x[i]**2 + y[i]**2) >= radius:
-                x[i] = (np.random.rand()-0.5)*radius*2
-                y[i] = (np.random.rand()-0.5)*radius*2
+                x[i] = (np.random.rand() - 0.5) * radius * 2
+                y[i] = (np.random.rand() - 0.5) * radius * 2
         z = np.random.normal(loc=loc, scale=scale, size=POP_SIZE)
         if cap is not None:
             if type(cap) in [float, np.float, np.float32, np.float64]:
-                while not np.all((z >= loc-cap) & (z < loc+cap)):
-                    inds = (z < loc-cap) ^ (z > loc+cap)
+                while not np.all((z >= loc - cap) & (z < loc + cap)):
+                    inds = (z < loc - cap) ^ (z > loc + cap)
                     z[inds] = np.random.normal(loc=loc, scale=scale,
                                                size=inds.sum())
-            elif type(cap) is list:
+            elif isinstance(cap, list):
                 try:
                     assert(len(cap) == 2)
                 except AssertionError:
-                    raise AssertionError('cap = {} is not a length 2 list'.format(float))
-                while not np.all((z >= loc-cap[0]) & (z < loc+cap[1])):
-                    inds = (z < loc-cap[0]) ^ (z > loc+cap[1])
+                    raise AssertionError(
+                        'cap = {} is not a length 2 list'.format(float))
+                while not np.all((z >= loc - cap[0]) & (z < loc + cap[1])):
+                    inds = (z < loc - cap[0]) ^ (z > loc + cap[1])
                     z[inds] = np.random.normal(loc=loc, scale=scale,
                                                size=inds.sum())
             else:
-                raise Exception('cap = {} is not None, a float or length 2 list of floats'.format(float))
+                raise Exception('cap = {} is not None'.format(float),
+                                'a float or length 2 list of floats')
 
         soma_pos = []
         for i in range(POP_SIZE):
-            soma_pos.append({'x' : x[i], 'y' : y[i], 'z' : z[i]})
+            soma_pos.append({'x': x[i], 'y': y[i], 'z': z[i]})
 
         return soma_pos
 
 
 class Network(object):
-    def __init__(self, dt=0.1, tstart=0., tstop=1000., v_init=-65., celsius=6.3,
-                 OUTPUTPATH='example_parallel_network',
-                 verbose=False):
+    def __init__(
+            self,
+            dt=0.1,
+            tstart=0.,
+            tstop=1000.,
+            v_init=-65.,
+            celsius=6.3,
+            OUTPUTPATH='example_parallel_network',
+            verbose=False):
         """
         Network class, creating distributed populations of cells of
         type Cell and handling connections between cells in the respective
@@ -488,20 +508,20 @@ class Network(object):
 
         Parameters
         ----------
-        dt : float
+        dt: float
             Simulation timestep size
-        tstart : float
+        tstart: float
             Start time of simulation
-        tstop : float
+        tstop: float
             End time of simulation
-        v_init : float
+        v_init: float
             Membrane potential set at first timestep across all cells
-        celsius : float
+        celsius: float
             Global control of temperature, affect channel kinetics.
             It will also be forced when creating the different Cell objects, as
             LFPy.Cell and LFPy.TemplateCell also accept the same keyword
             argument.
-        verbose : bool
+        verbose: bool
             if True, print out misc. messages
 
 
@@ -522,15 +542,13 @@ class Network(object):
         # with each cell's list of netcons)
         self.netconlist = neuron.h.List()
 
-
         # The different populations in the Network will be collected in
-        # a dictionary of NetworkPopulation object, where the keys represent the
-        # population name. The names are also put in a list ordered according to
-        # order populations are created in (as some operations rely on this)
+        # a dictionary of NetworkPopulation object, where the keys represent
+        # population names. The names are also put in a list ordered according
+        # to the order populations are created in (as some operations rely on
+        # this particular order)
         self.populations = dict()
         self.population_names = []
-
-
 
     def create_population(self, CWD=None, CELLPATH=None, Cell=NetworkCell,
                           POP_SIZE=4, name='L5PC',
@@ -539,37 +557,39 @@ class Network(object):
         """
         Create and append a distributed POP_SIZE-sized population of cells of
         type Cell with the corresponding name. Cell-object references, gids on
-        this RANK, population size POP_SIZE and names will be added to the lists
-        Network.gids, Network.cells, Network.sizes and Network.names,
+        this RANK, population size POP_SIZE and names will be added to the
+        lists Network.gids, Network.cells, Network.sizes and Network.names,
         respectively
 
         Parameters
         ----------
-        CWD : path
+        CWD: path
             Current working directory
         CELLPATH: path
-            Relative path from CWD to source files for cell model (morphology, hoc routines etc.)
-        Cell : class
+            Relative path from CWD to source files for cell model
+            (morphology, hoc routines etc.)
+        Cell: class
             class defining a Cell-like object, see class NetworkCell
-        POP_SIZE : int
+        POP_SIZE: int
             number of cells in population
-        name : str
+        name: str
             population name reference
-        cell_args : dict
+        cell_args: dict
             keys and values for Cell object
-        pop_args : dict
+        pop_args: dict
             keys and values for Network.draw_rand_pos assigning cell positions
-        rotation_arg : dict
+        rotation_arg: dict
             default cell rotations around x and y axis on the form
-            { 'x' : np.pi/2, 'y' : 0 }. Can only have the keys 'x' and 'y'.
-            Cells are randomly rotated around z-axis using the Cell.set_rotation
-            method.
+            { 'x': np.pi/2, 'y': 0 }. Can only have the keys 'x' and 'y'.
+            Cells are randomly rotated around z-axis using the
+            Cell.set_rotation method.
 
         """
         try:
             assert name not in self.populations.keys()
         except AssertionError:
-            raise AssertionError('population name {} already taken'.format(name))
+            raise AssertionError(
+                'population name {} already taken'.format(name))
 
         # compute the first global id of this new population, based
         # on population sizes of existing populations
@@ -578,12 +598,17 @@ class Network(object):
             first_gid += p.POP_SIZE
 
         # create NetworkPopulation object
-        population = NetworkPopulation(CWD=CWD, CELLPATH=CELLPATH, first_gid=first_gid,
-                                Cell=Cell,
-                                POP_SIZE=POP_SIZE, name=name,
-                                cell_args=cell_args, pop_args=pop_args,
-                                rotation_args=rotation_args,
-                                OUTPUTPATH=self.OUTPUTPATH)
+        population = NetworkPopulation(
+            CWD=CWD,
+            CELLPATH=CELLPATH,
+            first_gid=first_gid,
+            Cell=Cell,
+            POP_SIZE=POP_SIZE,
+            name=name,
+            cell_args=cell_args,
+            pop_args=pop_args,
+            rotation_args=rotation_args,
+            OUTPUTPATH=self.OUTPUTPATH)
 
         # associate gids of cells on this RANK such that NEURON can look up
         # at which RANK different cells are created when connecting the network
@@ -605,11 +630,11 @@ class Network(object):
         # add population object to dictionary of populations
         self.populations[name] = population
 
-        # append population name to list (Network.populations.keys() not unique)
+        # append population name to list (Network.populations.keys() not
+        # unique)
         self.population_names.append(name)
 
-
-    def get_connectivity_rand(self, pre='L5PC', post='L5PC', connprob = 0.2):
+    def get_connectivity_rand(self, pre='L5PC', post='L5PC', connprob=0.2):
         """
         Dummy function creating a (boolean) cell to cell connectivity matrix
         between pre and postsynaptic populations.
@@ -621,11 +646,11 @@ class Network(object):
 
         Parameters
         ----------
-        pre : str
+        pre: str
             presynaptic population name
-        post : str
+        post: str
             postsynaptic population name
-        connprob : float in [0, 1]
+        connprob: float in [0, 1]
             connection probability, connections are drawn on random
 
         Returns
@@ -646,12 +671,12 @@ class Network(object):
                 # avoid self connections.
                 gids_pre, gids_post = np.where(C)
                 gids_pre += self.populations[pre].first_gid
-                gids_post *= SIZE # asssume round-robin distribution of gids
+                gids_post *= SIZE  # asssume round-robin distribution of gids
                 gids_post += self.populations[post].gids[0]
-                inds = gids_pre == gids_post
-                gids_pre = gids_pre[inds == False]
+                inds = gids_pre != gids_post
+                gids_pre = gids_pre[inds]
                 gids_pre -= self.populations[pre].first_gid
-                gids_post = gids_post[inds == False]
+                gids_post = gids_post[inds]
                 gids_post -= self.populations[post].gids[0]
                 gids_post //= SIZE
                 c = np.c_[gids_pre, gids_post]
@@ -665,7 +690,6 @@ class Network(object):
         else:
             return np.zeros((n_pre, 0), dtype=bool)
 
-
     def connect(self, pre, post, connectivity,
                 syntype=neuron.h.ExpSyn,
                 synparams=dict(tau=2., e=0.),
@@ -678,9 +702,9 @@ class Network(object):
                 multapsefun=np.random.normal,
                 multapseargs=dict(loc=4, scale=1),
                 syn_pos_args=dict(section=['soma', 'dend', 'apic'],
-                                  fun=[stats.norm]*2,
-                                  funargs=[dict(loc=0, scale=100)]*2,
-                                  funweights=[0.5]*2,
+                                  fun=[stats.norm] * 2,
+                                  funargs=[dict(loc=0, scale=100)] * 2,
+                                  funweights=[0.5] * 2,
                                   z_min=-1E6, z_max=1E6,
                                   ),
                 save_connections=False,
@@ -693,39 +717,40 @@ class Network(object):
 
         Parameters
         ----------
-        pre : str
+        pre: str
             presynaptic population name
-        post : str
+        post: str
             postsynaptic population name
-        connectivity : ndarray / (scipy.sparse array)
+        connectivity: ndarray / (scipy.sparse array)
             boolean connectivity matrix between pre and post.
-        syntype : hoc.HocObject
+        syntype: hoc.HocObject
             reference to NEURON synapse mechanism, e.g., neuron.h.ExpSyn
-        synparams : dict
-            dictionary of parameters for synapse mechanism, keys 'e', 'tau' etc.
-        weightfun : function
+        synparams: dict
+            dictionary of parameters for synapse mechanism, keys 'e', 'tau'
+            etc.
+        weightfun: function
             function used to draw weights from a numpy.random distribution
-        weightargs : dict
+        weightargs: dict
             parameters passed to weightfun
-        minweight : float,
+        minweight: float,
             minimum weight in units of nS
-        delayfun : function
+        delayfun: function
             function used to draw delays from a numpy.random distribution
-        delayargs : dict
+        delayargs: dict
             parameters passed to delayfun
-        mindelay : float,
+        mindelay: float,
             minimum delay in multiples of dt
-        multapsefun : function or None
+        multapsefun: function or None
             function reference, e.g., numpy.random.normal used to draw a number
             of synapses for a cell-to-cell connection. If None, draw only one
             connection
-        multapseargs : dict
+        multapseargs: dict
             arguments passed to multapsefun
-        syn_pos_args : dict
+        syn_pos_args: dict
             arguments passed to inherited LFPy.Cell method
             NetworkCell.get_rand_idx_area_and_distribution_norm to find
             synapse locations.
-        save_connections : bool
+        save_connections: bool
             if True (default False), save instantiated connections to HDF5 file
             "Network.OUTPUTPATH/synapse_positions.h5" as dataset "<pre>:<post>"
             using a structured ndarray with dtype
@@ -747,12 +772,17 @@ class Network(object):
         syn_idx_pos = []
 
         # iterate over gids on this RANK and create connections
-        for i, (post_gid, cell) in enumerate(zip(self.populations[post].gids, self.populations[post].cells)):
+        for i, (post_gid, cell) in enumerate(zip(self.populations[post].gids,
+                                                 self.populations[post].cells)
+                                             ):
             # do NOT iterate over all possible presynaptic neurons
             for pre_gid in pre_gids[connectivity[:, i]]:
-                # throw a warning if sender neuron is identical to receiving neuron
+                # throw a warning if sender neuron is identical to receiving
+                # neuron
                 if post_gid == pre_gid:
-                    print('connecting cell w. gid {} to itself (RANK {})'.format(post_gid, RANK))
+                    print(
+                        'connecting cell w. gid {} to itself (RANK {})'.format(
+                            post_gid, RANK))
 
                 # assess number of synapses
                 if multapsefun is None:
@@ -764,10 +794,12 @@ class Network(object):
                         nidx = int(multapsefun(**multapseargs))
                         j += 1
                     if j == 1000:
-                        raise Exception('change multapseargs as no positive synapse count was found in 1000 trials')
+                        raise Exception('change multapseargs as no positive '
+                                        'synapse # was found in 1000 trials')
 
                 # find synapse locations and corresponding section names
-                idxs = cell.get_rand_idx_area_and_distribution_norm(nidx=nidx, **syn_pos_args)
+                idxs = cell.get_rand_idx_area_and_distribution_norm(
+                    nidx=nidx, **syn_pos_args)
                 secs = cell.get_idx_name(idxs)
 
                 # draw weights
@@ -784,19 +816,27 @@ class Network(object):
                     j = delays < mindelay
                     delays[j] = delayfun(size=j.sum(), **delayargs)
 
-                for i, ((idx, secname, x), weight, delay) in enumerate(zip(secs, weights, delays)):
-                    cell.create_synapse(cell,
-                                        # TODO: Find neater way of accessing Section reference, this seems slow
-                                        sec=list(cell.allseclist)[np.where(np.array(cell.allsecnames)==secname)[0][0]],
-                                        x=x, syntype=syntype,
-                                        synparams=synparams)
+                for i, ((idx, secname, x), weight, delay) in enumerate(
+                        zip(secs, weights, delays)):
+                    cell.create_synapse(
+                        cell,
+                        # TODO: Find neater way of accessing
+                        # Section reference, this seems slow
+                        sec=list(
+                            cell.allseclist)[
+                            np.where(
+                                np.array(
+                                    cell.allsecnames) == secname)[0][0]],
+                        x=x, syntype=syntype,
+                        synparams=synparams)
                     # connect up NetCon object
                     nc = self.pc.gid_connect(pre_gid, cell.netconsynapses[-1])
                     nc.weight[0] = weight
                     nc.delay = delays[i]
                     self.netconlist.append(nc)
 
-                    # store also synapse indices allowing for computing LFPs from syn.i
+                    # store also synapse indices allowing for computing LFPs
+                    # from syn.i
                     cell.synidx.append(idx)
 
                     # store gid and xyz-coordinate of synapse positions
@@ -810,12 +850,12 @@ class Network(object):
         syncount = COMM.reduce(syncount, op=MPI.SUM, root=0)
 
         if RANK == 0:
-            print('Connected population {} to {} by {} connections and {} synapses'.format(pre, post, conncount, syncount))
-
+            print('Connected population {} to {}'.format(pre, post),
+                  'by {} connections and {} synapses'.format(conncount,
+                                                             syncount))
         else:
             conncount = None
             syncount = None
-
 
         # gather and write syn_idx_pos data
         if save_connections:
@@ -823,7 +863,8 @@ class Network(object):
                 synData = flattenlist(COMM.gather(syn_idx_pos))
 
                 # convert to structured array
-                dtype = [('gid', 'i8'), ('x', float), ('y', float), ('z', float)]
+                dtype = [('gid', 'i8'), ('x', float),
+                         ('y', float), ('z', float)]
                 synDataArray = np.empty((len(synData), ), dtype=dtype)
                 for i, (gid, x, y, z) in enumerate(synData):
                     synDataArray[i]['gid'] = gid
@@ -905,11 +946,11 @@ class Network(object):
         to_file: bool
             only valid with `probes=[<probe>, ...]`, saves measurement in
             hdf5 file format.
-        file_name : str
+        file_name: str
             If to_file is True, file which measurements will be
             written to. The file format is HDF5, default is "OUTPUT.h5", put
             in folder Network.OUTPUTPATH
-        **kwargs :  keyword argument dict values passed along to function
+        **kwargs:  keyword argument dict values passed along to function
                     `_run_simulation_with_probes(), containing some or all of
                     the boolean flags: use_ipas, use_icap, use_isyn
                     (defaulting to 'False').
@@ -1068,7 +1109,6 @@ class Network(object):
 
         return dict(times=times, gids=gids)
 
-
     def _create_network_dummycell(self):
         """
         set up parameters for a DummyCell object, allowing for computing
@@ -1078,11 +1118,12 @@ class Network(object):
         """
         # compute the total number of segments per population on this RANK
         nsegs = [[cell.totnsegs for cell in self.populations[name].cells]
-            for name in self.population_names]
+                 for name in self.population_names]
         for i, nseg in enumerate(nsegs):
             if nseg == []:
                 nsegs[i] = [0]
-        for i, y in enumerate(nsegs): nsegs[i] = np.sum(y)
+        for i, y in enumerate(nsegs):
+            nsegs[i] = np.sum(y)
         nsegs = np.array(nsegs, dtype=int)
 
         totnsegs = nsegs.sum()
@@ -1118,12 +1159,12 @@ def _run_simulation(network, cvode, variable_dt=False, atol=0.001):
 
     Parameters
     ----------
-    network : LFPy.Network object
+    network: LFPy.Network object
         instantiation of class LFPy.Network
-    cvode : neuron.h.CVode() object
-    variable_dt : bool
+    cvode: neuron.h.CVode() object
+    variable_dt: bool
         switch for variable-timestep method
-    atol : float
+    atol: float
         absolute tolerance with CVode for variable time-step method
     """
     # set maximum integration step, it is necessary for communication of
@@ -1190,9 +1231,9 @@ def _run_simulation_with_probes(network, cvode,
 
     Parameters
     ----------
-    network : LFPy.Network object
+    network: LFPy.Network object
         instantiation of class LFPy.Network
-    cvode : neuron.h.CVode() object
+    cvode: neuron.h.CVode() object
     probes: list of :obj:, optional
         None or list of LFPykit.RecExtElectrode like object instances that
         each have a public method `get_transformation_matrix` returning
@@ -1201,37 +1242,37 @@ def _run_simulation_with_probes(network, cvode,
 
         .. math:: \\mathbf{P} = \\mathbf{M} \\mathbf{I}
 
-    variable_dt : bool
+    variable_dt: bool
         switch for variable-timestep method
-    atol : float
+    atol: float
         absolute tolerance with CVode for variable time-step method
     rtol: float
         relative tolerance with CVode for variable time-step method
-    to_memory : bool
+    to_memory: bool
         Boolean flag for computing extracellular potentials, default is True.
         If True, the corresponding <probe>.data attribute will be set.
-    to_file : bool or None
+    to_file: bool or None
         Boolean flag for computing extracellular potentials to file
         <OUTPUTPATH/file_name>, default is False. Raises an Exception if
         `to_memory` is True.
-    file_name : formattable str
+    file_name: formattable str
         If to_file is True, file which extracellular potentials will be
         written to. The file format is HDF5, default is
         "output_RANK_{:03d}.h5". The output is written per RANK, and the
         RANK # will be inserted into the corresponding file name.
-    use_ipas : bool
+    use_ipas: bool
         if True, compute the contribution to extracellular potentials across
         the passive leak channels embedded in the cells membranes summed over
         populations
-    use_icap : bool
+    use_icap: bool
         if True, compute the contribution to extracellular potentials across
         the membrane capacitance embedded in the cells membranes summed over
         populations
-    use_isyn : bool
+    use_isyn: bool
         if True, compute the contribution to extracellular potentials across
         the excitatory and inhibitory synapses embedded in the cells membranes
         summed over populations
-    rec_pop_contributions : bool
+    rec_pop_contributions: bool
         if True, compute and return single-population contributions to the
         extracellular potential during each time step of the simulation
 
@@ -1469,9 +1510,9 @@ def ReduceStructArray(sendbuf, op=MPI.SUM):
 
     Parameters
     ----------
-    sendbuf : structured ndarray
+    sendbuf: structured ndarray
         Array data to be reduced (default: summed)
-    op : mpi4py.MPI.Op object
+    op: mpi4py.MPI.Op object
         MPI_Reduce function. Default is mpi4py.MPI.SUM
     """
     if RANK == 0:

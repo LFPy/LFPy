@@ -28,10 +28,17 @@ class testNetworkPopulation(unittest.TestCase):
     """
     class LFPy.NetworkPopulation test suite
     """
+
     def test_NetworkPopulation_00(self):
         cellParameters = dict(
-            morphology=os.path.join(LFPy.__path__[0], 'test', 'ball_and_sticks_w_lists.hoc'),
-            templatefile=os.path.join(LFPy.__path__[0], 'test', 'ball_and_stick_template.hoc'),
+            morphology=os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'ball_and_sticks_w_lists.hoc'),
+            templatefile=os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'ball_and_stick_template.hoc'),
             templatename='ball_and_stick_template',
             templateargs=None,
             passive=False,
@@ -44,29 +51,32 @@ class testNetworkPopulation(unittest.TestCase):
             CWD=None,
             CELLPATH=None,
             Cell=LFPy.NetworkCell,
-            cell_args = cellParameters,
-            pop_args = dict(
+            cell_args=cellParameters,
+            pop_args=dict(
                 radius=100,
                 loc=0.,
                 scale=20.),
-            rotation_args = dict(x=0, y=0),
-            POP_SIZE = 4,
-            name = 'ball_and_sticks',
+            rotation_args=dict(x=0, y=0),
+            POP_SIZE=4,
+            name='ball_and_sticks',
             OUTPUTPATH='tmp_testNetworkPopulation'
         )
 
         population = LFPy.NetworkPopulation(**populationParameters)
 
         self.assertTrue(len(population.cells) == population.POP_SIZE)
-        for cell, soma_pos, gid in zip(population.cells, population.soma_pos, population.gids):
-            self.assertTrue(type(cell) is LFPy.NetworkCell)
+        for cell, soma_pos, gid in zip(
+                population.cells, population.soma_pos, population.gids):
+            self.assertTrue(isinstance(cell, LFPy.NetworkCell))
             self.assertTrue((cell.somapos[0] == soma_pos['x']) &
                             (cell.somapos[1] == soma_pos['y']) &
                             (cell.somapos[2] == soma_pos['z']))
             self.assertEqual(cell.gid, gid)
-            self.assertTrue(np.sqrt(soma_pos['x']**2 + soma_pos['y']**2) <= 100.)
+            self.assertTrue(
+                np.sqrt(
+                    soma_pos['x']**2 +
+                    soma_pos['y']**2) <= 100.)
         np.testing.assert_equal(population.gids, np.arange(4))
-
 
         os.system('rm -r tmp_testNetworkPopulation')
         for cell in population.cells:
@@ -78,10 +88,17 @@ class testNetwork(unittest.TestCase):
     """
     class LFPy.Network test suite
     """
+
     def test_Network_00(self):
         cellParameters = dict(
-            morphology=os.path.join(LFPy.__path__[0], 'test', 'ball_and_sticks_w_lists.hoc'),
-            templatefile=os.path.join(LFPy.__path__[0], 'test', 'ball_and_stick_template.hoc'),
+            morphology=os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'ball_and_sticks_w_lists.hoc'),
+            templatefile=os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'ball_and_stick_template.hoc'),
             templatename='ball_and_stick_template',
             templateargs=None,
             passive=False,
@@ -94,14 +111,14 @@ class testNetwork(unittest.TestCase):
             CWD=None,
             CELLPATH=None,
             Cell=LFPy.NetworkCell,
-            cell_args = cellParameters,
-            pop_args = dict(
+            cell_args=cellParameters,
+            pop_args=dict(
                 radius=100,
                 loc=0.,
                 scale=20.),
-            rotation_args = dict(x=0, y=0),
-            POP_SIZE = 4,
-            name = 'test',
+            rotation_args=dict(x=0, y=0),
+            POP_SIZE=4,
+            name='test',
         )
         networkParameters = dict(
             dt=2**-3,
@@ -110,26 +127,36 @@ class testNetwork(unittest.TestCase):
             v_init=-65.,
             celsius=6.3,
             OUTPUTPATH='tmp_testNetworkPopulation'
-            )
+        )
         # set up
         network = LFPy.Network(**networkParameters)
         network.create_population(**populationParameters)
-        connectivity = network.get_connectivity_rand(pre='test', post='test', connprob=0.5)
+        connectivity = network.get_connectivity_rand(
+            pre='test', post='test', connprob=0.5)
 
         # test set up
         for population in network.populations.values():
             self.assertTrue(len(population.cells) == population.POP_SIZE)
-            for cell, soma_pos, gid in zip(population.cells, population.soma_pos, population.gids):
-                self.assertTrue(type(cell) is LFPy.NetworkCell)
+            for cell, soma_pos, gid in zip(
+                    population.cells, population.soma_pos, population.gids):
+                self.assertTrue(isinstance(cell, LFPy.NetworkCell))
                 self.assertTrue((cell.somapos[0] == soma_pos['x']) &
                                 (cell.somapos[1] == soma_pos['y']) &
                                 (cell.somapos[2] == soma_pos['z']))
                 self.assertEqual(cell.gid, gid)
-                self.assertTrue(np.sqrt(soma_pos['x']**2 + soma_pos['y']**2) <= 100.)
+                self.assertTrue(
+                    np.sqrt(
+                        soma_pos['x']**2 +
+                        soma_pos['y']**2) <= 100.)
             np.testing.assert_equal(population.gids, np.arange(4))
 
-        np.testing.assert_equal(connectivity.shape, (population.POP_SIZE, population.POP_SIZE))
-        np.testing.assert_equal(connectivity.diagonal(), np.zeros(population.POP_SIZE))
+        np.testing.assert_equal(
+            connectivity.shape,
+            (population.POP_SIZE,
+             population.POP_SIZE))
+        np.testing.assert_equal(
+            connectivity.diagonal(), np.zeros(
+                population.POP_SIZE))
 
         # connect and run sim
         network.connect(pre='test', post='test', connectivity=connectivity)
@@ -149,8 +176,14 @@ class testNetwork(unittest.TestCase):
 
     def test_Network_01(self):
         cellParameters = dict(
-            morphology=os.path.join(LFPy.__path__[0], 'test', 'ball_and_sticks_w_lists.hoc'),
-            templatefile=os.path.join(LFPy.__path__[0], 'test', 'ball_and_stick_template.hoc'),
+            morphology=os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'ball_and_sticks_w_lists.hoc'),
+            templatefile=os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'ball_and_stick_template.hoc'),
             templatename='ball_and_stick_template',
             templateargs=None,
             passive=False,
@@ -163,14 +196,14 @@ class testNetwork(unittest.TestCase):
             CWD=None,
             CELLPATH=None,
             Cell=LFPy.NetworkCell,
-            cell_args = cellParameters,
-            pop_args = dict(
+            cell_args=cellParameters,
+            pop_args=dict(
                 radius=100,
                 loc=0.,
                 scale=20.),
-            rotation_args = dict(x=0, y=0),
-            POP_SIZE = 4,
-            name = 'test',
+            rotation_args=dict(x=0, y=0),
+            POP_SIZE=4,
+            name='test',
         )
         networkParameters = dict(
             dt=2**-3,
@@ -179,11 +212,12 @@ class testNetwork(unittest.TestCase):
             v_init=-65.,
             celsius=6.3,
             OUTPUTPATH='tmp_testNetworkPopulation'
-            )
+        )
         # set up
         network = LFPy.Network(**networkParameters)
         network.create_population(**populationParameters)
-        connectivity = network.get_connectivity_rand(pre='test', post='test', connprob=0.5)
+        connectivity = network.get_connectivity_rand(
+            pre='test', post='test', connprob=0.5)
 
         # connect
         network.connect(pre='test', post='test', connectivity=connectivity)
@@ -231,14 +265,14 @@ class testNetwork(unittest.TestCase):
             CWD=None,
             CELLPATH=None,
             Cell=LFPy.NetworkCell,
-            cell_args = cellParameters,
-            pop_args = dict(
+            cell_args=cellParameters,
+            pop_args=dict(
                 radius=100,
                 loc=0.,
                 scale=20.),
-            rotation_args = dict(x=0, y=0),
-            POP_SIZE = 4,
-            name = 'test',
+            rotation_args=dict(x=0, y=0),
+            POP_SIZE=4,
+            name='test',
         )
         networkParameters = dict(
             dt=2**-3,
@@ -247,16 +281,16 @@ class testNetwork(unittest.TestCase):
             v_init=-65.,
             celsius=6.3,
             OUTPUTPATH='tmp_testNetworkPopulation'
-            )
+        )
         clampParams = {
-            'idx' : 0,
-            'pptype' : 'VClamp',
-            'amp[0]' : -65,
-            'dur[0]' : 10,
-            'amp[1]' : 0,
-            'dur[1]' : 1,
-            'amp[2]' : -65,
-            'dur[2]' : 1E8,
+            'idx': 0,
+            'pptype': 'VClamp',
+            'amp[0]': -65,
+            'dur[0]': 10,
+            'amp[1]': 0,
+            'dur[1]': 1,
+            'amp[2]': -65,
+            'dur[2]': 1E8,
         }
 
         # set up
@@ -266,7 +300,11 @@ class testNetwork(unittest.TestCase):
                                                      connprob=1)
 
         # test connectivity
-        self.assertTrue(np.all(connectivity == (np.eye(populationParameters['POP_SIZE']) == 0)))
+        self.assertTrue(
+            np.all(
+                connectivity == (
+                    np.eye(
+                        populationParameters['POP_SIZE']) == 0)))
 
         # connect
         network.connect(pre='test', post='test', connectivity=connectivity,
@@ -276,7 +314,7 @@ class testNetwork(unittest.TestCase):
         for population in network.populations.values():
             for cell in population.cells:
                 if cell.gid == 0:
-                    vclamp = LFPy.StimIntElectrode(cell=cell, **clampParams)
+                    LFPy.StimIntElectrode(cell=cell, **clampParams)
 
         # simulate
         network.simulate()
@@ -293,11 +331,16 @@ class testNetwork(unittest.TestCase):
                 cell.strip_hoc_objects()
         neuron.h('forall delete_section()')
 
-
     def test_Network_03(self):
         cellParameters = dict(
-            morphology=os.path.join(LFPy.__path__[0], 'test', 'ball_and_sticks_w_lists.hoc'),
-            templatefile=os.path.join(LFPy.__path__[0], 'test', 'ball_and_stick_template.hoc'),
+            morphology=os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'ball_and_sticks_w_lists.hoc'),
+            templatefile=os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'ball_and_stick_template.hoc'),
             templatename='ball_and_stick_template',
             templateargs=None,
             passive=False,
@@ -310,14 +353,14 @@ class testNetwork(unittest.TestCase):
             CWD=None,
             CELLPATH=None,
             Cell=LFPy.NetworkCell,
-            cell_args = cellParameters,
-            pop_args = dict(
+            cell_args=cellParameters,
+            pop_args=dict(
                 radius=100,
                 loc=0.,
                 scale=20.),
-            rotation_args = dict(x=0, y=0),
-            POP_SIZE = 4,
-            name = 'test',
+            rotation_args=dict(x=0, y=0),
+            POP_SIZE=4,
+            name='test',
         )
         networkParameters = dict(
             dt=2**-3,
@@ -326,12 +369,12 @@ class testNetwork(unittest.TestCase):
             v_init=-65.,
             celsius=6.3,
             OUTPUTPATH='tmp_testNetworkPopulation'
-            )
+        )
         electrodeParameters = dict(
             sigma=0.3,
-            x=np.arange(10)*100,
-            y=np.arange(10)*100,
-            z=np.arange(10)*100
+            x=np.arange(10) * 100,
+            y=np.arange(10) * 100,
+            z=np.arange(10) * 100
         )
         # set up
         network = LFPy.Network(**networkParameters)
@@ -345,12 +388,15 @@ class testNetwork(unittest.TestCase):
             for cell, soma_pos, gid in zip(population.cells,
                                            population.soma_pos,
                                            population.gids):
-                self.assertTrue(type(cell) is LFPy.NetworkCell)
+                self.assertTrue(isinstance(cell, LFPy.NetworkCell))
                 self.assertTrue((cell.somapos[0] == soma_pos['x']) &
                                 (cell.somapos[1] == soma_pos['y']) &
                                 (cell.somapos[2] == soma_pos['z']))
                 self.assertEqual(cell.gid, gid)
-                self.assertTrue(np.sqrt(soma_pos['x']**2 + soma_pos['y']**2) <= 100.)
+                self.assertTrue(
+                    np.sqrt(
+                        soma_pos['x']**2 +
+                        soma_pos['y']**2) <= 100.)
             np.testing.assert_equal(population.gids, np.arange(4))
 
         np.testing.assert_equal(connectivity.shape,
@@ -385,8 +431,14 @@ class testNetwork(unittest.TestCase):
 
     def test_Network_04(self):
         cellParameters = dict(
-            morphology=os.path.join(LFPy.__path__[0], 'test', 'ball_and_sticks_w_lists.hoc'),
-            templatefile=os.path.join(LFPy.__path__[0], 'test', 'ball_and_stick_template.hoc'),
+            morphology=os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'ball_and_sticks_w_lists.hoc'),
+            templatefile=os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'ball_and_stick_template.hoc'),
             templatename='ball_and_stick_template',
             templateargs=None,
             passive=True,
@@ -402,14 +454,14 @@ class testNetwork(unittest.TestCase):
             CWD=None,
             CELLPATH=None,
             Cell=LFPy.NetworkCell,
-            cell_args = cellParameters,
-            pop_args = dict(
+            cell_args=cellParameters,
+            pop_args=dict(
                 radius=100,
                 loc=0.,
                 scale=20.),
-            rotation_args = dict(x=0, y=0),
-            POP_SIZE = 1,
-            name = 'test',
+            rotation_args=dict(x=0, y=0),
+            POP_SIZE=1,
+            name='test',
         )
         networkParameters = dict(
             dt=2**-3,
@@ -418,7 +470,7 @@ class testNetwork(unittest.TestCase):
             v_init=-70.,
             celsius=6.3,
             OUTPUTPATH='tmp_testNetworkPopulation'
-            )
+        )
         # set up
         network = LFPy.Network(**networkParameters)
         network.create_population(**populationParameters)
@@ -430,12 +482,16 @@ class testNetwork(unittest.TestCase):
         numsynapses = 2
         for i in range(numsynapses):
             synlist.append(LFPy.Synapse(cell=cell, **synapseParameters))
-            synlist[-1].set_spike_times(np.array([10+(i*10)]))
+            synlist[-1].set_spike_times(np.array([10 + (i * 10)]))
 
         network.simulate()
 
         # test that the input results in the correct amount of PSPs
-        np.testing.assert_equal(ss.argrelextrema(cell.somav, np.greater)[0].size, numsynapses)
+        np.testing.assert_equal(
+            ss.argrelextrema(
+                cell.somav,
+                np.greater)[0].size,
+            numsynapses)
 
         # clean up
         network.pc.gid_clear()
@@ -463,14 +519,14 @@ class testNetwork(unittest.TestCase):
             CWD=None,
             CELLPATH=None,
             Cell=LFPy.NetworkCell,
-            cell_args = cellParameters,
-            pop_args = dict(
+            cell_args=cellParameters,
+            pop_args=dict(
                 radius=100,
                 loc=0.,
                 scale=20.),
-            rotation_args = dict(x=0, y=0),
-            POP_SIZE = 4,
-            name = 'test',
+            rotation_args=dict(x=0, y=0),
+            POP_SIZE=4,
+            name='test',
         )
         networkParameters = dict(
             dt=2**-3,
@@ -479,12 +535,12 @@ class testNetwork(unittest.TestCase):
             v_init=-65.,
             celsius=6.3,
             OUTPUTPATH='tmp_testNetworkPopulation'
-            )
+        )
         electrodeParameters = dict(
             sigma=0.3,
-            x = np.arange(10)*100,
-            y = np.arange(10)*100,
-            z = np.arange(10)*100
+            x=np.arange(10) * 100,
+            y=np.arange(10) * 100,
+            z=np.arange(10) * 100
         )
         # set up
         network = LFPy.Network(**networkParameters)
@@ -498,12 +554,15 @@ class testNetwork(unittest.TestCase):
             for cell, soma_pos, gid in zip(population.cells,
                                            population.soma_pos,
                                            population.gids):
-                self.assertTrue(type(cell) is LFPy.NetworkCell)
+                self.assertTrue(isinstance(cell, LFPy.NetworkCell))
                 self.assertTrue((cell.somapos[0] == soma_pos['x']) &
                                 (cell.somapos[1] == soma_pos['y']) &
                                 (cell.somapos[2] == soma_pos['z']))
                 self.assertEqual(cell.gid, gid)
-                self.assertTrue(np.sqrt(soma_pos['x']**2 + soma_pos['y']**2) <= 100.)
+                self.assertTrue(
+                    np.sqrt(
+                        soma_pos['x']**2 +
+                        soma_pos['y']**2) <= 100.)
             np.testing.assert_equal(population.gids, np.arange(4))
 
         np.testing.assert_equal(connectivity.shape,
