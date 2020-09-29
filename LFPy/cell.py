@@ -2154,10 +2154,8 @@ class Cell(object):
     def _create_segment_polygon(self, i, projection=('x', 'z')):
         """Create a polygon to fill for segment i, in the plane
         determined by kwarg projection"""
-        x = [getattr(self, projection[0] + 'start')[i],
-             getattr(self, projection[0] + 'end')[i]]
-        z = [getattr(self, projection[1] + 'start')[i],
-             getattr(self, projection[1] + 'end')[i]]
+        x = getattr(self, projection[0])[i]
+        z = getattr(self, projection[1])[i]
         d = self.d[i]
 
         # calculate angles

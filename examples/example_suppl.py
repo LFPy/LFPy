@@ -38,7 +38,7 @@ def plot_ex1(cell, electrode, X, Y, Z):
     n_contours_black = 40
 
     # This is the extracellular potential, reshaped to the X, Z mesh
-    LFP = np.arcsinh(electrode.LFP[:, tidx]).reshape(X.shape)
+    LFP = np.arcsinh(electrode.data[:, tidx]).reshape(X.shape)
 
     # figure object
     fig = plt.figure(figsize=(12, 8))
@@ -51,8 +51,8 @@ def plot_ex1(cell, electrode, X, Y, Z):
     # plot_morphology(plot_synapses=True)
     for sec in neuron.h.allsec():
         idx = cell.get_idx(sec.name())
-        ax1.plot(np.r_[cell.xstart[idx], cell.xend[idx][-1]],
-                 np.r_[cell.zstart[idx], cell.zend[idx][-1]],
+        ax1.plot(np.r_[cell.x[idx, 0], cell.x[idx, 1][-1]],
+                 np.r_[cell.z[idx, 0], cell.z[idx, 1][-1]],
                  color='k')
     for i in range(len(cell.synapses)):
         ax1.plot([cell.synapses[i].x], [cell.synapses[i].z], '.',
@@ -94,43 +94,43 @@ def plot_ex1(cell, electrode, X, Y, Z):
 def plot_ex2(cell, electrode):
     '''example2.py plotting function'''
     # creating array of points and corresponding diameters along structure
-    for i in range(cell.xend.size):
+    for i in range(cell.x.shape[0]):
         if i == 0:
-            xcoords = np.array([cell.xmid[i]])
-            ycoords = np.array([cell.ymid[i]])
-            zcoords = np.array([cell.zmid[i]])
-            diams = np.array([cell.diam[i]])
+            xcoords = np.array([cell.x[i].mean()])
+            ycoords = np.array([cell.y[i].mean()])
+            zcoords = np.array([cell.z[i].mean()])
+            diams = np.array([cell.d[i]])
         else:
-            if cell.zmid[i] < 100 and cell.zmid[i] > -100 and \
-                    cell.xmid[i] < 100 and cell.xmid[i] > -100:
+            if cell.z[i].mean() < 100 and cell.z[i].mean() > -100 and \
+                    cell.x[i].mean() < 100 and cell.x[i].mean() > -100:
                 xcoords = np.r_[xcoords,
-                                np.linspace(cell.xstart[i],
-                                            cell.xend[i],
+                                np.linspace(cell.x[i, 0],
+                                            cell.x[i, 1],
                                             int(cell.length[i] * 3))]
                 ycoords = np.r_[ycoords,
-                                np.linspace(cell.ystart[i],
-                                            cell.yend[i],
+                                np.linspace(cell.y[i, 0],
+                                            cell.y[i, 1],
                                             int(cell.length[i] * 3))]
                 zcoords = np.r_[zcoords,
-                                np.linspace(cell.zstart[i],
-                                            cell.zend[i],
+                                np.linspace(cell.z[i, 0],
+                                            cell.z[i, 1],
                                             int(cell.length[i] * 3))]
                 diams = np.r_[diams,
-                              np.linspace(cell.diam[i], cell.diam[i],
+                              np.linspace(cell.d[i], cell.d[i],
                                           int(cell.length[i] * 3))]
 
     # sort along depth-axis
     argsort = np.argsort(ycoords)
 
     # plotting
-    fig = plt.figure(figsize=[15, 10])
+    fig = plt.figure(figsize=[12, 8])
     ax = fig.add_axes([0.1, 0.1, 0.533334, 0.8], frameon=False)
     ax.scatter(xcoords[argsort], zcoords[argsort], s=diams[argsort]**2 * 20,
                c=ycoords[argsort], edgecolors='none', cmap='gray')
     ax.plot(electrode.x, electrode.z, '.', marker='o', markersize=5, color='k')
 
     i = 0
-    for LFP in electrode.LFP:
+    for LFP in electrode.data:
         tvec = cell.tvec * 0.6 + electrode.x[i] + 2
         if abs(LFP).max() >= 1:
             factor = 2
@@ -205,10 +205,11 @@ def plot_ex3(cell, electrode):
 
     # plot the LFP as image plot
     ax = fig.add_axes([0.1, 0.1, 0.5, 0.2])
-    absmaxLFP = electrode.LFP.std() * 3
-    im = ax.pcolormesh(cell.tvec, electrode.z, electrode.LFP,
+    absmaxLFP = electrode.data.std() * 3
+    im = ax.pcolormesh(cell.tvec, electrode.z, electrode.data,
                        vmax=absmaxLFP, vmin=-absmaxLFP,
-                       cmap='PRGn')
+                       cmap='PRGn',
+                       shading='auto')
 
     rect = np.array(ax.get_position().bounds)
     rect[0] += rect[2] + 0.01
@@ -224,8 +225,8 @@ def plot_ex3(cell, electrode):
     ax = fig.add_axes([0.65, 0.1, 0.25, 0.8], frameon=False)
     for sec in neuron.h.allsec():
         idx = cell.get_idx(sec.name())
-        ax.plot(np.r_[cell.xstart[idx], cell.xend[idx][-1]],
-                np.r_[cell.zstart[idx], cell.zend[idx][-1]],
+        ax.plot(np.r_[cell.x[idx, 0], cell.x[idx, 1][-1]],
+                np.r_[cell.z[idx, 0], cell.z[idx, 1][-1]],
                 color='k')
     for i in range(len(cell.synapses)):
         ax.plot([cell.synapses[i].x], [cell.synapses[i].z], marker='.',
