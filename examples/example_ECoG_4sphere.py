@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-Example plot for LFPy: Single-synapse contribution to the potential through head
+Example plot for LFPy: Single-synapse contribution to the potential
+through head
 
 Copyright (C) 2017 Computational Neuroscience Group, NMBU.
 
@@ -28,33 +29,33 @@ rad_tol = 1e-2
 somapos = np.array([0., 0., 78750.])
 
 xlim = [-1000, 1000]
-ylim = [radii[0]-500, radii[1] + 500]
+ylim = [radii[0] - 500, radii[1] + 500]
 
 # cell with simplified morphology
 cellParameters = {
-    'morphology' : join("morphologies", 'example_morphology.hoc'),
-    'tstart' : 0.,
-    'tstop' : 5.,
-    'dt' : 2**-4,
-    'v_init' : -65,
-    'cm' : 1.,
-    'Ra' : 150.,
-    'passive' : True,
-    'passive_parameters' : {'g_pas' : 1./3E4, 'e_pas' : -65.},
-    'pt3d' : True,
+    'morphology': join("morphologies", 'example_morphology.hoc'),
+    'tstart': 0.,
+    'tstop': 5.,
+    'dt': 2**-4,
+    'v_init': -65,
+    'cm': 1.,
+    'Ra': 150.,
+    'passive': True,
+    'passive_parameters': {'g_pas': 1. / 3E4, 'e_pas': -65.},
+    'pt3d': True,
 }
 
 cell = LFPy.Cell(**cellParameters)
 synidx = cell.get_closest_idx(z=200)
 
 synapseParameters = {
-    'idx' : synidx,
-    'e' : 0,                                # reversal potential
-    'syntype' : 'Exp2Syn',                   # synapse type
-    'tau1' : 0.1,                              # syn. rise time constant
-    'tau2' : 1.,                              # syn. decay time constant
-    'weight' : 0.002,                        # syn. weight
-    'record_current' : True                 # syn. current record
+    'idx': synidx,
+    'e': 0,                                # reversal potential
+    'syntype': 'Exp2Syn',                   # synapse type
+    'tau1': 0.1,                              # syn. rise time constant
+    'tau2': 1.,                              # syn. decay time constant
+    'weight': 0.002,                        # syn. weight
+    'record_current': True                 # syn. current record
 }
 synapse = LFPy.Synapse(cell, **synapseParameters)
 synapse.set_spike_times(np.array([1.]))
@@ -63,7 +64,7 @@ cell.simulate(rec_imem=True, rec_vmem=True, rec_current_dipole_moment=True)
 
 # Setting up recording positions
 elec_z = np.array([radii[0],
-                  (radii[0] + radii[1]) / 2,
+                   (radii[0] + radii[1]) / 2,
                    radii[1],
                    radii[1] + 500])
 
@@ -86,8 +87,9 @@ ax = fig.add_subplot(111, aspect=1, frameon=False, xlim=xlim, ylim=ylim,
 for sec in LFPy.cell.neuron.h.allsec():
     idx = cell.get_idx(sec.name())
     l_cell, = ax.plot(np.r_[cell.xstart[idx], cell.xend[idx][-1]],
-            np.r_[cell.zstart[idx], cell.zend[idx][-1]],
-            color='r', zorder=3, lw=np.sqrt(np.average(cell.diam[idx])))
+                      np.r_[cell.zstart[idx], cell.zend[idx][-1]],
+                      color='r', zorder=3,
+                      lw=np.sqrt(np.average(cell.diam[idx])))
 
 l_syn, = ax.plot(cell.xmid[synapseParameters['idx']],
                  cell.zmid[synapseParameters['idx']],
@@ -105,13 +107,15 @@ ax.text(xlim[0], radii[0] - 70, "Brain", va="top", ha="left", color="k")
 ax.text(xlim[0], radii[0] + 70, "CSF", va="top", ha="left", color="k")
 ax.text(xlim[0], radii[1] + 70, "Skull", va="top", ha="left", color="k")
 
-ax.plot([-700, -200], [radii[0]-300, radii[0]-300], 'k', lw=2)
-ax.text(-550, radii[0]-290, "500 $\mu$m")
+ax.plot([-700, -200], [radii[0] - 300, radii[0] - 300], 'k', lw=2)
+ax.text(-550, radii[0] - 290, r"500 $\mu$m")
 
 # Plotting the potential at different positions
 y_norm = 200
 x_norm = 500
-elec_clr = lambda elec_idx: plt.cm.viridis(elec_idx / (len(elec_z) - 1))
+def elec_clr(elec_idx): return plt.cm.viridis(elec_idx / (len(elec_z) - 1))
+
+
 for elec_idx in range(len(elec_z)):
     l_elec, = ax.plot(elec_x[elec_idx], elec_z[elec_idx],
                       'o', c=elec_clr(elec_idx), clip_on=False)
@@ -126,9 +130,9 @@ for elec_idx in range(len(elec_z)):
     ax.text(x_[-1] + 250, elec_z[elec_idx] - y_norm / 2, scale_text)
 
 ax.plot([x_[0], x_[-1]],
-        [elec_z[1] - y_norm*1.1, elec_z[1] - y_norm*1.1],
+        [elec_z[1] - y_norm * 1.1, elec_z[1] - y_norm * 1.1],
         c='k', clip_on=False, lw=2)
-ax.text((x_[0] + x_[-1])/2, elec_z[1] - y_norm * 1.2,
+ax.text((x_[0] + x_[-1]) / 2, elec_z[1] - y_norm * 1.2,
         "{} ms".format(cell.tvec[-1]),
         va="top", ha="center", clip_on=False)
 
