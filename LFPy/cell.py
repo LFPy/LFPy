@@ -2333,7 +2333,7 @@ class Cell(object):
             the segment to the segment start point, and 2) the current from
             the segment start point to the mid point of the parent segment.
         d_vectors: ndarray, dtype=float
-            Shape ((cell.totnsegs-1)*2, 3) array of distance vectors traveled
+            Shape (3, (cell.totnsegs-1)*2) array of distance vectors traveled
             by each axial current in i_axial in units of (µm). The indices of
             the first axis, correspond to the first axis of i_axial and
             pos_vectors.
@@ -2455,7 +2455,7 @@ class Cell(object):
                 branch = False
                 bottom_seg = False
 
-        return np.array(i_axial), np.array(d_vectors), np.array(pos_vectors)
+        return np.array(i_axial), np.array(d_vectors).T, np.array(pos_vectors)
 
     def get_axial_resistance(self):
         """
@@ -2653,16 +2653,18 @@ class Cell(object):
         '''
         Return 3D current dipole moment vector and middle position vector
         from each axial current in space.
+
         Parameters
         ----------
         timepoints: ndarray, dtype=int
             array of timepoints at which you want to compute
             the current dipole moments. Defaults to None. If not given,
             all simulation timesteps will be included.
+
         Returns
         -------
         multi_dipoles: ndarray, dtype = float
-            Shape (n_axial_currents, n_timepoints, 3) array
+            Shape (n_axial_currents, 3, n_timepoints) array
             containing the x-,y-,z-components of the current dipole moment
             from each axial current in cell, at all timepoints.
             The number of axial currents,
@@ -2673,6 +2675,7 @@ class Cell(object):
             Shape (n_axial_currents, 3) array containing the x-, y-, and
             z-components giving the mid position in space of each multi_dipole
             in units of (µm).
+
         Examples
         --------
         Get all current dipole moments and positions from all axial currents in
@@ -2691,7 +2694,9 @@ class Cell(object):
         i_axial, d_axial, pos_axial = self.get_axial_currents_from_vmem(
             timepoints=timepoints)
         Ni, Nt = i_axial.shape
-        multi_dipoles = np.array(
-            [i_axial[i][:, np.newaxis] * d_axial[i] for i in range(Ni)])
+
+        multi_dipoles = np.zeros((Ni, 3, Nt))
+        for i in range(Ni):
+            multi_dipoles[i, ] = (i_axial[i][:, np.newaxis] * d_axial[:, i]).T
 
         return multi_dipoles, pos_axial

@@ -27,13 +27,12 @@ import matplotlib.pyplot as plt
 def plot_cell_to_ax(cell, ax, synidxs):
     for idx in range(cell.totnsegs):
         if idx == 0:
-            ax.plot(cell.xmid[idx], cell.zmid[idx], 'ko')
+            ax.plot(cell.x[idx].mean(), cell.z[idx].mean(), 'ko')
         else:
-            ax.plot([cell.xstart[idx], cell.xend[idx]],
-                    [cell.zstart[idx], cell.zend[idx]], c='k')
+            ax.plot(cell.x[idx], cell.z[idx], c='k')
 
     for synidx in synidxs:
-        l, = ax.plot(cell.xmid[synidx], cell.zmid[synidx], '*',
+        l, = ax.plot(cell.x[synidx].mean(), cell.z[synidx].mean(), '*',
                      c="r", ms=10)
     ax.legend([l], ["Synapse"], frameon=False, bbox_to_anchor=[1, -0.1])
 
@@ -109,11 +108,11 @@ if __name__ == '__main__':
     synapse = LFPy.Synapse(cell, **synapse_params)
     synapse.set_spike_times(np.array([5.]))
 
-    cell.simulate(rec_imem=True,
-                  rec_current_dipole_moment=True)
+    cell.simulate(rec_imem=True)
 
     # compute dipole
-    P = cell.current_dipole_moment
+    cdm = LFPy.CurrentDipoleMoment(cell)
+    P = cdm.get_transformation_matrix() @ cell.imem
 
     somapos = np.array([0., 0., 77500])
     r_soma_syns = [
@@ -125,7 +124,7 @@ if __name__ == '__main__':
 
     eeg_coords_top = np.array([[0., 0., radii[3] - rad_tol]])
     four_sphere_top = LFPy.FourSphereVolumeConductor(
-        radii, sigmas, eeg_coords_top)
+        eeg_coords_top, radii, sigmas)
     pot_db_4s_top = four_sphere_top.calc_potential(P, r_mid)
     eeg_top = np.array(pot_db_4s_top) * 1e9
 
@@ -151,11 +150,10 @@ if __name__ == '__main__':
     eeg_coords = np.vstack((x_eeg, y_eeg, z_eeg)).T
 
     # potential in 4S with db
-    time_max = np.argmax(np.linalg.norm(P, axis=1))
-    p = P[time_max, None]
+    time_max = np.argmax(np.linalg.norm(P, axis=0))
+    p = P[:, time_max].reshape((3, 1))
 
-    four_sphere = LFPy.FourSphereVolumeConductor(radii, sigmas, eeg_coords)
-
+    four_sphere = LFPy.FourSphereVolumeConductor(eeg_coords, radii, sigmas)
     pot_db_4s = four_sphere.calc_potential(p, r_mid)
     eeg = pot_db_4s.reshape(num_theta, num_phi) * 1e9  # from mV to pV
 
@@ -176,9 +174,9 @@ if __name__ == '__main__':
         312,
         title="Current dipole moment",
         ylabel=r"nA$\cdot\mu$m")
-    ax_p.plot(cell.tvec, P[:, 0], label="P$_x$")
-    ax_p.plot(cell.tvec, P[:, 1], label="P$_y$")
-    ax_p.plot(cell.tvec, P[:, 2], label="P$_z$")
+    ax_p.plot(cell.tvec, P[0, :], label="P$_x$")
+    ax_p.plot(cell.tvec, P[1, :], label="P$_y$")
+    ax_p.plot(cell.tvec, P[2, :], label="P$_z$")
     ax_p.axvline(cell.tvec[time_max], c='gray', ls='--')
     ax_p.legend(frameon=False, ncol=4, bbox_to_anchor=[1, -0.1])
 
