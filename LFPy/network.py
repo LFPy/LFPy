@@ -1104,8 +1104,7 @@ class Network(object):
                 # communicate and sum up measurements on each probe before
                 # returing spike times and corresponding gids:
                 for probe in probes:
-                    data = ReduceStructArray(probe.data)
-                    probe.data = data
+                    probe.data = ReduceStructArray(probe.data)
 
         return dict(times=times, gids=gids)
 
@@ -1456,7 +1455,7 @@ def _run_simulation_with_probes(network, cvode,
                     probe.data['isyn_i'][:, tstep] = M @ imem['isyn_i']
 
             if rec_pop_contributions:
-                for j, M in enumerate(transforms):
+                for j, (probe, M) in enumerate(zip(probes, transforms)):
                     k = 0  # counter
                     for nsegs, pop_name in zip(population_nsegs,
                                                network.population_names):
@@ -1489,7 +1488,7 @@ def _run_simulation_with_probes(network, cvode,
                 probe.data['isyn_i'][:, tstep] = M @ imem['isyn_i']
 
         if rec_pop_contributions:
-            for j, M in enumerate(transforms):
+            for j, (probe, M) in enumerate(zip(probes, transforms)):
                 k = 0  # counter
                 for nsegs, pop_name in zip(population_nsegs,
                                            network.population_names):

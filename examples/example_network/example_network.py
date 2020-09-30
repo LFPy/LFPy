@@ -32,7 +32,8 @@ import scipy.signal as ss
 import scipy.stats as st
 from mpi4py import MPI
 import neuron
-from LFPy import NetworkCell, Network, Synapse, RecExtElectrode
+from LFPy import NetworkCell, Network, Synapse, RecExtElectrode, \
+    CurrentDipoleMoment
 
 # set up MPI variables:
 COMM = MPI.COMM_WORLD
@@ -227,12 +228,11 @@ electrodeParameters = dict(
     r=5.,
     n=50,
     sigma=0.3,
-    method="soma_as_point"
+    method="root_as_point"
 )
 
 # method Network.simulate() parameters:
 networkSimulationArguments = dict(
-    rec_current_dipole_moment=True,
     rec_pop_contributions=True,
     to_memory=True,
     to_file=False
@@ -342,12 +342,18 @@ if __name__ == '__main__':
                 syn_pos_args=synapsePositionArguments[i][j],
             )
 
-    # set up extracellular recording device:
-    electrode = RecExtElectrode(**electrodeParameters)
+    # set up extracellular recording device.
+    # Here `cell` is set to None as handles to cell geometry is handled
+    # internally
+    electrode = RecExtElectrode(cell=None, **electrodeParameters)
+
+    # set up recording of current dipole moments. Ditto with regards to
+    # `cell` being set to None
+    current_dipole_moment = CurrentDipoleMoment(cell=None)
 
     # run simulation:
-    SPIKES, OUTPUT, DIPOLEMOMENT = network.simulate(
-        electrode=electrode,
+    SPIKES = network.simulate(
+        probes=[electrode, current_dipole_moment],
         **networkSimulationArguments
     )
 
@@ -436,7 +442,7 @@ if __name__ == '__main__':
         fig.suptitle('extracellular potentials')
         for i, (ax, name, label) in enumerate(zip(axes, ['E', 'I', 'imem'],
                                                   ['E', 'I', 'sum'])):
-            draw_lineplot(ax, decimate(OUTPUT[0][name], q=16),
+            draw_lineplot(ax, decimate(electrode.data[name], q=16),
                           dt=network.dt * 16,
                           T=(200, 1200),
                           scaling_factor=1.,
@@ -458,19 +464,15 @@ if __name__ == '__main__':
         fig.subplots_adjust(wspace=0.45)
         fig.suptitle('current-dipole moments')
         for i, u in enumerate(['x', 'y', 'z']):
-            for j, label in enumerate(['E', 'I', 'sum']):
-                t = np.arange(DIPOLEMOMENT.shape[0]) * network.dt
+            for j, (name, label) in enumerate(zip(['E', 'I', 'imem'],
+                                                  ['E', 'I', 'sum'])):
+                t = np.arange(current_dipole_moment.data.shape[1]) * network.dt
                 inds = (t >= 200) & (t <= 1200)
-                if label != 'sum':
-                    axes[i, j].plot(t[inds][::16],
-                                    decimate(DIPOLEMOMENT[label][inds, i],
-                                             q=16),
-                                    'C{}'.format(j))
-                else:
-                    axes[i, j].plot(t[inds][::16],
-                                    decimate(DIPOLEMOMENT['E'][inds, i] +
-                                             DIPOLEMOMENT['I'][inds, i], q=16),
-                                    'C{}'.format(j))
+                axes[i, j].plot(
+                    t[inds][::16],
+                    decimate(current_dipole_moment.data[name][i, inds],
+                             q=16),
+                    'C{}'.format(j))
 
                 if j == 0:
                     axes[i, j].set_ylabel(r'$\mathbf{p}\cdot\mathbf{e}_{' +
@@ -493,14 +495,12 @@ if __name__ == '__main__':
     for i, (name, pop) in enumerate(network.populations.items()):
         for cell in pop.cells:
             c = 'C0' if name == 'E' else 'C1'
-            ax.plot([cell.xstart[0], cell.xend[0]],
-                    [cell.ystart[0], cell.yend[0]],
-                    [cell.zstart[0], cell.zend[0]], c,
-                    lw=5, zorder=-cell.xmid[0] - cell.ymid[0])
-            ax.plot([cell.xstart[1], cell.xend[-1]],
-                    [cell.ystart[1], cell.yend[-1]],
-                    [cell.zstart[1], cell.zend[-1]], c,
-                    lw=0.5, zorder=-cell.xmid[0] - cell.ymid[0])
+            ax.plot(cell.x[0], cell.y[0], cell.z[0], c,
+                    lw=5, zorder=-cell.x[0].mean() - cell.y[0].mean())
+            ax.plot([cell.x[1, 0], cell.x[-1, -1]],
+                    [cell.y[1, 0], cell.y[-1, -1]],
+                    [cell.z[1, 0], cell.z[-1, -1]], c,
+                    lw=0.5, zorder=-cell.x[0].mean() - cell.y[0].mean())
     ax.set_xlabel(r'$x$ ($\mu$m)')
     ax.set_ylabel(r'$y$ ($\mu$m)')
     ax.set_zlabel(r'$z$ ($\mu$m)')
