@@ -1236,7 +1236,8 @@ class Network(object):
         rtol: float
             relative tolerance with CVode for variable time-step method
         to_memory: bool
-            Boolean flag for computing extracellular potentials, default is True.
+            Boolean flag for computing extracellular potentials,
+            default is True.
             If True, the corresponding <probe>.data attribute will be set.
         to_file: bool or None
             Boolean flag for computing extracellular potentials to file
@@ -1248,17 +1249,17 @@ class Network(object):
             "output_RANK_{:03d}.h5". The output is written per RANK, and the
             RANK # will be inserted into the corresponding file name.
         use_ipas: bool
-            if True, compute the contribution to extracellular potentials across
-            the passive leak channels embedded in the cells membranes summed over
-            populations
-        use_icap: bool
-            if True, compute the contribution to extracellular potentials across
-            the membrane capacitance embedded in the cells membranes summed over
-            populations
-        use_isyn: bool
-            if True, compute the contribution to extracellular potentials across
-            the excitatory and inhibitory synapses embedded in the cells membranes
+            if True, compute the contribution to extracellular potentials
+            across the passive leak channels embedded in the cells membranes
             summed over populations
+        use_icap: bool
+            if True, compute the contribution to extracellular potentials
+            across the membrane capacitance embedded in the cells membranes
+            summed over populations
+        use_isyn: bool
+            if True, compute the contribution to extracellular potentials
+            across the excitatory and inhibitory synapses embedded in the cells
+            membranes summed over populations
         rec_pop_contributions: bool
             if True, compute and return single-population contributions to the
             extracellular potential during each time step of the simulation
@@ -1338,11 +1339,13 @@ class Network(object):
         for name in self.population_names:
             cells += self.populations[name].cells
 
-        # load spike times from NetCon, only needed if LFPy.Synapse class is used
+        # load spike times from NetCon, only needed if LFPy.Synapse class
+        # is used
         for cell in cells:
             cell._loadspikes()
 
-        # define data type for structured arrays dependent on the boolean arguments
+        # define data type for structured arrays dependent on the boolean
+        # arguments
         dtype = [('imem', np.float)]
         if use_ipas:
             dtype += [('ipas', np.float)]
@@ -1382,7 +1385,8 @@ class Network(object):
                     i += 1
 
             # create groups
-            for i, (name, probe, M) in enumerate(zip(names, probes, transforms)):
+            for i, (name, probe, M) in enumerate(zip(names, probes,
+                                                     transforms)):
                 # can't do it this way until h5py issue #740
                 # (https://github.com/h5py/h5py/issues/740) is fixed:
                 # outputfile['{}'.format(name)] = np.zeros((M.shape[0],
@@ -1398,7 +1402,8 @@ class Network(object):
         imem = np.zeros(network_dummycell.totnsegs, dtype=dtype)
 
         def get_imem(imem):
-            '''helper function to gather currents across all cells on this RANK'''
+            '''helper function to gather currents across all cells
+            on this RANK'''
             i = 0
             totnsegs = 0
             if use_isyn:
