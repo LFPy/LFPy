@@ -51,59 +51,6 @@ np.random.seed(GLOBALSEED + RANK)
 ##########################################################################
 
 
-def decimate(x, q=10, n=4, k=0.8, filterfun=ss.cheby1):
-    """
-    scipy.signal.decimate like downsampling using filtfilt instead of lfilter,
-    and filter coeffs from butterworth or chebyshev type 1.
-
-    Parameters
-    ----------
-    x : ndarray
-        Array to be downsampled along last axis.
-    q : int
-        Downsampling factor.
-    n : int
-        Filter order.
-    k : float
-        Aliasing filter critical frequency Wn will be set as Wn=k/q.
-    filterfun : function
-        `scipy.signal.filter_design.cheby1` or
-        `scipy.signal.filter_design.butter` function
-
-    Returns
-    -------
-    ndarray
-        Downsampled signal.
-
-    """
-    if not isinstance(q, int):
-        raise TypeError("q must be an integer")
-
-    if n is None:
-        n = 1
-
-    if filterfun == ss.butter:
-        b, a = filterfun(n, k / q)
-    elif filterfun == ss.cheby1:
-        b, a = filterfun(n, 0.05, k / q)
-    else:
-        raise Exception('only ss.butter or ss.cheby1 supported')
-
-    try:
-        y = ss.filtfilt(b, a, x)
-    except BaseException:
-        # Multidim array can only be processed at once for scipy >= 0.9.0
-        y = []
-        for data in x:
-            y.append(ss.filtfilt(b, a, data))
-        y = np.array(y)
-
-    try:
-        return y[:, ::q]
-    except BaseException:
-        return y[::q]
-
-
 def remove_axis_junk(ax, lines=['right', 'top']):
     """remove chosen lines from plotting axis"""
     for loc, spine in ax.spines.items():
@@ -399,7 +346,8 @@ if __name__ == '__main__':
         fig = plt.figure()
         gs = GridSpec(5, 1)
         ax = fig.add_subplot(gs[:4])
-        draw_lineplot(ax, decimate(np.array(somavs)[0], q=16),
+        draw_lineplot(ax,
+                      ss.decimate(np.array(somavs)[0], q=16, zero_phase=True),
                       dt=network.dt * 16,
                       T=(200, 1200),
                       scaling_factor=1.,
@@ -418,7 +366,8 @@ if __name__ == '__main__':
         ax.set_xlabel('')
 
         ax = fig.add_subplot(gs[4])
-        draw_lineplot(ax, decimate(np.array(somavs)[1], q=16),
+        draw_lineplot(ax,
+                      ss.decimate(np.array(somavs)[1], q=16, zero_phase=True),
                       dt=network.dt * 16,
                       T=(200, 1200),
                       scaling_factor=1.,
@@ -442,7 +391,9 @@ if __name__ == '__main__':
         fig.suptitle('extracellular potentials')
         for i, (ax, name, label) in enumerate(zip(axes, ['E', 'I', 'imem'],
                                                   ['E', 'I', 'sum'])):
-            draw_lineplot(ax, decimate(electrode.data[name], q=16),
+            draw_lineplot(ax,
+                          ss.decimate(electrode.data[name], q=16,
+                                      zero_phase=True),
                           dt=network.dt * 16,
                           T=(200, 1200),
                           scaling_factor=1.,
@@ -470,8 +421,8 @@ if __name__ == '__main__':
                 inds = (t >= 200) & (t <= 1200)
                 axes[i, j].plot(
                     t[inds][::16],
-                    decimate(current_dipole_moment.data[name][i, inds],
-                             q=16),
+                    ss.decimate(current_dipole_moment.data[name][i, inds],
+                                q=16, zero_phase=True),
                     'C{}'.format(j))
 
                 if j == 0:
