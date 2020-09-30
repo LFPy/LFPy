@@ -17,24 +17,24 @@ GNU General Public License for more details.
 
 import numpy as np
 import scipy.signal as ss
+import pickle
+
 
 def load(filename):
     """Generic loading of cPickled objects from file"""
-    import pickle
-    
-    filen = open(filename,'rb')
-    obj = pickle.load(filen)
-    filen.close()
+    with open(filename, 'rb') as f:
+        obj = pickle.load(f)
     return obj
+
 
 def noise_brown(ncols, nrows=1, weight=1., filter=None, filterargs=None):
     """Return 1/f^2 noise of shape(nrows, ncols obtained by taking
     the cumulative sum of gaussian white noise, with rms weight.
-    
+
     If filter is not None, this function will apply
     the filter coefficients obtained
     by:
-        
+
     >>> b, a = filter(**filterargs)
     >>> signal = scipy.signal.lfilter(b, a, signal)
     """
@@ -46,14 +46,13 @@ def noise_brown(ncols, nrows=1, weight=1., filter=None, filterargs=None):
 
     if filter is not None:
         coeff_b, coeff_a = list(filter(**filterargs))
-    
-    noise = np.zeros((nrows, ncols))    
+
+    noise = np.zeros((nrows, ncols))
     for i in range(nrows):
-        signal = np.random.normal(size=ncols+10000).cumsum()
+        signal = np.random.normal(size=ncols + 10000).cumsum()
         if filter is not None:
             signal = ss.lfilter(coeff_b, coeff_a, signal)
         noise[i, :] = signal[10000:]
         noise[i, :] /= rms_flat(noise[i, :])
         noise[i, :] *= weight
     return noise
-

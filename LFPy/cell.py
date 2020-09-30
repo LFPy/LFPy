@@ -11,8 +11,6 @@ but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 """
-
-
 import os
 import neuron
 import numpy as np
@@ -21,7 +19,7 @@ import sys
 import posixpath
 from warnings import warn
 import pickle
-from .run_simulation import _run_simulation_with_electrode
+from .run_simulation import _run_simulation_with_probes
 from .run_simulation import _collect_geometry_neuron
 from .alias_method import alias_method
 
@@ -29,10 +27,11 @@ from .alias_method import alias_method
 try:
     try:
         assert(neuron.version >= '7.6.4')
-    except:
-        warn('LFPy could not read NEURON version info. v7.6.4 or newer required')
+    except AttributeError:
+        warn('Could not read NEURON version info. v7.6.4 or newer required')
 except AssertionError:
-    warn('LFPy requires NEURON v7.6.4 or newer. Found v{}'.format(neuron.version))
+    warn('LFPy requires NEURON v7.6.4 or newer. Found v{}'.format(
+        neuron.version))
 
 
 class Cell(object):
@@ -40,54 +39,54 @@ class Cell(object):
     The main cell class used in LFPy.
     Parameters
     ----------
-    morphology : str or neuron.h.SectionList
+    morphology: str or neuron.h.SectionList
         File path of morphology on format that NEURON can understand (w. file
         ending .hoc, .asc, .swc or .xml), or neuron.h.SectionList instance
         filled with references to neuron.h.Section instances.
-    v_init : float
+    v_init: float
         Initial membrane potential. Defaults to -70 mV.
-    Ra : float or None
+    Ra: float or None
         Axial resistance. Defaults to None (unit Ohm*cm)
-    cm : float
+    cm: float
         Membrane capacitance. Defaults to None (unit uF/cm2)
-    passive : bool
+    passive: bool
         Passive mechanisms are initialized if True. Defaults to False
-    passive_parameters : dict
+    passive_parameters: dict
         parameter dictionary with values for the passive membrane mechanism in
         NEURON ('pas'). The dictionary must contain keys 'g_pas' [S/cm^2] and
         'e_pas' [mV], like the default:
         passive_parameters=dict(g_pas=0.001, e_pas=-70)
-    extracellular : bool
+    extracellular: bool
         Switch for NEURON's extracellular mechanism. Defaults to False
-    dt : float
+    dt: float
         simulation timestep. Defaults to 2^-4 ms
-    tstart : float
+    tstart: float
         Initialization time for simulation <= 0 ms. Defaults to 0.
-    tstop : float
+    tstop: float
         Stop time for simulation > 0 ms. Defaults to 100 ms.
-    nsegs_method : 'lambda100' or 'lambda_f' or 'fixed_length' or None
+    nsegs_method: 'lambda100' or 'lambda_f' or 'fixed_length' or None
         nseg rule, used by NEURON to determine number of compartments.
         Defaults to 'lambda100'
-    max_nsegs_length : float or None
+    max_nsegs_length: float or None
         Maximum segment length for method 'fixed_length'. Defaults to None
-    lambda_f : int
+    lambda_f: int
         AC frequency for method 'lambda_f'. Defaults to 100
-    d_lambda : float
+    d_lambda: float
         Parameter for d_lambda rule. Defaults to 0.1
-    delete_sections : bool
+    delete_sections: bool
         Delete pre-existing section-references. Defaults to True
-    custom_code : list or None
+    custom_code: list or None
         List of model-specific code files ([.py/.hoc]). Defaults to None
-    custom_fun : list or None
+    custom_fun: list or None
         List of model-specific functions with args. Defaults to None
-    custom_fun_args : list or None
+    custom_fun_args: list or None
         List of args passed to custom_fun functions. Defaults to None
-    pt3d : bool
+    pt3d: bool
         Use pt3d-info of the cell geometries switch. Defaults to False
-    celsius : float or None
+    celsius: float or None
         Temperature in celsius. If nothing is specified here
         or in custom code it is 6.3 celcius
-    verbose : bool
+    verbose: bool
         Verbose output switch. Defaults to False
     Examples
     --------
@@ -96,122 +95,119 @@ class Cell(object):
     >>> import os
     >>> import LFPy
     >>> cellParameters = {
-    >>>     'morphology' : os.path.join('examples', 'morphologies', 'L5_Mainen96_LFPy.hoc'),
-    >>>     'v_init' : -65.,
-    >>>     'cm' : 1.0,
-    >>>     'Ra' : 150,
-    >>>     'passive' : True,
-    >>>     'passive_parameters' : {'g_pas' : 1./30000, 'e_pas' : -65},
-    >>>     'dt' : 2**-3,
-    >>>     'tstart' : 0,
-    >>>     'tstop' : 50,
+    >>>     'morphology': os.path.join('examples', 'morphologies',
+    >>>                                'L5_Mainen96_LFPy.hoc'),
+    >>>     'v_init': -65.,
+    >>>     'cm': 1.0,
+    >>>     'Ra': 150,
+    >>>     'passive': True,
+    >>>     'passive_parameters': {'g_pas': 1./30000, 'e_pas': -65},
+    >>>     'dt': 2**-3,
+    >>>     'tstart': 0,
+    >>>     'tstop': 50,
     >>> }
     >>> cell = LFPy.Cell(**cellParameters)
     >>> cell.simulate()
     >>> print(cell.somav)
     """
+
     def __init__(self, morphology,
-                    v_init=-70.,
-                    Ra=None,
-                    cm=None,
-                    passive=False,
-                    passive_parameters = dict(
-                        g_pas=0.001,
-                        e_pas=-70.),
-                    extracellular=False,
-                    tstart=0.,
-                    tstop=100.,
-                    dt = 2**-4,
-                    nsegs_method='lambda100',
-                    lambda_f = 100,
-                    d_lambda = 0.1,
-                    max_nsegs_length=None,
-                    delete_sections = True,
-                    custom_code=None,
-                    custom_fun=None,
-                    custom_fun_args=None,
-                    pt3d=False,
-                    celsius=None,
-                    verbose=False,
-                    **kwargs):
+                 v_init=-70.,
+                 Ra=None,
+                 cm=None,
+                 passive=False,
+                 passive_parameters=dict(
+                     g_pas=0.001,
+                     e_pas=-70.),
+                 extracellular=False,
+                 tstart=0.,
+                 tstop=100.,
+                 dt=2**-4,
+                 nsegs_method='lambda100',
+                 lambda_f=100,
+                 d_lambda=0.1,
+                 max_nsegs_length=None,
+                 delete_sections=True,
+                 custom_code=None,
+                 custom_fun=None,
+                 custom_fun_args=None,
+                 pt3d=False,
+                 celsius=None,
+                 verbose=False,
+                 **kwargs):
         """
         Initialization of the Cell object.
         """
         self.verbose = verbose
         self.pt3d = pt3d
 
-        # raise Exceptions on deprecated input arguments
-        for key in ['timeres_NEURON', 'timeres_python']:
-            if key in kwargs.keys():
-                raise DeprecationWarning('cell parameter {} is deprecated. Use dt=float instead'.format(key))
-        if 'tstartms' in kwargs.keys():
-            raise DeprecationWarning('cell parameter tstartms is deprecated. Use tstart=float instead')
-        if 'tstopms' in kwargs.keys():
-            raise DeprecationWarning('cell parameter tstopms is deprecated. Use tstop=float instead')
-        if 'rm' in kwargs.keys():
-            raise DeprecationWarning('Cell parameter rm is deprecated, set parameter passive_parameters=dict(g_pas=1/rm, e_pas=e_pas) instead')
-        if 'e_pas' in kwargs.keys():
-            raise DeprecationWarning('Cell parameter e_pas is deprecated, set parameter passive_parameters=dict(g_pas=1/rm, e_pas=e_pas) instead')
-
         # check if there are un-used keyword arguments present in kwargs
         for key, value in kwargs.items():
-            raise ValueError('The keyword and argument {}={} is not valid input to class LFPy.Cell'.format(key, value))
+            raise ValueError('keyword/argument {}={}'.format(key, value),
+                             'is invalid input to class LFPy.Cell')
 
         if passive:
             try:
-                assert(type(passive_parameters) is dict)
+                assert(isinstance(passive_parameters, dict))
             except AssertionError:
                 raise AssertionError('passive_parameters must be a dictionary')
             for key in ['g_pas', 'e_pas']:
                 try:
                     assert(key in passive_parameters.keys())
                 except AssertionError:
-                    raise AssertionError('key {} not found in passive_parameters'.format(key))
+                    raise AssertionError(
+                        'key {} not found in passive_parameters'.format(key))
 
         if not hasattr(neuron.h, 'd_lambda'):
-            neuron.h.load_file('stdlib.hoc')    #NEURON std. library
-            neuron.h.load_file('import3d.hoc')  #import 3D morphology lib
+            neuron.h.load_file('stdlib.hoc')  # NEURON std. library
+            neuron.h.load_file('import3d.hoc')  # import 3D morphology lib
 
         if delete_sections:
             if not isinstance(morphology, type(neuron.h.SectionList)):
                 if self.verbose:
                     print('%s existing sections deleted from memory' %
-                        sum(1 for sec in neuron.h.allsec()))
+                          sum(1 for sec in neuron.h.allsec()))
                 neuron.h('forall delete_section()')
         else:
             if not isinstance(morphology, type(neuron.h.SectionList)):
-                mssg = "%s sections detected! " % sum(1 for sec in neuron.h.allsec()) + \
-                       "Consider setting 'delete_sections=True'"
+                mssg = "%s sections detected! " % sum(
+                    1 for sec in neuron.h.allsec()) \
+                    + "Consider setting 'delete_sections=True'"
                 warn(mssg)
 
-        #load morphology
+        # load morphology
         try:
             assert(morphology is not None)
         except AssertionError:
-            raise AssertionError('deprecated keyword argument morphology==None, value must be a file path or neuron.h.SectionList instance with neuron.h.Section instances')
-        if "win32" in sys.platform and type(morphology) is str:
+            raise AssertionError(
+                'deprecated keyword argument morphology==None, value must be '
+                'a file path or neuron.h.SectionList instance with '
+                'neuron.h.Section instances')
+        if "win32" in sys.platform and isinstance(morphology, str):
             # fix Path on windows
             morphology = morphology.replace(os.sep, posixpath.sep)
         self.morphology = morphology
-        if type(self.morphology) is str:
+        if isinstance(self.morphology, str):
             if os.path.isfile(self.morphology):
                 self._load_geometry()
             else:
                 raise Exception('non-existent file %s' % self.morphology)
         else:
             try:
-                assert(type(self.morphology) is type(neuron.h.SectionList))
+                assert(isinstance(self.morphology, type(neuron.h.SectionList)))
                 # #will try to import top level cell and create sectionlist,
                 # #in case there were no morphology file loaded
             except AssertionError:
-                raise Exception("Could not recognize Cell keyword argument morphology as neuron.h.SectionList instance")
+                raise Exception(
+                    "Could not recognize Cell keyword argument morphology as "
+                    "neuron.h.SectionList instance")
 
             # instantiate 3D geometry of all sections
             neuron.h.define_shape()
             # set some additional attributes
             self._create_sectionlists()
 
-        #Some parameters and lists initialised
+        # Some parameters and lists initialised
         try:
             assert(tstart <= 0)
         except AssertionError:
@@ -222,10 +218,11 @@ class Cell(object):
         except AssertionError:
             if tstart == 0.:
                 if self.verbose:
-                    print('int(1./dt) not factorizable in base 2. '
-                          'cell.tvec errors may occur, continuing initialization.')
+                    print('int(1./dt) not factorizable in base 2. cell.tvec '
+                          'errors may occur, continuing initialization.')
             elif tstart < 0:
-                raise AssertionError('int(1./dt) must be factorizable in base 2 if tstart < 0.')
+                raise AssertionError(
+                    'int(1./dt) must be factorizable in base 2 if tstart < 0.')
 
         self.dt = dt
 
@@ -254,11 +251,11 @@ class Cell(object):
             if self.verbose:
                 print('No passive properties added')
 
-        #run user specified code and functions if argument given
+        # run user specified code and functions if argument given
         if custom_code is not None or custom_fun is not None:
             self._run_custom_codes(custom_code, custom_fun, custom_fun_args)
 
-        #Insert extracellular mech on all segments
+        # Insert extracellular mech on all segments
         self.extracellular = extracellular
         if self.extracellular:
             self._set_extracellular()
@@ -266,22 +263,22 @@ class Cell(object):
             if self.verbose:
                 print("no extracellular mechanism inserted")
 
-        #set number of segments accd to rule, and calculate the number
+        # set number of segments accd to rule, and calculate the number
         self._set_nsegs(nsegs_method, lambda_f, d_lambda, max_nsegs_length)
         self.totnsegs = self._calc_totnsegs()
         if self.verbose:
             print("Total number of segments: %i" % self.totnsegs)
 
-        #extract pt3d info from NEURON, and set these with the same rotation
-        #and position in space as in our simulations, assuming RH rule, which
-        #NEURON do NOT use in shape plot
+        # extract pt3d info from NEURON, and set these with the same rotation
+        # and position in space as in our simulations, assuming RH rule, which
+        # NEURON do NOT use in shape plot
         if self.pt3d:
             self.x3d, self.y3d, self.z3d, self.diam3d = self._collect_pt3d()
 
-        #Gather geometry, set position and rotation of morphology
+        # Gather geometry, set position and rotation of morphology
         if self.pt3d:
             self._update_pt3d()
-        else: # self._update_pt3d itself makes a call to self._collect_geometry()
+        else:  # self._update_pt3d makes a call to self._collect_geometry()
             self._collect_geometry()
         if hasattr(self, 'somapos'):
             self.set_pos()
@@ -292,7 +289,7 @@ class Cell(object):
 
         if celsius is not None:
             if neuron.h.celsius != 6.3:
-                print("Overwriting custom temperature of %1.2f. New temperature is %1.2f"
+                print("Changing temperature %1.2f to %1.2f"
                       % (neuron.h.celsius, celsius))
             neuron.h.celsius = celsius
 
@@ -316,7 +313,7 @@ class Cell(object):
 
     def _load_geometry(self):
         """Load the morphology-file in NEURON"""
-        #import the morphology, try and determine format
+        # import the morphology, try and determine format
         fileEnding = self.morphology.split('.')[-1]
         if fileEnding == 'hoc' or fileEnding == 'HOC':
             neuron.h.load_file(1, self.morphology)
@@ -331,23 +328,23 @@ class Cell(object):
             elif fileEnding == 'xml' or fileEnding == 'XML':
                 Import = neuron.h.Import3d_MorphML()
             else:
-                raise ValueError('%s is not a recognised morphology file format!'
-                                 ).with_traceback(
-                    'Should be either .hoc, .asc, .swc, .xml!' % self.morphology)
+                raise ValueError('%s not a recognised morphology file format'
+                                 % self.morphology).with_traceback(
+                    'Should be either .hoc, .asc, .swc, .xml')
 
-            #assuming now that morphologies file is the correct format
+            # assuming now that morphologies file is the correct format
             try:
                 Import.input(self.morphology)
-            except:
+            except BaseException:
                 if not hasattr(neuron, 'neuroml'):
-                    raise Exception('Can not import, try and copy the ' +
-                    'nrn/share/lib/python/neuron/neuroml ' +
-                    'folder into %s' % neuron.__path__[0])
+                    raise Exception('Can not import, try and copy the '
+                                    'nrn/share/lib/python/neuron/neuroml '
+                                    'folder into %s' % neuron.__path__[0])
                 else:
                     raise Exception('something wrong with file, see output')
             try:
                 imprt = neuron.h.Import3d_GUI(Import, 0)
-            except:
+            except BaseException:
                 raise Exception('See output, try to correct the file')
             imprt.instantiate(neuron.h.this)
 
@@ -365,19 +362,19 @@ class Cell(object):
                     try:
                         neuron.h.xopen(code)
                     except RuntimeError:
-                        ERRMSG = '\n'.join(['',
-                            'Could not load custom model code (%s)' %code,
-                            'while creating a Cell object.',
-                            'One possible cause is the NEURON mechanisms have',
-                            'not been compiled, ',
-                            'try running nrnivmodl or mknrndll (Windows) in ',
-                            'the mod-file-containing folder. ',])
+                        ERRMSG = '\n'.join(
+                            [
+                                '',
+                                'Could not load custom model code (%s)' % code,
+                                'while creating a Cell object.',
+                                'One possible cause is NEURON mechanisms have',
+                                'not been compiled, ',
+                                'try running nrnivmodl or mknrndll (Windows) ',
+                                'in the .mod-file containing folder. ',
+                            ])
                         raise Exception(ERRMSG)
                 elif code.split('.')[-1] == 'py':
-                    if sys.version >= "3.4":
-                        exec(code, globals())
-                    else:
-                        exec(code)
+                    exec(code)
                 else:
                     raise Exception('%s not a .hoc- nor .py-file' % code)
 
@@ -388,10 +385,9 @@ class Cell(object):
                 fun(**custom_fun_args[i])
                 i += 1
 
-        #recreate sectionlists in case something changed
+        # recreate sectionlists in case something changed
         neuron.h.define_shape()
         self._create_sectionlists()
-
 
     def _set_nsegs(self, nsegs_method, lambda_f, d_lambda, max_nsegs_length):
         """Set number of segments per section according to the lambda-rule,
@@ -409,10 +405,10 @@ class Cell(object):
     def _get_rotation(self):
         """Check if there exists a corresponding file
         with rotation angles"""
-        if type(self.morphology) is str:
+        if isinstance(self.morphology, str):
             base = os.path.splitext(self.morphology)[0]
-            if os.path.isfile(base+'.rot'):
-                rotation_file = base+'.rot'
+            if os.path.isfile(base + '.rot'):
+                rotation_file = base + '.rot'
                 rotation_data = open(rotation_file)
                 rotation = {}
                 for line in rotation_data:
@@ -428,7 +424,7 @@ class Cell(object):
 
     def _create_sectionlists(self):
         """Create section lists for different kinds of sections"""
-        #list with all sections
+        # list with all sections
         self.allsecnames = []
         if not isinstance(self.morphology, type(neuron.h.SectionList)):
             self.allseclist = neuron.h.SectionList()
@@ -440,7 +436,7 @@ class Cell(object):
             for sec in neuron.h.allsec():
                 self.allsecnames.append(sec.name())
 
-        #list of soma sections, assuming it is named on the format "soma*"
+        # list of soma sections, assuming it is named on the format "soma*"
         self.nsomasec = 0
         self.somalist = neuron.h.SectionList()
         for sec in neuron.h.allsec():
@@ -456,7 +452,7 @@ class Cell(object):
             return np.ones(self.totnsegs, dtype=bool)
         else:
             idxvec = np.zeros(self.totnsegs, dtype=bool)
-            #get sectionnames from seclist
+            # get sectionnames from seclist
             seclistnames = []
             for sec in seclist:
                 seclistnames.append(sec.name())
@@ -476,15 +472,18 @@ class Cell(object):
     def _set_nsegs_lambda_f(self, frequency=100, d_lambda=0.1):
         """Set the number of segments for section according to the
         d_lambda-rule for a given input frequency
+
         Parameters
         ----------
-        frequency : float
+        frequency: float
             frequency at which AC length constant is computed
-        d_lambda : float
+        d_lambda: float
         """
-        neuron.h.pop_section() # dirty fix: https://www.neuron.yale.edu/neuron/static/py_doc/modelspec/programmatic/topology/secspec.html#default-section
+        neuron.h.pop_section()  # dirty fix, see NEURON doc
         for sec in self.allseclist:
-            sec.nseg = int((sec.L / (d_lambda*neuron.h.lambda_f(frequency, sec=sec)) + .9) / 2)*2 + 1
+            sec.nseg = int(
+                (sec.L / (d_lambda * neuron.h.lambda_f(frequency, sec=sec))
+                 + .9) / 2) * 2 + 1
         if self.verbose:
             print("set nsegs using lambda-rule with frequency %i." % frequency)
 
@@ -541,15 +540,15 @@ class Cell(object):
         """Insert synapse on cell segment
         Parameters
         ----------
-        idx : int
+        idx: int
             Index of compartment where synapse is inserted
-        syntype : str
+        syntype: str
             Type of synapse. Built-in types in NEURON: ExpSyn, Exp2Syn
-        record_current : bool
+        record_current: bool
             If True, record synapse current
-        record_potential : bool
+        record_potential: bool
             If True, record postsynaptic potential seen by the synapse
-        weight : float
+        weight: float
             Strength of synapse
         kwargs
             arguments passed on from class Synapse
@@ -577,11 +576,12 @@ class Cell(object):
                     for param in list(kwargs.keys()):
                         try:
                             setattr(syn, param, kwargs[param])
-                        except:
+                        except BaseException:
                             pass
                     self.synlist.append(syn)
 
-                    #create NetStim (generator) and NetCon (connection) objects
+                    # create NetStim (generator) and NetCon (connection)
+                    # objects
                     self.netstimlist.append(neuron.h.NetStim(0.5))
                     self.netstimlist[-1].number = 0
 
@@ -607,12 +607,12 @@ class Cell(object):
         idx on cell object
         Parameters
         ----------
-        idx : int
+        idx: int
             Index of compartment where point process is inserted
-        pptype : str
+        pptype: str
             Type of pointprocess. Examples: SEClamp, VClamp,
             IClamp, SinIClamp, ChirpIClamp
-        record_current : bool
+        record_current: bool
             Decides if current is stored
         kwargs
             Parameters passed on from class StimIntElectrode
@@ -638,7 +638,8 @@ class Cell(object):
                         try:
                             exec('stim.{} = {}'.format(param, kwargs[param]))
                         except SyntaxError:
-                            ERRMSG = ''.join(['',
+                            ERRMSG = ''.join([
+                                '',
                                 'Point process type "{0}" might not '.format(
                                     pptype),
                                 'recognize attribute "{0}". '.format(param),
@@ -664,64 +665,55 @@ class Cell(object):
 
     def _collect_geometry(self):
         """Collects x, y, z-coordinates from NEURON"""
-        #None-type some attributes if they do not exis:
-        if not hasattr(self, 'xstart'):
-            self.xstart = None
-            self.ystart = None
-            self.zstart = None
-            self.xend = None
-            self.yend = None
-            self.zend = None
+        # None-type some attributes if they do not exist:
+        if not hasattr(self, 'x'):
+            self.x = None
+            self.y = None
+            self.z = None
             self.area = None
-            self.diam = None
+            self.d = None
             self.length = None
 
         _collect_geometry_neuron(self)
-        self._calc_midpoints()
 
         self.somaidx = self.get_idx(section='soma')
 
         if self.somaidx.size > 1:
-            xmids = self.xmid[self.somaidx]
-            ymids = self.ymid[self.somaidx]
-            zmids = self.zmid[self.somaidx]
+            xmids = self.x[self.somaidx].mean(axis=-1)
+            ymids = self.y[self.somaidx].mean(axis=-1)
+            zmids = self.z[self.somaidx].mean(axis=-1)
             self.somapos = np.zeros(3)
             self.somapos[0] = xmids.mean()
             self.somapos[1] = ymids.mean()
             self.somapos[2] = zmids.mean()
         elif self.somaidx.size == 1:
             self.somapos = np.zeros(3)
-            self.somapos[0] = self.xmid[self.somaidx]
-            self.somapos[1] = self.ymid[self.somaidx]
-            self.somapos[2] = self.zmid[self.somaidx]
+            self.somapos[0] = self.x[self.somaidx].mean()
+            self.somapos[1] = self.y[self.somaidx].mean()
+            self.somapos[2] = self.z[self.somaidx].mean()
         elif self.somaidx.size == 0:
             if self.verbose:
                 print('There is no soma!')
                 print('using first segment as root point')
             self.somaidx = np.array([0])
             self.somapos = np.zeros(3)
-            self.somapos[0] = self.xmid[self.somaidx]
-            self.somapos[1] = self.ymid[self.somaidx]
-            self.somapos[2] = self.zmid[self.somaidx]
+            self.somapos[0] = self.x[self.somaidx].mean()
+            self.somapos[1] = self.y[self.somaidx].mean()
+            self.somapos[2] = self.z[self.somaidx].mean()
         else:
             raise Exception('Huh?!')
 
-    def _calc_midpoints(self):
-        """Calculate midpoints of each segment"""
-        self.xmid = .5*(self.xstart+self.xend).flatten()
-        self.ymid = .5*(self.ystart+self.yend).flatten()
-        self.zmid = .5*(self.zstart+self.zend).flatten()
-
     def get_idx(self, section='allsec', z_min=-np.inf, z_max=np.inf):
-        """Returns compartment idx of segments from sections with names that match
+        """
+        Returns compartment idx of segments from sections with names that match
         the pattern defined in input section on interval [z_min, z_max].
         Parameters
         ----------
-        section : str
+        section: str
             Any entry in cell.allsecnames or just 'allsec'.
-        z_min : float
+        z_min: float
             Depth filter. Specify minimum z-position
-        z_max : float
+        z_max: float
             Depth filter. Specify maximum z-position
         Examples
         --------
@@ -735,11 +727,11 @@ class Cell(object):
             seclist = neuron.h.allsec()
         else:
             seclist = neuron.h.SectionList()
-            if type(section) == str:
+            if isinstance(section, str):
                 for sec in self.allseclist:
                     if sec.name().find(section) >= 0:
                         seclist.append(sec=sec)
-            elif type(section) == list:
+            elif isinstance(section, list):
                 for secname in section:
                     for sec in self.allseclist:
                         if sec.name().find(secname) >= 0:
@@ -749,7 +741,13 @@ class Cell(object):
                     print('%s did not match any section name' % str(section))
 
         idx = self._get_idx(seclist)
-        sel_z_idx = (self.zmid[idx] > z_min) & (self.zmid[idx] < z_max)
+        sel_z_idx = (
+            self.z[idx].mean(
+                axis=-
+                1) > z_min) & (
+            self.z[idx].mean(
+                axis=-
+                1) < z_max)
         return np.arange(self.totnsegs)[idx][sel_z_idx]
 
     def get_closest_idx(self, x=0., y=0., z=0., section='allsec'):
@@ -767,9 +765,9 @@ class Cell(object):
             String matching a section-name. Defaults to 'allsec'.
         """
         idx = self.get_idx(section)
-        dist = ((self.xmid[idx] - x)**2 +
-                (self.ymid[idx] - y)**2 +
-                (self.zmid[idx] - z)**2)
+        dist = ((self.x[idx].mean(axis=-1) - x)**2 +
+                (self.y[idx].mean(axis=-1) - y)**2 +
+                (self.z[idx].mean(axis=-1) - z)**2)
         return idx[np.argmin(dist)]
 
     def get_rand_idx_area_norm(self, section='allsec', nidx=1,
@@ -779,13 +777,13 @@ class Cell(object):
         interval [z_min, z_max]
         Parameters
         ----------
-        section : str
+        section: str
             String matching a section-name
-        nidx : int
+        nidx: int
             Number of random indices
-        z_min : float
+        z_min: float
             Depth filter
-        z_max : float
+        z_max: float
             Depth filter
         """
         poss_idx = self.get_idx(section=section, z_min=z_min, z_max=z_max)
@@ -793,13 +791,13 @@ class Cell(object):
             print('nidx < 1, returning empty array')
             return np.array([])
         elif poss_idx.size == 0:
-            print('No possible segment idx match enquire! returning empty array')
+            print('No possible segment idx match quiery - returning '
+                  'empty array')
             return np.array([])
         else:
             area = self.area[poss_idx]
             area /= area.sum()
             return alias_method(poss_idx, area, nidx)
-
 
     def get_rand_idx_area_and_distribution_norm(self, section='allsec', nidx=1,
                                                 z_min=-1E6, z_max=1E6,
@@ -822,15 +820,15 @@ class Cell(object):
             depth filter
         z_max: float
             depth filter
-        fun : function or str, or iterable of function or str
+        fun: function or str, or iterable of function or str
             if function a scipy.stats method, if str, must be method in
             scipy.stats module with the same name (like 'norm'),
             if iterable (list, tuple, numpy.array) of function or str some
             probability distribution in scipy.stats module
-        funargs : dict or iterable
+        funargs: dict or iterable
             iterable (list, tuple, numpy.array) of dict, arguments to fun.pdf
             method (e.g., w. keys 'loc' and 'scale')
-        funweights : None or iterable
+        funweights: None or iterable
             iterable (list, tuple, numpy.array) of floats, scaling of each
             individual fun (i.e., introduces layer specificity)
         Examples
@@ -842,9 +840,8 @@ class Cell(object):
         >>> from os.path import join
         >>> cell = LFPy.Cell(morphology=join('cells', 'cells', 'j4a.hoc'))
         >>> cell.set_rotation(x=4.99, y=-4.33, z=3.14)
-        >>> idx = cell.get_rand_idx_area_and_distribution_norm(nidx=10000,
-                                                               fun=ss.norm,
-                                                               funargs=dict(loc=0, scale=200))
+        >>> idx = cell.get_rand_idx_area_and_distribution_norm(
+            nidx=10000, fun=ss.norm, funargs=dict(loc=0, scale=200))
         >>> bins = np.arange(-30, 120)*10
         >>> plt.hist(cell.zmid[idx], bins=bins, alpha=0.5)
         >>> plt.show()
@@ -854,7 +851,8 @@ class Cell(object):
             print('nidx < 1, returning empty array')
             return np.array([])
         elif poss_idx.size == 0:
-            print('No possible segment idx match enquire! returning empty array')
+            print('No possible segment idx match query - returning '
+                  'empty array')
             return np.array([])
         else:
             p = self.area[poss_idx]
@@ -862,24 +860,26 @@ class Cell(object):
             if type(fun) in [list, tuple, np.ndarray]:
                 assert(type(funargs) in [list, tuple, np.ndarray])
                 assert(type(funweights) in [list, tuple, np.ndarray])
-                assert((len(fun) == len(funargs)) & (len(fun) == len(funweights)))
+                assert((len(fun) == len(funargs)) &
+                       (len(fun) == len(funweights)))
                 mod = np.zeros(poss_idx.shape)
                 for f, args, scl in zip(fun, funargs, funweights):
-                    if type(f) is str and f in dir(scipy.stats):
+                    if isinstance(f, str) and f in dir(scipy.stats):
                         f = getattr(scipy.stats, f)
                     df = f(**args)
-                    mod += df.pdf(x=self.zmid[poss_idx])*scl
+                    mod += df.pdf(x=self.z[poss_idx].mean(axis=-1)) * scl
                 p *= mod
             else:
-                if type(fun) is str and fun in dir(scipy.stats):
+                if isinstance(fun, str) and fun in dir(scipy.stats):
                     fun = getattr(scipy.stats, fun)
                 df = fun(**funargs)
-                p *= df.pdf(x=self.zmid[poss_idx])
+                p *= df.pdf(x=self.z[poss_idx].mean(axis=-1))
             # normalize
             p /= p.sum()
             return alias_method(poss_idx, p, nidx)
 
-    def enable_extracellular_stimulation(self, electrode, t_ext=None, n=1, model='inf'):
+    def enable_extracellular_stimulation(
+            self, electrode, t_ext=None, n=1, model='inf'):
         r"""
         Enable extracellular stimulation with 'extracellular' mechanism.
         Extracellular potentials are computed from the electrode currents
@@ -922,7 +922,7 @@ class Cell(object):
         # access electrode object and append mapping
         if electrode is not None:
             # put electrode argument in list if needed
-            if type(electrode) == list:
+            if isinstance(electrode, list):
                 electrodes = electrode
             else:
                 electrodes = [electrode]
@@ -934,7 +934,9 @@ class Cell(object):
 
         # extracellular stimulation
         if np.any([np.any(el.probe.currents != 0) for el in electrodes]):
-            cell_mid_points = np.array([self.xmid, self.ymid, self.zmid]).T
+            cell_mid_points = np.array([self.x.mean(axis=-1),
+                                        self.y.mean(axis=-1),
+                                        self.z.mean(axis=-1)]).T
             n_tsteps = int(self.tstop / self.dt + 1)
             t_cell = np.arange(n_tsteps) * self.dt
 
@@ -943,9 +945,11 @@ class Cell(object):
                 t_ext = t_cell
                 for electrode in electrodes:
                     assert electrode.probe.currents.shape[1] == len(t_cell), \
-                        "Discrepancy between t_ext and cell simulation time steps. Provide the 't_ext' argument"
+                        "Discrepancy between t_ext and cell simulation time" \
+                        "steps. Provide the 't_ext' argument"
             else:
-                assert len(t_ext) < len(t_cell), "Stimulation time steps are greater than cell simulation steps"
+                assert len(t_ext) < len(t_cell), \
+                    "Stimulation time steps greater than cell simulation steps"
 
             v_ext = np.zeros((self.totnsegs, len(t_ext)))
             for electrode in electrodes:
@@ -964,62 +968,59 @@ class Cell(object):
 
         return v_ext
 
-    def simulate(self, electrode=None, rec_imem=False, rec_vmem=False,
+    def simulate(self, probes=None,
+                 rec_imem=False, rec_vmem=False,
                  rec_ipas=False, rec_icap=False,
-                 rec_current_dipole_moment=False,
-                 rec_variables=[], variable_dt=False, atol=0.001, rtol=0.,
-                 to_memory=True, to_file=False, file_name=None,
-                 dotprodcoeffs=None, **kwargs):
+                 rec_variables=[],
+                 variable_dt=False, atol=0.001, rtol=0.,
+                 to_memory=True,
+                 to_file=False, file_name=None,
+                 **kwargs):
         """
         This is the main function running the simulation of the NEURON model.
         Start NEURON simulation and record variables specified by arguments.
         Parameters
         ----------
-        electrode : :obj: or list, optional
-            Either an LFPy.RecExtElectrode object or a list of such.
-            If supplied, LFPs will be calculated at every time step
-            and accessible as `electrode.LFP`. If a list of objects
-            is given, accessible as `electrode[0].LFP` etc.
-        rec_imem : bool
+        probes: list of :obj:, optional
+            None or list of LFPykit.RecExtElectrode like object instances that
+            each have a public method `get_transformation_matrix` returning
+            a matrix that linearly maps each compartments' transmembrane
+            current to corresponding measurement as
+
+            .. math:: \\mathbf{P} = \\mathbf{M} \\mathbf{I}
+
+        rec_imem: bool
             If true, segment membrane currents will be recorded
             If no electrode argument is given, it is necessary to
-            set rec_imem=True in order to calculate LFP later on.
+            set rec_imem=True in order to make predictions later on.
             Units of (nA).
-        rec_vmem : bool
+        rec_vmem: bool
             Record segment membrane voltages (mV)
-        rec_ipas : bool
+        rec_ipas: bool
             Record passive segment membrane currents (nA)
-        rec_icap : bool
+        rec_icap: bool
             Record capacitive segment membrane currents (nA)
-        rec_current_dipole_moment : bool
-            If True, compute and record current-dipole moment from
-            transmembrane currents as in Linden et al. (2010) J Comput Neurosci,
-            DOI: 10.1007/s10827-010-0245-4. Will set the `LFPy.Cell` attribute
-            `current_dipole_moment` as n_timesteps x 3 `np.ndarray` where the
-            last dimension contains the x,y,z components of the dipole moment.
-        rec_variables : list
-            List of variables to record, i.e arg=['cai', ]
-        variable_dt : bool
-            Use variable timestep in NEURON
-        atol : float
+        rec_variables: list
+            List of segment state variables to record, e.g. arg=['cai', ]
+        variable_dt: bool
+            Use NEURON's variable timestep method
+        atol: float
             Absolute local error tolerance for NEURON variable timestep method
-        rtol : float
+        rtol: float
             Relative local error tolerance for NEURON variable timestep method
-        to_memory : bool
-            Only valid with electrode, store lfp in -> electrode.LFP
-        to_file : bool
-            Only valid with electrode, save LFPs in hdf5 file format
-        file_name : str
+        to_memory: bool
+            Only valid with probes=[:obj:], store measurements as `:obj:.data`
+        to_file: bool
+            Only valid with probes, save simulated data in hdf5 file format
+        file_name: str
             Name of hdf5 file, '.h5' is appended if it doesnt exist
-        dotprodcoeffs : list
-            List of N x Nseg ndarray. These arrays will at
-            every timestep be multiplied by the membrane currents.
-            Presumably useful for memory efficient csd or lfp calcs
         """
         for key in kwargs.keys():
-            if key in ['rec_isyn', 'rec_vmemsyn', 'rec_istim', 'rec_vmemstim']:
-                raise DeprecationWarning('Cell.simulate parameter {} is deprecated.'.format(key))
-
+            if key in ['electrode', 'rec_current_dipole_moment',
+                       'dotprodcoeffs', 'rec_isyn', 'rec_vmemsyn',
+                       'rec_istim', 'rec_vmemstim']:
+                raise DeprecationWarning('Cell.simulate parameter '
+                                         '{} is deprecated.'.format(key))
 
         # set up integrator, use the CVode().fast_imem method by default
         # as it doesn't hurt sim speeds much if at all.
@@ -1027,7 +1028,8 @@ class Cell(object):
         try:
             cvode.use_fast_imem(1)
         except AttributeError:
-            raise Exception('neuron.h.CVode().use_fast_imem() method not found. Please update NEURON to v.7.4 or newer')
+            raise Exception('neuron.h.CVode().use_fast_imem() method not '
+                            'found. Update NEURON to v.7.4 or newer')
 
         if not variable_dt:
             dt = self.dt
@@ -1043,8 +1045,6 @@ class Cell(object):
             self._set_ipas_recorders(dt)
         if rec_icap:
             self._set_icap_recorders(dt)
-        if rec_current_dipole_moment:
-            self._set_current_dipole_moment_array(dt)
         if len(rec_variables) > 0:
             self._set_variable_recorders(rec_variables, dt)
         if hasattr(self, '_stimitorecord'):
@@ -1064,19 +1064,17 @@ class Cell(object):
         self._set_time_recorders(dt)
 
         # run fadvance until t >= tstop, and calculate LFP if asked for
-        if electrode is None and dotprodcoeffs is None and not rec_current_dipole_moment:
+        if probes is None or len(probes) == 0:
             if not rec_imem and self.verbose:
                 print("rec_imem = %s, membrane currents will not be recorded!"
-                                  % str(rec_imem))
+                      % str(rec_imem))
             self._run_simulation(cvode, variable_dt, atol, rtol)
 
         else:
-            #allow using both electrode and additional coefficients:
-            _run_simulation_with_electrode(self, cvode, electrode, variable_dt,
-                                           atol, rtol,
-                                           to_memory, to_file, file_name,
-                                           dotprodcoeffs,
-                                           rec_current_dipole_moment)
+            # simulate with probes saving to memory and/or file:
+            _run_simulation_with_probes(self, cvode, probes,
+                                        variable_dt, atol, rtol,
+                                        to_memory, to_file, file_name)
 
         # somatic trace
         if self.nsomasec >= 1:
@@ -1237,7 +1235,7 @@ class Cell(object):
         self.rec_variables = {}
         i = 0
         for values in self.recvariablesreclist:
-            self.rec_variables.update({rec_variables[i] : np.array(values)})
+            self.rec_variables.update({rec_variables[i]: np.array(values)})
             if self.verbose:
                 print('collected recorded variable %s' % rec_variables[i])
             i += 1
@@ -1251,7 +1249,8 @@ class Cell(object):
             if len(self.synlist) == len(self.sptimeslist):
                 for i in range(int(self.synlist.count())):
                     for ii in range(int(self.sptimeslist.o(i).size)):
-                        self.netconlist.o(i).event(float(self.sptimeslist.o(i)[ii]))
+                        self.netconlist.o(i).event(
+                            float(self.sptimeslist.o(i)[ii]))
 
     def _set_soma_volt_recorder(self, dt):
         """Record somatic membrane potential"""
@@ -1262,7 +1261,7 @@ class Cell(object):
                      'No somav attribute will be set.')
         elif self.nsomasec == 1:
             if dt is not None:
-                self.somav = neuron.h.Vector(int(self.tstop / self.dt+1))
+                self.somav = neuron.h.Vector(int(self.tstop / self.dt + 1))
                 for sec in self.somalist:
                     self.somav.record(sec(0.5)._ref_v, self.dt)
             else:
@@ -1271,18 +1270,18 @@ class Cell(object):
                     self.somav.record(sec(0.5)._ref_v)
         elif self.nsomasec > 1:
             if dt is not None:
-                self.somav = neuron.h.Vector(int(self.tstop / self.dt+1))
+                self.somav = neuron.h.Vector(int(self.tstop / self.dt + 1))
                 nseg = self.get_idx('soma').size
                 i, j = divmod(nseg, 2)
                 k = 1
                 for sec in self.somalist:
                     for seg in sec:
-                        if nseg==2 and k == 1:
-                            #if 2 segments, record from the first one:
+                        if nseg == 2 and k == 1:
+                            # if 2 segments, record from the first one:
                             self.somav.record(seg._ref_v, self.dt)
                         else:
-                            if k == i*2:
-                                #record from one of the middle segments:
+                            if k == i * 2:
+                                # record from one of the middle segments:
                                 self.somav.record(seg._ref_v, self.dt)
                         k += 1
             else:
@@ -1309,7 +1308,7 @@ class Cell(object):
         for sec in self.allseclist:
             for seg in sec:
                 if dt is not None:
-                    memirec = neuron.h.Vector(int(self.tstop / self.dt+1))
+                    memirec = neuron.h.Vector(int(self.tstop / self.dt + 1))
                     memirec.record(seg._ref_i_membrane_, self.dt)
                 else:
                     memirec = neuron.h.Vector()
@@ -1335,7 +1334,7 @@ class Cell(object):
         for sec in self.allseclist:
             for seg in sec:
                 if dt is not None:
-                    memipasrec = neuron.h.Vector(int(self.tstop / self.dt+1))
+                    memipasrec = neuron.h.Vector(int(self.tstop / self.dt + 1))
                     memipasrec.record(seg._ref_i_pas, self.dt)
                 else:
                     memipasrec = neuron.h.Vector()
@@ -1350,7 +1349,7 @@ class Cell(object):
         for sec in self.allseclist:
             for seg in sec:
                 if dt is not None:
-                    memicaprec = neuron.h.Vector(int(self.tstop / self.dt+1))
+                    memicaprec = neuron.h.Vector(int(self.tstop / self.dt + 1))
                     memicaprec.record(seg._ref_i_cap, self.dt)
                 else:
                     memicaprec = neuron.h.Vector()
@@ -1439,7 +1438,7 @@ class Cell(object):
         for sec in self.allseclist:
             for seg in sec:
                 if dt is not None:
-                    memvrec = neuron.h.Vector(int(self.tstop / self.dt+1))
+                    memvrec = neuron.h.Vector(int(self.tstop / self.dt + 1))
                     memvrec.record(seg._ref_v, self.dt)
                 else:
                     memvrec = neuron.h.Vector()
@@ -1453,7 +1452,8 @@ class Cell(object):
         the course of each simulation
         """
         if dt is not None:
-            self.current_dipole_moment = np.zeros((int(self.tstop / self.dt+1), 3))
+            self.current_dipole_moment = np.zeros(
+                (int(self.tstop / self.dt + 1), 3))
         else:
             self.current_dipole_moment = []
 
@@ -1470,20 +1470,25 @@ class Cell(object):
             for sec in self.allseclist:
                 for seg in sec:
                     if dt is not None:
-                        recvector = neuron.h.Vector(int(self.tstop / self.dt + 1))
+                        recvector = neuron.h.Vector(
+                            int(self.tstop / self.dt + 1))
                     else:
                         recvector = neuron.h.Vector()
                     try:
                         if dt is not None:
-                            recvector.record(getattr(seg, '_ref_%s' % variable),
-                                             self.dt)
+                            recvector.record(
+                                getattr(
+                                    seg, '_ref_%s' %
+                                    variable), self.dt)
                         else:
-                            recvector.record(getattr(seg, '_ref_%s' % variable))
+                            recvector.record(
+                                getattr(
+                                    seg, '_ref_%s' %
+                                    variable))
                     except(NameError, AttributeError):
                         print('non-existing variable %s, section %s.%f' %
-                                (variable, sec.name(), seg.x))
+                              (variable, sec.name(), seg.x))
                     variablereclist.append(recvector)
-
 
     def set_pos(self, x=0., y=0., z=0.):
         """Set the cell position.
@@ -1491,18 +1496,18 @@ class Cell(object):
         in (x, y, z). If no soma pos, use the first segment
         Parameters
         ----------
-        x : float
+        x: float
             x position defaults to 0.0
-        y : float
+        y: float
             y position defaults to 0.0
-        z : float
+        z: float
             z position defaults to 0.0
         """
-        diffx = x-self.somapos[0]
-        diffy = y-self.somapos[1]
-        diffz = z-self.somapos[2]
+        diffx = x - self.somapos[0]
+        diffy = y - self.somapos[1]
+        diffz = z - self.somapos[2]
 
-        #also update the pt3d_pos:
+        # also update the pt3d_pos:
         if self.pt3d and hasattr(self, 'x3d'):
             self._set_pt3d_pos(diffx, diffy, diffz)
         else:
@@ -1510,24 +1515,26 @@ class Cell(object):
             self.somapos[1] = y
             self.somapos[2] = z
 
-            self.xstart += diffx
-            self.ystart += diffy
-            self.zstart += diffz
+            self.x[:, 0] += diffx
+            self.y[:, 0] += diffy
+            self.z[:, 0] += diffz
 
-            self.xend += diffx
-            self.yend += diffy
-            self.zend += diffz
+            self.x[:, -1] += diffx
+            self.y[:, -1] += diffy
+            self.z[:, -1] += diffz
 
-        self._calc_midpoints()
         self._update_synapse_positions()
 
     def cellpickler(self, filename, pickler=pickle.dump):
-        """Save data in cell to filename, using cPickle. It will however destroy
-        any neuron.h objects upon saving, as c-objects cannot be pickled
+        """Save data in cell to filename, using cPickle. It will however
+        destroy any neuron.h objects upon saving, as c-objects cannot be
+        pickled
+
         Parameters
         ----------
-        filename : str
+        filename: str
             Where to save cell
+
         Examples
         --------
         To save a cell, use:
@@ -1540,14 +1547,18 @@ class Cell(object):
         alternatively:
         >>> import LFPy
         >>> cell = LFPy.tools.load('cell.cpickle')
+
+        Returns
+        -------
+
         """
         self.strip_hoc_objects()
-        if pickler==pickle.dump:
+        if pickler == pickle.dump:
             filen = open(filename, 'wb')
             pickle.dump(self, filen, protocol=2)
             filen.close()
             return None
-        elif pickler==pickle.dumps:
+        elif pickler == pickle.dumps:
             return pickle.dumps(self)
 
     def _update_synapse_positions(self):
@@ -1561,7 +1572,7 @@ class Cell(object):
         """
         Rotate geometry of cell object around the x-, y-, z-axis in the order
         described by rotation_order parameter.
-        rotation_order should be a string with 3 elements containing x, y, and z
+        rotation_order should be a string with 3 elements containing x, y and z
         e.g. 'xyz', 'zyx'
         Input should be angles in radians.
         using rotation matrices, takes dict with rot. angles,
@@ -1570,15 +1581,16 @@ class Cell(object):
         Examples
         --------
         >>> cell = LFPy.Cell(**kwargs)
-        >>> rotation = {'x' : 1.233, 'y' : 0.236, 'z' : np.pi}
+        >>> rotation = {'x': 1.233, 'y': 0.236, 'z': np.pi}
         >>> cell.set_rotation(**rotation)
         """
-        if type(rotation_order) is not str:
+        if not isinstance(rotation_order, str):
             raise AttributeError('rotation_order must be a string')
-        elif 'x' not in rotation_order or 'y' not in rotation_order or 'z' not in rotation_order:
+        elif not np.all([u in rotation_order for u in 'xyz']):
             raise AttributeError("'x', 'y', and 'z' must be in rotation_order")
         elif len(rotation_order) != 3:
-            raise AttributeError("rotation_order should have 3 elements (e.g. 'zyx')")
+            raise AttributeError(
+                "rotation_order should have 3 elements (e.g. 'zyx')")
 
         for ax in rotation_order:
             if ax == 'x' and x is not None:
@@ -1594,7 +1606,9 @@ class Cell(object):
 
                 self._real_positions(rel_start, rel_end)
                 if self.verbose:
-                    print('Rotated geometry %g radians around x-axis' % (-theta))
+                    print(
+                        'Rotated geometry %g radians around x-axis' %
+                        (-theta))
             else:
                 if self.verbose:
                     print('Geometry not rotated around x-axis')
@@ -1630,12 +1644,14 @@ class Cell(object):
 
                 self._real_positions(rel_start, rel_end)
                 if self.verbose:
-                    print('Rotated geometry %g radians around z-axis' % (-gamma))
+                    print(
+                        'Rotated geometry %g radians around z-axis' %
+                        (-gamma))
             else:
                 if self.verbose:
                     print('Geometry not rotated around z-axis')
 
-        #rotate the pt3d geometry accordingly
+        # rotate the pt3d geometry accordingly
         if self.pt3d and hasattr(self, 'x3d'):
             self._set_pt3d_rotation(x, y, z, rotation_order)
 
@@ -1645,10 +1661,10 @@ class Cell(object):
         useful to introduce more heterogeneouties in morphology shapes
         Parameters
         ----------
-        axis : str
+        axis: str
             'x' or 'y' or 'z'
         """
-        #morphology relative to soma-position
+        # morphology relative to soma-position
         rel_start, rel_end = self._rel_positions()
         if axis == 'x':
             rel_start[:, 0] = -rel_start[:, 0]
@@ -1665,32 +1681,19 @@ class Cell(object):
         if self.verbose:
             print('morphology mirrored across %s-axis' % axis)
 
-        #set the proper 3D positions
+        # set the proper 3D positions
         self._real_positions(rel_start, rel_end)
-
-    def _squeeze_me_macaroni(self):
-        """
-        Reducing the dimensions of the morphology matrices from 3D->1D
-        """
-        self.xstart = np.array(self.xstart).flatten()
-        self.xend = np.array(self.xend).flatten()
-
-        self.ystart = np.array(self.ystart).flatten()
-        self.yend = np.array(self.yend).flatten()
-
-        self.zstart = np.array(self.zstart).flatten()
-        self.zend = np.array(self.zend).flatten()
 
     def _rel_positions(self):
         """
         Morphology relative to soma position
         """
-        rel_start = np.array([self.xstart-self.somapos[0],
-                              self.ystart-self.somapos[1],
-                              self.zstart-self.somapos[2]]).T
-        rel_end = np.array([self.xend-self.somapos[0],
-                            self.yend-self.somapos[1],
-                            self.zend-self.somapos[2]]).T
+        rel_start = np.array([self.x[:, 0] - self.somapos[0],
+                              self.y[:, 0] - self.somapos[1],
+                              self.z[:, 0] - self.somapos[2]]).T
+        rel_end = np.array([self.x[:, -1] - self.somapos[0],
+                            self.y[:, -1] - self.somapos[1],
+                            self.z[:, -1] - self.somapos[2]]).T
 
         return rel_start, rel_end
 
@@ -1698,16 +1701,14 @@ class Cell(object):
         """
         Morphology coordinates relative to Origo
         """
-        self.xstart = rel_start[:, 0] + self.somapos[0]
-        self.ystart = rel_start[:, 1] + self.somapos[1]
-        self.zstart = rel_start[:, 2] + self.somapos[2]
+        self.x[:, 0] = rel_start[:, 0] + self.somapos[0]
+        self.y[:, 0] = rel_start[:, 1] + self.somapos[1]
+        self.z[:, 0] = rel_start[:, 2] + self.somapos[2]
 
-        self.xend = rel_end[:, 0] + self.somapos[0]
-        self.yend = rel_end[:, 1] + self.somapos[1]
-        self.zend = rel_end[:, 2] + self.somapos[2]
+        self.x[:, -1] = rel_end[:, 0] + self.somapos[0]
+        self.y[:, -1] = rel_end[:, 1] + self.somapos[1]
+        self.z[:, -1] = rel_end[:, 2] + self.somapos[2]
 
-        self._squeeze_me_macaroni()
-        self._calc_midpoints()
         self._update_synapse_positions()
 
     def get_rand_prob_area_norm(self, section='allsec',
@@ -1718,14 +1719,14 @@ class Cell(object):
         Probability normalized by area.
         Parameters
         ----------
-        section : str
+        section: str
             string matching a section-name. Defaults to 'allsec'
-        z_min : float
+        z_min: float
             depth filter
-        z_max : float
+        z_max: float
             depth filter
         """
-        idx = self.get_idx(section=section, z_min=z_min, z_max = z_max)
+        idx = self.get_idx(section=section, z_min=z_min, z_max=z_max)
         prob = self.area[idx] / sum(self.area[idx])
         return prob
 
@@ -1736,7 +1737,7 @@ class Cell(object):
         Normalised probability determined by area of segments.
         Parameters
         ----------
-        idx : ndarray, dtype=int.
+        idx: ndarray, dtype=int.
             array of segment indices
         """
         prob = self.area[idx] / sum(self.area[idx])
@@ -1745,21 +1746,39 @@ class Cell(object):
     def get_intersegment_vector(self, idx0=0, idx1=0):
         """Return the distance between midpoints of two segments with index
         idx0 and idx1. The argument returned is a vector [x, y, z], where
-        x = self.xmid[idx1] - self.xmid[idx0] etc.
+        x = self.x[idx1].mean(axis=-1) - self.x[idx0].mean(axis=-1) etc.
         Parameters
         ----------
-        idx0 : int
-        idx1 : int
+        idx0: int
+        idx1: int
         """
         vector = []
         try:
             if idx1 < 0 or idx0 < 0:
                 raise Exception('idx0 < 0 or idx1 < 0')
-            vector.append(self.xmid[idx1] - self.xmid[idx0])
-            vector.append(self.ymid[idx1] - self.ymid[idx0])
-            vector.append(self.zmid[idx1] - self.zmid[idx0])
+            vector.append(
+                self.x[idx1].mean(
+                    axis=-
+                    1) -
+                self.x[idx0].mean(
+                    axis=-
+                    1))
+            vector.append(
+                self.y[idx1].mean(
+                    axis=-
+                    1) -
+                self.y[idx0].mean(
+                    axis=-
+                    1))
+            vector.append(
+                self.z[idx1].mean(
+                    axis=-
+                    1) -
+                self.z[idx0].mean(
+                    axis=-
+                    1))
             return vector
-        except:
+        except BaseException:
             ERRMSG = 'idx0 and idx1 must be ints on [0, %i]' % self.totnsegs
             raise ValueError(ERRMSG)
 
@@ -1768,8 +1787,8 @@ class Cell(object):
         Return the Euclidean distance between midpoints of two segments.
         Parameters
         ----------
-        idx0 : int
-        idx1 : int
+        idx0: int
+        idx1: int
         Returns
         -------
         float
@@ -1778,7 +1797,7 @@ class Cell(object):
         try:
             vector = np.array(self.get_intersegment_vector(idx0, idx1))
             return np.sqrt((vector**2).sum())
-        except:
+        except BaseException:
             ERRMSG = 'idx0 and idx1 must be ints on [0, %i]' % self.totnsegs
             raise ValueError(ERRMSG)
 
@@ -1787,18 +1806,18 @@ class Cell(object):
         of sections connected to parent-argument
         Parameters
         ----------
-        parent : str
+        parent: str
             name-pattern matching a sectionname. Defaults to "soma[0]"
         """
         idxvec = np.zeros(self.totnsegs)
         secnamelist = []
         childseclist = []
-        #filling list of sectionnames for all sections, one entry per segment
+        # filling list of sectionnames for all sections, one entry per segment
         for sec in self.allseclist:
             for seg in sec:
                 secnamelist.append(sec.name())
         if parent in secnamelist:
-            #filling list of children section-names
+            # filling list of children section-names
             for sec in self.allseclist:
                 if sec.name() == parent:
                     sref = neuron.h.SectionRef(sec=sec)
@@ -1826,7 +1845,7 @@ class Cell(object):
         segments
         Parameters
         ----------
-        parent : str
+        parent: str
             name-pattern matching a sectionname. Defaults to "soma[0]"
         """
         seclist = [parent]
@@ -1848,23 +1867,23 @@ class Cell(object):
         [(0, 'neuron.h.soma[0]', 0.5),]
         kwargs:
         ::
-            idx : ndarray, dtype int
+            idx: ndarray, dtype int
                 segment indices, must be between 0 and cell.totnsegs
         '''
-        #ensure idx is array-like, or convert
-        if type(idx) == int or np.int64:
+        # ensure idx is array-like, or convert
+        if isinstance(idx, int) or np.int64:
             idx = np.array([idx])
         elif len(idx) == 0:
             return
         else:
             idx = np.array(idx).astype(int)
 
-        #ensure all idx are valid
+        # ensure all idx are valid
         if np.any(idx >= self.totnsegs):
             wrongidx = idx[np.where(idx >= self.totnsegs)]
             raise Exception('idx %s >= number of compartments' % str(wrongidx))
 
-        #create list of seg names:
+        # create list of seg names:
         allsegnames = []
         segidx = 0
         for sec in self.allseclist:
@@ -1891,13 +1910,12 @@ class Cell(object):
                 z_i[i] = neuron.h.z3d(i, sec=sec)
                 d_i[i] = neuron.h.diam3d(i, sec=sec)
 
-
             x.append(x_i)
             y.append(y_i)
             z.append(z_i)
             d.append(d_i)
 
-        #remove offsets which may be present if soma is centred in Origo
+        # remove offsets which may be present if soma is centred in Origo
         if len(x) > 1:
             xoff = x[0].mean()
             yoff = y[0].mean()
@@ -1917,13 +1935,13 @@ class Cell(object):
             n3d = int(neuron.h.n3d(sec=sec))
             for n in range(n3d):
                 neuron.h.pt3dchange(n,
-                                self.x3d[i][n],
-                                self.y3d[i][n],
-                                self.z3d[i][n],
-                                self.diam3d[i][n], sec=sec)
-            #let NEURON know about the changes we just did:
+                                    self.x3d[i][n],
+                                    self.y3d[i][n],
+                                    self.z3d[i][n],
+                                    self.diam3d[i][n], sec=sec)
+            # let NEURON know about the changes we just did:
             neuron.h.define_shape()
-        #must recollect the geometry, otherwise we get roundoff errors!
+        # must recollect the geometry, otherwise we get roundoff errors!
         self._collect_geometry()
 
     def _set_pt3d_pos(self, diffx=0, diffy=0, diffz=0):
@@ -1937,12 +1955,11 @@ class Cell(object):
             self.z3d[i] += diffz
         self._update_pt3d()
 
-
     def _set_pt3d_rotation(self, x=None, y=None, z=None, rotation_order='xyz'):
         """
         Rotate pt3d geometry of cell object around the x-, y-, z-axis
         in the order described by rotation_order parameter.
-        rotation_order should be a string with 3 elements containing x, y, and z
+        rotation_order should be a string with 3 elements containing x, y and z
         e.g. 'xyz', 'zyx'
         Input should be angles in radians.
         using rotation matrices, takes dict with rot. angles,
@@ -1951,7 +1968,7 @@ class Cell(object):
         Examples
         --------
         >>> cell = LFPy.Cell(**kwargs)
-        >>> rotation = {'x' : 1.233, 'y' : 0.236, 'z' : np.pi}
+        >>> rotation = {'x': 1.233, 'y': 0.236, 'z': np.pi}
         >>> cell.set_pt3d_rotation(**rotation)
         """
         for ax in rotation_order:
@@ -1961,15 +1978,16 @@ class Cell(object):
                                        [0, np.cos(theta), -np.sin(theta)],
                                        [0, np.sin(theta), np.cos(theta)]])
                 for i in range(len(self.x3d)):
-                    rel_pos = self._rel_pt3d_positions(self.x3d[i],
-                                                       self.y3d[i], self.z3d[i])
+                    rel_pos = self._rel_pt3d_positions(
+                        self.x3d[i], self.y3d[i], self.z3d[i])
 
                     rel_pos = np.dot(rel_pos, rotation_x)
 
                     self.x3d[i], self.y3d[i], self.z3d[i] = \
-                                                self._real_pt3d_positions(rel_pos)
+                        self._real_pt3d_positions(rel_pos)
                 if self.verbose:
-                    print(('Rotated geometry %g radians around x-axis' % (-theta)))
+                    print(('Rotated geometry %g radians around x-axis' %
+                           (-theta)))
             else:
                 if self.verbose:
                     print('Geometry not rotated around x-axis')
@@ -1980,13 +1998,13 @@ class Cell(object):
                                        [0, 1, 0],
                                        [-np.sin(phi), 0, np.cos(phi)]])
                 for i in range(len(self.x3d)):
-                    rel_pos = self._rel_pt3d_positions(self.x3d[i],
-                                                       self.y3d[i], self.z3d[i])
+                    rel_pos = self._rel_pt3d_positions(
+                        self.x3d[i], self.y3d[i], self.z3d[i])
 
                     rel_pos = np.dot(rel_pos, rotation_y)
 
                     self.x3d[i], self.y3d[i], self.z3d[i] = \
-                                                self._real_pt3d_positions(rel_pos)
+                        self._real_pt3d_positions(rel_pos)
                 if self.verbose:
                     print('Rotated geometry %g radians around y-axis' % (-phi))
             else:
@@ -1999,15 +2017,17 @@ class Cell(object):
                                        [np.sin(gamma), np.cos(gamma), 0],
                                        [0, 0, 1]])
                 for i in range(len(self.x3d)):
-                    rel_pos = self._rel_pt3d_positions(self.x3d[i],
-                                                       self.y3d[i], self.z3d[i])
+                    rel_pos = self._rel_pt3d_positions(
+                        self.x3d[i], self.y3d[i], self.z3d[i])
 
                     rel_pos = np.dot(rel_pos, rotation_z)
 
                     self.x3d[i], self.y3d[i], self.z3d[i] = \
-                                                self._real_pt3d_positions(rel_pos)
+                        self._real_pt3d_positions(rel_pos)
                 if self.verbose:
-                    print('Rotated geometry %g radians around z-axis' % (-gamma))
+                    print(
+                        'Rotated geometry %g radians around z-axis' %
+                        (-gamma))
             else:
                 if self.verbose:
                     print('Geometry not rotated around z-axis')
@@ -2035,13 +2055,13 @@ class Cell(object):
 
     def _create_polygon(self, i, projection=('x', 'z')):
         """create a polygon to fill for each section"""
-        x = getattr(self, projection[0]+'3d')[i]
-        y = getattr(self, projection[1]+'3d')[i]
-        #x = self.x3d[i]
-        #z = self.z3d[i]
+        x = getattr(self, projection[0] + '3d')[i]
+        y = getattr(self, projection[1] + '3d')[i]
+        # x = self.x3d[i]
+        # z = self.z3d[i]
         d = self.diam3d[i]
 
-        #calculate angles
+        # calculate angles
         dx = np.diff(x)
         dy = np.diff(y)
         theta = np.arctan2(dy, dx)
@@ -2052,32 +2072,32 @@ class Cell(object):
         theta = np.r_[theta, theta[::-1]]
         d = np.r_[d, d[::-1]]
 
-        #1st corner:
+        # 1st corner:
         x[0] -= 0.5 * d[0] * np.sin(theta[0])
         y[0] += 0.5 * d[0] * np.cos(theta[0])
 
-        ##pt3d points between start and end of section, first side
+        # pt3d points between start and end of section, first side
         x[1:dx.size] -= 0.25 * d[1:dx.size] * (
-            np.sin(theta[:dx.size-1]) + np.sin(theta[1:dx.size]))
+            np.sin(theta[:dx.size - 1]) + np.sin(theta[1:dx.size]))
         y[1:dy.size] += 0.25 * d[1:dy.size] * (
-            np.cos(theta[:dy.size-1]) + np.cos(theta[1:dx.size]))
+            np.cos(theta[:dy.size - 1]) + np.cos(theta[1:dx.size]))
 
-        #end of section, first side
+        # end of section, first side
         x[dx.size] -= 0.5 * d[dx.size] * np.sin(theta[dx.size])
         y[dy.size] += 0.5 * d[dy.size] * np.cos(theta[dy.size])
 
-        #other side
-        #end of section, second side
-        x[dx.size+1] += 0.5 * d[dx.size+1] * np.sin(theta[dx.size])
-        y[dy.size+1] -= 0.5 * d[dy.size+1] * np.cos(theta[dy.size])
+        # other side
+        # end of section, second side
+        x[dx.size + 1] += 0.5 * d[dx.size + 1] * np.sin(theta[dx.size])
+        y[dy.size + 1] -= 0.5 * d[dy.size + 1] * np.cos(theta[dy.size])
 
-        ##pt3d points between start and end of section, second side
+        # pt3d points between start and end of section, second side
         x[::-1][1:dx.size] += 0.25 * d[::-1][1:dx.size] * (
-            np.sin(theta[::-1][:dx.size-1]) + np.sin(theta[::-1][1:dx.size]))
+            np.sin(theta[::-1][:dx.size - 1]) + np.sin(theta[::-1][1:dx.size]))
         y[::-1][1:dy.size] -= 0.25 * d[::-1][1:dy.size] * (
-            np.cos(theta[::-1][:dy.size-1]) + np.cos(theta[::-1][1:dx.size]))
+            np.cos(theta[::-1][:dy.size - 1]) + np.cos(theta[::-1][1:dx.size]))
 
-        #last corner:
+        # last corner:
         x[-1] += 0.5 * d[-1] * np.sin(theta[-1])
         y[-1] -= 0.5 * d[-1] * np.cos(theta[-1])
 
@@ -2134,15 +2154,11 @@ class Cell(object):
     def _create_segment_polygon(self, i, projection=('x', 'z')):
         """Create a polygon to fill for segment i, in the plane
         determined by kwarg projection"""
-        x = [getattr(self, projection[0]+'start')[i],
-             getattr(self, projection[0]+'end')[i]]
-        z = [getattr(self, projection[1]+'start')[i],
-             getattr(self, projection[1]+'end')[i]]
-        #x = [self.xstart[i], self.xend[i]]
-        #z = [self.zstart[i], self.zend[i]]
-        d = self.diam[i]
+        x = getattr(self, projection[0])[i]
+        z = getattr(self, projection[1])[i]
+        d = self.d[i]
 
-        #calculate angles
+        # calculate angles
         dx = np.diff(x)
         dz = np.diff(z)
         theta = np.arctan2(dz, dx)
@@ -2150,20 +2166,20 @@ class Cell(object):
         x = np.r_[x, x[::-1]]
         z = np.r_[z, z[::-1]]
 
-        #1st corner:
+        # 1st corner:
         x[0] -= 0.5 * d * np.sin(theta)
         z[0] += 0.5 * d * np.cos(theta)
 
-        #end of section, first side
+        # end of section, first side
         x[1] -= 0.5 * d * np.sin(theta)
         z[1] += 0.5 * d * np.cos(theta)
 
-        #other side
-        #end of section, second side
+        # other side
+        # end of section, second side
         x[2] += 0.5 * d * np.sin(theta)
         z[2] -= 0.5 * d * np.cos(theta)
 
-        #last corner:
+        # last corner:
         x[3] += 0.5 * d * np.sin(theta)
         z[3] -= 0.5 * d * np.cos(theta)
 
@@ -2176,11 +2192,11 @@ class Cell(object):
         mpl.collections.PolyCollection
         Parameters
         ----------
-        projection : tuple of strings
+        projection: tuple of strings
             Determining projection. Defaults to ('x', 'z')
         Returns
         -------
-        polygons : list
+        polygons: list
             list of (ndarray, ndarray) tuples
             giving the trajectory of each section
         Examples
@@ -2232,9 +2248,9 @@ class Cell(object):
         Can not be deleted prior to running cell.simulate()
         Parameters
         ----------
-        v_ext : ndarray
+        v_ext: ndarray
             Numpy array of size cell.totnsegs x t_ext.size, unit mV
-        t_ext : ndarray
+        t_ext: ndarray
             Time vector of v_ext in ms
         Examples
         --------
@@ -2270,24 +2286,24 @@ class Cell(object):
         >>> plt.show()
         """
 
-        #test dimensions of input
+        # test dimensions of input
         try:
             if v_ext.shape[0] != self.totnsegs:
                 raise ValueError("v_ext.shape[0] != cell.totnsegs")
             if v_ext.shape[1] != t_ext.size:
                 raise ValueError('v_ext.shape[1] != t_ext.size')
-        except:
+        except BaseException:
             raise ValueError('v_ext, t_ext must both be np.array types')
 
         if not self.extracellular:
             raise Exception('LFPy.Cell arg extracellular != True')
 
-        #create list of extracellular potentials on each segment, time vector
+        # create list of extracellular potentials on each segment, time vector
         self.t_ext = neuron.h.Vector(t_ext)
         self.v_ext = []
         for v in v_ext:
             self.v_ext.append(neuron.h.Vector(v))
-        #play v_ext into e_extracellular reference
+        # play v_ext into e_extracellular reference
         i = 0
         for sec in self.allseclist:
             for seg in sec:
@@ -2301,28 +2317,30 @@ class Cell(object):
         distance vectors and position vectors.
         Parameters
         ----------
-        timepoints : ndarray, dtype=int
+        timepoints: ndarray, dtype=int
             array of timepoints in simulation at which you want to compute
             the axial currents. Defaults to False. If not given,
             all simulation timesteps will be included.
         Returns
         -------
-        i_axial : ndarray, dtype=float
+        i_axial: ndarray, dtype=float
             Shape ((cell.totnsegs-1)*2, len(timepoints)) array of axial current
-            magnitudes I in units of (nA) in cell at all timesteps in timepoints,
-            or at all timesteps of the simulation if timepoints=None.
+            magnitudes I in units of (nA) in cell at all timesteps in
+            timepoints, or at all timesteps of the simulation if
+            timepoints=None.
             Contains two current magnitudes per segment,
             (except for the root segment): 1) the current from the mid point of
             the segment to the segment start point, and 2) the current from
             the segment start point to the mid point of the parent segment.
-        d_vectors : ndarray, dtype=float
-            Shape ((cell.totnsegs-1)*2, 3) array of distance vectors traveled by
-            each axial current in i_axial in units of (µm). The indices of the
-            first axis, correspond to the first axis of i_axial and pos_vectors.
-        pos_vectors : ndarray, dtype=float
-            Shape ((cell.totnsegs-1)*2, 3) array of position vectors pointing to
-            the mid point of each axial current in i_axial in units of (µm). The
-            indices of the first axis, correspond to the first axis
+        d_vectors: ndarray, dtype=float
+            Shape (3, (cell.totnsegs-1)*2) array of distance vectors traveled
+            by each axial current in i_axial in units of (µm). The indices of
+            the first axis, correspond to the first axis of i_axial and
+            pos_vectors.
+        pos_vectors: ndarray, dtype=float
+            Shape ((cell.totnsegs-1)*2, 3) array of position vectors pointing
+            to the mid point of each axial current in i_axial in units of (µm).
+            The indices of the first axis, correspond to the first axis
             of i_axial and d_vectors.
 
         Raises
@@ -2336,12 +2354,12 @@ class Cell(object):
         i_axial = []
         d_vectors = []
         pos_vectors = []
-        dseg = np.c_[self.xmid - self.xstart,
-                     self.ymid - self.ystart,
-                     self.zmid - self.zstart]
-        dpar = np.c_[self.xend - self.xmid,
-                     self.yend - self.ymid,
-                     self.zend - self.zmid]
+        dseg = np.c_[self.x.mean(axis=-1) - self.x[:, 0],
+                     self.y.mean(axis=-1) - self.y[:, 0],
+                     self.z.mean(axis=-1) - self.z[:, 0]]
+        dpar = np.c_[self.x[:, -1] - self.x.mean(axis=-1),
+                     self.y[:, -1] - self.y.mean(axis=-1),
+                     self.z[:, -1] - self.z.mean(axis=-1)]
 
         # children_dict = self.get_dict_of_children_idx()
         for sec in self.allseclist:
@@ -2374,14 +2392,17 @@ class Cell(object):
                 conn_point = connection_dict[sec.name()]
                 # find parent index
                 if conn_point == 1 or parentsec.nseg == 1:
-                    internal_parent_idx = -1 # last seg in sec
+                    internal_parent_idx = -1  # last seg in sec
                 elif conn_point == 0:
-                    internal_parent_idx = 0 # first seg in sec
+                    internal_parent_idx = 0  # first seg in sec
                 else:
                     # if parentseg is not first or last seg in parentsec
-                    segment_xlist = np.array([segment.x for segment in parentsec])
-                    internal_parent_idx = np.abs(segment_xlist - conn_point).argmin()
-                parent_idx = self.get_idx(section=parentsec.name())[internal_parent_idx]
+                    segment_xlist = np.array(
+                        [segment.x for segment in parentsec])
+                    internal_parent_idx = np.abs(
+                        segment_xlist - conn_point).argmin()
+                parent_idx = self.get_idx(section=parentsec.name())[
+                    internal_parent_idx]
                 # find segment index
                 seg_idx = self.get_idx(section=sec.name())[0]
             for _ in sec:
@@ -2404,12 +2425,12 @@ class Cell(object):
                     # if a seg is connected to soma, it is
                     # connected to the middle of soma,
                     # and dpar needs to be altered.
-                    par_dist = np.array([(self.xstart[seg_idx] -
-                                        self.xmid[parent_idx]),
-                                        (self.ystart[seg_idx] -
-                                        self.ymid[parent_idx]),
-                                        (self.zstart[seg_idx] -
-                                        self.zmid[parent_idx])])
+                    par_dist = np.array([(self.x[seg_idx, 0] -
+                                          self.x[parent_idx].mean(axis=-1)),
+                                         (self.y[seg_idx, 0] -
+                                          self.y[parent_idx].mean(axis=-1)),
+                                         (self.z[seg_idx, 0] -
+                                          self.z[parent_idx].mean(axis=-1))])
 
                 else:
                     par_dist = dpar[parent_idx]
@@ -2418,13 +2439,14 @@ class Cell(object):
                 i_axial.append(ipar)
                 i_axial.append(iseg)
 
-                pos_par = np.array([self.xstart[seg_idx],
-                                    self.ystart[seg_idx],
-                                    self.zstart[seg_idx]]) - 0.5*par_dist
+                pos_par = np.array([self.x[seg_idx, 0],
+                                    self.y[seg_idx, 0],
+                                    self.z[seg_idx, 0]]) - 0.5 * par_dist
 
-                pos_seg = np.array([self.xmid[seg_idx],
-                                    self.ymid[seg_idx],
-                                    self.zmid[seg_idx]]) - 0.5*dseg[seg_idx]
+                pos_seg = np.array([self.x[seg_idx].mean(axis=-1),
+                                    self.y[seg_idx].mean(axis=-1),
+                                    self.z[seg_idx].mean(axis=-1)])
+                pos_seg -= 0.5 * dseg[seg_idx]
                 pos_vectors.append(pos_par)
                 pos_vectors.append(pos_seg)
 
@@ -2433,23 +2455,23 @@ class Cell(object):
                 branch = False
                 bottom_seg = False
 
-        return np.array(i_axial), np.array(d_vectors), np.array(pos_vectors)
+        return np.array(i_axial), np.array(d_vectors).T, np.array(pos_vectors)
 
     def get_axial_resistance(self):
         """
         Return NEURON axial resistance for all cell compartments.
         Returns
         -------
-        ri_list : ndarray, dtype=float
-            Shape (cell.totnsegs, ) array containing neuron.h.ri(seg.x) in units
-            of (MOhm) for all segments in cell calculated using the
+        ri_list: ndarray, dtype=float
+            Shape (cell.totnsegs, ) array containing neuron.h.ri(seg.x) in
+            units of (MOhm) for all segments in cell calculated using the
             neuron.h.ri(seg.x) method. neuron.h.ri(seg.x) returns the
             axial resistance from the middle of the segment to the middle of
             the parent segment. Note: If seg is the first segment in a section,
             i.e. the parent segment belongs to a different section or there is
             no parent section, then neuron.h.ri(seg.x) returns the axial
-            resistance from the middle of the segment to the node connecting the
-            segment to the parent section (or a ghost node if there is no
+            resistance from the middle of the segment to the node connecting
+            the segment to the parent section (or a ghost node if there is no
             parent)
         """
 
@@ -2467,7 +2489,7 @@ class Cell(object):
         Return dictionary with children segment indices for all sections.
         Returns
         -------
-        children_dict : dictionary
+        children_dict: dictionary
             Dictionary containing a list for each section,
             with the segment index of all the section's children.
             The dictionary is needed to find the
@@ -2488,7 +2510,7 @@ class Cell(object):
         Return dictionary with parent connection point for all sections.
         Returns
         -------
-        connection_dict : dictionary
+        connection_dict: dictionary
             Dictionary containing a float in range [0, 1] for each section
             in cell. The float gives the location on the parent segment
             to which the section is connected.
@@ -2509,27 +2531,27 @@ class Cell(object):
         and current from parent segment (parent_idx) end to parent segment mid.
         Parameters
         ----------
-        seg_idx : int
+        seg_idx: int
             Segment index
-        parent_idx : int
+        parent_idx: int
             Parent index
-        parent_ri : float
+        parent_ri: float
             Axial resistance from parent end to mid in units of (MΩ)
-        bottom_seg : boolean
-        branch : boolean
-        parentsec : neuron.Section object
-        timepoints : ndarray, dtype=int
+        bottom_seg: boolean
+        branch: boolean
+        parentsec: neuron.Section object
+        timepoints: ndarray, dtype=int
             array of timepoints in simulation at which you want to compute
             the axial currents. Defaults to None. If not given,
             the axial currents. Defaults to None. If not given,
             all simulation timesteps will be included.
-        sec : (QUICKFIX!) section is needed in new NEURON version
+        sec: (QUICKFIX!) section is needed in new NEURON version
         Returns
         -------
-        iseg : dtype=float
+        iseg: dtype=float
             Axial current in units of (nA)
             from segment mid point to segment start point.
-        ipar : dtype=float
+        ipar: dtype=float
             Axial current in units of (nA)
             from parent segment end point to parent segment mid point.
         """
@@ -2537,7 +2559,7 @@ class Cell(object):
         seg_ri = self._ri_list[seg_idx]
         vmem = self.vmem
         if timepoints is not None:
-            vmem = self.vmem[:,timepoints]
+            vmem = self.vmem[:, timepoints]
         vpar = vmem[parent_idx]
         vseg = vmem[seg_idx]
         # if segment is the first in its section and it is connected to
@@ -2554,21 +2576,23 @@ class Cell(object):
             else:
                 # if branch, need to compute iseg and ipar separately
                 [sib_idcs] = np.take(children_dict[parentsec.name()],
-                                  np.where(children_dict[parentsec.name()]
-                                           != seg_idx))
-                sibs = [self.get_idx_name(sib_idcs)[i][1] for i in range(len(sib_idcs))]
+                                     np.where(children_dict[parentsec.name()]
+                                              != seg_idx))
+                sibs = [self.get_idx_name(sib_idcs)[i][1]
+                        for i in range(len(sib_idcs))]
                 # compute potential in branch point between parent and siblings
-                v_branch_num = vpar/parent_ri + vseg/seg_ri
-                v_branch_denom = 1./parent_ri + 1./seg_ri
+                v_branch_num = vpar / parent_ri + vseg / seg_ri
+                v_branch_denom = 1. / parent_ri + 1. / seg_ri
                 for sib_idx, sib in zip(sib_idcs, sibs):
                     sib_conn_point = connection_dict[sib]
                     if sib_conn_point == conn_point:
-                        v_branch_num += vmem[sib_idx]/self._ri_list[sib_idx]
-                        v_branch_denom += 1./ self._ri_list[sib_idx]
-                v_branch = v_branch_num/v_branch_denom
-                iseg = (v_branch - vseg)/seg_ri
+                        v_branch_num += vmem[sib_idx] / self._ri_list[sib_idx]
+                        v_branch_denom += 1. / self._ri_list[sib_idx]
+                v_branch = v_branch_num / v_branch_denom
+                iseg = (v_branch - vseg) / seg_ri
                 # set ipar=iseg
-                # only fraction of total current into parent is added per sibling
+                # only fraction of total current into parent is added per
+                # sibling
                 ipar = iseg
         else:
             iseg = (vpar - vseg) / seg_ri
@@ -2582,18 +2606,18 @@ class Cell(object):
         isotropic media that embeds the cell. A ratio nu=0 will only affect
         geometry along the chosen axis. A ratio nu=-1 will isometrically scale
         the neuron geometry along each axis.
-        This method does not affect the underlying cable properties of the cell,
-        only predictions of extracellular measurements (by affecting the
+        This method does not affect the underlying cable properties of the
+        cell, only predictions of extracellular measurements (by affecting the
         relative locations of sources representing the compartments).
         Parameters
         ----------
-        factor : float
+        factor: float
             relative compression/stretching factor of morphology. Default is 0
             (no compression/stretching). Positive values implies a compression
             along the chosen axis.
-        axis : str
+        axis: str
             which axis to apply compression/stretching. Default is "z".
-        nu : float
+        nu: float
             Poisson's ratio. Ratio between axial and transversal
             compression/stretching. Default is 0.
         """
@@ -2607,54 +2631,69 @@ class Cell(object):
             raise AssertionError('axis={} not "x", "y" or "z"'.format(axis))
 
         for pos, dir_ in zip(self.somapos, 'xyz'):
-            geometry = np.c_[getattr(self, dir_+'start'),
-                             getattr(self, dir_+'mid'),
-                             getattr(self, dir_+'end')]
+            geometry = np.c_[getattr(self, dir_)[:, 0],
+                             getattr(self, dir_)[:, -1]]
             if dir_ == axis:
                 geometry -= pos
                 geometry *= (1. - factor)
                 geometry += pos
             else:
                 geometry -= pos
-                geometry *= (1. + factor*nu)
+                geometry *= (1. + factor * nu)
                 geometry += pos
 
-            setattr(self, dir_+'start', geometry[:, 0])
-            setattr(self, dir_+'mid', geometry[:, 1])
-            setattr(self, dir_+'end', geometry[:, 2])
+            setattr(self, dir_, geometry)
 
         # recompute length of each segment
-        self.length = np.sqrt((self.xend - self.xstart)**2 +
-                              (self.yend - self.ystart)**2 +
-                              (self.zend - self.zstart)**2)
+        self._set_length()
+
+    def _set_length(self):
+        '''callable method to (re)set length attribute'''
+        self.length = np.sqrt(np.diff(self.x, axis=-1)**2 +
+                              np.diff(self.y, axis=-1)**2 +
+                              np.diff(self.z, axis=-1)**2).flatten()
+
+    def _set_area(self):
+        '''callable method to (re)set area attribute'''
+        if self.d.ndim == 1:
+            self.area = self.length * np.pi * self.d
+        else:
+            # Surface area of conical frusta
+            # A = pi*(r1+r2)*sqrt((r1-r2)^2 + h^2)
+            self.area = np.pi * self.d.sum(axis=-1) * \
+                np.sqrt(np.diff(self.d, axis=-1)**2 + self.length**2)
 
     def get_multi_current_dipole_moments(self, timepoints=None):
         '''
         Return 3D current dipole moment vector and middle position vector
         from each axial current in space.
+
         Parameters
         ----------
-        timepoints : ndarray, dtype=int
+        timepoints: ndarray, dtype=int
             array of timepoints at which you want to compute
             the current dipole moments. Defaults to None. If not given,
             all simulation timesteps will be included.
+
         Returns
         -------
-        multi_dipoles : ndarray, dtype = float
-            Shape (n_axial_currents, n_timepoints, 3) array
+        multi_dipoles: ndarray, dtype = float
+            Shape (n_axial_currents, 3, n_timepoints) array
             containing the x-,y-,z-components of the current dipole moment
             from each axial current in cell, at all timepoints.
-            The number of axial currents, n_axial_currents = (cell.totnsegs-1)*2
+            The number of axial currents,
+            n_axial_currents = (cell.totnsegs-1) * 2
             and the number of timepoints, n_timepoints = cell.tvec.size.
             The current dipole moments are given in units of (nA µm).
-        pos_axial : ndarray, dtype = float
+        pos_axial: ndarray, dtype = float
             Shape (n_axial_currents, 3) array containing the x-, y-, and
             z-components giving the mid position in space of each multi_dipole
             in units of (µm).
+
         Examples
         --------
-        Get all current dipole moments and positions from all axial currents in a
-        single neuron simulation.
+        Get all current dipole moments and positions from all axial currents in
+        a single neuron simulation.
         >>> import LFPy
         >>> import numpy as np
         >>> cell = LFPy.Cell('PATH/TO/MORPHOLOGY', extracellular=False)
@@ -2663,10 +2702,15 @@ class Cell(object):
         >>> syn.set_spike_times(np.mgrid[20:100:20])
         >>> cell.simulate(rec_vmem=True, rec_imem=False)
         >>> timepoints = np.array([1,2,3,4])
-        >>> multi_dipoles, dipole_locs = cell.get_multi_current_dipole_moments(timepoints=timepoints)
+        >>> multi_dipoles, dipole_locs = cell.get_multi_current_dipole_moments(
+        >>>     timepoints=timepoints)
         '''
-        i_axial, d_axial, pos_axial = self.get_axial_currents_from_vmem(timepoints=timepoints)
+        i_axial, d_axial, pos_axial = self.get_axial_currents_from_vmem(
+            timepoints=timepoints)
         Ni, Nt = i_axial.shape
-        multi_dipoles = np.array([i_axial[i][:, np.newaxis]*d_axial[i] for i in range(Ni)])
+
+        multi_dipoles = np.zeros((Ni, 3, Nt))
+        for i in range(Ni):
+            multi_dipoles[i, ] = (i_axial[i][:, np.newaxis] * d_axial[:, i]).T
 
         return multi_dipoles, pos_axial

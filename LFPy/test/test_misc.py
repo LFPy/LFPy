@@ -71,8 +71,8 @@ class testMisc(unittest.TestCase):
         cvode.use_fast_imem(1)
 
         # record
-        i_membrane_control = []     # record currents using Vector.record method
-        i_membrane_fadvance = []    # record seg.i_membrane_ at each timestep
+        i_membrane_control = []  # record currents using Vector.record method
+        i_membrane_fadvance = []  # record seg.i_membrane_ at each timestep
         for sec in [soma, dend]:
             for seg in sec:
                 i = neuron.h.Vector()
@@ -81,9 +81,9 @@ class testMisc(unittest.TestCase):
                 i_membrane_fadvance.append([])
 
         # Simulation control
-        neuron.h.dt =  2**-4          # simulation time resolution
-        tstop = 500.        # simulation duration
-        v_init = -65.       # membrane voltage(s) at t = 0
+        neuron.h.dt = 2**-4  # simulation time resolution
+        tstop = 500.  # simulation duration
+        v_init = -65.  # membrane voltage(s) at t = 0
 
         def initialize():
             neuron.h.finitialize(v_init)
@@ -100,7 +100,7 @@ class testMisc(unittest.TestCase):
             while neuron.h.t < tstop:
                 collect_i_membrane()
                 neuron.h.fadvance()
-            collect_i_membrane() # otherwise shape mismatch
+            collect_i_membrane()  # otherwise shape mismatch
 
         initialize()
         integrate()
@@ -109,7 +109,6 @@ class testMisc(unittest.TestCase):
         i_membrane_fadvance = np.array(i_membrane_fadvance)
 
         np.testing.assert_equal(i_membrane_control, i_membrane_fadvance)
-
 
     def test_neuron_record_i_membrane_methods_01(self):
         '''not a test of LFPy per se, but we're using this method for
@@ -157,8 +156,8 @@ class testMisc(unittest.TestCase):
         cvode.use_fast_imem(1)
 
         # record
-        i_membrane_control = []     # record currents using Vector.record method
-        i_membrane_fadvance = []    # record seg.i_membrane_ at each timestep
+        i_membrane_control = []  # record currents using Vector.record method
+        i_membrane_fadvance = []  # record seg.i_membrane_ at each timestep
         for sec in [soma, dend]:
             for seg in sec:
                 i = neuron.h.Vector()
@@ -175,7 +174,7 @@ class testMisc(unittest.TestCase):
             neuron.h.finitialize(v_init)
             neuron.h.fcurrent()
             neuron.h.frecord_init()
-            neuron.h.t = -100. # force simulations to start at some negative t
+            neuron.h.t = -100.  # force simulations to start at some negative t
 
         def collect_i_membrane():
             j = 0
@@ -188,7 +187,7 @@ class testMisc(unittest.TestCase):
             while neuron.h.t < tstop:
                 collect_i_membrane()
                 neuron.h.fadvance()
-            collect_i_membrane() # otherwise shape mismatch
+            collect_i_membrane()  # otherwise shape mismatch
 
         initialize()
         integrate()

@@ -119,7 +119,7 @@ class TemplateCell(Cell):
         Initialization of the Template Cell object.
 
         """
-        if "win32" in sys.platform and type(templatefile) is str:
+        if "win32" in sys.platform and isinstance(templatefile, str):
             templatefile = templatefile.replace(os.sep, posixpath.sep)
         self.templatefile = templatefile
         self.templatename = templatename
@@ -127,82 +127,90 @@ class TemplateCell(Cell):
         self.verbose = verbose
 
         if not hasattr(neuron.h, 'd_lambda'):
-            neuron.h.load_file('stdlib.hoc', 'String')    #NEURON std. library
-            neuron.h.load_file('import3d.hoc')  #import 3D morphology lib
+            neuron.h.load_file('stdlib.hoc', 'String')  # NEURON std. library
+            neuron.h.load_file('import3d.hoc')  # import 3D morphology lib
 
-        #load the cell template specification
-        #check if templatename exist in neuron.h namespace:
+        # load the cell template specification
+        # check if templatename exist in neuron.h namespace:
         if hasattr(neuron.h, self.templatename):
             if self.verbose:
                 print('template %s exist already' % self.templatename)
         else:
-            if type(self.templatefile) == str:
+            if isinstance(self.templatefile, str):
                 neuron.h.load_file(self.templatefile)
-            elif type(self.templatefile) == list:
+            elif isinstance(self.templatefile, list):
                 for template in self.templatefile:
                     if "win32" in sys.platform:
                         template = template.replace(os.sep, posixpath.sep)
                     neuron.h.load_file(template)
 
-        #initialize the cell object
+        # initialize the cell object
         Cell.__init__(self, **kwargs)
 
     def _load_geometry(self):
         """Load the morphology-file in NEURON"""
-        #the python cell object we are loading the morphology into:
+        # the python cell object we are loading the morphology into:
         self.template = getattr(neuron.h, self.templatename)(self.templateargs)
 
-        #perform a test if the morphology is already loaded:
+        # perform a test if the morphology is already loaded:
         seccount = 0
         for sec in self.template.all:
             seccount += 1
         if seccount == 0:
-            #import the morphology, try and determine format
+            # import the morphology, try and determine format
             fileEnding = self.morphology.split('.')[-1]
 
             if not fileEnding == 'hoc' or fileEnding == 'HOC':
-                #create objects for importing morphologies of different formats
+                # create objects for importing morphologies of different
+                # formats
                 if fileEnding == 'asc' or fileEnding == 'ASC':
                     Import = neuron.h.Import3d_Neurolucida3()
                     if not self.verbose:
                         Import.quiet = 1
-                elif fileEnding == 'swc' or fileEnding ==  'SWC':
+                elif fileEnding == 'swc' or fileEnding == 'SWC':
                     Import = neuron.h.Import3d_SWC_read()
-                elif fileEnding == 'xml' or fileEnding ==  'XML':
+                elif fileEnding == 'xml' or fileEnding == 'XML':
                     Import = neuron.h.Import3d_MorphML()
                 else:
-                    raise ValueError('%s is not a recognised morphology file format! ').with_traceback('Should be either .hoc, .asc, .swc, .xml!' \
-                         % self.morphology)
+                    raise ValueError(
+                        '%s not a recognised morphology format'
+                        % self.morphology).with_traceback(
+                        'Should be either .hoc, .asc, .swc, .xml')
 
-                #assuming now that morphology file is the correct format
+                # assuming now that morphology file is the correct format
                 try:
                     Import.input(self.morphology)
-                except:
+                except BaseException:
                     if not hasattr(neuron, 'neuroml'):
-                        raise Exception('Can not import, try and copy the ' + \
-                        'nrn/share/lib/python/neuron/neuroml ' + \
-                        'folder into %s' % neuron.__path__[0])
+                        raise Exception(
+                            'Can not import, try and copy the ' +
+                            'nrn/share/lib/python/neuron/neuroml ' +
+                            'folder into %s' %
+                            neuron.__path__[0])
                     else:
-                        raise Exception('something wrong with file, see output')
+                        raise Exception(
+                            'something wrong with file, see output')
                 try:
                     imprt = neuron.h.Import3d_GUI(Import, 0)
-                except:
+                except BaseException:
                     raise Exception('See output, try to correct the file')
 
-                #instantiate the cell object
-                if fileEnding == 'xml' or fileEnding ==  'XML':
-                    #can not currently assign xml to cell template
+                # instantiate the cell object
+                if fileEnding == 'xml' or fileEnding == 'XML':
+                    # can not currently assign xml to cell template
                     try:
                         imprt.instantiate(self.template)
-                    except:
+                    except BaseException:
                         raise Exception("this xml file is not supported")
                 else:
                     imprt.instantiate(self.template)
 
             else:
-                neuron.h.execute("xopen(\"%s\")" % self.morphology, self.template)
+                neuron.h.execute(
+                    "xopen(\"%s\")" %
+                    self.morphology, self.template)
 
-        #set shapes and create sectionlists
+        # set shapes and create sectionlists
         neuron.h.define_shape()
         self._create_sectionlists()
 
@@ -215,7 +223,7 @@ class TemplateCell(Cell):
 
         self.allseclist = self.template.all
 
-        #list of soma sections, assuming it is named on the format "soma*"
+        # list of soma sections, assuming it is named on the format "soma*"
         self.nsomasec = 0
         self.somalist = neuron.h.SectionList()
         for sec in self.allseclist:
