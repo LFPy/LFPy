@@ -83,27 +83,25 @@ electrodeParameters = {
     'y': np.zeros(X.size),
     'z': Z.flatten(),
     'sigma': 0.3,
-    'method': 'soma_as_point',
+    'method': 'root_as_point',
 }
 # instantiate electrode
-electrode = LFPy.RecExtElectrode(**electrodeParameters)
+electrode = LFPy.RecExtElectrode(cell=cell, **electrodeParameters)
+
+# instantiate current dipole moment
+current_dipole_moment = LFPy.CurrentDipoleMoment(cell)
 
 # compute cell response, current dipole moment and extracellular potential
-cell.simulate(electrode=electrode,
+cell.simulate(probes=[electrode, current_dipole_moment],
               rec_imem=True,
-              rec_vmem=True,
-              rec_current_dipole_moment=True)
+              rec_vmem=True)
 
 
 # compute effective dipole location as the cell's 'center of gravity of areas'
-R_cell = (
-    cell.area *
-    np.c_[
-        cell.xmid,
-        cell.ymid,
-        cell.zmid].T /
-    cell.area.sum()).sum(
-    axis=1)
+R_cell = (cell.area * np.c_[cell.x.mean(axis=-1),
+                            cell.y.mean(axis=-1),
+                            cell.z.mean(axis=-1)].T /
+          cell.area.sum()).sum(axis=1)
 
 # compute the electric potential of the dipole using
 # \phi = \frac{1}{4 pi \sigma} \frac{\mathbf{p} \cdot \hat\mathbf{R}}{R^2}
@@ -117,9 +115,9 @@ Y_p = np.zeros(X_p.shape)
 R = np.c_[X_p.flatten(), Y_p.flatten(), Z_p.flatten()]
 R_rel = R - R_cell
 R_scalar = np.sqrt((R_rel**2).sum(axis=1))
-phi_p = 1. / (4 * np.pi * electrode.sigma)
-* np.dot(cell.current_dipole_moment,
-         R_rel.T) / R_scalar**3  # (omega*m*nA*µm/µm^3=mV)
+phi_p = 1. / (4 * np.pi * electrode.sigma) \
+    * ((R_rel @ current_dipole_moment.data).T
+        / R_scalar**3)  # (omega*m*nA*µm/µm^3=mV)
 # mask out values in spatial locations in vicinity of the cell:
 mask = np.zeros(phi_p.shape).astype(bool)
 mask[:, R_scalar < 500.] = True
@@ -132,20 +130,20 @@ electrodeParameters_p = {
     'y': np.zeros(X_p.size),
     'z': Z_p.flatten(),
     'sigma': 0.3,
-    'method': 'soma_as_point',
+    'method': 'root_as_point',
 }
 electrode_p = LFPy.RecExtElectrode(cell=cell, **electrodeParameters_p)
-electrode_p.calc_lfp()
-LFP_p = np.ma.masked_array(electrode_p.LFP, mask=(mask.T == False))
+electrode_p.data = electrode_p.get_transformation_matrix() @ cell.imem
+LFP_p = np.ma.masked_array(electrode_p.data, mask=(mask.T == False))
 
 
 # Compute the magnetic field strengt |\mathbf{H}| at locations corresponding
 # the electrode grid from the dipole moment using the Biot-Savart law
 # H = (p x R) / (4 pi u_0 |R|**3)
-H = np.zeros((cell.current_dipole_moment.shape[0], R_rel.shape[0], 3))
+H = np.zeros((current_dipole_moment.data.shape[1], R_rel.shape[0], 3))
 for i, r in enumerate(R_rel):
     if R_scalar[i] > 500:
-        H[:, i, :] = np.cross(cell.current_dipole_moment, r) / \
+        H[:, i, :] = np.cross(current_dipole_moment.data.T, r) / \
             (4 * np.pi * np.sqrt((r**2).sum())**3)
 
 
@@ -154,7 +152,7 @@ i_axial, d_vectors, pos_vectors = cell.get_axial_currents_from_vmem()
 inds = np.where(R_scalar < 500.)[0]
 for i in inds:
     R_ = R[i, ]
-    for i_, d_, r_ in zip(i_axial, d_vectors, pos_vectors):
+    for i_, d_, r_ in zip(i_axial, d_vectors.T, pos_vectors):
         r_rel = R_ - r_
         H[:, i, :] += np.dot(i_.reshape((-1, 1)),
                              np.cross(d_, r_rel).reshape((1, -1))
@@ -167,8 +165,8 @@ _y = np.zeros(_theta.size)
 _z = 90000. * np.cos(_theta)
 foursphereParams = {
     'radii': [79000., 80000., 85000., 90000.],  # shell radii
-    'sigmas': [0.3, 1.5, 0.015, 0.3],          # shell conductivity
-    'r': np.c_[_x, _y, _z],                    # contact coordinates
+    'sigmas': [0.3, 1.5, 0.015, 0.3],  # shell conductivity
+    'r_electrodes': np.c_[_x, _y, _z],  # contact coordinates
 }
 dipole_position = np.array([0, 0, 78000.])      # dipole location
 
@@ -336,7 +334,8 @@ for ax in [ax0]:
     ax.add_collection(polycol)
 
     # morphology mid points
-    ax.plot(cell.xmid, cell.zmid, 'o', mec='none', mfc='k',
+    ax.plot(cell.x.mean(axis=-1), cell.z.mean(axis=-1), 'o',
+            mec='none', mfc='k',
             markersize=3, zorder=0)
 
     # mark synapse location
@@ -390,17 +389,17 @@ ax0.plot(-80,
          clip_on=False)
 ax0.text(-80, 40, r'$\phi({\bf r}, t)$', horizontalalignment='center')
 idx = cell.get_idx('apic')[2]
-ax0.plot([cell.xmid[idx], -80], [cell.zmid[idx], 30],
+ax0.plot([cell.x[idx].mean(), -80], [cell.z[idx].mean(), 30],
          '-.k', linewidth=1.0, clip_on=False)
 ax0.fill(xz[idx][0], xz[idx][1], edgecolor='none', facecolor='k', zorder=-7)
 ax0.text(
-    cell.xmid[idx] + 5,
-    cell.zmid[idx],
+    cell.x[idx].mean() + 5,
+    cell.z[idx].mean(),
     r'$I_n^\mathrm{m}({\bf r}_n, t)$',
     verticalalignment='center')
 ax0.text(
-    cell.xmid[idx] - 40,
-    cell.zmid[idx] - 10,
+    cell.x[idx].mean() - 40,
+    cell.z[idx].mean() - 10,
     r'$|{\bf r}-{\bf r}_n|$',
     horizontalalignment='center')
 
@@ -408,11 +407,12 @@ ax0.text(
 # draw LFPs at t=|i_syn|_max
 t_max = abs(synapse.i) == abs(synapse.i).max()
 vmax = 2
-im = ax0.pcolormesh(X, Z, electrode.LFP[:, t_max].reshape(X.shape) * 1E3,
+im = ax0.pcolormesh(X, Z, electrode.data[:, t_max].reshape(X.shape) * 1E3,
                     cmap=plt.get_cmap('PRGn', 51), zorder=-10,
                     vmin=-vmax,
                     vmax=vmax,
-                    rasterized=True)
+                    rasterized=True,
+                    shading='auto')
 bbox = np.array(ax0.get_position())
 cax = fig.add_axes([bbox[0][0] + (bbox[1][0] - bbox[0][0]) / 4,
                     bbox[0][1], (bbox[1][0] - bbox[0][0]) / 2, 0.015])
@@ -424,14 +424,16 @@ axcb.set_ticks([-vmax, 0, vmax])
 # plot arrow representing dipole moment magnitude and direction
 ax0.annotate("",  # r"$\mathbf{p}(I_n^{(\mathrm{m})}(t), \mathbf{r}_n)$",
              xy=(R_cell[0], R_cell[2]),
-             xytext=(R_cell[0] + cell.current_dipole_moment[t_max][0, 0] * 5,
-                     R_cell[2] + cell.current_dipole_moment[t_max][0, 2] * 5),
+             xytext=(R_cell[0]
+                     + current_dipole_moment.data[:, t_max][0, 0] * 5,
+                     R_cell[2]
+                     + current_dipole_moment.data[:, t_max][2, 0] * 5),
              arrowprops=dict(arrowstyle="<-", lw=3, color='k',
                              shrinkA=0, shrinkB=0
                              ),
              zorder=100)
-ax0.text(R_cell[0] + cell.current_dipole_moment[t_max][0, 0] * 5 / 2 + 1,
-         R_cell[2] + cell.current_dipole_moment[t_max][0, 2] * 5 / 2,
+ax0.text(R_cell[0] + current_dipole_moment.data[:, t_max][0, 0] * 5 / 2 + 1,
+         R_cell[2] + current_dipole_moment.data[:, t_max][2, 0] * 5 / 2,
          r"$\mathbf{p}(I_n^\mathrm{m}(t), \mathbf{r}_n)$")
 
 
@@ -456,7 +458,7 @@ vax.set_ylabel(r'$V_\mathrm{soma}(t)$ (mV)')
 
 # create axes for extracellular potential
 lfpax = fig.add_axes([0.29, 0.58, bbox[1][0] - 0.27, 0.08])
-lfpax.plot(cell.tvec, electrode.LFP[(
+lfpax.plot(cell.tvec, electrode.data[(
     electrode.x == -80) & (electrode.z == 30), ].ravel() * 1E3, 'b', lw=1)
 lfpax.set_xticks([0, 5, 10])
 lfpax.set_xticklabels([])
@@ -466,7 +468,7 @@ lfpax.set_ylabel(r'$\phi(\mathbf{r}, t)$ ($\mu$V)')
 
 # create axes for current dipole moment
 pax = fig.add_axes([0.29, 0.46, bbox[1][0] - 0.27, 0.08])
-for i, x in enumerate(cell.current_dipole_moment[:, ::2].T):
+for i, x in enumerate(current_dipole_moment.data[::2, :]):
     pax.plot(
         cell.tvec,
         x *
@@ -505,12 +507,14 @@ im = ax1.pcolormesh(X_p, Z_p, phi_p[t_max, ].reshape(X_p.shape) * 1E6,
                     cmap=plt.get_cmap('PRGn', 51), zorder=-10,
                     vmin=-vmax,
                     vmax=vmax,
-                    rasterized=True)
+                    rasterized=True,
+                    shading='auto')
 _ = ax1.pcolormesh(X_p, Z_p, LFP_p.T[t_max, ].reshape(X_p.shape) * 1E6,
                    cmap=plt.get_cmap('PRGn', 51), zorder=-10,
                    vmin=-vmax,
                    vmax=vmax,
-                   rasterized=True)
+                   rasterized=True,
+                   shading='auto')
 # draw circle between "close field" and "far field"
 phi = np.linspace(0, 2 * np.pi, 37)
 r = 500
@@ -564,15 +568,15 @@ for ax in [ax1, ax2]:
     ax.annotate("",  # r"$\mathbf{p}(I_n(t), \mathbf{r}_n)$",
                 xy=(R_cell[0], R_cell[2]),
                 xytext=(R_cell[0]
-                        + cell.current_dipole_moment[t_max][0, 0] * 50,
+                        + current_dipole_moment.data[:, t_max][0, 0] * 50,
                         R_cell[2]
-                        + cell.current_dipole_moment[t_max][0, 2] * 50),
+                        + current_dipole_moment.data[:, t_max][2, 0] * 50),
                 arrowprops=dict(arrowstyle="<-", lw=3, color='k',
                                 shrinkA=0, shrinkB=0
                                 ),
                 zorder=100)
-    ax.text(R_cell[0] + cell.current_dipole_moment[t_max][0, 0] * 25 + 10,
-            R_cell[2] + cell.current_dipole_moment[t_max][0, 2] * 25,
+    ax.text(R_cell[0] + current_dipole_moment.data[:, t_max][0, 0] * 25 + 10,
+            R_cell[2] + current_dipole_moment.data[:, t_max][2, 0] * 25,
             r"$\mathbf{p}$")
     # r"$\mathbf{p}(I_n^{(\mathrm{m})}(t), \mathbf{r}_n)$")
 
@@ -596,7 +600,8 @@ im = ax2.pcolormesh(X_p, Z_p,
                     cmap=plt.get_cmap('BrBG', 51), zorder=-10,
                     vmin=-vmax,
                     vmax=vmax,
-                    rasterized=True)
+                    rasterized=True,
+                    shading='auto')
 
 phi = np.linspace(0, 2 * np.pi, 37)
 r = 500
@@ -698,9 +703,9 @@ for i, r, label in zip(range(4), foursphereParams['radii'], [
         clip_on=False)
 
 # draw measurement points
-ax3.plot(foursphereParams['r'][:, 0], foursphereParams['r']
-         [:, 2], 'ko', label='EEG/MEG sites')
-for i, (x, y, z) in enumerate(foursphereParams['r']):
+ax3.plot(foursphereParams['r_electrodes'][:, 0],
+         foursphereParams['r_electrodes'][:, 2], 'ko', label='EEG/MEG sites')
+for i, (x, y, z) in enumerate(foursphereParams['r_electrodes']):
     # theta = np.arcsin(x / foursphereParams['radii'][-1])
     # if x >= 0:
     #     ax3.text(x, z+5000, r'${}\pi$'.format(theta / np.pi))
@@ -721,7 +726,7 @@ ax3.legend(loc=(0.25, 0.15), frameon=False)
 sphere = LFPy.FourSphereVolumeConductor(
     **foursphereParams
 )
-phi_p = sphere.calc_potential(cell.current_dipole_moment, rz=dipole_position)
+phi_p = sphere.calc_potential(current_dipole_moment.data, rz=dipole_position)
 
 # import example_parallel_network_plotting as plotting
 vlimround = draw_lineplot(ax=ax4,
@@ -756,12 +761,12 @@ ax5.set_title(
     + r"$\mathbf{B}_\mathbf{p}(\mathbf{r}) \cdot \hat{\mathbf{\varphi}}$")
 # radial component of H at squid locations
 # create MEG object and compute magnetic field
-meg = LFPy.MEG(sensor_locations=foursphereParams['r'])
-H = meg.calculate_H(cell.current_dipole_moment, dipole_position)
+meg = LFPy.MEG(sensor_locations=foursphereParams['r_electrodes'])
+H = meg.calculate_H(current_dipole_moment.data, dipole_position)
 
 H_phi = np.zeros(phi_p.shape)
 for j, (h, u) in enumerate(zip(H, phi_hat)):
-    H_phi[j, ] += np.dot(h, u)
+    H_phi[j, ] += h.T @ u
 
 
 vlimround = draw_lineplot(

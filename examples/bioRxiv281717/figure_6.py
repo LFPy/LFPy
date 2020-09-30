@@ -109,7 +109,7 @@ if __name__ == '__main__':
                         transform=ax.transAxes)
 
             plotting.remove_axis_junk(ax)
-            x = plotting.decimate(p[:, i], q=PSET.decimate_q)
+            x = plotting.decimate(p[i, ], q=PSET.decimate_q)
             t = np.arange(x.size) * PSET.dt * PSET.decimate_q
             inds = (t >= T[0]) & (t <= T[1])
             ax.plot(t[inds], x[inds], ls=ls, lw=lw,
@@ -175,11 +175,11 @@ if __name__ == '__main__':
         for me_type in PSET.populationParameters['me_type']:
             # nA um -> 1E-3 nA m unit conversion
             bars.append((f['CURRENT_DIPOLE_MOMENT']
-                         [me_type][tind:, i] * 1E-3).var())
+                         [me_type][i, tind:] * 1E-3).var())
             p_temp += f['CURRENT_DIPOLE_MOMENT'][me_type]
         f.close()
         p_temp *= 1E-6  # nA um -> nA m unit conversion
-        bars.append(p_temp[tind:, i].var())
+        bars.append(p_temp[i, tind:].var())
         barhmax.append(np.array(bars).max())
         barhmin.append(np.array(bars).min())
         del p_temp

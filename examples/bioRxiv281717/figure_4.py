@@ -417,7 +417,7 @@ if __name__ == '__main__':
     bins = np.arange(0, -PSET.layer_data['thickness'].sum(), -50)[::-1]
 
     # file output
-    f = h5py.File(os.path.join(PSET.OUTPUTPATH, 'synapse_positions.h5'))
+    f = h5py.File(os.path.join(PSET.OUTPUTPATH, 'synapse_positions.h5'), 'r')
     for i, (m_post, post) in enumerate(zip(PSET.populationParameters['m_type'],
                                            PSET.populationParameters['me_type']
                                            )):

@@ -168,7 +168,7 @@ PSET.electrodeParams = {
     'n': 50,
     'N': np.array([[0., 1., 0]] * 16),
     'r': 5.,
-    'method': 'soma_as_point',
+    'method': 'root_as_point',
 }
 
 
@@ -180,8 +180,8 @@ _y = np.zeros(_theta.size)
 _z = 90000. * np.cos(_theta)
 PSET.foursphereParams = {
     'radii': [79000., 80000., 85000., 90000.],  # shell radii
-    'sigmas': [0.3, 1.5, 0.015, 0.3],          # shell conductivity
-    'r': np.c_[_x, _y, _z],                    # contact coordinates
+    'sigmas': [0.3, 1.5, 0.015, 0.3],  # shell conductivity
+    'r_electrodes': np.c_[_x, _y, _z],  # contact coordinates
 }
 
 
@@ -191,6 +191,7 @@ PSET.NetworkSimulateArgs = {
     'use_ipas': False,
     'use_icap': False,
     'use_isyn': False,
+    'to_memory': True,
 }
 
 # layer thickness top to bottom L1-L6, Markram et al. 2015 Fig 3A.

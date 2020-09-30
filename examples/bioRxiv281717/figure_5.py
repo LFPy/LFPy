@@ -138,7 +138,7 @@ if __name__ == '__main__':
                 PSET.populationParameters['me_type'])):
         ax = axes[i]
         plotting.remove_axis_junk(ax)
-        data = np.hstack(f['SPIKES'][name]['times'][()].flat)
+        data = np.hstack(f['SPIKES'][name]['times'][()])
         ax.hist(data, bins=bins, color=colors[i][:-1], label=m_name)
         ax.axis(ax.axis('tight'))
         ax.set_xlim(PSET.TRANSIENT, PSET.TRANSIENT + 1000.)
@@ -235,7 +235,7 @@ if __name__ == '__main__':
     p_temp = np.zeros(f['CURRENT_DIPOLE_MOMENT'].shape)
     for name in f['CURRENT_DIPOLE_MOMENT'].dtype.names:
         p_temp += f['CURRENT_DIPOLE_MOMENT'][name]
-    p_net = plotting.decimate(p_temp.T, q=PSET.decimate_q)
+    p_net = plotting.decimate(p_temp, q=PSET.decimate_q)
     p_net *= 1E-3  # nA um -> 1E-3 nA m unit conversion
     del p_temp
 
@@ -291,14 +291,12 @@ if __name__ == '__main__':
             clip_on=False)
 
     # draw measurement points
-    ax.plot(PSET.foursphereParams['r'][:,
-                                       0],
-            PSET.foursphereParams['r'][:,
-                                       2],
+    ax.plot(PSET.foursphereParams['r_electrodes'][:, 0],
+            PSET.foursphereParams['r_electrodes'][:, 2],
             'ko',
             label='EEG/MEG sites')
 
-    for i, (x, y, z) in enumerate(PSET.foursphereParams['r']):
+    for i, (x, y, z) in enumerate(PSET.foursphereParams['r_electrodes']):
         ax.text(x, z + 2500, r'{}'.format(i + 1), ha='center')
 
     # dipole location
@@ -330,8 +328,8 @@ if __name__ == '__main__':
     # compute dipole potentials as the sum of contributions in
     # different positions
     phi_p = np.zeros(
-        (PSET.foursphereParams['r'].shape[0],
-         f['CURRENT_DIPOLE_MOMENT'][name].shape[0]))
+        (PSET.foursphereParams['r_electrodes'].shape[0],
+         f['CURRENT_DIPOLE_MOMENT'][name].shape[1]))
     for i, name in enumerate(PSET.populationParameters['me_type']):
         p = f['CURRENT_DIPOLE_MOMENT'][name]
 
@@ -339,10 +337,12 @@ if __name__ == '__main__':
         sphere = FourSphereVolumeConductor(
             **PSET.foursphereParams
         )
-        phi_p += sphere.calc_potential(p=p, rz=np.array(
-            [0, 0,
-             PSET.foursphereParams['radii'][0]
-             + PSET.layer_data['center'][3:][i % 2]]),)
+        phi_p += sphere.calc_potential(
+            p=p,
+            rz=np.array([0, 0,
+                         PSET.foursphereParams['radii'][0]
+                         + PSET.layer_data['center'][3:][i % 2]])
+            )
 
     vlimround = plotting.draw_lineplot(
         ax=ax,
@@ -397,13 +397,13 @@ if __name__ == '__main__':
                  PSET.foursphereParams['radii'][0]
                  + PSET.layer_data['center'][3:][i % 2]])
             # create MEG object and compute magnetic field
-            meg = MEG(sensor_locations=PSET.foursphereParams['r'])
+            meg = MEG(sensor_locations=PSET.foursphereParams['r_electrodes'])
             H = meg.calculate_H(
                 f['CURRENT_DIPOLE_MOMENT'][name],
                 dipole_position)
 
             for k, (h, u) in enumerate(zip(H, unitvector)):
-                H_rt[k, ] += np.dot(h, u)
+                H_rt[k, ] += np.dot(h.T, u)
 
         B_rt = H_rt * meg.mu  # unit mT (from nA/µm * Tm/A)
         vlimround = plotting.draw_lineplot(
@@ -446,18 +446,18 @@ if __name__ == '__main__':
                  PSET.foursphereParams['radii'][0]
                  + PSET.layer_data['center'][3:][i % 2]])
             # create MEG object and compute magnetic field
-            meg = MEG(sensor_locations=PSET.foursphereParams['r'])
+            meg = MEG(sensor_locations=PSET.foursphereParams['r_electrodes'])
             H = meg.calculate_H(
                 np.dot(
                     Rx90,
-                    f['CURRENT_DIPOLE_MOMENT'][name].T).T,
+                    f['CURRENT_DIPOLE_MOMENT'][name]),
                 dipole_position)
             # compute the radial unit vector from the center of the sphere to
             # each
             # measurement point
 
             for k, (h, u) in enumerate(zip(H, unitvector)):
-                H_rt[k, ] += np.dot(h, u)
+                H_rt[k, ] += np.dot(h.T, u)
 
         B_rt = H_rt * meg.mu  # unit mT (from nA/µm * Tm/A)
         vlimround = plotting.draw_lineplot(
