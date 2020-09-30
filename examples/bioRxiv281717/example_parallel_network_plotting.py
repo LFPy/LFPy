@@ -316,14 +316,6 @@ def plot_m_types(ax, PSET, colors, section=[
         cell = NetworkCell(**PSET.cellParameters[NRN])
         cell.set_pos(x=i * spacing, y=0, z=data['pop_args']['loc'])
         cell.set_rotation(x=np.pi / 2)
-        print(
-            NRN,
-            cell.zstart.min(),
-            cell.zmid.min(),
-            cell.zend.min(),
-            cell.zstart.max(),
-            cell.zmid.max(),
-            cell.zend.max())
         n_segs += [cell.totnsegs]
         areas += [cell.area[cell.get_idx(section)].sum()]
 

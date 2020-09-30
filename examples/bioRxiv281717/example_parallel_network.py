@@ -144,7 +144,8 @@ but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 '''
-from example_parallel_network_plotting import decimate
+# from example_parallel_network_plotting import decimate
+from mpi4py import MPI
 import LFPy
 from time import time
 import os
@@ -155,7 +156,7 @@ from matplotlib.gridspec import GridSpec
 from matplotlib.collections import PolyCollection
 from matplotlib.ticker import MaxNLocator
 import matplotlib.pyplot as plt
-from mpi4py import MPI
+from scipy.signal import decimate
 import neuron
 import matplotlib
 matplotlib.use('agg')
@@ -331,16 +332,21 @@ if __name__ == '__main__':
     tic = time()
 
     ##########################################################################
-    # Set up extracellular electrode
+    # Set up extracellular electrodes and devices
     ##########################################################################
+    probes = []
+
     if PSET.COMPUTE_LFP:
-        electrode = LFPy.RecExtElectrode(**PSET.electrodeParams)
-    else:
-        electrode = None
+        electrode = LFPy.RecExtElectrode(cell=None, **PSET.electrodeParams)
+        probes.append(electrode)
 
     if PSET.COMPUTE_ECOG:
-        ecog_electrode = LFPy.RecMEAElectrode(**PSET.ecogParameters)
-        electrode = [electrode, ecog_electrode]
+        ecog_electrode = LFPy.RecMEAElectrode(cell=None, **PSET.ecogParameters)
+        probes.append(ecog_electrode)
+
+    if PSET.COMPUTE_P:
+        current_dipole_moment = LFPy.CurrentDipoleMoment(cell=None)
+        probes.append(current_dipole_moment)
 
     ##########################################################################
     # Recording of additional variables
@@ -359,16 +365,10 @@ if __name__ == '__main__':
     COMM.Barrier()
     if RANK == 0:
         print('running simulation....')
-    SPIKES, SUMMED_OUTPUT, CURRENT_DIPOLE_MOMENT = network.simulate(
-        electrode=electrode,
-        rec_current_dipole_moment=PSET.COMPUTE_P,
-        rec_pop_contributions=PSET.rec_pop_contributions,
-        **PSET.NetworkSimulateArgs)
-    # note: OUTPUT is a structured array if
-    #   PSET.COMPUTE_LFP = True and PSET.COMPUTE_P is False and
-    #   PSET.rec_pop_contributions is False.
-    #   If PSET.COMPUTE_P == True and/or PSET.rec_pop_contributions == True,
-    #   then output is a tuple (OUTPUT, current_dipole_moment)
+    SPIKES = network.simulate(probes=probes,
+                              rec_pop_contributions=PSET.rec_pop_contributions,
+                              **PSET.NetworkSimulateArgs)
+
     if RANK == 0:
         run_simulation_time = time() - tic
         print('Simulations finished in {} seconds'.format(run_simulation_time))
@@ -382,14 +382,18 @@ if __name__ == '__main__':
         f = h5py.File(os.path.join(PSET.OUTPUTPATH,
                                    'example_parallel_network_output.h5'),
                       'w')
+
         if PSET.COMPUTE_P:
-            f['CURRENT_DIPOLE_MOMENT'] = CURRENT_DIPOLE_MOMENT
+            # save current dipole moment
+            f['CURRENT_DIPOLE_MOMENT'] = current_dipole_moment.data
+
         if PSET.COMPUTE_LFP:
             # save all extracellular traces
-            f['SUMMED_OUTPUT'] = SUMMED_OUTPUT[0]
+            f['SUMMED_OUTPUT'] = electrode.data
         if PSET.COMPUTE_ECOG:
             # save extracellular potential on top of cortex
-            f['SUMMED_ECOG'] = SUMMED_OUTPUT[1]
+            f['SUMMED_ECOG'] = ecog_electrode.data
+
         # all spikes
         grp = f.create_group('SPIKES')
         # variable length datatype for spike time arrays
@@ -411,9 +415,10 @@ if __name__ == '__main__':
     COMM.Barrier()
 
     # clean up namespace
-    if PSET.COMPUTE_LFP:
-        del SUMMED_OUTPUT
+    # if PSET.COMPUTE_LFP:
+    #     del SUMMED_OUTPUT
     # del neurons, spikes
+    del electrode, ecog_electrode, current_dipole_moment, probes
 
     # tic toc
     if RANK == 0:
@@ -550,9 +555,11 @@ if __name__ == '__main__':
                         zips.append(list(zip(x, z)))
                     for idx, syn in zip(cell.synidx, cell.netconsynapses):
                         if hasattr(syn, 'e') and syn.e > -50:
-                            synpos_e += [[cell.xmid[idx], cell.zmid[idx]]]
+                            synpos_e += [[cell.x[idx].mean(),
+                                          cell.z[idx].mean()]]
                         else:
-                            synpos_i += [[cell.xmid[idx], cell.zmid[idx]]]
+                            synpos_i += [[cell.x[idx].mean(),
+                                          cell.z[idx].mean()]]
 
                 polycol = PolyCollection(zips,
                                          edgecolors=colors[i],
