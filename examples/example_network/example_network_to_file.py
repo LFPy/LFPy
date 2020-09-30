@@ -6,9 +6,12 @@ channels distributed throughout the apical dendrite. The corresponding
 morphology and template specifications are in the files BallAndStick.hoc and
 BallAndStickTemplate.hoc.
 
+Same as example_network.py, except that electrode and current dipole moment
+output is simulated to file.
+
 Execution (w. MPI):
 
-    mpirun -np 2 python example_network.py
+    mpirun -np 2 python example_network_to_file.py
 
 Copyright (C) 2017 Computational Neuroscience Group, NMBU.
 
@@ -30,6 +33,7 @@ from matplotlib.gridspec import GridSpec
 import numpy as np
 import scipy.signal as ss
 import scipy.stats as st
+import h5py
 from mpi4py import MPI
 import neuron
 from LFPy import NetworkCell, Network, Synapse, RecExtElectrode, \
@@ -135,7 +139,7 @@ def draw_lineplot(
 # Set up shared and population-specific parameters
 ##########################################################################
 # relative path for simulation output:
-OUTPUTPATH = 'example_network_output'
+OUTPUTPATH = 'example_network_to_file_output'
 
 # class NetworkCell parameters:
 cellParameters = dict(
@@ -181,8 +185,8 @@ electrodeParameters = dict(
 # method Network.simulate() parameters:
 networkSimulationArguments = dict(
     rec_pop_contributions=True,
-    to_memory=True,
-    to_file=False
+    to_memory=False,
+    to_file=True
 )
 
 # population names, sizes and connection probability:
@@ -394,20 +398,21 @@ if __name__ == '__main__':
         fig.suptitle('extracellular potentials')
         for i, (ax, name, label) in enumerate(zip(axes, ['E', 'I', 'imem'],
                                                   ['E', 'I', 'sum'])):
-            draw_lineplot(ax,
-                          ss.decimate(electrode.data[name], q=16,
-                                      zero_phase=True),
-                          dt=network.dt * 16,
-                          T=(200, 1200),
-                          scaling_factor=1.,
-                          vlimround=None,
-                          label=label,
-                          scalebar=True,
-                          unit='mV',
-                          ylabels=True if i == 0 else False,
-                          color='C{}'.format(i),
-                          ztransform=True
-                          )
+            with h5py.File(os.path.join(OUTPUTPATH, 'OUTPUT.h5'), 'r') as f:
+                draw_lineplot(ax,
+                              ss.decimate(f['RecExtElectrode0'][name], q=16,
+                                          zero_phase=True),
+                              dt=network.dt * 16,
+                              T=(200, 1200),
+                              scaling_factor=1.,
+                              vlimround=None,
+                              label=label,
+                              scalebar=True,
+                              unit='mV',
+                              ylabels=True if i == 0 else False,
+                              color='C{}'.format(i),
+                              ztransform=True
+                              )
             ax.set_title(label)
         fig.savefig(os.path.join(OUTPUTPATH, 'extracellular_potential.pdf'),
                     bbox_inches='tight')
@@ -417,26 +422,29 @@ if __name__ == '__main__':
         fig, axes = plt.subplots(3, 3, figsize=(6.4, 4.8))
         fig.subplots_adjust(wspace=0.45)
         fig.suptitle('current-dipole moments')
-        for i, u in enumerate(['x', 'y', 'z']):
-            for j, (name, label) in enumerate(zip(['E', 'I', 'imem'],
-                                                  ['E', 'I', 'sum'])):
-                t = np.arange(current_dipole_moment.data.shape[1]) * network.dt
-                inds = (t >= 200) & (t <= 1200)
-                axes[i, j].plot(
-                    t[inds][::16],
-                    ss.decimate(current_dipole_moment.data[name][i, inds],
-                                q=16, zero_phase=True),
-                    'C{}'.format(j))
+        with h5py.File(os.path.join(OUTPUTPATH, 'OUTPUT.h5'), 'r') as f:
+            for i, u in enumerate(['x', 'y', 'z']):
+                for j, (name, label) in enumerate(zip(['E', 'I', 'imem'],
+                                                      ['E', 'I', 'sum'])):
+                    t = np.arange(f['CurrentDipoleMoment0'][()].shape[1]
+                                  ) * network.dt
+                    inds = (t >= 200) & (t <= 1200)
+                    axes[i, j].plot(
+                        t[inds][::16],
+                        ss.decimate(f['CurrentDipoleMoment0'][name][i, inds],
+                                    q=16, zero_phase=True),
+                        'C{}'.format(j))
 
-                if j == 0:
-                    axes[i, j].set_ylabel(r'$\mathbf{p}\cdot\mathbf{e}_{' +
-                                          '{}'.format(u) + '}$ (nA$\\mu$m)')
-                if i == 0:
-                    axes[i, j].set_title(label)
-                if i != 2:
-                    axes[i, j].set_xticklabels([])
-                else:
-                    axes[i, j].set_xlabel('t (ms)')
+                    if j == 0:
+                        axes[i, j].set_ylabel(r'$\mathbf{p}\cdot\mathbf{e}_{'
+                                              + '{}'.format(u)
+                                              + '}$ (nA$\\mu$m)')
+                    if i == 0:
+                        axes[i, j].set_title(label)
+                    if i != 2:
+                        axes[i, j].set_xticklabels([])
+                    else:
+                        axes[i, j].set_xlabel('t (ms)')
         fig.savefig(os.path.join(OUTPUTPATH, 'current_dipole_moment.pdf'),
                     bbox_inches='tight')
         plt.close(fig)
