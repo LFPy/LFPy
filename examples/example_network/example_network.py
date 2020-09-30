@@ -175,7 +175,7 @@ electrodeParameters = dict(
     r=5.,
     n=50,
     sigma=0.3,
-    method="root_as_point"
+    method="linesource"
 )
 
 # method Network.simulate() parameters:
