@@ -60,7 +60,7 @@ synapseParameters = {
 synapse = LFPy.Synapse(cell, **synapseParameters)
 synapse.set_spike_times(np.array([1.]))
 cell.set_pos(z=somapos[2])
-cell.simulate(rec_imem=True, rec_vmem=True, rec_current_dipole_moment=True)
+cell.simulate(rec_imem=True, rec_vmem=True)
 
 # Setting up recording positions
 elec_z = np.array([radii[0],
@@ -72,7 +72,7 @@ elec_x = np.zeros(elec_z.shape)
 elec_y = np.zeros(elec_x.shape)
 eeg_coords = np.array([elec_x.flatten(), elec_y.flatten(), elec_z.flatten()]).T
 
-MD_4s = LFPy.FourSphereVolumeConductor(radii, sigmas, eeg_coords)
+MD_4s = LFPy.FourSphereVolumeConductor(eeg_coords, radii, sigmas)
 phi = MD_4s.calc_potential_from_multi_dipoles(cell) * 1e6  # from mV to nV
 
 # Plotting results
@@ -86,14 +86,14 @@ ax = fig.add_subplot(111, aspect=1, frameon=False, xlim=xlim, ylim=ylim,
 # Plotting cell
 for sec in LFPy.cell.neuron.h.allsec():
     idx = cell.get_idx(sec.name())
-    l_cell, = ax.plot(np.r_[cell.xstart[idx], cell.xend[idx][-1]],
-                      np.r_[cell.zstart[idx], cell.zend[idx][-1]],
-                      color='r', zorder=3,
-                      lw=np.sqrt(np.average(cell.diam[idx])))
+    l_cell = ax.plot(cell.x[idx], cell.z[idx],
+                     color='r', zorder=3,
+                     lw=np.sqrt(np.average(cell.d[idx])),
+                     label="Cell")
 
-l_syn, = ax.plot(cell.xmid[synapseParameters['idx']],
-                 cell.zmid[synapseParameters['idx']],
-                 '*', c='orange', zorder=5)
+l_syn, = ax.plot(synapse.x, synapse.z,
+                 '*', c='orange', zorder=5,
+                 label="Synapse")
 
 # Plotting the layers of the head model
 max_angle = np.abs(np.rad2deg(np.arcsin(xlim[0] / ylim[0])))
@@ -101,7 +101,7 @@ plot_angle = np.linspace(-max_angle, max_angle, 100)
 for b_idx in range(len(radii)):
     x_ = radii[b_idx] * np.sin(np.deg2rad(plot_angle))
     z_ = radii[b_idx] * np.cos(np.deg2rad(plot_angle))
-    l_curved, = ax.plot(x_, z_, ':', c="gray")
+    l_curved, = ax.plot(x_, z_, ':', c="gray", label="Four-sphere boundary")
 
 ax.text(xlim[0], radii[0] - 70, "Brain", va="top", ha="left", color="k")
 ax.text(xlim[0], radii[0] + 70, "CSF", va="top", ha="left", color="k")
@@ -121,7 +121,8 @@ def elec_clr(elec_idx):
 
 for elec_idx in range(len(elec_z)):
     l_elec, = ax.plot(elec_x[elec_idx], elec_z[elec_idx],
-                      'o', c=elec_clr(elec_idx), clip_on=False)
+                      'o', c=elec_clr(elec_idx), clip_on=False,
+                      label="Electrode")
     y_ = phi[elec_idx, :]
     norm_const = np.max(np.abs(y_))
     y_ = y_ * y_norm / norm_const + elec_z[elec_idx]
@@ -141,9 +142,10 @@ ax.text((x_[0] + x_[-1]) / 2, elec_z[1] - y_norm * 1.2,
 
 ax_inset = fig.add_axes([0.7, 0.05, 0.25, 0.15], title="Synaptic current",
                         ylabel="nA", xlabel="Time (ms)")
-l_isyn, = ax_inset.plot(cell.tvec, synapse.i, c='orange')
+l_isyn, = ax_inset.plot(cell.tvec, synapse.i, c='orange',
+                        label="Synaptic current")
 
-ax.legend([l_cell, l_curved, l_syn, l_isyn, l_elec],
+ax.legend([l_cell[0], l_curved, l_syn, l_isyn, l_elec],
           ["Cell", "Four-sphere boundary", "Synapse",
            "Synaptic current", "Electrode"],
           ncol=1, loc=(0.01, -0.1), frameon=False)

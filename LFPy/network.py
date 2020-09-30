@@ -1003,10 +1003,9 @@ class Network(object):
             if not rec_imem:
                 if self.verbose:
                     print("rec_imem==False, not recording membrane currents!")
-            _run_simulation(self, cvode, variable_dt, atol)
+            self._run_simulation(cvode, variable_dt, atol)
         else:
-            _run_simulation_with_probes(
-                self,
+            self._run_simulation_with_probes(
                 cvode=cvode,
                 probes=probes,
                 variable_dt=variable_dt,
@@ -1078,9 +1077,13 @@ class Network(object):
             dtype = []
             for key, value in f0[list(f0.keys())[0]].items():
                 dtype.append((str(key), np.float))
-            shape = value.shape
             for grp in f0.keys():
                 if RANK == 0:
+                    # get shape from the first dataset
+                    # (they should all be equal):
+                    for value in f0[grp].values():
+                        shape = value.shape
+                        continue
                     f1[grp] = np.zeros(shape, dtype=dtype)
                 for key, value in f0[grp].items():
                     if RANK == 0:
@@ -1096,16 +1099,12 @@ class Network(object):
                 f1.close()
             os.remove(fname)
 
-        # if probes is None and not rec_pop_contributions:
-        #    return dict(times=times, gids=gids)
-        # else:
         if probes is not None:
             if to_memory:
                 # communicate and sum up measurements on each probe before
                 # returing spike times and corresponding gids:
                 for probe in probes:
-                    data = ReduceStructArray(probe.data)
-                    probe.data = data
+                    probe.data = ReduceStructArray(probe.data)
 
         return dict(times=times, gids=gids)
 
@@ -1151,296 +1150,322 @@ class Network(object):
         # return number of segments per population and DummyCell object
         return nsegs, DummyCell(totnsegs, imem, x, y, z, d, area, somainds)
 
+    def _run_simulation(self, cvode, variable_dt=False, atol=0.001):
+        """
+        Running the actual simulation in NEURON, simulations in NEURON
+        are now interruptable.
 
-def _run_simulation(network, cvode, variable_dt=False, atol=0.001):
-    """
-    Running the actual simulation in NEURON, simulations in NEURON
-    are now interruptable.
+        Parameters
+        ----------
+        cvode: neuron.h.CVode() object
+        variable_dt: bool
+            switch for variable-timestep method
+        atol: float
+            absolute tolerance with CVode for variable time-step method
+        """
+        # set maximum integration step, it is necessary for communication of
+        # spikes across RANKs to occur.
+        self.pc.set_maxstep(10)
 
-    Parameters
-    ----------
-    network: LFPy.Network object
-        instantiation of class LFPy.Network
-    cvode: neuron.h.CVode() object
-    variable_dt: bool
-        switch for variable-timestep method
-    atol: float
-        absolute tolerance with CVode for variable time-step method
-    """
-    # set maximum integration step, it is necessary for communication of
-    # spikes across RANKs to occur.
-    network.pc.set_maxstep(10)
+        # time resolution
+        neuron.h.dt = self.dt
 
-    # time resolution
-    neuron.h.dt = network.dt
+        # needed for variable dt method
+        if variable_dt:
+            cvode.active(1)
+            cvode.atol(atol)
+        else:
+            cvode.active(0)
 
-    # needed for variable dt method
-    if variable_dt:
-        cvode.active(1)
-        cvode.atol(atol)
-    else:
-        cvode.active(0)
+        # initialize state
+        neuron.h.finitialize(self.v_init)
 
-    # initialize state
-    neuron.h.finitialize(network.v_init)
+        # initialize current- and record
+        if cvode.active():
+            cvode.re_init()
+        else:
+            neuron.h.fcurrent()
+        neuron.h.frecord_init()
 
-    # initialize current- and record
-    if cvode.active():
-        cvode.re_init()
-    else:
-        neuron.h.fcurrent()
-    neuron.h.frecord_init()
+        # Starting simulation at tstart
+        neuron.h.t = self.tstart
 
-    # Starting simulation at tstart
-    neuron.h.t = network.tstart
+        # only needed if LFPy.Synapse classes are used.
+        for name in self.population_names:
+            for cell in self.populations[name].cells:
+                cell._loadspikes()
 
-    # only needed if LFPy.Synapse classes are used.
-    for name in network.population_names:
-        for cell in network.populations[name].cells:
+        # neuron.run() should be marginally faster than calling
+        # neuron.h.fadvance()
+        # in a while loop (https://github.com/LFPy/LFPy/pull/217)
+        neuron.run(self.tstop)
+
+    def _run_simulation_with_probes(self, cvode,
+                                    probes=None,
+                                    variable_dt=False,
+                                    atol=0.001,
+                                    rtol=0.,
+                                    to_memory=True,
+                                    to_file=False,
+                                    file_name=None,
+                                    use_ipas=False, use_icap=False,
+                                    use_isyn=False,
+                                    rec_pop_contributions=False
+                                    ):
+        """
+        Running the actual simulation in NEURON with list of probes.
+        Each object in `probes` must have a public method
+        `get_transformation_matrix` which returns a linear mapping of
+        transmembrane currents to corresponding measurement.
+
+        Parameters
+        ----------
+        cvode: neuron.h.CVode() object
+        probes: list of :obj:, optional
+            None or list of LFPykit.RecExtElectrode like object instances that
+            each have a public method `get_transformation_matrix` returning
+            a matrix that linearly maps each compartments' transmembrane
+            current to corresponding measurement as
+
+            .. math:: \\mathbf{P} = \\mathbf{M} \\mathbf{I}
+
+        variable_dt: bool
+            switch for variable-timestep method
+        atol: float
+            absolute tolerance with CVode for variable time-step method
+        rtol: float
+            relative tolerance with CVode for variable time-step method
+        to_memory: bool
+            Boolean flag for computing extracellular potentials,
+            default is True.
+            If True, the corresponding <probe>.data attribute will be set.
+        to_file: bool or None
+            Boolean flag for computing extracellular potentials to file
+            <OUTPUTPATH/file_name>, default is False. Raises an Exception if
+            `to_memory` is True.
+        file_name: formattable str
+            If to_file is True, file which extracellular potentials will be
+            written to. The file format is HDF5, default is
+            "output_RANK_{:03d}.h5". The output is written per RANK, and the
+            RANK # will be inserted into the corresponding file name.
+        use_ipas: bool
+            if True, compute the contribution to extracellular potentials
+            across the passive leak channels embedded in the cells membranes
+            summed over populations
+        use_icap: bool
+            if True, compute the contribution to extracellular potentials
+            across the membrane capacitance embedded in the cells membranes
+            summed over populations
+        use_isyn: bool
+            if True, compute the contribution to extracellular potentials
+            across the excitatory and inhibitory synapses embedded in the cells
+            membranes summed over populations
+        rec_pop_contributions: bool
+            if True, compute and return single-population contributions to the
+            extracellular potential during each time step of the simulation
+
+        Returns
+        -------
+
+        Raises
+        ------
+        Exception:
+        - `if to_memory == to_file == True`
+        - `if to_file == True and file_name is None`
+        - `if to_file == variable_dt == True`
+        - `if <probe>.cell is not None`
+        """
+        if to_memory and to_file:
+            raise Exception('to_memory and to_file can not both be True')
+        if to_file and file_name is None:
+            raise Exception
+        # create a dummycell object lumping together needed attributes
+        # for calculation of extracellular potentials etc. The population_nsegs
+        # array is used to slice indices such that single-population
+        # contributions to the potential can be calculated.
+        population_nsegs, network_dummycell = self._create_network_dummycell()
+
+        # set cell attribute on each probe, assuming that each probe was
+        # instantiated with argument cell=None
+        for probe in probes:
+            if probe.cell is None:
+                probe.cell = network_dummycell
+            else:
+                raise Exception('{}.cell!=None'.format(probe.__class__))
+
+        # create list of transformation matrices; one for each probe
+        transforms = []
+        if probes is not None:
+            for probe in probes:
+                transforms.append(probe.get_transformation_matrix())
+
+        # reset probe.cell to None, as it is no longer needed
+        for probe in probes:
+            probe.cell = None
+
+        # set maximum integration step, it is necessary for communication of
+        # spikes across RANKs to occur.
+        # NOTE: Should this depend on the minimum delay in the network?
+        self.pc.set_maxstep(10)
+
+        # Initialize NEURON simulations of cell object
+        neuron.h.dt = self.dt
+
+        # needed for variable dt method
+        if variable_dt:
+            cvode.active(1)
+            cvode.atol(atol)
+        else:
+            cvode.active(0)
+
+        # initialize state
+        neuron.h.finitialize(self.v_init)
+
+        # use fast calculation of transmembrane currents
+        cvode.use_fast_imem(1)
+
+        # initialize current- and record
+        if cvode.active():
+            cvode.re_init()
+        else:
+            neuron.h.fcurrent()
+        neuron.h.frecord_init()
+
+        # Starting simulation at tstart
+        neuron.h.t = self.tstart
+
+        # create list of cells across all populations to simplify loops
+        cells = []
+        for name in self.population_names:
+            cells += self.populations[name].cells
+
+        # load spike times from NetCon, only needed if LFPy.Synapse class
+        # is used
+        for cell in cells:
             cell._loadspikes()
 
-    # neuron.run() should be marginally faster than calling neuron.h.fadvance()
-    # in a while loop (https://github.com/LFPy/LFPy/pull/217)
-    neuron.run(network.tstop)
-    '''while neuron.h.t < network.tstop:
-        neuron.h.fadvance()
-        if neuron.h.t % 100 == 0:
-            if RANK == 0:
-                print('t = {} ms'.format(neuron.h.t))'''
-
-    # return
-
-
-def _run_simulation_with_probes(network, cvode,
-                                probes=None,
-                                variable_dt=False,
-                                atol=0.001,
-                                rtol=0.,
-                                to_memory=True,
-                                to_file=False,
-                                file_name=None,
-                                use_ipas=False, use_icap=False,
-                                use_isyn=False,
-                                rec_pop_contributions=False
-                                ):
-    """
-    Running the actual simulation in NEURON with list of probes.
-    Each object in `probes` must have a public method
-    `get_transformation_matrix` which returns a linear mapping of
-    transmembrane currents to corresponding measurement.
-
-    Parameters
-    ----------
-    network: LFPy.Network object
-        instantiation of class LFPy.Network
-    cvode: neuron.h.CVode() object
-    probes: list of :obj:, optional
-        None or list of LFPykit.RecExtElectrode like object instances that
-        each have a public method `get_transformation_matrix` returning
-        a matrix that linearly maps each compartments' transmembrane
-        current to corresponding measurement as
-
-        .. math:: \\mathbf{P} = \\mathbf{M} \\mathbf{I}
-
-    variable_dt: bool
-        switch for variable-timestep method
-    atol: float
-        absolute tolerance with CVode for variable time-step method
-    rtol: float
-        relative tolerance with CVode for variable time-step method
-    to_memory: bool
-        Boolean flag for computing extracellular potentials, default is True.
-        If True, the corresponding <probe>.data attribute will be set.
-    to_file: bool or None
-        Boolean flag for computing extracellular potentials to file
-        <OUTPUTPATH/file_name>, default is False. Raises an Exception if
-        `to_memory` is True.
-    file_name: formattable str
-        If to_file is True, file which extracellular potentials will be
-        written to. The file format is HDF5, default is
-        "output_RANK_{:03d}.h5". The output is written per RANK, and the
-        RANK # will be inserted into the corresponding file name.
-    use_ipas: bool
-        if True, compute the contribution to extracellular potentials across
-        the passive leak channels embedded in the cells membranes summed over
-        populations
-    use_icap: bool
-        if True, compute the contribution to extracellular potentials across
-        the membrane capacitance embedded in the cells membranes summed over
-        populations
-    use_isyn: bool
-        if True, compute the contribution to extracellular potentials across
-        the excitatory and inhibitory synapses embedded in the cells membranes
-        summed over populations
-    rec_pop_contributions: bool
-        if True, compute and return single-population contributions to the
-        extracellular potential during each time step of the simulation
-
-    Returns
-    -------
-
-    Raises
-    ------
-    Exception:
-    - `if to_memory == to_file == True`
-    - `if to_file == True and file_name is None`
-    - `if to_file == variable_dt == True`
-    - `if <probe>.cell is not None`
-    """
-    if to_memory and to_file:
-        raise Exception('to_memory and to_file can not both be True')
-    if to_file and file_name is None:
-        raise Exception
-    # create a dummycell object lumping together needed attributes
-    # for calculation of extracellular potentials etc. The population_nsegs
-    # array is used to slice indices such that single-population
-    # contributions to the potential can be calculated.
-    population_nsegs, network_dummycell = network._create_network_dummycell()
-
-    # set cell attribute on each probe, assuming that each probe was
-    # instantiated with argument cell=None
-    for probe in probes:
-        if probe.cell is None:
-            probe.cell = network_dummycell
-        else:
-            raise Exception('{}.cell!=None'.format(probe.__class__))
-
-    # create list of transformation matrices; one for each probe
-    transforms = []
-    if probes is not None:
-        for probe in probes:
-            transforms.append(probe.get_transformation_matrix())
-
-    # reset probe.cell to None, as it is no longer needed
-    for probe in probes:
-        probe.cell = None
-
-    # set maximum integration step, it is necessary for communication of
-    # spikes across RANKs to occur.
-    # NOTE: Should this depend on the minimum delay in the network?
-    network.pc.set_maxstep(10)
-
-    # Initialize NEURON simulations of cell object
-    neuron.h.dt = network.dt
-
-    # needed for variable dt method
-    if variable_dt:
-        cvode.active(1)
-        cvode.atol(atol)
-    else:
-        cvode.active(0)
-
-    # initialize state
-    neuron.h.finitialize(network.v_init)
-
-    # use fast calculation of transmembrane currents
-    cvode.use_fast_imem(1)
-
-    # initialize current- and record
-    if cvode.active():
-        cvode.re_init()
-    else:
-        neuron.h.fcurrent()
-    neuron.h.frecord_init()
-
-    # Starting simulation at tstart
-    neuron.h.t = network.tstart
-
-    # create list of cells across all populations to simplify loops
-    cells = []
-    for name in network.population_names:
-        cells += network.populations[name].cells
-
-    # load spike times from NetCon, only needed if LFPy.Synapse class is used
-    for cell in cells:
-        cell._loadspikes()
-
-    # define data type for structured arrays dependent on the boolean arguments
-    dtype = [('imem', np.float)]
-    if use_ipas:
-        dtype += [('ipas', np.float)]
-    if use_icap:
-        dtype += [('icap', np.float)]
-    if use_isyn:
-        dtype += [('isyn_e', np.float), ('isyn_i', np.float)]
-    if rec_pop_contributions:
-        dtype += list(zip(network.population_names,
-                          [np.float] * len(network.population_names)))
-
-    # setup list of structured arrays for all extracellular potentials
-    # at each contact from different source terms and subpopulations
-    if to_memory:
-        for probe, M in zip(probes, transforms):
-            probe.data = np.zeros((M.shape[0],
-                                   int(network.tstop / network.dt) + 1),
-                                  dtype=dtype)
-
-    # signals for each probe will be stored here during simulations
-    if to_file:
-        # ensure right ending:
-        if file_name.split('.')[-1] != 'h5':
-            file_name += '.h5'
-        outputfile = h5py.File(os.path.join(network.OUTPUTPATH,
-                                            file_name.format(RANK)), 'w')
-
-        # define unique group names for each probe
-        names = []
-        for probe, M in zip(probes, transforms):
-            name = probe.__class__.__name__
-            i = 0
-            while True:
-                if name + '{}'.format(i) not in names:
-                    names.append(name)
-                    break
-                i += 1
-
-        # create groups
-        for i, (name, M, probe) in enumerate(zip(names, transforms, probes)):
-            # can't do it this way until h5py issue #740
-            # (https://github.com/h5py/h5py/issues/740) is fixed:
-            # outputfile['PROBE_[{}]'.format(name)] = np.zeros((M.shape[0],
-            #     int(network.tstop / network.dt) + 1), dtype=dtype)
-            probe.data = outputfile.create_group('PROBE_{}'.format(name))
-            for key, val in dtype:
-                probe.data[key] = np.zeros((M.shape[0],
-                                            int(network.tstop / network.dt)
-                                            + 1),
-                                           dtype=val)
-
-    # temporary vector to store membrane currents at each timestep:
-    imem = np.zeros(network_dummycell.totnsegs, dtype=dtype)
-
-    def get_imem(imem):
-        '''helper function to gather currents across all cells on this RANK'''
-        i = 0
-        totnsegs = 0
+        # define data type for structured arrays dependent on the boolean
+        # arguments
+        dtype = [('imem', np.float)]
+        if use_ipas:
+            dtype += [('ipas', np.float)]
+        if use_icap:
+            dtype += [('icap', np.float)]
         if use_isyn:
-            imem['isyn_e'] = 0.  # must reset these for every iteration
-            imem['isyn_i'] = 0.  # because we sum over synapses
-        for cell in cells:
-            for sec in cell.allseclist:
-                for seg in sec:
-                    imem['imem'][i] = seg.i_membrane_
-                    if use_ipas:
-                        imem['ipas'][i] = seg.i_pas
-                    if use_icap:
-                        imem['icap'][i] = seg.i_cap
+            dtype += [('isyn_e', np.float), ('isyn_i', np.float)]
+        if rec_pop_contributions:
+            dtype += list(zip(self.population_names,
+                              [np.float] * len(self.population_names)))
+
+        # setup list of structured arrays for all extracellular potentials
+        # at each contact from different source terms and subpopulations
+        if to_memory:
+            for probe, M in zip(probes, transforms):
+                probe.data = np.zeros((M.shape[0],
+                                       int(self.tstop / self.dt) + 1),
+                                      dtype=dtype)
+
+        # signals for each probe will be stored here during simulations
+        if to_file:
+            # ensure right ending:
+            if file_name.split('.')[-1] != 'h5':
+                file_name += '.h5'
+            outputfile = h5py.File(os.path.join(self.OUTPUTPATH,
+                                                file_name.format(RANK)), 'w')
+
+            # define unique group names for each probe
+            names = []
+            for probe, M in zip(probes, transforms):
+                name = probe.__class__.__name__
+                i = 0
+                while True:
+                    if name + '{}'.format(i) not in names:
+                        names.append(name + '{}'.format(i))
+                        break
                     i += 1
 
+            # create groups
+            for i, (name, probe, M) in enumerate(zip(names, probes,
+                                                     transforms)):
+                # can't do it this way until h5py issue #740
+                # (https://github.com/h5py/h5py/issues/740) is fixed:
+                # outputfile['{}'.format(name)] = np.zeros((M.shape[0],
+                #     int(network.tstop / network.dt) + 1), dtype=dtype)
+                probe.data = outputfile.create_group('{}'.format(name))
+                for key, val in dtype:
+                    probe.data[key] = np.zeros((M.shape[0],
+                                                int(self.tstop / self.dt)
+                                                + 1),
+                                               dtype=val)
+
+        # temporary vector to store membrane currents at each timestep:
+        imem = np.zeros(network_dummycell.totnsegs, dtype=dtype)
+
+        def get_imem(imem):
+            '''helper function to gather currents across all cells
+            on this RANK'''
+            i = 0
+            totnsegs = 0
             if use_isyn:
-                for idx, syn in zip(cell.synidx, cell.netconsynapses):
-                    if hasattr(syn, 'e') and syn.e > -50:
-                        imem['isyn_e'][idx + totnsegs] += syn.i
-                    else:
-                        imem['isyn_i'][idx + totnsegs] += syn.i
+                imem['isyn_e'] = 0.  # must reset these for every iteration
+                imem['isyn_i'] = 0.  # because we sum over synapses
+            for cell in cells:
+                for sec in cell.allseclist:
+                    for seg in sec:
+                        imem['imem'][i] = seg.i_membrane_
+                        if use_ipas:
+                            imem['ipas'][i] = seg.i_pas
+                        if use_icap:
+                            imem['icap'][i] = seg.i_cap
+                        i += 1
 
-            totnsegs += cell.totnsegs
-        return imem
+                if use_isyn:
+                    for idx, syn in zip(cell.synidx, cell.netconsynapses):
+                        if hasattr(syn, 'e') and syn.e > -50:
+                            imem['isyn_e'][idx + totnsegs] += syn.i
+                        else:
+                            imem['isyn_i'][idx + totnsegs] += syn.i
 
-    # run fadvance until time limit, and calculate LFPs for each timestep
-    tstep = 0
-    while neuron.h.t < network.tstop:
-        if neuron.h.t >= 0:
+                totnsegs += cell.totnsegs
+            return imem
+
+        # run fadvance until time limit, and calculate LFPs for each timestep
+        tstep = 0
+        while neuron.h.t < self.tstop:
+            if neuron.h.t >= 0:
+                imem = get_imem(imem)
+
+                for j, (probe, M) in enumerate(zip(probes, transforms)):
+                    probe.data['imem'][:, tstep] = M @ imem['imem']
+                    if use_ipas:
+                        probe.data['ipas'][:, tstep] = \
+                            M @ (imem['ipas'] * network_dummycell.area * 1E-2)
+                    if use_icap:
+                        probe.data['icap'][:, tstep] = \
+                            M @ (imem['icap'] * network_dummycell.area * 1E-2)
+                    if use_isyn:
+                        probe.data['isyn_e'][:, tstep] = M @ imem['isyn_e']
+                        probe.data['isyn_i'][:, tstep] = M @ imem['isyn_i']
+
+                if rec_pop_contributions:
+                    for j, (probe, M) in enumerate(zip(probes, transforms)):
+                        k = 0  # counter
+                        for nsegs, pop_name in zip(population_nsegs,
+                                                   self.population_names):
+                            cellinds = np.arange(k, k + nsegs)
+                            probe.data[pop_name][:, tstep] = \
+                                M[:, cellinds] @ imem['imem'][cellinds, ]
+                            k += nsegs
+
+                tstep += 1
+            neuron.h.fadvance()
+            if neuron.h.t % 100. == 0.:
+                if RANK == 0:
+                    print('t = {} ms'.format(neuron.h.t))
+
+        try:
+            # calculate LFP after final fadvance(), skipped if IndexError is
+            # encountered
             imem = get_imem(imem)
 
             for j, (probe, M) in enumerate(zip(probes, transforms)):
@@ -1456,52 +1481,19 @@ def _run_simulation_with_probes(network, cvode,
                     probe.data['isyn_i'][:, tstep] = M @ imem['isyn_i']
 
             if rec_pop_contributions:
-                for j, M in enumerate(transforms):
+                for j, (probe, M) in enumerate(zip(probes, transforms)):
                     k = 0  # counter
                     for nsegs, pop_name in zip(population_nsegs,
-                                               network.population_names):
+                                               self.population_names):
                         cellinds = np.arange(k, k + nsegs)
                         probe.data[pop_name][:, tstep] = \
                             M[:, cellinds] @ imem['imem'][cellinds, ]
                         k += nsegs
+        except IndexError:
+            pass
 
-            tstep += 1
-        neuron.h.fadvance()
-        if neuron.h.t % 100. == 0.:
-            if RANK == 0:
-                print('t = {} ms'.format(neuron.h.t))
-
-    try:
-        # calculate LFP after final fadvance(), skipped if IndexError is
-        # encountered
-        imem = get_imem(imem)
-
-        for j, (probe, M) in enumerate(zip(probes, transforms)):
-            probe.data['imem'][:, tstep] = M @ imem['imem']
-            if use_ipas:
-                probe.data['ipas'][:, tstep] = \
-                    M @ (imem['ipas'] * network_dummycell.area * 1E-2)
-            if use_icap:
-                probe.data['icap'][:, tstep] = \
-                    M @ (imem['icap'] * network_dummycell.area * 1E-2)
-            if use_isyn:
-                probe.data['isyn_e'][:, tstep] = M @ imem['isyn_e']
-                probe.data['isyn_i'][:, tstep] = M @ imem['isyn_i']
-
-        if rec_pop_contributions:
-            for j, M in enumerate(transforms):
-                k = 0  # counter
-                for nsegs, pop_name in zip(population_nsegs,
-                                           network.population_names):
-                    cellinds = np.arange(k, k + nsegs)
-                    probe.data[pop_name][:, tstep] = \
-                        M[:, cellinds] @ imem['imem'][cellinds, ]
-                    k += nsegs
-    except IndexError:
-        pass
-
-    if to_file:
-        outputfile.close()
+        if to_file:
+            outputfile.close()
 
 
 def ReduceStructArray(sendbuf, op=MPI.SUM):

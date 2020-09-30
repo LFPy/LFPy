@@ -104,12 +104,12 @@ class Population:
         '''
         class initialization
 
-        POPULATION_SIZE :       int, number of cells
-        cellParameters :        dict
-        populationParameters :  dict
-        electrodeParameters :   dict
-        synapseParameters :     dict
-        stationaryGammaArgs :   dict
+        POPULATION_SIZE:       int, number of cells
+        cellParameters:        dict
+        populationParameters:  dict
+        electrodeParameters:   dict
+        synapseParameters:     dict
+        stationaryGammaArgs:   dict
 
         '''
         self.POPULATION_SIZE = POPULATION_SIZE
@@ -206,8 +206,6 @@ class Population:
 
     def cellsim(self, cellindex):
         '''main cell- and LFP simulation procedure'''
-        # create extracellular electrode object
-        electrode = LFPy.RecExtElectrode(**self.electrodeParameters)
 
         # Initialize cell instance, using the LFPy.Cell class
         cell = LFPy.Cell(**self.cellParameters)
@@ -222,11 +220,14 @@ class Population:
         synapse = LFPy.Synapse(cell, **self.synapseParameters)
         synapse.set_spike_times(self.synapseTimes[cellindex])
 
+        # create extracellular electrode object
+        electrode = LFPy.RecExtElectrode(cell, **self.electrodeParameters)
+
         # perform NEURON simulation, results saved as attributes in cell
-        cell.simulate(electrode=electrode)
+        cell.simulate(probes=[electrode])
 
         # return dict with primary results from simulation
-        return {'LFP': electrode.LFP, 'somav': cell.somav}
+        return {'LFP': electrode.data, 'somav': cell.somav}
 
     def plotstuff(self):
         '''plot LFPs and somatraces'''
@@ -277,7 +278,8 @@ class Population:
             im = ax.pcolormesh(tvec, self.electrodeParameters['z'], self.LFP,
                                cmap='PRGn',
                                vmin=-self.LFP.std() * 3,
-                               vmax=self.LFP.std() * 3)
+                               vmax=self.LFP.std() * 3,
+                               shading='auto')
             ax.axis(ax.axis('tight'))
             cbar = plt.colorbar(im, cax=cax)
             cbar.set_label('LFP (mV)')

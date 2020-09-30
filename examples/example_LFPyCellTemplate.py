@@ -23,18 +23,15 @@ GNU General Public License for more details.
 """
 import LFPy
 import neuron
-import numpy as np
 import matplotlib.pyplot as plt
 
 
 def plotcell(cell, color='k'):
     '''A plottin' function'''
-    for sec in cell.template.all:
+    for sec in cell.allseclist:
         idx = cell.get_idx(sec.name())
-        plt.plot(np.r_[cell.xstart[idx], cell.xend[idx][-1]],
-                 np.r_[cell.zstart[idx], cell.zend[idx][-1]],
-                 color=color)
-    print(' ')
+        for i in idx:
+            plt.plot(cell.x[i], cell.z[i], color=color)
 
 
 # delete cell instances from previous script executions,

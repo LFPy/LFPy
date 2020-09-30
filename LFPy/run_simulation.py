@@ -108,7 +108,7 @@ def _run_simulation_with_probes(cell, cvode, probes=[],
                 i = 0
                 while True:
                     if name + '{}'.format(i) not in names:
-                        names.append(name)
+                        names.append(name + '{}'.format(i))
                         break
                     i += 1
                 #

@@ -1726,7 +1726,7 @@ class testCell(unittest.TestCase):
                                             rec_current_dipole_moment=True)
         dipoles, dipole_locs = cell.get_multi_current_dipole_moments()
         t_point = -1
-        P_from_multi_dipoles = np.sum(dipoles[:, t_point, :], axis=0)
+        P_from_multi_dipoles = np.sum(dipoles[:, :, t_point], axis=0)
         P = cell.current_dipole_moment[:, t_point]
 
         # some cleanup of Python-created section references
@@ -1750,7 +1750,7 @@ class testCell(unittest.TestCase):
                                             rec_current_dipole_moment=True)
         dipoles, dipole_locs = cell.get_multi_current_dipole_moments()
         t_point = -1
-        P_from_multi_dipoles = np.sum(dipoles[:, t_point, :], axis=0)
+        P_from_multi_dipoles = np.sum(dipoles[:, :, t_point], axis=0)
         P = cell.current_dipole_moment[:, t_point]
 
         # some cleanup of Python-created section references
@@ -1771,7 +1771,7 @@ class testCell(unittest.TestCase):
                                             rec_current_dipole_moment=True)
         dipoles, dipole_locs = cell.get_multi_current_dipole_moments()
         t_point = -1
-        P_from_multi_dipoles = np.sum(dipoles[:, t_point, :], axis=0)
+        P_from_multi_dipoles = np.sum(dipoles[:, :, t_point], axis=0)
         P = cell.current_dipole_moment[:, t_point]
 
         # some cleanup of Python-created section references
@@ -1798,7 +1798,7 @@ class testCell(unittest.TestCase):
                                             rec_current_dipole_moment=True)
         dipoles, dipole_locs = cell.get_multi_current_dipole_moments()
         t_point = -1
-        P_from_multi_dipoles = np.sum(dipoles[:, t_point, :], axis=0)
+        P_from_multi_dipoles = np.sum(dipoles[:, :, t_point], axis=0)
         P = cell.current_dipole_moment[:, t_point]
 
         # some cleanup of Python-created section references
@@ -1813,7 +1813,7 @@ class testCell(unittest.TestCase):
                                             rec_current_dipole_moment=True)
         dipoles, dipole_locs = cell.get_multi_current_dipole_moments()
         t_point = -1
-        P_from_multi_dipoles = np.sum(dipoles[:, t_point, :], axis=0)
+        P_from_multi_dipoles = np.sum(dipoles[:, :, t_point], axis=0)
         P = cell.current_dipole_moment[:, t_point]
 
         cell.__del__()

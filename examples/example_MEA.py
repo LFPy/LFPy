@@ -64,9 +64,9 @@ def plot_results(cell, synapse, MEA, electrode):
     [ax_v.plot(cell.tvec, cell.vmem[idx, :], c=cell_plot_colors[idx], lw=2)
         for idx in cell_plot_idxs]
     for elec in range(len(MEA.x)):
-        ax_ec.plot(cell.tvec, 1000 * (MEA.LFP[elec]),
+        ax_ec.plot(cell.tvec, 1000 * (MEA.data[elec]),
                    lw=2, c=elec_clr(elec))
-        ax_ec.plot(cell.tvec, 1000 * (electrode.LFP[elec]),
+        ax_ec.plot(cell.tvec, 1000 * (electrode.data[elec]),
                    lw=3, c=elec_clr(elec), ls=":")
 
     l_MEA, = ax_ec.plot(0, 0, lw=1, c="k")
@@ -84,25 +84,23 @@ def plot_results(cell, synapse, MEA, electrode):
 def plot_recording_set_up(cell, ax_neur, ax_side, MEA, elec_clr,
                           syn_idx, cell_plot_colors):
 
-    for comp in range(len(cell.xmid)):
+    for comp in range(cell.totnsegs):
         if comp == 0:
-            ax_neur.scatter(cell.xmid[comp], cell.ymid[comp],
-                            s=cell.diam[comp],
+            ax_neur.scatter(cell.x[comp].mean(), cell.y[comp].mean(),
+                            s=cell.d[comp],
                             edgecolor='none', color='gray', zorder=1)
         else:
-            ax_neur.plot([cell.xstart[comp], cell.xend[comp]],
-                         [cell.ystart[comp], cell.yend[comp]],
-                         lw=cell.diam[comp] / 2, color='gray', zorder=1)
+            ax_neur.plot(cell.x[comp], cell.y[comp],
+                         lw=cell.d[comp] / 2, color='gray', zorder=1)
 
-    for comp in range(len(cell.xmid)):
+    for comp in range(cell.totnsegs):
         if comp == 0:
-            ax_side.scatter(cell.xmid[comp], cell.zmid[comp],
-                            s=cell.diam[comp],
+            ax_side.scatter(cell.x[comp].mean(), cell.z[comp].mean(),
+                            s=cell.d[comp],
                             edgecolor='none', color='gray', zorder=1)
         else:
-            ax_side.plot([cell.xstart[comp], cell.xend[comp]],
-                         [cell.zstart[comp], cell.zend[comp]],
-                         lw=cell.diam[comp] / 2, color='gray', zorder=1)
+            ax_side.plot(cell.x[comp], cell.z[comp],
+                         lw=cell.d[comp] / 2, color='gray', zorder=1)
     for idx in range(len(MEA.x)):
         ax_side.plot(MEA.x[idx], MEA.z[idx] - 10, 's', clip_on=False,
                      c=elec_clr(idx), zorder=10, mec='none')
@@ -118,10 +116,10 @@ def plot_recording_set_up(cell, ax_neur, ax_side, MEA, elec_clr,
 
     l_elec, = ax_neur.plot(MEA.x[0], MEA.y[0], 's', c=elec_clr(0), zorder=0)
 
-    l_syn, = ax_neur.plot(cell.xmid[syn_idx], cell.ymid[syn_idx], '*',
+    l_syn, = ax_neur.plot(synapse.x, synapse.y, '*',
                           c=cell_plot_colors[syn_idx], ms=15)
 
-    ax_side.plot(cell.xmid[syn_idx], cell.zmid[syn_idx], '*',
+    ax_side.plot(synapse.x, synapse.z, '*',
                  c=cell_plot_colors[syn_idx], ms=15)
 
     ax_neur.arrow(-220, -100, 30, 0, lw=1, head_width=12,
@@ -254,7 +252,7 @@ grid_electrode_parameters = {
     'x': X.flatten(),  # electrode requires 1d vector of positions
     'y': Y.flatten(),
     'z': Z.flatten(),
-    "method": "soma_as_point",
+    "method": "root_as_point",
     'N': np.array([[0, 0, 1]] * X.size),  # surface normals
     'r': 50,              # contact site radius
     'n': 100,               # datapoints for averaging
@@ -269,7 +267,7 @@ MEA_electrode_parameters = {
     'x': X.flatten(),  # electrode requires 1d vector of positions
     'y': Y.flatten(),
     'z': Z.flatten(),
-    "method": "soma_as_point",
+    "method": "root_as_point",
     'N': np.array([[0, 0, 1]] * X.size),  # surface normals
     'r': 50,              # contact site radius
     'n': 100,               # datapoints for averaging,
@@ -289,7 +287,7 @@ electrode = LFPy.RecExtElectrode(cell, **grid_electrode_parameters)
 MEA = LFPy.RecMEAElectrode(cell, **MEA_electrode_parameters)
 
 # Calculate LFPs
-MEA.calc_lfp()
-electrode.calc_lfp()
+MEA.data = MEA.get_transformation_matrix() @ cell.imem
+electrode.data = electrode.get_transformation_matrix() @ cell.imem
 plot_results(cell, synapse, MEA, electrode)
 plt.show()

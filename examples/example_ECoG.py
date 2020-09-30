@@ -59,7 +59,7 @@ def plot_LFP_and_ECoG(cell, electrode, electrode_MoI, ecog_electrode):
 
     fig = plt.figure(figsize=[16, 8])
 
-    xlim = np.max([ecog_electrode.r, np.max(np.abs(cell.xend))]) + 50
+    xlim = np.max([ecog_electrode.r, np.abs(cell.x).max()]) + 50
 
     # plot the morphology, electrode contacts, synapses cortical surface etc.
     ax = fig.add_axes([0.01, 0.08, 0.3, 0.9],
@@ -68,9 +68,7 @@ def plot_LFP_and_ECoG(cell, electrode, electrode_MoI, ecog_electrode):
 
     for sec in LFPy.cell.neuron.h.allsec():
         idx = cell.get_idx(sec.name())
-        ax.plot(np.r_[cell.xstart[idx], cell.xend[idx][-1]],
-                np.r_[cell.zstart[idx], cell.zend[idx][-1]],
-                color='k')
+        ax.plot(cell.x[idx], cell.z[idx], color='k')
     for i in range(len(cell.synapses)):
         l, = ax.plot([cell.synapses[i].x], [cell.synapses[i].z], '.', c='r')
     for i in range(electrode.x.size):
@@ -98,7 +96,7 @@ def plot_LFP_and_ECoG(cell, electrode, electrode_MoI, ecog_electrode):
     ax.axhspan(top_of_cortex, top_of_cortex + 200,
                clip_on=False, facecolor=surface_clr, zorder=-2)
 
-    ax.axhspan(np.min(cell.zend) - 200, top_of_cortex,
+    ax.axhspan(cell.z.min() - 200, top_of_cortex,
                clip_on=True, facecolor=cortex_clr, zorder=-2)
 
     ax.plot([-xlim, xlim + 50], [top_of_cortex, top_of_cortex],
@@ -127,18 +125,19 @@ def plot_LFP_and_ECoG(cell, electrode, electrode_MoI, ecog_electrode):
 
     # plot the laminar LFP
     ax = fig.add_axes([0.4, 0.08, 0.25, 0.75], frameon=False, yticks=[],
-                      ylim=[cell.somapos[2] - 250, np.max(cell.zend) + 50])
+                      ylim=[cell.somapos[2] - 250, cell.z.max() + 50])
 
     dz = electrode.z[1] - electrode.z[0]
     for i in range(electrode.x.size):
 
         ax.plot(cell.tvec,
-                electrode.LFP[i] * 0.5 * dz / np.max(np.abs(electrode.LFP[i]))
+                electrode.data[i] * 0.5 * dz / np.max(np.abs(electrode.data[i])
+                                                      )
                 + electrode.z[i],
                 c="gray", lw=2)
         ax.plot(cell.tvec,
-                electrode_MoI.LFP[i] * 0.5 * dz
-                / np.max(np.abs(electrode.LFP[i])) + electrode.z[i],
+                electrode_MoI.data[i] * 0.5 * dz
+                / np.max(np.abs(electrode.data[i])) + electrode.z[i],
                 c='k', lw=2, ls="--")
         ax.plot(-10, electrode.z[i],
                 color=elec_clr(i), marker='o', ms=15, clip_on=False)
@@ -152,7 +151,8 @@ def plot_LFP_and_ECoG(cell, electrode, electrode_MoI, ecog_electrode):
 
     for i in range(ecog_electrode.x.size):
         ax.plot(cell.tvec,
-                ecog_electrode.LFP[i] / np.max(np.abs(ecog_electrode.LFP[i])),
+                ecog_electrode.data[i] / np.max(np.abs(ecog_electrode.data[i])
+                                                ),
                 c=ecog_clr, lw=2)
 
     ax.axis(ax.axis('tight'))
@@ -163,11 +163,11 @@ def plot_LFP_and_ECoG(cell, electrode, electrode_MoI, ecog_electrode):
     ax = fig.add_axes([0.72, 0.6, 0.25, 0.3],
                       title="Comparison of ECoG and\ntop electrode LFP")
 
-    l1, = ax.plot(cell.tvec, 1000 * electrode.LFP[-1], c="gray", lw=2)
+    l1, = ax.plot(cell.tvec, 1000 * electrode.data[-1], c="gray", lw=2)
     l3, = ax.plot(cell.tvec, 1000 *
-                  ecog_electrode.LFP[-1], c=ecog_clr, ls="-", lw=2)
+                  ecog_electrode.data[-1], c=ecog_clr, ls="-", lw=2)
     l2, = ax.plot(cell.tvec, 1000 *
-                  electrode_MoI.LFP[-1], c="k", ls="--", lw=2)
+                  electrode_MoI.data[-1], c="k", ls="--", lw=2)
 
     fig.legend([l1, l2, l3], ["LFP (infinite homogeneous)",
                               "LFP (cortical surface included)", "ECoG"],
@@ -227,13 +227,13 @@ cell = LFPy.Cell(**cellParameters)
 top_of_cortex = 0
 
 # We place top of cell 50 um below the cortical surface
-cell.set_pos(z=top_of_cortex - np.max(cell.zend) - 50)
+cell.set_pos(z=top_of_cortex - cell.z.max() - 50)
 
 # Cell bottom needs to be above bottom layer because of convention in
 # calculation of ECoG potentials using the Method of Images in
 # class RecMEAElectrode. This means that the middle layer
 # must extend deeper than the cell.
-h = - np.min(cell.zend) + 1
+h = - cell.z.min() + 1
 
 # Synaptic parameters taken from Hendrickson et al 2011
 # Excitatory synapse parameters:
@@ -376,16 +376,16 @@ cell.simulate(rec_imem=True)
 # electrode classes. Note that now cell is given as input to electrode
 # and created after the NEURON simulations are finished
 electrode = LFPy.RecExtElectrode(cell, **electrodeParameters)
-electrode.calc_lfp()
-electrode.LFP -= np.average(electrode.LFP, axis=1)[:, None]
+electrode.data = electrode.get_transformation_matrix() @ cell.imem
+electrode.data -= np.average(electrode.data, axis=1)[:, None]
 
 electrode_MoI = LFPy.RecMEAElectrode(cell, **elec_with_MoIParameters)
-electrode_MoI.calc_lfp()
-electrode_MoI.LFP -= np.average(electrode_MoI.LFP, axis=1)[:, None]
+electrode_MoI.data = electrode_MoI.get_transformation_matrix() @ cell.imem
+electrode_MoI.data -= np.average(electrode_MoI.data, axis=1)[:, None]
 
 ecog_electrode = LFPy.RecMEAElectrode(cell, **ecogParameters)
-ecog_electrode.calc_lfp()
-ecog_electrode.LFP -= np.average(ecog_electrode.LFP, axis=1)[:, None]
+ecog_electrode.data = ecog_electrode.get_transformation_matrix() @ cell.imem
+ecog_electrode.data -= np.average(ecog_electrode.data, axis=1)[:, None]
 
 # plotting some variables and geometry, saving output to .pdf.
 fig = plot_LFP_and_ECoG(cell, electrode, electrode_MoI, ecog_electrode)

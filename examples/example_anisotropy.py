@@ -64,7 +64,6 @@ synapse.set_spike_times(np.array([5.]))
 X, Z = np.mgrid[-100:101:2, -100:200:2]
 Y = np.zeros(X.shape)
 
-
 sigma = 0.3
 sigma_tensor = [0.3, 0.3, 0.45]
 
@@ -74,7 +73,7 @@ grid_electrode_parameters = {
     'x': X.flatten(),  # electrode requires 1d vector of positions
     'y': Y.flatten(),
     'z': Z.flatten(),
-    'method': 'soma_as_point'
+    'method': 'root_as_point'
 }
 
 grid_electrode_parameters_tensor = {
@@ -82,7 +81,7 @@ grid_electrode_parameters_tensor = {
     'x': X.flatten(),  # electrode requires 1d vector of positions
     'y': Y.flatten(),
     'z': Z.flatten(),
-    'method': 'soma_as_point'
+    'method': 'root_as_point'
 }
 
 
@@ -94,11 +93,12 @@ cell.simulate(rec_imem=True)
 # Create electrode objects
 
 grid_electrode = LFPy.RecExtElectrode(cell, **grid_electrode_parameters)
-grid_electrode.calc_lfp()
+grid_electrode.data = grid_electrode.get_transformation_matrix() @ cell.imem
 
 grid_electrode_tensor = LFPy.RecExtElectrode(
     cell, **grid_electrode_parameters_tensor)
-grid_electrode_tensor.calc_lfp()
+grid_electrode_tensor.data = \
+    grid_electrode_tensor.get_transformation_matrix() @ cell.imem
 
 fig = plt.figure(figsize=[10, 5])
 
@@ -110,7 +110,7 @@ ax = fig.add_subplot(121, aspect='equal',
 
 max_idx = np.argmax(np.abs(cell.imem[0, :]))
 
-LFP = 1000 * grid_electrode.LFP[:, max_idx].reshape(X.shape)
+LFP = 1000 * grid_electrode.data[:, max_idx].reshape(X.shape)
 im = ax.contourf(X, Z, LFP, 51,
                  vmin=-np.max(np.abs(LFP)) / 1, vmax=np.max(np.abs(LFP)) / 1,
                  cmap='bwr',
@@ -133,7 +133,7 @@ polycol = PolyCollection(zips, alpha=0.2,
 ax.add_collection(polycol)
 
 
-ax.plot(cell.xmid[cell.synidx], cell.zmid[cell.synidx], 'o', ms=5,
+ax.plot(synapse.x, synapse.z, 'o', ms=5,
         markeredgecolor='k',
         markerfacecolor='r')
 
@@ -144,7 +144,7 @@ ax2 = fig.add_subplot(122, aspect='equal', xlabel='x ($\\mu$m)',
                       xlim=[np.min(grid_electrode.x),
                             np.max(grid_electrode.x)])
 
-LFP = 1000 * grid_electrode_tensor.LFP[:, max_idx].reshape(X.shape)
+LFP = 1000 * grid_electrode_tensor.data[:, max_idx].reshape(X.shape)
 im = ax2.contourf(X, Z, LFP, 51,
                   vmin=-np.max(np.abs(LFP)) / 1, vmax=np.max(np.abs(LFP)) / 1,
                   cmap='bwr',
@@ -166,10 +166,10 @@ polycol = PolyCollection(zips,
 ax2.add_collection(polycol)
 
 
-ax2.plot(cell.xmid[cell.synidx], cell.zmid[cell.synidx], 'o', ms=5,
+ax2.plot(synapse.x, synapse.z, 'o', ms=5,
          markeredgecolor='k',
          markerfacecolor='r')
 
-plt.savefig('example_anisotropy.pdf', dpi=150)
+# plt.savefig('example_anisotropy.pdf', dpi=150)
 
 plt.show()

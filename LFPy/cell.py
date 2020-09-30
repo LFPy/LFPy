@@ -2154,10 +2154,8 @@ class Cell(object):
     def _create_segment_polygon(self, i, projection=('x', 'z')):
         """Create a polygon to fill for segment i, in the plane
         determined by kwarg projection"""
-        x = [getattr(self, projection[0] + 'start')[i],
-             getattr(self, projection[0] + 'end')[i]]
-        z = [getattr(self, projection[1] + 'start')[i],
-             getattr(self, projection[1] + 'end')[i]]
+        x = getattr(self, projection[0])[i]
+        z = getattr(self, projection[1])[i]
         d = self.d[i]
 
         # calculate angles
@@ -2335,7 +2333,7 @@ class Cell(object):
             the segment to the segment start point, and 2) the current from
             the segment start point to the mid point of the parent segment.
         d_vectors: ndarray, dtype=float
-            Shape ((cell.totnsegs-1)*2, 3) array of distance vectors traveled
+            Shape (3, (cell.totnsegs-1)*2) array of distance vectors traveled
             by each axial current in i_axial in units of (µm). The indices of
             the first axis, correspond to the first axis of i_axial and
             pos_vectors.
@@ -2457,7 +2455,7 @@ class Cell(object):
                 branch = False
                 bottom_seg = False
 
-        return np.array(i_axial), np.array(d_vectors), np.array(pos_vectors)
+        return np.array(i_axial), np.array(d_vectors).T, np.array(pos_vectors)
 
     def get_axial_resistance(self):
         """
@@ -2647,24 +2645,40 @@ class Cell(object):
             setattr(self, dir_, geometry)
 
         # recompute length of each segment
-        self.length = np.sqrt((self.x[:, -1] - self.x[:, 0])**2 +
-                              (self.y[:, -1] - self.y[:, 0])**2 +
-                              (self.z[:, -1] - self.z[:, 0])**2)
+        self._set_length()
+
+    def _set_length(self):
+        '''callable method to (re)set length attribute'''
+        self.length = np.sqrt(np.diff(self.x, axis=-1)**2 +
+                              np.diff(self.y, axis=-1)**2 +
+                              np.diff(self.z, axis=-1)**2).flatten()
+
+    def _set_area(self):
+        '''callable method to (re)set area attribute'''
+        if self.d.ndim == 1:
+            self.area = self.length * np.pi * self.d
+        else:
+            # Surface area of conical frusta
+            # A = pi*(r1+r2)*sqrt((r1-r2)^2 + h^2)
+            self.area = np.pi * self.d.sum(axis=-1) * \
+                np.sqrt(np.diff(self.d, axis=-1)**2 + self.length**2)
 
     def get_multi_current_dipole_moments(self, timepoints=None):
         '''
         Return 3D current dipole moment vector and middle position vector
         from each axial current in space.
+
         Parameters
         ----------
         timepoints: ndarray, dtype=int
             array of timepoints at which you want to compute
             the current dipole moments. Defaults to None. If not given,
             all simulation timesteps will be included.
+
         Returns
         -------
         multi_dipoles: ndarray, dtype = float
-            Shape (n_axial_currents, n_timepoints, 3) array
+            Shape (n_axial_currents, 3, n_timepoints) array
             containing the x-,y-,z-components of the current dipole moment
             from each axial current in cell, at all timepoints.
             The number of axial currents,
@@ -2675,6 +2689,7 @@ class Cell(object):
             Shape (n_axial_currents, 3) array containing the x-, y-, and
             z-components giving the mid position in space of each multi_dipole
             in units of (µm).
+
         Examples
         --------
         Get all current dipole moments and positions from all axial currents in
@@ -2693,7 +2708,9 @@ class Cell(object):
         i_axial, d_axial, pos_axial = self.get_axial_currents_from_vmem(
             timepoints=timepoints)
         Ni, Nt = i_axial.shape
-        multi_dipoles = np.array(
-            [i_axial[i][:, np.newaxis] * d_axial[i] for i in range(Ni)])
+
+        multi_dipoles = np.zeros((Ni, 3, Nt))
+        for i in range(Ni):
+            multi_dipoles[i, ] = (i_axial[i][:, np.newaxis] * d_axial[:, i]).T
 
         return multi_dipoles, pos_axial
