@@ -96,7 +96,7 @@ setup(
         'h5py>=2.5',
         'mpi4py>=1.2',
         'MEAutility>=1.4.2',
-        'LFPykit @ git+https://github.com/LFPy/LFPykit@lfpy22dev'
+        'LFPykit @ git+https://github.com/LFPy/LFPykit@master'
     ],
     extras_require={'tests': ['pytest'],
                     'docs': ['sphinx', 'numpydoc', 'sphinx_rtd_theme']
