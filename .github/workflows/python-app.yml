@@ -22,7 +22,7 @@ jobs:
         python-version: 3.8
     - name: Install dependencies
       run: |
-        sudo apt install python3-mpi4py 
+        sudo apt install python3-mpi4py libopenmpi-dev openmpi-bin
         python -m pip install --upgrade pip
         pip install flake8 pytest
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
