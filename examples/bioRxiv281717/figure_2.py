@@ -134,7 +134,7 @@ electrodeParameters_p = {
 }
 electrode_p = LFPy.RecExtElectrode(cell=cell, **electrodeParameters_p)
 electrode_p.data = electrode_p.get_transformation_matrix() @ cell.imem
-LFP_p = np.ma.masked_array(electrode_p.data, mask=(mask.T == False))
+LFP_p = np.ma.masked_array(electrode_p.data, mask=(np.equal(mask.T, False))
 
 
 # Compute the magnetic field strengt |\mathbf{H}| at locations corresponding
