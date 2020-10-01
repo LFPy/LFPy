@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-'''
+"""
 Simulation and plotting script reproducing figure 2 of:
 
 Multimodal modeling of neural network activity: computing LFP, ECoG, EEG and
 MEG signals with LFPy2.0
 Espen Hagen, Solveig Næss, Torbjørn V Ness, Gaute T Einevoll
 bioRxiv 281717; doi: https://doi.org/10.1101/281717
-'''
+"""
 # import of modules
 import LFPy
 import numpy as np
@@ -134,7 +134,7 @@ electrodeParameters_p = {
 }
 electrode_p = LFPy.RecExtElectrode(cell=cell, **electrodeParameters_p)
 electrode_p.data = electrode_p.get_transformation_matrix() @ cell.imem
-LFP_p = np.ma.masked_array(electrode_p.data, mask=(np.equal(mask.T, False))
+LFP_p = np.ma.masked_array(electrode_p.data, mask=(np.equal(mask.T, False)))
 
 
 # Compute the magnetic field strengt |\mathbf{H}| at locations corresponding
