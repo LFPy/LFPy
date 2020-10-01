@@ -171,7 +171,7 @@ PSET.electrodeParams = {
     'n': 50,
     'N': np.array([[0., 1., 0]] * 16),
     'r': 5.,
-    'method': 'soma_as_point',
+    'method': 'root_as_point',
 }
 
 

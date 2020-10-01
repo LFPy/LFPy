@@ -415,9 +415,6 @@ if __name__ == '__main__':
     COMM.Barrier()
 
     # clean up namespace
-    # if PSET.COMPUTE_LFP:
-    #     del SUMMED_OUTPUT
-    # del neurons, spikes
     del electrode, ecog_electrode, current_dipole_moment, probes
 
     # tic toc
