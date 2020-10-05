@@ -226,7 +226,7 @@ if __name__ == '__main__':
     # compute ECoG
     PSET.COMPUTE_ECOG = PSET.COMPUTE_LFP
 
-    # set reference network sizef
+    # set reference network size
     PSET.populationParameters['POP_SIZE'] = (
         np.array(PSET.POP_SIZE_REF) * PSET.POPSCALING).astype(int)
 
