@@ -199,14 +199,10 @@ if __name__ == '__main__':
     if RANK == 0:
         initialization_time = time() - tic
         print('Initialization in {} seconds'.format(initialization_time))
-        # create logfile recording time in seconds for different simulation
-        # steps
-        # (initialization, parameters, simulation etc.)
-
     tic = time()
 
     # import main parameters dictionary for simulation
-    from example_parallel_network_parameters import PSET, TESTING
+    from example_parallel_network_parameters import PSET
 
     # modify parameters accd. to parameterspace id ps_id
     OUTPUT = 'output'
@@ -231,11 +227,8 @@ if __name__ == '__main__':
     PSET.COMPUTE_ECOG = PSET.COMPUTE_LFP
 
     # set reference network sizef
-    if TESTING:
-        pass
-    else:
-        PSET.populationParameters['POP_SIZE'] = (
-            np.array(PSET.POP_SIZE_REF) * PSET.POPSCALING).astype(int)
+    PSET.populationParameters['POP_SIZE'] = (
+        np.array(PSET.POP_SIZE_REF) * PSET.POPSCALING).astype(int)
 
     # adjust connection probabilities to keep indegrees similar across sims
     for i, N_pre in enumerate(PSET.populationParameters['POP_SIZE']):

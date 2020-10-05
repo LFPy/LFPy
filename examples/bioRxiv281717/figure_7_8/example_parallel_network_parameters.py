@@ -183,8 +183,8 @@ _y = np.zeros(_theta.size)
 _z = 90000. * np.cos(_theta)
 PSET.foursphereParams = {
     'radii': [79000., 80000., 85000., 90000.],  # shell radii
-    'sigmas': [0.3, 1.5, 0.015, 0.3],          # shell conductivity
-    'r_electrodes': np.c_[_x, _y, _z],                    # contact coordinates
+    'sigmas': [0.3, 1.5, 0.015, 0.3],  # shell conductivity
+    'r_electrodes': np.c_[_x, _y, _z],  # contact coordinates
 }
 
 
@@ -210,7 +210,7 @@ PSET.layer_data = np.array([('L1', 165., -82.5),
 
 # Define electrode geometry corresponding to an ECoG electrode, where contact
 # points have a radius r, surface normal vectors N, and ECoG is calculated as
-# averaged LFP in n random points on each contact:
+# the average LFP in n random points on each contact:
 PSET.ecogParameters = {
     'sigma_S': 0.,        # CSF conductivity
     'sigma_T': 0.3,        # GM conductivity
@@ -287,17 +287,17 @@ PSET.populationParameters = np.array([
 # POP_SIZE :    number of neurons for each morphological type as given on
 # https://bbp.epfl.ch/nmc-portal/microcircuit
 
-# pop_args : dict
-#    radius, mean position (loc) and standard deviation (scale) of
-#    the soma positions
+# pop_args : dict,
+#     radius, mean position (loc) and standard deviation (scale) of the soma
+#     positions
 # rotation_args : dict, default rotations around x and y axis applied to
 # each cell in the population using LFPy.NetworkCell.set_rotation()
 # method.
 
 # syn_section : list
-#     section names where outgoing connections from this population are
-#     made onto postsynaptic neurons (i.e., no excitatory synapses on somatic
-#     sections anywhere)
+#     list of section names where outgoing connections from this population
+#     are made onto postsynaptic neurons (i.e., no excitatory synapses on
+#     somatic sections anywhere)
 # extrinsic_input_density : density of extrinisc incoming connections in
 #     units of [µm^-2]
 # extrinsic_input_frequency : frequency of synapse activation in units of [Hz]
