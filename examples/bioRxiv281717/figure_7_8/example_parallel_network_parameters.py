@@ -41,6 +41,11 @@ SIZE = COMM.Get_size()
 RANK = COMM.Get_rank()
 
 
+# load some neuron-interface files needed for the EPFL cell types
+neuron.h.load_file("stdrun.hoc")
+neuron.h.load_file("import3d.hoc")
+
+
 #######################
 # Functions
 #######################
@@ -60,11 +65,6 @@ def get_pre_m_type(post):
 #######################
 # Parameters
 #######################
-
-
-# load some neuron-interface files needed for the EPFL cell types
-neuron.h.load_file("stdrun.hoc")
-neuron.h.load_file("import3d.hoc")
 
 
 # test mode (1 cell per pop, all-to-all connectivity)
@@ -171,7 +171,7 @@ PSET.electrodeParams = {
     'n': 50,
     'N': np.array([[0., 1., 0]] * 16),
     'r': 5.,
-    'method': 'soma_as_point',
+    'method': 'root_as_point',
 }
 
 
@@ -183,8 +183,8 @@ _y = np.zeros(_theta.size)
 _z = 90000. * np.cos(_theta)
 PSET.foursphereParams = {
     'radii': [79000., 80000., 85000., 90000.],  # shell radii
-    'sigmas': [0.3, 1.5, 0.015, 0.3],          # shell conductivity
-    'r': np.c_[_x, _y, _z],                    # contact coordinates
+    'sigmas': [0.3, 1.5, 0.015, 0.3],  # shell conductivity
+    'r_electrodes': np.c_[_x, _y, _z],  # contact coordinates
 }
 
 
@@ -194,6 +194,7 @@ PSET.NetworkSimulateArgs = {
     'use_ipas': False,
     'use_icap': False,
     'use_isyn': False,
+    'to_memory': True,
 }
 
 # layer thickness top to bottom L1-L6, Markram et al. 2015 Fig 3A.
@@ -209,7 +210,7 @@ PSET.layer_data = np.array([('L1', 165., -82.5),
 
 # Define electrode geometry corresponding to an ECoG electrode, where contact
 # points have a radius r, surface normal vectors N, and ECoG is calculated as
-# averaged LFP in n random points on each contact:
+# the average LFP in n random points on each contact:
 PSET.ecogParameters = {
     'sigma_S': 0.,        # CSF conductivity
     'sigma_T': 0.3,        # GM conductivity
@@ -254,7 +255,10 @@ PSET.populationParameters = np.array([
          cap=[
                  719,
                  73.]),
-     dict(x=np.pi / 2, y=0.), ['dend', 'apic'], ['dend', 'apic'], 0.1, 5.),
+     dict(x=np.pi / 2, y=0.),
+     ['dend', 'apic'],
+     ['dend', 'apic'],
+     0.1, 5.),
     # Inhibitory
     ('L5_MC', 'bAC', 'L5_MC_bAC217_1', 395,
      dict(
@@ -266,7 +270,8 @@ PSET.populationParameters = np.array([
              890]),
      dict(x=np.pi / 2, y=0.),
      ['soma', 'dend', 'apic'],
-     ['dend', 'apic'], 0.125, 5.),
+     ['dend', 'apic'],
+     0.125, 5.),
 ],
     dtype=[('m_type', '|{}32'.format(stringType)),
            ('e_type', '|{}32'.format(stringType)),
@@ -282,17 +287,17 @@ PSET.populationParameters = np.array([
 # POP_SIZE :    number of neurons for each morphological type as given on
 # https://bbp.epfl.ch/nmc-portal/microcircuit
 
-# pop_args : dict
-#    radius, mean position (loc) and standard deviation (scale) of
-#    the soma positions
+# pop_args : dict,
+#     radius, mean position (loc) and standard deviation (scale) of the soma
+#     positions
 # rotation_args : dict, default rotations around x and y axis applied to
 # each cell in the population using LFPy.NetworkCell.set_rotation()
 # method.
 
 # syn_section : list
-#     section names where outgoing connections from this population are
-#     made onto postsynaptic neurons (i.e., no excitatory synapses on somatic
-#     sections anywhere)
+#     list of section names where outgoing connections from this population
+#     are made onto postsynaptic neurons (i.e., no excitatory synapses on
+#     somatic sections anywhere)
 # extrinsic_input_density : density of extrinisc incoming connections in
 #     units of [µm^-2]
 # extrinsic_input_frequency : frequency of synapse activation in units of [Hz]
@@ -339,7 +344,8 @@ for i, (y, Y, pop_args_Y, rotation_args_Y) in enumerate(zip(
     for k in range(PSET.layer_data.size):
         len_Y_sum[k] = cell_Y.length[cell_Y.get_idx(
             ['soma', 'dend', 'apic'],
-            z_min=layerbounds[k + 1], z_max=layerbounds[k])].sum()
+            z_min=layerbounds[k + 1],
+            z_max=layerbounds[k])].sum()
     for j, (X, pop_args_X, rotation_args_X) in enumerate(zip(
             PSET.populationParameters['me_type'],
             PSET.populationParameters['pop_args'],
@@ -369,8 +375,7 @@ PSET.cellParameters = dict()
 
 ##########################################################################
 # Set up various files and folders such that single-cell models from BBP can
-# be used,
-# and extract some numbers from pathway .json files
+# be used, and extract some numbers from pathway .json files
 ##########################################################################
 
 # TODO: Add automated download of cell models from EPFL microcircuit portal
@@ -422,9 +427,8 @@ if RANK == 0:
         for NRN in PSET.populationParameters['me_type']:
             for nmodl in glob(os.path.join(
                     PSET.CELLPATH, NRN, 'mechanisms', '*.mod')):
-                while not os.path.isfile(os.path.join(
-                        PSET.NMODL,
-                        os.path.split(nmodl)[-1])):
+                while not os.path.isfile(
+                        os.path.join(PSET.NMODL, os.path.split(nmodl)[-1])):
                     os.system('cp {} {}'.format(nmodl,
                                                 os.path.join(PSET.NMODL,
                                                              '.')))
@@ -498,19 +502,19 @@ for NRN in PSET.populationParameters['me_type']:
 # load synapse and connectivity data. mtype_map is the same for all cell types
 if sys.version < '3':
     with open(os.path.join('synapses', 'mtype_map.tsv')) as f:
-        mtype_map = np.loadtxt(
-            f,
-            dtype={'names': ('pre_mtype_id', 'pre_mtype'),
-                   'formats': ('i4', '{}9'.format(stringType))},
-            converters={1: lambda s: s.decode()})
+        mtype_map = np.loadtxt(f,
+                               dtype={'names': ('pre_mtype_id', 'pre_mtype'),
+                                      'formats': ('i4', '{}9'.format(
+                                          stringType))},
+                               converters={1: lambda s: s.decode()})
 else:
     with open(os.path.join('synapses', 'mtype_map.tsv'),
               encoding='us-ascii') as f:
-        mtype_map = np.loadtxt(
-            f,
-            dtype={'names': ('pre_mtype_id', 'pre_mtype'),
-                   'formats': ('i4', '{}9'.format(stringType))},
-            converters={1: lambda s: s.decode()})
+        mtype_map = np.loadtxt(f,
+                               dtype={'names': ('pre_mtype_id', 'pre_mtype'),
+                                      'formats': ('i4', '{}9'.format(
+                                          stringType))},
+                               converters={1: lambda s: s.decode()})
 
 os.chdir(PSET.CWD)
 
@@ -647,8 +651,8 @@ del synapses_tsv  # not needed anymore.
 ############################################################################
 
 # Main connection parameters between pre and post-synaptic populations
-# organized as
-# dictionary of parameter lists between pre and postsynaptic populations:
+# organized as dictionary of parameter lists between pre and postsynaptic
+# populations:
 if PSET.fully_connected:
     # fully connected network (no selfconnections)
     connprob = [[1] * PSET.populationParameters.size] * \
@@ -657,7 +661,7 @@ else:
     connprob = get_params(PSET.populationParameters['m_type'],
                           pathways_anatomy,
                           'connection_probability',
-                          # unit conversion % -> fraction,
+                          # unit conversion % -> fraction
                           0.01 * PSET.CONNPROBSCALING)
 
 PSET.connParams = dict(
@@ -669,8 +673,8 @@ PSET.connParams = dict(
                if syn_param_stats['{}:{}'.format(pre, post)
                                   ]['synapse_type'] >= 100 else
                neuron.h.ProbGABAAB_EMS
-               for post in PSET.populationParameters['m_type']
-               ] for pre in PSET.populationParameters['m_type']],
+               for post in PSET.populationParameters['m_type']]
+              for pre in PSET.populationParameters['m_type']],
 
 
     # synapse time constants and reversal potentials.
@@ -690,10 +694,10 @@ PSET.connParams = dict(
         synapseID=0,
         verboseLevel=0,
         NMDA_ratio=0.4  # this may take on several values in synconf.txt files,
-                        # not acccounted for here
+                        # not accounted for here
     )
-        if syn_param_stats['{}:{}'.format(pre, post)]['synapse_type'] >= 100
-        else
+        if syn_param_stats['{}:{}'.format(pre, post)
+                           ]['synapse_type'] >= 100 else
         dict(
         Use=syn_param_stats['{}:{}'.format(pre, post)]['Use_mean'],
         Dep=syn_param_stats['{}:{}'.format(pre, post)]['Dep_mean'],
@@ -709,7 +713,7 @@ PSET.connParams = dict(
         synapseID=0,
         verboseLevel=0,
         GABAB_ratio=0.0,
-        # this may take on several values, in synconf.txt files, not acccounted
+        # this may take on several values, in synconf.txt files, not accounted
         # for here
     )
         for post in PSET.populationParameters['m_type']]
@@ -751,15 +755,14 @@ PSET.connParams = dict(
                         z_min=-1E6,
                         z_max=1E6,
                         fun=[stats.norm] * PSET.layer_data.size,
-                        funargs=[dict(loc=loc, scale=scale / 2.) for loc,
-                                 scale in PSET.layer_data[['center',
-                                                           'thickness']]],
+                        funargs=[dict(loc=loc, scale=scale / 2.)
+                                 for loc, scale in PSET.layer_data[
+                                 ['center', 'thickness']]],
                         funweights=PSET.L_YXL_m_types[post_m_type][:, i]
                         ) for i, pre_m_type in enumerate(
-                            PSET.populationParameters['m_type'])]
-                  for post_m_type, syn_section
-                  in PSET.populationParameters[['m_type',
-                                                'syn_section']]],
+        PSET.populationParameters['m_type'])]
+        for post_m_type, syn_section in PSET.populationParameters[
+        ['m_type', 'syn_section']]],
 )
 
 # save connection data
@@ -790,7 +793,7 @@ PSET.connParamsExtrinsic = dict(
         synapseID=0,
         verboseLevel=0,
         NMDA_ratio=0.4  # this may take on several values in synconf.txt files,
-                        # not acccounted for here
+                        # not accounted for here
     ) for post in PSET.populationParameters['m_type']],
 
     # maximum conductances

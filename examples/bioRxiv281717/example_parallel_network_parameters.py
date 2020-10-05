@@ -297,9 +297,9 @@ PSET.populationParameters = np.array([
 # POP_SIZE :    number of neurons for each morphological type as given on
 # https://bbp.epfl.ch/nmc-portal/microcircuit
 
-
-# pop_args : dict, radius,
-#    mean position (loc) and standard deviation (scale) of the soma positions
+# pop_args : dict,
+#     radius, mean position (loc) and standard deviation (scale) of the soma
+#     positions
 # rotation_args : dict, default rotations around x and y axis applied to
 # each cell in the population using LFPy.NetworkCell.set_rotation()
 # method.
@@ -723,7 +723,7 @@ PSET.connParams = dict(
         synapseID=0,
         verboseLevel=0,
         GABAB_ratio=0.0,
-        # this may take on several values, in synconf.txt files, not acccounted
+        # this may take on several values, in synconf.txt files, not accounted
         # for here
     )
         for post in PSET.populationParameters['m_type']]
@@ -803,7 +803,7 @@ PSET.connParamsExtrinsic = dict(
         synapseID=0,
         verboseLevel=0,
         NMDA_ratio=0.4  # this may take on several values in synconf.txt files,
-                        # not acccounted for here
+                        # not accounted for here
     ) for post in PSET.populationParameters['m_type']],
 
     # maximum conductances

@@ -21,7 +21,7 @@ from example_parallel_network_parameters import PSET
 import matplotlib.pyplot as plt
 from matplotlib.ticker import ScalarFormatter
 
-plt.rcParams['axes.color_cycle'] = [
+color_cycle = [
     u'#1f77b4',
     u'#1f77b4',
     u'#ff7f0e',
@@ -31,6 +31,8 @@ plt.rcParams['axes.color_cycle'] = [
     u'#d62728',
     u'#d62728',
 ]
+
+plt.rcParams['axes.prop_cycle'] = plt.cycler(color=color_cycle)
 plt.rcParams.update({
     'axes.xmargin': 0.0,
     'axes.ymargin': 0.0,

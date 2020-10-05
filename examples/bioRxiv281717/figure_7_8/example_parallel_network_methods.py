@@ -14,7 +14,6 @@ but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 '''
-from __future__ import division
 import numpy as np
 import json
 
@@ -81,8 +80,8 @@ def get_syn_params(shortnames, names, pathways_physiology,
                                                   Fac_std=phys['f_std'],
                                                   )
 
-            pre_mtype = mtype_map['pre_mtype_id'][mtype_map['pre_mtype'] == pre
-                                                  ]
+            pre_mtype = mtype_map['pre_mtype_id'][mtype_map['pre_mtype']
+                                                  == pre]
             data = synapses_tsv[post][synapses_tsv[post]
                                       ['pre_mtype'] == pre_mtype]
 
@@ -100,9 +99,7 @@ def get_syn_params(shortnames, names, pathways_physiology,
                         # I'm only gonna differentiate between excitatory
                         synapse_type=data['synapse_type'][0],
                         # (>= 100) and inhibitory (<100) connections.
-                        # Connections
-                        # can't be
-                        # both.
+                        # Connections can't be both.
                     ))
                 elif data.size == 1:
                     out['{}:{}'.format(pre, post)].update(dict(
