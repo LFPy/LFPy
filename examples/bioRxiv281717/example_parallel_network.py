@@ -32,7 +32,7 @@ Cell 163:2, 456 - 492. doi: 10.1016/j.cell.2015.09.029
 A tar file with all single-cell models zipped can be downloaded and unpacked
 by issuing:
 $ wget https://bbp.epfl.ch/nmc-portal/documents/10184/7288948/\
-    hoc_combos_syn.1_0_10.allzips.tar
+hoc_combos_syn.1_0_10.allzips.tar
 $ tar -xvf hoc_combos_syn.1_0_10.allzips.tar
 $ cd hoc_combos_syn.1_0_10.allzips
 $ unzip 'L4_PC_*.zip'
@@ -144,7 +144,6 @@ but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 '''
-# from example_parallel_network_plotting import decimate
 from mpi4py import MPI
 import LFPy
 from time import time
@@ -281,7 +280,7 @@ if __name__ == '__main__':
                PSET.populationParameters['extrinsic_input_frequency'],
                PSET.connParamsExtrinsic['synparams'],
                PSET.connParamsExtrinsic['weightfuns'],
-               PSET.connParamsExtrinsic['weightargs'],):
+               PSET.connParamsExtrinsic['weightargs']):
         for cell in network.populations[me_type].cells:
             idx = cell.get_rand_idx_area_norm(
                 section=section,
@@ -583,10 +582,9 @@ if __name__ == '__main__':
                 j += 1  # counter
 
         # save figure output
-        fig.savefig(
-            os.path.join(PSET.OUTPUTPATH,
-                         'example_parallel_network_populations_'
-                         + 'RANK_{}.pdf'.format(RANK)),
+        fig.savefig(os.path.join(
+            PSET.OUTPUTPATH,
+            'example_parallel_network_populations_RANK_{}.pdf'.format(RANK)),
             bbox_inches='tight')
         plt.close(fig)
 

@@ -11,8 +11,7 @@ figure 7 and 8 in:
 
 This example file is not suited for execution on laptops or desktop computers.
 In the corresponding parameter file example_parallel_network_parameters.py
-there
-is an option to set
+there is an option to set
 
     TESTING = True
 
@@ -132,10 +131,9 @@ but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 '''
+from mpi4py import MPI
 import parameters as ps
 import sys
-# from example_parallel_network_plotting import decimate
-from scipy.signal import decimate
 import LFPy
 from time import time
 import os
@@ -146,7 +144,7 @@ from matplotlib.gridspec import GridSpec
 from matplotlib.collections import PolyCollection
 from matplotlib.ticker import MaxNLocator
 import matplotlib.pyplot as plt
-from mpi4py import MPI
+from scipy.signal import decimate
 import neuron
 import matplotlib
 matplotlib.use('agg')
@@ -251,9 +249,8 @@ if __name__ == '__main__':
             if RANK == 0:
                 string = '{}:{}: C0={}, K0={}'.format(
                     i, j, PSET.connParams['connprob'][i][j],
-                    np.log(1 - PSET.connParams['connprob'][i][j]
-                           ) / np.log(
-                        1 - PSET.POPSCALING**2 / (N_pre * N_post)))
+                    np.log(1 - PSET.connParams['connprob'][i][j])
+                    / np.log(1 - PSET.POPSCALING**2 / (N_pre * N_post)))
             if PSET.PRESERVE == 'total':
                 # Fixed number of connections (across different MPISIZE values)
                 PSET.connParams['connprob'][i][j] = \
@@ -272,19 +269,10 @@ if __name__ == '__main__':
                           ) / np.log(
                               1. - PSET.POPSCALING**2 / (N_pre * N_post)))
             if RANK == 0:
-                print(
-                    string +
-                    ', C1={}, K1={}'.format(
+                print(string + ', C1={}, K1={}'.format(
                         PSET.connParams['connprob'][i][j],
-                        np.log(
-                            1. -
-                            PSET.connParams['connprob'][i][j]) /
-                        np.log(
-                            1. -
-                            1. /
-                            (
-                                N_pre *
-                                N_post))))
+                        np.log(1. - PSET.connParams['connprob'][i][j]) /
+                        np.log(1. - 1. / (N_pre * N_post))))
 
     # file output destination
     PSET.OUTPUTPATH = os.path.join(OUTPUT, ps_id)
@@ -354,16 +342,15 @@ if __name__ == '__main__':
 
     # create for each cell in each population some external input with Poisson
     # statistics using NEURON's NetStim device (controlled using LFPy.Synapse)
-    for m_type, me_type, section, rho, f, \
-            synparams, weightfun, weightargs in zip(
-                PSET.populationParameters['m_type'],
-                PSET.populationParameters['me_type'],
-                PSET.populationParameters['extrinsic_input_section'],
-                PSET.populationParameters['extrinsic_input_density'],
-                PSET.populationParameters['extrinsic_input_frequency'],
-                PSET.connParamsExtrinsic['synparams'],
-                PSET.connParamsExtrinsic['weightfuns'],
-                PSET.connParamsExtrinsic['weightargs']):
+    for m_type, me_type, section, rho, f, synparams, weightfun, weightargs \
+        in zip(PSET.populationParameters['m_type'],
+               PSET.populationParameters['me_type'],
+               PSET.populationParameters['extrinsic_input_section'],
+               PSET.populationParameters['extrinsic_input_density'],
+               PSET.populationParameters['extrinsic_input_frequency'],
+               PSET.connParamsExtrinsic['synparams'],
+               PSET.connParamsExtrinsic['weightfuns'],
+               PSET.connParamsExtrinsic['weightargs']):
         for cell in network.populations[me_type].cells:
             idx = cell.get_rand_idx_area_norm(
                 section=section,
@@ -382,8 +369,7 @@ if __name__ == '__main__':
     for i, pre in enumerate(PSET.populationParameters['me_type']):
         for j, post in enumerate(PSET.populationParameters['me_type']):
             # boolean connectivity matrix between pre- and post-synaptic
-            # neurons
-            # in each population (postsynaptic on this RANK)
+            # neurons in each population (postsynaptic on this RANK)
             connectivity = network.get_connectivity_rand(
                 pre=pre, post=post,
                 connprob=PSET.connParams['connprob'][i][j])
@@ -670,9 +656,8 @@ if __name__ == '__main__':
         # save figure output
         fig.savefig(os.path.join(
             PSET.OUTPUTPATH,
-            'example_parallel_network_populations_RANK_{}.pdf'.format(
-                    RANK)),
-                    bbox_inches='tight')
+            'example_parallel_network_populations_RANK_{}.pdf'.format(RANK)),
+            bbox_inches='tight')
         plt.close(fig)
 
     ##########################################################################
