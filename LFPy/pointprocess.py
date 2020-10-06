@@ -20,8 +20,8 @@ import numpy as np
 
 class PointProcess(object):
     """
-    Superclass on top of Synapse, StimIntElectrode, just to import and set
-    some shared variables and extracts Cartesian coordinates of a segment
+    Parent class of Synapse, StimIntElectrode. Created in order to import
+    and set some shared variables and extract Cartesian coordinates of segments
 
     Parameters
     ----------
@@ -35,8 +35,11 @@ class PointProcess(object):
         Must be set to True for recording potential of pointprocess target idx
     kwargs: pointprocess specific variables passed on to cell/neuron
 
+    See also
+    --------
+    Synapse
+    StimIntElectrode
     """
-
     def __init__(
             self,
             cell,
@@ -44,9 +47,6 @@ class PointProcess(object):
             record_current=False,
             record_potential=False,
             **kwargs):
-        """
-        Initializes the PointProcess class
-        """
         for key in ['color', 'marker']:
             if key in kwargs.keys():
                 raise DeprecationWarning(
@@ -85,12 +85,12 @@ class Synapse(PointProcess):
     idx: int
         Cell index where the synaptic input arrives
     syntype: str
-        Type of synapse. Built-in examples: ExpSyn, Exp2Syn
+        Type of synapse, such as 'ExpSyn', 'Exp2Syn', 'AlphaSynapse'
     record_current: bool
-        Decides if current is recorded
+        If True, record synapse to `<synapse>.i` in units of nA
     **kwargs
         Additional arguments to be passed on to
-        NEURON in `cell.set_synapse`
+        NEURON in `Cell.set_synapse`
 
     Examples
     --------
@@ -125,8 +125,10 @@ class Synapse(PointProcess):
     >>> pl.plot(cell.tvec, cell.somav)
     >>> pl.title('Somatic potential (mV)')
 
+    See also
+    --------
+    StimIntElectrode
     """
-
     def __init__(self,
                  cell,
                  idx,
@@ -134,9 +136,6 @@ class Synapse(PointProcess):
                  record_current=False,
                  record_potential=False,
                  **kwargs):
-        """
-        Initialization of class Synapse
-        """
         PointProcess.__init__(self,
                               cell,
                               idx,
@@ -156,7 +155,13 @@ class Synapse(PointProcess):
         self.cell.sptimeslist.append(np.array([]))
 
     def set_spike_times(self, sptimes=np.zeros(0)):
-        """Set the spike times explicitly using numpy arrays"""
+        """Set the spike times explicitly using numpy arrays
+
+        Parameters
+        ----------
+        ndarray, dtype=float
+            Sequence of synapse activation times
+        """
         try:
             assert isinstance(sptimes, np.ndarray)
         except AssertionError:
@@ -193,14 +198,25 @@ class Synapse(PointProcess):
         self.cell.netstimlist[self._ns_index].seed(seed)
 
     def collect_current(self, cell):
-        """Collect synapse current"""
+        """Collect synapse current. Sets ``<synapse>.i``
+
+        Parameters
+        ----------
+        cell: LFPy.Cell like object
+        """
         try:
             self.i = np.array(cell.synireclist.o(self.hocidx))
         except BaseException:
             raise Exception('cell.synireclist deleted from consequtive runs')
 
     def collect_potential(self, cell):
-        """Collect membrane potential of segment with synapse"""
+        """Collect membrane potential of segment with synapse.
+        Sets ``<synapse>.v``
+
+        Parameters
+        ----------
+        cell: LFPy.Cell like object
+        """
         try:
             self.v = np.array(cell.synvreclist.o(self.hocidx))
         except BaseException:
@@ -299,12 +315,13 @@ class StimIntElectrode(PointProcess):
     >>>      pl.legend(loc='best')
     >>>      pl.title('Somatic potential (mV)')
 
+    See also
+    --------
+    Synapse
     """
-
     def __init__(self, cell, idx, pptype='SEClamp',
                  record_current=False,
                  record_potential=False, **kwargs):
-        """Initialize StimIntElectrode class"""
         PointProcess.__init__(self, cell=cell, idx=idx,
                               record_current=record_current,
                               record_potential=record_potential)
@@ -318,9 +335,20 @@ class StimIntElectrode(PointProcess):
         cell.pointprocess_idx.append(idx)
 
     def collect_current(self, cell):
-        """Fetch electrode current from recorder list"""
+        """Fetch electrode current. Sets ``Sets ``<stimintelectrode>.i``
+
+        Parameters
+        ----------
+        cell: LFPy.Cell like object
+        """
         self.i = np.array(cell.stimireclist.o(self.hocidx))
 
     def collect_potential(self, cell):
-        """Collect membrane potential of segment with PointProcess"""
+        """Collect membrane potential of segment with PointProcess.
+        Sets ``<stimintelectrode>.v``
+
+        Parameters
+        ----------
+        cell: LFPy.Cell like object
+        """
         self.v = np.array(cell.stimvreclist.o(self.hocidx))

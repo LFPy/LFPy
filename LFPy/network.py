@@ -43,8 +43,6 @@ def flattenlist(lst):
 ##########################################################################
 class NetworkCell(TemplateCell):
     """
-    class NetworkCell
-
     Similar to `LFPy.TemplateCell` with the addition of some attributes and
     methods allowing for spike communication between parallel RANKs.
 
@@ -129,14 +127,13 @@ class NetworkCell(TemplateCell):
     >>> cell = LFPy.NetworkCell(**cellParameters)
     >>> cell.simulate()
 
-
+    See also
+    --------
+    Cell
+    TemplateCell
     """
 
     def __init__(self, **args):
-        """
-        Initialization of class LFPy.NetworkCell.
-
-        """
         TemplateCell.__init__(self, **args)
 
         # create list netconlist for spike detecting NetCon object(s)
@@ -249,7 +246,6 @@ class NetworkCell(TemplateCell):
 
 class DummyCell(object):
     def __init__(self, totnsegs=0,
-                 imem=np.array([[]]),
                  x=np.array([]),
                  y=np.array([]),
                  z=np.array([]),
@@ -266,19 +262,16 @@ class DummyCell(object):
         ----------
         totnsegs: int
             total number of segments
-        imem: ndarray
-            totnsegs x ntimesteps array with transmembrane currents in nA
         x, y, z: ndarray
             arrays of shape (totnsegs, 2) with (x,y,z) coordinates of start
             and end points of segments in units of (um)
-        diam: ndarray
+        d: ndarray
             array of length totnsegs with segment diameters
         area: ndarray
             array of segment surface areas
         """
         # set attributes
         self.totnsegs = totnsegs
-        self.imem = imem
         self.x = x
         self.y = y
         self.z = z
@@ -294,44 +287,44 @@ class DummyCell(object):
 
 
 class NetworkPopulation(object):
+    """
+    NetworkPopulation class representing a group of Cell objects
+    distributed across RANKs.
+
+    Parameters
+    ----------
+    CWD: path or None
+        Current working directory
+    CELLPATH: path or None
+        Relative path from CWD to source files for cell model
+        (morphology, hoc routines etc.)
+    first_gid: int
+        The global identifier of the first cell created in this population
+        instance. The first_gid in the first population created should be 0
+        and cannot exist in previously created NetworkPopulation instances
+    Cell: class
+        class defining a Cell object, see class NetworkCell above
+    POP_SIZE: int
+        number of cells in population
+    name: str
+        population name reference
+    cell_args: dict
+        keys and values for Cell object
+    pop_args: dict
+        keys and values for Network.draw_rand_pos assigning cell positions
+    rotation_arg: dict
+        default cell rotations around x and y axis on the form
+        { 'x': np.pi/2, 'y': 0 }. Can only have the keys 'x' and 'y'.
+        Cells are randomly rotated around z-axis using the
+        Cell.set_rotation() method.
+    OUTPUTPATH: str
+        path to output file destination
+    """
     def __init__(self, CWD=None, CELLPATH=None, first_gid=0, Cell=NetworkCell,
                  POP_SIZE=4, name='L5PC',
                  cell_args=dict(), pop_args=dict(),
                  rotation_args=dict(),
                  OUTPUTPATH='example_parallel_network'):
-        """
-        NetworkPopulation class representing a group of Cell objects
-        distributed across RANKs.
-
-        Parameters
-        ----------
-        CWD: path or None
-            Current working directory
-        CELLPATH: path or None
-            Relative path from CWD to source files for cell model
-            (morphology, hoc routines etc.)
-        first_gid: int
-            The global identifier of the first cell created in this population
-            instance. The first_gid in the first population created should be 0
-            and cannot exist in previously created NetworkPopulation instances
-        Cell: class
-            class defining a Cell object, see class NetworkCell above
-        POP_SIZE: int
-            number of cells in population
-        name: str
-            population name reference
-        cell_args: dict
-            keys and values for Cell object
-        pop_args: dict
-            keys and values for Network.draw_rand_pos assigning cell positions
-        rotation_arg: dict
-            default cell rotations around x and y axis on the form
-            { 'x': np.pi/2, 'y': 0 }. Can only have the keys 'x' and 'y'.
-            Cells are randomly rotated around z-axis using the
-            Cell.set_rotation() method.
-        OUTPUTPATH: str
-            path to output file destination
-        """
         # set class attributes
         self.CWD = CWD
         self.CELLPATH = CELLPATH
@@ -492,6 +485,29 @@ class NetworkPopulation(object):
 
 
 class Network(object):
+    """
+    Network class, creating distributed populations of cells of
+    type Cell and handling connections between cells in the respective
+    populations.
+
+    Parameters
+    ----------
+    dt: float
+        Simulation timestep size
+    tstart: float
+        Start time of simulation
+    tstop: float
+        End time of simulation
+    v_init: float
+        Membrane potential set at first timestep across all cells
+    celsius: float
+        Global control of temperature, affect channel kinetics.
+        It will also be forced when creating the different Cell objects, as
+        LFPy.Cell and LFPy.TemplateCell also accept the same keyword
+        argument.
+    verbose: bool
+        if True, print out misc. messages
+    """
     def __init__(
             self,
             dt=0.1,
@@ -501,31 +517,6 @@ class Network(object):
             celsius=6.3,
             OUTPUTPATH='example_parallel_network',
             verbose=False):
-        """
-        Network class, creating distributed populations of cells of
-        type Cell and handling connections between cells in the respective
-        populations.
-
-        Parameters
-        ----------
-        dt: float
-            Simulation timestep size
-        tstart: float
-            Start time of simulation
-        tstop: float
-            End time of simulation
-        v_init: float
-            Membrane potential set at first timestep across all cells
-        celsius: float
-            Global control of temperature, affect channel kinetics.
-            It will also be forced when creating the different Cell objects, as
-            LFPy.Cell and LFPy.TemplateCell also accept the same keyword
-            argument.
-        verbose: bool
-            if True, print out misc. messages
-
-
-        """
         # set attributes
         self.dt = dt
         self.tstart = tstart
@@ -951,16 +942,22 @@ class Network(object):
             written to. The file format is HDF5, default is "OUTPUT.h5", put
             in folder Network.OUTPUTPATH
         **kwargs:  keyword argument dict values passed along to function
-                    `_run_simulation_with_probes(), containing some or all of
-                    the boolean flags: use_ipas, use_icap, use_isyn
-                    (defaulting to 'False').
+                    `_run_simulation_with_probes()`, containing some or all of
+                    the boolean flags: `use_ipas`, `use_icap`, `use_isyn`
+                    (defaulting to `False`).
 
         Returns
         -------
+        events
+            Dictionary with keys `times` and `gids`, where values are
+            ndarrays with detected spikes and global neuron identifiers
 
         Raises
         ------
-
+        Exception
+            if `CVode().use_fast_imem()` method not found
+        AssertionError
+            if rec_pop_contributions==True and probes==None
         """
         # set up integrator, use the CVode().fast_imem method by default
         # as it doesn't hurt sim speeds much if at all.
@@ -1126,7 +1123,6 @@ class Network(object):
         nsegs = np.array(nsegs, dtype=int)
 
         totnsegs = nsegs.sum()
-        imem = np.eye(totnsegs)
         x = np.empty((0, 2))
         y = np.empty((0, 2))
         z = np.empty((0, 2))
@@ -1148,7 +1144,7 @@ class Network(object):
                 nseg += cell.totnsegs
 
         # return number of segments per population and DummyCell object
-        return nsegs, DummyCell(totnsegs, imem, x, y, z, d, area, somainds)
+        return nsegs, DummyCell(totnsegs, x, y, z, d, area, somainds)
 
     def _run_simulation(self, cvode, variable_dt=False, atol=0.001):
         """

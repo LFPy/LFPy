@@ -21,7 +21,13 @@ import pickle
 
 
 def load(filename):
-    """Generic loading of cPickled objects from file"""
+    """Generic loading of cPickled objects from file
+
+    Parameters
+    ----------
+    filename: str
+        path to pickle file
+    """
     with open(filename, 'rb') as f:
         obj = pickle.load(f)
     return obj
@@ -37,6 +43,15 @@ def noise_brown(ncols, nrows=1, weight=1., filter=None, filterargs=None):
 
     >>> b, a = filter(**filterargs)
     >>> signal = scipy.signal.lfilter(b, a, signal)
+
+    Parameters
+    ----------
+    ncols: int
+    nrows: int
+    weight: float
+    filter: None or function
+    filterargs: **dict
+        parameters passed to `filter`
     """
     def rms_flat(a):
         """

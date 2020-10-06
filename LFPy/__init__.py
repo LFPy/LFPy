@@ -22,10 +22,16 @@ GNU General Public License for more details.
 :Classes:
   * Cell - object built on top of NEURON representing biological neuron
   * TemplateCell - Similar to Cell, but for models using cell templates
+  * NetworkCell - Similar to `TemplateCell` with some attributes and methods
+    for spike communication between parallel RANKs
+  * PointProcess - Parent class of Synapse and StimIntElectrode
   * Synapse - Convenience class for inserting synapses onto Cell objects
   * StimIntElectrode - Convenience class for inserting stimulating electrodes
     into Cell objects
-  * PointProcess - Parent class of Synapse and StimIntElectrode
+  * Network - Class for creating distributed populations of cells and
+    handling connections between cells in populations
+  * NetworkPopulation - Class representing group of Cell objects distributed
+    across MPI RANKs
   * RecExtElectrode - Class for setup of simulations of extracellular
     potentials
   * RecMEAElectrode - Class for setup of simulations of in vitro (slice)
@@ -34,12 +40,6 @@ GNU General Public License for more details.
     assuming point current sources in conductive media
   * LineSourcePotential - Base forward-model for extracellular potentials
     assuming line current sources in conductive media
-  * Network - Class for creating distributed populations of cells and
-    handling connections between cells in populations
-  * NetworkCell - Similar to `TemplateCell` with some attributes and methods
-    for spike communication between parallel RANKs
-  * NetworkPopulation - Class representing group of Cell objects distributed
-    across MPI RANKs
   * OneSphereVolumeConductor - For computing extracellular potentials within
     and outside a homogeneous sphere
   * CurrentDipoleMoment,
@@ -49,10 +49,10 @@ GNU General Public License for more details.
     dipoles in infinite volume conductor
   * MEG - Class for computing magnetic field from current dipole moment
 :Modules:
-  * lfpcalc - Functions used by RecExtElectrode class
+  * lfpcalc - Misc. functions used by RecExtElectrode class
   * tools - Some convenient functions
   * inputgenerators - Functions for synaptic input time generation
-  * eegcalc - Functions for calculating current dipole moment vector
+  * eegmegcalc - Classes for calculating current dipole moment vector
     P and P_tot from currents and distances.
   * run_simulations - Functions to run NEURON simulations
 """
