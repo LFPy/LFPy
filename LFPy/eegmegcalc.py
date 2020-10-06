@@ -198,7 +198,6 @@ class InfiniteVolumeConductor(lfpykit.eegmegcalc.InfiniteVolumeConductor):
         """
         super().__init__(sigma=sigma)
 
-
     def get_multi_dipole_potential(self, cell,
                                    electrode_locs, timepoints=None):
         """
