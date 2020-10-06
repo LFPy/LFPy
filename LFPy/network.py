@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""Defines classes and methods used by example_parallel_network.py script
+"""Defines classes and methods used for recurrent neuronal networks.
 
 Copyright (C) 2012 Computational Neuroscience Group, NMBU.
 

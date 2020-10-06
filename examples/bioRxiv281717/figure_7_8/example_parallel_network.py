@@ -263,9 +263,9 @@ if __name__ == '__main__':
                               1. - PSET.POPSCALING**2 / (N_pre * N_post)))
             if RANK == 0:
                 print(string + ', C1={}, K1={}'.format(
-                        PSET.connParams['connprob'][i][j],
-                        np.log(1. - PSET.connParams['connprob'][i][j]) /
-                        np.log(1. - 1. / (N_pre * N_post))))
+                    PSET.connParams['connprob'][i][j],
+                    np.log(1. - PSET.connParams['connprob'][i][j]) /
+                    np.log(1. - 1. / (N_pre * N_post))))
 
     # file output destination
     PSET.OUTPUTPATH = os.path.join(OUTPUT, ps_id)
