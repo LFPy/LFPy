@@ -1,7 +1,3 @@
-====
-LFPy
-====
-
 Module :mod:`LFPy`
 ==================
 .. automodule:: LFPy
