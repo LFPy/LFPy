@@ -5,10 +5,10 @@
 
 .. image:: Logo_liten.png
 
-LFPy Homepage
-=============
+Welcome to LFPy's documentation!
+================================
 
-(Looking for the old LFPy documentation? Follow `link <https://lfpy.github.io/v1.3>`_)
+(Looking for the old LFPy v1.* documentation? Follow `link <https://lfpy.github.io/v1.3>`_)
 
 LFPy is a `Python <http://www.python.org>`_ package for calculation of extracellular potentials from multicompartment neuron models and recurrent networks of multicompartment neurons.
 It relies on the `NEURON simulator <http://www.neuron.yale.edu/neuron/>`_ and uses the
@@ -56,13 +56,8 @@ This scientific software is released under the GNU Public License `GPLv3 <http:/
 Tutorial slides on LFPy
 -----------------------
 
-- Slides for OCNS 2018 meeting tutorial `T5: Modeling and analysis of extracellular potentials <https://www.cnsorg.org/cns-2018-tutorials#T5>`_ hosted in Seattle, USA on LFPy: `CNS2018_LFPy_tutorial.pdf  <http://LFPy.github.io/downloads/CNS2018_LFPy_tutorial.pdf>`_
-- Slides for OCNS 2017 meeting tutorial `T4: Modeling and analysis of extracellular potentials <http://www.cnsorg.org/cns-2017-tutorials#t4>`_ hosted in Antwerp, Belgium on LFPy and hybridLFPy: `CNS2017_LFPy_tutorial.pdf  <http://LFPy.github.io/downloads/CNS2017_LFPy_tutorial.pdf>`_
-- Slides from OCNS 2015 meeting tutorial `T2:  Modeling and analysis of extracellular potentials <http://www.cnsorg.org/cns-2015-tutorials#t2>`_ hosted in Prague, Czech Republic on LFPy and hybridLFPy: `CNS2015_LFPy_tutorial.pdf  <http://LFPy.github.io/downloads/CNS2015_LFPy_tutorial.pdf>`_
-- Slides from OCNS 2014 meeting tutorial `T4:  Modeling and analysis of extracellular potentials <http://www.cnsorg.org/cns-2014-tutorials#T4>`_ hosted in Quebec City: `hybridlfpy_tutorial_OCNS2014.pdf  <http://LFPy.github.io/downloads/hybridlfpy_tutorial_OCNS2014.pdf>`_
-- As part of the OCNS 2013 meeting workshop `Modeling and interpretation of extracellular potentials <http://www.cnsorg.org/cns-2013-tutorials#extracellular_potentials>`_,
-  there was also a talk on LFPy. The slides can be found here: `lfpy-tutorial_OCNS2013.pdf  <http://LFPy.github.io/downloads/lfpy-tutorial_OCNS2013.pdf>`_.
-
+- Slides for OCNS 2019 meeting tutorial `T8: Biophysical modeling of extracellular potentials (using LFPy).` <https://www.cnsorg.org/cns-2019-tutorials#T8>_ hosted in Barcelona, Spain on LFPy: `CNS2019_LFPy_tutorial` <https://LFPy.github.io/downloads/CNS2019_LFPy_tutorial.pdf>_
+- Older tutorial slides can be found at `https://LFPy.github.io/downloads` <https://github.com/LFPy/LFPy.github.io/tree/master/downloads>_
 
 Related projects
 ----------------
@@ -78,13 +73,10 @@ LFPy has been used extensively in ongoing and published work, and may be a requi
   point-neuron network models (https://github.com/INM-6/hybridLFPy),
   as described in Hagen, E. and Dahmen, D., et al. (2016), Cereb Cortex, DOI:`10.1093/cercor/bhw237 <http://dx.doi.org/10.1093/cercor/bhw237>`_
 
-
-
-
 Contents
 ========
 .. toctree::
-    :maxdepth: 3
+    :maxdepth: 20
 
     information
     tutorial

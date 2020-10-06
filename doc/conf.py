@@ -54,7 +54,8 @@ extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.autosummary',
               'sphinx.ext.viewcode',
               'sphinx.ext.mathjax',
-              'numpydoc']
+              'numpydoc',
+              'm2r2']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -93,7 +94,7 @@ release = _release
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
-exclude_patterns = ['_build']
+exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 # The reST default role (used for this markup: `text`) to use for all
 # documents.
@@ -242,7 +243,7 @@ numpydoc_show_class_members = False
 
 
 def setup(app):
-    app.add_stylesheet('custom.css')  # may also be an URL
+    app.add_css_file('custom.css')  # may also be an URL
 
 # -- Options for manual page output --------------------------------------
 

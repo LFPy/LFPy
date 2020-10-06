@@ -24,12 +24,12 @@ from LFPy import Cell
 class TemplateCell(Cell):
 
     """
-    class LFPy.TemplateCell
-
-    This class allow using NEURON templates with some limitations.
+    `LFPy.Cell` like class allowing use of NEURON templates with some
+    limitations.
 
     This takes all the same parameters as the Cell class, but requires three
-    more template related parameters
+    more template related parameters `templatefile`, `templatename` and
+    `templateargs`
 
     Parameters
     ----------
@@ -107,6 +107,10 @@ class TemplateCell(Cell):
     >>> cell = LFPy.TemplateCell(**cellParameters)
     >>> cell.simulate()
 
+    See also
+    --------
+    Cell
+    NetworkCell
     """
 
     def __init__(self,
@@ -115,10 +119,6 @@ class TemplateCell(Cell):
                  templateargs=None,
                  verbose=False,
                  **kwargs):
-        """
-        Initialization of the Template Cell object.
-
-        """
         if "win32" in sys.platform and isinstance(templatefile, str):
             templatefile = templatefile.replace(os.sep, posixpath.sep)
         self.templatefile = templatefile
