@@ -22,11 +22,11 @@ jobs:
         python-version: 3.8
     - name: Install dependencies
       run: |
-        sudo apt install build-essential python3-mpi4py libopenmpi-dev openmpi-bin
+        sudo apt install build-essential libopenmpi-dev openmpi-bin libgcc1 libreadline7
         python -m pip install --upgrade pip
         pip install flake8 pytest
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-        pip install .
+        python setup.py install
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
