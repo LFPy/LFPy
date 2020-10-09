@@ -75,7 +75,7 @@ class FourSphereVolumeConductor(lfpykit.eegmegcalc.FourSphereVolumeConductor):
     >>> # current dipole moment
     >>> p = np.array([[10., 10., 10.]]*10) # 10 timesteps [nA µm]
     >>> # compute potential
-    >>> sphere_model.calc_potential(p, rz)  # [mV]
+    >>> sphere_model.get_dipole_potential(p, rz)  # [mV]
     array([[1.06247669e-08, 1.06247669e-08, 1.06247669e-08, 1.06247669e-08,
             1.06247669e-08, 1.06247669e-08, 1.06247669e-08, 1.06247669e-08,
             1.06247669e-08, 1.06247669e-08],
@@ -96,7 +96,7 @@ class FourSphereVolumeConductor(lfpykit.eegmegcalc.FourSphereVolumeConductor):
                          sigmas=sigmas,
                          iter_factor=iter_factor)
 
-    def calc_potential_from_multi_dipoles(self, cell, timepoints=None):
+    def get_dipole_potential_from_multi_dipoles(self, cell, timepoints=None):
         """
         Return electric potential from multiple current dipoles from cell.
 
@@ -141,7 +141,7 @@ class FourSphereVolumeConductor(lfpykit.eegmegcalc.FourSphereVolumeConductor):
         >>> MD_4s = FourSphereVolumeConductor(radii,
         >>>                                   sigmas,
         >>>                                   electrode_locs)
-        >>> phi = MD_4s.calc_potential_from_multi_dipoles(cell,
+        >>> phi = MD_4s.get_dipole_potential_from_multi_dipoles(cell,
         >>>                                               timepoints)
         """
         multi_p, multi_p_locs = cell.get_multi_current_dipole_moments(
@@ -150,7 +150,7 @@ class FourSphereVolumeConductor(lfpykit.eegmegcalc.FourSphereVolumeConductor):
         Ni, Nd, Nt = multi_p.shape
         potential = np.zeros((N_elec, Nt))
         for i in range(Ni):
-            pot = self.calc_potential(multi_p[i], multi_p_locs[i])
+            pot = self.get_dipole_potential(multi_p[i], multi_p_locs[i])
             potential += pot
         return potential
 
