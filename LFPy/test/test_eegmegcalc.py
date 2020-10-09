@@ -366,7 +366,7 @@ class testFourSphereVolumeConductor(unittest.TestCase):
         z1 = fs._calc_zn(n)
         np.testing.assert_almost_equal(z1, -2.16574585635359)
 
-    def test_calc_potential(self):
+    def test_get_dipole_potential(self):
         '''test comparison between four-sphere model and model for
         infinite homogeneous space
         when sigma is constant and r4 goes to infinity'''
@@ -384,13 +384,13 @@ class testFourSphereVolumeConductor(unittest.TestCase):
                            [0., 40., 0.]])
         four_s = LFPy.FourSphereVolumeConductor(
             r_elec, radii, sigmas)
-        pots_4s = four_s.calc_potential(p, rz)
+        pots_4s = four_s.get_dipole_potential(p, rz)
         inf_s = LFPy.InfiniteVolumeConductor(0.3)
         pots_inf = inf_s.get_dipole_potential(p, r_elec - rz)
 
         np.testing.assert_allclose(pots_4s, pots_inf, rtol=1e-6)
 
-    def test_calc_potential01(self):
+    def test_get_dipole_potential01(self):
         '''test comparison between analytical 4S-model and FEM simulation'''
         # load data
         fem_sim = np.load(
@@ -408,7 +408,7 @@ class testFourSphereVolumeConductor(unittest.TestCase):
         fs = LFPy.FourSphereVolumeConductor(
             ele_coords, radii, sigmas)
         k_mV_to_muV = 1e3
-        pot_analytical = fs.calc_potential(
+        pot_analytical = fs.get_dipole_potential(
             p, rz).reshape(
             (len(ele_coords),)).reshape(
             pot_fem.shape) * k_mV_to_muV
@@ -416,7 +416,7 @@ class testFourSphereVolumeConductor(unittest.TestCase):
             (np.max(np.abs(pot_fem)))
         np.testing.assert_array_less(global_error, 0.01)
 
-    def test_calc_potential02(self):
+    def test_get_dipole_potential02(self):
         '''Test radial and tangential parts of dipole sums to dipole'''
         radii = [88000, 90000, 95000, 100000]
         sigmas = [0.3, 1.5, 0.015, 0.3]
@@ -445,7 +445,7 @@ class testFourSphereVolumeConductor(unittest.TestCase):
         for i in range(len(p_locs)):
             fs = LFPy.FourSphereVolumeConductor(
                 el_locs[i], radii, sigmas)
-            phi = fs.calc_potential(dips[i].T, p_locs[i])
+            phi = fs.get_dipole_potential(dips[i].T, p_locs[i])
             if i == 0:
                 phi0 = phi[0][0]
             else:
@@ -480,12 +480,12 @@ class testFourSphereVolumeConductor(unittest.TestCase):
         for i in range(len(p_locs)):
             fs = LFPy.FourSphereVolumeConductor(
                 el_locs[i], radii, sigmas)
-            phi = fs.calc_potential(dips[i].T, p_locs[i])
+            phi = fs.get_dipole_potential(dips[i].T, p_locs[i])
 
             M = fs.get_transformation_matrix(p_locs[i])
             np.testing.assert_allclose(M @ dips[i].T, phi)
 
-    def test_calc_potential_from_multi_dipoles00(self):
+    def test_get_dipole_potential_from_multi_dipoles00(self):
         """test comparison between multi-dipoles and single dipole approach"""
         neuron.h('forall delete_section()')
         soma = neuron.h.Section(name='soma')
@@ -511,7 +511,7 @@ class testFourSphereVolumeConductor(unittest.TestCase):
         p, dipole_locs = cell.get_multi_current_dipole_moments(t_point)
         Np, Nt, Nd = p.shape
         Ne = electrode_locs.shape[0]
-        pot_MD = MD_4s.calc_potential_from_multi_dipoles(cell, t_point)
+        pot_MD = MD_4s.get_dipole_potential_from_multi_dipoles(cell, t_point)
 
         cell.__del__()
 
@@ -521,13 +521,13 @@ class testFourSphereVolumeConductor(unittest.TestCase):
             dip_loc = dipole_locs[i]
             fs = LFPy.FourSphereVolumeConductor(
                 electrode_locs, radii, sigmas)
-            pot = fs.calc_potential(dip, dip_loc)
+            pot = fs.get_dipole_potential(dip, dip_loc)
             pot_sum += pot
 
         np.testing.assert_almost_equal(pot_MD, pot_sum)
         np.testing.assert_allclose(pot_MD, pot_sum, rtol=1E-4)
 
-    def test_calc_potential_from_multi_dipoles01(self):
+    def test_get_dipole_potential_from_multi_dipoles01(self):
         """test comparison between multi-dipoles and single dipole approach"""
         neuron.h('forall delete_section()')
         soma = neuron.h.Section(name='soma')
@@ -555,7 +555,7 @@ class testFourSphereVolumeConductor(unittest.TestCase):
         p, dipole_locs = cell.get_multi_current_dipole_moments(t_point)
         Np, Nt, Nd = p.shape
         Ne = electrode_locs.shape[0]
-        pot_MD = MD_4s.calc_potential_from_multi_dipoles(cell, t_point)
+        pot_MD = MD_4s.get_dipole_potential_from_multi_dipoles(cell, t_point)
 
         cell.__del__()
 
@@ -565,7 +565,7 @@ class testFourSphereVolumeConductor(unittest.TestCase):
             dip_loc = dipole_locs[i]
             fs = LFPy.FourSphereVolumeConductor(
                 electrode_locs, radii, sigmas)
-            pot = fs.calc_potential(dip, dip_loc)
+            pot = fs.get_dipole_potential(dip, dip_loc)
             pot_sum += pot
 
         np.testing.assert_almost_equal(pot_MD, pot_sum)

@@ -149,6 +149,16 @@ class :class:`MEG`
     :undoc-members:
 
 
+Current Source Density (CSD)
+============================
+
+class :class:`LaminarCurrentSourceDensity`
+------------------------------------------
+.. autoclass:: LaminarCurrentSourceDensity
+    :members:
+    :show-inheritance:
+    :undoc-members:
+
 Misc.
 =====
 
