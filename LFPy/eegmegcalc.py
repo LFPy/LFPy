@@ -14,6 +14,7 @@ GNU General Public License for more details.
 
 '''
 import lfpykit
+from lfpykit.eegmegcalc import NYHeadModel
 import numpy as np
 
 
