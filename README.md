@@ -109,7 +109,9 @@ LFPy was developed in the Computational Neuroscience Group, Department of Mathem
 at the Norwegian University of Life Sciences (http://www.nmbu.no),
 in collaboration with the Laboratory of Neuroinformatics (http://www.nencki.gov.pl/en/laboratory-of-neuroinformatics),
 Nencki Institute of Experimental Biology (http://www.nencki.gov.pl), Warsaw, Poland. The effort was supported by
-International Neuroinformatics Coordinating Facility (http://incf.org), the Research Council of Norway (http://www.forskningsradet.no/english) (eScience, NevroNor) and EU-FP7 (BrainScaleS, http://www.brainscales.org).
+International Neuroinformatics Coordinating Facility (http://incf.org), the Research Council of Norway (http://www.forskningsradet.no/english) (eScience, NevroNor),
+EU-FP7 (BrainScaleS, http://www.brainscales.org),
+the European Union Horizon 2020 Framework Programme for Research and Innovation under Specific Grant Agreement No. 785907 and No. 945539 [Human Brain Project (HBP) SGA2, SGA3 and EBRAINS].
 
 For updated information on LFPy and online documentation, see the LFPy homepage (http://lfpy.readthedocs.io).
 
