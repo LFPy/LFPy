@@ -140,6 +140,14 @@ class :class:`FourSphereVolumeConductor`
     :show-inheritance:
     :undoc-members:
 
+class :class:`NYHeadModel`
+--------------------------
+.. autoclass:: NYHeadModel
+    :members:
+    :inherited-members:
+    :show-inheritance:
+    :undoc-members:
+
 class :class:`MEG`
 ------------------
 .. autoclass:: MEG
