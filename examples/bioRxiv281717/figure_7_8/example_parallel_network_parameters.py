@@ -421,20 +421,22 @@ synapses_tsv = {}
 # attempt to set up a folder with all unique EPFL mechanism mod files,
 # compile, and load them all in order to be able to load cells as
 # LFPy.NetworkCell objects
-if RANK == 0:
-    if not os.path.isdir(PSET.NMODL):
-        os.mkdir(PSET.NMODL)
-        for NRN in PSET.populationParameters['me_type']:
-            for nmodl in glob(os.path.join(
-                    PSET.CELLPATH, NRN, 'mechanisms', '*.mod')):
-                while not os.path.isfile(
-                        os.path.join(PSET.NMODL, os.path.split(nmodl)[-1])):
-                    os.system('cp {} {}'.format(nmodl,
-                                                os.path.join(PSET.NMODL,
-                                                             '.')))
+if not neuron.load_mechanisms(PSET.NMODL):
+    if RANK == 0:
+        if not os.path.isdir(PSET.NMODL):
+            os.mkdir(PSET.NMODL)
+            for NRN in PSET.populationParameters['me_type']:
+                for nmodl in glob(os.path.join(
+                        PSET.CELLPATH, NRN, 'mechanisms', '*.mod')):
+                    while not os.path.isfile(
+                            os.path.join(PSET.NMODL,
+                                         os.path.split(nmodl)[-1])):
+                        os.system('cp {} {}'.format(nmodl,
+                                                    os.path.join(PSET.NMODL,
+                                                                 '.')))
         os.chdir(PSET.NMODL)
-        # patch faulty ProbGABAAB_EMS.mod file (otherwise stochastic inhibitory
-        # synapses will stay closed except at first activation)
+        # patch faulty ProbGABAAB_EMS.mod file (otherwise stochastic
+        # inhibitory synapses will stay closed except at first activation)
         diff = '''319c319
 <                 urand = scop_random(1)
 ---
@@ -449,7 +451,7 @@ if RANK == 0:
         os.chdir(PSET.CWD)
 COMM.Barrier()
 neuron.load_mechanisms(PSET.NMODL)
-os.chdir(PSET.CWD)
+# os.chdir(PSET.CWD)
 
 
 # Fill in dictionary of population-specific cell parameters
