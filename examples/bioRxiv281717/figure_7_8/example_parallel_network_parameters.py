@@ -40,7 +40,6 @@ COMM = MPI.COMM_WORLD
 SIZE = COMM.Get_size()
 RANK = COMM.Get_rank()
 
-
 # load some neuron-interface files needed for the EPFL cell types
 neuron.h.load_file("stdrun.hoc")
 neuron.h.load_file("import3d.hoc")
@@ -85,9 +84,6 @@ PSET.CWD = os.getcwd()
 PSET.CELLPATH = 'hoc_combos_syn.1_0_10.allzips'
 PSET.NMODL = 'hoc_combos_syn.1_0_10.allmods'
 
-# set global seed value. Seed per MPI rank will be set as GLOBALSEED + RANK #
-PSET.GLOBALSEED = 1234
-
 
 ########################################################
 # Simulation control
@@ -108,6 +104,7 @@ PSET.CONNPROBSCALING = 1. / PSET.POPSCALING
 # switch for fully connected network (do not use with large population sizes)
 PSET.fully_connected = True if TESTING else False
 
+'''
 # bool flag switching LFP calculations on or off (faster)
 PSET.COMPUTE_LFP = True
 
@@ -121,6 +118,7 @@ PSET.COMPUTE_P = PSET.COMPUTE_LFP
 # bool flag switching on calculations of contributions to the extracellular
 # potential per population
 PSET.rec_pop_contributions = PSET.COMPUTE_LFP
+'''
 
 # downsample factor for timeseries plots
 PSET.decimate_q = 10
@@ -229,22 +227,37 @@ PSET.ecogParameters = {
 
 
 # Main population parameters:
+'''
 PSET.populationParameters = np.array([
-    # # Layer 4
-    # # Excitatory
-    # ('L4_PC',       'cAD', 'L4_PC_cADpyr230_1',        2674,
-    #  dict(radius=210, loc=PSET.layer_data[3]['center'],
-    #       scale=100., cap=[1078., 97.]),
-    #  dict(x=np.pi/2, y=0.), ['dend', 'apic'],
-    #      ['dend', 'apic'],   0.125,    5.),
-    # # Inhibitory
-    # ('L4_LBC',      'dNAC', 'L4_LBC_dNAC222_1',         122,
-    #  dict(radius=210, loc=PSET.layer_data[3]['center'],
-    #       scale=100., cap=[938., 670]),
-    # dict(x=np.pi/2, y=0.),
-    #      ['soma', 'dend', 'apic'],    ['dend', 'apic'],
-    # 0.125,    5.),
-
+    # Layer 4
+    # Excitatory
+    ('L4_PC', 'cAD', 'L4_PC_cADpyr230_1', 2674,
+     dict(
+         radius=210,
+         loc=PSET.layer_data[3]['center'],
+         scale=100.,
+         cap=[
+             1078.,
+             97.]),
+     dict(x=np.pi / 2, y=0.),
+     ['dend', 'apic'],
+     ['dend', 'apic'],
+     0.125, 5.),
+    # Inhibitory
+    ('L4_LBC', 'dNAC', 'L4_LBC_dNAC222_1', 122,
+     dict(
+         radius=210,
+         loc=PSET.layer_data[3]['center'],
+         scale=100.,
+         cap=[
+             938.,
+             670]),
+     dict(x=np.pi / 2, y=0.),
+     ['soma', 'dend', 'apic'],
+     ['dend', 'apic'],
+     0.125, 5.),
+     '''
+PSET.populationParameters = np.array([
     # Layer 5
     # Excitatory
     ('L5_TTPC1', 'cAD', 'L5_TTPC1_cADpyr232_1', 2403,
@@ -312,7 +325,6 @@ if TESTING:
     PSET.populationParameters['POP_SIZE'] = np.ones(
         PSET.populationParameters.size)
 
-
 # Define a layer-specificity of connections L_YXL
 # (see Hagen, Dahmen et al. (2016), Cereb Cortex) based on the anatomy of
 # dendrites and axons. We here define this depth-dependence of synapse
@@ -346,6 +358,7 @@ for i, (y, Y, pop_args_Y, rotation_args_Y) in enumerate(zip(
             ['soma', 'dend', 'apic'],
             z_min=layerbounds[k + 1],
             z_max=layerbounds[k])].sum()
+    cell_Y.__del__()  # clean up section refs
     for j, (X, pop_args_X, rotation_args_X) in enumerate(zip(
             PSET.populationParameters['me_type'],
             PSET.populationParameters['pop_args'],
@@ -362,6 +375,8 @@ for i, (y, Y, pop_args_Y, rotation_args_Y) in enumerate(zip(
 
         data[:, j] = np.sqrt(len_Y_sum * len_X_sum) / \
             np.sqrt(len_Y_sum * len_X_sum).sum()
+        cell_X.__del__()  # clean up section refs
+
     # fill in
     PSET.L_YXL_m_types[y] = data
 
@@ -417,26 +432,23 @@ synapses_tsv_dtype = [
 ]
 synapses_tsv = {}
 
-
 # attempt to set up a folder with all unique EPFL mechanism mod files,
 # compile, and load them all in order to be able to load cells as
 # LFPy.NetworkCell objects
-if not neuron.load_mechanisms(PSET.NMODL):
-    if RANK == 0:
-        if not os.path.isdir(PSET.NMODL):
-            os.mkdir(PSET.NMODL)
-            for NRN in PSET.populationParameters['me_type']:
-                for nmodl in glob(os.path.join(
-                        PSET.CELLPATH, NRN, 'mechanisms', '*.mod')):
-                    while not os.path.isfile(
-                            os.path.join(PSET.NMODL,
-                                         os.path.split(nmodl)[-1])):
-                        os.system('cp {} {}'.format(nmodl,
-                                                    os.path.join(PSET.NMODL,
-                                                                 '.')))
+if RANK == 0:
+    if not os.path.isdir(PSET.NMODL):
+        os.mkdir(PSET.NMODL)
+        for NRN in PSET.populationParameters['me_type']:
+            for nmodl in glob(os.path.join(
+                    PSET.CELLPATH, NRN, 'mechanisms', '*.mod')):
+                while not os.path.isfile(
+                        os.path.join(PSET.NMODL, os.path.split(nmodl)[-1])):
+                    os.system('cp {} {}'.format(nmodl,
+                                                os.path.join(PSET.NMODL,
+                                                             '.')))
         os.chdir(PSET.NMODL)
-        # patch faulty ProbGABAAB_EMS.mod file (otherwise stochastic
-        # inhibitory synapses will stay closed except at first activation)
+        # patch faulty ProbGABAAB_EMS.mod file (otherwise stochastic inhibitory
+        # synapses will stay closed except at first activation)
         diff = '''319c319
 <                 urand = scop_random(1)
 ---
@@ -449,9 +461,9 @@ if not neuron.load_mechanisms(PSET.NMODL):
 
         os.system('nrnivmodl')
         os.chdir(PSET.CWD)
-COMM.Barrier()
+
+# load mechanisms
 neuron.load_mechanisms(PSET.NMODL)
-# os.chdir(PSET.CWD)
 
 
 # Fill in dictionary of population-specific cell parameters
