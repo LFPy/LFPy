@@ -178,8 +178,8 @@ tic = time()
 # avoid same sequence of random numbers from numpy and neuron on each RANK,
 # e.g., in order to draw unique cell locations and random synapse activation
 # times
-# GLOBALSEED = 1234
-# np.random.seed(GLOBALSEED + RANK)
+GLOBALSEED = 1234
+np.random.seed(GLOBALSEED + RANK)
 
 
 ##########################################################################
@@ -203,6 +203,9 @@ if __name__ == '__main__':
 
     # import main parameters dictionary for simulation
     from example_parallel_network_parameters import PSET
+
+    # load NEURON .mod files
+    neuron.load_mechanisms(PSET.NMODL)
 
     # modify parameters accd. to parameterspace id ps_id
     OUTPUT = 'output'
