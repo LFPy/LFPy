@@ -132,7 +132,6 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 '''
 from mpi4py import MPI
-import parameters as ps
 import sys
 import LFPy
 from time import time
@@ -146,6 +145,7 @@ from matplotlib.ticker import MaxNLocator
 import matplotlib.pyplot as plt
 from scipy.signal import decimate
 import neuron
+from parameters import ParameterSet
 import matplotlib
 matplotlib.use('agg')
 if LooseVersion(h5py.version.hdf5_version) < LooseVersion('1.8.16'):
@@ -185,7 +185,6 @@ np.random.seed(GLOBALSEED + RANK)
 ##########################################################################
 # Main simulation procedure
 ##########################################################################
-
 if __name__ == '__main__':
     # Remove cells from previous script executions
     neuron.h('forall delete_section()')
@@ -200,12 +199,9 @@ if __name__ == '__main__':
         initialization_time = time() - tic
         print('Initialization in {} seconds'.format(initialization_time))
     tic = time()
-
+    
     # import main parameters dictionary for simulation
     from example_parallel_network_parameters import PSET
-
-    # load NEURON .mod files
-    neuron.load_mechanisms(PSET.NMODL)
 
     # modify parameters accd. to parameterspace id ps_id
     OUTPUT = 'output'
@@ -214,17 +210,17 @@ if __name__ == '__main__':
 
     # get parameterset id, and load corresponding parameterset file
     ps_id = sys.argv[-1]
-    pset = ps.ParameterSet(os.path.join(PSETDIR, ps_id + '.txt'))
+    pset = ParameterSet(os.path.join(PSETDIR, ps_id + '.txt'))
 
     # patch up main ParameterSet object with values from ParameterSpace
-    PSET = ps.ParameterSet(PSET.copy())
+    PSET = ParameterSet(PSET.copy())
     PSET.update(pset)
 
     # compute dipole moment
     PSET.COMPUTE_P = PSET.COMPUTE_LFP
 
     # record population contributions to extracellular signals
-    PSET.rec_pop_contribution = PSET.COMPUTE_LFP
+    PSET.rec_pop_contributions = PSET.COMPUTE_LFP
 
     # compute ECoG
     PSET.COMPUTE_ECOG = PSET.COMPUTE_LFP

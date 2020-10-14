@@ -40,7 +40,6 @@ COMM = MPI.COMM_WORLD
 SIZE = COMM.Get_size()
 RANK = COMM.Get_rank()
 
-
 # load some neuron-interface files needed for the EPFL cell types
 neuron.h.load_file("stdrun.hoc")
 neuron.h.load_file("import3d.hoc")
@@ -326,7 +325,6 @@ if TESTING:
     PSET.populationParameters['POP_SIZE'] = np.ones(
         PSET.populationParameters.size)
 
-
 # Define a layer-specificity of connections L_YXL
 # (see Hagen, Dahmen et al. (2016), Cereb Cortex) based on the anatomy of
 # dendrites and axons. We here define this depth-dependence of synapse
@@ -434,7 +432,6 @@ synapses_tsv_dtype = [
 ]
 synapses_tsv = {}
 
-
 # attempt to set up a folder with all unique EPFL mechanism mod files,
 # compile, and load them all in order to be able to load cells as
 # LFPy.NetworkCell objects
@@ -464,9 +461,9 @@ if RANK == 0:
 
         os.system('nrnivmodl')
         os.chdir(PSET.CWD)
-COMM.Barrier()
-# neuron.load_mechanisms(PSET.NMODL)
-# os.chdir(PSET.CWD)
+
+# load mechanisms
+neuron.load_mechanisms(PSET.NMODL)
 
 
 # Fill in dictionary of population-specific cell parameters
