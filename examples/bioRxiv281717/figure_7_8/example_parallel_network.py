@@ -199,7 +199,7 @@ if __name__ == '__main__':
         initialization_time = time() - tic
         print('Initialization in {} seconds'.format(initialization_time))
     tic = time()
-    
+
     # import main parameters dictionary for simulation
     from example_parallel_network_parameters import PSET
 
