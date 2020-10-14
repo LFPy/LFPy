@@ -476,7 +476,13 @@ if __name__ == '__main__':
     COMM.Barrier()
 
     # clean up namespace
-    del electrode, ecog_electrode, current_dipole_moment, probes
+    if PSET.COMPUTE_LFP:
+        del electrode
+    if PSET.COMPUTE_ECOG:
+        del ecog_electrode
+    if PSET.COMPUTE_P:
+        del current_dipole_moment
+    del probes
 
     # tic toc
     if RANK == 0:
