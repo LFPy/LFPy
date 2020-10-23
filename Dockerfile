@@ -1,10 +1,36 @@
-FROM continuumio/miniconda3
+# -------- base ---------
+FROM debian:latest AS base
 
-RUN conda config --add channels conda-forge
+RUN apt-get update && \
+    apt-get install -y \
+        wget \
+        bash \
+        build-essential \
+        make \
+        gcc \
+        g++ \
+        git \
+        libncurses-dev \
+        python3 \
+        python3-numpy \
+        python3-scipy \
+        python3-matplotlib \
+        python3-h5py \
+        python3-yaml \
+        python3-pytest \
+        python3-pip \
+        cython3 \
+        jupyter \
+        ipython3
 
-RUN conda create -n lfpy python=3 lfpy ipython jupyter git matplotlib make gxx_linux-64
 
-RUN echo "source activate lfpy" > ~/.bashrc
-ENV PATH /opt/conda/envs/lfpy/bin:$PATH
+# ------ latest -----------
 
-RUN git clone https://github.com/LFPy/LFPy.git /opt/LFPy
+FROM base AS latest
+
+RUN apt-get update && \
+    apt-get install -y \
+    python3-mpi4py
+
+RUN pip3 install neuron
+RUN pip3 install git+https://github.com/LFPy/LFPy.git@master#egg=LFPy
