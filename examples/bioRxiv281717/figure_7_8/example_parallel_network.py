@@ -352,7 +352,9 @@ if __name__ == '__main__':
                                    syntype=PSET.connParamsExtrinsic['syntype'],
                                    weight=weightfun(**weightargs),
                                    **synparams)
-                syn.set_spike_times_w_netstim(interval=1000. / f)
+                syn.set_spike_times_w_netstim(interval=1000. / f,
+                                              seed=np.random.rand() * 2**32 - 1
+                                              )
 
     # connect pre and post-synaptic populations with some connectivity and
     # weight of connections and other connection parameters:
