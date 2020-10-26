@@ -260,7 +260,9 @@ if __name__ == '__main__':
                 syn = Synapse(cell=cell, idx=i, syntype='Exp2Syn',
                               weight=0.002,
                               **dict(tau1=0.2, tau2=1.8, e=0.))
-                syn.set_spike_times_w_netstim(interval=100.)
+                syn.set_spike_times_w_netstim(interval=100.,
+                                              seed=np.random.rand() * 2**32 - 1
+                                              )
 
     # create connectivity matrices and connect populations:
     for i, pre in enumerate(population_names):
