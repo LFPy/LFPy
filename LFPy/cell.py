@@ -27,12 +27,11 @@ from .alias_method import alias_method
 
 # check neuron version:
 try:
-    try:
-        assert(neuron.version >= '7.6.4')
-    except:
-        warn('LFPy could not read NEURON version info. v7.6.4 or newer required')
+    assert neuron.version >= '7.6.4'
 except AssertionError:
     warn('LFPy requires NEURON v7.6.4 or newer. Found v{}'.format(neuron.version))
+except:
+    warn('LFPy could not read NEURON version info. v7.6.4 or newer required')
 
 
 class Cell(object):
