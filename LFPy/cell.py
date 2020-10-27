@@ -114,9 +114,7 @@ class Cell(object):
                     Ra=None,
                     cm=None,
                     passive=False,
-                    passive_parameters = dict(
-                        g_pas=0.001,
-                        e_pas=-70.),
+                    passive_parameters=None,
                     extracellular=False,
                     tstart=0.,
                     tstop=100.,
@@ -138,6 +136,8 @@ class Cell(object):
         """
         self.verbose = verbose
         self.pt3d = pt3d
+        if passive_parameters is None:
+            passive_parameters = dict(g_pas=0.001, e_pas=-70.)
 
         # raise Exceptions on deprecated input arguments
         for key in ['timeres_NEURON', 'timeres_python']:
