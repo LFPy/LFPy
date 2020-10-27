@@ -154,18 +154,12 @@ class Cell(object):
 
         # check if there are un-used keyword arguments present in kwargs
         for key, value in kwargs.items():
-            raise ValueError('The keyword and argument {}={} is not valid input to class LFPy.Cell'.format(key, value))
+            raise ValueError(f'The keyword and argument {key}={value} is not valid input to class LFPy.Cell')
 
         if passive:
-            try:
-                assert(type(passive_parameters) is dict)
-            except AssertionError:
-                raise AssertionError('passive_parameters must be a dictionary')
+            assert type(passive_parameters) is dict, 'passive_parameters must be a dictionary'
             for key in ['g_pas', 'e_pas']:
-                try:
-                    assert(key in passive_parameters.keys())
-                except AssertionError:
-                    raise AssertionError('key {} not found in passive_parameters'.format(key))
+                assert key in passive_parameters.keys(), f'key {key} not found in passive_parameters'
 
         if not hasattr(neuron.h, 'd_lambda'):
             neuron.h.load_file('stdlib.hoc')    #NEURON std. library
@@ -184,10 +178,7 @@ class Cell(object):
                 warn(mssg)
 
         #load morphology
-        try:
-            assert(morphology is not None)
-        except AssertionError:
-            raise AssertionError('deprecated keyword argument morphology==None, value must be a file path or neuron.h.SectionList instance with neuron.h.Section instances')
+        assert morphology is not None, 'deprecated keyword argument morphology==None, value must be a file path or neuron.h.SectionList instance with neuron.h.Section instances'
         if "win32" in sys.platform and type(morphology) is str:
             # fix Path on windows
             morphology = morphology.replace(os.sep, posixpath.sep)
@@ -198,12 +189,9 @@ class Cell(object):
             else:
                 raise Exception('non-existent file %s' % self.morphology)
         else:
-            try:
-                assert(type(self.morphology) is type(neuron.h.SectionList))
-                # #will try to import top level cell and create sectionlist,
-                # #in case there were no morphology file loaded
-            except AssertionError:
-                raise Exception("Could not recognize Cell keyword argument morphology as neuron.h.SectionList instance")
+            assert type(self.morphology) is type(neuron.h.SectionList), "Could not recognize Cell keyword argument morphology as neuron.h.SectionList instance"
+            # #will try to import top level cell and create sectionlist,
+            # #in case there were no morphology file loaded
 
             # instantiate 3D geometry of all sections
             neuron.h.define_shape()
@@ -211,13 +199,9 @@ class Cell(object):
             self._create_sectionlists()
 
         #Some parameters and lists initialised
+        assert tstart <= 0, 'tstart must be <= 0.'
         try:
-            assert(tstart <= 0)
-        except AssertionError:
-            raise AssertionError('tstart must be <= 0.')
-
-        try:
-            assert(dt in 2.**np.arange(-16, -1))
+            assert dt in 2.**np.arange(-16, -1)
         except AssertionError:
             if tstart == 0.:
                 if self.verbose:
@@ -859,9 +843,9 @@ class Cell(object):
             p = self.area[poss_idx]
             # scale with density function
             if type(fun) in [list, tuple, np.ndarray]:
-                assert(type(funargs) in [list, tuple, np.ndarray])
-                assert(type(funweights) in [list, tuple, np.ndarray])
-                assert((len(fun) == len(funargs)) & (len(fun) == len(funweights)))
+                assert type(funargs) in [list, tuple, np.ndarray]
+                assert type(funweights) in [list, tuple, np.ndarray]
+                assert (len(fun) == len(funargs)) and (len(fun) == len(funweights))
                 mod = np.zeros(poss_idx.shape)
                 for f, args, scl in zip(fun, funargs, funweights):
                     if type(f) is str and f in dir(scipy.stats):
@@ -1765,7 +1749,7 @@ class Cell(object):
                 if sec.name() == parent:
                     sref = neuron.h.SectionRef(sec=sec)
                     break
-            assert(sec.name() == parent == sref.sec.name())
+            assert sec.name() == parent == sref.sec.name()
             for sec in sref.child:
                 childseclist.append(sec.name())
             # idxvec=1 where both coincide
@@ -1796,7 +1780,7 @@ class Cell(object):
             if sec.name() == parent:
                 sref = neuron.h.SectionRef(sec=sec)
                 break
-        assert(sref.sec.name() == parent)
+        assert sref.sec.name() == parent
         for sec in sref.child:
             seclist.append(sec.name())
 
@@ -2083,10 +2067,7 @@ class Cell(object):
             mssg = "projection must be a length 2 tuple of 'x', 'y' or 'z'!"
             raise ValueError(mssg)
 
-        try:
-            assert(self.pt3d is True)
-        except AssertionError:
-            raise AssertionError('Cell keyword argument pt3d != True')
+        assert self.pt3d is True, 'Cell keyword argument pt3d != True'
         polygons = []
         for i in range(len(self.x3d)):
             polygons.append(self._create_polygon(i, projection))
@@ -2559,14 +2540,8 @@ class Cell(object):
             Poisson's ratio. Ratio between axial and transversal
             compression/stretching. Default is 0.
         """
-        try:
-            assert(abs(factor) < 1.)
-        except AssertionError:
-            raise AssertionError('abs(factor) >= 1, factor must be in <-1, 1>')
-        try:
-            assert(axis in ['x', 'y', 'z'])
-        except AssertionError:
-            raise AssertionError('axis={} not "x", "y" or "z"'.format(axis))
+        assert abs(factor) < 1., 'abs(factor) >= 1, factor must be in <-1, 1>'
+        assert axis in ['x', 'y', 'z'], f'axis={axis} not "x", "y" or "z"'
 
         for pos, dir_ in zip(self.somapos, 'xyz'):
             geometry = np.c_[getattr(self, dir_+'start'),
