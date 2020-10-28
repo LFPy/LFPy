@@ -246,12 +246,12 @@ class NetworkCell(TemplateCell):
 
 class DummyCell(object):
     def __init__(self, totnsegs=0,
-                 x=np.array([]),
-                 y=np.array([]),
-                 z=np.array([]),
-                 d=np.array([]),
-                 area=np.array([]),
-                 somainds=np.array([])):
+                 x=None,
+                 y=None,
+                 z=None,
+                 d=None,
+                 area=None,
+                 somainds=None:
         """
         Dummy Cell object initialized with all attributes needed for LFP
         calculations using the LFPy.RecExtElectrode class and methods.
@@ -272,12 +272,12 @@ class DummyCell(object):
         """
         # set attributes
         self.totnsegs = totnsegs
-        self.x = x
-        self.y = y
-        self.z = z
-        self.d = d
-        self.area = area
-        self.somainds = somainds
+        self.x = x if x is not None else np.array([])
+        self.y = y if y is not None else np.array([])
+        self.z = z if z is not None else np.array([])
+        self.d = d if d is not None else np.array([])
+        self.area = area if area is not None else np.array([])
+        self.somainds = somainds if somainds is not None else np.array([])
 
     def get_idx(self, section="soma"):
         if section == "soma":
@@ -322,8 +322,8 @@ class NetworkPopulation(object):
     """
     def __init__(self, CWD=None, CELLPATH=None, first_gid=0, Cell=NetworkCell,
                  POP_SIZE=4, name='L5PC',
-                 cell_args=dict(), pop_args=dict(),
-                 rotation_args=dict(),
+                 cell_args=None, pop_args=None,
+                 rotation_args=None,
                  OUTPUTPATH='example_parallel_network'):
         # set class attributes
         self.CWD = CWD
@@ -332,9 +332,9 @@ class NetworkPopulation(object):
         self.Cell = Cell
         self.POP_SIZE = POP_SIZE
         self.name = name
-        self.cell_args = cell_args
-        self.pop_args = pop_args
-        self.rotation_args = rotation_args
+        self.cell_args = cell_args if cell_args is not None else dict()
+        self.pop_args = pop_args if pop_args is not None else dict()
+        self.rotation_args = rotation_args if rotation_args is not None else dict()
         self.OUTPUTPATH = OUTPUTPATH
 
         # create folder for output if it does not exist
@@ -543,8 +543,8 @@ class Network(object):
 
     def create_population(self, CWD=None, CELLPATH=None, Cell=NetworkCell,
                           POP_SIZE=4, name='L5PC',
-                          cell_args=dict(), pop_args=dict(),
-                          rotation_args=dict()):
+                          cell_args=None, pop_args=None,
+                          rotation_args=None):
         """
         Create and append a distributed POP_SIZE-sized population of cells of
         type Cell with the corresponding name. Cell-object references, gids on
