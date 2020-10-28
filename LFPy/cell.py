@@ -655,7 +655,7 @@ class Cell(object):
                     stim = eval(command, locals(), globals())
                     for param in list(kwargs.keys()):
                         try:
-                            exec('stim.{} = {}'.format(param, kwargs[param]))
+                            setattr(stim, param, kwargs[param])
                         except SyntaxError:
                             ERRMSG = ''.join([
                                 '',
