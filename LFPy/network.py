@@ -251,7 +251,7 @@ class DummyCell(object):
                  z=None,
                  d=None,
                  area=None,
-                 somainds=None:
+                 somainds=None):
         """
         Dummy Cell object initialized with all attributes needed for LFP
         calculations using the LFPy.RecExtElectrode class and methods.
