@@ -232,7 +232,8 @@ for i, NRN in enumerate(neurons):
 
             pointProcess = LFPy.StimIntElectrode(cell, **PointProcParams)
 
-            electrode = LFPy.RecExtElectrode(x=np.array([-40, 40., 0, 0]),
+            electrode = LFPy.RecExtElectrode(cell=cell,
+                                             x=np.array([-40, 40., 0, 0]),
                                              y=np.array([0, 0, -40, 40]),
                                              z=np.zeros(4),
                                              sigma=0.3, r=5, n=50,
@@ -240,13 +241,13 @@ for i, NRN in enumerate(neurons):
                                                          [1, 0, 0],
                                                          [1, 0, 0],
                                                          [1, 0, 0]]),
-                                             method='soma_as_point')
+                                             method='root_as_point')
             # run simulation
-            cell.simulate(electrode=electrode)
+            cell.simulate(probes=[electrode])
 
             # compute LFP
             if apply_filter:
-                LFP = ss.filtfilt(b, a, electrode.LFP, axis=-1)
+                LFP = ss.filtfilt(b, a, electrode.data, axis=-1)
 
             # detect action potentials from intracellular trace
             AP_train = np.zeros(cell.somav.size, dtype=int)
