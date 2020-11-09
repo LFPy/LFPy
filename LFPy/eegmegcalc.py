@@ -86,12 +86,16 @@ class FourSphereVolumeConductor(lfpykit.eegmegcalc.FourSphereVolumeConductor):
     """
     def __init__(self,
                  r_electrodes,
-                 radii=[79000., 80000., 85000., 90000.],
-                 sigmas=[0.3, 1.5, 0.015, 0.3],
+                 radii=None,
+                 sigmas=None,
                  iter_factor=2. / 99. * 1e-6):
         """
         Initialize class FourSphereVolumeConductor
         """
+        if radii is None:
+            radii = [79000., 80000., 85000., 90000.]
+        if sigmas is None:
+            sigmas = [0.3, 1.5, 0.015, 0.3]
         super().__init__(r_electrodes=r_electrodes,
                          radii=radii,
                          sigmas=sigmas,
