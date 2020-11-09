@@ -1,21 +1,17 @@
 # -------- base ---------
-FROM debian:latest AS base
+FROM buildpack-deps:focal AS base
 
 RUN apt-get update && \
     apt-get install -y \
         wget \
-        bash \
-        build-essential \
-        make \
-        gcc \
-        g++ \
-        git \
         libncurses-dev \
+        libmpich-dev \
+        mpich \
         python3 \
         python3-numpy \
         python3-scipy \
         python3-matplotlib \
-        python3-h5py \
+        #python3-h5py \
         python3-yaml \
         python3-pytest \
         python3-pip \
@@ -23,14 +19,13 @@ RUN apt-get update && \
         jupyter \
         ipython3
 
+RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 10 && \
+    update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 10 && \
+    update-alternatives --install /usr/bin/ipython ipython /usr/bin/ipython3 10
+
 
 # ------ latest -----------
+# FROM base AS latest
 
-FROM base AS latest
-
-RUN apt-get update && \
-    apt-get install -y \
-    python3-mpi4py
-
-RUN pip3 install neuron
-RUN pip3 install git+https://github.com/LFPy/LFPy.git@master#egg=LFPy
+RUN pip install h5py mpi4py neuron
+RUN pip install git+https://github.com/LFPy/LFPy.git@2.2.dev0#egg=LFPy
