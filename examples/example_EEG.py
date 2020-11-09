@@ -125,7 +125,7 @@ if __name__ == '__main__':
     eeg_coords_top = np.array([[0., 0., radii[3] - rad_tol]])
     four_sphere_top = LFPy.FourSphereVolumeConductor(
         eeg_coords_top, radii, sigmas)
-    pot_db_4s_top = four_sphere_top.calc_potential(P, r_mid)
+    pot_db_4s_top = four_sphere_top.get_dipole_potential(P, r_mid)
     eeg_top = np.array(pot_db_4s_top) * 1e9
 
     # measurement points
@@ -154,7 +154,7 @@ if __name__ == '__main__':
     p = P[:, time_max].reshape((3, 1))
 
     four_sphere = LFPy.FourSphereVolumeConductor(eeg_coords, radii, sigmas)
-    pot_db_4s = four_sphere.calc_potential(p, r_mid)
+    pot_db_4s = four_sphere.get_dipole_potential(p, r_mid)
     eeg = pot_db_4s.reshape(num_theta, num_phi) * 1e9  # from mV to pV
 
     P_mag = np.sqrt(P[:, 0]**2 + P[:, 1]**2 + P[:, 2]**2)
