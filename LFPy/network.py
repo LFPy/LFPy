@@ -334,7 +334,8 @@ class NetworkPopulation(object):
         self.name = name
         self.cell_args = cell_args if cell_args is not None else dict()
         self.pop_args = pop_args if pop_args is not None else dict()
-        self.rotation_args = rotation_args if rotation_args is not None else dict()
+        self.rotation_args = rotation_args if rotation_args is not None \
+            else dict()
         self.OUTPUTPATH = OUTPUTPATH
 
         # create folder for output if it does not exist
