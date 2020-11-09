@@ -73,7 +73,7 @@ elec_y = np.zeros(elec_x.shape)
 eeg_coords = np.array([elec_x.flatten(), elec_y.flatten(), elec_z.flatten()]).T
 
 MD_4s = LFPy.FourSphereVolumeConductor(eeg_coords, radii, sigmas)
-phi = MD_4s.calc_potential_from_multi_dipoles(cell) * 1e6  # from mV to nV
+phi = MD_4s.get_dipole_potential_from_multi_dipoles(cell) * 1e6  # from mV to nV
 
 # Plotting results
 plt.close('all')
