@@ -285,12 +285,8 @@ class testNetwork(unittest.TestCase):
         clampParams = {
             'idx': 0,
             'pptype': 'VClamp',
-            'amp[0]': -65,
-            'dur[0]': 10,
-            'amp[1]': 0,
-            'dur[1]': 1,
-            'amp[2]': -65,
-            'dur[2]': 1E8,
+            'amp': [-65, 0, -65],
+            'dur': [10, 1, 1E8],
         }
 
         # set up

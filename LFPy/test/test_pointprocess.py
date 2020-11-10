@@ -296,12 +296,8 @@ class testStimIntElectrode(unittest.TestCase):
                                      record_potential=True,
                                      **{'idx': 0,
                                         'pptype': 'VClamp',
-                                        'amp[0]': -65,
-                                        'dur[0]': 10,
-                                        'amp[1]': -55.,
-                                        'dur[1]': 20,
-                                        'amp[2]': -65,
-                                        'dur[2]': 10,
+                                        'amp': [-65, -55, -65],
+                                        'dur': [10, 20, 10],
                                         })
         cell.simulate()
         gt = np.zeros(cell.tvec.size) - 65.
