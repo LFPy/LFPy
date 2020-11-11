@@ -16,6 +16,7 @@ GNU General Public License for more details.
 
 
 import numpy as np
+from warnings import warn
 
 
 class PointProcess(object):
@@ -47,10 +48,6 @@ class PointProcess(object):
             record_current=False,
             record_potential=False,
             **kwargs):
-        for key in ['color', 'marker']:
-            if key in kwargs.keys():
-                raise DeprecationWarning(
-                    'Parameter {} has been deprecated'.format(key))
         self.idx = idx
         self.record_current = record_current
         self.record_potential = record_potential
