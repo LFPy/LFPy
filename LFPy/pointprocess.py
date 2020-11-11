@@ -16,7 +16,6 @@ GNU General Public License for more details.
 
 
 import numpy as np
-from warnings import warn
 
 
 class PointProcess(object):
