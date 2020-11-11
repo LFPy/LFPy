@@ -1056,8 +1056,7 @@ class Cell(object):
             if key in ['electrode', 'rec_current_dipole_moment',
                        'dotprodcoeffs', 'rec_isyn', 'rec_vmemsyn',
                        'rec_istim', 'rec_vmemstim']:
-                raise DeprecationWarning('Cell.simulate parameter '
-                                         '{} is deprecated.'.format(key))
+                warn('Cell.simulate parameter {} is deprecated.'.format(key))
 
         # set up integrator, use the CVode().fast_imem method by default
         # as it doesn't hurt sim speeds much if at all.
