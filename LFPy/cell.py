@@ -654,17 +654,14 @@ class Cell(object):
                 if i == idx:
                     command = cmd1 + pptype + cmd2
                     stim = eval(command, locals(), globals())
-                    for param in list(kwargs.keys()):
+                    for key, value in kwargs.items():
                         try:
-                            exec('stim.{} = {}'.format(param, kwargs[param]))
-                        except SyntaxError:
-                            ERRMSG = ''.join([
-                                '',
-                                'Point process type "{0}" might not '.format(
-                                    pptype),
-                                'recognize attribute "{0}". '.format(param),
-                                'Check for misspellings'])
-                            raise Exception(ERRMSG)
+                            itr = enumerate(iter(value))
+                        except TypeError:
+                            setattr(stim, key, value)
+                        else:
+                            for i, v in itr:
+                                getattr(stim, key)[i] = v
                     self.stimlist.append(stim)
 
                     # record current
@@ -713,8 +710,8 @@ class Cell(object):
             self.somapos[2] = self.z[self.somaidx].mean()
         elif self.somaidx.size == 0:
             if self.verbose:
-                print('There is no soma!')
-                print('using first segment as root point')
+                warn("There is no soma!" +
+                     "Using first segment as root point")
             self.somaidx = np.array([0])
             self.somapos = np.zeros(3)
             self.somapos[0] = self.x[self.somaidx].mean()

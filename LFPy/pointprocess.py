@@ -279,12 +279,8 @@ class StimIntElectrode(PointProcess):
     >>>         'idx': 0,
     >>>         'record_current': True,
     >>>         'pptype': 'VClamp',
-    >>>         'amp[0]': -70,
-    >>>         'dur[0]': 10,
-    >>>         'amp[1]': 0,
-    >>>         'dur[1]': 20,
-    >>>         'amp[2]': -70,
-    >>>         'dur[2]': 10,
+    >>>         'amp': [-70, 0, -70],
+    >>>         'dur': [10, 20, 10],
     >>>    },
     >>>    {
     >>>        'idx': 0,
@@ -297,23 +293,22 @@ class StimIntElectrode(PointProcess):
     >>>        'dur3': 10,
     >>>        'amp3': -70,
     >>>     },
-    >>>  ]
-    >>>  # create a cell instance for each electrode
-    >>>  for pointprocess in pointprocesses:
-    >>>      cell = LFPy.Cell(morphology=os.path.join('examples',
-    >>>                                               'morphologies',
-    >>>                                               'L5_Mainen96_LFPy.hoc'),
-    >>>                       passive=True)
-    >>>      stimulus = LFPy.StimIntElectrode(cell, **pointprocess)
-    >>>      cell.simulate()
-    >>>      pl.subplot(211)
-    >>>      pl.plot(cell.tvec, stimulus.i, label=pointprocess['pptype'])
-    >>>      pl.legend(loc='best')
-    >>>      pl.title('Stimulus currents (nA)')
-    >>>      pl.subplot(212)
-    >>>      pl.plot(cell.tvec, cell.somav, label=pointprocess['pptype'])
-    >>>      pl.legend(loc='best')
-    >>>      pl.title('Somatic potential (mV)')
+    >>> ]
+    >>> # create a cell instance for each electrode
+    >>> fix, axes = pl.subplots(2, 1, sharex=True)
+    >>> for pointprocess in pointprocesses:
+    >>>     cell = LFPy.Cell(morphology=os.path.join('examples',
+    >>>                                              'morphologies',
+    >>>                                              'L5_Mainen96_LFPy.hoc'),
+    >>>                      passive=True)
+    >>>     stimulus = LFPy.StimIntElectrode(cell, **pointprocess)
+    >>>     cell.simulate()
+    >>>     axes[0].plot(cell.tvec, stimulus.i, label=pointprocess['pptype'])
+    >>>     axes[0].legend(loc='best')
+    >>>     axes[0].set_title('Stimulus currents (nA)')
+    >>>     axes[1].plot(cell.tvec, cell.somav, label=pointprocess['pptype'])
+    >>>     axes[1].legend(loc='best')
+    >>>     axes[1].set_title('Somatic potential (mV)')
 
     See also
     --------

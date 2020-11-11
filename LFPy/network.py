@@ -203,7 +203,7 @@ class NetworkCell(TemplateCell):
         cell.netconsynapses.append(syntype(x, sec=sec))
 
         for key, value in synparams.items():
-            exec("cell.netconsynapses[-1].{} = {}".format(key, value))
+            setattr(cell.netconsynapses[-1], key, value)
             # check that synapses are parameterized correctly
             if assert_syn_values:
                 try:
