@@ -80,10 +80,8 @@ def _run_simulation_with_probes(cell, cvode, probes=[],
     transforms = []  # container
     for probe in probes:
         M = probe.get_transformation_matrix()
-        try:
-            assert(M.shape[-1] == cell.totnsegs)
-        except AssertionError:
-            raise AssertionError('Linear transformation shape mismatch')
+        assert M.shape[-1] == cell.totnsegs, \
+            'Linear transformation shape mismatch'
         transforms.append(M)
         if not variable_dt:
             probe.data = np.zeros((M.shape[0], int(cell.tstop / cell.dt) + 1))

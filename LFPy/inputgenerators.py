@@ -82,12 +82,8 @@ def get_activation_times_from_distribution(n, tstart=0., tstop=1.E6,
     >>>                                                rvs_args=dict(loc=0.,
     >>>                                                scale=100.))
     """
-    try:
-        assert hasattr(distribution, 'rvs')
-    except AssertionError:
-        raise AssertionError(
-            'distribution={} must have the attribute "rvs"'.format(distribution
-                                                                   ))
+    assert hasattr(distribution, 'rvs'), \
+        'distribution={} must have the attribute "rvs"'.format(distribution)
 
     times = []
     if 'size' in rvs_args.keys():

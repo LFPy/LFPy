@@ -158,12 +158,9 @@ class Synapse(PointProcess):
         ndarray, dtype=float
             Sequence of synapse activation times
         """
-        try:
-            assert isinstance(sptimes, np.ndarray)
-        except AssertionError:
-            raise AssertionError('synapse activation times must be a ',
-                                 'np.ndarray, not type({})'.format(type(sptimes
-                                                                        )))
+        assert isinstance(sptimes, np.ndarray), \
+            'synapse activation times must be ndarray, not ({})'.format(
+                type(sptimes))
         self.cell.sptimeslist.insrt(self._ns_index, sptimes)
         self.cell.sptimeslist.remove(self._ns_index + 1)
 
