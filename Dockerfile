@@ -11,7 +11,6 @@ RUN apt-get update && \
         python3-numpy \
         python3-scipy \
         python3-matplotlib \
-        #python3-h5py \
         python3-yaml \
         python3-pytest \
         python3-pip \
