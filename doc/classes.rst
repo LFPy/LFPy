@@ -167,6 +167,14 @@ class :class:`LaminarCurrentSourceDensity`
     :show-inheritance:
     :undoc-members:
 
+class :class:`VolumetricCurrentSourceDensity`
+---------------------------------------------
+.. autoclass:: VolumetricCurrentSourceDensity
+    :members:
+    :show-inheritance:
+    :undoc-members:
+
+
 Misc.
 =====
 
