@@ -61,7 +61,7 @@ from .version import version as __version__
 from .pointprocess import Synapse, PointProcess, StimIntElectrode
 from lfpykit import RecExtElectrode, RecMEAElectrode, CurrentDipoleMoment, \
     PointSourcePotential, LineSourcePotential, OneSphereVolumeConductor, \
-    LaminarCurrentSourceDensity
+    LaminarCurrentSourceDensity, VolumetricCurrentSourceDensity
 from .cell import Cell
 from .templatecell import TemplateCell
 from .network import NetworkCell, NetworkPopulation, Network
