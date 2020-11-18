@@ -370,7 +370,7 @@ class NetworkPopulation(object):
 
         # assign a random rotation around the z-axis of each cell
         self.rotations = np.random.uniform(0, np.pi * 2, len(self.gids))
-        assert('z' not in self.rotation_args.keys())
+        assert 'z' not in self.rotation_args.keys()
         for i, cell in enumerate(self.cells):
             cell.set_rotation(z=self.rotations[i], **self.rotation_args)
 
@@ -403,10 +403,7 @@ class NetworkPopulation(object):
             # delete old entry if it exist
             if self.name in f.keys():
                 del f[self.name]
-                try:
-                    assert self.name not in f.keys()
-                except AssertionError:
-                    raise AssertionError
+                assert self.name not in f.keys()
             f[self.name] = popDataArray
             f.close()
         else:
@@ -465,11 +462,8 @@ class NetworkPopulation(object):
                     z[inds] = np.random.normal(loc=loc, scale=scale,
                                                size=inds.sum())
             elif isinstance(cap, list):
-                try:
-                    assert(len(cap) == 2)
-                except AssertionError:
-                    raise AssertionError(
-                        'cap = {} is not a length 2 list'.format(float))
+                assert len(cap) == 2, \
+                    'cap = {} is not a length 2 list'.format(float)
                 while not np.all((z >= loc - cap[0]) & (z < loc + cap[1])):
                     inds = (z < loc - cap[0]) ^ (z > loc + cap[1])
                     z[inds] = np.random.normal(loc=loc, scale=scale,
@@ -577,11 +571,8 @@ class Network(object):
             Cell.set_rotation method.
 
         """
-        try:
-            assert name not in self.populations.keys()
-        except AssertionError:
-            raise AssertionError(
-                'population name {} already taken'.format(name))
+        assert name not in self.populations.keys(), \
+            'population name {} already taken'.format(name)
 
         # compute the first global id of this new population, based
         # on population sizes of existing populations
@@ -869,10 +860,7 @@ class Network(object):
                 key = '{}:{}'.format(pre, post)
                 if key in f.keys():
                     del f[key]
-                    try:
-                        assert key not in f.keys()
-                    except AssertionError:
-                        raise AssertionError
+                    assert key not in f.keys()
                 f[key] = synDataArray
                 f.close()
             else:
@@ -970,12 +958,9 @@ class Network(object):
                             'Please update NEURON to v.7.4 or newer')
 
         # test some of the inputs
-        try:
-            if probes is None:
-                assert(rec_pop_contributions is False)
-        except AssertionError:
-            raise AssertionError('rec_pop_contributions can not be True '
-                                 'when probes is None')
+        if probes is None:
+            assert rec_pop_contributions is False, \
+                'rec_pop_contributions can not be True when probes is None'
 
         if not variable_dt:
             dt = self.dt
