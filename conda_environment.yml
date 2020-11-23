@@ -1,19 +1,21 @@
-name: lfpytest
+name: lfpy
 channels:
   - conda-forge
   - defaults
 dependencies:
-  - python=3
-  - numpy
-  - scipy
-  - matplotlib
+  - python<3.9  # neuron not on PyPI yet for 3.9
+  - c-compiler
+  - cxx-compiler
   - Cython
   - h5py
-  - clang_osx-64
-  - neuron=*=mpi_*
-  - pytest
-  - mpi4py
+  - jupyter
+  - numpy
   - MEAutility>=1.4.2
+  - matplotlib
+  - mpi4py
+  - pytest
+  - scipy
   - pip
   - pip:
+    - neuron
     - '--editable=git+https://github.com/LFPy/LFPykit.git@master#egg=LFPykit'
