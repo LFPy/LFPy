@@ -14,28 +14,29 @@ GNU General Public License for more details.
 
 """
 
-def _test(verbosity=1):
+
+def _test(verbosity=2):
     """run all unit tests included with LFPy.
-    
+
     Parameters
     ----------
     verbosity : int
         unittest.TestCase verbosity level, default is 1
-    
+
     Examples
     --------
     From Python:
     >>> import LFPy
     >>> LFPy.run_tests()
-    
+
     Using external testing framework (nose, py.test etc.) from command line
     $ cd <path to LFPy>
     $ nosetests-2.7
-    
+
     Run single test modules
     $ cd <path to LFPy>
     $ nosetests-2.7 LFPy/test/test_cell.py
-    
+
     """
     # import methods here to avoid polluting LFPy.test namespace
     from .test_cell import testCell
@@ -44,73 +45,30 @@ def _test(verbosity=1):
     from .test_recextelectrode import testRecExtElectrode
     from .test_lfpcalc import testLfpCalc
     from .test_misc import testMisc
-    from .test_pointprocess import testPointProcess, testSynapse, testStimIntElectrode 
+    from .test_pointprocess import testPointProcess, testSynapse, testStimIntElectrode
     from .test_inputgenerators import testInputGenerators
     from .test_templatecell import testTemplateCell
     from .test_networkcell import testNetworkCell
     from .test_network import testNetworkPopulation, testNetwork
     import unittest
 
-    print('\ntest LFPy.Cell class and methods:')
-    suite = unittest.TestLoader().loadTestsFromTestCase(testCell)
-    unittest.TextTestRunner(verbosity=verbosity).run(suite)
+    # list of test cases
+    suites = []
+    suites += [unittest.TestLoader().loadTestsFromTestCase(testCell)]
+    suites += [unittest.TestLoader().loadTestsFromTestCase(testTemplateCell)]
+    suites += [unittest.TestLoader().loadTestsFromTestCase(testLfpCalc)]
+    suites += [unittest.TestLoader().loadTestsFromTestCase(testRecExtElectrode)]
+    suites += [unittest.TestLoader().loadTestsFromTestCase(testNetworkCell)]
+    suites += [unittest.TestLoader().loadTestsFromTestCase(testNetworkPopulation)]
+    suites += [unittest.TestLoader().loadTestsFromTestCase(testNetwork)]
+    suites += [unittest.TestLoader().loadTestsFromTestCase(testMEG)]
+    suites += [unittest.TestLoader().loadTestsFromTestCase(testFourSphereVolumeConductor)]
+    suites += [unittest.TestLoader().loadTestsFromTestCase(testInfiniteVolumeConductor)]
+    suites += [unittest.TestLoader().loadTestsFromTestCase(testAliasMethod)]
+    suites += [unittest.TestLoader().loadTestsFromTestCase(testPointProcess)]
+    suites += [unittest.TestLoader().loadTestsFromTestCase(testSynapse)]
+    suites += [unittest.TestLoader().loadTestsFromTestCase(testStimIntElectrode)]
+    suites += [unittest.TestLoader().loadTestsFromTestCase(testInputGenerators)]
+    suites += [unittest.TestLoader().loadTestsFromTestCase(testMisc)]
 
-    print('\ntest LFPy.TemplateCell class and methods:')
-    suite = unittest.TestLoader().loadTestsFromTestCase(testTemplateCell)
-    unittest.TextTestRunner(verbosity=verbosity).run(suite)
-
-    print('\ntest LFPy.lfpcalc methods:')
-    suite = unittest.TestLoader().loadTestsFromTestCase(testLfpCalc)
-    unittest.TextTestRunner(verbosity=verbosity).run(suite)
-
-    print('\ntest LFPy.RecExtElectrode class and methods:')
-    suite = unittest.TestLoader().loadTestsFromTestCase(testRecExtElectrode)
-    unittest.TextTestRunner(verbosity=verbosity).run(suite)
-
-    print('\ntest LFPy.NetworkCell class and methods:')
-    suite = unittest.TestLoader().loadTestsFromTestCase(testNetworkCell)
-    unittest.TextTestRunner(verbosity=verbosity).run(suite)
-
-    print('\ntest LFPy.NetworkPopulation class and methods:')
-    suite = unittest.TestLoader().loadTestsFromTestCase(testNetworkPopulation)
-    unittest.TextTestRunner(verbosity=verbosity).run(suite)
-
-    print('\ntest LFPy.Network class and methods:')
-    suite = unittest.TestLoader().loadTestsFromTestCase(testNetwork)
-    unittest.TextTestRunner(verbosity=verbosity).run(suite)
-
-    print('\ntest LFPy.MEG class and methods:')
-    suite = unittest.TestLoader().loadTestsFromTestCase(testMEG)
-    unittest.TextTestRunner(verbosity=verbosity).run(suite)
-
-    print('\ntest LFPy.FourSphereVolumeConductor class and methods:')
-    suite = unittest.TestLoader().loadTestsFromTestCase(testFourSphereVolumeConductor)
-    unittest.TextTestRunner(verbosity=verbosity).run(suite)
-
-    print('\ntest LFPy.InfiniteVolumeConductor class and methods:')
-    suite = unittest.TestLoader().loadTestsFromTestCase(testInfiniteVolumeConductor)
-    unittest.TextTestRunner(verbosity=verbosity).run(suite)
-
-    print('\ntest LFPy.alias_method methods:')
-    suite = unittest.TestLoader().loadTestsFromTestCase(testAliasMethod)
-    unittest.TextTestRunner(verbosity=verbosity).run(suite)
-
-    print('\ntest LFPy.PointProcess class and methods:')
-    suite = unittest.TestLoader().loadTestsFromTestCase(testPointProcess)
-    unittest.TextTestRunner(verbosity=verbosity).run(suite)
-
-    print('\ntest LFPy.Synapse class and methods:')
-    suite = unittest.TestLoader().loadTestsFromTestCase(testSynapse)
-    unittest.TextTestRunner(verbosity=verbosity).run(suite)
-
-    print('\ntest LFPy.StimIntElectrode class and methods:')
-    suite = unittest.TestLoader().loadTestsFromTestCase(testStimIntElectrode)
-    unittest.TextTestRunner(verbosity=verbosity).run(suite)
-
-    print('\ntest LFPy.inputgenerators methods:')
-    suite = unittest.TestLoader().loadTestsFromTestCase(testInputGenerators)
-    unittest.TextTestRunner(verbosity=verbosity).run(suite)
-
-    print('\ntest misc. methods:')
-    suite = unittest.TestLoader().loadTestsFromTestCase(testMisc)
-    unittest.TextTestRunner(verbosity=verbosity).run(suite)
+    unittest.TextTestRunner(verbosity=verbosity).run(unittest.TestSuite(suites))
