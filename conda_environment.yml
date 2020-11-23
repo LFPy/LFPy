@@ -9,6 +9,7 @@ dependencies:
   - Cython
   - h5py
   - jupyter
+  - lfpykit
   - numpy
   - MEAutility>=1.4.2
   - matplotlib
@@ -18,4 +19,3 @@ dependencies:
   - pip
   - pip:
     - neuron
-    - '--editable=git+https://github.com/LFPy/LFPykit.git@master#egg=LFPykit'
