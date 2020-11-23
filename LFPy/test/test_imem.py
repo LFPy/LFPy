@@ -18,7 +18,7 @@ import numpy as np
 import LFPy
 
 
-class test_imem(unittest.TestCase):
+class testImem(unittest.TestCase):
     def test_cell_v_init_00(self):
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
                                                  'ball_and_sticks.hoc'),
