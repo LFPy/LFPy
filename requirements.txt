@@ -8,4 +8,4 @@ mpi4py>=1.2
 matplotlib>=2.0
 MEAutility>=1.4.2
 neuron>=7.6.4
--e git://github.com/LFPy/LFPykit.git@master#egg=LFPykit
+LFPykit>=0.2
