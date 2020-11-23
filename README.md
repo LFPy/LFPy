@@ -249,7 +249,7 @@ or
     $ docker run -it -p 5000:5000 lfpy:latest
 
 or
-    # build local Dockerfile (obtained by cloning repo, checkout branch -etc.)
+    # build local Dockerfile (obtained by cloning repo, checkout branch etc.)
     $ docker build -t lfpy - < Dockerfile
     $ docker run -it -p 5000:5000 lfpy:latest
 
