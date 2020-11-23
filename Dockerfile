@@ -27,4 +27,4 @@ RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 10 && 
 # FROM base AS latest
 
 RUN pip install h5py mpi4py neuron
-RUN pip install git+https://github.com/LFPy/LFPy.git@2.2.dev0#egg=LFPy
+RUN pip install git+https://github.com/LFPy/LFPy.git@master#egg=LFPy
