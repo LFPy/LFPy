@@ -4,14 +4,14 @@
 Main simulation script for setting up the model producing the data shown in
 figure 7 and 8 in:
 
-    Multimodal modeling of neural network activity: computing LFP, ECoG, EEG and
-    MEG signals with LFPy2.0
+    Multimodal modeling of neural network activity: computing LFP, ECoG, EEG
+    and MEG signals with LFPy2.0
     Espen Hagen, Solveig Næss, Torbjørn V Ness, Gaute T Einevoll
     bioRxiv 281717; doi: https://doi.org/10.1101/281717
 
 This example file is not suited for execution on laptops or desktop computers.
-In the corresponding parameter file example_parallel_network_parameters.py there
-is an option to set
+In the corresponding parameter file example_parallel_network_parameters.py
+there is an option to set
 
     TESTING = True
 
@@ -29,8 +29,10 @@ Ailamaki A, Alonso-Nanclares L, Antille N, Arsever S et al. (2015).
 Reconstruction and Simulation of Neocortical Microcircuitry.
 Cell 163:2, 456 - 492. doi: 10.1016/j.cell.2015.09.029
 
-A tar file with all single-cell models zipped can be downloaded and unpacked by issuing:
-$ wget https://bbp.epfl.ch/nmc-portal/documents/10184/7288948/hoc_combos_syn.1_0_10.allzips.tar
+A tar file with all single-cell models zipped can be downloaded and unpacked
+by issuing:
+$ wget https://bbp.epfl.ch/nmc-portal/documents/10184/7288948/\
+hoc_combos_syn.1_0_10.allzips.tar
 $ tar -xvf hoc_combos_syn.1_0_10.allzips.tar
 $ cd hoc_combos_syn.1_0_10.allzips
 $ unzip 'L4_PC_*.zip'
@@ -56,10 +58,14 @@ Load some required neuron-interface files
 
 Load only some layer 5 pyramidal cell types
 Define a list of the neuron models (defined in the parameter file)
->>> neurons = [os.path.join('hoc_combos_syn.1_0_10.allzips', 'L4_PC_cADpyr230_1'),
-               os.path.join('hoc_combos_syn.1_0_10.allzips', 'L4_LBC_dNAC222_1'),
-               os.path.join('hoc_combos_syn.1_0_10.allzips', 'L5_TTPC1_cADpyr232_1'),
-               os.path.join('hoc_combos_syn.1_0_10.allzips', 'L5_MC_bAC217_1')]
+>>> neurons = [os.path.join('hoc_combos_syn.1_0_10.allzips',
+                            'L4_PC_cADpyr230_1'),
+               os.path.join('hoc_combos_syn.1_0_10.allzips',
+                            'L4_LBC_dNAC222_1'),
+               os.path.join('hoc_combos_syn.1_0_10.allzips',
+                            'L5_TTPC1_cADpyr232_1'),
+               os.path.join('hoc_combos_syn.1_0_10.allzips',
+                            'L5_MC_bAC217_1')]
 
 Attempt to set up a folder with all unique mechanism mod files, compile, and
 load them all. One synapse mechanism file is faulty and must be patched.
@@ -87,7 +93,8 @@ load them all. One synapse mechanism file is faulty and must be patched.
 >>> os.system('patch ProbGABAAB_EMS.mod ProbGABAAB_EMS.patch')
 >>> if "win32" in sys.platform:
 >>>     warn("no autompile of NMODL (.mod) files on Windows. "
->>>          + "Run mknrndll from NEURON bash in the folder %s and rerun example script" % NMODL)
+>>>          + "Run mknrndll from NEURON bash in the folder "
+>>>          + "%s and rerun example script" % NMODL)
 >>> else:
 >>>     os.system('nrnivmodl')
 >>> os.chdir(CWD)
@@ -95,8 +102,8 @@ load them all. One synapse mechanism file is faulty and must be patched.
 
 In order to run simulations to generate the data, modify the script
 example_parallel_network_parameterspace.py to create suitable job scripts for
-the cluster used for the simulations. Some examples we used are set up using the
-SLURM workload management software (https://slurm.schedmd.com/). Then many
+the cluster used for the simulations. Some examples we used are set up using
+the SLURM workload management software (https://slurm.schedmd.com/). Then many
 jobs can be submitted at once by issuing:
 
     $ python example_parallel_network_parameters.py
@@ -124,27 +131,26 @@ but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 '''
-from __future__ import division
 from mpi4py import MPI
+import sys
+import LFPy
+from time import time
+import os
+import h5py
+from distutils.version import LooseVersion
+import numpy as np
+from matplotlib.gridspec import GridSpec
+from matplotlib.collections import PolyCollection
+from matplotlib.ticker import MaxNLocator
+import matplotlib.pyplot as plt
+from scipy.signal import decimate
 import neuron
+from parameters import ParameterSet
 import matplotlib
 matplotlib.use('agg')
-import matplotlib.pyplot as plt
-from matplotlib.ticker import MaxNLocator
-from matplotlib.collections import PolyCollection
-from matplotlib.gridspec import GridSpec
-import numpy as np
-from distutils.version import LooseVersion
-import h5py
 if LooseVersion(h5py.version.hdf5_version) < LooseVersion('1.8.16'):
     raise ImportError('h5py uses HDF5 v{}: v1.8.16 or newer required'.format(
         h5py.version.hdf5_version))
-import os
-from time import time
-import LFPy
-from example_parallel_network_plotting import decimate
-import sys
-import parameters as ps
 
 
 # set up MPI environment
@@ -153,7 +159,7 @@ SIZE = COMM.Get_size()
 RANK = COMM.Get_rank()
 
 # set default plotting parameters
-fontsize=8
+fontsize = 8
 plt.rcParams.update({
     'axes.xmargin': 0.0,
     'axes.ymargin': 0.0,
@@ -172,32 +178,27 @@ tic = time()
 # avoid same sequence of random numbers from numpy and neuron on each RANK,
 # e.g., in order to draw unique cell locations and random synapse activation
 # times
-# GLOBALSEED = 1234
-# np.random.seed(GLOBALSEED + RANK)
+GLOBALSEED = 1234
+np.random.seed(GLOBALSEED + RANK)
 
 
-################################################################################
+##########################################################################
 # Main simulation procedure
-################################################################################
-
+##########################################################################
 if __name__ == '__main__':
     # Remove cells from previous script executions
     neuron.h('forall delete_section()')
 
-    ############################################################################
+    ##########################################################################
     # Simulation control and parameters
-    ############################################################################
+    ##########################################################################
     # import LFPy.NetworkCell and Network classes
     from LFPy import NetworkCell, Network
 
     if RANK == 0:
         initialization_time = time() - tic
         print('Initialization in {} seconds'.format(initialization_time))
-        # create logfile recording time in seconds for different simulation steps
-        # (initialization, parameters, simulation etc.)
-
     tic = time()
-
 
     # import main parameters dictionary for simulation
     from example_parallel_network_parameters import PSET
@@ -209,49 +210,68 @@ if __name__ == '__main__':
 
     # get parameterset id, and load corresponding parameterset file
     ps_id = sys.argv[-1]
-    pset = ps.ParameterSet(os.path.join(PSETDIR, ps_id + '.txt'))
+    pset = ParameterSet(os.path.join(PSETDIR, ps_id + '.txt'))
 
     # patch up main ParameterSet object with values from ParameterSpace
-    PSET = ps.ParameterSet(PSET.copy())
+    PSET = ParameterSet(PSET.copy())
     PSET.update(pset)
 
     # compute dipole moment
     PSET.COMPUTE_P = PSET.COMPUTE_LFP
 
     # record population contributions to extracellular signals
-    PSET.rec_pop_contribution = PSET.COMPUTE_LFP
+    PSET.rec_pop_contributions = PSET.COMPUTE_LFP
 
     # compute ECoG
     PSET.COMPUTE_ECOG = PSET.COMPUTE_LFP
 
     # set reference network size
-    PSET.populationParameters['POP_SIZE'] = (np.array(PSET.POP_SIZE_REF)*PSET.POPSCALING).astype(int)
+    PSET.populationParameters['POP_SIZE'] = (
+        np.array(PSET.POP_SIZE_REF) * PSET.POPSCALING).astype(int)
 
     # adjust connection probabilities to keep indegrees similar across sims
     for i, N_pre in enumerate(PSET.populationParameters['POP_SIZE']):
         for j, N_post in enumerate(PSET.populationParameters['POP_SIZE']):
-            # Modified connection probability dependent on population scaling S:
-            # C1 = 1 - (1 - 1 / (N_pre^1 * N_post^1))**(log(1-C0) / log(1 - S**2 / (N_pre^1 * N_post^1))))
-            # where the exponent (log(1-C0) / log(1 - S**2 / (N_pre^1 * N_post^1)))) = K,
+            # Modified connection probability dependent on pop. scaling S:
+            # C1 = 1 - (1 - 1 / (N_pre^1 * N_post^1))**(log(1-C0) /\
+            #  log(1 - S**2 / (N_pre^1 * N_post^1))))
+            # where the exponent
+            # (log(1-C0) / log(1 - S**2 / (N_pre^1 * N_post^1)))) = K,
             # the number of connections which should stay approximately fixed
             if RANK == 0:
-                string = '{}:{}: C0={}, K0={}'.format(i, j, PSET.connParams['connprob'][i][j], np.log(1-PSET.connParams['connprob'][i][j]) / np.log(1 - PSET.POPSCALING**2 / (N_pre * N_post)))
+                string = '{}:{}: C0={}, K0={}'.format(
+                    i, j, PSET.connParams['connprob'][i][j],
+                    np.log(1 - PSET.connParams['connprob'][i][j])
+                    / np.log(1 - PSET.POPSCALING**2 / (N_pre * N_post)))
             if PSET.PRESERVE == 'total':
                 # Fixed number of connections (across different MPISIZE values)
-                PSET.connParams['connprob'][i][j] = 1. - (1. - 1. / (N_pre * N_post))**(np.log(1.-PSET.connParams['connprob'][i][j]) / np.log(1. - PSET.POPSCALING**2 / (N_pre * N_post)))
+                PSET.connParams['connprob'][i][j] = \
+                    1. - (1. - 1. / (N_pre * N_post))**(
+                        np.log(1. - PSET.connParams['connprob'][i][j]
+                               ) / np.log(
+                            1. - PSET.POPSCALING**2 / (N_pre * N_post)))
             if PSET.PRESERVE == 'indegree':
-                # Fixed indegree (obtained by multiplying K_YX computed for scaling 1 with the population scaling variable, and recompute the corresponding connection probability)
-                PSET.connParams['connprob'][i][j] = 1. - (1. - 1. / (N_pre * N_post))**(PSET.POPSCALING*np.log(1.-PSET.connParams['connprob'][i][j]) / np.log(1. - PSET.POPSCALING**2 / (N_pre * N_post)))
+                # Fixed indegree (obtained by multiplying K_YX computed for
+                # scaling 1 with the population scaling variable, and recompute
+                # the corresponding connection probability)
+                PSET.connParams['connprob'][i][j] = \
+                    1. - (1. - 1. / (N_pre * N_post)
+                          )**(PSET.POPSCALING * np.log(
+                              1. - PSET.connParams['connprob'][i][j]
+                          ) / np.log(
+                              1. - PSET.POPSCALING**2 / (N_pre * N_post)))
             if RANK == 0:
-                print(string + ', C1={}, K1={}'.format(PSET.connParams['connprob'][i][j], np.log(1.-PSET.connParams['connprob'][i][j]) / np.log(1. - 1./ (N_pre * N_post))))
+                print(string + ', C1={}, K1={}'.format(
+                    PSET.connParams['connprob'][i][j],
+                    np.log(1. - PSET.connParams['connprob'][i][j]) /
+                    np.log(1. - 1. / (N_pre * N_post))))
 
     # file output destination
     PSET.OUTPUTPATH = os.path.join(OUTPUT, ps_id)
 
-
     # avoid same sequence of random numbers from numpy and neuron on each RANK,
-    # e.g., in order to draw unique cell locations and random synapse activation
-    # times
+    # e.g., in order to draw unique cell locations and random synapse
+    # activation times
     np.random.seed(PSET.GLOBALSEED + RANK)
 
     # set up file destination
@@ -269,32 +289,33 @@ if __name__ == '__main__':
         logfile.write('parameters {}\n'.format(parameters_time))
     tic = time()
 
-
-    ############################################################################
+    ##########################################################################
     # Create population, provide noisy input to each cell, connect network
-    ############################################################################
+    ##########################################################################
     # create network object instance
     network = Network(dt=PSET.dt, tstop=PSET.tstop, v_init=PSET.v_init,
                       celsius=PSET.celsius,
                       OUTPUTPATH=PSET.OUTPUTPATH)
     # create populations iteratively
     for name, pop_args, rotation_args, POP_SIZE in zip(
-        PSET.populationParameters['me_type'],
-        PSET.populationParameters['pop_args'],
-        PSET.populationParameters['rotation_args'],
-        (PSET.populationParameters['POP_SIZE']).astype(int)):
+            PSET.populationParameters['me_type'],
+            PSET.populationParameters['pop_args'],
+            PSET.populationParameters['rotation_args'],
+            (PSET.populationParameters['POP_SIZE']).astype(int)):
         network.create_population(CWD=PSET.CWD, CELLPATH=PSET.CELLPATH,
                                   Cell=NetworkCell, POP_SIZE=POP_SIZE,
-                                  name=name, cell_args=PSET.cellParameters[name],
-                                  pop_args=pop_args, rotation_args=rotation_args)
+                                  name=name,
+                                  cell_args=PSET.cellParameters[name],
+                                  pop_args=pop_args,
+                                  rotation_args=rotation_args)
 
     # tic-toc
     if RANK == 0:
         create_population_time = time() - tic
-        print('Populations initialized in {} seconds'.format(create_population_time))
+        print('Populations initialized in {} seconds'.format(
+            create_population_time))
         logfile.write('population {}\n'.format(create_population_time))
     tic = time()
-
 
     # Sync MPI threads as populations may take a different amount of
     # time across RANKs. All neurons must have been created before connections
@@ -313,19 +334,19 @@ if __name__ == '__main__':
 
     # create for each cell in each population some external input with Poisson
     # statistics using NEURON's NetStim device (controlled using LFPy.Synapse)
-    for m_type, me_type, section, rho, f, synparams, weightfun, weightargs in zip(
-                        PSET.populationParameters['m_type'],
-                        PSET.populationParameters['me_type'],
-                        PSET.populationParameters['extrinsic_input_section'],
-                        PSET.populationParameters['extrinsic_input_density'],
-                        PSET.populationParameters['extrinsic_input_frequency'],
-                        PSET.connParamsExtrinsic['synparams'],
-                        PSET.connParamsExtrinsic['weightfuns'],
-                        PSET.connParamsExtrinsic['weightargs'],
-                        ):
+    for m_type, me_type, section, rho, f, synparams, weightfun, weightargs \
+        in zip(PSET.populationParameters['m_type'],
+               PSET.populationParameters['me_type'],
+               PSET.populationParameters['extrinsic_input_section'],
+               PSET.populationParameters['extrinsic_input_density'],
+               PSET.populationParameters['extrinsic_input_frequency'],
+               PSET.connParamsExtrinsic['synparams'],
+               PSET.connParamsExtrinsic['weightfuns'],
+               PSET.connParamsExtrinsic['weightargs']):
         for cell in network.populations[me_type].cells:
-            idx = cell.get_rand_idx_area_norm(section=section,
-                                              nidx=int(cell.area[cell.get_idx(section)].sum() * rho))
+            idx = cell.get_rand_idx_area_norm(
+                section=section,
+                nidx=int(cell.area[cell.get_idx(section)].sum() * rho))
             for i in idx:
                 syn = LFPy.Synapse(cell=cell, idx=i,
                                    syntype=PSET.connParamsExtrinsic['syntype'],
@@ -335,121 +356,117 @@ if __name__ == '__main__':
                                               seed=np.random.rand() * 2**32 - 1
                                               )
 
-
-
     # connect pre and post-synaptic populations with some connectivity and
     # weight of connections and other connection parameters:
     total_conncount = 0
     total_syncount = 0
     for i, pre in enumerate(PSET.populationParameters['me_type']):
         for j, post in enumerate(PSET.populationParameters['me_type']):
-            # boolean connectivity matrix between pre- and post-synaptic neurons
-            # in each population (postsynaptic on this RANK)
-            connectivity = network.get_connectivity_rand(pre=pre, post=post,
-                                    connprob=PSET.connParams['connprob'][i][j])
+            # boolean connectivity matrix between pre- and post-synaptic
+            # neurons in each population (postsynaptic on this RANK)
+            connectivity = network.get_connectivity_rand(
+                pre=pre, post=post,
+                connprob=PSET.connParams['connprob'][i][j])
 
             # connect network
             (conncount, syncount) = network.connect(
-                            pre=pre, post=post,
-                            connectivity=connectivity,
-                            syntype=PSET.connParams['syntypes'][i][j],
-                            synparams=PSET.connParams['synparams'][i][j],
-                            weightfun=PSET.connParams['weightfuns'][i][j],
-                            weightargs=PSET.connParams['weightargs'][i][j],
-                            delayfun=PSET.connParams['delayfuns'][i][j],
-                            delayargs=PSET.connParams['delayargs'][i][j],
-                            multapsefun=PSET.connParams['multapsefuns'][i][j],
-                            multapseargs=PSET.connParams['multapseargs'][i][j],
-                            syn_pos_args=PSET.connParams['syn_pos_args'][i][j],
-                            save_connections=PSET.save_connections,
-                            )
+                pre=pre, post=post,
+                connectivity=connectivity,
+                syntype=PSET.connParams['syntypes'][i][j],
+                synparams=PSET.connParams['synparams'][i][j],
+                weightfun=PSET.connParams['weightfuns'][i][j],
+                weightargs=PSET.connParams['weightargs'][i][j],
+                delayfun=PSET.connParams['delayfuns'][i][j],
+                delayargs=PSET.connParams['delayargs'][i][j],
+                multapsefun=PSET.connParams['multapsefuns'][i][j],
+                multapseargs=PSET.connParams['multapseargs'][i][j],
+                syn_pos_args=PSET.connParams['syn_pos_args'][i][j],
+                save_connections=PSET.save_connections,
+            )
             total_conncount += conncount
             total_syncount += syncount
     if RANK == 0:
         create_connections_time = time() - tic
-        print('Network build finished with {} connections and {} synapses in {} seconds'.format(
-            total_conncount, total_syncount, create_connections_time))
+        print('Network build finished with '
+              '{} connections and {} synapses in {} seconds'.format(
+                  total_conncount, total_syncount, create_connections_time))
         logfile.write('connections {}\n'.format(create_connections_time))
     tic = time()
 
+    ##########################################################################
+    # Set up extracellular electrodes and devices
+    ##########################################################################
+    probes = []
 
-    ############################################################################
-    # Set up extracellular electrode
-    ############################################################################
     if PSET.COMPUTE_LFP:
-        electrode = LFPy.RecExtElectrode(**PSET.electrodeParams)
-    else:
-        electrode = None
+        electrode = LFPy.RecExtElectrode(cell=None, **PSET.electrodeParams)
+        probes.append(electrode)
 
     if PSET.COMPUTE_ECOG:
-        ecog_electrode = LFPy.RecMEAElectrode(**PSET.ecogParameters)
-        electrode = [electrode, ecog_electrode]
+        ecog_electrode = LFPy.RecMEAElectrode(cell=None, **PSET.ecogParameters)
+        probes.append(ecog_electrode)
 
+    if PSET.COMPUTE_P:
+        current_dipole_moment = LFPy.CurrentDipoleMoment(cell=None)
+        probes.append(current_dipole_moment)
 
-    ############################################################################
+    ##########################################################################
     # Recording of additional variables
-    ############################################################################
+    ##########################################################################
     if RANK == 0:
         network.t = neuron.h.Vector()
         network.t.record(neuron.h._ref_t)
     else:
         network.t = None
 
-
-
-    ############################################################################
+    ##########################################################################
     # run simulation, gather results across all RANKs
-    ############################################################################
+    ##########################################################################
     # Assert that connect routines has finished across RANKS before starting
     # main simulation procedure
     COMM.Barrier()
     if RANK == 0:
         print('running simulation....')
-    if PSET.COMPUTE_LFP:
-        SPIKES, SUMMED_OUTPUT, CURRENT_DIPOLE_MOMENT = network.simulate(
-                                  electrode=electrode,
-                                  rec_current_dipole_moment=PSET.COMPUTE_P,
-                                  rec_pop_contributions=PSET.rec_pop_contributions,
-                                  **PSET.NetworkSimulateArgs)
-    else:
-        SPIKES = network.simulate()
-    # note: OUTPUT is a structured array if
-    #   PSET.COMPUTE_LFP = True and PSET.COMPUTE_P is False and
-    #   PSET.rec_pop_contributions is False.
-    #   If PSET.COMPUTE_P == True and/or PSET.rec_pop_contributions == True,
-    #   then output is a tuple (OUTPUT, current_dipole_moment)
+    SPIKES = network.simulate(probes=probes,
+                              rec_pop_contributions=PSET.rec_pop_contributions,
+                              **PSET.NetworkSimulateArgs)
+
     if RANK == 0:
         run_simulation_time = time() - tic
         print('Simulations finished in {} seconds'.format(run_simulation_time))
         logfile.write('simulation {}\n'.format(run_simulation_time))
     tic = time()
 
-
-
-    ############################################################################
+    ##########################################################################
     # save simulated output to file to allow for offline plotting
-    ############################################################################
+    ##########################################################################
 
     if RANK == 0:
         f = h5py.File(os.path.join(PSET.OUTPUTPATH,
                                    'example_parallel_network_output.h5'),
                       'w')
+
         if PSET.COMPUTE_P:
-            f['CURRENT_DIPOLE_MOMENT'] = CURRENT_DIPOLE_MOMENT
+            # save current dipole moment
+            f['CURRENT_DIPOLE_MOMENT'] = current_dipole_moment.data
+
         if PSET.COMPUTE_LFP:
             # save all extracellular traces
-            f['SUMMED_OUTPUT'] = SUMMED_OUTPUT[0]
+            f['SUMMED_OUTPUT'] = electrode.data
         if PSET.COMPUTE_ECOG:
             # save extracellular potential on top of cortex
-            f['SUMMED_ECOG'] = SUMMED_OUTPUT[1]
+            f['SUMMED_ECOG'] = ecog_electrode.data
+
         # all spikes
         grp = f.create_group('SPIKES')
-        dtype = h5py.special_dtype(vlen=np.dtype('float')) # variable length datatype for spike time arrays
+        # variable length datatype for spike time arrays
+        dtype = h5py.special_dtype(vlen=np.dtype('float'))
         for i, name in enumerate(PSET.populationParameters['me_type']):
             subgrp = grp.create_group(name)
             if len(SPIKES['gids'][i]) > 0:
                 subgrp['gids'] = np.array(SPIKES['gids'][i]).flatten()
-                dset = subgrp.create_dataset('times', (len(SPIKES['gids'][i]),),
+                dset = subgrp.create_dataset('times',
+                                             (len(SPIKES['gids'][i]),),
                                              dtype=dtype)
                 for j, spt in enumerate(SPIKES['times'][i]):
                     dset[j] = spt
@@ -462,8 +479,12 @@ if __name__ == '__main__':
 
     # clean up namespace
     if PSET.COMPUTE_LFP:
-        del SUMMED_OUTPUT
-    # del neurons, spikes
+        del electrode
+    if PSET.COMPUTE_ECOG:
+        del ecog_electrode
+    if PSET.COMPUTE_P:
+        del current_dipole_moment
+    del probes
 
     # tic toc
     if RANK == 0:
@@ -472,7 +493,6 @@ if __name__ == '__main__':
         logfile.write('save {}\n'.format(saving_data_time))
         logfile.close()
     tic = time()
-
 
     # # create logfile recording time in seconds for different simulation steps
     # # (initialization, parameters, simulation etc.)
@@ -488,16 +508,16 @@ if __name__ == '__main__':
 
 
 if __name__ == '__main__':
-    ############################################################################
+    ##########################################################################
     # Plot simulated output (relies on Network class instance)
-    ############################################################################
+    ##########################################################################
 
     T = (PSET.TRANSIENT, PSET.tstop)
 
     colors = [plt.get_cmap('Set1', PSET.populationParameters.size)(i)
               for i in range(PSET.populationParameters.size)]
 
-     # don't want thousands of figure files:
+    # don't want thousands of figure files:
     PLOTRANKS = np.arange(0, SIZE, 16) if SIZE >= 48 else np.arange(SIZE)
 
     if RANK in PLOTRANKS:
@@ -513,7 +533,7 @@ if __name__ == '__main__':
         fig.suptitle('RANK {}'.format(RANK))
         counter = 0
         # somatic traces
-        tvec = np.arange(PSET.tstop / PSET.dt + 1)*PSET.dt
+        tvec = np.arange(PSET.tstop / PSET.dt + 1) * PSET.dt
         tinds = tvec >= PSET.TRANSIENT
         for i, name in enumerate(PSET.populationParameters['me_type']):
             population = network.populations[name]
@@ -526,7 +546,7 @@ if __name__ == '__main__':
                                  q=PSET.decimate_q),
                         color=colors[i], lw=1.5, label=name)
                 ax.set_ylabel('gid {}'.format(population.gids[j]),
-                                         rotation='horizontal', labelpad=30)
+                              rotation='horizontal', labelpad=30)
                 ax.axis(ax.axis('tight'))
                 ax.set_ylim(-90, -20)
                 ax.legend(loc='best')
@@ -540,13 +560,12 @@ if __name__ == '__main__':
         # save figure output
         fig.savefig(os.path.join(PSET.OUTPUTPATH,
                                  'example_parallel_network_RANK_{}.pdf'.format(
-                                    RANK)),
+                                     RANK)),
                     bbox_inches='tight')
         plt.close(fig)
 
-
     # make an illustration of the different populations on each RANK.
-    if RANK in PLOTRANKS: # don't want thousands of figure files
+    if RANK in PLOTRANKS:  # don't want thousands of figure files
 
         # figure out which populations has at least one cell on this RANK
         local_me_types = []
@@ -554,8 +573,8 @@ if __name__ == '__main__':
             if len(network.populations[name].gids) >= 1:
                 local_me_types += [name]
 
-        fig, axes = plt.subplots(1, len(local_me_types)+1,
-                                 figsize=((len(local_me_types)+1)*5, 10),
+        fig, axes = plt.subplots(1, len(local_me_types) + 1,
+                                 figsize=((len(local_me_types) + 1) * 5, 10),
                                  sharey=True, sharex=True)
         ax = axes[0]
         # plot electrode contact points
@@ -586,7 +605,7 @@ if __name__ == '__main__':
         ax.set_title('network populations')
 
         # for i, (name, population) in enumerate(network.populations.items()):
-        j = 1 #counter
+        j = 1  # counter
         for i, name in enumerate(PSET.populationParameters['me_type']):
             if name in local_me_types:
                 population = network.populations[name]
@@ -604,9 +623,11 @@ if __name__ == '__main__':
                         zips.append(list(zip(x, z)))
                     for idx, syn in zip(cell.synidx, cell.netconsynapses):
                         if hasattr(syn, 'e') and syn.e > -50:
-                            synpos_e += [[cell.xmid[idx], cell.zmid[idx]]]
+                            synpos_e += [[cell.x[idx].mean(),
+                                          cell.z[idx].mean()]]
                         else:
-                            synpos_i += [[cell.xmid[idx], cell.zmid[idx]]]
+                            synpos_i += [[cell.x[idx].mean(),
+                                          cell.z[idx].mean()]]
 
                 polycol = PolyCollection(zips,
                                          edgecolors=colors[i],
@@ -630,23 +651,22 @@ if __name__ == '__main__':
                 ax.set_xticks([-400, 0, 400])
                 ax.set_xlabel(r'x ($\mu$m)')
                 ax.set_title(name)
-                j += 1 #counter
+                j += 1  # counter
 
         # save figure output
-        fig.savefig(os.path.join(PSET.OUTPUTPATH,
-                    'example_parallel_network_populations_RANK_{}.pdf'.format(
-                        RANK)),
-                    bbox_inches='tight')
+        fig.savefig(os.path.join(
+            PSET.OUTPUTPATH,
+            'example_parallel_network_populations_RANK_{}.pdf'.format(RANK)),
+            bbox_inches='tight')
         plt.close(fig)
 
-
-    ############################################################################
+    ##########################################################################
     # customary cleanup of object references - the psection() function may not
-    # write correct information if NEURON still has object references in memory,
+    # write correct information if NEURON still has object references in memory
     # even if Python references has been deleted. It will also allow the script
     # to be run in successive fashion.
-    ############################################################################
-    network.pc.gid_clear() # allows assigning new gids to threads
+    ##########################################################################
+    network.pc.gid_clear()  # allows assigning new gids to threads
     for population in network.populations.values():
         for cell in population.cells:
             cell = None

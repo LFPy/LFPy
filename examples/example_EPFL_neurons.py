@@ -43,7 +43,7 @@ plt.rcParams.update({
     'font.size': 8,
     'ytick.labelsize': 8,
     'xtick.labelsize': 8,
-    })
+})
 
 COMM = MPI.COMM_WORLD
 SIZE = COMM.Get_size()
@@ -92,7 +92,7 @@ if RANK == 0:
 COMM.Barrier()
 if "win32" in sys.platform:
     if NMODL not in neuron.nrn_dll_loaded:
-        neuron.h.nrn_load_dll(NMODL+"/nrnmech.dll")
+        neuron.h.nrn_load_dll(NMODL + "/nrnmech.dll")
     neuron.nrn_dll_loaded.append(NMODL)
 else:
     neuron.load_mechanisms(NMODL)
@@ -156,7 +156,7 @@ PointProcParams = {
     'dur': tstop - 300.,
     'pkamp': 0.5,
     'freq': 0.,
-    'phase': np.pi/2,
+    'phase': np.pi / 2,
     'bias': 0.,
     'record_current': False
 }
@@ -166,7 +166,8 @@ threshold = -20  # spike threshold (mV)
 samplelength = int(2. / dt)
 
 # filter settings for extracellular traces
-b, a = ss.butter(N=3, Wn=(300*dt*2/1000, 5000*dt*2/1000), btype='bandpass')
+b, a = ss.butter(N=3, Wn=(300 * dt * 2 / 1000, 5000 *
+                          dt * 2 / 1000), btype='bandpass')
 apply_filter = True
 
 # communication buffer where all simulation output will be gathered on RANK 0
@@ -214,12 +215,12 @@ for i, NRN in enumerate(neurons):
         # Load main cell template
         neuron.h.load_file(1, "template.hoc")
 
+    templatefile = posixpth(os.path.join(NRN, 'template.hoc'))
     for morphologyfile in glob(os.path.join('morphology', '*')):
         if COUNTER % SIZE == RANK:
             # Instantiate the cell(s) using LFPy
             cell = LFPy.TemplateCell(morphology=morphologyfile,
-                                     templatefile=posixpth(os.path.join(NRN,
-                                                           'template.hoc')),
+                                     templatefile=templatefile,
                                      templatename=templatename,
                                      templateargs=1 if add_synapses else 0,
                                      tstop=tstop,
@@ -227,11 +228,12 @@ for i, NRN in enumerate(neurons):
                                      nsegs_method=None)
 
             # set view as in most other examples
-            cell.set_rotation(x=np.pi/2)
+            cell.set_rotation(x=np.pi / 2)
 
             pointProcess = LFPy.StimIntElectrode(cell, **PointProcParams)
 
-            electrode = LFPy.RecExtElectrode(x=np.array([-40, 40., 0, 0]),
+            electrode = LFPy.RecExtElectrode(cell=cell,
+                                             x=np.array([-40, 40., 0, 0]),
                                              y=np.array([0, 0, -40, 40]),
                                              z=np.zeros(4),
                                              sigma=0.3, r=5, n=50,
@@ -239,13 +241,13 @@ for i, NRN in enumerate(neurons):
                                                          [1, 0, 0],
                                                          [1, 0, 0],
                                                          [1, 0, 0]]),
-                                             method='soma_as_point')
+                                             method='root_as_point')
             # run simulation
-            cell.simulate(electrode=electrode)
+            cell.simulate(probes=[electrode])
 
             # compute LFP
             if apply_filter:
-                LFP = ss.filtfilt(b, a, electrode.LFP, axis=-1)
+                LFP = ss.filtfilt(b, a, electrode.data, axis=-1)
 
             # detect action potentials from intracellular trace
             AP_train = np.zeros(cell.somav.size, dtype=int)
@@ -253,8 +255,8 @@ for i, NRN in enumerate(neurons):
                          (cell.somav[1:] >= threshold))
             spike_inds = np.where(crossings)[0]
             # sampled spike waveforms for each event
-            spw = np.zeros((crossings.sum()*LFP.shape[0], 2*samplelength))
-            tspw = np.arange(-samplelength, samplelength)*dt
+            spw = np.zeros((crossings.sum() * LFP.shape[0], 2 * samplelength))
+            tspw = np.arange(-samplelength, samplelength) * dt
             # set spike time where voltage gradient is largest
             n = 0  # counter
             for j, i in enumerate(spike_inds):
@@ -263,8 +265,9 @@ for i, NRN in enumerate(neurons):
                 k = inds[:-1][np.diff(w) == np.diff(w).max()][0]
                 AP_train[k] = 1
                 # sample spike waveform
-                for l in LFP:
-                    spw[n, ] = l[np.arange(k - samplelength, k + samplelength)]
+                for lfp in LFP:
+                    spw[n, ] = lfp[np.arange(k - samplelength,
+                                             k + samplelength)]
                     n += 1
 
             # fill in sampled spike waveforms and times of spikes in comm_dict
@@ -300,15 +303,15 @@ for i, NRN in enumerate(neurons):
             # soma potential and spikes
             ax = fig.add_subplot(gs[0, 1])
             ax.plot(cell.tvec, cell.somav, rasterized=True)
-            ax.plot(cell.tvec, AP_train*20 + 50)
+            ax.plot(cell.tvec, AP_train * 20 + 50)
             ax.axis(ax.axis('tight'))
             ax.set_title('soma voltage, spikes')
             ax.set_ylabel('(mV)', labelpad=0)
 
             # extracellular potential
             ax = fig.add_subplot(gs[1, 1])
-            for l in LFP:
-                ax.plot(cell.tvec, l, rasterized=True)
+            for lfp in LFP:
+                ax.plot(cell.tvec, lfp, rasterized=True)
             ax.axis(ax.axis('tight'))
             ax.set_title('extracellular potential')
             ax.set_xlabel('(ms)', labelpad=0)
@@ -323,7 +326,8 @@ for i, NRN in enumerate(neurons):
                     zips.append(list(zip(tspw, x)))
                 linecol = LineCollection(zips,
                                          linewidths=0.5,
-                                         colors=plt.cm.Spectral(int(255.*j/n)),
+                                         colors=plt.cm.Spectral(
+                                             int(255. * j / n)),
                                          rasterized=True)
                 ax.add_collection(linecol)
             ax.axis(ax.axis('tight'))
@@ -345,8 +349,9 @@ for i, NRN in enumerate(neurons):
             ax.set_ylabel('(mV)', labelpad=0)
 
             fig.savefig(os.path.join(CWD, FIGS, os.path.split(NRN)[-1] + '_' +
-                        os.path.split(morphologyfile
-                                      )[-1].replace('.asc', '.pdf')),
+                                     os.path.split(morphologyfile
+                                                   )[-1].replace('.asc',
+                                                                 '.pdf')),
                         dpi=200)
             plt.close(fig)
 
@@ -375,7 +380,7 @@ if RANK == 0:
     fig.suptitle('spike peak-2-peak time and amplitude')
     n = electrode.x.size
     for k in range(n):
-        ax = fig.add_subplot(n, 2, k*2+1)
+        ax = fig.add_subplot(n, 2, k * 2 + 1)
         for key, val in COMM_DICT.items():
             spw = val['spw'][k::n, ]
             w = []

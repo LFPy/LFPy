@@ -1,0 +1,21 @@
+name: lfpy
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python<3.9  # neuron not on PyPI yet for 3.9
+  - c-compiler
+  - cxx-compiler
+  - Cython
+  - h5py
+  - jupyter
+  - lfpykit
+  - numpy
+  - MEAutility>=1.4.2
+  - matplotlib
+  - mpi4py
+  - pytest
+  - scipy
+  - pip
+  - pip:
+    - neuron

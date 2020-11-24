@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 # cython: language_level=2
 
-
 import numpy as np
 cimport numpy as np
 cimport cython
@@ -17,34 +16,32 @@ cdef extern from "math.h":
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
-cpdef np.ndarray[long, ndim=1, negative_indices=False] alias_method(np.ndarray[long, ndim=1, negative_indices=False] idx,
-                 np.ndarray[DTYPE_t, ndim=1, negative_indices=False] probs,
-                 int nsyn):
+cpdef np.ndarray[long, ndim=1, negative_indices=False] alias_method(
+    np.ndarray[long, ndim=1, negative_indices=False] idx,
+    np.ndarray[DTYPE_t, ndim=1, negative_indices=False] probs,
+    int nsyn):
     """
     Alias method for drawing random numbers from a discrete probability
     distribution. See http://www.keithschwarz.com/darts-dice-coins/
 
     Parameters
     ----------
-    idx : np.ndarray
+    idx: np.ndarray
         compartment indices as array of ints
-    probs : np.ndarray
+    probs: np.ndarray
         compartment areas as array of floats
-    nsyn : int
+    nsyn: int
         number of randomized compartment indices
 
     Returns
     -------
-    out : np.ndarray
+    out: np.ndarray
         integer array of randomly drawn compartment indices
 
     """
-    try:
-        assert idx.size == probs.size
-    except AssertionError as ae:
-        raise ae('length of idx and probs arrays must be equal')
+    assert idx.size == probs.size, 'length of idx and probs arrays must be equal'
 
-    #C-declare variables
+    # C-declare variables
     cdef np.ndarray[long, ndim=1, negative_indices=False] J, spc
     cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] q
     cdef np.ndarray[DTYPE_t, ndim=2, negative_indices=False] rands
@@ -53,10 +50,10 @@ cpdef np.ndarray[long, ndim=1, negative_indices=False] alias_method(np.ndarray[l
     # Construct the table.
     J, q = alias_setup(probs)
 
-    #output array
+    # output array
     spc = np.zeros(nsyn, dtype=int)
 
-    #prefetch random numbers, alias_draw needs nsyn x 2 numbers
+    # prefetch random numbers, alias_draw needs nsyn x 2 numbers
     rands = np.random.rand(nsyn, 2)
 
     K = J.size
@@ -79,18 +76,18 @@ cpdef alias_setup(np.ndarray[DTYPE_t, ndim=1, negative_indices=False] probs):
 
     Parameters
     ----------
-    probs : np.ndarray
+    probs: np.ndarray
         float array of compartment areas
 
     Returns
     -------
-    J : np.ndarray
+    J: np.ndarray
         array of ints
-    q : np.ndarray
+    q: np.ndarray
         array of floats
 
     """
-    #C-declare variables
+    # C-declare variables
     cdef np.ndarray[DTYPE_t, ndim=1, negative_indices=False] q
     cdef np.ndarray[long, ndim=1, negative_indices=False] J, smaller, larger
     cdef long K

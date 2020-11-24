@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""Defines classes and methods used by example_parallel_network.py script
+"""Defines classes and methods used for recurrent neuronal networks.
 
 Copyright (C) 2012 Computational Neuroscience Group, NMBU.
 
@@ -31,19 +31,18 @@ SIZE = COMM.Get_size()
 RANK = COMM.Get_rank()
 
 
-flattenlist = lambda lst: [item for sublist in lst for item in sublist]
+def flattenlist(lst):
+    return [item for sublist in lst for item in sublist]
 
 
-################################################################################
+##########################################################################
 # NetworkCell class that has a create_synapse method that
 # creates a synapse on the target cell, and a create_spike_detector method that
 # allows for connecting to a synapse on a target cell. All other methods and
 # attributes are inherited from the standard LFPy.TemplateCell class
-################################################################################
+##########################################################################
 class NetworkCell(TemplateCell):
     """
-    class NetworkCell
-
     Similar to `LFPy.TemplateCell` with the addition of some attributes and
     methods allowing for spike communication between parallel RANKs.
 
@@ -54,57 +53,57 @@ class NetworkCell(TemplateCell):
 
     Parameters
     ----------
-    morphology : str
+    morphology: str
         path to morphology file
-    templatefile : str
+    templatefile: str
         File with cell template definition(s)
-    templatename : str
+    templatename: str
         Cell template-name used for this cell object
-    templateargs : str
+    templateargs: str
         Parameters provided to template-definition
-    v_init : float
+    v_init: float
         Initial membrane potential. Default to -65.
-    Ra : float
+    Ra: float
         axial resistance. Defaults to 150.
-    cm : float
+    cm: float
         membrane capacitance. Defaults to 1.0
-    passive : bool
+    passive: bool
         Passive mechanisms are initialized if True. Defaults to True
-    passive_parameters : dict
+    passive_parameters: dict
         parameter dictionary with values for the passive membrane mechanism in
         NEURON ('pas'). The dictionary must contain keys 'g_pas' and 'e_pas',
         like the default: passive_parameters=dict(g_pas=0.001, e_pas=-70)
-    extracellular : bool
+    extracellular: bool
         switch for NEURON's extracellular mechanism. Defaults to False
     dt: float
         Simulation time step. Defaults to 2**-4
-    tstart : float
+    tstart: float
         initialization time for simulation <= 0 ms. Defaults to 0.
-    tstop : float
+    tstop: float
         stop time for simulation > 0 ms. Defaults to 100.
-    nsegs_method : 'lambda100' or 'lambda_f' or 'fixed_length' or None
+    nsegs_method: 'lambda100' or 'lambda_f' or 'fixed_length' or None
         nseg rule, used by NEURON to determine number of compartments.
         Defaults to 'lambda100'
-    max_nsegs_length : float or None
+    max_nsegs_length: float or None
         max segment length for method 'fixed_length'. Defaults to None
-    lambda_f : int
+    lambda_f: int
         AC frequency for method 'lambda_f'. Defaults to 100
-    d_lambda : float
+    d_lambda: float
         parameter for d_lambda rule. Defaults to 0.1
-    delete_sections : bool
+    delete_sections: bool
         delete pre-existing section-references. Defaults to True
-    custom_code : list or None
+    custom_code: list or None
         list of model-specific code files ([.py/.hoc]). Defaults to None
-    custom_fun : list or None
+    custom_fun: list or None
         list of model-specific functions with args. Defaults to None
-    custom_fun_args : list or None
+    custom_fun_args: list or None
         list of args passed to custom_fun functions. Defaults to None
-    pt3d : bool
+    pt3d: bool
         use pt3d-info of the cell geometries switch. Defaults to False
-    celsius : float or None
+    celsius: float or None
         Temperature in celsius. If nothing is specified here
         or in custom code it is 6.3 celcius
-    verbose : bool
+    verbose: bool
         verbose output switch. Defaults to False
 
     Examples
@@ -112,29 +111,29 @@ class NetworkCell(TemplateCell):
 
     >>> import LFPy
     >>> cellParameters = {
-    >>>     'morphology' : '<path to morphology.hoc>',
-    >>>     'templatefile' :  '<path to template_file.hoc>',
-    >>>     'templatename' :  'templatename',
-    >>>     'templateargs' :  None,
-    >>>     'v_init' : -65,
-    >>>     'cm' : 1.0,
-    >>>     'Ra' : 150,
-    >>>     'passive' : True,
-    >>>     'passive_parameters' : {'g_pas' : 0.001, 'e_pas' : -65.},
-    >>>     'dt' : 2**-3,
-    >>>     'tstart' : 0,
-    >>>     'tstop' : 50,
+    >>>     'morphology': '<path to morphology.hoc>',
+    >>>     'templatefile':  '<path to template_file.hoc>',
+    >>>     'templatename':  'templatename',
+    >>>     'templateargs':  None,
+    >>>     'v_init': -65,
+    >>>     'cm': 1.0,
+    >>>     'Ra': 150,
+    >>>     'passive': True,
+    >>>     'passive_parameters': {'g_pas': 0.001, 'e_pas': -65.},
+    >>>     'dt': 2**-3,
+    >>>     'tstart': 0,
+    >>>     'tstop': 50,
     >>> }
     >>> cell = LFPy.NetworkCell(**cellParameters)
     >>> cell.simulate()
 
-
+    See also
+    --------
+    Cell
+    TemplateCell
     """
-    def __init__(self, **args):
-        """
-        Initialization of class LFPy.NetworkCell.
 
-        """
+    def __init__(self, **args):
         TemplateCell.__init__(self, **args)
 
         # create list netconlist for spike detecting NetCon object(s)
@@ -152,7 +151,6 @@ class NetworkCell(TemplateCell):
         for sec in self.somalist:
             self.somav.record(sec(0.5)._ref_v)
 
-
     def create_synapse(self, cell, sec, x=0.5, syntype=neuron.h.ExpSyn,
                        synparams=dict(tau=2., e=0.),
                        assert_syn_values=False):
@@ -164,19 +162,19 @@ class NetworkCell(TemplateCell):
 
         Parameters
         ----------
-        cell : object
+        cell: object
             instantiation of class NetworkCell or similar
-        sec : neuron.h.Section object,
+        sec: neuron.h.Section object,
             section reference on cell
-        x : float in [0, 1],
+        x: float in [0, 1],
             relative position along section
-        syntype : hoc.HocObject
+        syntype: hoc.HocObject
             NEURON synapse model reference, e.g., neuron.h.ExpSyn
-        synparams : dict
+        synparams: dict
             parameters for syntype, e.g., for neuron.h.ExpSyn we have:
-                tau : float, synapse time constant
-                e : float, synapse reversal potential
-        assert_syn_values : bool
+                tau: float, synapse time constant
+                e: float, synapse reversal potential
+        assert_syn_values: bool
             if True, raise AssertionError if synapse attribute values do not
             match the values in the synparams dictionary
 
@@ -190,50 +188,57 @@ class NetworkCell(TemplateCell):
             # Create the random number generator for the synapse
             rng = neuron.h.Random()
             # not sure if this is how it is supposed to be set up...
-            rng.MCellRan4(np.random.randint(0, 2**32-1), np.random.randint(0, 2**32-1))
+            rng.MCellRan4(
+                np.random.randint(
+                    0,
+                    2**32 - 1),
+                np.random.randint(
+                    0,
+                    2**32 - 1))
             rng.uniform(0, 1)
-            syn.setRNG(rng) # used for e.g., stochastic synapse mechanisms (cf. BBP microcircuit portal files)
-            cell.rng_list.append(rng) # must store ref to rng object
+            # used for e.g., stochastic synapse mechanisms (cf. BBP
+            # microcircuit portal files)
+            syn.setRNG(rng)
+            cell.rng_list.append(rng)  # must store ref to rng object
         cell.netconsynapses.append(syntype(x, sec=sec))
 
         for key, value in synparams.items():
-            exec("cell.netconsynapses[-1].{} = {}".format(key, value))
+            setattr(cell.netconsynapses[-1], key, value)
             # check that synapses are parameterized correctly
             if assert_syn_values:
                 try:
-                    np.testing.assert_almost_equal(getattr(cell.netconsynapses[-1], key), value)
+                    np.testing.assert_almost_equal(
+                        getattr(cell.netconsynapses[-1], key), value)
                 except AssertionError:
-                    raise AssertionError('{} = {} != {}'.format(key,
-                                                                getattr(cell.netconsynapses[-1], key),
-                                                                value))
-
+                    raise AssertionError('{} = {} != {}'.format(
+                        key, getattr(cell.netconsynapses[-1], key), value))
 
     def create_spike_detector(self, target=None, threshold=-10.,
-                     weight=0.0, delay=0.0):
+                              weight=0.0, delay=0.0):
         """
         Create spike-detecting NetCon object attached to the cell's soma
         midpoint, but this could be extended to having multiple spike-detection
-        sites. The NetCon object created is attached to the cell's sd_netconlist
-        attribute, and will be used by the Network class when creating
-        connections between all presynaptic cells and postsynaptic cells on
-        each local RANK.
+        sites. The NetCon object created is attached to the cell's
+        sd_netconlist attribute, and will be used by the Network class when
+        creating connections between all presynaptic cells and postsynaptic
+        cells on each local RANK.
 
         Parameters
         ----------
-        target : None (default) or a NEURON point process
-        threshold : float
+        target: None (default) or a NEURON point process
+        threshold: float
             spike detection threshold
-        weight : float
+        weight: float
             connection weight (not used unless target is a point process)
-        delay : float
+        delay: float
             connection delay (not used unless target is a point process)
         """
         # create new NetCon objects for the connections. Activation times will
         # be triggered on the somatic voltage with a given threshold.
         for sec in self.somalist:
             self.sd_netconlist.append(neuron.h.NetCon(sec(0.5)._ref_v,
-                                                target,
-                                                sec=sec))
+                                                      target,
+                                                      sec=sec))
             self.sd_netconlist[-1].threshold = threshold
             self.sd_netconlist[-1].weight[0] = weight
             self.sd_netconlist[-1].delay = delay
@@ -241,97 +246,85 @@ class NetworkCell(TemplateCell):
 
 class DummyCell(object):
     def __init__(self, totnsegs=0,
-                 imem=np.array([[]]),
-                 xstart=np.array([]), xmid=np.array([]), xend=np.array([]),
-                 ystart=np.array([]), ymid=np.array([]), yend=np.array([]),
-                 zstart=np.array([]), zmid=np.array([]), zend=np.array([]),
-                 diam=np.array([]), area=np.array([]), somainds=np.array([])):
+                 x=None,
+                 y=None,
+                 z=None,
+                 d=None,
+                 area=None,
+                 somainds=None):
         """
         Dummy Cell object initialized with all attributes needed for LFP
-        calculations using the LFPy.RecExtElectrode class and methods. This cell
-        can be imagined as one "super" cell containing transmembrane currents
-        generated by all NetworkCell segments on this RANK at once.
-
+        calculations using the LFPy.RecExtElectrode class and methods.
+        This cell can be imagined as one "super" cell containing transmembrane
+        currents generated by all NetworkCell segments on this RANK at once.
 
         Parameters
         ----------
-        totnsegs : int
+        totnsegs: int
             total number of segments
-        imem : ndarray
-            totnsegs x ntimesteps array with transmembrane currents in nA
-        xstart, ystart, zstart : ndarray
-            arrays of length totnsegs with start (x,y,z) coordinate of segments
-            in units of um
-        xmid, ymid, zmid : ndarray
-            midpoint coordinates of segments
-        xend, yend, zend : ndarray
-            endpoint coordinateso of segments
-        diam : ndarray
+        x, y, z: ndarray
+            arrays of shape (totnsegs, 2) with (x,y,z) coordinates of start
+            and end points of segments in units of (um)
+        d: ndarray
             array of length totnsegs with segment diameters
-        area : ndarray
+        area: ndarray
             array of segment surface areas
         """
         # set attributes
         self.totnsegs = totnsegs
-        self.imem = imem
-        self.xstart = xstart
-        self.xmid = xmid
-        self.xend = xend
-        self.ystart = ystart
-        self.ymid = ymid
-        self.yend = yend
-        self.zstart = zstart
-        self.zmid = zmid
-        self.zend = zend
-        self.diam = diam
-        self.area = area
-        self.somainds = somainds
+        self.x = x if x is not None else np.array([])
+        self.y = y if y is not None else np.array([])
+        self.z = z if z is not None else np.array([])
+        self.d = d if d is not None else np.array([])
+        self.area = area if area is not None else np.array([])
+        self.somainds = somainds if somainds is not None else np.array([])
 
     def get_idx(self, section="soma"):
-        if section=="soma":
+        if section == "soma":
             return self.somainds
         else:
             raise ValueError('section argument must be "soma"')
 
 
 class NetworkPopulation(object):
+    """
+    NetworkPopulation class representing a group of Cell objects
+    distributed across RANKs.
+
+    Parameters
+    ----------
+    CWD: path or None
+        Current working directory
+    CELLPATH: path or None
+        Relative path from CWD to source files for cell model
+        (morphology, hoc routines etc.)
+    first_gid: int
+        The global identifier of the first cell created in this population
+        instance. The first_gid in the first population created should be 0
+        and cannot exist in previously created NetworkPopulation instances
+    Cell: class
+        class defining a Cell object, see class NetworkCell above
+    POP_SIZE: int
+        number of cells in population
+    name: str
+        population name reference
+    cell_args: dict
+        keys and values for Cell object
+    pop_args: dict
+        keys and values for Network.draw_rand_pos assigning cell positions
+    rotation_arg: dict
+        default cell rotations around x and y axis on the form
+        { 'x': np.pi/2, 'y': 0 }. Can only have the keys 'x' and 'y'.
+        Cells are randomly rotated around z-axis using the
+        Cell.set_rotation() method.
+    OUTPUTPATH: str
+        path to output file destination
+    """
     def __init__(self, CWD=None, CELLPATH=None, first_gid=0, Cell=NetworkCell,
                  POP_SIZE=4, name='L5PC',
-                 cell_args=dict(), pop_args=dict(),
-                 rotation_args=dict(),
+                 cell_args=None, pop_args=None,
+                 rotation_args=None,
                  OUTPUTPATH='example_parallel_network'):
-        """
-        NetworkPopulation class representing a group of Cell objects distributed
-        across RANKs.
-
-        Parameters
-        ----------
-        CWD : path or None
-            Current working directory
-        CELLPATH: path or None
-            Relative path from CWD to source files for cell model (morphology, hoc routines etc.)
-        first_gid : int
-            The global identifier of the first cell created in this population
-            instance. The first_gid in the first population created should be 0
-            and cannot exist in previously created NetworkPopulation instances
-        Cell : class
-            class defining a Cell object, see class NetworkCell above
-        POP_SIZE : int
-            number of cells in population
-        name : str
-            population name reference
-        cell_args : dict
-            keys and values for Cell object
-        pop_args : dict
-            keys and values for Network.draw_rand_pos assigning cell positions
-        rotation_arg : dict
-            default cell rotations around x and y axis on the form
-            { 'x' : np.pi/2, 'y' : 0 }. Can only have the keys 'x' and 'y'.
-            Cells are randomly rotated around z-axis using the Cell.set_rotation
-            method.
-        OUTPUTPATH : str
-            path to output file destination
-        """
         # set class attributes
         self.CWD = CWD
         self.CELLPATH = CELLPATH
@@ -339,9 +332,10 @@ class NetworkPopulation(object):
         self.Cell = Cell
         self.POP_SIZE = POP_SIZE
         self.name = name
-        self.cell_args = cell_args
-        self.pop_args = pop_args
-        self.rotation_args = rotation_args
+        self.cell_args = cell_args if cell_args is not None else dict()
+        self.pop_args = pop_args if pop_args is not None else dict()
+        self.rotation_args = rotation_args if rotation_args is not None \
+            else dict()
         self.OUTPUTPATH = OUTPUTPATH
 
         # create folder for output if it does not exist
@@ -354,7 +348,12 @@ class NetworkPopulation(object):
         self.spike_vectors = []
 
         # set up population of cells on this RANK
-        self.gids = [(i+first_gid) for i in range(POP_SIZE) if (i+first_gid) % SIZE == RANK]
+        self.gids = [
+            (i +
+             first_gid) for i in range(POP_SIZE) if (
+                i +
+                first_gid) %
+            SIZE == RANK]
 
         # we have to enter the cell's corresponding file directory to
         # create cell because how EPFL set their code up
@@ -370,8 +369,8 @@ class NetworkPopulation(object):
             cell.set_pos(**self.soma_pos[i])
 
         # assign a random rotation around the z-axis of each cell
-        self.rotations = np.random.uniform(0, np.pi*2, len(self.gids))
-        assert('z' not in self.rotation_args.keys())
+        self.rotations = np.random.uniform(0, np.pi * 2, len(self.gids))
+        assert 'z' not in self.rotation_args.keys()
         for i, cell in enumerate(self.cells):
             cell.set_rotation(z=self.rotations[i], **self.rotation_args)
 
@@ -379,11 +378,11 @@ class NetworkPopulation(object):
         for gid, cell in zip(self.gids, self.cells):
             cell.gid = gid
 
-
         # gather gids, soma positions and cell rotations to RANK 0, and write
         # as structured array.
         if RANK == 0:
-            populationData = flattenlist(COMM.gather(zip(self.gids, self.soma_pos, self.rotations)))
+            populationData = flattenlist(COMM.gather(
+                zip(self.gids, self.soma_pos, self.rotations)))
 
             # create structured array for storing data
             dtype = [('gid', 'i8'), ('x', float), ('y', float), ('z', float),
@@ -394,7 +393,7 @@ class NetworkPopulation(object):
                 popDataArray[i]['x'] = pos['x']
                 popDataArray[i]['y'] = pos['y']
                 popDataArray[i]['z'] = pos['z']
-                popDataArray[i]['x_rot'] = np.pi/2
+                popDataArray[i]['x_rot'] = np.pi / 2
                 popDataArray[i]['y_rot'] = 0.
                 popDataArray[i]['z_rot'] = z_rot
 
@@ -404,10 +403,7 @@ class NetworkPopulation(object):
             # delete old entry if it exist
             if self.name in f.keys():
                 del f[self.name]
-                try:
-                    assert self.name not in f.keys()
-                except AssertionError:
-                    raise AssertionError
+                assert self.name not in f.keys()
             f[self.name] = popDataArray
             f.close()
         else:
@@ -415,7 +411,6 @@ class NetworkPopulation(object):
 
         # sync
         COMM.Barrier()
-
 
     def draw_rand_pos(self, POP_SIZE, radius, loc, scale, cap=None):
         """
@@ -427,22 +422,22 @@ class NetworkPopulation(object):
 
         Parameters
         ----------
-        POP_SIZE : int
+        POP_SIZE: int
             Population size
-        radius : float
+        radius: float
             Radius of population.
-        loc : float
+        loc: float
             expected mean depth of somas of population.
-        scale : float
+        scale: float
             expected standard deviation of depth of somas of population.
-        cap : None, float or length to list of floats
+        cap: None, float or length to list of floats
             if float, cap distribution between [loc-cap, loc+cap),
             if list, cap distribution between [loc-cap[0], loc+cap[1]]
 
 
         Returns
         -------
-        soma_pos : list
+        soma_pos: list
             List of dicts of len POP_SIZE
             where dict have keys x, y, z specifying
             xyz-coordinates of cell at list entry `i`.
@@ -454,66 +449,69 @@ class NetworkPopulation(object):
         y = np.empty(POP_SIZE)
         z = np.empty(POP_SIZE)
         for i in range(POP_SIZE):
-            x[i] = (np.random.rand()-0.5) * radius*2
-            y[i] = (np.random.rand()-0.5) * radius*2
+            x[i] = (np.random.rand() - 0.5) * radius * 2
+            y[i] = (np.random.rand() - 0.5) * radius * 2
             while np.sqrt(x[i]**2 + y[i]**2) >= radius:
-                x[i] = (np.random.rand()-0.5)*radius*2
-                y[i] = (np.random.rand()-0.5)*radius*2
+                x[i] = (np.random.rand() - 0.5) * radius * 2
+                y[i] = (np.random.rand() - 0.5) * radius * 2
         z = np.random.normal(loc=loc, scale=scale, size=POP_SIZE)
         if cap is not None:
             if type(cap) in [float, np.float, np.float32, np.float64]:
-                while not np.all((z >= loc-cap) & (z < loc+cap)):
-                    inds = (z < loc-cap) ^ (z > loc+cap)
+                while not np.all((z >= loc - cap) & (z < loc + cap)):
+                    inds = (z < loc - cap) ^ (z > loc + cap)
                     z[inds] = np.random.normal(loc=loc, scale=scale,
                                                size=inds.sum())
-            elif type(cap) is list:
-                try:
-                    assert(len(cap) == 2)
-                except AssertionError:
-                    raise AssertionError('cap = {} is not a length 2 list'.format(float))
-                while not np.all((z >= loc-cap[0]) & (z < loc+cap[1])):
-                    inds = (z < loc-cap[0]) ^ (z > loc+cap[1])
+            elif isinstance(cap, list):
+                assert len(cap) == 2, \
+                    'cap = {} is not a length 2 list'.format(float)
+                while not np.all((z >= loc - cap[0]) & (z < loc + cap[1])):
+                    inds = (z < loc - cap[0]) ^ (z > loc + cap[1])
                     z[inds] = np.random.normal(loc=loc, scale=scale,
                                                size=inds.sum())
             else:
-                raise Exception('cap = {} is not None, a float or length 2 list of floats'.format(float))
+                raise Exception('cap = {} is not None'.format(float),
+                                'a float or length 2 list of floats')
 
         soma_pos = []
         for i in range(POP_SIZE):
-            soma_pos.append({'x' : x[i], 'y' : y[i], 'z' : z[i]})
+            soma_pos.append({'x': x[i], 'y': y[i], 'z': z[i]})
 
         return soma_pos
 
 
 class Network(object):
-    def __init__(self, dt=0.1, tstart=0., tstop=1000., v_init=-65., celsius=6.3,
-                 OUTPUTPATH='example_parallel_network',
-                 verbose=False):
-        """
-        Network class, creating distributed populations of cells of
-        type Cell and handling connections between cells in the respective
-        populations.
+    """
+    Network class, creating distributed populations of cells of
+    type Cell and handling connections between cells in the respective
+    populations.
 
-        Parameters
-        ----------
-        dt : float
-            Simulation timestep size
-        tstart : float
-            Start time of simulation
-        tstop : float
-            End time of simulation
-        v_init : float
-            Membrane potential set at first timestep across all cells
-        celsius : float
-            Global control of temperature, affect channel kinetics.
-            It will also be forced when creating the different Cell objects, as
-            LFPy.Cell and LFPy.TemplateCell also accept the same keyword
-            argument.
-        verbose : bool
-            if True, print out misc. messages
-
-
-        """
+    Parameters
+    ----------
+    dt: float
+        Simulation timestep size
+    tstart: float
+        Start time of simulation
+    tstop: float
+        End time of simulation
+    v_init: float
+        Membrane potential set at first timestep across all cells
+    celsius: float
+        Global control of temperature, affect channel kinetics.
+        It will also be forced when creating the different Cell objects, as
+        LFPy.Cell and LFPy.TemplateCell also accept the same keyword
+        argument.
+    verbose: bool
+        if True, print out misc. messages
+    """
+    def __init__(
+            self,
+            dt=0.1,
+            tstart=0.,
+            tstop=1000.,
+            v_init=-65.,
+            celsius=6.3,
+            OUTPUTPATH='example_parallel_network',
+            verbose=False):
         # set attributes
         self.dt = dt
         self.tstart = tstart
@@ -530,54 +528,51 @@ class Network(object):
         # with each cell's list of netcons)
         self.netconlist = neuron.h.List()
 
-
         # The different populations in the Network will be collected in
-        # a dictionary of NetworkPopulation object, where the keys represent the
-        # population name. The names are also put in a list ordered according to
-        # order populations are created in (as some operations rely on this)
+        # a dictionary of NetworkPopulation object, where the keys represent
+        # population names. The names are also put in a list ordered according
+        # to the order populations are created in (as some operations rely on
+        # this particular order)
         self.populations = dict()
         self.population_names = []
 
-
-
     def create_population(self, CWD=None, CELLPATH=None, Cell=NetworkCell,
                           POP_SIZE=4, name='L5PC',
-                          cell_args=dict(), pop_args=dict(),
-                          rotation_args=dict()):
+                          cell_args=None, pop_args=None,
+                          rotation_args=None):
         """
         Create and append a distributed POP_SIZE-sized population of cells of
         type Cell with the corresponding name. Cell-object references, gids on
-        this RANK, population size POP_SIZE and names will be added to the lists
-        Network.gids, Network.cells, Network.sizes and Network.names,
+        this RANK, population size POP_SIZE and names will be added to the
+        lists Network.gids, Network.cells, Network.sizes and Network.names,
         respectively
 
         Parameters
         ----------
-        CWD : path
+        CWD: path
             Current working directory
         CELLPATH: path
-            Relative path from CWD to source files for cell model (morphology, hoc routines etc.)
-        Cell : class
+            Relative path from CWD to source files for cell model
+            (morphology, hoc routines etc.)
+        Cell: class
             class defining a Cell-like object, see class NetworkCell
-        POP_SIZE : int
+        POP_SIZE: int
             number of cells in population
-        name : str
+        name: str
             population name reference
-        cell_args : dict
+        cell_args: dict
             keys and values for Cell object
-        pop_args : dict
+        pop_args: dict
             keys and values for Network.draw_rand_pos assigning cell positions
-        rotation_arg : dict
+        rotation_arg: dict
             default cell rotations around x and y axis on the form
-            { 'x' : np.pi/2, 'y' : 0 }. Can only have the keys 'x' and 'y'.
-            Cells are randomly rotated around z-axis using the Cell.set_rotation
-            method.
+            { 'x': np.pi/2, 'y': 0 }. Can only have the keys 'x' and 'y'.
+            Cells are randomly rotated around z-axis using the
+            Cell.set_rotation method.
 
         """
-        try:
-            assert name not in self.populations.keys()
-        except AssertionError:
-            raise AssertionError('population name {} already taken'.format(name))
+        assert name not in self.populations.keys(), \
+            'population name {} already taken'.format(name)
 
         # compute the first global id of this new population, based
         # on population sizes of existing populations
@@ -586,12 +581,17 @@ class Network(object):
             first_gid += p.POP_SIZE
 
         # create NetworkPopulation object
-        population = NetworkPopulation(CWD=CWD, CELLPATH=CELLPATH, first_gid=first_gid,
-                                Cell=Cell,
-                                POP_SIZE=POP_SIZE, name=name,
-                                cell_args=cell_args, pop_args=pop_args,
-                                rotation_args=rotation_args,
-                                OUTPUTPATH=self.OUTPUTPATH)
+        population = NetworkPopulation(
+            CWD=CWD,
+            CELLPATH=CELLPATH,
+            first_gid=first_gid,
+            Cell=Cell,
+            POP_SIZE=POP_SIZE,
+            name=name,
+            cell_args=cell_args,
+            pop_args=pop_args,
+            rotation_args=rotation_args,
+            OUTPUTPATH=self.OUTPUTPATH)
 
         # associate gids of cells on this RANK such that NEURON can look up
         # at which RANK different cells are created when connecting the network
@@ -613,11 +613,11 @@ class Network(object):
         # add population object to dictionary of populations
         self.populations[name] = population
 
-        # append population name to list (Network.populations.keys() not unique)
+        # append population name to list (Network.populations.keys() not
+        # unique)
         self.population_names.append(name)
 
-
-    def get_connectivity_rand(self, pre='L5PC', post='L5PC', connprob = 0.2):
+    def get_connectivity_rand(self, pre='L5PC', post='L5PC', connprob=0.2):
         """
         Dummy function creating a (boolean) cell to cell connectivity matrix
         between pre and postsynaptic populations.
@@ -629,11 +629,11 @@ class Network(object):
 
         Parameters
         ----------
-        pre : str
+        pre: str
             presynaptic population name
-        post : str
+        post: str
             postsynaptic population name
-        connprob : float in [0, 1]
+        connprob: float in [0, 1]
             connection probability, connections are drawn on random
 
         Returns
@@ -654,12 +654,12 @@ class Network(object):
                 # avoid self connections.
                 gids_pre, gids_post = np.where(C)
                 gids_pre += self.populations[pre].first_gid
-                gids_post *= SIZE # asssume round-robin distribution of gids
+                gids_post *= SIZE  # asssume round-robin distribution of gids
                 gids_post += self.populations[post].gids[0]
-                inds = gids_pre == gids_post
-                gids_pre = gids_pre[inds == False]
+                inds = gids_pre != gids_post
+                gids_pre = gids_pre[inds]
                 gids_pre -= self.populations[pre].first_gid
-                gids_post = gids_post[inds == False]
+                gids_post = gids_post[inds]
                 gids_post -= self.populations[post].gids[0]
                 gids_post //= SIZE
                 c = np.c_[gids_pre, gids_post]
@@ -673,7 +673,6 @@ class Network(object):
         else:
             return np.zeros((n_pre, 0), dtype=bool)
 
-
     def connect(self, pre, post, connectivity,
                 syntype=neuron.h.ExpSyn,
                 synparams=dict(tau=2., e=0.),
@@ -686,9 +685,9 @@ class Network(object):
                 multapsefun=np.random.normal,
                 multapseargs=dict(loc=4, scale=1),
                 syn_pos_args=dict(section=['soma', 'dend', 'apic'],
-                                  fun=[stats.norm]*2,
-                                  funargs=[dict(loc=0, scale=100)]*2,
-                                  funweights=[0.5]*2,
+                                  fun=[stats.norm] * 2,
+                                  funargs=[dict(loc=0, scale=100)] * 2,
+                                  funweights=[0.5] * 2,
                                   z_min=-1E6, z_max=1E6,
                                   ),
                 save_connections=False,
@@ -701,39 +700,40 @@ class Network(object):
 
         Parameters
         ----------
-        pre : str
+        pre: str
             presynaptic population name
-        post : str
+        post: str
             postsynaptic population name
-        connectivity : ndarray / (scipy.sparse array)
+        connectivity: ndarray / (scipy.sparse array)
             boolean connectivity matrix between pre and post.
-        syntype : hoc.HocObject
+        syntype: hoc.HocObject
             reference to NEURON synapse mechanism, e.g., neuron.h.ExpSyn
-        synparams : dict
-            dictionary of parameters for synapse mechanism, keys 'e', 'tau' etc.
-        weightfun : function
+        synparams: dict
+            dictionary of parameters for synapse mechanism, keys 'e', 'tau'
+            etc.
+        weightfun: function
             function used to draw weights from a numpy.random distribution
-        weightargs : dict
+        weightargs: dict
             parameters passed to weightfun
-        minweight : float,
+        minweight: float,
             minimum weight in units of nS
-        delayfun : function
+        delayfun: function
             function used to draw delays from a numpy.random distribution
-        delayargs : dict
+        delayargs: dict
             parameters passed to delayfun
-        mindelay : float,
+        mindelay: float,
             minimum delay in multiples of dt
-        multapsefun : function or None
+        multapsefun: function or None
             function reference, e.g., numpy.random.normal used to draw a number
             of synapses for a cell-to-cell connection. If None, draw only one
             connection
-        multapseargs : dict
+        multapseargs: dict
             arguments passed to multapsefun
-        syn_pos_args : dict
+        syn_pos_args: dict
             arguments passed to inherited LFPy.Cell method
             NetworkCell.get_rand_idx_area_and_distribution_norm to find
             synapse locations.
-        save_connections : bool
+        save_connections: bool
             if True (default False), save instantiated connections to HDF5 file
             "Network.OUTPUTPATH/synapse_positions.h5" as dataset "<pre>:<post>"
             using a structured ndarray with dtype
@@ -755,12 +755,17 @@ class Network(object):
         syn_idx_pos = []
 
         # iterate over gids on this RANK and create connections
-        for i, (post_gid, cell) in enumerate(zip(self.populations[post].gids, self.populations[post].cells)):
+        for i, (post_gid, cell) in enumerate(zip(self.populations[post].gids,
+                                                 self.populations[post].cells)
+                                             ):
             # do NOT iterate over all possible presynaptic neurons
             for pre_gid in pre_gids[connectivity[:, i]]:
-                # throw a warning if sender neuron is identical to receiving neuron
+                # throw a warning if sender neuron is identical to receiving
+                # neuron
                 if post_gid == pre_gid:
-                    print('connecting cell w. gid {} to itself (RANK {})'.format(post_gid, RANK))
+                    print(
+                        'connecting cell w. gid {} to itself (RANK {})'.format(
+                            post_gid, RANK))
 
                 # assess number of synapses
                 if multapsefun is None:
@@ -772,10 +777,12 @@ class Network(object):
                         nidx = int(multapsefun(**multapseargs))
                         j += 1
                     if j == 1000:
-                        raise Exception('change multapseargs as no positive synapse count was found in 1000 trials')
+                        raise Exception('change multapseargs as no positive '
+                                        'synapse # was found in 1000 trials')
 
                 # find synapse locations and corresponding section names
-                idxs = cell.get_rand_idx_area_and_distribution_norm(nidx=nidx, **syn_pos_args)
+                idxs = cell.get_rand_idx_area_and_distribution_norm(
+                    nidx=nidx, **syn_pos_args)
                 secs = cell.get_idx_name(idxs)
 
                 # draw weights
@@ -792,23 +799,33 @@ class Network(object):
                     j = delays < mindelay
                     delays[j] = delayfun(size=j.sum(), **delayargs)
 
-                for i, ((idx, secname, x), weight, delay) in enumerate(zip(secs, weights, delays)):
-                    cell.create_synapse(cell,
-                                        # TODO: Find neater way of accessing Section reference, this seems slow
-                                        sec=list(cell.allseclist)[np.where(np.array(cell.allsecnames)==secname)[0][0]],
-                                        x=x, syntype=syntype,
-                                        synparams=synparams)
+                for i, ((idx, secname, x), weight, delay) in enumerate(
+                        zip(secs, weights, delays)):
+                    cell.create_synapse(
+                        cell,
+                        # TODO: Find neater way of accessing
+                        # Section reference, this seems slow
+                        sec=list(
+                            cell.allseclist)[
+                            np.where(
+                                np.array(
+                                    cell.allsecnames) == secname)[0][0]],
+                        x=x, syntype=syntype,
+                        synparams=synparams)
                     # connect up NetCon object
                     nc = self.pc.gid_connect(pre_gid, cell.netconsynapses[-1])
                     nc.weight[0] = weight
                     nc.delay = delays[i]
                     self.netconlist.append(nc)
 
-                    # store also synapse indices allowing for computing LFPs from syn.i
+                    # store also synapse indices allowing for computing LFPs
+                    # from syn.i
                     cell.synidx.append(idx)
 
                     # store gid and xyz-coordinate of synapse positions
-                    syn_idx_pos.append((cell.gid, cell.xmid[idx], cell.ymid[idx], cell.zmid[idx]))
+                    syn_idx_pos.append((cell.gid, cell.x[idx].mean(axis=-1),
+                                        cell.y[idx].mean(axis=-1),
+                                        cell.z[idx].mean(axis=-1)))
 
                 syncount += nidx
 
@@ -816,12 +833,12 @@ class Network(object):
         syncount = COMM.reduce(syncount, op=MPI.SUM, root=0)
 
         if RANK == 0:
-            print('Connected population {} to {} by {} connections and {} synapses'.format(pre, post, conncount, syncount))
-
+            print('Connected population {} to {}'.format(pre, post),
+                  'by {} connections and {} synapses'.format(conncount,
+                                                             syncount))
         else:
             conncount = None
             syncount = None
-
 
         # gather and write syn_idx_pos data
         if save_connections:
@@ -829,7 +846,8 @@ class Network(object):
                 synData = flattenlist(COMM.gather(syn_idx_pos))
 
                 # convert to structured array
-                dtype = [('gid', 'i8'), ('x', float), ('y', float), ('z', float)]
+                dtype = [('gid', 'i8'), ('x', float),
+                         ('y', float), ('z', float)]
                 synDataArray = np.empty((len(synData), ), dtype=dtype)
                 for i, (gid, x, y, z) in enumerate(synData):
                     synDataArray[i]['gid'] = gid
@@ -842,10 +860,7 @@ class Network(object):
                 key = '{}:{}'.format(pre, post)
                 if key in f.keys():
                     del f[key]
-                    try:
-                        assert key not in f.keys()
-                    except AssertionError:
-                        raise AssertionError
+                    assert key not in f.keys()
                 f[key] = synDataArray
                 f.close()
             else:
@@ -853,99 +868,99 @@ class Network(object):
 
         return COMM.bcast([conncount, syncount])
 
-    def enable_extracellular_stimulation(self, electrode, t_ext=None, n=1, seed=None):
+    def enable_extracellular_stimulation(self, electrode, t_ext=None, n=1,
+                                         seed=None):
         raise NotImplementedError()
 
-    def simulate(self, electrode=None, rec_imem=False, rec_vmem=False,
+    def simulate(self, probes=None,
+                 rec_imem=False, rec_vmem=False,
                  rec_ipas=False, rec_icap=False,
                  rec_isyn=False, rec_vmemsyn=False, rec_istim=False,
-                 rec_current_dipole_moment=False,
                  rec_pop_contributions=False,
                  rec_variables=[], variable_dt=False, atol=0.001,
                  to_memory=True, to_file=False,
                  file_name='OUTPUT.h5',
-                 dotprodcoeffs=None, **kwargs):
+                 **kwargs):
         """
         This is the main function running the simulation of the network model.
 
         Parameters
         ----------
-        electrode:
-            Either an LFPy.RecExtElectrode object or a list of such.
-                    If supplied, LFPs will be calculated at every time step
-                    and accessible as electrode.LFP. If a list of objects
-                    is given, accessible as electrode[0].LFP etc.
-        rec_imem:   If true, segment membrane currents will be recorded
-                    If no electrode argument is given, it is necessary to
-                    set rec_imem=True in order to calculate LFP later on.
-                    Units of (nA).
-        rec_vmem:   record segment membrane voltages (mV)
-        rec_ipas:   record passive segment membrane currents (nA)
-        rec_icap:   record capacitive segment membrane currents (nA)
-        rec_isyn:   record synaptic currents of from Synapse class (nA)
-        rec_vmemsyn:    record membrane voltage of segments with Synapse(mV)
-        rec_istim:  record currents of StimIntraElectrode (nA)
-        rec_current_dipole_moment : bool
-            If True, compute and record current-dipole moment from
-            transmembrane currents as in Linden et al. (2010) J Comput Neurosci,
-            DOI: 10.1007/s10827-010-0245-4. Will set the `LFPy.Cell` attribute
-            `current_dipole_moment` as n_timesteps x 3 `ndarray` where the
-            last dimension contains the x,y,z components of the dipole moment.
-        rec_pop_contributions : bool
+        probes: list of :obj:, optional
+            None or list of LFPykit.RecExtElectrode like object instances that
+            each have a public method `get_transformation_matrix` returning
+            a matrix that linearly maps each compartments' transmembrane
+            current to corresponding measurement as
+
+            .. math:: \\mathbf{P} = \\mathbf{M} \\mathbf{I}
+
+        rec_imem: bool
+            If true, segment membrane currents will be recorded
+            If no electrode argument is given, it is necessary to
+            set rec_imem=True in order to calculate LFP later on.
+            Units of (nA).
+        rec_vmem: bool
+            record segment membrane voltages (mV)
+        rec_ipas: bool
+            record passive segment membrane currents (nA)
+        rec_icap: bool
+            record capacitive segment membrane currents (nA)
+        rec_isyn: bool
+            record synaptic currents of from Synapse class (nA)
+        rec_vmemsyn: bool
+            record membrane voltage of segments with Synapse (mV)
+        rec_istim: bool
+            record currents of StimIntraElectrode (nA)
+        rec_pop_contributions: bool
             If True, compute and return single-population contributions to
             the extracellular potential during simulation time
-        rec_variables: list of variables to record, i.e arg=['cai', ]
-        variable_dt: boolean, using variable timestep in NEURON
-        atol:       absolute tolerance used with NEURON variable timestep
-        to_memory:  only valid with electrode, store lfp in -> electrode.LFP
-        to_file:    only valid with electrode, save LFPs in hdf5 file format
-        file_name : str
-            If to_file is True, file which extracellular potentials will be
+        rec_variables: list of str
+            variables to record, i.e arg=['cai', ]
+        variable_dt: boolean
+            use variable timestep in NEURON. Can not be combimed with `to_file`
+        atol: float
+            absolute tolerance used with NEURON variable timestep
+        to_memory: bool
+            Simulate to memory. Only valid with `probes=[<probe>, ...]`, which
+            store measurements to -> <probe>.data
+        to_file: bool
+            only valid with `probes=[<probe>, ...]`, saves measurement in
+            hdf5 file format.
+        file_name: str
+            If to_file is True, file which measurements will be
             written to. The file format is HDF5, default is "OUTPUT.h5", put
             in folder Network.OUTPUTPATH
-        dotprodcoeffs :  list of N x Nseg ndarray. These arrays will at
-                    every timestep be multiplied by the membrane currents.
-                    Presumably useful for memory efficient csd or lfp calcs
-        **kwargs :  keyword argument dict values passed along to function
-                    _run_simulation_with_electrode(), containing some or all of
-                    the boolean flags: use_ipas, use_icap, use_isyn
-                    (defaulting to 'False').
+        **kwargs:  keyword argument dict values passed along to function
+                    `_run_simulation_with_probes()`, containing some or all of
+                    the boolean flags: `use_ipas`, `use_icap`, `use_isyn`
+                    (defaulting to `False`).
 
         Returns
         -------
-        SPIKES : dict
-            the first returned argument is a dictionary with keys 'gids' and
-            'times'. Each item is a nested list of len(Npop) times N_X where N_X
-            is the corresponding population size. Each entry is a np.ndarray
-            containing the spike times of each cell in the nested list in item
-            'gids'
-        OUTPUT : list of ndarray
-            if parameters electrode is not None and/or dotprodcoeffs is not
-            None, contains the
-            [electrode.LFP, ...., (dotprodcoeffs[0] dot I)(t), ...]
-            The first output is a structured array, so OUTPUT[0]['imem']
-            corresponds to the total LFP and the other the per-population
-            contributions.
-        P : ndarray
-            if rec_current_dipole_moment==True, contains the x,y,z-components of
-            current-dipole moment from transmembrane currents summed up over
-            all populations
+        events
+            Dictionary with keys `times` and `gids`, where values are
+            ndarrays with detected spikes and global neuron identifiers
 
+        Raises
+        ------
+        Exception
+            if `CVode().use_fast_imem()` method not found
+        AssertionError
+            if rec_pop_contributions==True and probes==None
         """
         # set up integrator, use the CVode().fast_imem method by default
         # as it doesn't hurt sim speeds much if at all.
         cvode = neuron.h.CVode()
         try:
             cvode.use_fast_imem(1)
-        except AttributeError as ae:
-            raise Exception('neuron.h.CVode().use_fast_imem() not found. Please update NEURON to v.7.4 or newer')
+        except AttributeError:
+            raise Exception('neuron.h.CVode().use_fast_imem() not found. '
+                            'Please update NEURON to v.7.4 or newer')
 
         # test some of the inputs
-        try:
-            if electrode is None:
-                assert(rec_pop_contributions is False)
-        except AssertionError:
-            raise AssertionError('rec_pop_contributions can not be True when electrode is None')
+        if probes is None:
+            assert rec_pop_contributions is False, \
+                'rec_pop_contributions can not be True when probes is None'
 
         if not variable_dt:
             dt = self.dt
@@ -963,35 +978,30 @@ class Network(object):
                     cell._set_ipas_recorders(dt)
                 if rec_icap:
                     cell._set_icap_recorders(dt)
-                # if rec_current_dipole_moment:
-                #     self._set_current_dipole_moment_array()
                 if len(rec_variables) > 0:
                     cell._set_variable_recorders(rec_variables)
 
-        #run fadvance until t >= tstop, and calculate LFP if asked for
-        if electrode is None and dotprodcoeffs is None and not rec_current_dipole_moment and not rec_pop_contributions and not to_file:
+        # run fadvance until t >= tstop, and calculate LFP if asked for
+        if probes is None and not rec_pop_contributions and not to_file:
             if not rec_imem:
                 if self.verbose:
-                    print("rec_imem = {}, not recording membrane currents!".format(rec_imem))
-            _run_simulation(self, cvode, variable_dt, atol)
+                    print("rec_imem==False, not recording membrane currents!")
+            self._run_simulation(cvode, variable_dt, atol)
         else:
-            if dotprodcoeffs is not None:
-                raise NotImplementedError
-            LFP, P = _run_simulation_with_electrode(self, cvode=cvode,
-                            electrode=electrode,
-                            variable_dt=variable_dt,
-                            atol=atol,
-                            to_memory=to_memory,
-                            to_file=to_file,
-                            file_name='tmp_output_RANK_{:03d}.h5',
-                            dotprodcoeffs=dotprodcoeffs,
-                            rec_current_dipole_moment=rec_current_dipole_moment,
-                            rec_pop_contributions=rec_pop_contributions,
-                            **kwargs)
+            self._run_simulation_with_probes(
+                cvode=cvode,
+                probes=probes,
+                variable_dt=variable_dt,
+                atol=atol,
+                to_memory=to_memory,
+                to_file=to_file,
+                file_name='tmp_output_RANK_{:03d}.h5',
+                rec_pop_contributions=rec_pop_contributions,
+                **kwargs)
 
         for name in self.population_names:
             for cell in self.populations[name].cells:
-                #somatic trace
+                # somatic trace
                 cell.somav = np.array(cell.somav)
                 if rec_imem:
                     cell._calc_imem()
@@ -1016,7 +1026,8 @@ class Network(object):
         for name in self.population_names:
             population = self.populations[name]
             for i in range(len(population.spike_vectors)):
-                population.spike_vectors[i] = np.array(population.spike_vectors[i])
+                population.spike_vectors[i] = \
+                    np.array(population.spike_vectors[i])
         if RANK == 0:
             times = []
             gids = []
@@ -1033,30 +1044,37 @@ class Network(object):
             gids = None
             for name in self.population_names:
                 COMM.send([x for x in self.populations[name].spike_vectors],
-                    dest=0, tag=13)
+                          dest=0, tag=13)
                 COMM.send([x for x in self.populations[name].gids],
-                    dest=0, tag=14)
+                          dest=0, tag=14)
 
-        # create final output file, summing up single RANK output from temp files
-        if to_file and electrode is not None:
-            op=MPI.SUM
-            fname = os.path.join(self.OUTPUTPATH, 'tmp_output_RANK_{:03d}.h5'.format(RANK))
+        # create final output file, summing up single RANK output from
+        # temporary files
+        if to_file and probes is not None:
+            op = MPI.SUM
+            fname = os.path.join(self.OUTPUTPATH,
+                                 'tmp_output_RANK_{:03d}.h5'.format(RANK))
             f0 = h5py.File(fname, 'r')
             if RANK == 0:
                 f1 = h5py.File(os.path.join(self.OUTPUTPATH, file_name), 'w')
             dtype = []
             for key, value in f0[list(f0.keys())[0]].items():
                 dtype.append((str(key), np.float))
-            shape = value.shape
             for grp in f0.keys():
                 if RANK == 0:
+                    # get shape from the first dataset
+                    # (they should all be equal):
+                    for value in f0[grp].values():
+                        shape = value.shape
+                        continue
                     f1[grp] = np.zeros(shape, dtype=dtype)
                 for key, value in f0[grp].items():
                     if RANK == 0:
                         recvbuf = np.zeros(shape, dtype=np.float)
                     else:
                         recvbuf = None
-                    COMM.Reduce(value[()].astype(np.float), recvbuf, op=op, root=0)
+                    COMM.Reduce(value[()].astype(np.float), recvbuf,
+                                op=op, root=0)
                     if RANK == 0:
                         f1[grp][key] = recvbuf
             f0.close()
@@ -1064,18 +1082,14 @@ class Network(object):
                 f1.close()
             os.remove(fname)
 
+        if probes is not None:
+            if to_memory:
+                # communicate and sum up measurements on each probe before
+                # returing spike times and corresponding gids:
+                for probe in probes:
+                    probe.data = ReduceStructArray(probe.data)
 
-        if electrode is None and dotprodcoeffs is None and not rec_current_dipole_moment and not rec_pop_contributions:
-            return dict(times=times, gids=gids)
-        else:
-            # communicate and sum up LFPs and dipole moments:
-            if LFP is not None:
-                for i in range(len(LFP)):
-                    LFP[i] = ReduceStructArray(LFP[i])
-            if P is not None:
-                P = ReduceStructArray(P)
-            return dict(times=times, gids=gids), LFP, P
-
+        return dict(times=times, gids=gids)
 
     def _create_network_dummycell(self):
         """
@@ -1086,25 +1100,19 @@ class Network(object):
         """
         # compute the total number of segments per population on this RANK
         nsegs = [[cell.totnsegs for cell in self.populations[name].cells]
-            for name in self.population_names]
+                 for name in self.population_names]
         for i, nseg in enumerate(nsegs):
             if nseg == []:
                 nsegs[i] = [0]
-        for i, y in enumerate(nsegs): nsegs[i] = np.sum(y)
+        for i, y in enumerate(nsegs):
+            nsegs[i] = np.sum(y)
         nsegs = np.array(nsegs, dtype=int)
 
         totnsegs = nsegs.sum()
-        imem = np.eye(totnsegs)
-        xstart = np.array([])
-        xmid = np.array([])
-        xend = np.array([])
-        ystart = np.array([])
-        ymid = np.array([])
-        yend = np.array([])
-        zstart = np.array([])
-        zmid = np.array([])
-        zend = np.array([])
-        diam = np.array([])
+        x = np.empty((0, 2))
+        y = np.empty((0, 2))
+        z = np.empty((0, 2))
+        d = np.array([])
         area = np.array([])
 
         somainds = np.array([], dtype=int)
@@ -1112,322 +1120,277 @@ class Network(object):
 
         for name in self.population_names:
             for cell in self.populations[name].cells:
-                xstart = np.r_[xstart, cell.xstart]
-                ystart = np.r_[ystart, cell.ystart]
-                zstart = np.r_[zstart, cell.zstart]
-                xmid = np.r_[xmid, cell.xmid]
-                ymid = np.r_[ymid, cell.ymid]
-                zmid = np.r_[zmid, cell.zmid]
-                xend = np.r_[xend, cell.xend]
-                yend = np.r_[yend, cell.yend]
-                zend = np.r_[zend, cell.zend]
-                diam = np.r_[diam, cell.diam]
+                x = np.r_[x, cell.x]
+                y = np.r_[y, cell.y]
+                z = np.r_[z, cell.z]
+                d = np.r_[d, cell.d]
                 area = np.r_[area, cell.area]
 
-                somainds = np.r_[somainds, cell.get_idx("soma")+nseg]
+                somainds = np.r_[somainds, cell.get_idx("soma") + nseg]
                 nseg += cell.totnsegs
 
-
         # return number of segments per population and DummyCell object
-        return nsegs, DummyCell(totnsegs,
-                         imem,
-                         xstart, xmid, xend,
-                         ystart, ymid, yend,
-                         zstart, zmid, zend,
-                         diam, area, somainds)
+        return nsegs, DummyCell(totnsegs, x, y, z, d, area, somainds)
 
+    def _run_simulation(self, cvode, variable_dt=False, atol=0.001):
+        """
+        Running the actual simulation in NEURON, simulations in NEURON
+        are now interruptable.
 
-def _run_simulation(network, cvode, variable_dt=False, atol=0.001):
-    """
-    Running the actual simulation in NEURON, simulations in NEURON
-    are now interruptable.
+        Parameters
+        ----------
+        cvode: neuron.h.CVode() object
+        variable_dt: bool
+            switch for variable-timestep method
+        atol: float
+            absolute tolerance with CVode for variable time-step method
+        """
+        # set maximum integration step, it is necessary for communication of
+        # spikes across RANKs to occur.
+        self.pc.set_maxstep(10)
 
-    Parameters
-    ----------
-    network : LFPy.Network object
-        instantiation of class LFPy.Network
-    cvode : neuron.h.CVode() object
-    variable_dt : bool
-        switch for variable-timestep method
-    atol : float
-        absolute tolerance with CVode for variable time-step method
-    """
-    # set maximum integration step, it is necessary for communication of
-    # spikes across RANKs to occur.
-    network.pc.set_maxstep(10)
+        # time resolution
+        neuron.h.dt = self.dt
 
-    # time resolution
-    neuron.h.dt = network.dt
+        # needed for variable dt method
+        if variable_dt:
+            cvode.active(1)
+            cvode.atol(atol)
+        else:
+            cvode.active(0)
 
-    # needed for variable dt method
-    if variable_dt:
-        cvode.active(1)
-        cvode.atol(atol)
-    else:
-        cvode.active(0)
+        # initialize state
+        neuron.h.finitialize(self.v_init)
 
-    # initialize state
-    neuron.h.finitialize(network.v_init)
+        # initialize current- and record
+        if cvode.active():
+            cvode.re_init()
+        else:
+            neuron.h.fcurrent()
+        neuron.h.frecord_init()
 
-    # initialize current- and record
-    if cvode.active():
-        cvode.re_init()
-    else:
-        neuron.h.fcurrent()
-    neuron.h.frecord_init()
+        # Starting simulation at tstart
+        neuron.h.t = self.tstart
 
-    # Starting simulation at tstart
-    neuron.h.t = network.tstart
+        # only needed if LFPy.Synapse classes are used.
+        for name in self.population_names:
+            for cell in self.populations[name].cells:
+                cell._loadspikes()
 
-    # only needed if LFPy.Synapse classes are used.
-    for name in network.population_names:
-        for cell in network.populations[name].cells:
+        # neuron.run() should be marginally faster than calling
+        # neuron.h.fadvance()
+        # in a while loop (https://github.com/LFPy/LFPy/pull/217)
+        neuron.run(self.tstop)
+
+    def _run_simulation_with_probes(self, cvode,
+                                    probes=None,
+                                    variable_dt=False,
+                                    atol=0.001,
+                                    rtol=0.,
+                                    to_memory=True,
+                                    to_file=False,
+                                    file_name=None,
+                                    use_ipas=False, use_icap=False,
+                                    use_isyn=False,
+                                    rec_pop_contributions=False
+                                    ):
+        """
+        Running the actual simulation in NEURON with list of probes.
+        Each object in `probes` must have a public method
+        `get_transformation_matrix` which returns a linear mapping of
+        transmembrane currents to corresponding measurement.
+
+        Parameters
+        ----------
+        cvode: neuron.h.CVode() object
+        probes: list of :obj:, optional
+            None or list of LFPykit.RecExtElectrode like object instances that
+            each have a public method `get_transformation_matrix` returning
+            a matrix that linearly maps each compartments' transmembrane
+            current to corresponding measurement as
+
+            .. math:: \\mathbf{P} = \\mathbf{M} \\mathbf{I}
+
+        variable_dt: bool
+            switch for variable-timestep method
+        atol: float
+            absolute tolerance with CVode for variable time-step method
+        rtol: float
+            relative tolerance with CVode for variable time-step method
+        to_memory: bool
+            Boolean flag for computing extracellular potentials,
+            default is True.
+            If True, the corresponding <probe>.data attribute will be set.
+        to_file: bool or None
+            Boolean flag for computing extracellular potentials to file
+            <OUTPUTPATH/file_name>, default is False. Raises an Exception if
+            `to_memory` is True.
+        file_name: formattable str
+            If to_file is True, file which extracellular potentials will be
+            written to. The file format is HDF5, default is
+            "output_RANK_{:03d}.h5". The output is written per RANK, and the
+            RANK # will be inserted into the corresponding file name.
+        use_ipas: bool
+            if True, compute the contribution to extracellular potentials
+            across the passive leak channels embedded in the cells membranes
+            summed over populations
+        use_icap: bool
+            if True, compute the contribution to extracellular potentials
+            across the membrane capacitance embedded in the cells membranes
+            summed over populations
+        use_isyn: bool
+            if True, compute the contribution to extracellular potentials
+            across the excitatory and inhibitory synapses embedded in the cells
+            membranes summed over populations
+        rec_pop_contributions: bool
+            if True, compute and return single-population contributions to the
+            extracellular potential during each time step of the simulation
+
+        Returns
+        -------
+
+        Raises
+        ------
+        Exception:
+        - `if to_memory == to_file == True`
+        - `if to_file == True and file_name is None`
+        - `if to_file == variable_dt == True`
+        - `if <probe>.cell is not None`
+        """
+        if to_memory and to_file:
+            raise Exception('to_memory and to_file can not both be True')
+        if to_file and file_name is None:
+            raise Exception
+        # create a dummycell object lumping together needed attributes
+        # for calculation of extracellular potentials etc. The population_nsegs
+        # array is used to slice indices such that single-population
+        # contributions to the potential can be calculated.
+        population_nsegs, network_dummycell = self._create_network_dummycell()
+
+        # set cell attribute on each probe, assuming that each probe was
+        # instantiated with argument cell=None
+        for probe in probes:
+            if probe.cell is None:
+                probe.cell = network_dummycell
+            else:
+                raise Exception('{}.cell!=None'.format(probe.__class__))
+
+        # create list of transformation matrices; one for each probe
+        transforms = []
+        if probes is not None:
+            for probe in probes:
+                transforms.append(probe.get_transformation_matrix())
+
+        # reset probe.cell to None, as it is no longer needed
+        for probe in probes:
+            probe.cell = None
+
+        # set maximum integration step, it is necessary for communication of
+        # spikes across RANKs to occur.
+        # NOTE: Should this depend on the minimum delay in the network?
+        self.pc.set_maxstep(10)
+
+        # Initialize NEURON simulations of cell object
+        neuron.h.dt = self.dt
+
+        # needed for variable dt method
+        if variable_dt:
+            cvode.active(1)
+            cvode.atol(atol)
+        else:
+            cvode.active(0)
+
+        # initialize state
+        neuron.h.finitialize(self.v_init)
+
+        # use fast calculation of transmembrane currents
+        cvode.use_fast_imem(1)
+
+        # initialize current- and record
+        if cvode.active():
+            cvode.re_init()
+        else:
+            neuron.h.fcurrent()
+        neuron.h.frecord_init()
+
+        # Starting simulation at tstart
+        neuron.h.t = self.tstart
+
+        # create list of cells across all populations to simplify loops
+        cells = []
+        for name in self.population_names:
+            cells += self.populations[name].cells
+
+        # load spike times from NetCon, only needed if LFPy.Synapse class
+        # is used
+        for cell in cells:
             cell._loadspikes()
 
-    while neuron.h.t < network.tstop:
-        neuron.h.fadvance()
-        if neuron.h.t % 100 == 0:
-            if RANK == 0:
-                print('t = {} ms'.format(neuron.h.t))
+        # define data type for structured arrays dependent on the boolean
+        # arguments
+        dtype = [('imem', np.float)]
+        if use_ipas:
+            dtype += [('ipas', np.float)]
+        if use_icap:
+            dtype += [('icap', np.float)]
+        if use_isyn:
+            dtype += [('isyn_e', np.float), ('isyn_i', np.float)]
+        if rec_pop_contributions:
+            dtype += list(zip(self.population_names,
+                              [np.float] * len(self.population_names)))
 
-    return
+        # setup list of structured arrays for all extracellular potentials
+        # at each contact from different source terms and subpopulations
+        if to_memory:
+            for probe, M in zip(probes, transforms):
+                probe.data = np.zeros((M.shape[0],
+                                       int(self.tstop / self.dt) + 1),
+                                      dtype=dtype)
 
+        # signals for each probe will be stored here during simulations
+        if to_file:
+            # ensure right ending:
+            if file_name.split('.')[-1] != 'h5':
+                file_name += '.h5'
+            outputfile = h5py.File(os.path.join(self.OUTPUTPATH,
+                                                file_name.format(RANK)), 'w')
 
-def _run_simulation_with_electrode(network, cvode,
-                                   electrode=None,
-                                   variable_dt=False,
-                                   atol=0.001,
-                                   to_memory=True,
-                                   to_file=False,
-                                   file_name=None,
-                                   dotprodcoeffs=None,
-                                   rec_current_dipole_moment=False,
-                                   use_ipas=False, use_icap=False,
-                                   use_isyn=False,
-                                   rec_pop_contributions=False
-                                   ):
-    """
-    Running the actual simulation in NEURON.
-    electrode argument used to determine coefficient
-    matrix, and calculate the LFP on every time step.
+            # define unique group names for each probe
+            names = []
+            for probe, M in zip(probes, transforms):
+                name = probe.__class__.__name__
+                i = 0
+                while True:
+                    if name + '{}'.format(i) not in names:
+                        names.append(name + '{}'.format(i))
+                        break
+                    i += 1
 
-    Parameters
-    ----------
-    network : LFPy.Network object
-        instantiation of class LFPy.Network
-    cvode : neuron.h.CVode() object
-    electrode : LFPy.RecExtElectrode object or None
-        instantiation of class LFPy.RecExtElectrode for which extracellular
-        potentials will be computed.
-    variable_dt : bool
-        switch for variable-timestep method
-    atol : float
-        absolute tolerance with CVode for variable time-step method
-    to_memory : bool
-        Boolean flag for computing extracellular potentials, default is True
-    to_file : bool or None
-        Boolean flag for computing extracellular potentials to file
-        <OUTPUTPATH/file_name>, default is False
-    file_name : formattable str
-        If to_file is True, file which extracellular potentials will be
-        written to. The file format is HDF5, default is
-        "output_RANK_{:03d}.h5". The output is written per RANK, and the
-        RANK # will be inserted into the corresponding file name.
-    dotprodcoeffs : None or list of ndarrays
-        Each element in list is a mapping of transmembrane currents to a measure
-        on the form :math:`V = \\mathbf{C} \\cdot \\mathbf{I}`
-    rec_current_dipole_moment : bool
-        if True, compute and store the total current-dipole moment per time
-        step as the sum over each individual population
-    use_ipas : bool
-        if True, compute the contribution to extracellular potentials across
-        the passive leak channels embedded in the cells membranes summed over
-        populations
-    use_icap : bool
-        if True, compute the contribution to extracellular potentials across
-        the membrane capacitance embedded in the cells membranes summed over
-        populations
-    use_isyn : bool
-        if True, compute the contribution to extracellular potentials across
-        the excitatory and inhibitory synapses embedded in the cells membranes
-        summed over populations
-    rec_pop_contributions : bool
-        if True, compute and return single-population contributions to the
-        extracellular potential during each time step of the simulation
+            # create groups
+            for i, (name, probe, M) in enumerate(zip(names, probes,
+                                                     transforms)):
+                # can't do it this way until h5py issue #740
+                # (https://github.com/h5py/h5py/issues/740) is fixed:
+                # outputfile['{}'.format(name)] = np.zeros((M.shape[0],
+                #     int(network.tstop / network.dt) + 1), dtype=dtype)
+                probe.data = outputfile.create_group('{}'.format(name))
+                for key, val in dtype:
+                    probe.data[key] = np.zeros((M.shape[0],
+                                                int(self.tstop / self.dt)
+                                                + 1),
+                                               dtype=val)
 
-    Returns
-    -------
-    RESULTS : list
-        ordered according to [dotprodcoeffs, ..., electrode, ...], each element
-        being the superimposed contribution to i.e., the extracellular potential
-        at each timestep from all cell objects on this particular RANK.
-        Thus, no single-cell contributions to the LFP
-        are returned.
-    DIPOLE_MOMENT : ndarray
-        Shape (n_timesteps, 3) array containing the x,y,z-components of the
-        current-dipole moment summed up over contributions from cells across
-        all populations on this MPI RANK.
-    """
-    # create a dummycell object lumping together needed attributes
-    # for calculation of extracellular potentials etc. The population_nsegs
-    # array is used to slice indices such that single-population
-    # contributions to the potential can be calculated.
-    population_nsegs, network_dummycell = network._create_network_dummycell()
+        # temporary vector to store membrane currents at each timestep:
+        imem = np.zeros(network_dummycell.totnsegs, dtype=dtype)
 
-    # Use electrode object(s) to calculate coefficient matrices for LFP
-    # calculations. If electrode is a list, then
-    # put electrodecoeff in a list, if it isn't already
-    if dotprodcoeffs is not None:
-        if type(dotprodcoeffs) != list:
-            dotprodcoeffs = [dotprodcoeffs]
-    else:
-        #create empty list if no dotprodcoeffs are supplied
-        dotprodcoeffs = []
-
-    #access electrode object and append dotprodcoeffs
-    if electrode is not None:
-        #put electrode argument in list if needed
-        if type(electrode) == list:
-            electrodes = electrode
-        else:
-            electrodes = [electrode]
-
-        # At each timestep we will later construct a single vector I of all
-        # transmembrane currents. With that, and a corresponding matrix G
-        # mapping a current contribution to an electrode contact, we can here
-        # compute the extracellular potentials V_r in all contacts r at
-        # timestep t_i as
-        # V_r(r, t_i) = G x I(r, t_i)
-
-
-        # # create a dummycell object lumping together needed attributes
-        # # for calculation of extracellular potentials. The population_nsegs
-        # # array is used to slice indices such that single-population
-        # # contributions to the potential can be calculated.
-        # population_nsegs, network_dummycell = network._create_network_dummycell()
-
-        # We can have a number of separate electrode objects in a list, create
-        # mappings for each
-        for el in electrodes:
-            # el.calc_lfp(cell=network_dummycell)
-            el.calc_mapping(cell=network_dummycell)
-            dotprodcoeffs += [el.mapping]
-            # del el.LFP
-            del el.mapping
-
-    elif electrode is None:
-        electrodes = None
-        # if rec_current_dipole_moment:
-        #     population_nsegs, network_dummycell = network._create_network_dummycell()
-
-
-
-
-    # set maximum integration step, it is necessary for communication of
-    # spikes across RANKs to occur.
-    # NOTE: Should this depend on the minimum delay in the network?
-    network.pc.set_maxstep(10)
-
-    # Initialize NEURON simulations of cell object
-    neuron.h.dt = network.dt
-
-    # needed for variable dt method
-    if variable_dt:
-        cvode.active(1)
-        cvode.atol(atol)
-    else:
-        cvode.active(0)
-
-    #initialize state
-    neuron.h.finitialize(network.v_init)
-
-    # use fast calculation of transmembrane currents
-    cvode.use_fast_imem(1)
-
-    #initialize current- and record
-    if cvode.active():
-        cvode.re_init()
-    else:
-        neuron.h.fcurrent()
-    neuron.h.frecord_init()
-
-    #Starting simulation at tstart
-    neuron.h.t = network.tstart
-
-    # create list of cells across all populations to simplify loops
-    cells = []
-    for name in network.population_names:
-        cells += network.populations[name].cells
-
-    #load spike times from NetCon, only needed if LFPy.Synapse class is used
-    for cell in cells:
-        cell._loadspikes()
-
-
-    # define data type for structured arrays dependent on the boolean arguments
-    dtype = [('imem', np.float)]
-    if use_ipas: dtype += [('ipas', np.float)]
-    if use_icap: dtype += [('icap', np.float)]
-    if use_isyn: dtype += [('isyn_e', np.float), ('isyn_i', np.float)]
-    if rec_pop_contributions: dtype += list(zip(network.population_names,
-                                                [np.float]*len(network.population_names)))
-
-    # setup list of structured arrays for all extracellular potentials
-    # at each contact from different source terms and subpopulations
-    if to_memory:
-        RESULTS = []
-        for coeffs in dotprodcoeffs:
-            RESULTS.append(np.zeros((coeffs.shape[0],
-                                     int(network.tstop / network.dt) + 1),
-                                    dtype=dtype)
-                           )
-    else:
-        RESULTS = None
-
-    # container for electric current dipole moment for the individual
-    # populations captured inside the DummyCell instance
-    if rec_current_dipole_moment:
-        DIPOLE_MOMENT = np.zeros((int(network.tstop / network.dt) + 1, 3),
-            dtype=list(zip(network.population_names,
-                           [np.float]*len(network.population_names))))
-    else:
-        DIPOLE_MOMENT = None
-
-    #LFPs for each electrode will be put here during simulations
-    if to_file:
-        #ensure right ending:
-        if file_name.split('.')[-1] != 'h5':
-            file_name += '.h5'
-        outputfile = h5py.File(os.path.join(network.OUTPUTPATH,
-                                            file_name.format(RANK)), 'w')
-        for i, coeffs in enumerate(dotprodcoeffs):
-            # can't do it this way until h5py issue #770
-            # (https://github.com/h5py/h5py/issues/770) is fixed:
-            # outputfile['OUTPUT[{}]'.format(i)] = np.zeros((coeffs.shape[0],
-            #                     int(network.tstop / network.dt) + 1), dtype=dtype)
-            grp = outputfile.create_group('OUTPUT[{}]'.format(i))
-            for key, val in dtype:
-                grp[key] = np.zeros((coeffs.shape[0], int(network.tstop / network.dt) + 1), dtype=val)
-
-    # temp vector to store membrane currents at each timestep:
-    imem = np.zeros(network_dummycell.totnsegs, dtype=dtype)
-
-    # create a 2D array representation of segment midpoints for dot product
-    # with transmembrane currents when computing dipole moment
-    if rec_current_dipole_moment:
-        midpoints = np.c_[network_dummycell.xmid,
-                          network_dummycell.ymid,
-                          network_dummycell.zmid]
-
-    #run fadvance until time limit, and calculate LFPs for each timestep
-    tstep = 0
-    while neuron.h.t < network.tstop:
-        if neuron.h.t >= 0:
+        def get_imem(imem):
+            '''helper function to gather currents across all cells
+            on this RANK'''
             i = 0
             totnsegs = 0
             if use_isyn:
-                imem['isyn_e'] = 0. # need to reset these for every iteration
-                imem['isyn_i'] = 0. # because we sum over synapses
+                imem['isyn_e'] = 0.  # must reset these for every iteration
+                imem['isyn_i'] = 0.  # because we sum over synapses
             for cell in cells:
                 for sec in cell.allseclist:
                     for seg in sec:
@@ -1441,160 +1404,78 @@ def _run_simulation_with_electrode(network, cvode,
                 if use_isyn:
                     for idx, syn in zip(cell.synidx, cell.netconsynapses):
                         if hasattr(syn, 'e') and syn.e > -50:
-                            imem['isyn_e'][idx+totnsegs] += syn.i
+                            imem['isyn_e'][idx + totnsegs] += syn.i
                         else:
-                            imem['isyn_i'][idx+totnsegs] += syn.i
+                            imem['isyn_i'][idx + totnsegs] += syn.i
 
                 totnsegs += cell.totnsegs
+            return imem
 
-            if rec_current_dipole_moment:
-                k = 0 # counter
-                for nsegs, name in zip(population_nsegs, network.population_names):
-                    cellinds = np.arange(k, k+nsegs)
-                    DIPOLE_MOMENT[name][tstep, ] = np.dot(imem['imem'][cellinds, ],
-                                                          midpoints[cellinds, ])
-                    k += nsegs
+        # run fadvance until time limit, and calculate LFPs for each timestep
+        tstep = 0
+        while neuron.h.t < self.tstop:
+            if neuron.h.t >= 0:
+                imem = get_imem(imem)
 
-            if to_memory:
-                for j, coeffs in enumerate(dotprodcoeffs):
-                    RESULTS[j]['imem'][:, tstep] = np.dot(coeffs, imem['imem'])
+                for j, (probe, M) in enumerate(zip(probes, transforms)):
+                    probe.data['imem'][:, tstep] = M @ imem['imem']
                     if use_ipas:
-                        RESULTS[j]['ipas'][:, tstep] = np.dot(coeffs, imem['ipas'] * network_dummycell.area * 1E-2)
+                        probe.data['ipas'][:, tstep] = \
+                            M @ (imem['ipas'] * network_dummycell.area * 1E-2)
                     if use_icap:
-                        RESULTS[j]['icap'][:, tstep] = np.dot(coeffs, imem['icap'] * network_dummycell.area * 1E-2)
+                        probe.data['icap'][:, tstep] = \
+                            M @ (imem['icap'] * network_dummycell.area * 1E-2)
                     if use_isyn:
-                        RESULTS[j]['isyn_e'][:, tstep] = np.dot(coeffs, imem['isyn_e'])
-                        RESULTS[j]['isyn_i'][:, tstep] = np.dot(coeffs, imem['isyn_i'])
+                        probe.data['isyn_e'][:, tstep] = M @ imem['isyn_e']
+                        probe.data['isyn_i'][:, tstep] = M @ imem['isyn_i']
 
                 if rec_pop_contributions:
-                    for j, coeffs in enumerate(dotprodcoeffs):
-                        k = 0 # counter
-                        for nsegs, name in zip(population_nsegs, network.population_names):
-                            cellinds = np.arange(k, k+nsegs)
-                            RESULTS[j][name][:, tstep] = np.dot(coeffs[:, cellinds],
-                                                                imem['imem'][cellinds, ])
+                    for j, (probe, M) in enumerate(zip(probes, transforms)):
+                        k = 0  # counter
+                        for nsegs, pop_name in zip(population_nsegs,
+                                                   self.population_names):
+                            cellinds = np.arange(k, k + nsegs)
+                            probe.data[pop_name][:, tstep] = \
+                                M[:, cellinds] @ imem['imem'][cellinds, ]
                             k += nsegs
 
-            if to_file:
-                for j, coeffs in enumerate(dotprodcoeffs):
-                    outputfile['OUTPUT[{}]'.format(j)
-                               ]['imem'][:, tstep] = np.dot(coeffs, imem['imem'])
-                    if use_ipas:
-                        outputfile['OUTPUT[{}]'.format(j)
-                                   ]['ipas'][:, tstep] = np.dot(coeffs, imem['ipas'] * network_dummycell.area * 1E-2)
-                    if use_icap:
-                        outputfile['OUTPUT[{}]'.format(j)
-                                   ]['icap'][:, tstep] = np.dot(coeffs, imem['icap'] * network_dummycell.area * 1E-2)
-                    if use_isyn:
-                        outputfile['OUTPUT[{}]'.format(j)
-                                   ]['isyn_e'][:, tstep] = np.dot(coeffs, imem['isyn_e'])
-                        outputfile['OUTPUT[{}]'.format(j)
-                                   ]['isyn_i'][:, tstep] = np.dot(coeffs, imem['isyn_i'])
+                tstep += 1
+            neuron.h.fadvance()
+            if neuron.h.t % 100. == 0.:
+                if RANK == 0:
+                    print('t = {} ms'.format(neuron.h.t))
 
-                if rec_pop_contributions:
-                    for j, coeffs in enumerate(dotprodcoeffs):
-                        k = 0 # counter
-                        for nsegs, name in zip(population_nsegs, network.population_names):
-                            cellinds = np.arange(k, k+nsegs)
-                            outputfile['OUTPUT[{}]'.format(j)
-                                       ][name][:, tstep] = np.dot(coeffs[:, cellinds], imem['imem'][cellinds, ])
-                            k += nsegs
+        try:
+            # calculate LFP after final fadvance(), skipped if IndexError is
+            # encountered
+            imem = get_imem(imem)
 
-            tstep += 1
-        neuron.h.fadvance()
-        if neuron.h.t % 100. == 0.:
-            if RANK == 0:
-                print('t = {} ms'.format(neuron.h.t))
-
-
-    try:
-        #calculate LFP after final fadvance()
-        i = 0
-        totnsegs = 0
-        if use_isyn:
-            imem['isyn_e'] = 0. # need to reset these for every iteration because we sum over synapses
-            imem['isyn_i'] = 0.
-        for cell in cells:
-            for sec in cell.allseclist:
-                for seg in sec:
-                    imem['imem'][i] = seg.i_membrane_
-                    if use_ipas:
-                        imem['ipas'][i] = seg.i_pas
-                    if use_icap:
-                        imem['icap'][i] = seg.i_cap
-                    i += 1
-
-            if use_isyn:
-                for idx, syn in zip(cell.synidx, cell.netconsynapses):
-                    if hasattr(syn, 'e') and syn.e > -50:
-                        imem['isyn_e'][idx+totnsegs] += syn.i
-                    else:
-                        imem['isyn_i'][idx+totnsegs] += syn.i
-
-            totnsegs += cell.totnsegs
-
-        if rec_current_dipole_moment:
-            k = 0 # counter
-            for nsegs, name in zip(population_nsegs, network.population_names):
-                cellinds = np.arange(k, k+nsegs)
-                DIPOLE_MOMENT[name][tstep, ] = np.dot(imem['imem'][cellinds, ], midpoints[cellinds, ])
-                k += nsegs
-
-        if to_memory:
-            for j, coeffs in enumerate(dotprodcoeffs):
-                RESULTS[j]['imem'][:, tstep] = np.dot(coeffs, imem['imem'])
+            for j, (probe, M) in enumerate(zip(probes, transforms)):
+                probe.data['imem'][:, tstep] = M @ imem['imem']
                 if use_ipas:
-                    RESULTS[j]['ipas'][:, tstep] = np.dot(coeffs, imem['ipas'] * network_dummycell.area * 1E-2)
+                    probe.data['ipas'][:, tstep] = \
+                        M @ (imem['ipas'] * network_dummycell.area * 1E-2)
                 if use_icap:
-                    RESULTS[j]['icap'][:, tstep] = np.dot(coeffs, imem['icap'] * network_dummycell.area * 1E-2)
+                    probe.data['icap'][:, tstep] = \
+                        M @ (imem['icap'] * network_dummycell.area * 1E-2)
                 if use_isyn:
-                    RESULTS[j]['isyn_e'][:, tstep] = np.dot(coeffs, imem['isyn_e'])
-                    RESULTS[j]['isyn_i'][:, tstep] = np.dot(coeffs, imem['isyn_i'])
+                    probe.data['isyn_e'][:, tstep] = M @ imem['isyn_e']
+                    probe.data['isyn_i'][:, tstep] = M @ imem['isyn_i']
 
             if rec_pop_contributions:
-                for j, coeffs in enumerate(dotprodcoeffs):
-                    k = 0 # counter
-                    for nsegs, name in zip(population_nsegs, network.population_names):
-                        cellinds = np.arange(k, k+nsegs)
-                        RESULTS[j][name][:, tstep] = np.dot(coeffs[:, cellinds], imem['imem'][cellinds, ])
+                for j, (probe, M) in enumerate(zip(probes, transforms)):
+                    k = 0  # counter
+                    for nsegs, pop_name in zip(population_nsegs,
+                                               self.population_names):
+                        cellinds = np.arange(k, k + nsegs)
+                        probe.data[pop_name][:, tstep] = \
+                            M[:, cellinds] @ imem['imem'][cellinds, ]
                         k += nsegs
-
+        except IndexError:
+            pass
 
         if to_file:
-            for j, coeffs in enumerate(dotprodcoeffs):
-                outputfile['OUTPUT[{}]'.format(j)
-                           ]['imem'][:, tstep] = np.dot(coeffs, imem['imem'])
-                if use_ipas:
-                    outputfile['OUTPUT[{}]'.format(j)
-                               ]['ipas'][:, tstep] = np.dot(coeffs, imem['ipas'] * network_dummycell.area * 1E-2)
-                if use_icap:
-                    outputfile['OUTPUT[{}]'.format(j)
-                               ]['icap'][:, tstep] = np.dot(coeffs, imem['icap'] * network_dummycell.area * 1E-2)
-                if use_isyn:
-                    outputfile['OUTPUT[{}]'.format(j)
-                               ]['isyn_e'][:, tstep] = np.dot(coeffs, imem['isyn_e'])
-                    outputfile['OUTPUT[{}]'.format(j)
-                               ]['isyn_i'][:, tstep] = np.dot(coeffs, imem['isyn_i'])
-
-            if rec_pop_contributions:
-                for j, coeffs in enumerate(dotprodcoeffs):
-                    k = 0 # counter
-                    for nsegs, name in zip(population_nsegs, network.population_names):
-                        cellinds = np.arange(k, k+nsegs)
-                        outputfile['OUTPUT[{}]'.format(j)
-                                   ][name][:, tstep] = np.dot(coeffs[:, cellinds],
-                                                              imem['imem'][cellinds, ])
-                        k += nsegs
-
-    except IndexError:
-        pass
-
-    if to_memory:
-        return RESULTS, DIPOLE_MOMENT
-
-    if to_file:
-        outputfile.close()
-        return RESULTS, DIPOLE_MOMENT
+            outputfile.close()
 
 
 def ReduceStructArray(sendbuf, op=MPI.SUM):
@@ -1603,9 +1484,9 @@ def ReduceStructArray(sendbuf, op=MPI.SUM):
 
     Parameters
     ----------
-    sendbuf : structured ndarray
+    sendbuf: structured ndarray
         Array data to be reduced (default: summed)
-    op : mpi4py.MPI.Op object
+    op: mpi4py.MPI.Op object
         MPI_Reduce function. Default is mpi4py.MPI.SUM
     """
     if RANK == 0:
@@ -1620,7 +1501,8 @@ def ReduceStructArray(sendbuf, op=MPI.SUM):
     if RANK == 0:
         reduced = np.zeros(shape,
                            dtype=list(zip(dtype_names,
-                                     ['f8' for i in range(len(dtype_names))])))
+                                          ['f8' for i in range(len(dtype_names)
+                                                               )])))
     else:
         reduced = None
     for name in dtype_names:

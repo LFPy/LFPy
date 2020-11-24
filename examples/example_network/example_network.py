@@ -27,13 +27,13 @@ GNU General Public License for more details.
 import os
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
-from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 import scipy.signal as ss
 import scipy.stats as st
 from mpi4py import MPI
 import neuron
-from LFPy import NetworkCell, Network, Synapse, RecExtElectrode
+from LFPy import NetworkCell, Network, Synapse, RecExtElectrode, \
+    CurrentDipoleMoment
 
 # set up MPI variables:
 COMM = MPI.COMM_WORLD
@@ -46,60 +46,10 @@ RANK = COMM.Get_rank()
 GLOBALSEED = 1234
 np.random.seed(GLOBALSEED + RANK)
 
-################################################################################
+##########################################################################
 # Function declarations
-################################################################################
+##########################################################################
 
-def decimate(x, q=10, n=4, k=0.8, filterfun=ss.cheby1):
-    """
-    scipy.signal.decimate like downsampling using filtfilt instead of lfilter,
-    and filter coeffs from butterworth or chebyshev type 1.
-
-    Parameters
-    ----------
-    x : ndarray
-        Array to be downsampled along last axis.
-    q : int
-        Downsampling factor.
-    n : int
-        Filter order.
-    k : float
-        Aliasing filter critical frequency Wn will be set as Wn=k/q.
-    filterfun : function
-        `scipy.signal.filter_design.cheby1` or
-        `scipy.signal.filter_design.butter` function
-
-    Returns
-    -------
-    ndarray
-        Downsampled signal.
-
-    """
-    if not isinstance(q, int):
-        raise TypeError("q must be an integer")
-
-    if n is None:
-        n = 1
-
-    if filterfun == ss.butter:
-        b, a = filterfun(n, k / q)
-    elif filterfun == ss.cheby1:
-        b, a = filterfun(n, 0.05, k / q)
-    else:
-        raise Exception('only ss.butter or ss.cheby1 supported')
-
-    try:
-        y = ss.filtfilt(b, a, x)
-    except: # Multidim array can only be processed at once for scipy >= 0.9.0
-        y = []
-        for data in x:
-            y.append(ss.filtfilt(b, a, data))
-        y = np.array(y)
-
-    try:
-        return y[:, ::q]
-    except:
-        return y[::q]
 
 def remove_axis_junk(ax, lines=['right', 'top']):
     """remove chosen lines from plotting axis"""
@@ -108,6 +58,7 @@ def remove_axis_junk(ax, lines=['right', 'top']):
             spine.set_color('none')
     ax.xaxis.set_ticks_position('bottom')
     ax.yaxis.set_ticks_position('left')
+
 
 def draw_lineplot(
         ax, data, dt=0.1,
@@ -123,7 +74,7 @@ def draw_lineplot(
         filter_data=False,
         filterargs=dict(N=2, Wn=0.02, btype='lowpass')):
     """helper function to draw line plots"""
-    tvec = np.arange(data.shape[1])*dt
+    tvec = np.arange(data.shape[1]) * dt
     tinds = (tvec >= T[0]) & (tvec <= T[1])
 
     # apply temporal filter
@@ -131,7 +82,7 @@ def draw_lineplot(
         b, a = ss.butter(**filterargs)
         data = ss.filtfilt(b, a, data, axis=-1)
 
-    #subtract mean in each channel
+    # subtract mean in each channel
     if ztransform:
         dataT = data.T - data.mean(axis=1)
         data = dataT.T
@@ -155,15 +106,15 @@ def draw_lineplot(
             ax.plot(tvec[tinds], data[i][tinds] / vlimround + z, lw=1,
                     rasterized=False, clip_on=False,
                     color=color)
-        yticklabels.append('ch. %i' % (i+1))
+        yticklabels.append('ch. %i' % (i + 1))
         yticks.append(z)
 
     if scalebar:
         ax.plot([tvec[-1], tvec[-1]],
                 [-1, -2], lw=2, color='k', clip_on=False)
-        ax.text(tvec[-1]+np.diff(T)*0.02, -1.5,
+        ax.text(tvec[-1] + np.diff(T) * 0.02, -1.5,
                 '$2^{' + '{}'.format(np.log2(vlimround)
-                                    ) + '}$ ' + '{0}'.format(unit),
+                                     ) + '}$ ' + '{0}'.format(unit),
                 color='k', rotation='vertical',
                 va='center')
 
@@ -180,9 +131,9 @@ def draw_lineplot(
     return vlimround
 
 
-################################################################################
+##########################################################################
 # Set up shared and population-specific parameters
-################################################################################
+##########################################################################
 # relative path for simulation output:
 OUTPUTPATH = 'example_network_output'
 
@@ -224,12 +175,11 @@ electrodeParameters = dict(
     r=5.,
     n=50,
     sigma=0.3,
-    method="soma_as_point"
+    method="linesource"
 )
 
 # method Network.simulate() parameters:
 networkSimulationArguments = dict(
-    rec_current_dipole_moment=True,
     rec_pop_contributions=True,
     to_memory=True,
     to_file=False
@@ -276,18 +226,18 @@ synapsePositionArguments = [[dict(section=['soma', 'apic'],
                                   funargs=[dict(loc=500., scale=100.),
                                            dict(loc=500., scale=100.)],
                                   funweights=[0.5, 1.]
-                                 ) for _ in range(2)],
+                                  ) for _ in range(2)],
                             [dict(section=['soma', 'apic'],
                                   fun=[st.norm, st.norm],
                                   funargs=[dict(loc=0., scale=100.),
                                            dict(loc=0., scale=100.)],
                                   funweights=[1., 0.5]
-                                 ) for _ in range(2)]]
+                                  ) for _ in range(2)]]
 
 if __name__ == '__main__':
-    ############################################################################
+    ##########################################################################
     # Main simulation
-    ############################################################################
+    ##########################################################################
     # create directory for output:
     if not os.path.isdir(OUTPUTPATH):
         if RANK == 0:
@@ -302,7 +252,6 @@ if __name__ == '__main__':
         network.create_population(name=name, POP_SIZE=size,
                                   **populationParameters)
 
-
         # create excitatory background synaptic activity for each cell
         # with Poisson statistics
         for cell in network.populations[name].cells:
@@ -315,16 +264,15 @@ if __name__ == '__main__':
                                               seed=np.random.rand() * 2**32 - 1
                                               )
 
-
     # create connectivity matrices and connect populations:
     for i, pre in enumerate(population_names):
         for j, post in enumerate(population_names):
-            # boolean connectivity matrix between pre- and post-synaptic neurons
-            # in each population (postsynaptic on this RANK)
+            # boolean connectivity matrix between pre- and post-synaptic
+            # neurons in each population (postsynaptic on this RANK)
             connectivity = network.get_connectivity_rand(
                 pre=pre, post=post,
                 connprob=connectionProbability[i][j]
-                )
+            )
 
             # connect network:
             (conncount, syncount) = network.connect(
@@ -341,44 +289,54 @@ if __name__ == '__main__':
                 multapsefun=multapseFunction,
                 multapseargs=multapseArguments[i][j],
                 syn_pos_args=synapsePositionArguments[i][j],
-                )
+            )
 
-    # set up extracellular recording device:
-    electrode = RecExtElectrode(**electrodeParameters)
+    # set up extracellular recording device.
+    # Here `cell` is set to None as handles to cell geometry is handled
+    # internally
+    electrode = RecExtElectrode(cell=None, **electrodeParameters)
+
+    # set up recording of current dipole moments. Ditto with regards to
+    # `cell` being set to None
+    current_dipole_moment = CurrentDipoleMoment(cell=None)
 
     # run simulation:
-    SPIKES, OUTPUT, DIPOLEMOMENT = network.simulate(
-        electrode=electrode,
+    SPIKES = network.simulate(
+        probes=[electrode, current_dipole_moment],
         **networkSimulationArguments
     )
 
     # collect somatic potentials across all RANKs to RANK 0:
     if RANK == 0:
         somavs = []
-        for i, name in enumerate(population_names):
-            somavs.append([])
-            somavs[i] += [cell.somav
-                          for cell in network.populations[name].cells]
+    for i, name in enumerate(population_names):
+        for j, cell in enumerate(network.populations[name].cells):
+            if j == 0:
+                somavs_pop = cell.somav
+            else:
+                somavs_pop = np.vstack((somavs_pop, cell.somav))
+        if RANK == 0:
             for j in range(1, SIZE):
-                somavs[i] += COMM.recv(source=j, tag=15)
-    else:
-        somavs = None
-        for name in population_names:
-            COMM.send([cell.somav for cell in network.populations[name].cells],
-                      dest=0, tag=15)
+                somavs_pop = np.vstack((somavs_pop,
+                                        COMM.recv(source=j, tag=15)))
+            somavs.append(somavs_pop)
+        else:
+            COMM.send(somavs_pop, dest=0, tag=15)
+        del somavs_pop
 
-    ############################################################################
+    ##########################################################################
     # Plot some output on RANK 0
-    ############################################################################
+    ##########################################################################
     if RANK == 0:
         # spike raster
         fig, ax = plt.subplots(1, 1)
-        for name, spts, gids in zip(population_names, SPIKES['times'], SPIKES['gids']):
+        for name, spts, gids in zip(
+                population_names, SPIKES['times'], SPIKES['gids']):
             t = []
             g = []
             for spt, gid in zip(spts, gids):
                 t = np.r_[t, spt]
-                g = np.r_[g, np.zeros(spt.size)+gid]
+                g = np.r_[g, np.zeros(spt.size) + gid]
             ax.plot(t[t >= 200], g[t >= 200], '|', label=name)
         ax.legend(loc=1)
         remove_axis_junk(ax, lines=['right', 'top'])
@@ -389,12 +347,13 @@ if __name__ == '__main__':
                     bbox_inches='tight')
         plt.close(fig)
 
-
         # somatic potentials
         fig = plt.figure()
         gs = GridSpec(5, 1)
         ax = fig.add_subplot(gs[:4])
-        draw_lineplot(ax, decimate(np.array(somavs)[0], q=16), dt=network.dt*16,
+        draw_lineplot(ax,
+                      ss.decimate(somavs[0], q=16, axis=-1, zero_phase=True),
+                      dt=network.dt * 16,
                       T=(200, 1200),
                       scaling_factor=1.,
                       vlimround=16,
@@ -404,7 +363,7 @@ if __name__ == '__main__':
                       ylabels=False,
                       color='C0',
                       ztransform=True
-                     )
+                      )
         ax.set_yticks([])
         ax.set_xticklabels([])
         ax.set_ylabel('E')
@@ -412,7 +371,9 @@ if __name__ == '__main__':
         ax.set_xlabel('')
 
         ax = fig.add_subplot(gs[4])
-        draw_lineplot(ax, decimate(np.array(somavs)[1], q=16), dt=network.dt*16,
+        draw_lineplot(ax,
+                      ss.decimate(somavs[1], q=16, axis=-1, zero_phase=True),
+                      dt=network.dt * 16,
                       T=(200, 1200),
                       scaling_factor=1.,
                       vlimround=16,
@@ -422,7 +383,7 @@ if __name__ == '__main__':
                       ylabels=False,
                       color='C1',
                       ztransform=True
-                     )
+                      )
         ax.set_yticks([])
         ax.set_ylabel('I')
 
@@ -430,13 +391,15 @@ if __name__ == '__main__':
                     bbox_inches='tight')
         plt.close(fig)
 
-
         # extracellular potentials, E and I contributions, sum
         fig, axes = plt.subplots(1, 3, figsize=(6.4, 4.8))
         fig.suptitle('extracellular potentials')
         for i, (ax, name, label) in enumerate(zip(axes, ['E', 'I', 'imem'],
                                                   ['E', 'I', 'sum'])):
-            draw_lineplot(ax, decimate(OUTPUT[0][name], q=16), dt=network.dt*16,
+            draw_lineplot(ax,
+                          ss.decimate(electrode.data[name], q=16,
+                                      zero_phase=True),
+                          dt=network.dt * 16,
                           T=(200, 1200),
                           scaling_factor=1.,
                           vlimround=None,
@@ -446,35 +409,30 @@ if __name__ == '__main__':
                           ylabels=True if i == 0 else False,
                           color='C{}'.format(i),
                           ztransform=True
-                         )
+                          )
             ax.set_title(label)
         fig.savefig(os.path.join(OUTPUTPATH, 'extracellular_potential.pdf'),
                     bbox_inches='tight')
         plt.close(fig)
-
 
         # current-dipole moments, E and I contributions, sum
         fig, axes = plt.subplots(3, 3, figsize=(6.4, 4.8))
         fig.subplots_adjust(wspace=0.45)
         fig.suptitle('current-dipole moments')
         for i, u in enumerate(['x', 'y', 'z']):
-            for j, label in enumerate(['E', 'I', 'sum']):
-                t = np.arange(DIPOLEMOMENT.shape[0])*network.dt
+            for j, (name, label) in enumerate(zip(['E', 'I', 'imem'],
+                                                  ['E', 'I', 'sum'])):
+                t = np.arange(current_dipole_moment.data.shape[1]) * network.dt
                 inds = (t >= 200) & (t <= 1200)
-                if label != 'sum':
-                    axes[i, j].plot(t[inds][::16],
-                                    decimate(DIPOLEMOMENT[label][inds, i],
-                                             q=16),
-                                    'C{}'.format(j))
-                else:
-                    axes[i, j].plot(t[inds][::16],
-                                    decimate(DIPOLEMOMENT['E'][inds, i] +
-                                             DIPOLEMOMENT['I'][inds, i], q=16),
-                                    'C{}'.format(j))
+                axes[i, j].plot(
+                    t[inds][::16],
+                    ss.decimate(current_dipole_moment.data[name][i, inds],
+                                q=16, zero_phase=True),
+                    'C{}'.format(j))
 
                 if j == 0:
                     axes[i, j].set_ylabel(r'$\mathbf{p}\cdot\mathbf{e}_{' +
-                                          '{}'.format(u) +'}$ (nA$\mu$m)')
+                                          '{}'.format(u) + '}$ (nA$\\mu$m)')
                 if i == 0:
                     axes[i, j].set_title(label)
                 if i != 2:
@@ -485,39 +443,36 @@ if __name__ == '__main__':
                     bbox_inches='tight')
         plt.close(fig)
 
-
     # population illustration (per RANK)
-    fig = plt.figure(figsize=(6.4, 4.8*2))
+    fig = plt.figure(figsize=(6.4, 4.8 * 2))
     ax = fig.add_subplot(111, projection='3d')
     ax.view_init(elev=5)
     ax.plot(electrode.x, electrode.y, electrode.z, 'ko', zorder=0)
     for i, (name, pop) in enumerate(network.populations.items()):
         for cell in pop.cells:
             c = 'C0' if name == 'E' else 'C1'
-            ax.plot([cell.xstart[0], cell.xend[0]],
-                    [cell.ystart[0], cell.yend[0]],
-                    [cell.zstart[0], cell.zend[0]], c,
-                    lw=5, zorder=-cell.xmid[0]-cell.ymid[0])
-            ax.plot([cell.xstart[1], cell.xend[-1]],
-                    [cell.ystart[1], cell.yend[-1]],
-                    [cell.zstart[1], cell.zend[-1]], c,
-                    lw=0.5, zorder=-cell.xmid[0]-cell.ymid[0])
-    ax.set_xlabel('$x$ ($\mu$m)')
-    ax.set_ylabel('$y$ ($\mu$m)')
-    ax.set_zlabel('$z$ ($\mu$m)')
+            ax.plot(cell.x[0], cell.y[0], cell.z[0], c,
+                    lw=5, zorder=-cell.x[0].mean() - cell.y[0].mean())
+            ax.plot([cell.x[1, 0], cell.x[-1, -1]],
+                    [cell.y[1, 0], cell.y[-1, -1]],
+                    [cell.z[1, 0], cell.z[-1, -1]], c,
+                    lw=0.5, zorder=-cell.x[0].mean() - cell.y[0].mean())
+    ax.set_xlabel(r'$x$ ($\mu$m)')
+    ax.set_ylabel(r'$y$ ($\mu$m)')
+    ax.set_zlabel(r'$z$ ($\mu$m)')
     ax.set_title('network populations')
-    fig.savefig(os.path.join(OUTPUTPATH, 'population_RANK_{}.pdf'.format(RANK)),
+    fig.savefig(os.path.join(OUTPUTPATH,
+                             'population_RANK_{}.pdf'.format(RANK)),
                 bbox_inches='tight')
     plt.close(fig)
 
-
-    ############################################################################
+    ##########################################################################
     # customary cleanup of object references - the psection() function may not
-    # write correct information if NEURON still has object references in memory,
+    # write correct information if NEURON still has object references in memory
     # even if Python references has been deleted. It will also allow the script
     # to be run in successive fashion.
-    ############################################################################
-    network.pc.gid_clear() # allows assigning new gids to threads
+    ##########################################################################
+    network.pc.gid_clear()  # allows assigning new gids to threads
     electrode = None
     syn = None
     synapseModel = None

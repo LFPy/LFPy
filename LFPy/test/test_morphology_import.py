@@ -30,9 +30,9 @@ class testMorphologyImport(unittest.TestCase):
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
                                                  'L23E_p23.hoc'),
                          nsegs_method=None)
-        data = np.c_[cell.xstart, cell.xmid, cell.xend,
-                     cell.ystart, cell.ymid, cell.yend,
-                     cell.zstart, cell.zmid, cell.zend]
+        data = np.c_[cell.x[:, 0], cell.x.mean(axis=-1), cell.x[:, -1],
+                     cell.y[:, 0], cell.y.mean(axis=-1), cell.y[:, -1],
+                     cell.z[:, 0], cell.z.mean(axis=-1), cell.z[:, -1]]
         expected_data = np.array([
             [0., 0., 0., 0., 0., 0., -10., 0., 10.],
             [0., 50., 100., 0., -50., -100., 10., 55., 100.],

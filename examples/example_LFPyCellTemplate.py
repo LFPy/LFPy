@@ -8,7 +8,7 @@ file LFPyCellTemplate.hoc
 Execution:
 
     python example_LFPyCellTemplate.py
-    
+
 Copyright (C) 2017 Computational Neuroscience Group, NMBU.
 
 This program is free software: you can redistribute it and/or modify
@@ -23,22 +23,21 @@ GNU General Public License for more details.
 """
 import LFPy
 import neuron
-import numpy as np
 import matplotlib.pyplot as plt
 
-#A plottin' function
-def plotcell(cell, color='k'):
-    for sec in cell.template.all:
-        idx = cell.get_idx(sec.name())
-        plt.plot(np.r_[cell.xstart[idx], cell.xend[idx][-1]],
-                 np.r_[cell.zstart[idx], cell.zend[idx][-1]],
-                 color=color)
-    print(' ')
 
-#delete cell instances from previous script executions,
+def plotcell(cell, color='k'):
+    '''A plottin' function'''
+    for sec in cell.allseclist:
+        idx = cell.get_idx(sec.name())
+        for i in idx:
+            plt.plot(cell.x[i], cell.z[i], color=color)
+
+
+# delete cell instances from previous script executions,
 neuron.h('forall delete_section()')
 
-#create some cell instances, set the positions, plot the morphologies
+# create some cell instances, set the positions, plot the morphologies
 cell1 = LFPy.TemplateCell(
     morphology='morphologies/markram/CNG version/C010398B-P2.CNG.swc',
     templatefile='LFPyCellTemplate.hoc',
@@ -65,4 +64,3 @@ cell3 = LFPy.TemplateCell(
 cell3.set_pos(400)
 plotcell(cell=cell3, color='b')
 plt.show()
-
