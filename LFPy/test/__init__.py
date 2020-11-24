@@ -40,35 +40,43 @@ def _test(verbosity=2):
     """
     # import methods here to avoid polluting LFPy.test namespace
     from .test_cell import testCell
-    from .test_eegmegcalc import testMEG, testFourSphereVolumeConductor, testInfiniteVolumeConductor
+    from .test_eegmegcalc import testMEG, testFourSphereVolumeConductor, \
+        testInfiniteVolumeConductor, testOneSphereVolumeConductor
     from .test_alias_method import testAliasMethod
     from .test_recextelectrode import testRecExtElectrode
     from .test_lfpcalc import testLfpCalc
     from .test_misc import testMisc
-    from .test_pointprocess import testPointProcess, testSynapse, testStimIntElectrode
+    from .test_pointprocess import testPointProcess, testSynapse, \
+        testStimIntElectrode
     from .test_inputgenerators import testInputGenerators
     from .test_templatecell import testTemplateCell
     from .test_networkcell import testNetworkCell
     from .test_network import testNetworkPopulation, testNetwork
-    import unittest
+    from .test_tools import testTools
+    from .test_imem import testImem
+    from .test_morphology_import import testMorphologyImport
+    from unittest import TestSuite, TestLoader, TextTestRunner
 
     # list of test cases
     suites = []
-    suites += [unittest.TestLoader().loadTestsFromTestCase(testCell)]
-    suites += [unittest.TestLoader().loadTestsFromTestCase(testTemplateCell)]
-    suites += [unittest.TestLoader().loadTestsFromTestCase(testLfpCalc)]
-    suites += [unittest.TestLoader().loadTestsFromTestCase(testRecExtElectrode)]
-    suites += [unittest.TestLoader().loadTestsFromTestCase(testNetworkCell)]
-    suites += [unittest.TestLoader().loadTestsFromTestCase(testNetworkPopulation)]
-    suites += [unittest.TestLoader().loadTestsFromTestCase(testNetwork)]
-    suites += [unittest.TestLoader().loadTestsFromTestCase(testMEG)]
-    suites += [unittest.TestLoader().loadTestsFromTestCase(testFourSphereVolumeConductor)]
-    suites += [unittest.TestLoader().loadTestsFromTestCase(testInfiniteVolumeConductor)]
-    suites += [unittest.TestLoader().loadTestsFromTestCase(testAliasMethod)]
-    suites += [unittest.TestLoader().loadTestsFromTestCase(testPointProcess)]
-    suites += [unittest.TestLoader().loadTestsFromTestCase(testSynapse)]
-    suites += [unittest.TestLoader().loadTestsFromTestCase(testStimIntElectrode)]
-    suites += [unittest.TestLoader().loadTestsFromTestCase(testInputGenerators)]
-    suites += [unittest.TestLoader().loadTestsFromTestCase(testMisc)]
-
-    unittest.TextTestRunner(verbosity=verbosity).run(unittest.TestSuite(suites))
+    suites += [TestLoader().loadTestsFromTestCase(testCell)]
+    suites += [TestLoader().loadTestsFromTestCase(testTemplateCell)]
+    suites += [TestLoader().loadTestsFromTestCase(testLfpCalc)]
+    suites += [TestLoader().loadTestsFromTestCase(testRecExtElectrode)]
+    suites += [TestLoader().loadTestsFromTestCase(testNetworkCell)]
+    suites += [TestLoader().loadTestsFromTestCase(testNetworkPopulation)]
+    suites += [TestLoader().loadTestsFromTestCase(testNetwork)]
+    suites += [TestLoader().loadTestsFromTestCase(testMEG)]
+    suites += [TestLoader().loadTestsFromTestCase(testFourSphereVolumeConductor)]
+    suites += [TestLoader().loadTestsFromTestCase(testInfiniteVolumeConductor)]
+    suites += [TestLoader().loadTestsFromTestCase(testOneSphereVolumeConductor)]
+    suites += [TestLoader().loadTestsFromTestCase(testAliasMethod)]
+    suites += [TestLoader().loadTestsFromTestCase(testPointProcess)]
+    suites += [TestLoader().loadTestsFromTestCase(testSynapse)]
+    suites += [TestLoader().loadTestsFromTestCase(testStimIntElectrode)]
+    suites += [TestLoader().loadTestsFromTestCase(testInputGenerators)]
+    suites += [TestLoader().loadTestsFromTestCase(testImem)]
+    suites += [TestLoader().loadTestsFromTestCase(testMisc)]
+    suites += [TestLoader().loadTestsFromTestCase(testTools)]
+    suites += [TestLoader().loadTestsFromTestCase(testMorphologyImport)]
+    TextTestRunner(verbosity=verbosity).run(TestSuite(suites))
