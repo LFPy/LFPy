@@ -75,6 +75,7 @@ setup(
     description=('A module for modeling extracellular potentials of '
                  'multicompartment neuron models built on NEURON'),
     long_description=long_description,
+    long_description_content_type="text/markdown",
     classifiers=[
         'License :: OSI Approved :: GNU General Public License (GPL)',
         'Programming Language :: Python',
