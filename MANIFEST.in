@@ -2,6 +2,10 @@ include README.md
 include LICENSE
 
 recursive-include LFPy *.pyx
+recursive-include LFPy/test *.py
+recursive-include LFPy/test *.hoc
+recursive-include LFPy/test *.mod
+recursive-include LFPy/test *.npz
 recursive-include LFPy/test/x86_64 *
 
 recursive-include examples *.py
