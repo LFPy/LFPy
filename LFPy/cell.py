@@ -295,13 +295,16 @@ class Cell(object):
 
     def strip_hoc_objects(self):
         """Destroy any NEURON hoc objects in the cell object"""
-        for key in self.__dict__.keys():
+        if not (isinstance(neuron, type(None)) or
+                isinstance(neuron.nrn, type(None))):
+            print(type(neuron), type(neuron.nrn))
             nrntypes = (neuron.nrn.Segment, neuron.nrn.Section,
                         neuron.nrn.Mechanism, type(neuron.h.List()))
-            if isinstance(getattr(self, key), nrntypes):
-                setattr(self, key, None)
-                if self.verbose:
-                    print('{}.{} = None'.format(self.__name__, key))
+            for key in self.__dict__.keys():
+                if isinstance(getattr(self, key), nrntypes):
+                    setattr(self, key, None)
+                    if self.verbose:
+                        print('{}.{} = None'.format(self.__name__, key))
 
     def _load_geometry(self):
         """Load the morphology-file in NEURON"""
