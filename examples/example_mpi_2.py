@@ -195,6 +195,9 @@ for cell_id in range(n_cells):
         point_el = LFPy.RecExtElectrode(cell, **point_el_parameters)
         point_el.data = point_el.get_transformation_matrix() @ cell.imem
 
+        # call destructor to avoid hanging hoc refs to sections
+        cell.__del__()
+
         # sum LFP on this RANK
         summed_LFP += point_el.data[0]
 
@@ -246,6 +249,9 @@ if RANK == 0:
 
         ax = plt.gca()
         ax.add_collection(linecol)
+
+        # call destructor to avoid hanging hoc refs to sections
+        cell.__del__()
 
     axis = ax.axis(ax.axis('equal'))
     ax.axis(np.array(axis) / 1.15)
