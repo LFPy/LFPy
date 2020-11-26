@@ -30,7 +30,6 @@ jobs:
         python -m pip install --upgrade pip
         pip install flake8 pytest wheel
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-        pip uninstall LFPykit
         pip install --upgrade --no-deps git+https://github.com/LFPy/LFPykit.git@master#egg=LFPykit
         pip install .
     - name: Lint with flake8
