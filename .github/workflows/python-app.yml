@@ -28,7 +28,7 @@ jobs:
       run: |
         sudo apt install build-essential libopenmpi-dev openmpi-bin libgcc1 libreadline7
         python -m pip install --upgrade pip
-        pip install flake8 pytest wheel
+        pip install flake8 pytest wheel pytest-cov coveralls coverage
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
         pip install --upgrade --no-deps git+https://github.com/LFPy/LFPykit.git@master#egg=LFPykit
         python setup.py install
@@ -39,5 +39,8 @@ jobs:
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with pytest
+      env:
+        COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
       run: |
-        py.test -v LFPy
+        py.test -v LFPy --cov=LFPy/test/
+        coveralls
