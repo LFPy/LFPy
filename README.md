@@ -62,7 +62,6 @@ Code status
 -----------
 
 [![PyPI version](https://badge.fury.io/py/LFPy.svg)](https://badge.fury.io/py/LFPy)
-[![Build Status](https://travis-ci.com/LFPy/LFPy.svg?branch=master)](https://travis-ci.com/LFPy/LFPy)
 ![Lintly flake8 checks](https://github.com/LFPy/LFPy/workflows/Lintly%20flake8%20checks/badge.svg)
 ![Python application](https://github.com/LFPy/LFPy/workflows/Python%20application/badge.svg)
 [![Coverage Status](https://coveralls.io/repos/github/LFPy/LFPy/badge.svg?branch=master)](https://coveralls.io/github/LFPy/LFPy?branch=master)
