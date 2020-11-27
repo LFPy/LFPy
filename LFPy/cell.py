@@ -297,7 +297,6 @@ class Cell(object):
         """Destroy any NEURON hoc objects in the cell object"""
         if not (isinstance(neuron, type(None)) or
                 isinstance(neuron.nrn, type(None))):
-            print(type(neuron), type(neuron.nrn))
             nrntypes = (neuron.nrn.Segment, neuron.nrn.Section,
                         neuron.nrn.Mechanism, type(neuron.h.List()))
             for key in self.__dict__.keys():
