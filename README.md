@@ -209,14 +209,16 @@ There are few options to install LFPy:
         $ conda config --add channels conda-forge
         $ conda config --set channel_priority strict  # suggested
 
-    Install LFPy either issuing
+    Create a new conda environment with LFPy and activate it:
 
+        $ conda create -n lfpy python=3 pip lfpy  # creates new Python 3.x conda environment named lfpy with pip and LFPy and their dependencies
+        $ conda activate lfpy  # activate the lfpy environment
+        $ python -c "import LFPy; LFPy.run_tests()"  # check that installation is working
+
+    LFPy can also be installed in existing conda environments if the dependency tree is solvable:
+
+        $ conda activate <environment>
         $ conda install lfpy  # installs LFPy and its dependencies in the current conda environment
-
-    or
-
-        $ conda create -n lfpy python=3 lfpy  # creates new Python 3.x conda environment named lfpy with LFPy and its dependencies
-        $ conda activate lfpy        # activate the lfpy environment
 
 
 Uninstall
