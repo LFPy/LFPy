@@ -54,7 +54,7 @@ if not any(arg in sys.argv for arg in ['sdist', 'upload']):
         spawn([shutil.which('mknrndll')])
         os.chdir(os.path.join('..', '..'))
     else:
-        print("nrnivmodl/mknrndll script not found in PATH, thus NMODL "+
+        print("nrnivmodl/mknrndll script not found in PATH, thus NMODL " +
               "files could not be compiled. LFPy.test() functions will fail")
 
 
@@ -70,8 +70,8 @@ setup(
     package_data={'LFPy': ['*.pyx',
                            os.path.join('test', '*.hoc'),
                            os.path.join('test', '*.py'),
-                           os.path.join('test', 'sinsyn.mod',
-                           os.path.join('test', 'expsyni.mod')),
+                           os.path.join('test', 'sinsyn.mod'),
+                           os.path.join('test', 'expsyni.mod'),
                            ]},
     include_package_data=True,
     cmdclass=cmdclass,
