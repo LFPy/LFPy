@@ -4,7 +4,7 @@
 
 """
 
-from distutils.spawn import find_executable, spawn
+from distutils.spawn import spawn
 import os
 import sys
 import shutil
@@ -36,20 +36,26 @@ except ImportError:
     ext_modules = []
 
 
-# try and locate the nrnivmodl script of NEURON in PATH so that the
+# try and locate the nrnivmodl or mknrndll script of NEURON in PATH so that the
 # NEURON NMODL files LFPy/test/*.mod can be compiled in place and be copied
 # as part of the package_data, allowing unit tests to run
 if not any(arg in sys.argv for arg in ['sdist', 'upload']):
-    if find_executable('nrnivmodl') is not None:
+    if shutil.which('nrnivmodl') is not None:
         os.chdir(os.path.join('LFPy', 'test'))
         for path in ['x86_64']:
             if os.path.isdir(path):
                 shutil.rmtree(path)
-        spawn([find_executable('nrnivmodl')])
+        spawn([shutil.which('nrnivmodl')])
+        os.chdir(os.path.join('..', '..'))
+    elif shutil.which('mknrndll') is not None:
+        os.chdir(os.path.join('LFPy', 'test'))
+        if os.path.isfile("nrnmech.dll"):
+            os.remove("nrnmech.dll")
+        spawn([shutil.which('mknrndll')])
         os.chdir(os.path.join('..', '..'))
     else:
-        print("nrnivmodl script not found in PATH, thus NEURON .mod files" +
-              "could not be compiled, and LFPy.test() functions will fail")
+        print("nrnivmodl/mknrndll script not found in PATH, thus NMODL " +
+              "files could not be compiled. LFPy.test() functions will fail")
 
 
 with open('README.md') as file:
@@ -65,6 +71,7 @@ setup(
                            os.path.join('test', '*.hoc'),
                            os.path.join('test', '*.py'),
                            os.path.join('test', 'sinsyn.mod'),
+                           os.path.join('test', 'expsyni.mod'),
                            ]},
     include_package_data=True,
     cmdclass=cmdclass,

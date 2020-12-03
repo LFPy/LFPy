@@ -7,6 +7,7 @@ recursive-include LFPy/test *.hoc
 recursive-include LFPy/test *.mod
 recursive-include LFPy/test *.npz
 recursive-include LFPy/test/x86_64 *
+include LFPy/test/nrnmech.dll
 
 recursive-include examples *.py
 recursive-include examples *.ipynb
