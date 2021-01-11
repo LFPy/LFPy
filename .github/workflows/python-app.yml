@@ -15,8 +15,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
         matrix:
-            os: [ubuntu-latest]
-            python-version: [3.7, 3.8, 3.9]
+            os: [ubuntu-latest, macOS-latest]
+            python-version: [3.8]
 
     steps:
     - uses: actions/checkout@v2
@@ -26,7 +26,14 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
       run: |
-        sudo apt install build-essential libopenmpi-dev openmpi-bin libgcc1 libreadline7
+        if [ $RUNNER_OS == 'macOS']; then
+            brew install openmpi
+        elif [ "$RUNNER_OS" == "Linux" ]; then
+            sudo apt install build-essential libopenmpi-dev openmpi-bin libgcc1 libreadline7
+        else
+            echo "$RUNNER_OS not supported"
+            exit 1
+        fi
         python -m pip install --upgrade pip
         pip install flake8 pytest wheel pytest-cov coveralls coverage
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
