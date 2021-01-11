@@ -26,7 +26,7 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
       run: |
-        if [ $RUNNER_OS == 'macOS']; then
+        if [ "$RUNNER_OS" == "macOS"]; then
             brew install openmpi
         elif [ "$RUNNER_OS" == "Linux" ]; then
             sudo apt install build-essential libopenmpi-dev openmpi-bin libgcc1 libreadline7
