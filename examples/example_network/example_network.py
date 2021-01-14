@@ -238,10 +238,14 @@ if __name__ == '__main__':
     ##########################################################################
     # Main simulation
     ##########################################################################
-    # create directory for output:
-    if not os.path.isdir(OUTPUTPATH):
-        if RANK == 0:
+    if RANK == 0:
+        # create directory for output:
+        if not os.path.isdir(OUTPUTPATH):
             os.mkdir(OUTPUTPATH)
+        # remove old simulation output if directory exist
+        else:
+            for fname in os.listdir(OUTPUTPATH):
+                os.unlink(os.path.join(OUTPUTPATH, fname))
     COMM.Barrier()
 
     # instantiate Network:
@@ -289,6 +293,7 @@ if __name__ == '__main__':
                 multapsefun=multapseFunction,
                 multapseargs=multapseArguments[i][j],
                 syn_pos_args=synapsePositionArguments[i][j],
+                save_connections=False,
             )
 
     # set up extracellular recording device.
@@ -478,6 +483,7 @@ if __name__ == '__main__':
     synapseModel = None
     for population in network.populations.values():
         for cell in population.cells:
+            cell.__del__()
             cell = None
         population.cells = None
         population = None

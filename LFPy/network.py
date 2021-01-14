@@ -735,8 +735,8 @@ class Network(object):
             synapse locations.
         save_connections: bool
             if True (default False), save instantiated connections to HDF5 file
-            "Network.OUTPUTPATH/synapse_positions.h5" as dataset "<pre>:<post>"
-            using a structured ndarray with dtype
+            "Network.OUTPUTPATH/synapse_connections.h5" as dataset
+            "<pre>:<post>" using a structured ndarray with dtype
             [('gid_pre'), ('gid', 'i8'), ('weight', 'f8'), ('delay', 'f8'),
              ('sec', 'U64'), ('sec.x', 'f8'),
              ('x', 'f8'), ('y', 'f8'), ('z', 'f8')],
@@ -881,14 +881,26 @@ class Network(object):
                     synDataArray[i]['y'] = y
                     synDataArray[i]['z'] = z
                 # Dump to hdf5 file, append to file if entry exists
-                f = h5py.File(os.path.join(self.OUTPUTPATH,
-                                           'synapse_positions.h5'), 'a')
-                key = '{}:{}'.format(pre, post)
-                if key in f.keys():
-                    del f[key]
-                    assert key not in f.keys()
-                f[key] = synDataArray
-                f.close()
+                with h5py.File(os.path.join(self.OUTPUTPATH,
+                                            'synapse_connections.h5'), 'a') as f:
+                    key = '{}:{}'.format(pre, post)
+                    if key in f.keys():
+                        del f[key]
+                        assert key not in f.keys()
+                    f[key] = synDataArray
+                    # save global connection data (synapse type/parameters)
+                    # equal for all synapses
+                    try:
+                        grp = f.create_group('synparams')
+                    except ValueError:
+                        grp = f['synparams']
+                    try:
+                        subgrp = grp.create_group(key)
+                    except ValueError:
+                        subgrp = grp[key]
+                    subgrp['mechanism'] = syntype.__str__().strip('()')
+                    for key, value in synparams.items():
+                        subgrp[key] = value
             else:
                 COMM.gather(syn_idx_pos)
 
