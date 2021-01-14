@@ -735,16 +735,22 @@ class Network(object):
             synapse locations.
         save_connections: bool
             if True (default False), save instantiated connections to HDF5 file
-            "Network.OUTPUTPATH/synapse_positions.h5" as dataset "<pre>:<post>"
-            using a structured ndarray with dtype
-            [('gid', 'i8'), ('x', float), ('y', float), ('z', float)]
-            where gid is postsynaptic cell id, and x,y,z the corresponding
+            "Network.OUTPUTPATH/synapse_connections.h5" as dataset
+            "<pre>:<post>" using a structured ndarray with dtype
+            [('gid_pre'), ('gid', 'i8'), ('weight', 'f8'), ('delay', 'f8'),
+             ('sec', 'U64'), ('sec.x', 'f8'),
+             ('x', 'f8'), ('y', 'f8'), ('z', 'f8')],
+            where `gid_pre` is presynapic cell id,
+            `gid` is postsynaptic cell id,
+            `weight` connection weight, `delay` connection delay,
+            `sec` section name, `sec.x` relative location on section,
+            and `x`,`y`,`z` the corresponding
             midpoint coordinates of the target compartment.
         """
         # set up connections from all cells in presynaptic to post across RANKs
         n0 = self.populations[pre].first_gid
         # gids of presynaptic neurons:
-        pre_gids = np.arange(n0, n0 + self.populations[pre].POP_SIZE)
+        gids_pre = np.arange(n0, n0 + self.populations[pre].POP_SIZE)
 
         # count connections and synapses made on this RANK
         conncount = connectivity.astype(int).sum()
@@ -755,17 +761,17 @@ class Network(object):
         syn_idx_pos = []
 
         # iterate over gids on this RANK and create connections
-        for i, (post_gid, cell) in enumerate(zip(self.populations[post].gids,
+        for i, (gid_post, cell) in enumerate(zip(self.populations[post].gids,
                                                  self.populations[post].cells)
                                              ):
             # do NOT iterate over all possible presynaptic neurons
-            for pre_gid in pre_gids[connectivity[:, i]]:
+            for gid_pre in gids_pre[connectivity[:, i]]:
                 # throw a warning if sender neuron is identical to receiving
                 # neuron
-                if post_gid == pre_gid:
+                if gid_post == gid_pre:
                     print(
                         'connecting cell w. gid {} to itself (RANK {})'.format(
-                            post_gid, RANK))
+                            gid_post, RANK))
 
                 # assess number of synapses
                 if multapsefun is None:
@@ -799,21 +805,22 @@ class Network(object):
                     j = delays < mindelay
                     delays[j] = delayfun(size=j.sum(), **delayargs)
 
-                for i, ((idx, secname, x), weight, delay) in enumerate(
+                for i, ((idx, secname, secx), weight, delay) in enumerate(
                         zip(secs, weights, delays)):
                     cell.create_synapse(
                         cell,
                         # TODO: Find neater way of accessing
-                        # Section reference, this seems slow
+                        # Section reference, this looks slow
                         sec=list(
                             cell.allseclist)[
                             np.where(
                                 np.array(
                                     cell.allsecnames) == secname)[0][0]],
-                        x=x, syntype=syntype,
+                        x=secx,
+                        syntype=syntype,
                         synparams=synparams)
                     # connect up NetCon object
-                    nc = self.pc.gid_connect(pre_gid, cell.netconsynapses[-1])
+                    nc = self.pc.gid_connect(gid_pre, cell.netconsynapses[-1])
                     nc.weight[0] = weight
                     nc.delay = delays[i]
                     self.netconlist.append(nc)
@@ -823,7 +830,13 @@ class Network(object):
                     cell.synidx.append(idx)
 
                     # store gid and xyz-coordinate of synapse positions
-                    syn_idx_pos.append((cell.gid, cell.x[idx].mean(axis=-1),
+                    syn_idx_pos.append((gid_pre,
+                                        cell.gid,
+                                        weight,
+                                        delays[i],
+                                        secname,
+                                        secx,
+                                        cell.x[idx].mean(axis=-1),
                                         cell.y[idx].mean(axis=-1),
                                         cell.z[idx].mean(axis=-1)))
 
@@ -846,23 +859,49 @@ class Network(object):
                 synData = flattenlist(COMM.gather(syn_idx_pos))
 
                 # convert to structured array
-                dtype = [('gid', 'i8'), ('x', float),
-                         ('y', float), ('z', float)]
+                dtype = [('gid_pre', 'i8'),
+                         ('gid', 'i8'),
+                         ('weight', 'f8'),
+                         ('delay', 'f8'),
+                         ('sec', 'S64'),
+                         ('sec.x', 'f8'),
+                         ('x', 'f8'),
+                         ('y', 'f8'),
+                         ('z', 'f8')]
                 synDataArray = np.empty((len(synData), ), dtype=dtype)
-                for i, (gid, x, y, z) in enumerate(synData):
+                for i, (gid_pre, gid, weight, delay, secname, secx, x, y, z
+                        ) in enumerate(synData):
+                    synDataArray[i]['gid_pre'] = gid_pre
                     synDataArray[i]['gid'] = gid
+                    synDataArray[i]['weight'] = weight
+                    synDataArray[i]['delay'] = delay
+                    synDataArray[i]['sec'] = secname
+                    synDataArray[i]['sec.x'] = secx
                     synDataArray[i]['x'] = x
                     synDataArray[i]['y'] = y
                     synDataArray[i]['z'] = z
                 # Dump to hdf5 file, append to file if entry exists
-                f = h5py.File(os.path.join(self.OUTPUTPATH,
-                                           'synapse_positions.h5'), 'a')
-                key = '{}:{}'.format(pre, post)
-                if key in f.keys():
-                    del f[key]
-                    assert key not in f.keys()
-                f[key] = synDataArray
-                f.close()
+                with h5py.File(os.path.join(self.OUTPUTPATH,
+                                            'synapse_connections.h5'),
+                               'a') as f:
+                    key = '{}:{}'.format(pre, post)
+                    if key in f.keys():
+                        del f[key]
+                        assert key not in f.keys()
+                    f[key] = synDataArray
+                    # save global connection data (synapse type/parameters)
+                    # equal for all synapses
+                    try:
+                        grp = f.create_group('synparams')
+                    except ValueError:
+                        grp = f['synparams']
+                    try:
+                        subgrp = grp.create_group(key)
+                    except ValueError:
+                        subgrp = grp[key]
+                    subgrp['mechanism'] = syntype.__str__().strip('()')
+                    for key, value in synparams.items():
+                        subgrp[key] = value
             else:
                 COMM.gather(syn_idx_pos)
 

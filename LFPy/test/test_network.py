@@ -22,6 +22,7 @@ import LFPy
 import neuron
 import h5py
 import scipy.signal as ss
+import scipy.stats as st
 
 
 class testNetworkPopulation(unittest.TestCase):
@@ -588,6 +589,137 @@ class testNetwork(unittest.TestCase):
             np.testing.assert_equal(value[()], LFP)
         f.close()
 
+        network.pc.gid_clear()
+        os.system('rm -r tmp_testNetworkPopulation')
+        for population in network.populations.values():
+            for cell in population.cells:
+                cell.__del__()
+        neuron.h('forall delete_section()')
+
+    def test_Network_06(self):
+        cellParameters = dict(
+            morphology=os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'ball_and_sticks_w_lists.hoc'),
+            templatefile=os.path.join(
+                LFPy.__path__[0],
+                'test',
+                'ball_and_stick_template.hoc'),
+            templatename='ball_and_stick_template',
+            templateargs=None,
+            passive=False,
+            dt=2**-3,
+            tstop=100,
+            delete_sections=False,
+        )
+
+        populationParameters = dict(
+            CWD=None,
+            CELLPATH=None,
+            Cell=LFPy.NetworkCell,
+            cell_args=cellParameters,
+            pop_args=dict(
+                radius=100,
+                loc=0.,
+                scale=20.),
+            rotation_args=dict(x=0, y=0),
+            POP_SIZE=4,
+            name='test',
+        )
+
+        networkParameters = dict(
+            dt=2**-3,
+            tstart=0.,
+            tstop=100.,
+            v_init=-65.,
+            celsius=6.3,
+            OUTPUTPATH='tmp_testNetworkPopulation'
+        )
+
+        def return_constant(size, value):
+            return np.ones(size) * value
+
+        connectionParameters = dict(
+            syntype=neuron.h.ExpSyn,
+            synparams={'tau': 2.0, 'e': 0.0},
+            weightfun=return_constant,
+            weightargs={'value': 0.1},
+            minweight=0,
+            delayfun=return_constant,
+            delayargs={'value': 2.},
+            mindelay=0.3,
+            multapsefun=None,  # 1 synapse per connection
+            save_connections=True,
+            syn_pos_args=dict(section=['soma'],
+                              fun=[st.norm] * 2,
+                              funargs=[dict(loc=0, scale=100)] * 2,
+                              funweights=[0.5] * 2,
+                              z_min=-1E6, z_max=1E6,
+                              )
+        )
+        # set up
+        network = LFPy.Network(**networkParameters)
+        network.create_population(**populationParameters)
+        connectivity = network.get_connectivity_rand(
+            pre='test', post='test', connprob=1)
+
+        # test set up
+        for population in network.populations.values():
+            self.assertTrue(len(population.cells) == population.POP_SIZE)
+            for cell, soma_pos, gid in zip(
+                    population.cells, population.soma_pos, population.gids):
+                self.assertTrue(isinstance(cell, LFPy.NetworkCell))
+                self.assertTrue((cell.somapos[0] == soma_pos['x']) &
+                                (cell.somapos[1] == soma_pos['y']) &
+                                (cell.somapos[2] == soma_pos['z']))
+                self.assertEqual(cell.gid, gid)
+                self.assertTrue(
+                    np.sqrt(
+                        soma_pos['x']**2 +
+                        soma_pos['y']**2) <= 100.)
+            np.testing.assert_equal(population.gids, np.arange(4))
+
+        np.testing.assert_equal(
+            connectivity.shape,
+            (population.POP_SIZE,
+             population.POP_SIZE))
+        np.testing.assert_equal(
+            connectivity.diagonal(), np.zeros(
+                population.POP_SIZE))
+
+        # connect and run sim
+        network.connect(pre='test', post='test', connectivity=connectivity,
+                        **connectionParameters)
+
+        # check that saved connections are indeed correct
+        f = h5py.File(os.path.join(network.OUTPUTPATH,
+                                   'synapse_connections.h5'), 'r')
+        conn_data = f['test:test'][()]
+
+        assert np.all(conn_data['weight'] ==
+                      connectionParameters['weightargs']['value'])
+        assert np.all(conn_data['delay'] ==
+                      connectionParameters['delayargs']['value'])
+        assert np.all(conn_data['sec.x'] == 0.5)
+        for cell in population.cells:
+            inds = conn_data['gid'] == cell.gid
+            assert np.all(conn_data['gid_pre'][inds] != cell.gid)
+            for secname in conn_data['sec'][inds]:
+                assert secname.decode() == \
+                    'ball_and_stick_template[{}].soma[0]'.format(cell.gid)
+            assert np.all(conn_data['x'][inds] == cell.x.mean(axis=-1)[0])
+            assert np.all(conn_data['y'][inds] == cell.y.mean(axis=-1)[0])
+            assert np.all(conn_data['z'][inds] == cell.z.mean(axis=-1)[0])
+
+        # check static connection parameters
+        synparams = f['synparams']['test:test']
+        assert synparams['mechanism'][()].decode() == \
+            connectionParameters['syntype'].__str__().strip('()')
+        for key, value in connectionParameters['synparams'].items():
+            assert synparams[key][()] == value
+
+        # clean exit
         network.pc.gid_clear()
         os.system('rm -r tmp_testNetworkPopulation')
         for population in network.populations.values():
