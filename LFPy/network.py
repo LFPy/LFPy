@@ -882,7 +882,8 @@ class Network(object):
                     synDataArray[i]['z'] = z
                 # Dump to hdf5 file, append to file if entry exists
                 with h5py.File(os.path.join(self.OUTPUTPATH,
-                                            'synapse_connections.h5'), 'a') as f:
+                                            'synapse_connections.h5'),
+                               'a') as f:
                     key = '{}:{}'.format(pre, post)
                     if key in f.keys():
                         del f[key]

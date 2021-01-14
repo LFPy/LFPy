@@ -596,7 +596,6 @@ class testNetwork(unittest.TestCase):
                 cell.__del__()
         neuron.h('forall delete_section()')
 
-
     def test_Network_06(self):
         cellParameters = dict(
             morphology=os.path.join(
