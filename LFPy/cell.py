@@ -553,8 +553,8 @@ class Cell(object):
         int
             index of synapse object on cell
         """
-        if not hasattr(self, 'synlist'):
-            self.synlist = neuron.h.List()
+        if not hasattr(self, '_hoc_synlist'):
+            self._hoc_synlist = neuron.h.List()
         if not hasattr(self, '_synitorecord'):
             self._synitorecord = []
         if not hasattr(self, '_synvtorecord'):
@@ -581,7 +581,7 @@ class Cell(object):
                             setattr(syn, param, kwargs[param])
                         except BaseException:
                             pass
-                    self.synlist.append(syn)
+                    self._hoc_synlist.append(syn)
 
                     # create NetStim (generator) and NetCon (connection)
                     # objects
@@ -594,15 +594,15 @@ class Cell(object):
 
                     # record current
                     if record_current:
-                        self._synitorecord.append(self.synlist.count() - 1)
+                        self._synitorecord.append(self._hoc_synlist.count() - 1)
 
                     # record potential
                     if record_potential:
-                        self._synvtorecord.append(self.synlist.count() - 1)
+                        self._synvtorecord.append(self._hoc_synlist.count() - 1)
 
                 i += 1
 
-        return self.synlist.count() - 1
+        return self._hoc_synlist.count() - 1
 
     def set_point_process(self, idx, pptype, record_current=False,
                           record_potential=False, **kwargs):
@@ -1270,9 +1270,9 @@ class Cell(object):
         """
         Initialize spiketimes from netcon if they exist
         """
-        if hasattr(self, 'synlist'):
-            if len(self.synlist) == len(self.sptimeslist):
-                for i in range(int(self.synlist.count())):
+        if hasattr(self, '_hoc_synlist'):
+            if len(self._hoc_synlist) == len(self.sptimeslist):
+                for i in range(int(self._hoc_synlist.count())):
                     for spt in self.sptimeslist[i]:
                         self._hoc_netconlist.o(i).event(spt)
 
@@ -1424,7 +1424,7 @@ class Cell(object):
         self.synireclist = neuron.h.List()
         for idx, pp in enumerate(self.synapses):
             if idx in self._synitorecord:
-                syn = self.synlist[idx]
+                syn = self._hoc_synlist[idx]
                 if dt is not None:
                     synirec = neuron.h.Vector(int(self.tstop / self.dt + 1))
                     synirec.record(syn._ref_i, self.dt)
@@ -1442,7 +1442,7 @@ class Cell(object):
         self.synvreclist = neuron.h.List()
         for idx, pp in enumerate(self.synapses):
             if idx in self._synvtorecord:
-                syn = self.synlist[idx]
+                syn = self._hoc_synlist[idx]
                 seg = syn.get_segment()
                 if dt is not None:
                     synvrec = neuron.h.Vector(int(self.tstop / self.dt + 1))
