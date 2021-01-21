@@ -145,10 +145,9 @@ class Synapse(PointProcess):
                                            record_current=record_current,
                                            record_potential=record_potential,
                                            **kwargs))
-        self._ns_index = int(cell.netstimlist.count()) - 1
+        self._ns_index = int(cell._hoc_netstimlist.count()) - 1
         cell.synapses.append(self)
         cell.synidx.append(idx)
-        self.cell.sptimeslist.append(np.array([]))
 
     def set_spike_times(self, sptimes=np.zeros(0)):
         """Set the spike times explicitly using numpy arrays
@@ -161,8 +160,7 @@ class Synapse(PointProcess):
         assert isinstance(sptimes, np.ndarray), \
             'synapse activation times must be ndarray, not ({})'.format(
                 type(sptimes))
-        self.cell.sptimeslist.insrt(self._ns_index, sptimes)
-        self.cell.sptimeslist.remove(self._ns_index + 1)
+        self.cell.sptimeslist[self._ns_index] = sptimes
 
     def set_spike_times_w_netstim(self, noise=1., start=0., number=1E3,
                                   interval=10., seed=1234.):
@@ -184,11 +182,11 @@ class Synapse(PointProcess):
         seed: float
             Random seed value
         """
-        self.cell.netstimlist[self._ns_index].noise = noise
-        self.cell.netstimlist[self._ns_index].start = start
-        self.cell.netstimlist[self._ns_index].number = number
-        self.cell.netstimlist[self._ns_index].interval = interval
-        self.cell.netstimlist[self._ns_index].seed(seed)
+        self.cell._hoc_netstimlist[self._ns_index].noise = noise
+        self.cell._hoc_netstimlist[self._ns_index].start = start
+        self.cell._hoc_netstimlist[self._ns_index].number = number
+        self.cell._hoc_netstimlist[self._ns_index].interval = interval
+        self.cell._hoc_netstimlist[self._ns_index].seed(seed)
 
     def collect_current(self, cell):
         """Collect synapse current. Sets ``<synapse>.i``
@@ -198,7 +196,7 @@ class Synapse(PointProcess):
         cell: LFPy.Cell like object
         """
         try:
-            self.i = np.array(cell.synireclist.o(self.hocidx))
+            self.i = np.array(cell._hoc_synireclist.o(self.hocidx))
         except BaseException:
             raise Exception('cell.synireclist deleted from consequtive runs')
 
@@ -211,7 +209,7 @@ class Synapse(PointProcess):
         cell: LFPy.Cell like object
         """
         try:
-            self.v = np.array(cell.synvreclist.o(self.hocidx))
+            self.v = np.array(cell._hoc_synvreclist.o(self.hocidx))
         except BaseException:
             raise Exception('cell.synvreclist deleted from consequtive runs')
 
@@ -329,7 +327,7 @@ class StimIntElectrode(PointProcess):
         ----------
         cell: LFPy.Cell like object
         """
-        self.i = np.array(cell.stimireclist.o(self.hocidx))
+        self.i = np.array(cell._hoc_stimireclist.o(self.hocidx))
 
     def collect_potential(self, cell):
         """Collect membrane potential of segment with PointProcess.
@@ -339,4 +337,4 @@ class StimIntElectrode(PointProcess):
         ----------
         cell: LFPy.Cell like object
         """
-        self.v = np.array(cell.stimvreclist.o(self.hocidx))
+        self.v = np.array(cell._hoc_stimvreclist.o(self.hocidx))
