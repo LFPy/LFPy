@@ -525,8 +525,8 @@ class Network(object):
         self.pc = neuron.h.ParallelContext()
 
         # create empty list for connections between cells (not to be confused
-        # with each cell's list of netcons)
-        self.netconlist = neuron.h.List()
+        # with each cell's list of netcons _hoc_netconlist)
+        self._hoc_netconlist = neuron.h.List()
 
         # The different populations in the Network will be collected in
         # a dictionary of NetworkPopulation object, where the keys represent
@@ -823,7 +823,7 @@ class Network(object):
                     nc = self.pc.gid_connect(gid_pre, cell.netconsynapses[-1])
                     nc.weight[0] = weight
                     nc.delay = delays[i]
-                    self.netconlist.append(nc)
+                    self._hoc_netconlist.append(nc)
 
                     # store also synapse indices allowing for computing LFPs
                     # from syn.i
