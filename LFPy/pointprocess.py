@@ -145,7 +145,7 @@ class Synapse(PointProcess):
                                            record_current=record_current,
                                            record_potential=record_potential,
                                            **kwargs))
-        self._ns_index = int(cell.netstimlist.count()) - 1
+        self._ns_index = int(cell._hoc_netstimlist.count()) - 1
         cell.synapses.append(self)
         cell.synidx.append(idx)
 
@@ -182,11 +182,11 @@ class Synapse(PointProcess):
         seed: float
             Random seed value
         """
-        self.cell.netstimlist[self._ns_index].noise = noise
-        self.cell.netstimlist[self._ns_index].start = start
-        self.cell.netstimlist[self._ns_index].number = number
-        self.cell.netstimlist[self._ns_index].interval = interval
-        self.cell.netstimlist[self._ns_index].seed(seed)
+        self.cell._hoc_netstimlist[self._ns_index].noise = noise
+        self.cell._hoc_netstimlist[self._ns_index].start = start
+        self.cell._hoc_netstimlist[self._ns_index].number = number
+        self.cell._hoc_netstimlist[self._ns_index].interval = interval
+        self.cell._hoc_netstimlist[self._ns_index].seed(seed)
 
     def collect_current(self, cell):
         """Collect synapse current. Sets ``<synapse>.i``

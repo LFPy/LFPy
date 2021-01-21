@@ -905,7 +905,7 @@ class testTemplateCell(unittest.TestCase):
         self.assertTrue('ExpSyn' in cell.synlist[0].hname())
         self.assertEqual(len(cell.synlist), 1)
         self.assertEqual(len(cell.netconlist), 1)
-        self.assertEqual(len(cell.netstimlist), 1)
+        self.assertEqual(len(cell._hoc_netstimlist), 1)
         self.assertEqual(cell.synlist[0].e, 10.)
         self.assertEqual(cell.synlist[0].tau, 2.)
         self.assertEqual(cell.netconlist[0].weight[0], 1.)

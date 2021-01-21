@@ -559,8 +559,8 @@ class Cell(object):
             self._synitorecord = []
         if not hasattr(self, '_synvtorecord'):
             self._synvtorecord = []
-        if not hasattr(self, 'netstimlist'):
-            self.netstimlist = neuron.h.List()
+        if not hasattr(self, '_hoc_netstimlist'):
+            self._hoc_netstimlist = neuron.h.List()
         if not hasattr(self, 'netconlist'):
             self.netconlist = neuron.h.List()
         if not hasattr(self, 'sptimeslist'):
@@ -585,10 +585,10 @@ class Cell(object):
 
                     # create NetStim (generator) and NetCon (connection)
                     # objects
-                    self.netstimlist.append(neuron.h.NetStim(0.5))
-                    self.netstimlist[-1].number = 0
+                    self._hoc_netstimlist.append(neuron.h.NetStim(0.5))
+                    self._hoc_netstimlist[-1].number = 0
 
-                    nc = neuron.h.NetCon(self.netstimlist[-1], syn)
+                    nc = neuron.h.NetCon(self._hoc_netstimlist[-1], syn)
                     nc.weight[0] = weight
                     self.netconlist.append(nc)
 
@@ -1125,10 +1125,10 @@ class Cell(object):
             self._collect_vsyn()
         if len(rec_variables) > 0:
             self._collect_rec_variables(rec_variables)
-        if hasattr(self, 'netstimlist'):
-            # self.netstimlist.remove_all()
-            self.netstimlist = None
-            del self.netstimlist
+        if hasattr(self, '_hoc_netstimlist'):
+            # self._hoc_netstimlist.remove_all()
+            self._hoc_netstimlist = None
+            del self._hoc_netstimlist
 
     def _run_simulation(self, cvode, variable_dt=False, atol=0.001, rtol=0.):
         """

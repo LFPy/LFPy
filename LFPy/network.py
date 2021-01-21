@@ -1058,8 +1058,8 @@ class Network(object):
                     cell._collect_istim()
                 if len(rec_variables) > 0:
                     cell._collect_rec_variables(rec_variables)
-                if hasattr(cell, 'netstimlist'):
-                    del cell.netstimlist
+                if hasattr(cell, '_hoc_netstimlist'):
+                    del cell._hoc_netstimlist
 
         # Collect spike trains across all RANKs to RANK 0
         for name in self.population_names:
