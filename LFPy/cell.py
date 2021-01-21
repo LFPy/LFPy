@@ -629,8 +629,8 @@ class Cell(object):
             index of point process on cell
         """
 
-        if not hasattr(self, 'stimlist'):
-            self.stimlist = neuron.h.List()
+        if not hasattr(self, '_hoc_stimlist'):
+            self._hoc_stimlist = neuron.h.List()
         if not hasattr(self, '_stimitorecord'):
             self._stimitorecord = []
         if not hasattr(self, '_stimvtorecord'):
@@ -653,15 +653,17 @@ class Cell(object):
                         else:
                             for i, v in itr:
                                 getattr(stim, key)[i] = v
-                    self.stimlist.append(stim)
+                    self._hoc_stimlist.append(stim)
 
                     # record current
                     if record_current:
-                        self._stimitorecord.append(self.stimlist.count() - 1)
+                        self._stimitorecord.append(
+                            self._hoc_stimlist.count() - 1)
 
                     # record potential
                     if record_potential:
-                        self._stimvtorecord.append(self.stimlist.count() - 1)
+                        self._stimvtorecord.append(
+                            self._hoc_stimlist.count() - 1)
 
                     ppset = True
                     break
@@ -669,7 +671,7 @@ class Cell(object):
             if ppset:
                 break
 
-        return self.stimlist.count() - 1
+        return self._hoc_stimlist.count() - 1
 
     def _collect_geometry(self):
         """Collects x, y, z-coordinates from NEURON"""
@@ -1117,13 +1119,13 @@ class Cell(object):
         if rec_vmem:
             self._collect_vmem()
 
-        if hasattr(self, 'stimireclist'):
+        if hasattr(self, '_hoc_stimireclist'):
             self._collect_istim()
-        if hasattr(self, 'stimvreclist'):
+        if hasattr(self, '_hoc_stimvreclist'):
             self._collect_vstim()
-        if hasattr(self, 'synireclist'):
+        if hasattr(self, '_hoc_synireclist'):
             self._collect_isyn()
-        if hasattr(self, 'synvreclist'):
+        if hasattr(self, '_hoc_synvreclist'):
             self._collect_vsyn()
         if len(rec_variables) > 0:
             self._collect_rec_variables(rec_variables)
@@ -1182,37 +1184,37 @@ class Cell(object):
         Fetch the vectors from the memireclist and calculate self.imem
         containing all the membrane currents.
         """
-        self.imem = np.array(self.memireclist)
-        self.memireclist = None
-        del self.memireclist
+        self.imem = np.array(self._hoc_memireclist)
+        self._hoc_memireclist = None
+        del self._hoc_memireclist
 
     def _calc_ipas(self):
         """
         Get the passive currents
         """
-        self.ipas = np.array(self.memipasreclist)
+        self.ipas = np.array(self._hoc_memipasreclist)
         for i in range(self.ipas.shape[0]):
             self.ipas[i, ] *= self.area[i] * 1E-2
-        self.memipasreclist = None
-        del self.memipasreclist
+        self._hoc_memipasreclist = None
+        del self._hoc_memipasreclist
 
     def _calc_icap(self):
         """
         Get the capacitive currents
         """
-        self.icap = np.array(self.memicapreclist)
+        self.icap = np.array(self._hoc_memicapreclist)
         for i in range(self.icap.shape[0]):
             self.icap[i, ] *= self.area[i] * 1E-2
-        self.memicapreclist = None
-        del self.memicapreclist
+        self._hoc_memicapreclist = None
+        del self._hoc_memicapreclist
 
     def _collect_vmem(self):
         """
         Get the membrane currents
         """
-        self.vmem = np.array(self.memvreclist)
-        self.memvreclist = None
-        del self.memvreclist
+        self.vmem = np.array(self._hoc_memvreclist)
+        self._hoc_memvreclist = None
+        del self._hoc_memvreclist
 
     def _collect_isyn(self):
         """
@@ -1221,8 +1223,8 @@ class Cell(object):
         for syn in self.synapses:
             if syn.record_current:
                 syn.collect_current(self)
-        self.synireclist = None
-        del self.synireclist
+        self._hoc_synireclist = None
+        del self._hoc_synireclist
 
     def _collect_vsyn(self):
         """
@@ -1231,8 +1233,8 @@ class Cell(object):
         for syn in self.synapses:
             if syn.record_potential:
                 syn.collect_potential(self)
-        self.synvreclist = None
-        del self.synvreclist
+        self._hoc_synvreclist = None
+        del self._hoc_synvreclist
 
     def _collect_istim(self):
         """
@@ -1241,8 +1243,8 @@ class Cell(object):
         for pp in self.pointprocesses:
             if pp.record_current:
                 pp.collect_current(self)
-        self.stimireclist = None
-        del self.stimireclist
+        self._hoc_stimireclist = None
+        del self._hoc_stimireclist
 
     def _collect_vstim(self):
         """
@@ -1251,8 +1253,8 @@ class Cell(object):
         for pp in self.pointprocesses:
             if pp.record_potential:
                 pp.collect_potential(self)
-        self.stimvreclist = None
-        del self.stimvreclist
+        self._hoc_stimvreclist = None
+        del self._hoc_stimvreclist
 
     def _collect_rec_variables(self, rec_variables):
         """
@@ -1261,12 +1263,12 @@ class Cell(object):
         """
         self.rec_variables = {}
         i = 0
-        for values in self.recvariablesreclist:
+        for values in self._hoc_recvariablesreclist:
             self.rec_variables.update({rec_variables[i]: np.array(values)})
             if self.verbose:
                 print('collected recorded variable %s' % rec_variables[i])
             i += 1
-        del self.recvariablesreclist
+        del self._hoc_recvariablesreclist
 
     def _loadspikes(self):
         """
@@ -1330,7 +1332,7 @@ class Cell(object):
         """
         Record membrane currents for all segments
         """
-        self.memireclist = neuron.h.List()
+        self._hoc_memireclist = neuron.h.List()
         for sec in self.allseclist:
             for seg in sec:
                 if dt is not None:
@@ -1339,7 +1341,7 @@ class Cell(object):
                 else:
                     memirec = neuron.h.Vector()
                     memirec.record(seg._ref_i_membrane_)
-                self.memireclist.append(memirec)
+                self._hoc_memireclist.append(memirec)
 
     def _set_time_recorders(self, dt):
         """
@@ -1356,7 +1358,7 @@ class Cell(object):
         """
         Record passive membrane currents for all segments
         """
-        self.memipasreclist = neuron.h.List()
+        self._hoc_memipasreclist = neuron.h.List()
         for sec in self.allseclist:
             for seg in sec:
                 if dt is not None:
@@ -1365,13 +1367,13 @@ class Cell(object):
                 else:
                     memipasrec = neuron.h.Vector()
                     memipasrec.record(seg._ref_i_pas)
-                self.memipasreclist.append(memipasrec)
+                self._hoc_memipasreclist.append(memipasrec)
 
     def _set_icap_recorders(self, dt):
         """
         Record capacitive membrane currents for all segments
         """
-        self.memicapreclist = neuron.h.List()
+        self._hoc_memicapreclist = neuron.h.List()
         for sec in self.allseclist:
             for seg in sec:
                 if dt is not None:
@@ -1380,16 +1382,16 @@ class Cell(object):
                 else:
                     memicaprec = neuron.h.Vector()
                     memicaprec.record(seg._ref_i_cap)
-                self.memicapreclist.append(memicaprec)
+                self._hoc_memicapreclist.append(memicaprec)
 
     def _set_ipointprocess_recorders(self, dt):
         """
         Record point process current
         """
-        self.stimireclist = neuron.h.List()
+        self._hoc_stimireclist = neuron.h.List()
         for idx, pp in enumerate(self.pointprocesses):
             if idx in self._stimitorecord:
-                stim = self.stimlist[idx]
+                stim = self._hoc_stimlist[idx]
                 if dt is not None:
                     stimirec = neuron.h.Vector(int(self.tstop / self.dt + 1))
                     stimirec.record(stim._ref_i, self.dt)
@@ -1398,16 +1400,16 @@ class Cell(object):
                     stimirec.record(stim._ref_i)
             else:
                 stimirec = neuron.h.Vector(0)
-            self.stimireclist.append(stimirec)
+            self._hoc_stimireclist.append(stimirec)
 
     def _set_vpointprocess_recorders(self, dt):
         """
         Record point process membrane
         """
-        self.stimvreclist = neuron.h.List()
+        self._hoc_stimvreclist = neuron.h.List()
         for idx, pp in enumerate(self.pointprocesses):
             if idx in self._stimvtorecord:
-                stim = self.stimlist[idx]
+                stim = self._hoc_stimlist[idx]
                 seg = stim.get_segment()
                 if dt is not None:
                     stimvrec = neuron.h.Vector(int(self.tstop / self.dt + 1))
@@ -1417,13 +1419,13 @@ class Cell(object):
                     stimvrec.record(seg._ref_v)
             else:
                 stimvrec = neuron.h.Vector(0)
-            self.stimvreclist.append(stimvrec)
+            self._hoc_stimvreclist.append(stimvrec)
 
     def _set_isyn_recorders(self, dt):
         """
         Record point process current
         """
-        self.synireclist = neuron.h.List()
+        self._hoc_synireclist = neuron.h.List()
         for idx, pp in enumerate(self.synapses):
             if idx in self._synitorecord:
                 syn = self._hoc_synlist[idx]
@@ -1435,13 +1437,13 @@ class Cell(object):
                     synirec.record(syn._ref_i)
             else:
                 synirec = neuron.h.Vector(0)
-            self.synireclist.append(synirec)
+            self._hoc_synireclist.append(synirec)
 
     def _set_vsyn_recorders(self, dt):
         """
         Record point process membrane
         """
-        self.synvreclist = neuron.h.List()
+        self._hoc_synvreclist = neuron.h.List()
         for idx, pp in enumerate(self.synapses):
             if idx in self._synvtorecord:
                 syn = self._hoc_synlist[idx]
@@ -1454,13 +1456,13 @@ class Cell(object):
                     synvrec.record(seg._ref_v)
             else:
                 synvrec = neuron.h.Vector(0)
-            self.synvreclist.append(synvrec)
+            self._hoc_synvreclist.append(synvrec)
 
     def _set_voltage_recorders(self, dt):
         """
         Record membrane potentials for all segments
         """
-        self.memvreclist = neuron.h.List()
+        self._hoc_memvreclist = neuron.h.List()
         for sec in self.allseclist:
             for seg in sec:
                 if dt is not None:
@@ -1469,7 +1471,7 @@ class Cell(object):
                 else:
                     memvrec = neuron.h.Vector()
                     memvrec.record(seg._ref_v)
-                self.memvreclist.append(memvrec)
+                self._hoc_memvreclist.append(memvrec)
 
     def _set_current_dipole_moment_array(self, dt):
         """
@@ -1487,12 +1489,12 @@ class Cell(object):
         """
         Create a recorder for each variable name in list
         rec_variables
-        Variables is stored in nested list self.recvariablesreclist
+        Variables is stored in nested list self._hoc_recvariablesreclist
         """
-        self.recvariablesreclist = neuron.h.List()
+        self._hoc_recvariablesreclist = neuron.h.List()
         for variable in rec_variables:
             variablereclist = neuron.h.List()
-            self.recvariablesreclist.append(variablereclist)
+            self._hoc_recvariablesreclist.append(variablereclist)
             for sec in self.allseclist:
                 for seg in sec:
                     if dt is not None:

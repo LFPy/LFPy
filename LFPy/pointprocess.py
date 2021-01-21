@@ -196,7 +196,7 @@ class Synapse(PointProcess):
         cell: LFPy.Cell like object
         """
         try:
-            self.i = np.array(cell.synireclist.o(self.hocidx))
+            self.i = np.array(cell._hoc_synireclist.o(self.hocidx))
         except BaseException:
             raise Exception('cell.synireclist deleted from consequtive runs')
 
@@ -209,7 +209,7 @@ class Synapse(PointProcess):
         cell: LFPy.Cell like object
         """
         try:
-            self.v = np.array(cell.synvreclist.o(self.hocidx))
+            self.v = np.array(cell._hoc_synvreclist.o(self.hocidx))
         except BaseException:
             raise Exception('cell.synvreclist deleted from consequtive runs')
 
@@ -327,7 +327,7 @@ class StimIntElectrode(PointProcess):
         ----------
         cell: LFPy.Cell like object
         """
-        self.i = np.array(cell.stimireclist.o(self.hocidx))
+        self.i = np.array(cell._hoc_stimireclist.o(self.hocidx))
 
     def collect_potential(self, cell):
         """Collect membrane potential of segment with PointProcess.
@@ -337,4 +337,4 @@ class StimIntElectrode(PointProcess):
         ----------
         cell: LFPy.Cell like object
         """
-        self.v = np.array(cell.stimvreclist.o(self.hocidx))
+        self.v = np.array(cell._hoc_stimvreclist.o(self.hocidx))

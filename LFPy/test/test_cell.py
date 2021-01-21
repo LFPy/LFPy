@@ -644,10 +644,10 @@ class testCell(unittest.TestCase):
                                                  'ball_and_sticks.hoc'))
         cell.set_point_process(idx=0, pptype='IClamp', record_current=False,
                                **dict(delay=1., amp=1.))
-        self.assertEqual(cell.stimlist[0].hname(), 'IClamp[0]')
-        self.assertEqual(len(cell.stimlist), 1)
-        self.assertEqual(cell.stimlist[0].delay, 1.)
-        self.assertEqual(cell.stimlist[0].amp, 1.)
+        self.assertEqual(cell._hoc_stimlist[0].hname(), 'IClamp[0]')
+        self.assertEqual(len(cell._hoc_stimlist), 1)
+        self.assertEqual(cell._hoc_stimlist[0].delay, 1.)
+        self.assertEqual(cell._hoc_stimlist[0].amp, 1.)
 
     def test_cell_strip_hoc_objects_00(self):
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
