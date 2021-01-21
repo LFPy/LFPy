@@ -561,8 +561,8 @@ class Cell(object):
             self._synvtorecord = []
         if not hasattr(self, '_hoc_netstimlist'):
             self._hoc_netstimlist = neuron.h.List()
-        if not hasattr(self, 'netconlist'):
-            self.netconlist = neuron.h.List()
+        if not hasattr(self, '_hoc_netconlist'):
+            self._hoc_netconlist = neuron.h.List()
         if not hasattr(self, 'sptimeslist'):
             self.sptimeslist = []
 
@@ -590,7 +590,7 @@ class Cell(object):
 
                     nc = neuron.h.NetCon(self._hoc_netstimlist[-1], syn)
                     nc.weight[0] = weight
-                    self.netconlist.append(nc)
+                    self._hoc_netconlist.append(nc)
 
                     # record current
                     if record_current:
@@ -1274,7 +1274,7 @@ class Cell(object):
             if len(self.synlist) == len(self.sptimeslist):
                 for i in range(int(self.synlist.count())):
                     for spt in self.sptimeslist[i]:
-                        self.netconlist.o(i).event(spt)
+                        self._hoc_netconlist.o(i).event(spt)
 
     def _set_soma_volt_recorder(self, dt):
         """Record somatic membrane potential"""
