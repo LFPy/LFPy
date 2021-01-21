@@ -68,8 +68,6 @@ class testSynapse(unittest.TestCase):
         np.testing.assert_allclose(i, syn.i, rtol=1E-1)
         np.testing.assert_equal(cell.somav, syn.v)
 
-        cell.__del__()
-
     def test_Synapse_01(self):
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
                                                  'ball_and_sticks.hoc'))
@@ -115,8 +113,6 @@ class testSynapse(unittest.TestCase):
         self.assertFalse(hasattr(syn3, 'i'))
         self.assertFalse(hasattr(syn3, 'v'))
 
-        cell.__del__()
-
     def test_Synapse_02(self):
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
                                                  'ball_and_sticks.hoc'))
@@ -149,8 +145,6 @@ class testSynapse(unittest.TestCase):
 
         np.testing.assert_allclose(i1, syn1.i, rtol=1E-1)
         np.testing.assert_equal(cell.somav, syn1.v)
-
-        cell.__del__()
 
     def test_Synapse_03(self):
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
@@ -186,10 +180,6 @@ class testSynapse(unittest.TestCase):
         np.testing.assert_allclose(i1, syn1.i, rtol=1E-1)
         np.testing.assert_equal(cell.somav, syn1.v)
 
-        cell.__del__()
-        '''for attr in cell.__dict__.keys():
-            setattr(cell, attr, None)'''
-
     def test_Synapse_04(self):
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
                                                  'ball_and_sticks.hoc'))
@@ -224,8 +214,6 @@ class testSynapse(unittest.TestCase):
         np.testing.assert_allclose(i1, syn1.i, rtol=1E-1)
         np.testing.assert_equal(cell.somav, syn1.v)
 
-        cell.__del__()
-
     def test_Synapse_05(self):
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
                                                  'ball_and_sticks.hoc'))
@@ -259,10 +247,6 @@ class testSynapse(unittest.TestCase):
 
         np.testing.assert_allclose(i1, syn1.i, rtol=1E-1)
         np.testing.assert_equal(cell.somav, syn1.v)
-
-        cell.__del__()
-        '''for attr in cell.__dict__.keys():
-            setattr(cell, attr, None)'''
 
 
 class testStimIntElectrode(unittest.TestCase):

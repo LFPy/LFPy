@@ -1218,8 +1218,6 @@ class testNetworkCell(unittest.TestCase):
                           stick.z.mean(axis=-1)].T @ stick.imem
                 np.testing.assert_allclose(p, probes[0].data)
 
-                stick.__del__()
-
     def test_cell_simulate_current_dipole_moment_01(self):
         stickParams = {
             'morphology': os.path.join(
@@ -1267,8 +1265,6 @@ class testNetworkCell(unittest.TestCase):
                           stick.y.mean(axis=-1),
                           stick.z.mean(axis=-1)].T @ stick.imem
                 np.testing.assert_allclose(p, probes[0].data)
-
-                stick.__del__()
 
     def test_cell_simulate_current_dipole_moment_02(self):
         stickParams = {

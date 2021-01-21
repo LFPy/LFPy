@@ -513,8 +513,6 @@ class testFourSphereVolumeConductor(unittest.TestCase):
         Ne = electrode_locs.shape[0]
         pot_MD = MD_4s.get_dipole_potential_from_multi_dipoles(cell, t_point)
 
-        cell.__del__()
-
         pot_sum = np.zeros((Ne, Nt))
         for i in range(Np):
             dip = p[i]
@@ -556,8 +554,6 @@ class testFourSphereVolumeConductor(unittest.TestCase):
         Np, Nt, Nd = p.shape
         Ne = electrode_locs.shape[0]
         pot_MD = MD_4s.get_dipole_potential_from_multi_dipoles(cell, t_point)
-
-        cell.__del__()
 
         pot_sum = np.zeros((Ne, Nt))
         for i in range(Np):
@@ -619,8 +615,6 @@ class testInfiniteVolumeConductor(unittest.TestCase):
         pot_MD = MD_inf.get_multi_dipole_potential(cell, electrode_locs)
         pot_cb = electrode.data
 
-        cell.__del__()
-
         np.testing.assert_almost_equal(pot_MD, pot_cb)
         np.testing.assert_allclose(pot_MD, pot_cb, rtol=1E-4)
 
@@ -635,8 +629,6 @@ class testInfiniteVolumeConductor(unittest.TestCase):
         MD_inf = LFPy.InfiniteVolumeConductor(sigma)
         pot_MD = MD_inf.get_multi_dipole_potential(cell, electrode_locs)
         pot_cb = electrode.data
-
-        cell.__del__()
 
         np.testing.assert_almost_equal(pot_MD, pot_cb)
         np.testing.assert_allclose(pot_MD, pot_cb, rtol=1E-3)
@@ -654,8 +646,6 @@ class testInfiniteVolumeConductor(unittest.TestCase):
         pot_MD = MD_inf.get_multi_dipole_potential(
             cell, electrode_locs, t_point)
         pot_cb = electrode.data[:, t_point]
-
-        cell.__del__()
 
         np.testing.assert_almost_equal(pot_MD, pot_cb)
         np.testing.assert_allclose(pot_MD, pot_cb, rtol=1E-3)

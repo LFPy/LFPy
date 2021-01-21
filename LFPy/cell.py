@@ -1130,9 +1130,24 @@ class Cell(object):
         if len(rec_variables) > 0:
             self._collect_rec_variables(rec_variables)
         if hasattr(self, '_hoc_netstimlist'):
-            # self._hoc_netstimlist.remove_all()
             self._hoc_netstimlist = None
             del self._hoc_netstimlist
+
+        self.__purge_pointprocesses()
+
+    def __purge_pointprocesses(self):
+        """
+        Empty lists which may store PointProcess objects. This is needed
+        a there may otherwise be circular references between Cell and
+        PointProcess objects resulting in "Segmentation Fault 11"
+        """
+        while len(self.synapses) > 0:
+            syn = self.synapses.pop()
+            syn.cell = None
+        assert len(self.synapses) == 0
+        while len(self.pointprocesses) > 0:
+            pp = self.pointprocesses.pop()
+            pp.cell = None
 
     def _run_simulation(self, cvode, variable_dt=False, atol=0.001, rtol=0.):
         """
