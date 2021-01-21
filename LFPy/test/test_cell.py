@@ -1714,9 +1714,6 @@ class testCell(unittest.TestCase):
         P_from_multi_dipoles = np.sum(dipoles[:, :, t_point], axis=0)
         P = cell.current_dipole_moment[:, t_point]
 
-        # some cleanup of Python-created section references
-        # cell.__del__()
-
         np.testing.assert_almost_equal(P, P_from_multi_dipoles)
 
     def test_get_multi_current_dipole_moments_03(self):
