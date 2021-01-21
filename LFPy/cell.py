@@ -564,7 +564,10 @@ class Cell(object):
         if not hasattr(self, 'netconlist'):
             self.netconlist = neuron.h.List()
         if not hasattr(self, 'sptimeslist'):
-            self.sptimeslist = neuron.h.List()
+            self.sptimeslist = []
+
+        # need to append w. one empty array per synapse
+        self.sptimeslist.append(np.array([]))
 
         i = 0
         cmd = 'neuron.h.{}(seg.x, sec=sec)'
@@ -1123,6 +1126,7 @@ class Cell(object):
         if len(rec_variables) > 0:
             self._collect_rec_variables(rec_variables)
         if hasattr(self, 'netstimlist'):
+            # self.netstimlist.remove_all()
             self.netstimlist = None
             del self.netstimlist
 
@@ -1269,9 +1273,8 @@ class Cell(object):
         if hasattr(self, 'synlist'):
             if len(self.synlist) == len(self.sptimeslist):
                 for i in range(int(self.synlist.count())):
-                    for ii in range(int(self.sptimeslist.o(i).size)):
-                        self.netconlist.o(i).event(
-                            float(self.sptimeslist.o(i)[ii]))
+                    for spt in self.sptimeslist[i]:
+                        self.netconlist.o(i).event(spt)
 
     def _set_soma_volt_recorder(self, dt):
         """Record somatic membrane potential"""

@@ -148,7 +148,6 @@ class Synapse(PointProcess):
         self._ns_index = int(cell.netstimlist.count()) - 1
         cell.synapses.append(self)
         cell.synidx.append(idx)
-        self.cell.sptimeslist.append(np.array([]))
 
     def set_spike_times(self, sptimes=np.zeros(0)):
         """Set the spike times explicitly using numpy arrays
@@ -161,8 +160,7 @@ class Synapse(PointProcess):
         assert isinstance(sptimes, np.ndarray), \
             'synapse activation times must be ndarray, not ({})'.format(
                 type(sptimes))
-        self.cell.sptimeslist.insrt(self._ns_index, sptimes)
-        self.cell.sptimeslist.remove(self._ns_index + 1)
+        self.cell.sptimeslist[self._ns_index] = sptimes
 
     def set_spike_times_w_netstim(self, noise=1., start=0., number=1E3,
                                   interval=10., seed=1234.):
