@@ -879,7 +879,7 @@ class testTemplateCell(unittest.TestCase):
         self.assertAlmostEqual(
             np.corrcoef(
                 cell.area, hist)[
-                0, 1], 1., places=5)
+                0, 1], 1., places=4)
 
         # check if min and max is in the range of segment indices
         self.assertEqual(idx.min(), 0)
