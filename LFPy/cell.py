@@ -594,11 +594,13 @@ class Cell(object):
 
                     # record current
                     if record_current:
-                        self._synitorecord.append(self._hoc_synlist.count() - 1)
+                        self._synitorecord.append(
+                            self._hoc_synlist.count() - 1)
 
                     # record potential
                     if record_potential:
-                        self._synvtorecord.append(self._hoc_synlist.count() - 1)
+                        self._synvtorecord.append(
+                            self._hoc_synlist.count() - 1)
 
                 i += 1
 
