@@ -5,6 +5,8 @@ __pycache__/
 
 # C extensions
 *.so
+*.o
+*.c
 
 # Distribution / packaging
 .Python
@@ -69,7 +71,8 @@ instance/
 .scrapy
 
 # Sphinx documentation
-docs/_build/
+docs/_build
+doc/_build
 
 # PyBuilder
 target/

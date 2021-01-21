@@ -19,6 +19,7 @@ GNU General Public License for more details.
 import LFPy
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.collections import PolyCollection
 from os.path import join
 
 # four-sphere properties
@@ -84,12 +85,14 @@ ax = fig.add_subplot(111, aspect=1, frameon=False, xlim=xlim, ylim=ylim,
                      xticks=[], yticks=[])
 
 # Plotting cell
-for sec in LFPy.cell.neuron.h.allsec():
-    idx = cell.get_idx(sec.name())
-    l_cell = ax.plot(cell.x[idx], cell.z[idx],
-                     color='r', zorder=3,
-                     lw=np.sqrt(np.average(cell.d[idx])),
-                     label="Cell")
+zips = []
+for x, z in cell.get_pt3d_polygons(projection=('x', 'z')):
+    zips.append(list(zip(x, z)))
+polycol = PolyCollection(zips,
+                         edgecolors='r',
+                         facecolors='r')
+l_cell = ax.add_collection(polycol)
+
 
 l_syn, = ax.plot(synapse.x, synapse.z,
                  '*', c='orange', zorder=5,
@@ -145,7 +148,7 @@ ax_inset = fig.add_axes([0.7, 0.05, 0.25, 0.15], title="Synaptic current",
 l_isyn, = ax_inset.plot(cell.tvec, synapse.i, c='orange',
                         label="Synaptic current")
 
-ax.legend([l_cell[0], l_curved, l_syn, l_isyn, l_elec],
+ax.legend([l_cell, l_curved, l_syn, l_isyn, l_elec],
           ["Cell", "Four-sphere boundary", "Synapse",
            "Synaptic current", "Electrode"],
           ncol=1, loc=(0.01, -0.1), frameon=False)
@@ -153,4 +156,5 @@ ax.legend([l_cell[0], l_curved, l_syn, l_isyn, l_elec],
 plt.savefig(join('example_potential_through_head.pdf'))
 plt.show()
 
+# Call destructor
 cell.__del__()

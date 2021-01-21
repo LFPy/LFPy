@@ -1141,12 +1141,9 @@ class Cell(object):
         a there may otherwise be circular references between Cell and
         PointProcess objects resulting in "Segmentation Fault 11"
         """
-        while len(self.synapses) > 0:
-            syn = self.synapses.pop()
+        for syn in self.synapses:
             syn.cell = None
-        assert len(self.synapses) == 0
-        while len(self.pointprocesses) > 0:
-            pp = self.pointprocesses.pop()
+        for pp in self.pointprocesses:
             pp.cell = None
 
     def _run_simulation(self, cvode, variable_dt=False, atol=0.001, rtol=0.):
@@ -2213,7 +2210,7 @@ class Cell(object):
         >>> cell = LFPy.Cell(morphology='PATH/TO/MORPHOLOGY')
         >>> zips = []
         >>> for x, z in cell.get_pt3d_polygons(projection=('x', 'z')):
-        >>>     zips.append(zip(x, z))
+        >>>     zips.append(list(zip(x, z)))
         >>> polycol = PolyCollection(zips,
         >>>                          edgecolors='none',
         >>>                          facecolors='gray')
@@ -2301,7 +2298,7 @@ class Cell(object):
         >>> cell = LFPy.Cell(morphology='PATH/TO/MORPHOLOGY')
         >>> zips = []
         >>> for x, z in cell.get_idx_polygons(projection=('x', 'z')):
-        >>>     zips.append(zip(x, z))
+        >>>     zips.append(list(zip(x, z)))
         >>> polycol = PolyCollection(zips,
         >>>                          edgecolors='none',
         >>>                          facecolors='gray')
