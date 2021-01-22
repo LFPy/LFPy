@@ -132,12 +132,11 @@ class Synapse(PointProcess):
                  record_current=False,
                  record_potential=False,
                  **kwargs):
-        PointProcess.__init__(self,
-                              cell,
-                              idx,
-                              record_current,
-                              record_potential,
-                              **kwargs)
+        super().__init__(cell=cell,
+                         idx=idx,
+                         record_current=record_current,
+                         record_potential=record_potential,
+                         **kwargs)
 
         self.syntype = syntype
         self.hocidx = int(cell.set_synapse(idx=idx, syntype=syntype,
@@ -150,6 +149,12 @@ class Synapse(PointProcess):
 
         # needed by set_spike_times* methods:
         self.cell = cell
+
+    def __del__(self):
+        """Finalizer removing attributes which may contain hoc refs
+
+        """
+        self.cell = None
 
     def set_spike_times(self, sptimes=np.zeros(0)):
         """Set the spike times explicitly using numpy arrays
@@ -310,9 +315,9 @@ class StimIntElectrode(PointProcess):
     def __init__(self, cell, idx, pptype='SEClamp',
                  record_current=False,
                  record_potential=False, **kwargs):
-        PointProcess.__init__(self, cell=cell, idx=idx,
-                              record_current=record_current,
-                              record_potential=record_potential)
+        super().__init__(cell=cell, idx=idx,
+                         record_current=record_current,
+                         record_potential=record_potential)
         self.pptype = pptype
         self.hocidx = int(cell.set_point_process(
             idx, pptype,

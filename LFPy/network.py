@@ -134,7 +134,7 @@ class NetworkCell(TemplateCell):
     """
 
     def __init__(self, **args):
-        super().__init__(self, **args)
+        super().__init__(**args)
 
         # create list netconlist for spike detecting NetCon object(s)
         self._hoc_sd_netconlist = neuron.h.List()

@@ -144,8 +144,8 @@ class TemplateCell(Cell):
                         template = template.replace(os.sep, posixpath.sep)
                     neuron.h.load_file(template)
 
-        # initialize the cell object
-        Cell.__init__(self, **kwargs)
+        # initialize the parent Cell object
+        super().__init__(**kwargs)
 
     def _load_geometry(self):
         """Load the morphology-file in NEURON"""
