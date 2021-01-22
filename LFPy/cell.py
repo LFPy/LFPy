@@ -290,7 +290,7 @@ class Cell(object):
         self._neuron_tvec = None
 
     def __del__(self):
-        """Cell Destructor"""
+        """Cell finalizer"""
         self.strip_hoc_objects()
 
     def strip_hoc_objects(self):
