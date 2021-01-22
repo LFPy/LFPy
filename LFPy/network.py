@@ -134,7 +134,7 @@ class NetworkCell(TemplateCell):
     """
 
     def __init__(self, **args):
-        TemplateCell.__init__(self, **args)
+        super().__init__(self, **args)
 
         # create list netconlist for spike detecting NetCon object(s)
         self._hoc_sd_netconlist = neuron.h.List()
@@ -970,7 +970,7 @@ class Network(object):
             written to. The file format is HDF5, default is "OUTPUT.h5", put
             in folder Network.OUTPUTPATH
         **kwargs:  keyword argument dict values passed along to function
-                    `_run_simulation_with_probes()`, containing some or all of
+                    `__run_simulation_with_probes()`, containing some or all of
                     the boolean flags: `use_ipas`, `use_icap`, `use_isyn`
                     (defaulting to `False`).
 
@@ -1025,9 +1025,9 @@ class Network(object):
             if not rec_imem:
                 if self.verbose:
                     print("rec_imem==False, not recording membrane currents!")
-            self._run_simulation(cvode, variable_dt, atol)
+            self.__run_simulation(cvode, variable_dt, atol)
         else:
-            self._run_simulation_with_probes(
+            self.__run_simulation_with_probes(
                 cvode=cvode,
                 probes=probes,
                 variable_dt=variable_dt,
@@ -1130,7 +1130,7 @@ class Network(object):
 
         return dict(times=times, gids=gids)
 
-    def _create_network_dummycell(self):
+    def __create_network_dummycell(self):
         """
         set up parameters for a DummyCell object, allowing for computing
         the sum of all single-cell LFPs at each timestep, essentially
@@ -1171,7 +1171,7 @@ class Network(object):
         # return number of segments per population and DummyCell object
         return nsegs, DummyCell(totnsegs, x, y, z, d, area, somainds)
 
-    def _run_simulation(self, cvode, variable_dt=False, atol=0.001):
+    def __run_simulation(self, cvode, variable_dt=False, atol=0.001):
         """
         Running the actual simulation in NEURON, simulations in NEURON
         are now interruptable.
@@ -1221,18 +1221,18 @@ class Network(object):
         # in a while loop (https://github.com/LFPy/LFPy/pull/217)
         neuron.run(self.tstop)
 
-    def _run_simulation_with_probes(self, cvode,
-                                    probes=None,
-                                    variable_dt=False,
-                                    atol=0.001,
-                                    rtol=0.,
-                                    to_memory=True,
-                                    to_file=False,
-                                    file_name=None,
-                                    use_ipas=False, use_icap=False,
-                                    use_isyn=False,
-                                    rec_pop_contributions=False
-                                    ):
+    def __run_simulation_with_probes(self, cvode,
+                                     probes=None,
+                                     variable_dt=False,
+                                     atol=0.001,
+                                     rtol=0.,
+                                     to_memory=True,
+                                     to_file=False,
+                                     file_name=None,
+                                     use_ipas=False, use_icap=False,
+                                     use_isyn=False,
+                                     rec_pop_contributions=False
+                                     ):
         """
         Running the actual simulation in NEURON with list of probes.
         Each object in `probes` must have a public method
@@ -1304,7 +1304,7 @@ class Network(object):
         # for calculation of extracellular potentials etc. The population_nsegs
         # array is used to slice indices such that single-population
         # contributions to the potential can be calculated.
-        population_nsegs, network_dummycell = self._create_network_dummycell()
+        population_nsegs, network_dummycell = self.__create_network_dummycell()
 
         # set cell attribute on each probe, assuming that each probe was
         # instantiated with argument cell=None
@@ -1527,6 +1527,11 @@ def ReduceStructArray(sendbuf, op=MPI.SUM):
         Array data to be reduced (default: summed)
     op: mpi4py.MPI.Op object
         MPI_Reduce function. Default is mpi4py.MPI.SUM
+
+    Returns
+    -------
+    recvbuf: structured ndarray or None
+        Reduced array on RANK 0, None on all other RANKs
     """
     if RANK == 0:
         shape = sendbuf.shape
