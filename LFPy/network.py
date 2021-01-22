@@ -1214,7 +1214,7 @@ class Network(object):
         # only needed if LFPy.Synapse classes are used.
         for name in self.population_names:
             for cell in self.populations[name].cells:
-                cell._loadspikes()
+                cell._load_spikes()
 
         # neuron.run() should be marginally faster than calling
         # neuron.h.fadvance()
@@ -1363,7 +1363,7 @@ class Network(object):
         # load spike times from NetCon, only needed if LFPy.Synapse class
         # is used
         for cell in cells:
-            cell._loadspikes()
+            cell._load_spikes()
 
         # define data type for structured arrays dependent on the boolean
         # arguments
