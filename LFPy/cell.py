@@ -233,12 +233,12 @@ class Cell(object):
         # Set axial resistance and membrane capacitance
         self.Ra = Ra
         self.cm = cm
-        self._set_ra_and_cm()
+        self.__set_ra_and_cm()
 
         # Set passive properties, insert passive on all segments
         self.passive_parameters = passive_parameters
         if passive:
-            self._set_passive()
+            self.__set_passive()
         else:
             if self.verbose:
                 print('No passive properties added')
@@ -250,14 +250,14 @@ class Cell(object):
         # Insert extracellular mech on all segments
         self.extracellular = extracellular
         if self.extracellular:
-            self._set_extracellular()
+            self.__set_extracellular()
         else:
             if self.verbose:
                 print("no extracellular mechanism inserted")
 
         # set number of segments accd to rule, and calculate the number
         self.__set_negs(nsegs_method, lambda_f, d_lambda, max_nsegs_length)
-        self.totnsegs = self._calc_totnsegs()
+        self.totnsegs = self.__calc_totnsegs()
         if self.verbose:
             print("Total number of segments: %i" % self.totnsegs)
 
@@ -438,7 +438,7 @@ class Cell(object):
                 self.somalist.append(sec=sec)
                 self.nsomasec += 1
 
-    def _get_idx(self, seclist):
+    def __get_idx(self, seclist):
         """Return boolean vector which indexes where segments in seclist
         matches segments in neuron.h.allsec(), rewritten from
         LFPy.hoc function get_idx()"""
@@ -490,7 +490,7 @@ class Cell(object):
         for sec in self.allseclist:
             sec.nseg = int(sec.L / maxlength) + 1
 
-    def _calc_totnsegs(self):
+    def __calc_totnsegs(self):
         """Calculate the number of segments in the allseclist"""
         i = 0
         for sec in self.allseclist:
@@ -498,12 +498,12 @@ class Cell(object):
 
         return i
 
-    def _check_currents(self):
+    def __check_currents(self):
         """Check that the sum of all membrane and electrode currents over all
         segments is sufficiently close to zero"""
         raise NotImplementedError('this function need to be written')
 
-    def _set_ra_and_cm(self):
+    def __set_ra_and_cm(self):
         """Insert ra and cm on all segments"""
         for sec in self.allseclist:
             if self.Ra is not None:
@@ -511,14 +511,14 @@ class Cell(object):
             if self.cm is not None:
                 sec.cm = self.cm
 
-    def _set_passive(self):
+    def __set_passive(self):
         """Insert passive mechanism on all segments"""
         for sec in self.allseclist:
             sec.insert('pas')
             sec.g_pas = self.passive_parameters['g_pas']
             sec.e_pas = self.passive_parameters['e_pas']
 
-    def _set_extracellular(self):
+    def __set_extracellular(self):
         """Insert extracellular mechanism on all sections
         to set an external potential V_ext as boundary condition.
         """
@@ -757,7 +757,7 @@ class Cell(object):
                 if self.verbose:
                     print('%s did not match any section name' % str(section))
 
-        idx = self._get_idx(seclist)
+        idx = self.__get_idx(seclist)
         sel_z_idx = (
             self.z[idx].mean(
                 axis=-
@@ -989,7 +989,7 @@ class Cell(object):
                         ve = ve[:, np.newaxis]
                     v_ext += ve
 
-            self._set_extracellular()
+            self.__set_extracellular()
             self.insert_v_ext(v_ext, np.array(t_ext))
         else:
             v_ext = None
