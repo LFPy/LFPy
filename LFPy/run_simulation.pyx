@@ -78,7 +78,7 @@ def _run_simulation_with_probes(cell, cvode, probes=[],
     neuron.h.t = cell.tstart
 
     # load spike times from NetCon
-    cell._loadspikes()
+    cell._load_spikes()
 
     # temporary vector to store membrane currents at each timestep
     imem = np.zeros(cell.totnsegs)

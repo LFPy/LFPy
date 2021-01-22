@@ -226,9 +226,6 @@ class Population:
         # perform NEURON simulation, results saved as attributes in cell
         cell.simulate(probes=[electrode])
 
-        # call destructor to avoid hanging hoc refs to sections
-        cell.__del__()
-
         # return dict with primary results from simulation
         return {'LFP': electrode.data, 'somav': cell.somav}
 

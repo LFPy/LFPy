@@ -35,6 +35,7 @@ import LFPy
 import numpy as np
 import scipy.stats
 import matplotlib.pyplot as plt
+from matplotlib.collections import PolyCollection
 plt.rcParams.update({'font.size': 12,
                      'figure.facecolor': '1',
                      'figure.subplot.wspace': 0.5,
@@ -66,9 +67,13 @@ def plot_LFP_and_ECoG(cell, electrode, electrode_MoI, ecog_electrode):
                       frameon=False, aspect=1, xlim=[-xlim, xlim],
                       ylim=[cell.somapos[2] - 250, top_of_cortex + 200])
 
-    for sec in LFPy.cell.neuron.h.allsec():
-        idx = cell.get_idx(sec.name())
-        ax.plot(cell.x[idx], cell.z[idx], color='k')
+    zips = []
+    for x, z in cell.get_idx_polygons(projection=('x', 'z')):
+        zips.append(list(zip(x, z)))
+    polycol = PolyCollection(zips,
+                             edgecolors='k',
+                             facecolors='k')
+    ax.add_collection(polycol)
     for i in range(len(cell.synapses)):
         l, = ax.plot([cell.synapses[i].x], [cell.synapses[i].z], '.', c='r')
     for i in range(electrode.x.size):
@@ -392,5 +397,5 @@ fig = plot_LFP_and_ECoG(cell, electrode, electrode_MoI, ecog_electrode)
 fig.savefig('example_ECoG.pdf', dpi=300)
 plt.show()
 
-# clean up
+# run Cell destructor
 cell.__del__()

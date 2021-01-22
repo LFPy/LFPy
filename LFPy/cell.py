@@ -200,7 +200,7 @@ class Cell(object):
             # instantiate 3D geometry of all sections
             neuron.h.define_shape()
             # set some additional attributes
-            self._create_sectionlists()
+            self.__create_sectionlists()
 
         # Some parameters and lists initialised
         assert tstart <= 0, 'tstart must be <= 0.'
@@ -228,36 +228,36 @@ class Cell(object):
 
         self.v_init = v_init
 
-        self.default_rotation = self._get_rotation()
+        self.default_rotation = self.__get_rotation()
 
         # Set axial resistance and membrane capacitance
         self.Ra = Ra
         self.cm = cm
-        self._set_ra_and_cm()
+        self.__set_ra_and_cm()
 
         # Set passive properties, insert passive on all segments
         self.passive_parameters = passive_parameters
         if passive:
-            self._set_passive()
+            self.__set_passive()
         else:
             if self.verbose:
                 print('No passive properties added')
 
         # run user specified code and functions if argument given
         if custom_code is not None or custom_fun is not None:
-            self._run_custom_codes(custom_code, custom_fun, custom_fun_args)
+            self.__run_custom_codes(custom_code, custom_fun, custom_fun_args)
 
         # Insert extracellular mech on all segments
         self.extracellular = extracellular
         if self.extracellular:
-            self._set_extracellular()
+            self.__set_extracellular()
         else:
             if self.verbose:
                 print("no extracellular mechanism inserted")
 
         # set number of segments accd to rule, and calculate the number
-        self._set_nsegs(nsegs_method, lambda_f, d_lambda, max_nsegs_length)
-        self.totnsegs = self._calc_totnsegs()
+        self.__set_negs(nsegs_method, lambda_f, d_lambda, max_nsegs_length)
+        self.totnsegs = self.__calc_totnsegs()
         if self.verbose:
             print("Total number of segments: %i" % self.totnsegs)
 
@@ -290,7 +290,7 @@ class Cell(object):
         self._neuron_tvec = None
 
     def __del__(self):
-        """Cell Destructor"""
+        """Cell finalizer"""
         self.strip_hoc_objects()
 
     def strip_hoc_objects(self):
@@ -343,9 +343,9 @@ class Cell(object):
             imprt.instantiate(neuron.h.this)
 
         neuron.h.define_shape()
-        self._create_sectionlists()
+        self.__create_sectionlists()
 
-    def _run_custom_codes(self, custom_code, custom_fun, custom_fun_args):
+    def __run_custom_codes(self, custom_code, custom_fun, custom_fun_args):
         """Execute custom model code and functions with arguments"""
         # load custom codes
         if custom_code is not None:
@@ -381,22 +381,22 @@ class Cell(object):
 
         # recreate sectionlists in case something changed
         neuron.h.define_shape()
-        self._create_sectionlists()
+        self.__create_sectionlists()
 
-    def _set_nsegs(self, nsegs_method, lambda_f, d_lambda, max_nsegs_length):
+    def __set_negs(self, nsegs_method, lambda_f, d_lambda, max_nsegs_length):
         """Set number of segments per section according to the lambda-rule,
         or according to maximum length of segments"""
         if nsegs_method == 'lambda100':
-            self._set_nsegs_lambda100(d_lambda)
+            self.__set_nsegs_lambda100(d_lambda)
         elif nsegs_method == 'lambda_f':
-            self._set_nsegs_lambda_f(lambda_f, d_lambda)
+            self.__set_nsegs_lambda_f(lambda_f, d_lambda)
         elif nsegs_method == 'fixed_length':
-            self._set_nsegs_fixed_length(max_nsegs_length)
+            self.__set_nsegs_fixed_length(max_nsegs_length)
         else:
             if self.verbose:
                 print('No nsegs_method applied (%s)' % nsegs_method)
 
-    def _get_rotation(self):
+    def __get_rotation(self):
         """Check if there exists a corresponding file
         with rotation angles"""
         if isinstance(self.morphology, str):
@@ -416,7 +416,7 @@ class Cell(object):
             rotation = {}
         return rotation
 
-    def _create_sectionlists(self):
+    def __create_sectionlists(self):
         """Create section lists for different kinds of sections"""
         # list with all sections
         self.allsecnames = []
@@ -438,7 +438,7 @@ class Cell(object):
                 self.somalist.append(sec=sec)
                 self.nsomasec += 1
 
-    def _get_idx(self, seclist):
+    def __get_idx(self, seclist):
         """Return boolean vector which indexes where segments in seclist
         matches segments in neuron.h.allsec(), rewritten from
         LFPy.hoc function get_idx()"""
@@ -463,7 +463,7 @@ class Cell(object):
 
             return idxvec
 
-    def _set_nsegs_lambda_f(self, frequency=100, d_lambda=0.1):
+    def __set_nsegs_lambda_f(self, frequency=100, d_lambda=0.1):
         """Set the number of segments for section according to the
         d_lambda-rule for a given input frequency
 
@@ -481,16 +481,16 @@ class Cell(object):
         if self.verbose:
             print("set nsegs using lambda-rule with frequency %i." % frequency)
 
-    def _set_nsegs_lambda100(self, d_lambda=0.1):
+    def __set_nsegs_lambda100(self, d_lambda=0.1):
         """Set the numbers of segments using d_lambda(100)"""
-        self._set_nsegs_lambda_f(frequency=100, d_lambda=d_lambda)
+        self.__set_nsegs_lambda_f(frequency=100, d_lambda=d_lambda)
 
-    def _set_nsegs_fixed_length(self, maxlength):
+    def __set_nsegs_fixed_length(self, maxlength):
         """Set nseg for sections so that every segment L < maxlength"""
         for sec in self.allseclist:
             sec.nseg = int(sec.L / maxlength) + 1
 
-    def _calc_totnsegs(self):
+    def __calc_totnsegs(self):
         """Calculate the number of segments in the allseclist"""
         i = 0
         for sec in self.allseclist:
@@ -498,12 +498,12 @@ class Cell(object):
 
         return i
 
-    def _check_currents(self):
+    def __check_currents(self):
         """Check that the sum of all membrane and electrode currents over all
         segments is sufficiently close to zero"""
         raise NotImplementedError('this function need to be written')
 
-    def _set_ra_and_cm(self):
+    def __set_ra_and_cm(self):
         """Insert ra and cm on all segments"""
         for sec in self.allseclist:
             if self.Ra is not None:
@@ -511,14 +511,14 @@ class Cell(object):
             if self.cm is not None:
                 sec.cm = self.cm
 
-    def _set_passive(self):
+    def __set_passive(self):
         """Insert passive mechanism on all segments"""
         for sec in self.allseclist:
             sec.insert('pas')
             sec.g_pas = self.passive_parameters['g_pas']
             sec.e_pas = self.passive_parameters['e_pas']
 
-    def _set_extracellular(self):
+    def __set_extracellular(self):
         """Insert extracellular mechanism on all sections
         to set an external potential V_ext as boundary condition.
         """
@@ -563,11 +563,11 @@ class Cell(object):
             self._hoc_netstimlist = neuron.h.List()
         if not hasattr(self, '_hoc_netconlist'):
             self._hoc_netconlist = neuron.h.List()
-        if not hasattr(self, 'sptimeslist'):
-            self.sptimeslist = []
+        if not hasattr(self, '_sptimeslist'):
+            self._sptimeslist = []
 
         # need to append w. one empty array per synapse
-        self.sptimeslist.append(np.array([]))
+        self._sptimeslist.append(np.array([]))
 
         i = 0
         cmd = 'neuron.h.{}(seg.x, sec=sec)'
@@ -757,7 +757,7 @@ class Cell(object):
                 if self.verbose:
                     print('%s did not match any section name' % str(section))
 
-        idx = self._get_idx(seclist)
+        idx = self.__get_idx(seclist)
         sel_z_idx = (
             self.z[idx].mean(
                 axis=-
@@ -989,7 +989,7 @@ class Cell(object):
                         ve = ve[:, np.newaxis]
                     v_ext += ve
 
-            self._set_extracellular()
+            self.__set_extracellular()
             self.insert_v_ext(v_ext, np.array(t_ext))
         else:
             v_ext = None
@@ -1077,26 +1077,26 @@ class Cell(object):
             self._set_variable_recorders(rec_variables, dt)
         if hasattr(self, '_stimitorecord'):
             if len(self._stimitorecord) > 0:
-                self._set_ipointprocess_recorders(dt)
+                self.__set_ipointprocess_recorders(dt)
         if hasattr(self, '_stimvtorecord'):
             if len(self._stimvtorecord) > 0:
-                self._set_vpointprocess_recorders(dt)
+                self.__set_vpointprocess_recorders(dt)
         if hasattr(self, '_synitorecord'):
             if len(self._synitorecord) > 0:
-                self._set_isyn_recorders(dt)
+                self.__set_isyn_recorders(dt)
         if hasattr(self, '_synvtorecord'):
             if len(self._synvtorecord) > 0:
-                self._set_vsyn_recorders(dt)
+                self.__set_vsyn_recorders(dt)
 
         # set time recorder from NEURON
-        self._set_time_recorders(dt)
+        self.__set_time_recorders(dt)
 
         # run fadvance until t >= tstop, and calculate LFP if asked for
         if probes is None or len(probes) == 0:
             if not rec_imem and self.verbose:
                 print("rec_imem = %s, membrane currents will not be recorded!"
                       % str(rec_imem))
-            self._run_simulation(cvode, variable_dt, atol, rtol)
+            self.__run_simulation(cvode, variable_dt, atol, rtol)
 
         else:
             # simulate with probes saving to memory and/or file:
@@ -1108,7 +1108,7 @@ class Cell(object):
         if self.nsomasec >= 1:
             self.somav = np.array(self.somav)
 
-        self._collect_tvec()
+        self.__collect_tvec()
 
         if rec_imem:
             self._calc_imem()
@@ -1122,7 +1122,7 @@ class Cell(object):
         if hasattr(self, '_hoc_stimireclist'):
             self._collect_istim()
         if hasattr(self, '_hoc_stimvreclist'):
-            self._collect_vstim()
+            self.__collect_vstim()
         if hasattr(self, '_hoc_synireclist'):
             self._collect_isyn()
         if hasattr(self, '_hoc_synvreclist'):
@@ -1130,11 +1130,23 @@ class Cell(object):
         if len(rec_variables) > 0:
             self._collect_rec_variables(rec_variables)
         if hasattr(self, '_hoc_netstimlist'):
-            # self._hoc_netstimlist.remove_all()
             self._hoc_netstimlist = None
             del self._hoc_netstimlist
 
-    def _run_simulation(self, cvode, variable_dt=False, atol=0.001, rtol=0.):
+        self.__purge_synapses()
+
+    def __purge_synapses(self):
+        """
+        Empty lists which may store `Synapse` objects. This is needed
+        a there may otherwise be circular references between Cell and
+        `Synapse` objects resulting in "Segmentation Fault 11"
+        """
+        for syn in self.synapses:
+            syn.cell = None
+            syn._sptimes = None
+            syn._hoc_netstimlist = None
+
+    def __run_simulation(self, cvode, variable_dt=False, atol=0.001, rtol=0.):
         """
         Running the actual simulation in NEURON, simulations in NEURON
         is now interruptable.
@@ -1162,7 +1174,7 @@ class Cell(object):
         # Starting simulation at t != 0
         neuron.h.t = self.tstart
 
-        self._loadspikes()
+        self._load_spikes()
 
         # advance simulation until tstop
         neuron.run(self.tstop)
@@ -1171,7 +1183,7 @@ class Cell(object):
         if neuron.h.t < self.tstop:
             neuron.h.fadvance()
 
-    def _collect_tvec(self):
+    def __collect_tvec(self):
         """
         Set the tvec to be a monotonically increasing numpy array after sim.
         """
@@ -1246,7 +1258,7 @@ class Cell(object):
         self._hoc_stimireclist = None
         del self._hoc_stimireclist
 
-    def _collect_vstim(self):
+    def __collect_vstim(self):
         """
         Collect the membrane voltage of segments with stimulus
         """
@@ -1270,14 +1282,14 @@ class Cell(object):
             i += 1
         del self._hoc_recvariablesreclist
 
-    def _loadspikes(self):
+    def _load_spikes(self):
         """
         Initialize spiketimes from netcon if they exist
         """
         if hasattr(self, '_hoc_synlist'):
-            if len(self._hoc_synlist) == len(self.sptimeslist):
+            if len(self._hoc_synlist) == len(self._sptimeslist):
                 for i in range(int(self._hoc_synlist.count())):
-                    for spt in self.sptimeslist[i]:
+                    for spt in self._sptimeslist[i]:
                         self._hoc_netconlist.o(i).event(spt)
 
     def _set_soma_volt_recorder(self, dt):
@@ -1343,7 +1355,7 @@ class Cell(object):
                     memirec.record(seg._ref_i_membrane_)
                 self._hoc_memireclist.append(memirec)
 
-    def _set_time_recorders(self, dt):
+    def __set_time_recorders(self, dt):
         """
         Record time of simulation
         """
@@ -1384,7 +1396,7 @@ class Cell(object):
                     memicaprec.record(seg._ref_i_cap)
                 self._hoc_memicapreclist.append(memicaprec)
 
-    def _set_ipointprocess_recorders(self, dt):
+    def __set_ipointprocess_recorders(self, dt):
         """
         Record point process current
         """
@@ -1402,7 +1414,7 @@ class Cell(object):
                 stimirec = neuron.h.Vector(0)
             self._hoc_stimireclist.append(stimirec)
 
-    def _set_vpointprocess_recorders(self, dt):
+    def __set_vpointprocess_recorders(self, dt):
         """
         Record point process membrane
         """
@@ -1421,7 +1433,7 @@ class Cell(object):
                 stimvrec = neuron.h.Vector(0)
             self._hoc_stimvreclist.append(stimvrec)
 
-    def _set_isyn_recorders(self, dt):
+    def __set_isyn_recorders(self, dt):
         """
         Record point process current
         """
@@ -1439,7 +1451,7 @@ class Cell(object):
                 synirec = neuron.h.Vector(0)
             self._hoc_synireclist.append(synirec)
 
-    def _set_vsyn_recorders(self, dt):
+    def __set_vsyn_recorders(self, dt):
         """
         Record point process membrane
         """
@@ -1473,7 +1485,7 @@ class Cell(object):
                     memvrec.record(seg._ref_v)
                 self._hoc_memvreclist.append(memvrec)
 
-    def _set_current_dipole_moment_array(self, dt):
+    def __set_current_dipole_moment_array(self, dt):
         """
         Creates container for current dipole moment, an empty
         n_timesteps x 3 `numpy.ndarray` that will be filled with values during
@@ -1552,7 +1564,7 @@ class Cell(object):
             self.y[:, -1] += diffy
             self.z[:, -1] += diffz
 
-        self._update_synapse_positions()
+        self.__update_synapse_positions()
 
     def cellpickler(self, filename, pickler=pickle.dump):
         """Save data in cell to filename, using cPickle. It will however
@@ -1590,7 +1602,7 @@ class Cell(object):
         elif pickler == pickle.dumps:
             return pickle.dumps(self)
 
-    def _update_synapse_positions(self):
+    def __update_synapse_positions(self):
         """
         Update synapse positions after rotation of morphology
         """
@@ -1747,7 +1759,7 @@ class Cell(object):
         self.y[:, -1] = rel_end[:, 1] + self.somapos[1]
         self.z[:, -1] = rel_end[:, 2] + self.somapos[2]
 
-        self._update_synapse_positions()
+        self.__update_synapse_positions()
 
     def get_rand_prob_area_norm(self, section='allsec',
                                 z_min=-10000, z_max=10000):
@@ -2198,7 +2210,7 @@ class Cell(object):
         >>> cell = LFPy.Cell(morphology='PATH/TO/MORPHOLOGY')
         >>> zips = []
         >>> for x, z in cell.get_pt3d_polygons(projection=('x', 'z')):
-        >>>     zips.append(zip(x, z))
+        >>>     zips.append(list(zip(x, z)))
         >>> polycol = PolyCollection(zips,
         >>>                          edgecolors='none',
         >>>                          facecolors='gray')
@@ -2286,7 +2298,7 @@ class Cell(object):
         >>> cell = LFPy.Cell(morphology='PATH/TO/MORPHOLOGY')
         >>> zips = []
         >>> for x, z in cell.get_idx_polygons(projection=('x', 'z')):
-        >>>     zips.append(zip(x, z))
+        >>>     zips.append(list(zip(x, z)))
         >>> polycol = PolyCollection(zips,
         >>>                          edgecolors='none',
         >>>                          facecolors='gray')

@@ -144,8 +144,8 @@ class TemplateCell(Cell):
                         template = template.replace(os.sep, posixpath.sep)
                     neuron.h.load_file(template)
 
-        # initialize the cell object
-        Cell.__init__(self, **kwargs)
+        # initialize the parent Cell object
+        super().__init__(**kwargs)
 
     def _load_geometry(self):
         """Load the morphology-file in NEURON"""
@@ -212,9 +212,9 @@ class TemplateCell(Cell):
 
         # set shapes and create sectionlists
         neuron.h.define_shape()
-        self._create_sectionlists()
+        self.__create_sectionlists()
 
-    def _create_sectionlists(self):
+    def __create_sectionlists(self):
         """Create section lists for different kinds of sections"""
 
         self.allsecnames = []
