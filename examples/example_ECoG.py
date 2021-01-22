@@ -396,6 +396,3 @@ ecog_electrode.data -= np.average(ecog_electrode.data, axis=1)[:, None]
 fig = plot_LFP_and_ECoG(cell, electrode, electrode_MoI, ecog_electrode)
 fig.savefig('example_ECoG.pdf', dpi=300)
 plt.show()
-
-# run Cell destructor
-cell.__del__()

@@ -1133,18 +1133,17 @@ class Cell(object):
             self._hoc_netstimlist = None
             del self._hoc_netstimlist
 
-        self.__purge_synapses()
+        self.__purge_hoc_pointprocesses()
 
-    def __purge_synapses(self):
+    def __purge_hoc_pointprocesses(self):
         """
-        Empty lists which may store `Synapse` objects. This is needed
-        a there may otherwise be circular references between Cell and
-        `Synapse` objects resulting in "Segmentation Fault 11"
+        Empty lists which may store point process objects in `hoc` name space.
+        This is needed to avoid "Segmentation Fault 11"
         """
-        for syn in self.synapses:
-            syn.cell = None
-            syn._sptimes = None
-            syn._hoc_netstimlist = None
+        if hasattr(self, '_hoc_synlist'):
+            self._hoc_synlist.remove_all()
+        if hasattr(self, '__hoc_stimlist'):
+            self._hoc_stimlist.remove_all()
 
     def __run_simulation(self, cvode, variable_dt=False, atol=0.001, rtol=0.):
         """
