@@ -1315,8 +1315,6 @@ class testTemplateCell(unittest.TestCase):
                           stick.z.mean(axis=-1)].T @ stick.imem
                 np.testing.assert_allclose(p, probes[0].data)
 
-                stick.__del__()
-
     def test_cell_tstart_00(self):
         stickParams = {
             'morphology': os.path.join(
