@@ -24,12 +24,12 @@ from LFPy import Cell
 class TemplateCell(Cell):
 
     """
-    `LFPy.Cell` like class allowing use of NEURON templates with some
+    ``LFPy.Cell`` like class allowing use of NEURON templates with some
     limitations.
 
     This takes all the same parameters as the Cell class, but requires three
-    more template related parameters `templatefile`, `templatename` and
-    `templateargs`
+    more template related parameters ``templatefile``, ``templatename`` and
+    ``templateargs``
 
     Parameters
     ----------

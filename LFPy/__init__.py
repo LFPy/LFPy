@@ -20,41 +20,42 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 :Classes:
-  * Cell - object built on top of NEURON representing biological neuron
-  * TemplateCell - Similar to Cell, but for models using cell templates
-  * NetworkCell - Similar to `TemplateCell` with some attributes and methods
-    for spike communication between parallel RANKs
-  * PointProcess - Parent class of Synapse and StimIntElectrode
-  * Synapse - Convenience class for inserting synapses onto Cell objects
-  * StimIntElectrode - Convenience class for inserting stimulating electrodes
-    into Cell objects
-  * Network - Class for creating distributed populations of cells and
+  * ``Cell`` - object built on top of NEURON representing biological neuron
+  * ``TemplateCell`` - Similar to ``Cell``, but for models using cell templates
+  * ``NetworkCell`` - Similar to ``TemplateCell`` with some attributes and
+    methods for spike communication between parallel RANKs
+  * ``PointProcess`` - Parent class of ``Synapse`` and ``StimIntElectrode``
+  * ``Synapse`` - Convenience class for inserting synapses onto ``Cell``
+    objects
+  * ``StimIntElectrode`` - Convenience class for inserting stimulating
+    electrodes into ``Cell`` objects
+  * ``Network`` - Class for creating distributed populations of cells and
     handling connections between cells in populations
-  * NetworkPopulation - Class representing group of Cell objects distributed
-    across MPI RANKs
-  * RecExtElectrode - Class for setup of simulations of extracellular
+  * ``NetworkPopulation`` - Class representing group of ``Cell`` objects
+    distributed across MPI RANKs
+  * ``RecExtElectrode`` - Class for setup of simulations of extracellular
     potentials
-  * RecMEAElectrode - Class for setup of simulations of in vitro (slice)
+  * ``RecMEAElectrode`` - Class for setup of simulations of in vitro (slice)
     extracellular potentials
-  * PointSourcePotential - Base forward-model for extracellular potentials
+  * ``PointSourcePotential`` - Base forward-model for extracellular potentials
     assuming point current sources in conductive media
-  * LineSourcePotential - Base forward-model for extracellular potentials
+  * ``LineSourcePotential`` - Base forward-model for extracellular potentials
     assuming line current sources in conductive media
-  * OneSphereVolumeConductor - For computing extracellular potentials within
-    and outside a homogeneous sphere
-  * CurrentDipoleMoment,
-  * FourSphereVolumeConductor - For computing extracellular potentials in
+  * ``OneSphereVolumeConductor`` - For computing extracellular potentials
+    within and outside a homogeneous sphere
+  * ``CurrentDipoleMoment`` - For computing the current dipole moment,
+  * ``FourSphereVolumeConductor`` - For computing extracellular potentials in
     four-sphere head model (brain, CSF, skull, scalp)
-  * InfiniteVolumeConductor - To compute extracellular potentials with current
-    dipoles in infinite volume conductor
-  * MEG - Class for computing magnetic field from current dipole moment
+  * ``InfiniteVolumeConductor`` - To compute extracellular potentials with
+    current dipoles in infinite volume conductor
+  * ``MEG`` - Class for computing magnetic field from current dipole moment
 :Modules:
-  * lfpcalc - Misc. functions used by RecExtElectrode class
-  * tools - Some convenient functions
-  * inputgenerators - Functions for synaptic input time generation
-  * eegmegcalc - Classes for calculating current dipole moment vector
+  * ``lfpcalc`` - Misc. functions used by RecExtElectrode class
+  * ``tools`` - Some convenient functions
+  * ``inputgenerators`` - Functions for synaptic input time generation
+  * ``eegmegcalc`` - Classes for calculating current dipole moment vector
     P and P_tot from currents and distances.
-  * run_simulations - Functions to run NEURON simulations
+  * ``run_simulations`` - Functions to run NEURON simulations
 """
 
 from .version import version as __version__
