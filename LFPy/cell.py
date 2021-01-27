@@ -1567,7 +1567,7 @@ class Cell(object):
 
     def cellpickler(self, filename, pickler=pickle.dump):
         """Save data in cell to filename, using cPickle. It will however
-        destroy any neuron.h objects upon saving, as c-objects cannot be
+        destroy any ``neuron.h`` objects upon saving, as c-objects cannot be
         pickled
 
         Parameters
@@ -1577,16 +1577,12 @@ class Cell(object):
 
         Examples
         --------
-        To save a cell, use:
+        >>> # To save a cell, issue:
         >>> cell.cellpickler('cell.cpickle')
-        To load this cell again in another session:
+        >>> # To load this cell again in another session:
         >>> import cPickle
-        >>> f = file('cell.cpickle', 'rb')
-        >>> cell = cPickle.load(f)
-        >>> f.close()
-        alternatively:
-        >>> import LFPy
-        >>> cell = LFPy.tools.load('cell.cpickle')
+        >>> with file('cell.cpickle', 'rb') as f:
+        >>>     cell = cPickle.load(f)
 
         Returns
         -------
@@ -1624,7 +1620,6 @@ class Cell(object):
         rotation_order: str
             string with 3 elements containing x, y and z
             e.g. 'xyz', 'zyx'. Default: 'xyz'
-
 
         Examples
         --------
@@ -2291,7 +2286,6 @@ class Cell(object):
 
         Examples
         --------
-        The most efficient way of using this would be something like
         >>> from matplotlib.collections import PolyCollection
         >>> import matplotlib.pyplot as plt
         >>> cell = LFPy.Cell(morphology='PATH/TO/MORPHOLOGY')
@@ -2795,7 +2789,8 @@ class Cell(object):
         Examples
         --------
         Get all current dipole moments and positions from all axial currents in
-        a single neuron simulation.
+        a single neuron simulation:
+
         >>> import LFPy
         >>> import numpy as np
         >>> cell = LFPy.Cell('PATH/TO/MORPHOLOGY', extracellular=False)
