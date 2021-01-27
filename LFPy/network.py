@@ -707,7 +707,7 @@ class Network(object):
         connectivity: ndarray / (scipy.sparse array)
             boolean connectivity matrix between pre and post.
         syntype: hoc.HocObject
-            reference to NEURON synapse mechanism, e.g., neuron.h.ExpSyn
+            reference to NEURON synapse mechanism, e.g., ``neuron.h.ExpSyn``
         synparams: dict
             dictionary of parameters for synapse mechanism, keys 'e', 'tau'
             etc.
@@ -730,22 +730,31 @@ class Network(object):
         multapseargs: dict
             arguments passed to multapsefun
         syn_pos_args: dict
-            arguments passed to inherited LFPy.Cell method
-            NetworkCell.get_rand_idx_area_and_distribution_norm to find
+            arguments passed to inherited ``LFPy.Cell`` method
+            ``NetworkCell.get_rand_idx_area_and_distribution_norm`` to find
             synapse locations.
         save_connections: bool
             if True (default False), save instantiated connections to HDF5 file
-            "Network.OUTPUTPATH/synapse_connections.h5" as dataset
-            "<pre>:<post>" using a structured ndarray with dtype
-            [('gid_pre'), ('gid', 'i8'), ('weight', 'f8'), ('delay', 'f8'),
-             ('sec', 'U64'), ('sec.x', 'f8'),
-             ('x', 'f8'), ('y', 'f8'), ('z', 'f8')],
-            where `gid_pre` is presynapic cell id,
-            `gid` is postsynaptic cell id,
-            `weight` connection weight, `delay` connection delay,
-            `sec` section name, `sec.x` relative location on section,
-            and `x`,`y`,`z` the corresponding
+            ``Network.OUTPUTPATH/synapse_connections.h5`` as dataset
+            ``<pre>:<post>`` using a structured ndarray with dtype
+            ::
+
+                [('gid_pre'), ('gid', 'i8'), ('weight', 'f8'), ('delay', 'f8'),
+                ('sec', 'U64'), ('sec.x', 'f8'),
+                ('x', 'f8'), ('y', 'f8'), ('z', 'f8')],
+
+            where ``gid_pre`` is presynapic cell id,
+            ``gid`` is postsynaptic cell id,
+            ``weight`` connection weight, ``delay`` connection delay,
+            ``sec`` section name, ``sec.x`` relative location on section,
+            and ``x``, ``y``, ``z`` the corresponding
             midpoint coordinates of the target compartment.
+
+        Returns
+        -------
+        list
+            Length 2 list with ndarrays [conncount, syncount] with numbers of
+            instantiated connections and synapses.
         """
         # set up connections from all cells in presynaptic to post across RANKs
         n0 = self.populations[pre].first_gid
