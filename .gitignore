@@ -133,3 +133,14 @@ dmypy.json
 
 # macos stuff
 .DS_Store
+
+# misc
+examples/hoc_combos*
+examples/L5b*
+examples/bioRxiv281717/hoc_combos*
+examples/bioRxiv281717/figure_7_8/hoc_combos*
+examples/bioRxiv281717/figure_7_8/parameters
+*.zip
+*.pdf
+*.h5
+x86_64
