@@ -8,6 +8,9 @@ LFPy is a Python module for calculation of extracellular potentials from multico
 It relies on the NEURON simulator (http://www.neuron.yale.edu/neuron) and uses the
 Python interface (http://www.frontiersin.org/neuroinformatics/10.3389/neuro.11.001.2009/abstract) it provides.
 
+Latest changes
+--------------
+Just updated LFPy? Please check the latest release notes: https://github.com/LFPy/LFPy/releases
 
 Usage
 -----
