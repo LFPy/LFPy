@@ -212,9 +212,9 @@ class TemplateCell(Cell):
 
         # set shapes and create sectionlists
         neuron.h.define_shape()
-        self.__create_sectionlists()
+        self._create_sectionlists()
 
-    def __create_sectionlists(self):
+    def _create_sectionlists(self):
         """Create section lists for different kinds of sections"""
 
         self.allsecnames = []
