@@ -376,7 +376,7 @@ class Cell(object):
         i = 0
         if custom_fun is not None:
             for fun in custom_fun:
-                fun(**custom_fun_args[i])
+                fun(self, **custom_fun_args[i])
                 i += 1
 
         # recreate sectionlists in case something changed
