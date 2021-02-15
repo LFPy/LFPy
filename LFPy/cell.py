@@ -200,7 +200,7 @@ class Cell(object):
             # instantiate 3D geometry of all sections
             neuron.h.define_shape()
             # set some additional attributes
-            self.__create_sectionlists()
+            self._create_sectionlists()
 
         # Some parameters and lists initialised
         assert tstart <= 0, 'tstart must be <= 0.'
@@ -343,7 +343,7 @@ class Cell(object):
             imprt.instantiate(neuron.h.this)
 
         neuron.h.define_shape()
-        self.__create_sectionlists()
+        self._create_sectionlists()
 
     def __run_custom_codes(self, custom_code, custom_fun, custom_fun_args):
         """Execute custom model code and functions with arguments"""
@@ -381,7 +381,7 @@ class Cell(object):
 
         # recreate sectionlists in case something changed
         neuron.h.define_shape()
-        self.__create_sectionlists()
+        self._create_sectionlists()
 
     def __set_negs(self, nsegs_method, lambda_f, d_lambda, max_nsegs_length):
         """Set number of segments per section according to the lambda-rule,
@@ -416,7 +416,7 @@ class Cell(object):
             rotation = {}
         return rotation
 
-    def __create_sectionlists(self):
+    def _create_sectionlists(self):
         """Create section lists for different kinds of sections"""
         # list with all sections
         self.allsecnames = []
