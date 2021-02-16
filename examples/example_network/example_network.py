@@ -284,7 +284,7 @@ if __name__ == '__main__':
                 connectivity=connectivity,
                 syntype=synapseModel,
                 synparams=synapseParameters[i][j],
-                weightfun=np.random.normal,
+                weightfun=weightFunction,
                 weightargs=weightArguments[i][j],
                 minweight=minweight,
                 delayfun=delayFunction,
