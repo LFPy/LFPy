@@ -114,7 +114,7 @@ def _run_simulation_with_probes(cell, cvode, probes=[],
                     name=name,
                     shape=(M.shape[0],
                            int(cell.tstop / cell.dt) + 1),
-                    dtype=np.float)
+                    dtype=float)
 
     def get_imem(imem):
         i = 0

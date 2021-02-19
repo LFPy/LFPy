@@ -456,7 +456,7 @@ class NetworkPopulation(object):
                 y[i] = (np.random.rand() - 0.5) * radius * 2
         z = np.random.normal(loc=loc, scale=scale, size=POP_SIZE)
         if cap is not None:
-            if type(cap) in [float, np.float, np.float32, np.float64]:
+            if type(cap) in [float, np.float32, np.float64]:
                 while not np.all((z >= loc - cap) & (z < loc + cap)):
                     inds = (z < loc - cap) ^ (z > loc + cap)
                     z[inds] = np.random.normal(loc=loc, scale=scale,
@@ -1107,7 +1107,7 @@ class Network(object):
                 f1 = h5py.File(os.path.join(self.OUTPUTPATH, file_name), 'w')
             dtype = []
             for key, value in f0[list(f0.keys())[0]].items():
-                dtype.append((str(key), np.float))
+                dtype.append((str(key), float))
             for grp in f0.keys():
                 if RANK == 0:
                     # get shape from the first dataset
@@ -1118,10 +1118,10 @@ class Network(object):
                     f1[grp] = np.zeros(shape, dtype=dtype)
                 for key, value in f0[grp].items():
                     if RANK == 0:
-                        recvbuf = np.zeros(shape, dtype=np.float)
+                        recvbuf = np.zeros(shape, dtype=float)
                     else:
                         recvbuf = None
-                    COMM.Reduce(value[()].astype(np.float), recvbuf,
+                    COMM.Reduce(value[()].astype(float), recvbuf,
                                 op=op, root=0)
                     if RANK == 0:
                         f1[grp][key] = recvbuf
@@ -1376,16 +1376,16 @@ class Network(object):
 
         # define data type for structured arrays dependent on the boolean
         # arguments
-        dtype = [('imem', np.float)]
+        dtype = [('imem', float)]
         if use_ipas:
-            dtype += [('ipas', np.float)]
+            dtype += [('ipas', float)]
         if use_icap:
-            dtype += [('icap', np.float)]
+            dtype += [('icap', float)]
         if use_isyn:
-            dtype += [('isyn_e', np.float), ('isyn_i', np.float)]
+            dtype += [('isyn_e', float), ('isyn_i', float)]
         if rec_pop_contributions:
             dtype += list(zip(self.population_names,
-                              [np.float] * len(self.population_names)))
+                              [float] * len(self.population_names)))
 
         # setup list of structured arrays for all extracellular potentials
         # at each contact from different source terms and subpopulations
