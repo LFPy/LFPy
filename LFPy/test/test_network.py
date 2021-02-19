@@ -714,8 +714,12 @@ class testNetwork(unittest.TestCase):
 
         # check static connection parameters
         synparams = f['synparams']['test:test']
-        assert synparams['mechanism'][()].decode() == \
-            connectionParameters['syntype'].__str__().strip('()')
+        if h5py.__version__ < '3':
+            assert synparams['mechanism'][()] == \
+                connectionParameters['syntype'].__str__().strip('()')
+        else:
+            assert synparams['mechanism'][()].decode() == \
+                connectionParameters['syntype'].__str__().strip('()')
         for key, value in connectionParameters['synparams'].items():
             assert synparams[key][()] == value
 
