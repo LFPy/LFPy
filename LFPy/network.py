@@ -789,7 +789,7 @@ class Network(object):
                     nidx = 0
                     j = 0
                     while nidx <= 0 and j < 1000:
-                        nidx = int(multapsefun(**multapseargs))
+                        nidx = int(round(multapsefun(**multapseargs)))
                         j += 1
                     if j == 1000:
                         raise Exception('change multapseargs as no positive '
