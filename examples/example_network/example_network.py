@@ -8,7 +8,7 @@ BallAndStickTemplate.hoc.
 
 Execution (w. MPI):
 
-    mpirun -np 2 python example_network.py
+    mpirun python example_network.py
 
 Copyright (C) 2017 Computational Neuroscience Group, NMBU.
 
@@ -357,7 +357,8 @@ if __name__ == '__main__':
         gs = GridSpec(5, 1)
         ax = fig.add_subplot(gs[:4])
         draw_lineplot(ax,
-                      ss.decimate(somavs[0][::4], q=16, axis=-1, zero_phase=True),
+                      ss.decimate(somavs[0][::4], q=16, axis=-1,
+                                  zero_phase=True),
                       dt=network.dt * 16,
                       T=(200, 1200),
                       scaling_factor=1.,
@@ -377,7 +378,8 @@ if __name__ == '__main__':
 
         ax = fig.add_subplot(gs[4])
         draw_lineplot(ax,
-                      ss.decimate(somavs[1][::4], q=16, axis=-1, zero_phase=True),
+                      ss.decimate(somavs[1][::4], q=16, axis=-1,
+                                  zero_phase=True),
                       dt=network.dt * 16,
                       T=(200, 1200),
                       scaling_factor=1.,
