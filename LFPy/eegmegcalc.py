@@ -45,16 +45,16 @@ class FourSphereVolumeConductor(lfpykit.eegmegcalc.FourSphereVolumeConductor):
     ----------
     r_electrodes: ndarray, dtype=float
         Shape (n_contacts, 3) array containing n_contacts electrode locations
-        in cartesian coordinates in units of [µm].
+        in cartesian coordinates in units of (µm).
         All ``r_el`` in ``r_electrodes`` must be less than or equal to scalp
         radius and larger than the distance between dipole and sphere
         center: ``|rz| < r_el <= radii[3]``.
     radii: list, dtype=float
-        Len 4 list with the outer radii in units of [µm] for the 4
+        Len 4 list with the outer radii in units of (µm) for the 4
         concentric shells in the four-sphere model: brain, csf, skull and
         scalp, respectively.
     sigmas: list, dtype=float
-        Len 4 list with the electrical conductivity in units of [S/m] of
+        Len 4 list with the electrical conductivity in units of (S/m) of
         the four shells in the four-sphere model: brain, csf, skull and
         scalp, respectively.
     iter_factor: float
@@ -65,18 +65,18 @@ class FourSphereVolumeConductor(lfpykit.eegmegcalc.FourSphereVolumeConductor):
     Compute extracellular potential from current dipole moment in four-sphere
     head model:
 
-    >>> from lfpykit import FourSphereVolumeConductor
+    >>> from lfpykit.eegmegcalc import FourSphereVolumeConductor
     >>> import numpy as np
-    >>> radii = [79000., 80000., 85000., 90000.]  # [µm]
-    >>> sigmas = [0.3, 1.5, 0.015, 0.3]  # [S/m]
-    >>> r_electrodes = np.array([[0., 0., 90000.], [0., 85000., 0.]]) # [µm]
-    >>> rz = np.array([0., 0., 78000.])  # [µm]
+    >>> radii = [79000., 80000., 85000., 90000.]  # (µm)
+    >>> sigmas = [0.3, 1.5, 0.015, 0.3]  # (S/m)
+    >>> r_electrodes = np.array([[0., 0., 90000.], [0., 85000., 0.]]) # (µm)
     >>> sphere_model = FourSphereVolumeConductor(r_electrodes, radii,
     >>>                                          sigmas)
     >>> # current dipole moment
-    >>> p = np.array([[10., 10., 10.]]*10) # 10 timesteps [nA µm]
+    >>> p = np.array([[10.]*10, [10.]*10, [10.]*10]) # 10 timesteps (nA µm)
+    >>> dipole_location = np.array([0., 0., 78000.])  # (µm)
     >>> # compute potential
-    >>> sphere_model.get_dipole_potential(p, rz)  # [mV]
+    >>> sphere_model.get_dipole_potential(p, dipole_location)  # (mV)
     array([[1.06247669e-08, 1.06247669e-08, 1.06247669e-08, 1.06247669e-08,
             1.06247669e-08, 1.06247669e-08, 1.06247669e-08, 1.06247669e-08,
             1.06247669e-08, 1.06247669e-08],
@@ -131,23 +131,27 @@ class FourSphereVolumeConductor(lfpykit.eegmegcalc.FourSphereVolumeConductor):
         a single dipole, we compute the contribution from every multi dipole
         from all axial currents in neuron simulation:
 
+        >>> import os
         >>> import LFPy
         >>> from LFPy import FourSphereVolumeConductor
         >>> import numpy as np
-        >>> cell = LFPy.Cell('PATH/TO/MORPHOLOGY', extracellular=False)
+        >>> cell = LFPy.Cell(os.path.join(LFPy.__path__[0], 'test',
+        >>>                               'ball_and_sticks.hoc'),
+        >>>                  v_init=-65, cm=1., Ra=150,
+        >>>                  passive=True,
+        >>>                  passive_parameters=dict(g_pas=1/1E4, e_pas=-65))
         >>> syn = LFPy.Synapse(cell, idx=cell.get_closest_idx(0,0,100),
-        >>>                   syntype='ExpSyn', e=0., tau=1., weight=0.001)
+        >>>                    syntype='ExpSyn', e=0., tau=1., weight=0.001)
         >>> syn.set_spike_times(np.mgrid[20:100:20])
         >>> cell.simulate(rec_vmem=True, rec_imem=False)
-        >>> radii = [200., 300., 400., 500.]
+        >>> cell.set_pos(0, 0, 78800)
+        >>> radii = [79000., 80000., 85000., 90000.]
         >>> sigmas = [0.3, 1.5, 0.015, 0.3]
-        >>> electrode_locs = np.array([[50., -50., 250.]])
-        >>> timepoints = np.array([0,100])
-        >>> MD_4s = FourSphereVolumeConductor(radii,
-        >>>                                   sigmas,
-        >>>                                   electrode_locs)
-        >>> phi = MD_4s.get_dipole_potential_from_multi_dipoles(cell,
-        >>>                                               timepoints)
+        >>> r_electrodes = np.array([[0., 0., 90000.]])
+        >>> MD_4s = FourSphereVolumeConductor(r_electrodes=r_electrodes,
+        >>>                                   radii=radii,
+        >>>                                   sigmas=sigmas)
+        >>> phi = MD_4s.get_dipole_potential_from_multi_dipoles(cell)
         """
         multi_p, multi_p_locs = cell.get_multi_current_dipole_moments(
             timepoints)
