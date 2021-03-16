@@ -223,10 +223,27 @@ if __name__ == '__main__':
     from example_parallel_network_parameters import PSET
 
     # set up file destination
-    if not os.path.isdir(PSET.OUTPUTPATH):
-        if RANK == 0:
+    if RANK == 0:
+        # create directory for output:
+        if not os.path.isdir(PSET.OUTPUTPATH):
             os.mkdir(PSET.OUTPUTPATH)
+        # remove old simulation output if directory exist
+        else:
+            for fname in os.listdir(PSET.OUTPUTPATH):
+                os.unlink(os.path.join(PSET.OUTPUTPATH, fname))
     COMM.Barrier()
+
+    # Modify release probabilities of excitatory synapses in order to
+    # stabilize circuit.
+    # This change is incorporated in https://github.com/LFPy/LFPy/pull/320
+    # which modifies slightly the way multapse counts are generated
+    # (and hence affected the network state compared to the old behaviour)
+    for i, pre in enumerate(PSET.populationParameters['m_type']):
+        for j, post in enumerate(PSET.populationParameters['m_type']):
+            if (pre in ['L4_PC', 'L5_TTPC1']) & (pre == post):
+                PSET.connParams['synparams'][i][j]['Use'] = \
+                    PSET.connParams['synparams'][i][j]['Use'] * 0.8
+
 
     if RANK == 0:
         parameters_time = time() - tic
