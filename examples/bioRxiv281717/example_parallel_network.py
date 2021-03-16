@@ -31,7 +31,7 @@ Cell 163:2, 456 - 492. doi: 10.1016/j.cell.2015.09.029
 
 A tar file with all single-cell models zipped can be downloaded and unpacked
 by issuing:
-$ wget https://bbp.epfl.ch/nmc-portal/documents/10184/7288948/\
+$ wget https://bbp.epfl.ch/nmc-portal/assets/documents/static/Download/\
 hoc_combos_syn.1_0_10.allzips.tar
 $ tar -xvf hoc_combos_syn.1_0_10.allzips.tar
 $ cd hoc_combos_syn.1_0_10.allzips
@@ -40,6 +40,13 @@ $ unzip 'L4_LBC_*.zip'
 $ unzip 'L5_TTPC1_*.zip'
 $ unzip 'L5_MC_*.zip'
 $ cd -
+
+.json files with anatomy and physiology data of the microcircuit are also
+needed:
+$ wget https://bbp.epfl.ch/nmc-portal/assets/documents/static/Download/\
+pathways_anatomy_factsheets_simplified.json
+$ wget https://bbp.epfl.ch/nmc-portal/assets/documents/static/Download/\
+pathways_physiology_factsheets_simplified.json
 
 Some preparatory steps has to be made in order to compile NMODL language
 files used by the neuron models:
@@ -98,7 +105,6 @@ load them all. One synapse mechanism file is faulty and must be patched.
 >>> else:
 >>>     os.system('nrnivmodl')
 >>> os.chdir(CWD)
-
 
 An example job script set up using the SLURM workload management software
 (https://slurm.schedmd.com/) on a compute cluster is provided in the file
