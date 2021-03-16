@@ -22,6 +22,7 @@ import os
 import numpy as np
 import scipy.signal as ss
 import h5py
+from copy import copy
 from LFPy import NetworkCell
 from mpi4py import MPI
 import neuron
@@ -207,6 +208,7 @@ def plot_connectivity(ax, PSET, cmap=plt.get_cmap('inferno'),
     masked_array = np.ma.array(
         PSET.connParams[data], mask=np.array(
             PSET.connParams[data]) == 0.)
+    cmap = copy(cmap)
     cmap.set_bad('k', 0.5)
     # interpolation='nearest')
     im = ax.pcolormesh(masked_array, cmap=cmap, vmin=0, )
