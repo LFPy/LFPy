@@ -244,7 +244,6 @@ if __name__ == '__main__':
                 PSET.connParams['synparams'][i][j]['Use'] = \
                     PSET.connParams['synparams'][i][j]['Use'] * 0.8
 
-
     if RANK == 0:
         parameters_time = time() - tic
         print('Parameters in {} seconds'.format(parameters_time))
