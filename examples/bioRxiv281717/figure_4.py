@@ -21,6 +21,7 @@ from matplotlib.collections import PolyCollection
 from matplotlib.ticker import MaxNLocator
 import os
 import numpy as np
+from copy import copy
 import h5py
 from LFPy import NetworkCell
 import neuron
@@ -121,6 +122,7 @@ def plot_multapseargs(ax, PSET, cmap=plt.get_cmap('inferno'),
     array = [[i[key] for i in j] for j in item]
 
     masked_array = np.ma.array(array, mask=np.array(array) == 0.)
+    cmap = copy(cmap)
     cmap.set_bad('k', 0.5)
     im = ax.pcolormesh(masked_array, cmap=cmap, vmin=0, )
     ax.axis(ax.axis('tight'))

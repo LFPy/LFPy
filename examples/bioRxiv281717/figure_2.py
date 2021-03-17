@@ -726,7 +726,8 @@ ax3.legend(loc=(0.25, 0.15), frameon=False)
 sphere = LFPy.FourSphereVolumeConductor(
     **foursphereParams
 )
-phi_p = sphere.calc_potential(current_dipole_moment.data, rz=dipole_position)
+phi_p = sphere.get_dipole_potential(current_dipole_moment.data,
+                                    dipole_location=dipole_position)
 
 # import example_parallel_network_plotting as plotting
 vlimround = draw_lineplot(ax=ax4,

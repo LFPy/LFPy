@@ -11,7 +11,7 @@ output is simulated to file.
 
 Execution (w. MPI):
 
-    mpirun -np 2 python example_network_to_file.py
+    mpirun python example_network_to_file.py
 
 Copyright (C) 2017 Computational Neuroscience Group, NMBU.
 
@@ -103,11 +103,11 @@ def draw_lineplot(
 
     for i, z in enumerate(zvec):
         if i == 0:
-            ax.plot(tvec[tinds], data[i][tinds] / vlimround + z, lw=1,
+            ax.plot(tvec[tinds], data[i][tinds] / vlimround + z, lw=0.75,
                     rasterized=False, label=label, clip_on=False,
                     color=color)
         else:
-            ax.plot(tvec[tinds], data[i][tinds] / vlimround + z, lw=1,
+            ax.plot(tvec[tinds], data[i][tinds] / vlimround + z, lw=0.75,
                     rasterized=False, clip_on=False,
                     color=color)
         yticklabels.append('ch. %i' % (i + 1))
@@ -191,7 +191,7 @@ networkSimulationArguments = dict(
 
 # population names, sizes and connection probability:
 population_names = ['E', 'I']
-population_sizes = [80, 20]
+population_sizes = [256, 64]
 connectionProbability = [[0.1, 0.1], [0.1, 0.1]]
 
 # synapse model. All corresponding parameters for weights,
@@ -208,10 +208,10 @@ synapseParameters = [[dict(tau1=0.2, tau2=1.8, e=0.),
                       dict(tau1=0.1, tau2=9.0, e=-80.)]]
 # synapse max. conductance (function, mean, st.dev., min.):
 weightFunction = np.random.normal
-weightArguments = [[dict(loc=0.002, scale=0.0002),
-                    dict(loc=0.002, scale=0.0002)],
-                   [dict(loc=0.02, scale=0.002),
-                    dict(loc=0.02, scale=0.002)]]
+weightArguments = [[dict(loc=0.001, scale=0.0001),
+                    dict(loc=0.001, scale=0.0001)],
+                   [dict(loc=0.01, scale=0.001),
+                    dict(loc=0.01, scale=0.001)]]
 minweight = 0.
 # conduction delay (function, mean, st.dev., min.):
 delayFunction = np.random.normal
@@ -227,14 +227,14 @@ multapseArguments = [[dict(loc=2., scale=.5), dict(loc=2., scale=.5)],
 # parameters for layerwise synapse positions:
 synapsePositionArguments = [[dict(section=['soma', 'apic'],
                                   fun=[st.norm, st.norm],
-                                  funargs=[dict(loc=500., scale=100.),
+                                  funargs=[dict(loc=0., scale=100.),
                                            dict(loc=500., scale=100.)],
                                   funweights=[0.5, 1.]
                                   ) for _ in range(2)],
                             [dict(section=['soma', 'apic'],
                                   fun=[st.norm, st.norm],
                                   funargs=[dict(loc=0., scale=100.),
-                                           dict(loc=0., scale=100.)],
+                                           dict(loc=100., scale=100.)],
                                   funweights=[1., 0.5]
                                   ) for _ in range(2)]]
 
@@ -243,9 +243,13 @@ if __name__ == '__main__':
     # Main simulation
     ##########################################################################
     # create directory for output:
-    if not os.path.isdir(OUTPUTPATH):
-        if RANK == 0:
+    if RANK == 0:
+        if not os.path.isdir(OUTPUTPATH):
             os.mkdir(OUTPUTPATH)
+        # remove old simulation output if directory exist
+        else:
+            for fname in os.listdir(OUTPUTPATH):
+                os.unlink(os.path.join(OUTPUTPATH, fname))
     COMM.Barrier()
 
     # instantiate Network:
@@ -262,9 +266,11 @@ if __name__ == '__main__':
             idx = cell.get_rand_idx_area_norm(section='allsec', nidx=64)
             for i in idx:
                 syn = Synapse(cell=cell, idx=i, syntype='Exp2Syn',
-                              weight=0.002,
+                              weight=0.001,
                               **dict(tau1=0.2, tau2=1.8, e=0.))
-                syn.set_spike_times_w_netstim(interval=100.)
+                syn.set_spike_times_w_netstim(interval=50.,
+                                              seed=np.random.rand() * 2**32 - 1
+                                              )
 
     # create connectivity matrices and connect populations:
     for i, pre in enumerate(population_names):
@@ -282,7 +288,7 @@ if __name__ == '__main__':
                 connectivity=connectivity,
                 syntype=synapseModel,
                 synparams=synapseParameters[i][j],
-                weightfun=np.random.normal,
+                weightfun=weightFunction,
                 weightargs=weightArguments[i][j],
                 minweight=minweight,
                 delayfun=delayFunction,
@@ -291,6 +297,7 @@ if __name__ == '__main__':
                 multapsefun=multapseFunction,
                 multapseargs=multapseArguments[i][j],
                 syn_pos_args=synapsePositionArguments[i][j],
+                save_connections=False,
             )
 
     # set up extracellular recording device.
@@ -339,7 +346,7 @@ if __name__ == '__main__':
             for spt, gid in zip(spts, gids):
                 t = np.r_[t, spt]
                 g = np.r_[g, np.zeros(spt.size) + gid]
-            ax.plot(t[t >= 200], g[t >= 200], '|', label=name)
+            ax.plot(t[t >= 200], g[t >= 200], '.', label=name)
         ax.legend(loc=1)
         remove_axis_junk(ax, lines=['right', 'top'])
         ax.set_xlabel('t (ms)')
@@ -354,7 +361,8 @@ if __name__ == '__main__':
         gs = GridSpec(5, 1)
         ax = fig.add_subplot(gs[:4])
         draw_lineplot(ax,
-                      ss.decimate(somavs[0], q=16, axis=-1, zero_phase=True),
+                      ss.decimate(somavs[0][::4], q=16, axis=-1,
+                                  zero_phase=True),
                       dt=network.dt * 16,
                       T=(200, 1200),
                       scaling_factor=1.,
@@ -374,7 +382,8 @@ if __name__ == '__main__':
 
         ax = fig.add_subplot(gs[4])
         draw_lineplot(ax,
-                      ss.decimate(somavs[1], q=16, axis=-1, zero_phase=True),
+                      ss.decimate(somavs[1][::4], q=16, axis=-1,
+                                  zero_phase=True),
                       dt=network.dt * 16,
                       T=(200, 1200),
                       scaling_factor=1.,
@@ -484,6 +493,7 @@ if __name__ == '__main__':
     synapseModel = None
     for population in network.populations.values():
         for cell in population.cells:
+            cell.__del__()
             cell = None
         population.cells = None
         population = None

@@ -337,11 +337,11 @@ if __name__ == '__main__':
         sphere = FourSphereVolumeConductor(
             **PSET.foursphereParams
         )
-        phi_p += sphere.calc_potential(
+        phi_p += sphere.get_dipole_potential(
             p=p,
-            rz=np.array([0, 0,
-                         PSET.foursphereParams['radii'][0]
-                         + PSET.layer_data['center'][3:][i % 2]])
+            dipole_location=np.array([0, 0,
+                                      PSET.foursphereParams['radii'][0]
+                                      + PSET.layer_data['center'][3:][i % 2]])
             )
 
     vlimround = plotting.draw_lineplot(
