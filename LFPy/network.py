@@ -649,7 +649,9 @@ class Network(object):
         # first check if there are any postsyn cells on this RANK
         if gids.size > 0:
             # define incoming connections for cells on this RANK
-            C = np.random.rand(n_pre, gids.size) < connprob
+            C = np.random.binomial(n=1, p=connprob,
+                                   size=(n_pre, gids.size)
+                                   ).astype(bool)
             if pre == post:
                 # avoid self connections.
                 gids_pre, gids_post = np.where(C)
