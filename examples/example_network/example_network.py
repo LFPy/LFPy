@@ -315,6 +315,7 @@ if __name__ == '__main__':
     if RANK == 0:
         somavs = []
     for i, name in enumerate(population_names):
+        somavs_pop = None  # avoid undeclared variable
         for j, cell in enumerate(network.populations[name].cells):
             if j == 0:
                 somavs_pop = cell.somav
@@ -322,8 +323,17 @@ if __name__ == '__main__':
                 somavs_pop = np.vstack((somavs_pop, cell.somav))
         if RANK == 0:
             for j in range(1, SIZE):
-                somavs_pop = np.vstack((somavs_pop,
-                                        COMM.recv(source=j, tag=15)))
+                recv = COMM.recv(source=j, tag=15)
+                if somavs_pop is None:
+                    if recv is not None:
+                        somavs_pop = recv
+                    else:
+                        continue
+                else:
+                    if recv is not None:
+                        somavs_pop = np.vstack((somavs_pop, recv))
+            if somavs_pop.ndim == 1:
+                somavs_pop = somavs_pop.reshape((1, -1))
             somavs.append(somavs_pop)
         else:
             COMM.send(somavs_pop, dest=0, tag=15)
@@ -342,7 +352,7 @@ if __name__ == '__main__':
             for spt, gid in zip(spts, gids):
                 t = np.r_[t, spt]
                 g = np.r_[g, np.zeros(spt.size) + gid]
-            ax.plot(t[t >= 200], g[t >= 200], '.', label=name)
+            ax.plot(t[t >= 200], g[t >= 200], '.', ms=3, label=name)
         ax.legend(loc=1)
         remove_axis_junk(ax, lines=['right', 'top'])
         ax.set_xlabel('t (ms)')
@@ -354,11 +364,16 @@ if __name__ == '__main__':
 
         # somatic potentials
         fig = plt.figure()
-        gs = GridSpec(5, 1)
-        ax = fig.add_subplot(gs[:4])
+        gs = GridSpec(4, 1)
+        ax = fig.add_subplot(gs[:2])
+        if somavs[0].shape[0] > 10:
+            somavs_pop = ss.decimate(somavs[0][:10], q=16, axis=-1,
+                                     zero_phase=True)
+        else:
+            somavs_pop = ss.decimate(somavs[0], q=16, axis=-1,
+                                     zero_phase=True)
         draw_lineplot(ax,
-                      ss.decimate(somavs[0][::4], q=16, axis=-1,
-                                  zero_phase=True),
+                      somavs_pop,
                       dt=network.dt * 16,
                       T=(200, 1200),
                       scaling_factor=1.,
@@ -376,10 +391,15 @@ if __name__ == '__main__':
         ax.set_title('somatic potentials')
         ax.set_xlabel('')
 
-        ax = fig.add_subplot(gs[4])
+        ax = fig.add_subplot(gs[2:])
+        if somavs[1].shape[0] > 10:
+            somavs_pop = ss.decimate(somavs[1][:10], q=16, axis=-1,
+                                     zero_phase=True)
+        else:
+            somavs_pop = ss.decimate(somavs[1], q=16, axis=-1,
+                                     zero_phase=True)
         draw_lineplot(ax,
-                      ss.decimate(somavs[1][::4], q=16, axis=-1,
-                                  zero_phase=True),
+                      somavs_pop,
                       dt=network.dt * 16,
                       T=(200, 1200),
                       scaling_factor=1.,
