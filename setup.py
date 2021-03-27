@@ -103,7 +103,6 @@ setup(
         'Cython>=0.20',
         'h5py>=2.5',
         'mpi4py>=1.2',
-        'MEAutility>=1.4.2',
         'LFPykit>=0.3'
     ],
     extras_require={'tests': ['pytest'],
