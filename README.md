@@ -253,6 +253,7 @@ or
     $ docker run -it -p 5000:5000 lfpy:latest
 
 or
+    
     # build local Dockerfile (obtained by cloning repo, checkout branch etc.)
     $ docker build -t lfpy - < Dockerfile
     $ docker run -it -p 5000:5000 lfpy:latest
@@ -261,6 +262,7 @@ or
 The ``--mount`` option can be used to mount a folder on the host to a target folder as:
 
     $ docker run --mount type=bind,source="$(pwd)",target=/opt -it -p 5000:5000 <image-name>
+
 
 which mounts the present working dirctory (``$(pwd)``) to the ``/opt`` directory of the container.
 Try mounting the ``LFPy`` source directory for example (by setting ``source="<path-to-LFPy>"``).
