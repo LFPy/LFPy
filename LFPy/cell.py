@@ -27,14 +27,14 @@ from .alias_method import alias_method
 # check neuron version:
 try:
     try:
-        assert neuron.version >= '7.6.4'
+        assert neuron.version >= '7.7.2'
     except AttributeError:
-        warn('Could not read NEURON version info. v7.6.4 or newer required')
+        warn('Could not read NEURON version info. v7.7.2 or newer required')
     except TypeError:
         # workaround for doc build neuron Mock module
         pass
 except AssertionError:
-    warn('LFPy requires NEURON v7.6.4 or newer. Found v{}'.format(
+    warn('LFPy requires NEURON v7.7.2 or newer. Found v{}'.format(
         neuron.version))
 
 
