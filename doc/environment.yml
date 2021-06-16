@@ -3,9 +3,8 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - python=3.7
+  - python=3.8
   - numpy
-  - mpich
   - gcc_linux-64
   - pthread-stubs
   - mpi4py
@@ -14,3 +13,4 @@ dependencies:
   - m2r2
   - pip
   - pip:
+    - neuron
