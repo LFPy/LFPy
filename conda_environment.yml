@@ -3,7 +3,7 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - python
+  - python=3
   - c-compiler
   - cxx-compiler
   - Cython
@@ -17,4 +17,4 @@ dependencies:
   - scipy
   - pip
   - pip:
-    - neuron
+    - neuron>=7.7.2
