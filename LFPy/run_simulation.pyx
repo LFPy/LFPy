@@ -19,6 +19,7 @@ import numpy as np
 cimport numpy as np
 import h5py
 import neuron
+from neuron import units
 from pathlib import Path
 
 DTYPE = np.float64
@@ -64,7 +65,7 @@ def _run_simulation_with_probes(cell, cvode, probes=[],
         cvode.active(0)
 
     # re-initialize state
-    neuron.h.finitialize(cell.v_init)
+    neuron.h.finitialize(cell.v_init * units.mV)
 
     # initialize current- and record
     if cvode.active():

@@ -97,7 +97,7 @@ setup(
         'Development Status :: 5 - Production/Stable',
     ],
     install_requires=[
-        'neuron>=7.6.4',
+        'neuron>=7.7.2',
         'numpy>=1.8',
         'scipy>=0.14',
         'Cython>=0.20',

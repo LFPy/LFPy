@@ -5,7 +5,8 @@ channels:
 dependencies:
   - python=3.8
   - numpy
-  - gcc_linux-64
+  - c-compiler
+  - cxx-compiler
   - pthread-stubs
   - mpi4py
   - sphinx_rtd_theme
@@ -13,4 +14,4 @@ dependencies:
   - m2r2
   - pip
   - pip:
-    - neuron
+    - neuron>=7.7.2
