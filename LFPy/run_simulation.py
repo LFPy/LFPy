@@ -15,6 +15,7 @@ GNU General Public License for more details.
 '''
 import numpy as np
 import neuron
+from neuron import units
 from pathlib import Path
 import h5py
 
@@ -57,7 +58,7 @@ def _run_simulation_with_probes(cell, cvode, probes=[],
         cvode.active(0)
 
     # re-initialize state
-    neuron.h.finitialize(cell.v_init)
+    neuron.h.finitialize(cell.v_init * units.mV)
 
     # initialize current- and record
     if cvode.active():

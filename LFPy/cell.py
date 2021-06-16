@@ -13,6 +13,7 @@ GNU General Public License for more details.
 """
 import os
 import neuron
+from neuron import units
 import numpy as np
 import scipy.stats
 import sys
@@ -164,6 +165,8 @@ class Cell(object):
         if not hasattr(neuron.h, 'd_lambda'):
             neuron.h.load_file('stdlib.hoc')  # NEURON std. library
             neuron.h.load_file('import3d.hoc')  # import 3D morphology lib
+        if not hasattr(neuron.h, 'continuerun'):
+            neuron.h.load_file('stdrun.hoc')  # NEURON stdrun library
 
         if delete_sections:
             if not isinstance(morphology, type(neuron.h.SectionList)):
@@ -286,7 +289,7 @@ class Cell(object):
             neuron.h.celsius = celsius
 
         # initialize membrane voltage in all segments.
-        neuron.h.finitialize(self.v_init)
+        neuron.h.finitialize(self.v_init * units.mV)
         self._neuron_tvec = None
 
     def __del__(self):
@@ -1161,7 +1164,7 @@ class Cell(object):
             cvode.active(0)
 
         # re-initialize state
-        neuron.h.finitialize(self.v_init)
+        neuron.h.finitialize(self.v_init * units.mV)
 
         # initialize current- and record
         if cvode.active():
@@ -1176,7 +1179,7 @@ class Cell(object):
         self._load_spikes()
 
         # advance simulation until tstop
-        neuron.run(self.tstop)
+        neuron.h.continuerun(self.tstop * units.ms)
 
         # for consistency with 'old' behaviour where tstop is included in tvec:
         if neuron.h.t < self.tstop:

@@ -22,6 +22,7 @@ import scipy.stats as stats
 import h5py
 from mpi4py import MPI
 import neuron
+from neuron import units
 from .templatecell import TemplateCell
 import scipy.sparse as ss
 
@@ -1210,7 +1211,7 @@ class Network(object):
             cvode.active(0)
 
         # initialize state
-        neuron.h.finitialize(self.v_init)
+        neuron.h.finitialize(self.v_init * units.mV)
 
         # initialize current- and record
         if cvode.active():
@@ -1227,10 +1228,8 @@ class Network(object):
             for cell in self.populations[name].cells:
                 cell._load_spikes()
 
-        # neuron.run() should be marginally faster than calling
-        # neuron.h.fadvance()
-        # in a while loop (https://github.com/LFPy/LFPy/pull/217)
-        neuron.run(self.tstop)
+        # advance simulation until tstop
+        neuron.h.continuerun(self.tstop * units.ms)
 
     def __run_simulation_with_probes(self, cvode,
                                      probes=None,
@@ -1351,7 +1350,7 @@ class Network(object):
             cvode.active(0)
 
         # initialize state
-        neuron.h.finitialize(self.v_init)
+        neuron.h.finitialize(self.v_init * units.mV)
 
         # use fast calculation of transmembrane currents
         cvode.use_fast_imem(1)
