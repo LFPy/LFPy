@@ -252,6 +252,7 @@ class DummyCell(object):
                  z=None,
                  d=None,
                  area=None,
+                 length=None,
                  somainds=None):
         """
         Dummy Cell object initialized with all attributes needed for LFP
@@ -270,6 +271,8 @@ class DummyCell(object):
             array of length totnsegs with segment diameters
         area: ndarray
             array of segment surface areas
+        length: ndarray
+            array of segment lengths
         """
         # set attributes
         self.totnsegs = totnsegs
@@ -278,6 +281,7 @@ class DummyCell(object):
         self.z = z if z is not None else np.array([])
         self.d = d if d is not None else np.array([])
         self.area = area if area is not None else np.array([])
+        self.length = length if area is not None else np.array([])
         self.somainds = somainds if somainds is not None else np.array([])
 
     def get_idx(self, section="soma"):
@@ -1165,6 +1169,7 @@ class Network(object):
         z = np.empty((0, 2))
         d = np.array([])
         area = np.array([])
+        length = np.array([])
 
         somainds = np.array([], dtype=int)
         nseg = 0
@@ -1176,12 +1181,13 @@ class Network(object):
                 z = np.r_[z, cell.z]
                 d = np.r_[d, cell.d]
                 area = np.r_[area, cell.area]
+                length = np.r_[length, cell.length]
 
                 somainds = np.r_[somainds, cell.get_idx("soma") + nseg]
                 nseg += cell.totnsegs
 
         # return number of segments per population and DummyCell object
-        return nsegs, DummyCell(totnsegs, x, y, z, d, area, somainds)
+        return nsegs, DummyCell(totnsegs, x, y, z, d, area, length, somainds)
 
     def __run_simulation(self, cvode, variable_dt=False, atol=0.001):
         """
