@@ -144,3 +144,5 @@ examples/bioRxiv281717/figure_7_8/parameters
 *.pdf
 *.h5
 x86_64
+arm64
+aarch64
