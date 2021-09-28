@@ -42,7 +42,7 @@ except ImportError:
 if not any(arg in sys.argv for arg in ['sdist', 'upload']):
     if shutil.which('nrnivmodl') is not None:
         os.chdir(os.path.join('LFPy', 'test'))
-        for path in ['x86_64', 'arm64']:
+        for path in ['x86_64', 'arm64', 'aarch64']:
             if os.path.isdir(path):
                 shutil.rmtree(path)
         spawn([shutil.which('nrnivmodl')])
