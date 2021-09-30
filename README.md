@@ -246,14 +246,16 @@ To get started, install Docker and issue either:
     $ docker pull lfpy/lfpy
     $ docker run -it -p 5000:5000 lfpy/lfpy
 
+
 or
 
     # build Dockerfile from GitHub
     $ docker build -t lfpy https://raw.githubusercontent.com/LFPy/LFPy/master/Dockerfile
     $ docker run -it -p 5000:5000 lfpy:latest
 
+
 or
-    
+
     # build local Dockerfile (obtained by cloning repo, checkout branch etc.)
     $ docker build -t lfpy - < Dockerfile
     $ docker run -it -p 5000:5000 lfpy:latest
@@ -261,7 +263,7 @@ or
 
 The ``--mount`` option can be used to mount a folder on the host to a target folder as:
 
-    $ docker run --mount type=bind,source="$(pwd)",target=/opt -it -p 5000:5000 <image-name>
+    $ docker run --mount type=bind,source="$(pwd)",target=/opt -it -p 5000:5000 lfpy
 
 
 which mounts the present working dirctory (``$(pwd)``) to the ``/opt`` directory of the container.
@@ -273,7 +275,8 @@ Jupyter notebook servers running from within the
 container can be accessed after invoking them by issuing:
 
     $ cd /opt/LFPy/examples/
-    $ jupyter notebook --ip 0.0.0.0 --port=5000 --no-browser --allow-root
+    $ jupyter-notebook --ip 0.0.0.0 --port=5000 --no-browser --allow-root
+
 
 and opening the resulting URL in a browser on the host computer, similar to:
 http://127.0.0.1:5000/?token=dcf8f859f859740fc858c568bdd5b015e0cf15bfc2c5b0c1
@@ -287,6 +290,7 @@ issue from the LFPy source code directory:
 
     $ cd doc
     $ make html
+
 
 The main html file is in ``_build/html/index.html``.
 m2r2, Numpydoc and the Sphinx ReadTheDocs theme may be needed:
