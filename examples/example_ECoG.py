@@ -91,11 +91,11 @@ def plot_LFP_and_ECoG(cell, electrode, electrode_MoI, ecog_electrode):
             color=ecog_clr)
 
     ax.text(xlim, top_of_cortex + 100,
-            r"$\sigma_S$=\n{} S/m".format(electrode_MoI.sigma_S),
+            "$\sigma_S$=\n{} S/m".format(electrode_MoI.sigma_S),
             rotation=-90, color=surface_clr, va='center')
 
     ax.text(xlim, top_of_cortex - 150,
-            r"$\sigma_T$=\n{} S/m".format(electrode_MoI.sigma_T),
+            "$\sigma_T$=\n{} S/m".format(electrode_MoI.sigma_T),
             rotation=-90, color=cortex_clr, va="center")
 
     ax.axhspan(top_of_cortex, top_of_cortex + 200,
