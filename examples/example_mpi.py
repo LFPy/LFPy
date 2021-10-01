@@ -282,8 +282,8 @@ class Population:
                                shading='auto')
             ax.axis(ax.axis('tight'))
             cbar = plt.colorbar(im, cax=cax)
-            cbar.set_label('LFP (mV)')
-            ax.set_title('superimposed LFP')
+            cbar.set_label('extracellular potential (mV)')
+            ax.set_title('superimposed extracellular potential')
             ax.set_xlabel('time (ms)')
             ax.set_ylabel(r'$z$ ($\mu$m)')
 
