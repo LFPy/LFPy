@@ -200,16 +200,16 @@ class Cell(object):
                 ("Could not recognize Cell keyword argument morphology as " +
                  "neuron.h.SectionList instance")
 
+            # set some additional attributes
+            self._create_sectionlists()
+
             # instantiate 3D geometry of all sections            
             # don't run define_shape if segments don't connect to end points
             if self._run_define_shape():
                 neuron.h.define_shape()
             else:
-                print("Can't run define_shape() since some connection are not " \
+                print("Can't run define_shape() since some connection are not "
                       "at the end of section")
-
-            # set some additional attributes
-            self._create_sectionlists()
 
         # Some parameters and lists initialised
         assert tstart <= 0, 'tstart must be <= 0.'
@@ -357,7 +357,7 @@ class Cell(object):
     def _run_define_shape(self):
         """Check if define_shape should be run"""
         # check if any segment connects to 0 < x < 1
-        for sec in self.morphology:
+        for sec in self.allseclist:
             x = neuron.h.parent_connection(sec=sec)
             if x not in [0, 1]:
                 return False
