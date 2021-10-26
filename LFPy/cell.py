@@ -200,22 +200,14 @@ class Cell(object):
                 ("Could not recognize Cell keyword argument morphology as " +
                  "neuron.h.SectionList instance")
 
-            # instantiate 3D geometry of all sections
-            
-            # check if any segment connects to 0 < x < 1
-            self._run_define_shape = True
-            for sec in self.morphology:
-                x = neuron.h.parent_connection(sec=sec)
-                if x not in [0, 1]:
-                    self._run_define_shape = False
-                    break 
-
+            # instantiate 3D geometry of all sections            
             # don't run define_shape if segments don't connect to end points
-            if self._run_define_shape:
+            if self._run_define_shape():
                 neuron.h.define_shape()
             else:
-                print(f"Can't run define_shape() since some connection are not at the end of section")
-                
+                print("Can't run define_shape() since some connection are not " \
+                      "at the end of section")
+
             # set some additional attributes
             self._create_sectionlists()
 
@@ -361,6 +353,15 @@ class Cell(object):
 
         neuron.h.define_shape()
         self._create_sectionlists()
+
+    def _run_define_shape(self):
+        """Check if define_shape should be run"""
+        # check if any segment connects to 0 < x < 1
+        for sec in self.morphology:
+            x = neuron.h.parent_connection(sec=sec)
+            if x not in [0, 1]:
+                return False
+        return True
 
     def __run_custom_codes(self, custom_code, custom_fun, custom_fun_args):
         """Execute custom model code and functions with arguments"""
@@ -2023,7 +2024,7 @@ class Cell(object):
                                     self.z3d[i][n],
                                     self.diam3d[i][n], sec=sec)
             # let NEURON know about the changes we just did:
-            if self._run_define_shape:
+            if self._run_define_shape():
                 neuron.h.define_shape()
         # must recollect the geometry, otherwise we get roundoff errors!
         self._collect_geometry()
