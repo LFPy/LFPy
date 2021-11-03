@@ -693,7 +693,10 @@ class Network(object):
                 delayargs=dict(a=0.3, b=np.inf, loc=2, scale=0.2),
                 mindelay=None,
                 multapsefun=stats.truncnorm,
-                multapseargs=dict(a=(1 - 4) / 1., b=(10 - 4) / 1, loc=4, scale=1),
+                multapseargs=dict(a=(1 - 4) / 1.,
+                                  b=(10 - 4) / 1,
+                                  loc=4,
+                                  scale=1),
                 syn_pos_args=dict(section=['soma', 'dend', 'apic'],
                                   fun=[stats.norm] * 2,
                                   funargs=[dict(loc=0, scale=100)] * 2,
@@ -829,7 +832,7 @@ class Network(object):
                         nidx = stats.rv_discrete(values=(xk, pk)).rvs()
                         # this aint pretty:
                         mssg = (
-                            f'multapsefun: '
+                            'multapsefun: '
                             + multapsefun(**multapseargs).__str__()
                             + f'w. multapseargs: {multapseargs} resulted '
                             + f'in {nidx} synapses'
