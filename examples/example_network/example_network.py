@@ -209,13 +209,15 @@ weightArguments = [[dict(loc=0.001, scale=0.0001),
                    [dict(loc=0.01, scale=0.001),
                     dict(loc=0.01, scale=0.001)]]
 minweight = 0.
-# conduction delay (function, mean, st.dev., min.):
-delayFunction = np.random.normal
-delayArguments = [[dict(loc=1.5, scale=0.3),
-                   dict(loc=1.5, scale=0.3)],
-                  [dict(loc=1.5, scale=0.3),
-                   dict(loc=1.5, scale=0.3)]]
-mindelay = 0.3
+# conduction delay (function, mean, st.dev., min.) using truncated normal
+# continuous random variable:
+delayFunction = st.truncnorm
+delayArguments = [[dict(a=0.3, b=np.inf, loc=1.5, scale=0.3),
+                   dict(a=0.3, b=np.inf, loc=1.5, scale=0.3)],
+                  [dict(a=0.3, b=np.inf, loc=1.5, scale=0.3),
+                   dict(a=0.3, b=np.inf, loc=1.5, scale=0.3)]]
+mindelay = None  # will be deprecated
+
 multapseFunction = np.random.normal
 multapseArguments = [[dict(loc=2., scale=.5), dict(loc=2., scale=.5)],
                      [dict(loc=5., scale=1.), dict(loc=5., scale=1.)]]

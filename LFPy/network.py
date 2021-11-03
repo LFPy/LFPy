@@ -25,6 +25,7 @@ import neuron
 from neuron import units
 from .templatecell import TemplateCell
 import scipy.sparse as ss
+from warnings import warn
 
 # set up MPI environment
 COMM = MPI.COMM_WORLD
@@ -325,6 +326,7 @@ class NetworkPopulation(object):
     OUTPUTPATH: str
         path to output file destination
     """
+
     def __init__(self, CWD=None, CELLPATH=None, first_gid=0, Cell=NetworkCell,
                  POP_SIZE=4, name='L5PC',
                  cell_args=None, pop_args=None,
@@ -508,6 +510,7 @@ class Network(object):
     verbose: bool
         if True, print out misc. messages
     """
+
     def __init__(
             self,
             dt=0.1,
@@ -686,9 +689,9 @@ class Network(object):
                 weightfun=np.random.normal,
                 weightargs=dict(loc=0.1, scale=0.01),
                 minweight=0,
-                delayfun=np.random.normal,
-                delayargs=dict(loc=2, scale=0.2),
-                mindelay=0.3,
+                delayfun=stats.truncnorm,
+                delayargs=dict(a=0.3, b=np.inf, loc=2, scale=0.2),
+                mindelay=None,
                 multapsefun=np.random.normal,
                 multapseargs=dict(loc=4, scale=1),
                 syn_pos_args=dict(section=['soma', 'dend', 'apic'],
@@ -725,11 +728,13 @@ class Network(object):
         minweight: float,
             minimum weight in units of nS
         delayfun: function
-            function used to draw delays from a numpy.random distribution
+            function used to draw delays from a subclass of
+            scipy.stats.rv_continuous or numpy.random distribution
         delayargs: dict
-            parameters passed to delayfun
+            parameters passed to ``delayfun``
         mindelay: float,
-            minimum delay in multiples of dt
+            minimum delay in multiples of dt. Ignored if ``delayfun`` is an
+            inherited from ``scipy.stats.rv_continuous``
         multapsefun: function or None
             function reference, e.g., numpy.random.normal used to draw a number
             of synapses for a cell-to-cell connection. If None, draw only one
@@ -762,7 +767,25 @@ class Network(object):
         list
             Length 2 list with ndarrays [conncount, syncount] with numbers of
             instantiated connections and synapses.
+
+        Raises
+        ------
+        DeprecationWarning
+            if ``delayfun`` is not a subclass of ``scipy.stats.rv_continuous``
+
         """
+        # check if delayfun is a scipy.stats.rv_continuous like function that
+        # provides a function `rvs` for random variates.
+        # Otherwise, raise some warnings
+        if not hasattr(delayfun, 'rvs'):
+            warn(f'argument delayfun={delayfun.__str__()} do not appear ' +
+                 'scipy.stats.rv_continuous or scipy.stats.rv_discrete like ' +
+                 'and will be deprecated in the future')
+        else:
+            if mindelay is not None:
+                warn(f'mindelay={mindelay} not usable with ' +
+                     f'delayfun={delayfun.__str__()}')
+
         # set up connections from all cells in presynaptic to post across RANKs
         n0 = self.populations[pre].first_gid
         # gids of presynaptic neurons:
@@ -815,11 +838,19 @@ class Network(object):
                     weights[j] = weightfun(size=j.sum(), **weightargs)
 
                 # draw delays
-                delays = delayfun(size=nidx, **delayargs)
-                # redraw delays shorter than mindelay
-                while np.any(delays < mindelay):
-                    j = delays < mindelay
-                    delays[j] = delayfun(size=j.sum(), **delayargs)
+                if hasattr(delayfun, 'rvs'):
+                    try:
+                        assert delayargs['a'] > self.dt
+                    except AssertionError as ae:
+                        raise ae(f'the delayfun parameter a={delayargs["a"]} '
+                                 + f'must be greater than dt={self.dt}')
+                    delays = delayfun(**delayargs).rvs(size=nidx)
+                else:
+                    delays = delayfun(size=nidx, **delayargs)
+                    # redraw delays shorter than mindelay
+                    while np.any(delays < mindelay):
+                        j = delays < mindelay
+                        delays[j] = delayfun(size=j.sum(), **delayargs)
 
                 for i, ((idx, secname, secx), weight, delay) in enumerate(
                         zip(secs, weights, delays)):

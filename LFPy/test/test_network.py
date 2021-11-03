@@ -646,9 +646,9 @@ class testNetwork(unittest.TestCase):
             weightfun=return_constant,
             weightargs={'value': 0.1},
             minweight=0,
-            delayfun=return_constant,
-            delayargs={'value': 2.},
-            mindelay=0.3,
+            delayfun=st.rv_discrete,
+            delayargs=dict(a=0.3, b=np.inf, values=(2., 1.)),
+            mindelay=None,
             multapsefun=None,  # 1 synapse per connection
             save_connections=True,
             syn_pos_args=dict(section=['soma'],
@@ -700,7 +700,7 @@ class testNetwork(unittest.TestCase):
         assert np.all(conn_data['weight'] ==
                       connectionParameters['weightargs']['value'])
         assert np.all(conn_data['delay'] ==
-                      connectionParameters['delayargs']['value'])
+                      connectionParameters['delayargs']['values'][0])
         assert np.all(conn_data['sec.x'] == 0.5)
         for cell in population.cells:
             inds = conn_data['gid'] == cell.gid
