@@ -692,8 +692,8 @@ class Network(object):
                 delayfun=stats.truncnorm,
                 delayargs=dict(a=0.3, b=np.inf, loc=2, scale=0.2),
                 mindelay=None,
-                multapsefun=np.random.normal,
-                multapseargs=dict(loc=4, scale=1),
+                multapsefun=stats.truncnorm,
+                multapseargs=dict(a=(1 - 4) / 1., b=(10 - 4) / 1, loc=4, scale=1),
                 syn_pos_args=dict(section=['soma', 'dend', 'apic'],
                                   fun=[stats.norm] * 2,
                                   funargs=[dict(loc=0, scale=100)] * 2,
@@ -736,9 +736,9 @@ class Network(object):
             minimum delay in multiples of dt. Ignored if ``delayfun`` is an
             inherited from ``scipy.stats.rv_continuous``
         multapsefun: function or None
-            function reference, e.g., numpy.random.normal used to draw a number
-            of synapses for a cell-to-cell connection. If None, draw only one
-            connection
+            function reference, e.g., ``scipy.stats.rv_continuous`` used to
+            draw a number of synapses for a cell-to-cell connection.
+            If None, draw only one connection
         multapseargs: dict
             arguments passed to multapsefun
         syn_pos_args: dict
@@ -816,14 +816,49 @@ class Network(object):
                 if multapsefun is None:
                     nidx = 1
                 else:
-                    nidx = 0
-                    j = 0
-                    while nidx <= 0 and j < 1000:
-                        nidx = int(round(multapsefun(**multapseargs)))
-                        j += 1
-                    if j == 1000:
-                        raise Exception('change multapseargs as no positive '
-                                        'synapse # was found in 1000 trials')
+                    if hasattr(multapsefun, 'pdf'):
+                        # assume we're dealing with a scipy.stats.rv_continuous
+                        # like method. Then evaluate pdf at positive integer
+                        # values and feed as custom scipy.stats.rv_discrete
+                        # distribution
+                        d = multapsefun(**multapseargs)
+                        # number of multapses must be on interval [1, 100]
+                        xk = np.arange(1, 100)
+                        pk = d.pdf(xk)
+                        pk /= pk.sum()
+                        nidx = stats.rv_discrete(values=(xk, pk)).rvs()
+                        # this aint pretty:
+                        mssg = (
+                            f'multapsefun: '
+                            + multapsefun(**multapseargs).__str__()
+                            + f'w. multapseargs: {multapseargs} resulted '
+                            + f'in {nidx} synapses'
+                        )
+                        assert nidx >= 1, mssg
+                    elif hasattr(multapsefun, 'pmf'):
+                        # assume we're dealing with a scipy.stats.rv_discrete
+                        # like method that can be used to generate random
+                        # variates directly
+                        nidx = multapsefun(**multapseargs).rvs()
+                        mssg = (
+                            f'multapsefun: {multapsefun().__str__()} w. '
+                            + f'multapseargs: {multapseargs} resulted in '
+                            + f'{nidx} synapses'
+                        )
+                        assert nidx >= 1, mssg
+                    else:
+                        warn(f'multapsefun{multapsefun.__str__()} will be ' +
+                             'deprecated. Use scipy.stats.rv_continuous or ' +
+                             'scipy.stats.rv_discrete like methods instead')
+                        nidx = 0
+                        j = 0
+                        while nidx <= 0 and j < 1000:
+                            nidx = int(round(multapsefun(**multapseargs)))
+                            j += 1
+                        if j == 1000:
+                            raise Exception(
+                                'change multapseargs as no positive '
+                                'synapse # was found in 1000 trials')
 
                 # find synapse locations and corresponding section names
                 idxs = cell.get_rand_idx_area_and_distribution_norm(
@@ -847,7 +882,7 @@ class Network(object):
                         raise ae(
                             f'the delayfun parameter a={delayargs["a"]} '
                             + f'resulted in delay less than dt={self.dt}'
-                            )
+                        )
                 else:
                     delays = delayfun(size=nidx, **delayargs)
                     # redraw delays shorter than mindelay

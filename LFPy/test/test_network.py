@@ -305,7 +305,8 @@ class testNetwork(unittest.TestCase):
 
         # connect
         network.connect(pre='test', post='test', connectivity=connectivity,
-                        multapseargs=dict(loc=1, scale=1E-9))
+                        multapsefun=st.rv_discrete,
+                        multapseargs=dict(a=0, b=np.inf, values=(1, 1)))
 
         # create synthetic AP in cell with gid == 0
         for population in network.populations.values():
