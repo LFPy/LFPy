@@ -212,10 +212,10 @@ minweight = 0.
 # conduction delay (function, mean, st.dev., min.) using truncated normal
 # continuous random variable:
 delayFunction = st.truncnorm
-delayArguments = [[dict(a=0.3, b=np.inf, loc=1.5, scale=0.3),
-                   dict(a=0.3, b=np.inf, loc=1.5, scale=0.3)],
-                  [dict(a=0.3, b=np.inf, loc=1.5, scale=0.3),
-                   dict(a=0.3, b=np.inf, loc=1.5, scale=0.3)]]
+delayArguments = [[dict(a=(0.3 - 1.5) / 0.3, b=np.inf, loc=1.5, scale=0.3),
+                   dict(a=(0.3 - 1.5) / 0.3, b=np.inf, loc=1.5, scale=0.3)],
+                  [dict(a=(0.3 - 1.5) / 0.3, b=np.inf, loc=1.5, scale=0.3),
+                   dict(a=(0.3 - 1.5) / 0.3, b=np.inf, loc=1.5, scale=0.3)]]
 mindelay = None  # will be deprecated
 
 multapseFunction = np.random.normal

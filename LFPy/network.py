@@ -839,12 +839,15 @@ class Network(object):
 
                 # draw delays
                 if hasattr(delayfun, 'rvs'):
-                    try:
-                        assert delayargs['a'] > self.dt
-                    except AssertionError as ae:
-                        raise ae(f'the delayfun parameter a={delayargs["a"]} '
-                                 + f'must be greater than dt={self.dt}')
                     delays = delayfun(**delayargs).rvs(size=nidx)
+                    # check that all delays are > dt
+                    try:
+                        assert np.all(delays >= self.dt)
+                    except AssertionError as ae:
+                        raise ae(
+                            f'the delayfun parameter a={delayargs["a"]} '
+                            + f'resulted in delay less than dt={self.dt}'
+                            )
                 else:
                     delays = delayfun(size=nidx, **delayargs)
                     # redraw delays shorter than mindelay
