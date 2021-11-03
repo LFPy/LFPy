@@ -219,7 +219,7 @@ delayArguments = [[dict(a=(0.3 - 1.5) / 0.3, b=np.inf, loc=1.5, scale=0.3),
 mindelay = None  # will be deprecated
 
 # Distributions of multapses. They are here defined via a truncated normal
-# continous random variable distribuion which will be used to compute a
+# continous random variable distribution which will be used to compute a
 # discrete probability distribution for integer numbers of
 # synapses 1, 2, ..., 100, via a scipy.stats.rv_discrete instance
 multapseFunction = st.truncnorm
@@ -232,11 +232,11 @@ multapseArguments = [[dict(a=(1 - 2.) / .5,
                            loc=2.,
                            scale=.5)],
                      [dict(a=(1 - 5.) / 1.,
-                           b=(10 - 2.) / .5,
+                           b=(10 - 5.) / 1.,
                            loc=5.,
                            scale=1.),
                       dict(a=(1 - 5.) / 1.,
-                           b=(10 - 2.) / .5,
+                           b=(10 - 5.) / 1.,
                            loc=5.,
                            scale=1.)]]
 
