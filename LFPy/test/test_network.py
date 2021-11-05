@@ -305,7 +305,8 @@ class testNetwork(unittest.TestCase):
 
         # connect
         network.connect(pre='test', post='test', connectivity=connectivity,
-                        multapseargs=dict(loc=1, scale=1E-9))
+                        multapsefun=st.rv_discrete,
+                        multapseargs=dict(a=0, b=np.inf, values=(1, 1)))
 
         # create synthetic AP in cell with gid == 0
         for population in network.populations.values():
@@ -646,9 +647,9 @@ class testNetwork(unittest.TestCase):
             weightfun=return_constant,
             weightargs={'value': 0.1},
             minweight=0,
-            delayfun=return_constant,
-            delayargs={'value': 2.},
-            mindelay=0.3,
+            delayfun=st.rv_discrete,
+            delayargs=dict(a=0.3, b=np.inf, values=(2., 1.)),
+            mindelay=None,
             multapsefun=None,  # 1 synapse per connection
             save_connections=True,
             syn_pos_args=dict(section=['soma'],
@@ -700,7 +701,7 @@ class testNetwork(unittest.TestCase):
         assert np.all(conn_data['weight'] ==
                       connectionParameters['weightargs']['value'])
         assert np.all(conn_data['delay'] ==
-                      connectionParameters['delayargs']['value'])
+                      connectionParameters['delayargs']['values'][0])
         assert np.all(conn_data['sec.x'] == 0.5)
         for cell in population.cells:
             inds = conn_data['gid'] == cell.gid
