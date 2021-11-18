@@ -1,4 +1,4 @@
-name: latest
+name: lfpy
 channels:
   - conda-forge
   - defaults
@@ -14,4 +14,3 @@ dependencies:
   - m2r2
   - pip
   - pip:
-    - neuron>=7.7.2
