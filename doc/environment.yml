@@ -8,7 +8,7 @@ dependencies:
   - c-compiler
   - cxx-compiler
   - pthread-stubs
-  - mpi
+  - mpi4py
   - sphinx_rtd_theme
   - numpydoc
   - m2r2
