@@ -49,7 +49,8 @@ RUN cmake --build . --parallel 4 --target install && \
 RUN cd
 RUN rm -rf nrn && rm -rf nrn-bld
 
-
+# add nrnpython to PYTHONPATH
+ENV PYTHONPATH /usr/local/lib/python:${PYTHONPATH}
 
 # --- Install LFPy ----
 RUN git clone --depth=1 --branch master https://github.com/LFPy/LFPy
