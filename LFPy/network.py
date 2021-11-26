@@ -25,7 +25,7 @@ import neuron
 from neuron import units
 from .templatecell import TemplateCell
 import scipy.sparse as ss
-from warnings import warn
+from warnings import warn, filterwarnings
 
 # set up MPI environment
 COMM = MPI.COMM_WORLD
@@ -136,6 +136,12 @@ class NetworkCell(TemplateCell):
     """
 
     def __init__(self, **args):
+        # suppress some warnings if section references belonging to other
+        # NetworkCell instances are found
+        filterwarnings(action='ignore',
+                       message="(?=.*(sections detected))",
+                       category=UserWarning)
+        # instantiate parent class
         super().__init__(**args)
 
         # create list netconlist for spike detecting NetCon object(s)
