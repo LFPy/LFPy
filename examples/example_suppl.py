@@ -127,7 +127,7 @@ def plot_ex2(cell, electrode):
     ax = fig.add_axes([0.1, 0.1, 0.533334, 0.8], frameon=False)
     ax.scatter(xcoords[argsort], zcoords[argsort], s=diams[argsort]**2 * 20,
                c=ycoords[argsort], edgecolors='none', cmap='gray')
-    ax.plot(electrode.x, electrode.z, '.', marker='o', markersize=5, color='k')
+    ax.plot(electrode.x, electrode.z, 'o', markersize=5, color='k')
 
     i = 0
     for LFP in electrode.data:

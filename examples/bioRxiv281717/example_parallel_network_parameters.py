@@ -748,6 +748,8 @@ PSET.connParams = dict(
     ) for post in PSET.populationParameters['m_type']]
         for pre in PSET.populationParameters['m_type']],
 
+    # delays less than this value will be redrawn
+    mindelay=2**-3,
 
     # numbers of synapses per connection
     multapsefuns=[[np.random.normal] \
