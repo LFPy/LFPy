@@ -338,6 +338,7 @@ if __name__ == '__main__':
                 weightargs=PSET.connParams['weightargs'][i][j],
                 delayfun=PSET.connParams['delayfuns'][i][j],
                 delayargs=PSET.connParams['delayargs'][i][j],
+                mindelay=PSET.connParams['mindelay'],
                 multapsefun=PSET.connParams['multapsefuns'][i][j],
                 multapseargs=PSET.connParams['multapseargs'][i][j],
                 syn_pos_args=PSET.connParams['syn_pos_args'][i][j],
