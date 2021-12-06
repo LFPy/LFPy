@@ -1,17 +1,18 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""Demonstrate usage of LFPy.Network with network of ball-and-stick type
+"""Demonstrate the stimulation of a LFPy.Network.
+Here a simple model of neuron ball-and-stick is used to populate two 
 morphologies with active HH channels inserted in the somas and passive-leak
 channels distributed throughout the apical dendrite. The corresponding
 morphology and template specifications are in the files BallAndStick.hoc and
 BallAndStickTemplate.hoc.
 
-Same as example_network.py, except that electrode and current dipole moment
-output is simulated to file.
+Same as example_network_to_file.py, except that a stimulating current is 
+applied instead of background Poisson activity.
 
 Execution (w. MPI):
 
-    mpirun python example_network_to_file.py
+    mpirun python example_network_stim.py
 
 Copyright (C) 2017 Computational Neuroscience Group, NMBU.
 
