@@ -1,20 +1,22 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""Demonstrate the stimulation of a LFPy.Network.
-Here a simple model of neuron ball-and-stick is used to populate two 
+"""Demonstrate extracellular electric stimulation of a LFPy.Network instance,
+using the LFPy.Network.enable_extracellular_stimulation() method.
+
+Here a simple model of neuron ball-and-stick is used to populate two
 morphologies with active HH channels inserted in the somas and passive-leak
 channels distributed throughout the apical dendrite. The corresponding
 morphology and template specifications are in the files BallAndStick.hoc and
 BallAndStickTemplate.hoc.
 
-Same as example_network_to_file.py, except that a stimulating current is 
+Same as example_network_to_file.py, except that a stimulating current is
 applied instead of background Poisson activity.
 
 Execution (w. MPI):
 
     mpirun python example_network_stim.py
 
-Copyright (C) 2017 Computational Neuroscience Group, NMBU.
+Copyright (C) 2021 Computational Neuroscience Group, NMBU.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -140,7 +142,7 @@ def draw_lineplot(
 # Set up shared and population-specific parameters
 ##########################################################################
 # relative path for simulation output:
-OUTPUTPATH = 'example_network_to_file_output'
+OUTPUTPATH = 'example_network_stim_output'
 
 # class NetworkCell parameters:
 cellParameters = dict(
@@ -150,7 +152,7 @@ cellParameters = dict(
     templateargs=None,
     delete_sections=False,
     dt=2**-4,
-    tstop=10000., # ms
+    tstop=2000,
 )
 
 # class NetworkPopulation parameters:
@@ -169,19 +171,19 @@ networkParameters = dict(
     dt=2**-4,
     tstop=1200.,
     v_init=-65.,
-    celsius= 36.5,
+    celsius=36.5,
     OUTPUTPATH=OUTPUTPATH
 )
 
 # class RecExtElectrode parameters:
 electrodeParameters = dict(
-    x=np.array([-100,0,100,-100,0,100,-100,0,100]),
-    y=np.array([100,100,100,0,0,0,-100,-100,-100]),
+    x=np.array([-100, 0, 100, -100, 0, 100, -100, 0, 100]),
+    y=np.array([100, 100, 100, 0, 0, 0, -100, -100, -100]),
     z=np.zeros(9),
     N=np.array([[0., 0., 1.] for _ in range(9)]),
-    r=20., # 5um radius
-    n=50, # nb of discrete point used to compute the potential
-    sigma=1, # conductivity S/m
+    r=20.,  # 5um radius
+    n=50,  # nb of discrete point used to compute the potential
+    sigma=1,  # conductivity S/m
     method="linesource"
 )
 
@@ -297,15 +299,15 @@ if __name__ == '__main__':
     electrode = RecExtElectrode(cell=None, **electrodeParameters)
     stim_elec = 4
     I_stim, t_ext = electrode.probe.set_current_pulses(
-                n_pulses = 20, 
-                biphasic= True, # width2=width1, amp2=-amp1
-                width1=5,
-                amp1=3000, # nA
-                dt=network.dt,
-                t_stop=network.tstop,
-                interpulse=200,
-                el_id = stim_elec,
-                t_start = 200)
+        n_pulses=20,
+        biphasic=True,  # width2=width1, amp2=-amp1
+        width1=5,
+        amp1=3000,  # nA
+        dt=network.dt,
+        t_stop=network.tstop,
+        interpulse=200,
+        el_id=stim_elec,
+        t_start=200)
     network.enable_extracellular_stimulation(electrode, t_ext, n=5)
     # set up recording of current dipole moments. Ditto with regards to
     # `cell` being set to None
