@@ -1004,55 +1004,55 @@ class Network(object):
     def enable_extracellular_stimulation(self, electrode, t_ext=None, n=1,
                                          model='inf'):
         """
-        Enable extracellular stimulation with 'extracellular' mechanism.
-        Extracellular potentials are computed from the electrode currents
-        using the pointsource approximation.
-        If 'model' is 'inf' (default), potentials are computed as
-        (:math:`r_i` is the position of a comparment i,
-        :math:`r_e` is the position of an elextrode e, :math:`\sigma` is the
-        conductivity of the medium):
+        Enable extracellular stimulation with NEURON's `extracellular`
+        mechanism. Extracellular potentials are computed from electrode
+        currents using the point-source approximation.
+        If ``model`` is ``'inf'`` (default), potentials are computed as
+        (:math:`r_i` is the position of a compartment :math:`i`,
+        :math:`r_n` is the position of an electrode :math:`n`,
+        :math:`\sigma` is the conductivity of the medium):
 
         .. math::
-            V_e(r_i) = \sum_n \frac{I_n}{4 \pi \sigma |r_i - r_n|}
+            V_e(r_i) = \sum_n \\frac{I_n}{4 \pi \sigma |r_i - r_n|}
 
-        If model is 'semi', the method of images is used:
+        If ``model`` is ``'semi'``, the method of images is used:
 
         .. math::
-            V_e(r_i) = \sum_n \frac{I_n}{2 \pi \sigma |r_i - r_n|}
+            V_e(r_i) = \sum_n \\frac{I_n}{2 \pi \sigma |r_i - r_n|}
 
         Parameters
         ----------
         electrode: RecExtElectrode
             Electrode object with stimulating currents
         t_ext: np.ndarray or list
-            Time im ms corrisponding to step changes in the provided currents.
+            Time in ms corresponding to step changes in the provided currents.
             If None, currents are assumed to have
-            the same time steps as NEURON simulation.
+            the same time steps as the NEURON simulation.
         n: int
-            Points per electrode to compute spatial averaging
+            Points per electrode for spatial averaging
         model: str
-            'inf' or 'semi'. If 'inf' the medium is assumed to be infinite and
-            homogeneous. If 'semi', the method of
+            ``'inf'`` or ``'semi'``. If ``'inf'`` the medium is assumed to be
+            infinite and homogeneous. If ``'semi'``, the method of
             images is used.
 
         Returns
         -------
-        v_ext: dict of np.ndarray
-            Computed extracellular potentials at cell mid points 
-            for each cell of the network's populations.
-            v_ext = {'pop1': np.ndarray[cell,cell_seg,t_ext]}
+        v_ext: dict of np.ndarrays
+            Computed extracellular potentials at cell mid points
+            for each cell of the network's populations. Formatted as
+            ``v_ext = {'pop1': np.ndarray[cell, cell_seg,t_ext]}``
         """
         v_ext = {}
         for popname in self.populations.keys():
-            cells = self.populations[popname].cells 
-            v_ext[popname] = np.zeros((len(cells), cells[0].totnsegs, len(t_ext)))
-            
+            cells = self.populations[popname].cells
+            v_ext[popname] = np.zeros(
+                (len(cells), cells[0].totnsegs, len(t_ext)))
+
             for id_cell, cell in enumerate(cells):
-                v_ext[popname][id_cell] = cell.enable_extracellular_stimulation(electrode, 
-                                                                                t_ext,
-                                                                                n,
-                                                                                model)
-        
+                v_ext[popname][id_cell] = \
+                    cell.enable_extracellular_stimulation(
+                        electrode, t_ext, n, model)
+
         return v_ext
 
     def simulate(self, probes=None,
