@@ -70,7 +70,6 @@ Code status
 [![Coverage Status](https://coveralls.io/repos/github/LFPy/LFPy/badge.svg?branch=master)](https://coveralls.io/github/LFPy/LFPy?branch=master)
 [![Documentation Status](https://readthedocs.org/projects/lfpy/badge/?version=latest)](http://lfpy.readthedocs.io/en/latest/?badge=latest)
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/LFPy/LFPy_binder_examples/master)
-[![Docker](https://img.shields.io/badge/Docker-yes-green.svg)](https://hub.docker.com/r/lfpy/lfpy)
 [![DOI](https://zenodo.org/badge/78627256.svg)](https://zenodo.org/badge/latestdoi/78627256)
 
 
@@ -239,15 +238,8 @@ In case LFPy was installed using conda in an environment, it can be uninstalled 
 Docker
 ------
 
-We provide a Docker (https://www.docker.com, https://hub.docker.com/r/lfpy/lfpy) container build file with LFPy.
+We provide a Docker (https://www.docker.com) container recipe file with LFPy.
 To get started, install Docker and issue either:
-
-    # pull from docker hub
-    $ docker pull lfpy/lfpy
-    $ docker run -it -p 5000:5000 lfpy/lfpy
-
-
-or
 
     # build Dockerfile from GitHub
     $ docker build -t lfpy https://raw.githubusercontent.com/LFPy/LFPy/master/Dockerfile
@@ -261,7 +253,12 @@ or
     $ docker run -it -p 5000:5000 lfpy:latest
 
 
-The ``--mount`` option can be used to mount a folder on the host to a target folder as:
+If the docker file should fail for some reason it is possible to store the build log and avoid build caches by issuing
+
+    $ docker build --no-cache --progress=plain -t lfpy - < Dockerfile 2>&1 | tee lfpy.log
+
+
+If the build is successful, the ``--mount`` option can be used to mount a folder on the host to a target folder as:
 
     $ docker run --mount type=bind,source="$(pwd)",target=/opt -it -p 5000:5000 lfpy
 
