@@ -74,8 +74,8 @@ class Cell(object):
         Defaults to 'lambda100'
     max_nsegs_length: float or None
         Maximum segment length for method 'fixed_length'. Defaults to None
-    lambda_f: int
-        AC frequency for method 'lambda_f'. Defaults to 100
+    lambda_f: float
+        AC frequency for method 'lambda_f'. Defaults to 100. (Hz)
     d_lambda: float
         Parameter for d_lambda rule. Defaults to 0.1
     delete_sections: bool
@@ -133,7 +133,7 @@ class Cell(object):
                  tstop=100.,
                  dt=2**-4,
                  nsegs_method='lambda100',
-                 lambda_f=100,
+                 lambda_f=100.,
                  d_lambda=0.1,
                  max_nsegs_length=None,
                  delete_sections=True,

@@ -409,7 +409,7 @@ class MEG(lfpykit.eegmegcalc.MEG):
         >>> plt.subplot(312)
         >>> plt.plot(cell.tvec, syn.i)
         >>> plt.subplot(313)
-        >>> plt.plot(cell.tvec, H[0])
+        >>> plt.plot(cell.tvec, H[0, 1, :])  # y-component
         >>> plt.show()
 
         Returns
@@ -423,7 +423,7 @@ class MEG(lfpykit.eegmegcalc.MEG):
         H = np.zeros((R.shape[0], 3, cell.tvec.size))
 
         for i, R_ in enumerate(R):
-            for i_, d_, r_ in zip(i_axial, d_vectors, pos_vectors):
+            for i_, d_, r_ in zip(i_axial, d_vectors.T, pos_vectors):
                 r_rel = R_ - r_
                 H[i, :, :] += (i_.reshape((-1, 1))
                                @ np.cross(d_, r_rel).reshape((1, -1))).T \
