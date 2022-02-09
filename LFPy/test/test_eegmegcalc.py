@@ -22,12 +22,12 @@ import LFPy
 import neuron
 
 
-class testMEG(unittest.TestCase):
+class testInfiniteHomogeneousVolCondMEG(unittest.TestCase):
     """
-    test class eegmegcalc.MEG
+    test class eegmegcalc.InfiniteHomogeneousVolCondMEG
     """
 
-    def test_MEG_00(self):
+    def test_InfiniteHomogeneousVolCondMEG_00(self):
         '''test eegmegcalc.MEG.calculate_H()'''
         current_dipole_moment = np.zeros((3, 11))
         current_dipole_moment[0, :] += 1.
@@ -41,11 +41,11 @@ class testMEG(unittest.TestCase):
         gt[4, 2, :] = -1. / 4 / np.pi
         gt[5, 1, :] = 1. / 4 / np.pi
 
-        meg = LFPy.MEG(sensor_locations)
+        meg = LFPy.InfiniteHomogeneousVolCondMEG(sensor_locations)
         np.testing.assert_equal(gt, meg.calculate_H(current_dipole_moment,
                                                     dipole_location))
 
-    def test_MEG_01(self):
+    def test_InfiniteHomogeneousVolCondMEG_01(self):
         '''test eegmegcalc.MEG.calculate_H()'''
         current_dipole_moment = np.zeros((3, 11))
         current_dipole_moment[1, :] += 1.
@@ -59,11 +59,11 @@ class testMEG(unittest.TestCase):
         gt[3, 2, :] = 1. / 4 / np.pi
         gt[5, 0, :] = -1. / 4 / np.pi
 
-        meg = LFPy.MEG(sensor_locations)
+        meg = LFPy.InfiniteHomogeneousVolCondMEG(sensor_locations)
         np.testing.assert_equal(gt, meg.calculate_H(current_dipole_moment,
                                                     dipole_location))
 
-    def test_MEG_02(self):
+    def test_InfiniteHomogeneousVolCondMEG_02(self):
         '''test eegmegcalc.MEG.calculate_H()'''
         current_dipole_moment = np.zeros((3, 11))
         current_dipole_moment[2, :] += 1.
@@ -78,11 +78,11 @@ class testMEG(unittest.TestCase):
         gt[3, 1, :] = -1. / 4 / np.pi
         gt[4, 0, :] = 1. / 4 / np.pi
 
-        meg = LFPy.MEG(sensor_locations)
+        meg = LFPy.InfiniteHomogeneousVolCondMEG(sensor_locations)
         np.testing.assert_equal(gt, meg.calculate_H(current_dipole_moment,
                                                     dipole_location))
 
-    def test_MEG_03(self):
+    def test_InfiniteHomogeneousVolCondMEG_03(self):
         '''test eegmegcalc.MEG.calculate_H()'''
         current_dipole_moment = np.zeros((3, 1))
         current_dipole_moment[0, :] += 1.
@@ -96,11 +96,11 @@ class testMEG(unittest.TestCase):
         gt[4, 2, :] = -1. / 4 / np.pi
         gt[5, 1, :] = 1. / 4 / np.pi
 
-        meg = LFPy.MEG(sensor_locations)
+        meg = LFPy.InfiniteHomogeneousVolCondMEG(sensor_locations)
         np.testing.assert_equal(gt, meg.calculate_H(current_dipole_moment,
                                                     dipole_location))
 
-    def test_MEG_04(self):
+    def test_InfiniteHomogeneousVolCondMEG_04(self):
         '''test eegmegcalc.MEG.calculate_H()'''
         current_dipole_moment = np.zeros((3, 1))
         current_dipole_moment[1, :] += 1.
@@ -114,11 +114,11 @@ class testMEG(unittest.TestCase):
         gt[3, 2, :] = 1. / 4 / np.pi
         gt[5, 0, :] = -1. / 4 / np.pi
 
-        meg = LFPy.MEG(sensor_locations)
+        meg = LFPy.InfiniteHomogeneousVolCondMEG(sensor_locations)
         np.testing.assert_equal(gt, meg.calculate_H(current_dipole_moment,
                                                     dipole_location))
 
-    def test_MEG_05(self):
+    def test_InfiniteHomogeneousVolCondMEG_05(self):
         '''test eegmegcalc.MEG.calculate_H()'''
         current_dipole_moment = np.zeros((3, 1))
         current_dipole_moment[2, :] += 1.
@@ -132,11 +132,11 @@ class testMEG(unittest.TestCase):
         gt[3, 1, :] = -1. / 4 / np.pi
         gt[4, 0, :] = 1. / 4 / np.pi
 
-        meg = LFPy.MEG(sensor_locations)
+        meg = LFPy.InfiniteHomogeneousVolCondMEG(sensor_locations)
         np.testing.assert_equal(gt, meg.calculate_H(current_dipole_moment,
                                                     dipole_location))
 
-    def test_MEG_06(self):
+    def test_InfiniteHomogeneousVolCondMEG_06(self):
         '''test eegmegcalc.MEG.get_transformation_matrix()'''
         current_dipole_moment = np.c_[np.eye(3), -np.eye(3)]
 
@@ -162,7 +162,7 @@ class testMEG(unittest.TestCase):
                         [1., 0., 0., -1., 0., 0.],
                         [0., 0., 0., 0., 0., 0.]]]) / 4 / np.pi
 
-        meg = LFPy.MEG(sensor_locations)
+        meg = LFPy.InfiniteHomogeneousVolCondMEG(sensor_locations)
         M = meg.get_transformation_matrix(dipole_location)
 
         np.testing.assert_equal(gt, M @ current_dipole_moment)
