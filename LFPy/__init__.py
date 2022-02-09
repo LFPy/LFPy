@@ -68,7 +68,8 @@ from .templatecell import TemplateCell
 from .network import NetworkCell, NetworkPopulation, Network
 from .test import _test as run_tests
 from .eegmegcalc import FourSphereVolumeConductor, InfiniteVolumeConductor, \
-    MEG, NYHeadModel
+    MEG, InfiniteHomogeneousVolCondMEG, SphericallySymmetricVolCondMEG, \
+    NYHeadModel
 from lfpykit import lfpcalc
 from . import tools
 from . import inputgenerators
