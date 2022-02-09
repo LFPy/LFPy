@@ -231,8 +231,6 @@ class Cell(object):
 
         self.v_init = v_init
 
-        self.default_rotation = self.__get_rotation()
-
         # Set axial resistance and membrane capacitance
         self.Ra = Ra
         self.cm = cm
@@ -280,8 +278,7 @@ class Cell(object):
         else:
             if self.verbose:
                 print('no soma, using the midpoint if initial segment.')
-        self.set_rotation(**self.default_rotation)
-
+        
         if celsius is not None:
             if neuron.h.celsius != 6.3:
                 print("Changing temperature %1.2f to %1.2f"
@@ -398,26 +395,6 @@ class Cell(object):
         else:
             if self.verbose:
                 print('No nsegs_method applied (%s)' % nsegs_method)
-
-    def __get_rotation(self):
-        """Check if there exists a corresponding file
-        with rotation angles"""
-        if isinstance(self.morphology, str):
-            base = os.path.splitext(self.morphology)[0]
-            if os.path.isfile(base + '.rot'):
-                rotation_file = base + '.rot'
-                rotation_data = open(rotation_file)
-                rotation = {}
-                for line in rotation_data:
-                    var, val = line.split('=')
-                    val = val.strip()
-                    val = float(str(val))
-                    rotation[var] = val
-            else:
-                rotation = {}
-        else:
-            rotation = {}
-        return rotation
 
     def _create_sectionlists(self):
         """Create section lists for different kinds of sections"""

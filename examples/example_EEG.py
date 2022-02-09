@@ -103,6 +103,7 @@ if __name__ == '__main__':
                       }
     # create cell with parameters in dictionary
     cell = LFPy.Cell(**cell_params)
+    cell.set_rotation(x=4.98919, y=-4.33261, z=0.)
     pos = syn_loc
     synapse_params['idx'] = cell.get_closest_idx(x=pos[0], y=pos[1], z=pos[2])
     synapse = LFPy.Synapse(cell, **synapse_params)
