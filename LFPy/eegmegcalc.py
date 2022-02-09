@@ -348,7 +348,9 @@ class InfiniteHomogeneousVolCondMEG(
     >>> cell.simulate(probes=[cdm])
     >>> # Compute the dipole location as an average of segment locations
     >>> # weighted by membrane area:
-    >>> dipole_location = (cell.area * np.c_[cell.x.mean(axis=1), cell.y.mean(axis=1), cell.z.mean(axis=1)].T
+    >>> dipole_location = (cell.area * np.c_[cell.x.mean(axis=1),
+    >>>                                      cell.y.mean(axis=1),
+    >>>                                      cell.z.mean(axis=1)].T
     >>>                    / cell.area.sum()).sum(axis=1)
     >>> # Define sensor site, instantiate MEG object, get transformation matrix
     >>> sensor_locations = np.array([[1E4, 0, 0]])
