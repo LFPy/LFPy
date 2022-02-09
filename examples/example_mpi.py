@@ -217,7 +217,9 @@ class Population:
                      y=self.cellPositions[cellindex, 1],
                      z=self.cellPositions[cellindex, 2])
         # rotate the morphology
-        cell.set_rotation(z=self.cellRotations_z[cellindex], **self.cellRotations)
+        cell.set_rotation(
+            z=self.cellRotations_z[cellindex],
+            **self.cellRotations)
 
         # attach synapse with parameters and set spike time
         synapse = LFPy.Synapse(cell, **self.synapseParameters)
@@ -247,7 +249,9 @@ class Population:
                 cell.set_pos(x=self.cellPositions[cellindex, 0],
                              y=self.cellPositions[cellindex, 1],
                              z=self.cellPositions[cellindex, 2])
-                cell.set_rotation(z=self.cellRotations_z[cellindex], **self.cellRotations)
+                cell.set_rotation(
+                    z=self.cellRotations_z[cellindex],
+                    **self.cellRotations)
 
                 zips = []
                 for x, z in cell.get_idx_polygons():
@@ -357,7 +361,7 @@ if __name__ == '__main__':
         'zmin': -200,
         'zmax': 200,
     }
-    
+
     # default rotation around x and y axis
     cellRotations = {'x': 4.99, 'y': -4.33}
 
@@ -365,7 +369,7 @@ if __name__ == '__main__':
     population = Population(POPULATION_SIZE,
                             cellParameters,
                             populationParameters,
-                            cellRotations, 
+                            cellRotations,
                             electrodeParameters,
                             synapseParameters,
                             stationaryGammaArgs,)
