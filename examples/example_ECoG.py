@@ -228,6 +228,7 @@ cellParameters = {
 }
 # Initialize cell instance, using the LFPy.Cell class
 cell = LFPy.Cell(**cellParameters)
+cell.set_rotation(x=4.98919, y=-4.33261, z=0.)
 
 top_of_cortex = 0
 

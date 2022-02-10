@@ -97,6 +97,7 @@ class Population:
     def __init__(self, POPULATION_SIZE,
                  cellParameters,
                  populationParameters,
+                 cellRotations,
                  electrodeParameters,
                  synapseParameters,
                  stationaryGammaArgs,
@@ -107,6 +108,7 @@ class Population:
         POPULATION_SIZE:       int, number of cells
         cellParameters:        dict
         populationParameters:  dict
+        cellRotations:         dict
         electrodeParameters:   dict
         synapseParameters:     dict
         stationaryGammaArgs:   dict
@@ -123,7 +125,8 @@ class Population:
         # self-object
         self.synapseTimes = self.drawRandSpikeTimes()
         self.cellPositions = self.drawRandCellPositions()
-        self.cellRotations = self.drawRandCellRotations()
+        self.cellRotations = cellRotations
+        self.cellRotations_z = self.drawRandCellRotations()
 
     def run(self):
         '''execute the proper simulation and collect simulation results'''
@@ -214,7 +217,9 @@ class Population:
                      y=self.cellPositions[cellindex, 1],
                      z=self.cellPositions[cellindex, 2])
         # rotate the morphology
-        cell.set_rotation(z=self.cellRotations[cellindex])
+        cell.set_rotation(
+            z=self.cellRotations_z[cellindex],
+            **self.cellRotations)
 
         # attach synapse with parameters and set spike time
         synapse = LFPy.Synapse(cell, **self.synapseParameters)
@@ -244,7 +249,9 @@ class Population:
                 cell.set_pos(x=self.cellPositions[cellindex, 0],
                              y=self.cellPositions[cellindex, 1],
                              z=self.cellPositions[cellindex, 2])
-                cell.set_rotation(z=self.cellRotations[cellindex])
+                cell.set_rotation(
+                    z=self.cellRotations_z[cellindex],
+                    **self.cellRotations)
 
                 zips = []
                 for x, z in cell.get_idx_polygons():
@@ -355,10 +362,14 @@ if __name__ == '__main__':
         'zmax': 200,
     }
 
+    # default rotation around x and y axis
+    cellRotations = {'x': 4.99, 'y': -4.33}
+
     # ######### INITIALIZE POPULATION #########################################
     population = Population(POPULATION_SIZE,
                             cellParameters,
                             populationParameters,
+                            cellRotations,
                             electrodeParameters,
                             synapseParameters,
                             stationaryGammaArgs,)

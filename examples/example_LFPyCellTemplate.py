@@ -44,6 +44,7 @@ cell1 = LFPy.TemplateCell(
     templatename='LFPyCellTemplate',
     templateargs=None)
 cell1.set_pos(0)
+cell1.set_rotation(x=4.71694, y=-3.20448, z=0)
 plotcell(cell=cell1, color='r')
 
 
@@ -53,6 +54,7 @@ cell2 = LFPy.TemplateCell(
     templatename='LFPyCellTemplate',
     templateargs=None)
 cell2.set_pos(200)
+cell2.set_rotation(x=4.71694, y=-3.20448, z=0)
 plotcell(cell=cell2, color='g')
 
 
@@ -62,5 +64,6 @@ cell3 = LFPy.TemplateCell(
     templatename='LFPyCellTemplate',
     templateargs=None)
 cell3.set_pos(400)
+cell3.set_rotation(x=4.71694, y=-3.20448, z=0)
 plotcell(cell=cell3, color='b')
 plt.show()

@@ -122,6 +122,7 @@ class Cell(object):
     TemplateCell
     NetworkCell
     """
+
     def __init__(self, morphology,
                  v_init=-70.,
                  Ra=None,
@@ -231,8 +232,6 @@ class Cell(object):
 
         self.v_init = v_init
 
-        self.default_rotation = self.__get_rotation()
-
         # Set axial resistance and membrane capacitance
         self.Ra = Ra
         self.cm = cm
@@ -270,7 +269,7 @@ class Cell(object):
         if self.pt3d:
             self.x3d, self.y3d, self.z3d, self.diam3d = self._collect_pt3d()
 
-        # Gather geometry, set position and rotation of morphology
+        # Gather geometry, set position morphology
         if self.pt3d:
             self._update_pt3d()
         else:  # self._update_pt3d makes a call to self._collect_geometry()
@@ -280,7 +279,14 @@ class Cell(object):
         else:
             if self.verbose:
                 print('no soma, using the midpoint if initial segment.')
-        self.set_rotation(**self.default_rotation)
+
+        # print warning in case .rot file is hanging
+        if isinstance(self.morphology, str):
+            mpath = os.path.splitext(self.morphology)[0]
+            if os.path.isfile(mpath + '.rot'):
+                mssg = f'Ignoring rotation file {mpath + ".rot"}. ' + \
+                    'Call ``<Cell>.set_rotation(**kwargs)`` directly.'
+                warn(mssg)
 
         if celsius is not None:
             if neuron.h.celsius != 6.3:
@@ -398,26 +404,6 @@ class Cell(object):
         else:
             if self.verbose:
                 print('No nsegs_method applied (%s)' % nsegs_method)
-
-    def __get_rotation(self):
-        """Check if there exists a corresponding file
-        with rotation angles"""
-        if isinstance(self.morphology, str):
-            base = os.path.splitext(self.morphology)[0]
-            if os.path.isfile(base + '.rot'):
-                rotation_file = base + '.rot'
-                rotation_data = open(rotation_file)
-                rotation = {}
-                for line in rotation_data:
-                    var, val = line.split('=')
-                    val = val.strip()
-                    val = float(str(val))
-                    rotation[var] = val
-            else:
-                rotation = {}
-        else:
-            rotation = {}
-        return rotation
 
     def _create_sectionlists(self):
         """Create section lists for different kinds of sections"""
@@ -920,15 +906,15 @@ class Cell(object):
         If ``model`` is ``'inf'`` (default), potentials are computed as
         (:math:`r_i` is the position of a compartment :math:`i`,
         :math:`r_n` is the position of an electrode :math:`n`,
-        :math:`\sigma` is the conductivity of the medium):
+        :math:`\\sigma` is the conductivity of the medium):
 
         .. math::
-            V_e(r_i) = \sum_n \\frac{I_n}{4 \pi \sigma |r_i - r_n|}
+            V_e(r_i) = \\sum_n \\frac{I_n}{4 \\pi \\sigma |r_i - r_n|}
 
         If ``model`` is ``'semi'``, the method of images is used:
 
         .. math::
-            V_e(r_i) = \sum_n \\frac{I_n}{2 \pi \sigma |r_i - r_n|}
+            V_e(r_i) = \\sum_n \\frac{I_n}{2 \\pi \\sigma |r_i - r_n|}
 
         Parameters
         ----------

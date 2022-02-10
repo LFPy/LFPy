@@ -88,19 +88,19 @@ def plot_recording_set_up(cell, ax_neur, ax_side, MEA, elec_clr,
         if comp == 0:
             ax_neur.scatter(cell.x[comp].mean(), cell.y[comp].mean(),
                             s=cell.d[comp],
-                            edgecolor='none', color='gray', zorder=1)
+                            edgecolor='none', color='gray', zorder=10)
         else:
             ax_neur.plot(cell.x[comp], cell.y[comp],
-                         lw=cell.d[comp] / 2, color='gray', zorder=1)
+                         lw=cell.d[comp] / 2, color='gray', zorder=10)
 
     for comp in range(cell.totnsegs):
         if comp == 0:
             ax_side.scatter(cell.x[comp].mean(), cell.z[comp].mean(),
                             s=cell.d[comp],
-                            edgecolor='none', color='gray', zorder=1)
+                            edgecolor='none', color='gray', zorder=10)
         else:
             ax_side.plot(cell.x[comp], cell.z[comp],
-                         lw=cell.d[comp] / 2, color='gray', zorder=1)
+                         lw=cell.d[comp] / 2, color='gray', zorder=10)
     for idx in range(len(MEA.x)):
         ax_side.plot(MEA.x[idx], MEA.z[idx] - 10, 's', clip_on=False,
                      c=elec_clr(idx), zorder=10, mec='none')
