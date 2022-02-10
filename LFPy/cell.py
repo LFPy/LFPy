@@ -269,7 +269,7 @@ class Cell(object):
         if self.pt3d:
             self.x3d, self.y3d, self.z3d, self.diam3d = self._collect_pt3d()
 
-        # Gather geometry, set position and rotation of morphology
+        # Gather geometry, set position morphology
         if self.pt3d:
             self._update_pt3d()
         else:  # self._update_pt3d makes a call to self._collect_geometry()
@@ -279,6 +279,14 @@ class Cell(object):
         else:
             if self.verbose:
                 print('no soma, using the midpoint if initial segment.')
+
+        # print warning in case .rot file is hanging
+        if isinstance(self.morphology, str):
+            mpath = os.path.splitext(self.morphology)[0]
+            if os.path.isfile(mpath + '.rot'):
+                mssg = f'Ignoring rotation file {mpath + ".rot"}. ' + \
+                    'Call ``<Cell>.set_rotation(**kwargs)`` directly.'
+                warn(mssg)
 
         if celsius is not None:
             if neuron.h.celsius != 6.3:
