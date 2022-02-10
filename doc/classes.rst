@@ -148,9 +148,17 @@ class :class:`NYHeadModel`
     :show-inheritance:
     :undoc-members:
 
-class :class:`MEG`
-------------------
-.. autoclass:: MEG
+class :class:`InfiniteHomogeneousVolCondMEG`
+--------------------------------------------
+.. autoclass:: InfiniteHomogeneousVolCondMEG
+    :members:
+    :inherited-members:
+    :show-inheritance:
+    :undoc-members:
+
+class :class:`SphericallySymmetricVolCondMEG`
+---------------------------------------------
+.. autoclass:: SphericallySymmetricVolCondMEG
     :members:
     :inherited-members:
     :show-inheritance:
