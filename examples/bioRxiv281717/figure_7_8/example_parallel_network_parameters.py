@@ -324,7 +324,7 @@ PSET.populationParameters = np.array([
 
 # # Override population sizes (for testing)
 if TESTING:
-    PSET.populationParameters['POP_SIZE']=np.ones(
+    PSET.populationParameters['POP_SIZE'] = np.ones(
         PSET.populationParameters.size)
 
 # Define a layer-specificity of connections L_YXL
@@ -335,52 +335,52 @@ if TESTING:
 # boundaries of each layer. The products are normalized such that the sum of
 # each column is 1, i.e., the sum of layer specificities of a connection
 # between X and Y is 1.
-PSET.L_YXL_m_types={}
-bins=np.r_[-PSET.layer_data['thickness'].cumsum()[::-1], 0]
+PSET.L_YXL_m_types = {}
+bins = np.r_[-PSET.layer_data['thickness'].cumsum()[::-1], 0]
 for i, (y, Y, pop_args_Y, rotation_args_Y) in enumerate(zip(
         PSET.populationParameters['m_type'],
         PSET.populationParameters['me_type'],
         PSET.populationParameters['pop_args'],
         PSET.populationParameters['rotation_args'])):
     # create a container for the layer specificities of connections
-    data=np.zeros((PSET.layer_data.size,
+    data = np.zeros((PSET.layer_data.size,
                      PSET.populationParameters.size))
 
     # find and load the corresponding morphology files into LFPy
-    m_Y=glob(os.path.join(PSET.CELLPATH, Y, 'morphology', '*.asc'))[0]
-    cell_Y=LFPy.Cell(morphology = m_Y)
+    m_Y = glob(os.path.join(PSET.CELLPATH, Y, 'morphology', '*.asc'))[0]
+    cell_Y = LFPy.Cell(morphology=m_Y)
     cell_Y.set_rotation(**rotation_args_Y)
-    cell_Y.set_pos(z = pop_args_Y['loc'])
+    cell_Y.set_pos(z=pop_args_Y['loc'])
 
     # sum the total length of axon in each layer bin
-    layerbounds=np.r_[0, -PSET.layer_data['thickness'].cumsum()]
-    len_Y_sum=np.zeros(PSET.layer_data.size)
+    layerbounds = np.r_[0, -PSET.layer_data['thickness'].cumsum()]
+    len_Y_sum = np.zeros(PSET.layer_data.size)
     for k in range(PSET.layer_data.size):
-        len_Y_sum[k]=cell_Y.length[cell_Y.get_idx(
+        len_Y_sum[k] = cell_Y.length[cell_Y.get_idx(
             ['soma', 'dend', 'apic'],
-            z_min= layerbounds[k + 1],
-            z_max = layerbounds[k])].sum()
+            z_min=layerbounds[k + 1],
+            z_max=layerbounds[k])].sum()
     cell_Y.__del__()  # clean up section refs
     for j, (X, pop_args_X, rotation_args_X) in enumerate(zip(
             PSET.populationParameters['me_type'],
             PSET.populationParameters['pop_args'],
             PSET.populationParameters['rotation_args'])):
-        m_X=glob(os.path.join(PSET.CELLPATH, X, 'morphology', '*.asc'))[0]
-        cell_X=LFPy.Cell(morphology = m_X)
+        m_X = glob(os.path.join(PSET.CELLPATH, X, 'morphology', '*.asc'))[0]
+        cell_X = LFPy.Cell(morphology=m_X)
         cell_X.set_rotation(**rotation_args_X)
-        cell_X.set_pos(z = pop_args_X['loc'])
+        cell_X.set_pos(z=pop_args_X['loc'])
 
-        len_X_sum=np.zeros(PSET.layer_data.size)
+        len_X_sum = np.zeros(PSET.layer_data.size)
         for k in range(PSET.layer_data.size):
-            len_X_sum[k]=cell_X.length[cell_X.get_idx(
-                'axon', z_min = layerbounds[k + 1], z_max = layerbounds[k])].sum()
+            len_X_sum[k] = cell_X.length[cell_X.get_idx(
+                'axon', z_min=layerbounds[k + 1], z_max=layerbounds[k])].sum()
 
-        data[:, j]=np.sqrt(len_Y_sum * len_X_sum) / \
+        data[:, j] = np.sqrt(len_Y_sum * len_X_sum) / \
             np.sqrt(len_Y_sum * len_X_sum).sum()
         cell_X.__del__()  # clean up section refs
 
     # fill in
-    PSET.L_YXL_m_types[y]=data
+    PSET.L_YXL_m_types[y] = data
 
 # clean up namespace
 del cell_X, cell_Y, len_X_sum, len_Y_sum, data
@@ -388,7 +388,7 @@ del cell_X, cell_Y, len_X_sum, len_Y_sum, data
 
 # Container for LFPy.NetworkCell class parameters (path to morphology file
 # etc.)
-PSET.cellParameters=dict()
+PSET.cellParameters = dict()
 
 ##########################################################################
 # Set up various files and folders such that single-cell models from BBP can
@@ -399,7 +399,7 @@ PSET.cellParameters=dict()
 
 
 # autodownload some json files with anatomical and pathway specific data
-pathway_files=['pathways_anatomy_factsheets_simplified.json',
+pathway_files = ['pathways_anatomy_factsheets_simplified.json',
                  'pathways_physiology_factsheets_simplified.json']
 if RANK == 0:
     for fname in pathway_files:
@@ -743,10 +743,10 @@ PSET.connParams = dict(
 
     # connection delays
     delayfuns=[[stats.truncnorm] * PSET.populationParameters.size] * \
-        PSET.populationParameters.size,
+    PSET.populationParameters.size,
     delayargs=[[dict(
         a=(2**-3 - syn_param_stats[f'{pre}:{post}']['delay_mean']) /
-            syn_param_stats[f'{pre}:{post}']['delay_std'],
+        syn_param_stats[f'{pre}:{post}']['delay_std'],
         b=np.inf,
         loc=syn_param_stats[f'{pre}:{post}']['delay_mean'],
         scale=syn_param_stats[f'{pre}:{post}']['delay_std']
@@ -761,10 +761,10 @@ PSET.connParams = dict(
                   * PSET.populationParameters.size] \
     * PSET.populationParameters.size,
     multapseargs=get_clipped_params(PSET.populationParameters['m_type'],
-                            pathways_anatomy,
-                            ['mean_number_of_synapse_per_connection',
-                             'number_of_synapse_per_connection_std'],
-                             myclip_a=1, myclip_b=20),
+                                    pathways_anatomy,
+                                    ['mean_number_of_synapse_per_connection',
+                                     'number_of_synapse_per_connection_std'],
+                                    myclip_a=1, myclip_b=20),
 
     # parameters for finding random synapse locations using the method
     # LFPy.Cell.get_rand_idx_area_and_distribution_norm. The argument nidx is
