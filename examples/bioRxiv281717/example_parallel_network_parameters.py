@@ -739,10 +739,10 @@ PSET.connParams = dict(
 
     # connection delays
     delayfuns=[[stats.truncnorm] * PSET.populationParameters.size] * \
-        PSET.populationParameters.size,
+    PSET.populationParameters.size,
     delayargs=[[dict(
         a=(2**-3 - syn_param_stats[f'{pre}:{post}']['delay_mean']) /
-            syn_param_stats[f'{pre}:{post}']['delay_std'],
+        syn_param_stats[f'{pre}:{post}']['delay_std'],
         b=np.inf,
         loc=syn_param_stats[f'{pre}:{post}']['delay_mean'],
         scale=syn_param_stats[f'{pre}:{post}']['delay_std']
@@ -757,10 +757,10 @@ PSET.connParams = dict(
                   * PSET.populationParameters.size] \
     * PSET.populationParameters.size,
     multapseargs=get_clipped_params(PSET.populationParameters['m_type'],
-                            pathways_anatomy,
-                            ['mean_number_of_synapse_per_connection',
-                             'number_of_synapse_per_connection_std'],
-                             myclip_a=1, myclip_b=20),
+                                    pathways_anatomy,
+                                    ['mean_number_of_synapse_per_connection',
+                                     'number_of_synapse_per_connection_std'],
+                                    myclip_a=1, myclip_b=20),
 
     # parameters for finding random synapse locations using the method
     # LFPy.Cell.get_rand_idx_area_and_distribution_norm. The argument nidx is
