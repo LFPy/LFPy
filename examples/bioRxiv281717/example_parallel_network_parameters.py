@@ -794,7 +794,8 @@ PSET.connParamsExtrinsic = dict(
         Dep=syn_param_stats[f'{get_pre_m_type(post)}:{post}']['Dep_mean'],
         Fac=syn_param_stats[f'{get_pre_m_type(post)}:{post}']['Fac_mean'],
         tau_r_AMPA=0.2,
-        tau_d_AMPA=syn_param_stats[f'{get_pre_m_type(post)}:{post}']['tau_d_mean'],
+        tau_d_AMPA=syn_param_stats[f'{get_pre_m_type(post)}:{post}'
+                                   ]['tau_d_mean'],
         tau_r_NMDA=0.29,
         tau_d_NMDA=43,
         e=0,

@@ -349,8 +349,10 @@ if __name__ == '__main__':
     # tic-toc
     if RANK == 0:
         create_connections_time = time() - tic
-        print('Network build finished with ' +
-              f'{total_conncount} connections and {total_syncount} synapses in {create_connections_time} seconds')
+        print(
+            'Network build finished with ' +
+            f'{total_conncount} connections and '+
+            f'{total_syncount} synapses in {create_connections_time} seconds')
     tic = time()
 
     ##########################################################################
