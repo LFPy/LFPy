@@ -154,7 +154,7 @@ For manual preinstallation of dependencies, the following packages are needed:
 -  Python modules numpy, scipy, matplotlib, h5py, mpi4py
 -  MEAutility (https://github.com/alejoe91/MEAutility)
 -  LFPykit (https://github.com/LFPy/LFPykit)
--  NEURON (from http://www.neuron.yale.edu, v7.6.4 or newer) and corresponding Python module. The following should execute without error in a Python console:
+-  NEURON (from http://www.neuron.yale.edu) and corresponding Python module. The following should execute without error in a Python console:
 
         >>> import neuron
         >>> neuron.test()

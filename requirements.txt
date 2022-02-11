@@ -7,4 +7,4 @@ h5py>=2.5
 mpi4py>=1.2
 matplotlib>=2.0
 neuron>=7.7.2
-LFPykit>=0.3
+LFPykit>=0.4

@@ -103,7 +103,7 @@ setup(
         'Cython>=0.20',
         'h5py>=2.5',
         'mpi4py>=1.2',
-        'LFPykit>=0.4.dev0'
+        'LFPykit>=0.4'
     ],
     extras_require={'tests': ['pytest'],
                     'docs': ['sphinx', 'numpydoc', 'sphinx_rtd_theme']
