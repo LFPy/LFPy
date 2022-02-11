@@ -267,7 +267,7 @@ if __name__ == '__main__':
                 print(string + f', C1={C1}, K1={K1}')
 
     # file output destination
-    PSET.OUTPUTPATH=os.path.join(OUTPUT, ps_id)
+    PSET.OUTPUTPATH = os.path.join(OUTPUT, ps_id)
 
     # avoid same sequence of random numbers from numpy and neuron on each RANK,
     # e.g., in order to draw unique cell locations and random synapse
@@ -281,40 +281,40 @@ if __name__ == '__main__':
     COMM.Barrier()
 
     if RANK == 0:
-        parameters_time=time() - tic
+        parameters_time = time() - tic
         # open file object for writing
-        logfile=open(os.path.join(PSET.OUTPUTPATH, 'log.txt'), 'w')
+        logfile = open(os.path.join(PSET.OUTPUTPATH, 'log.txt'), 'w')
         logfile.write(f'initialization {initialization_time}\n')
         print(f'Parameters in {parameters_time} seconds')
         logfile.write(f'parameters {parameters_time}\n')
-    tic=time()
+    tic = time()
 
     ##########################################################################
     # Create population, provide noisy input to each cell, connect network
     ##########################################################################
     # create network object instance
-    network=Network(dt = PSET.dt, tstop = PSET.tstop, v_init = PSET.v_init,
-                      celsius = PSET.celsius,
-                      OUTPUTPATH = PSET.OUTPUTPATH)
+    network = Network(dt=PSET.dt, tstop=PSET.tstop, v_init=PSET.v_init,
+                      celsius=PSET.celsius,
+                      OUTPUTPATH=PSET.OUTPUTPATH)
     # create populations iteratively
     for name, pop_args, rotation_args, POP_SIZE in zip(
             PSET.populationParameters['me_type'],
             PSET.populationParameters['pop_args'],
             PSET.populationParameters['rotation_args'],
             (PSET.populationParameters['POP_SIZE']).astype(int)):
-        network.create_population(CWD = PSET.CWD, CELLPATH = PSET.CELLPATH,
-                                  Cell = NetworkCell, POP_SIZE = POP_SIZE,
-                                  name = name,
-                                  cell_args = PSET.cellParameters[name],
-                                  pop_args = pop_args,
-                                  rotation_args = rotation_args)
+        network.create_population(CWD=PSET.CWD, CELLPATH=PSET.CELLPATH,
+                                  Cell=NetworkCell, POP_SIZE=POP_SIZE,
+                                  name=name,
+                                  cell_args=PSET.cellParameters[name],
+                                  pop_args=pop_args,
+                                  rotation_args=rotation_args)
 
     # tic-toc
     if RANK == 0:
-        create_population_time=time() - tic
+        create_population_time = time() - tic
         print(f'Populations initialized in {create_population_time} seconds')
         logfile.write(f'population {create_population_time}\n')
-    tic=time()
+    tic = time()
 
     # Sync MPI threads as populations may take a different amount of
     # time across RANKs. All neurons must have been created before connections
@@ -389,7 +389,7 @@ if __name__ == '__main__':
         create_connections_time = time() - tic
         print(
             'Network build finished with ' +
-            f'{total_conncount} connections and '+
+            f'{total_conncount} connections and ' +
             f'{total_syncount} synapses in {create_connections_time} seconds')
         logfile.write(f'connections {create_connections_time}\n')
     tic = time()
