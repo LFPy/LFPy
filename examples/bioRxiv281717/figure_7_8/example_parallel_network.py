@@ -240,8 +240,8 @@ if __name__ == '__main__':
             # the number of connections which should stay approximately fixed
             if RANK == 0:
                 C0 = PSET.connParams['connprob'][i][j]
-                K0 = np.log(1 - PSET.connParams['connprob'][i][j]) \
-                    / np.log(1 - PSET.POPSCALING**2 / (N_pre * N_post))
+                K0 = np.log(1 - PSET.connParams['connprob'][i][j]) / \
+                    np.log(1 - PSET.POPSCALING**2 / (N_pre * N_post))
                 string = f'{i}:{j}: C0={C0}, K0={K0}'
             if PSET.PRESERVE == 'total':
                 # Fixed number of connections (across different MPISIZE values)
@@ -262,7 +262,7 @@ if __name__ == '__main__':
                               1. - PSET.POPSCALING**2 / (N_pre * N_post)))
             if RANK == 0:
                 C1 = PSET.connParams['connprob'][i][j]
-                K1 = np.log(1. - PSET.connParams['connprob'][i][j]) /
+                K1 = np.log(1. - PSET.connParams['connprob'][i][j]) / \
                     np.log(1. - 1. / (N_pre * N_post)))
                 print(string + f', C1={C1}, K1={K1}')
 
