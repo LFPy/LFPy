@@ -347,7 +347,7 @@ def plot_m_types(ax, PSET, colors, section=[
         ax.text(
             axis[0],
             z,
-            r'$z={' + f'{int(z)}'+  r'}$ $\mu$m',
+            r'$z={' + f'{int(z)}' + r'}$ $\mu$m',
             ha='right',
             va='center')
 
