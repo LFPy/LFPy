@@ -120,8 +120,7 @@ def draw_lineplot(
         ax.plot([tvec[-1], tvec[-1]],
                 [-1, -2], lw=2, color='k', clip_on=False)
         ax.text(tvec[-1] + np.diff(T) * 0.02, -1.5,
-                '$2^{' + '{}'.format(np.log2(vlimround)
-                                     ) + '}$ ' + '{0}'.format(unit),
+                '$2^{' + f'{np.log2(vlimround)}' + '}$ ' + f'{unit}',
                 color='k', rotation='vertical',
                 va='center')
 
@@ -443,7 +442,7 @@ if __name__ == '__main__':
                               scalebar=True,
                               unit='mV',
                               ylabels=True if i == 0 else False,
-                              color='C{}'.format(i),
+                              color=f'C{i}',
                               ztransform=True
                               )
             ax.set_title(label)
