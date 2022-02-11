@@ -435,7 +435,7 @@ if __name__ == '__main__':
     if RANK == 0:
         run_simulation_time = time() - tic
         print(f'Simulations finished in {run_simulation_time} seconds')
-        logfile.write(f'simulation {run_simulation_time}\n'
+        logfile.write(f'simulation {run_simulation_time}\n')
     tic = time()
 
     ##########################################################################

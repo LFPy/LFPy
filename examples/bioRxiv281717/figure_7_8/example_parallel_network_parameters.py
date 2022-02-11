@@ -289,8 +289,10 @@ PSET.populationParameters = np.array([
     dtype=[('m_type', f'|{stringType}32'),
            ('e_type', f'|{stringType}32'),
            ('me_type', f'|{stringType}32'),
-            ), ('POP_SIZE', 'i8'), ('pop_args', dict),
-           ('rotation_args', dict), ('syn_section', list),
+           ('POP_SIZE', 'i8'),
+           ('pop_args', dict),
+           ('rotation_args', dict),
+           ('syn_section', list),
            ('extrinsic_input_section', list),
            ('extrinsic_input_density', 'f8'),
            ('extrinsic_input_frequency', 'f8')])
