@@ -56,7 +56,8 @@ def get_params(names, dictionary, keys, scaling=1.):
                 assert len(keys) == 2
                 out[i][j] = dict()
                 for key, entry in zip(['loc', 'scale'], keys):
-                    out[i][j][key] = dictionary[f'{pre}:{post}'][entry] * scaling
+                    out[i][j][key] = dictionary[f'{pre}:{post}'
+                                                ][entry] * scaling
     return out
 
 
