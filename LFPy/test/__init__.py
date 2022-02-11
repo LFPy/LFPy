@@ -40,7 +40,8 @@ def _test(verbosity=2):
     """
     # import methods here to avoid polluting LFPy.test namespace
     from .test_cell import testCell
-    from .test_eegmegcalc import testMEG, testFourSphereVolumeConductor, \
+    from .test_eegmegcalc import testInfiniteHomogeneousVolCondMEG, \
+        testFourSphereVolumeConductor, \
         testInfiniteVolumeConductor, testOneSphereVolumeConductor
     from .test_alias_method import testAliasMethod
     from .test_recextelectrode import testRecExtElectrode
@@ -66,7 +67,7 @@ def _test(verbosity=2):
     suites += [TestLoader().loadTestsFromTestCase(testNetworkCell)]
     suites += [TestLoader().loadTestsFromTestCase(testNetworkPopulation)]
     suites += [TestLoader().loadTestsFromTestCase(testNetwork)]
-    suites += [TestLoader().loadTestsFromTestCase(testMEG)]
+    suites += [TestLoader().loadTestsFromTestCase(testInfiniteHomogeneousVolCondMEG)]
     suites += [TestLoader().loadTestsFromTestCase(testFourSphereVolumeConductor)]
     suites += [TestLoader().loadTestsFromTestCase(testInfiniteVolumeConductor)]
     suites += [TestLoader().loadTestsFromTestCase(testOneSphereVolumeConductor)]
