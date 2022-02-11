@@ -61,7 +61,7 @@ def get_params(names, dictionary, keys, scaling=1.):
 
 
 def get_clipped_params(names, dictionary, keys, scaling=1.,
-        myclip_a=0, myclip_b=np.inf):
+                       myclip_a=0, myclip_b=np.inf):
     '''update output dicts of `get_params` setting `a` and `b` suitable
     for `scipy.stats.truncnorm` as::
 
