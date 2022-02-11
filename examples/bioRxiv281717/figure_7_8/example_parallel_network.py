@@ -263,7 +263,7 @@ if __name__ == '__main__':
             if RANK == 0:
                 C1 = PSET.connParams['connprob'][i][j]
                 K1 = np.log(1. - PSET.connParams['connprob'][i][j]) / \
-                    np.log(1. - 1. / (N_pre * N_post)))
+                    np.log(1. - 1. / (N_pre * N_post))
                 print(string + f', C1={C1}, K1={K1}')
 
     # file output destination
