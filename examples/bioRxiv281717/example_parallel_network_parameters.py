@@ -30,7 +30,7 @@ import neuron
 import sys
 from urllib.request import urlopen
 from example_parallel_network_methods import get_templatename, get_params, \
-    get_syn_params
+    get_clipped_params, get_syn_params
 import LFPy
 
 stringType = 'U'
@@ -201,7 +201,7 @@ PSET.layer_data = np.array([('L1', 165., -82.5),
                             ('L4', 190., -762.),
                             ('L5', 525, -1119.5),
                             ('L6', 700, -1732.)],
-                           dtype=[('layer', '|{}2'.format(stringType)),
+                           dtype=[('layer', f'|{stringType}2'),
                                   ('thickness', float), ('center', float)])
 
 
@@ -283,11 +283,13 @@ PSET.populationParameters = np.array([
      ['dend', 'apic'],
      0.125, 5.),
 ],
-    dtype=[('m_type', '|{}32'.format(stringType)),
-           ('e_type', '|{}32'.format(stringType)),
-           ('me_type', '|{}32'.format(stringType)
-            ), ('POP_SIZE', 'i8'), ('pop_args', dict),
-           ('rotation_args', dict), ('syn_section', list),
+    dtype=[('m_type', f'|{stringType}32'),
+           ('e_type', f'|{stringType}32'),
+           ('me_type', f'|{stringType}32'),
+           ('POP_SIZE', 'i8'),
+           ('pop_args', dict),
+           ('rotation_args', dict),
+           ('syn_section', list),
            ('extrinsic_input_section', list),
            ('extrinsic_input_density', 'f8'),
            ('extrinsic_input_frequency', 'f8')])
@@ -320,7 +322,7 @@ PSET.populationParameters = np.array([
 # # Override population sizes (for testing)
 if TESTING:
     PSET.populationParameters['POP_SIZE'] = np.ones(
-        PSET.populationParameters.size)
+        PSET.populationParameters.size) * 4
 
 
 # Define a layer-specificity of connections L_YXL
@@ -439,9 +441,7 @@ if RANK == 0:
                     PSET.CELLPATH, NRN, 'mechanisms', '*.mod')):
                 while not os.path.isfile(
                         os.path.join(PSET.NMODL, os.path.split(nmodl)[-1])):
-                    os.system('cp {} {}'.format(nmodl,
-                                                os.path.join(PSET.NMODL,
-                                                             '.')))
+                    os.system(f"cp {nmodl} {os.path.join(PSET.NMODL, '.')}")
         os.chdir(PSET.NMODL)
         # patch faulty ProbGABAAB_EMS.mod file (otherwise stochastic inhibitory
         # synapses will stay closed except at first activation)
@@ -514,16 +514,14 @@ if sys.version < '3':
     with open(os.path.join('synapses', 'mtype_map.tsv')) as f:
         mtype_map = np.loadtxt(f,
                                dtype={'names': ('pre_mtype_id', 'pre_mtype'),
-                                      'formats': ('i4', '{}9'.format(
-                                          stringType))},
+                                      'formats': ('i4', f'{stringType}9')},
                                converters={1: lambda s: s.decode()})
 else:
     with open(os.path.join('synapses', 'mtype_map.tsv'),
               encoding='us-ascii') as f:
         mtype_map = np.loadtxt(f,
                                dtype={'names': ('pre_mtype_id', 'pre_mtype'),
-                                      'formats': ('i4', '{}9'.format(
-                                          stringType))},
+                                      'formats': ('i4', f'{stringType}9')},
                                converters={1: lambda s: s.decode()})
 
 os.chdir(PSET.CWD)
@@ -551,12 +549,12 @@ f = open(pathway_files[0], 'r')
 j = json.load(f)
 for pre in PSET.populationParameters['m_type']:
     for post in PSET.populationParameters['m_type']:
-        key = '{}:{}'.format(pre, post)
+        key = f'{pre}:{post}'
         try:
             pathways_anatomy[key] = j[key]
         except KeyError:
             # fill in dummy data, no synapses will be created
-            print('no pathway anatomy data for connection {}'.format(key))
+            print(f'no pathway anatomy data for connection {key}')
             if sys.version < '3':
                 pathways_anatomy[key] = {
                     'common_neighbor_bias': 0,
@@ -588,12 +586,12 @@ f = open(pathway_files[1], 'r')
 j = json.load(f)
 for pre in PSET.populationParameters['m_type']:
     for post in PSET.populationParameters['m_type']:
-        key = '{}:{}'.format(pre, post)
+        key = f'{pre}:{post}'
         try:
             pathways_physiology[key] = j[key]
         except KeyError:
             # fill in dummy data, no synapses will be created
-            print('no pathway physiology data for connection {}'.format(key))
+            print(f'no pathway physiology data for connection {key}')
             if sys.version < '3':
                 pathways_physiology[key] = {
                     'cv_psp_amplitude_mean': 3,
@@ -680,7 +678,7 @@ PSET.connParams = dict(
 
     # synapse mechanisms
     syntypes=[[neuron.h.ProbAMPANMDA_EMS
-               if syn_param_stats['{}:{}'.format(pre, post)
+               if syn_param_stats[f'{pre}:{post}'
                                   ]['synapse_type'] >= 100 else
                neuron.h.ProbGABAAB_EMS
                for post in PSET.populationParameters['m_type']]
@@ -691,11 +689,11 @@ PSET.connParams = dict(
     # Use the mean/global EPFL synapse model parameters
     # (for now) as some connections appear to be missing in pathway files.
     synparams=[[dict(
-        Use=syn_param_stats['{}:{}'.format(pre, post)]['Use_mean'],
-        Dep=syn_param_stats['{}:{}'.format(pre, post)]['Dep_mean'],
-        Fac=syn_param_stats['{}:{}'.format(pre, post)]['Fac_mean'],
+        Use=syn_param_stats[f'{pre}:{post}']['Use_mean'],
+        Dep=syn_param_stats[f'{pre}:{post}']['Dep_mean'],
+        Fac=syn_param_stats[f'{pre}:{post}']['Fac_mean'],
         tau_r_AMPA=0.2,
-        tau_d_AMPA=syn_param_stats['{}:{}'.format(pre, post)]['tau_d_mean'],
+        tau_d_AMPA=syn_param_stats[f'{pre}:{post}']['tau_d_mean'],
         tau_r_NMDA=0.29,
         tau_d_NMDA=43,
         e=0,
@@ -706,15 +704,15 @@ PSET.connParams = dict(
         NMDA_ratio=0.4  # this may take on several values in synconf.txt files,
                         # not accounted for here
     )
-        if syn_param_stats['{}:{}'.format(pre, post)
+        if syn_param_stats[f'{pre}:{post}'
                            ]['synapse_type'] >= 100 else
         dict(
-        Use=syn_param_stats['{}:{}'.format(pre, post)]['Use_mean'],
-        Dep=syn_param_stats['{}:{}'.format(pre, post)]['Dep_mean'],
-        Fac=syn_param_stats['{}:{}'.format(pre, post)]['Fac_mean'],
+        Use=syn_param_stats[f'{pre}:{post}']['Use_mean'],
+        Dep=syn_param_stats[f'{pre}:{post}']['Dep_mean'],
+        Fac=syn_param_stats[f'{pre}:{post}']['Fac_mean'],
         tau_r_GABAA=0.2,
         # from synapses.hoc: rng.lognormal(0.2, 0.1) (mean, variance)
-        tau_d_GABAA=syn_param_stats['{}:{}'.format(pre, post)]['tau_d_mean'],
+        tau_d_GABAA=syn_param_stats[f'{pre}:{post}']['tau_d_mean'],
         tau_r_GABAB=3.5,
         tau_d_GABAB=260.9,
         e_GABAA=-80,
@@ -740,25 +738,29 @@ PSET.connParams = dict(
     # than the reported averaged gsyn.
 
     # connection delays
-    delayfuns=[[np.random.normal] * PSET.populationParameters.size] * \
-    PSET.populationParameters.size,
+    delayfuns=[[stats.truncnorm] * PSET.populationParameters.size] * \
+        PSET.populationParameters.size,
     delayargs=[[dict(
-        loc=syn_param_stats['{}:{}'.format(pre, post)]['delay_mean'],
-        scale=syn_param_stats['{}:{}'.format(pre, post)]['delay_std']
+        a=(2**-3 - syn_param_stats[f'{pre}:{post}']['delay_mean']) /
+            syn_param_stats[f'{pre}:{post}']['delay_std'],
+        b=np.inf,
+        loc=syn_param_stats[f'{pre}:{post}']['delay_mean'],
+        scale=syn_param_stats[f'{pre}:{post}']['delay_std']
     ) for post in PSET.populationParameters['m_type']]
         for pre in PSET.populationParameters['m_type']],
 
-    # delays less than this value will be redrawn
-    mindelay=2**-3,
+    # min delays now set by delayargs[['a']], this param will be deprecated
+    mindelay=None,
 
     # numbers of synapses per connection
-    multapsefuns=[[np.random.normal] \
+    multapsefuns=[[stats.truncnorm] \
                   * PSET.populationParameters.size] \
     * PSET.populationParameters.size,
-    multapseargs=get_params(PSET.populationParameters['m_type'],
+    multapseargs=get_clipped_params(PSET.populationParameters['m_type'],
                             pathways_anatomy,
                             ['mean_number_of_synapse_per_connection',
-                             'number_of_synapse_per_connection_std']),
+                             'number_of_synapse_per_connection_std'],
+                             myclip_a=1, myclip_b=20),
 
     # parameters for finding random synapse locations using the method
     # LFPy.Cell.get_rand_idx_area_and_distribution_norm. The argument nidx is
@@ -788,15 +790,11 @@ PSET.connParamsExtrinsic = dict(
     # synapse parameters (assumes parameters of excitatory population in the
     # layer)
     synparams=[dict(
-        Use=syn_param_stats['{}:{}'.format(
-            get_pre_m_type(post), post)]['Use_mean'],
-        Dep=syn_param_stats['{}:{}'.format(
-            get_pre_m_type(post), post)]['Dep_mean'],
-        Fac=syn_param_stats['{}:{}'.format(
-            get_pre_m_type(post), post)]['Fac_mean'],
+        Use=syn_param_stats[f'{get_pre_m_type(post)}:{post}']['Use_mean'],
+        Dep=syn_param_stats[f'{get_pre_m_type(post)}:{post}']['Dep_mean'],
+        Fac=syn_param_stats[f'{get_pre_m_type(post)}:{post}']['Fac_mean'],
         tau_r_AMPA=0.2,
-        tau_d_AMPA=syn_param_stats['{}:{}'.format(
-            get_pre_m_type(post), post)]['tau_d_mean'],
+        tau_d_AMPA=syn_param_stats[f'{get_pre_m_type(post)}:{post}']['tau_d_mean'],
         tau_r_NMDA=0.29,
         tau_d_NMDA=43,
         e=0,
