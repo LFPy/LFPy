@@ -21,7 +21,8 @@ from mpl_toolkits.axisartist.axislines import SubplotZero
 import os
 import numpy as np
 import h5py
-from LFPy import FourSphereVolumeConductor, MEG
+from LFPy import FourSphereVolumeConductor
+from LFPy import InfiniteHomogeneousVolCondMEG as MEG
 import example_parallel_network_plotting as plotting
 from mpi4py import MPI
 
