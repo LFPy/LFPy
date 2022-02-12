@@ -155,7 +155,7 @@ import LFPy
 from time import time
 import os
 import h5py
-from distutils.version import LooseVersion
+from packaging.version import Version
 import numpy as np
 from matplotlib.gridspec import GridSpec
 from matplotlib.collections import PolyCollection
@@ -165,9 +165,9 @@ from scipy.signal import decimate
 import neuron
 import matplotlib
 matplotlib.use('agg')
-if LooseVersion(h5py.version.hdf5_version) < LooseVersion('1.8.16'):
-    raise ImportError('h5py uses HDF5 v{}: v1.8.16 or newer required'.format(
-        h5py.version.hdf5_version))
+if Version(h5py.version.hdf5_version) < Version('1.8.16'):
+    m = f'h5py uses HDF5 {h5py.version.hdf5_version}: 1.8.16 or newer required'
+    raise ImportError(m)
 
 
 # set up MPI environment
@@ -216,7 +216,7 @@ if __name__ == '__main__':
     # tic-toc
     if RANK == 0:
         initialization_time = time() - tic
-        print('Initialization in {} seconds'.format(initialization_time))
+        print(f'Initialization in {initialization_time} seconds')
     tic = time()
 
     # import main parameters dictionary for simulation
@@ -246,7 +246,7 @@ if __name__ == '__main__':
 
     if RANK == 0:
         parameters_time = time() - tic
-        print('Parameters in {} seconds'.format(parameters_time))
+        print(f'Parameters in {parameters_time} seconds')
     tic = time()
 
     ##########################################################################
@@ -273,8 +273,7 @@ if __name__ == '__main__':
     # tic-toc
     if RANK == 0:
         create_population_time = time() - tic
-        print('Populations initialized in {} seconds'.format(
-            create_population_time))
+        print(f'Populations initialized in {create_population_time} seconds')
     tic = time()
 
     # Sync MPI threads as populations may take a different amount of
@@ -350,9 +349,10 @@ if __name__ == '__main__':
     # tic-toc
     if RANK == 0:
         create_connections_time = time() - tic
-        print('Network build finished with '
-              '{} connections and {} synapses in {} seconds'.format(
-                  total_conncount, total_syncount, create_connections_time))
+        print(
+            'Network build finished with ' +
+            f'{total_conncount} connections and ' +
+            f'{total_syncount} synapses in {create_connections_time} seconds')
     tic = time()
 
     ##########################################################################
@@ -395,7 +395,7 @@ if __name__ == '__main__':
 
     if RANK == 0:
         run_simulation_time = time() - tic
-        print('Simulations finished in {} seconds'.format(run_simulation_time))
+        print(f'Simulations finished in {run_simulation_time} seconds')
     tic = time()
 
     ##########################################################################
@@ -444,19 +444,19 @@ if __name__ == '__main__':
     # tic toc
     if RANK == 0:
         saving_data_time = time() - tic
-        print('Wrote output files in {} seconds'.format(saving_data_time))
+        print(f'Wrote output files in {saving_data_time} seconds')
     tic = time()
 
     # create logfile recording time in seconds for different simulation steps
     # (initialization, parameters, simulation etc.)
     if RANK == 0:
         logfile = open(os.path.join(PSET.OUTPUTPATH, 'log.txt'), 'w')
-        logfile.write('initialization {}\n'.format(initialization_time))
-        logfile.write('parameters {}\n'.format(parameters_time))
-        logfile.write('population {}\n'.format(create_population_time))
-        logfile.write('connections {}\n'.format(create_connections_time))
-        logfile.write('simulation {}\n'.format(run_simulation_time))
-        logfile.write('save {}\n'.format(saving_data_time))
+        logfile.write(f'initialization {initialization_time}\n')
+        logfile.write(f'parameters {parameters_time}\n')
+        logfile.write(f'population {create_population_time}\n')
+        logfile.write(f'connections {create_connections_time}\n')
+        logfile.write(f'simulation {run_simulation_time}\n')
+        logfile.write(f'save {saving_data_time}\n')
         logfile.close()
 
 
@@ -483,7 +483,7 @@ if __name__ == '__main__':
 
         gs = GridSpec(nrows=nrows, ncols=ncols)
 
-        fig.suptitle('RANK {}'.format(RANK))
+        fig.suptitle(f'RANK {RANK}')
         counter = 0
         # somatic traces
         tvec = np.arange(PSET.tstop / PSET.dt + 1) * PSET.dt
@@ -498,7 +498,7 @@ if __name__ == '__main__':
                         decimate(cell.somav[tinds],
                                  q=PSET.decimate_q),
                         color=colors[i], lw=1.5, label=name)
-                ax.set_ylabel('gid {}'.format(population.gids[j]),
+                ax.set_ylabel(f'gid {population.gids[j]}',
                               rotation='horizontal', labelpad=30)
                 ax.axis(ax.axis('tight'))
                 ax.set_ylim(-90, -20)
@@ -512,8 +512,7 @@ if __name__ == '__main__':
 
         # save figure output
         fig.savefig(os.path.join(PSET.OUTPUTPATH,
-                                 'example_parallel_network_RANK_{}.pdf'.format(
-                                     RANK)),
+                                 f'example_parallel_network_RANK_{RANK}.pdf'),
                     bbox_inches='tight')
         plt.close(fig)
 
@@ -609,7 +608,7 @@ if __name__ == '__main__':
         # save figure output
         fig.savefig(os.path.join(
             PSET.OUTPUTPATH,
-            'example_parallel_network_populations_RANK_{}.pdf'.format(RANK)),
+            f'example_parallel_network_populations_RANK_{RANK}.pdf'),
             bbox_inches='tight')
         plt.close(fig)
 

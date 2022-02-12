@@ -113,8 +113,7 @@ def draw_lineplot(
         ax.plot([tvec[-1], tvec[-1]],
                 [-1, -2], lw=2, color='k', clip_on=False)
         ax.text(tvec[-1] + np.diff(T) * 0.02, -1.5,
-                '$2^{' + '{}'.format(np.log2(vlimround)
-                                     ) + '}$ ' + '{0}'.format(unit),
+                '$2^{' + f'{np.log2(vlimround)}' + '}$ ' + f'{unit}',
                 color='k', rotation='vertical',
                 va='center')
 
@@ -455,7 +454,7 @@ if __name__ == '__main__':
                           scalebar=True,
                           unit='mV',
                           ylabels=True if i == 0 else False,
-                          color='C{}'.format(i),
+                          color=f'C{i}',
                           ztransform=True
                           )
             ax.set_title(label)
@@ -476,11 +475,11 @@ if __name__ == '__main__':
                     t[inds][::16],
                     ss.decimate(current_dipole_moment.data[name][i, inds],
                                 q=16, zero_phase=True),
-                    'C{}'.format(j))
+                    f'C{j}')
 
                 if j == 0:
                     axes[i, j].set_ylabel(r'$\mathbf{p}\cdot\mathbf{e}_{' +
-                                          '{}'.format(u) + '}$ (nA$\\mu$m)')
+                                          f'{u}' + '}$ (nA$\\mu$m)')
                 if i == 0:
                     axes[i, j].set_title(label)
                 if i != 2:
@@ -510,7 +509,7 @@ if __name__ == '__main__':
     ax.set_zlabel(r'$z$ ($\mu$m)')
     ax.set_title('network populations')
     fig.savefig(os.path.join(OUTPUTPATH,
-                             'population_RANK_{}.pdf'.format(RANK)),
+                             f'population_RANK_{RANK}.pdf'),
                 bbox_inches='tight')
     plt.close(fig)
 

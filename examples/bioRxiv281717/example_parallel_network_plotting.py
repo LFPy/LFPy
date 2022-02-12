@@ -163,8 +163,8 @@ def draw_lineplot(
                     [-1 - scalebarpos, -2 - scalebarpos], lw=2,
                     color=color, clip_on=False)
             ax.text(tvec[tinds][-1] + np.diff(T) * 0.03, -1.5 - scalebarpos,
-                    '$2^{' + '{}'.format(int(np.log2(vlimround))) +
-                    '}$ ' + '{0}'.format(unit),
+                    '$2^{' + f'{int(np.log2(vlimround))}' +
+                    '}$ ' + f'{unit}',
                     color=color, rotation='vertical',
                     va='center')
         elif scalebarbasis == 'log10':
@@ -177,7 +177,7 @@ def draw_lineplot(
                     np.array([0.5, -0.5]) * rescale - 1.5 - scalebarpos,
                     lw=2, color=color, clip_on=False)
             ax.text(tvec[tinds][-1] + np.diff(T) * 0.03, -1.5 - scalebarpos,
-                    '{0} '.format(vlimround10) + '{0}'.format(unit),
+                    f'{vlimround10} ' + f'{unit}',
                     color=color, rotation='vertical',
                     va='center')
 
@@ -347,9 +347,7 @@ def plot_m_types(ax, PSET, colors, section=[
         ax.text(
             axis[0],
             z,
-            r'$z={}$'.format(
-                int(z)) +
-            r'$\mu$m',
+            r'$z={' + f'{int(z)}' + r'}$ $\mu$m',
             ha='right',
             va='center')
 
@@ -478,8 +476,7 @@ if __name__ == '__main__':
             # save figure output
             fig.savefig(
                 os.path.join(PSET.OUTPUTPATH,
-                             'example_parallel_network_summed_{}.pdf'.format(
-                                 suffix)),
+                             f'example_parallel_network_summed_{suffix}.pdf'),
                 bbox_inches='tight')
             plt.close(fig)
         f.close()
@@ -489,7 +486,7 @@ if __name__ == '__main__':
         ax = fig.add_subplot(211)
         ax.set_title('extracellular signal variance')
         y = PSET.electrodeParams['z']
-        yticklabels = ['ch. {}'.format(x + 1) for x in range(y.size)]
+        yticklabels = [f'ch. {x + 1}' for x in range(y.size)]
         tind = int(PSET.TRANSIENT / PSET.dt)
         f = h5py.File(
             os.path.join(
@@ -664,8 +661,8 @@ if __name__ == '__main__':
         fig = plt.figure(figsize=(10, 10))
         fig.subplots_adjust(hspace=0.4)
         fig.suptitle(
-            'per-cell spike count hist., T={} s'.format(
-                (PSET.tstop - PSET.TRANSIENT) / 1000.))
+            'per-cell spike count hist., T=' +
+            f'{(PSET.tstop - PSET.TRANSIENT) / 1000.} s')
 
         bins = np.arange(42) * (PSET.tstop - PSET.TRANSIENT) / \
             1000.  # make count bins conform to bin size of 1 Hz.

@@ -34,7 +34,7 @@ def get_templatename(f):
     for line in f.readlines():
         if 'begintemplate' in line.split():
             templatename = line.split()[-1]
-            print('template {} found!'.format(templatename))
+            print(f'template {templatename} found!')
             continue
 
     return templatename
@@ -51,14 +51,30 @@ def get_params(names, dictionary, keys, scaling=1.):
         for j, post in enumerate(names):
             out[i].append([])
             if isinstance(keys, str):  # each entry just the value
-                out[i][j] = dictionary['{}:{}'.format(
-                    pre, post)][keys] * scaling
+                out[i][j] = dictionary[f'{pre}:{post}'][keys] * scaling
             elif isinstance(keys, list):  # each entry a dict w. keys loc scale
                 assert len(keys) == 2
                 out[i][j] = dict()
                 for key, entry in zip(['loc', 'scale'], keys):
-                    out[i][j][key] = dictionary['{}:{}'.format(
-                        pre, post)][entry] * scaling
+                    out[i][j][key] = dictionary[f'{pre}:{post}'
+                                                ][entry] * scaling
+    return out
+
+
+def get_clipped_params(names, dictionary, keys, scaling=1.,
+                       myclip_a=0, myclip_b=np.inf):
+    '''update output dicts of `get_params` setting `a` and `b` suitable
+    for `scipy.stats.truncnorm` as::
+
+        a, b = (myclip_a - my_mean) / my_std, (myclip_b - my_mean) / my_std
+    '''
+    out = get_params(names, dictionary, keys, scaling)
+    for i, pre in enumerate(names):
+        for j, post in enumerate(names):
+            my_mean = out[i][j]['loc']
+            my_std = out[i][j]['scale']
+            a, b = (myclip_a - my_mean) / my_std, (myclip_b - my_mean) / my_std
+            out[i][j].update(dict(a=a, b=b))
     return out
 
 
@@ -71,14 +87,14 @@ def get_syn_params(shortnames, names, pathways_physiology,
     out = {}
     for i, (pre, pre_l) in enumerate(zip(shortnames, names)):
         for j, (post, post_l) in enumerate(zip(shortnames, names)):
-            phys = pathways_physiology['{}:{}'.format(pre, post)]
+            phys = pathways_physiology[f'{pre}:{post}']
 
             # use just the averaged values
-            out['{}:{}'.format(pre, post)] = dict(Dep_mean=phys['d_mean'],
-                                                  Dep_std=phys['d_std'],
-                                                  Fac_mean=phys['f_mean'],
-                                                  Fac_std=phys['f_std'],
-                                                  )
+            out[f'{pre}:{post}'] = dict(Dep_mean=phys['d_mean'],
+                                        Dep_std=phys['d_std'],
+                                        Fac_mean=phys['f_mean'],
+                                        Fac_std=phys['f_std'],
+                                        )
 
             pre_mtype = mtype_map['pre_mtype_id'][mtype_map['pre_mtype']
                                                   == pre]
@@ -87,7 +103,7 @@ def get_syn_params(shortnames, names, pathways_physiology,
 
             if not isinstance(data, np.void):
                 if data.size > 1:
-                    out['{}:{}'.format(pre, post)].update(dict(
+                    out[f'{pre}:{post}'].update(dict(
                         Use_mean=data['use'].mean(),
                         Use_std=data['use'].std(),
                         tau_d_mean=data['tau_d'].mean(),
@@ -102,7 +118,7 @@ def get_syn_params(shortnames, names, pathways_physiology,
                         # Connections can't be both.
                     ))
                 elif data.size == 1:
-                    out['{}:{}'.format(pre, post)].update(dict(
+                    out[f'{pre}:{post}'].update(dict(
                         Use_mean=data['use'],
                         Use_std=data['use'],
                         tau_d_mean=data['tau_d'],
@@ -116,7 +132,7 @@ def get_syn_params(shortnames, names, pathways_physiology,
                 # presumably no connections are gonna be made anyway (bc. conn.
                 # prob. better be 0)
                 else:
-                    out['{}:{}'.format(pre, post)].update(dict(
+                    out[f'{pre}:{post}'].update(dict(
                         Use_mean=0,
                         Use_std=0,
                         tau_d_mean=0,
@@ -129,7 +145,7 @@ def get_syn_params(shortnames, names, pathways_physiology,
                     ))
             else:
                 if data.size == 1:
-                    out['{}:{}'.format(pre, post)].update(dict(
+                    out[f'{pre}:{post}'].update(dict(
                         Use_mean=data['use'],
                         Use_std=data['use'],
                         tau_d_mean=data['tau_d'],
@@ -141,7 +157,7 @@ def get_syn_params(shortnames, names, pathways_physiology,
                         synapse_type=data['synapse_type']
                     ))
                 else:
-                    out['{}:{}'.format(pre, post)].update(dict(
+                    out[f'{pre}:{post}'].update(dict(
                         Use_mean=0,
                         Use_std=0.1,
                         tau_d_mean=0,

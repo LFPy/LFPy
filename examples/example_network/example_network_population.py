@@ -52,6 +52,5 @@ population = NetworkPopulation(
 )
 # print out some info:
 for cell in population.cells:
-    print('RANK {}; pop {}; gid {}; cell {}'.format(
-        COMM.Get_rank(), population.name,
-        cell.gid, cell))
+    print(f'RANK {COMM.Get_rank()}; pop {population.name}; ' +
+          f'gid {cell.gid}; cell {cell}')
