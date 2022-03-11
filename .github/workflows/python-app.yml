@@ -38,7 +38,6 @@ jobs:
         python -m pip install --upgrade pip
         pip install flake8 pytest wheel pytest-cov coveralls coverage
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-        pip install --upgrade --no-deps git+https://github.com/LFPy/LFPykit.git@master#egg=LFPykit
         python setup.py install
     - name: Lint with flake8
       run: |
