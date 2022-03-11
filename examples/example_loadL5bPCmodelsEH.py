@@ -52,7 +52,7 @@ if not os.path.isfile('L5bPCmodelsEH/morphologies/cell1.asc'):
     url = '{}{}'.format('http://senselab.med.yale.edu/ModelDB/eavBinDown.asp',
                         '?o=139653&a=23&mime=application/zip')
     u = urlopen(url, context=ssl._create_unverified_context())
-    localFile = open('L5bPCmodelsEH.zip', 'w')
+    localFile = open('L5bPCmodelsEH.zip', 'wb')
     localFile.write(u.read())
     localFile.close()
     # unzip:
