@@ -55,7 +55,7 @@ class testLfpCalc(unittest.TestCase):
                                     x=0.5, y=0, z=1,
                                     sigma=sigma,
                                     r_limit=cell.d / 2
-                                ))
+        ))
 
     def test_lfpcalc_calc_lfp_pointsource_moi_00(self):
         """
@@ -316,14 +316,19 @@ class testLfpCalc(unittest.TestCase):
                                                        h=h,
                                                        steps=steps)
 
-        without_saline = lfpcalc.calc_lfp_pointsource_moi(cell.x, cell.y, cell.z,
-                                                          x=0, y=0, z=0,
-                                                          sigma_T=sigma_T,
-                                                          sigma_G=sigma_G,
-                                                          sigma_S=sigma_T,
-                                                          r_limit=cell.d / 2,
-                                                          h=h,
-                                                          steps=steps)
+        without_saline = lfpcalc.calc_lfp_pointsource_moi(
+            cell.x,
+            cell.y,
+            cell.z,
+            x=0,
+            y=0,
+            z=0,
+            sigma_T=sigma_T,
+            sigma_G=sigma_G,
+            sigma_S=sigma_T,
+            r_limit=cell.d / 2,
+            h=h,
+            steps=steps)
 
         np.testing.assert_array_less(with_saline, without_saline)
 
@@ -348,14 +353,19 @@ class testLfpCalc(unittest.TestCase):
                                                       h=h,
                                                       steps=steps)
 
-        without_saline = lfpcalc.calc_lfp_linesource_moi(cell.x, cell.y, cell.z,
-                                                         x=0, y=0, z=0,
-                                                         sigma_T=sigma_T,
-                                                         sigma_G=sigma_G,
-                                                         sigma_S=sigma_T,
-                                                         r_limit=cell.d / 2,
-                                                         h=h,
-                                                         steps=steps)
+        without_saline = lfpcalc.calc_lfp_linesource_moi(
+            cell.x,
+            cell.y,
+            cell.z,
+            x=0,
+            y=0,
+            z=0,
+            sigma_T=sigma_T,
+            sigma_G=sigma_G,
+            sigma_S=sigma_T,
+            r_limit=cell.d / 2,
+            h=h,
+            steps=steps)
 
         np.testing.assert_array_less(with_saline, without_saline)
 
@@ -371,23 +381,33 @@ class testLfpCalc(unittest.TestCase):
 
         cell = DummyCell(z=np.array([[100, 100]]))
 
-        with_saline = lfpcalc.calc_lfp_root_as_point_moi(cell.x, cell.y, cell.z,
-                                                         x=0, y=0, z=0,
-                                                         sigma_T=sigma_T,
-                                                         sigma_G=sigma_G,
-                                                         sigma_S=sigma_S,
-                                                         r_limit=cell.d / 2,
-                                                         h=h,
-                                                         steps=steps)
+        with_saline = lfpcalc.calc_lfp_root_as_point_moi(
+            cell.x,
+            cell.y,
+            cell.z,
+            x=0,
+            y=0,
+            z=0,
+            sigma_T=sigma_T,
+            sigma_G=sigma_G,
+            sigma_S=sigma_S,
+            r_limit=cell.d / 2,
+            h=h,
+            steps=steps)
 
-        without_saline = lfpcalc.calc_lfp_root_as_point_moi(cell.x, cell.y, cell.z,
-                                                            x=0, y=0, z=0,
-                                                            sigma_T=sigma_T,
-                                                            sigma_G=sigma_G,
-                                                            sigma_S=sigma_T,
-                                                            r_limit=cell.d / 2,
-                                                            h=h,
-                                                            steps=steps)
+        without_saline = lfpcalc.calc_lfp_root_as_point_moi(
+            cell.x,
+            cell.y,
+            cell.z,
+            x=0,
+            y=0,
+            z=0,
+            sigma_T=sigma_T,
+            sigma_G=sigma_G,
+            sigma_S=sigma_T,
+            r_limit=cell.d / 2,
+            h=h,
+            steps=steps)
 
         np.testing.assert_array_less(with_saline, without_saline)
 
@@ -493,14 +513,19 @@ class testLfpCalc(unittest.TestCase):
                                                        h=h,
                                                        steps=steps)
 
-        without_saline = lfpcalc.calc_lfp_pointsource_moi(cell.x, cell.y, cell.z,
-                                                          x=0, y=0, z=50,
-                                                          sigma_T=sigma_T,
-                                                          sigma_G=sigma_G,
-                                                          sigma_S=sigma_T,
-                                                          r_limit=cell.d / 2,
-                                                          h=h,
-                                                          steps=steps)
+        without_saline = lfpcalc.calc_lfp_pointsource_moi(
+            cell.x,
+            cell.y,
+            cell.z,
+            x=0,
+            y=0,
+            z=50,
+            sigma_T=sigma_T,
+            sigma_G=sigma_G,
+            sigma_S=sigma_T,
+            r_limit=cell.d / 2,
+            h=h,
+            steps=steps)
 
         np.testing.assert_almost_equal(with_saline, without_saline)
 
@@ -525,14 +550,19 @@ class testLfpCalc(unittest.TestCase):
                                                       h=h,
                                                       steps=steps)
 
-        without_saline = lfpcalc.calc_lfp_linesource_moi(cell.x, cell.y, cell.z,
-                                                         x=0, y=0, z=0,
-                                                         sigma_T=sigma_T,
-                                                         sigma_G=sigma_G,
-                                                         sigma_S=sigma_T,
-                                                         r_limit=cell.d / 2,
-                                                         h=h,
-                                                         steps=steps)
+        without_saline = lfpcalc.calc_lfp_linesource_moi(
+            cell.x,
+            cell.y,
+            cell.z,
+            x=0,
+            y=0,
+            z=0,
+            sigma_T=sigma_T,
+            sigma_G=sigma_G,
+            sigma_S=sigma_T,
+            r_limit=cell.d / 2,
+            h=h,
+            steps=steps)
 
         np.testing.assert_almost_equal(with_saline, without_saline)
 
@@ -548,23 +578,33 @@ class testLfpCalc(unittest.TestCase):
 
         cell = DummyCell(z=np.array([[100, 100]]))
 
-        with_saline = lfpcalc.calc_lfp_root_as_point_moi(cell.x, cell.y, cell.z,
-                                                         x=0, y=0, z=0,
-                                                         sigma_T=sigma_T,
-                                                         sigma_G=sigma_G,
-                                                         sigma_S=sigma_S,
-                                                         r_limit=cell.d / 2,
-                                                         h=h,
-                                                         steps=steps)
+        with_saline = lfpcalc.calc_lfp_root_as_point_moi(
+            cell.x,
+            cell.y,
+            cell.z,
+            x=0,
+            y=0,
+            z=0,
+            sigma_T=sigma_T,
+            sigma_G=sigma_G,
+            sigma_S=sigma_S,
+            r_limit=cell.d / 2,
+            h=h,
+            steps=steps)
 
-        without_saline = lfpcalc.calc_lfp_root_as_point_moi(cell.x, cell.y, cell.z,
-                                                            x=0, y=0, z=0,
-                                                            sigma_T=sigma_T,
-                                                            sigma_G=sigma_G,
-                                                            sigma_S=sigma_T,
-                                                            r_limit=cell.d / 2,
-                                                            h=h,
-                                                            steps=steps)
+        without_saline = lfpcalc.calc_lfp_root_as_point_moi(
+            cell.x,
+            cell.y,
+            cell.z,
+            x=0,
+            y=0,
+            z=0,
+            sigma_T=sigma_T,
+            sigma_G=sigma_G,
+            sigma_S=sigma_T,
+            r_limit=cell.d / 2,
+            h=h,
+            steps=steps)
 
         np.testing.assert_almost_equal(with_saline, without_saline)
 
