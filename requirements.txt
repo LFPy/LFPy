@@ -7,4 +7,5 @@ h5py>=2.5
 mpi4py>=1.2
 matplotlib>=2.0
 neuron>=7.7.2
-LFPykit>=0.4,<0.5
+# LFPykit>=0.5.dev
+git+https://github.com/LFPy/LFPykit@master#egg=lfpykit
