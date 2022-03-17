@@ -58,11 +58,11 @@ NMODL = 'hoc_combos_syn.1_0_10.allmods'
 neuron.h.load_file("stdrun.hoc")
 neuron.h.load_file("import3d.hoc")
 
-# load only some layer 5 pyramidal cell types
-neurons = glob(os.path.join('hoc_combos_syn.1_0_10.allzips', 'L5_TTPC*'))[:1]
-neurons += glob(os.path.join('hoc_combos_syn.1_0_10.allzips', 'L5_MC*'))[:1]
-neurons += glob(os.path.join('hoc_combos_syn.1_0_10.allzips', 'L5_LBC*'))[:1]
-neurons += glob(os.path.join('hoc_combos_syn.1_0_10.allzips', 'L5_NBC*'))[:1]
+# load only some layer 5 cell types
+neurons = glob(os.path.join('hoc_combos_syn.1_0_10.allzips', 'L5_TTPC*', ''))[:1]
+neurons += glob(os.path.join('hoc_combos_syn.1_0_10.allzips', 'L5_MC*', ''))[:1]
+neurons += glob(os.path.join('hoc_combos_syn.1_0_10.allzips', 'L5_LBC*', ''))[:1]
+neurons += glob(os.path.join('hoc_combos_syn.1_0_10.allzips', 'L5_NBC*', ''))[:1]
 
 # flag for cell template file to switch on (inactive) synapses
 add_synapses = False
@@ -175,6 +175,7 @@ COMM_DICT = {}
 
 COUNTER = 0
 for i, NRN in enumerate(neurons):
+    NRN = os.path.dirname(NRN)
     os.chdir(NRN)
 
     # get the template name
