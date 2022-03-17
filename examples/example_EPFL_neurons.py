@@ -62,11 +62,11 @@ neuron.h.load_file("import3d.hoc")
 neurons = glob(os.path.join('hoc_combos_syn.1_0_10.allzips', 'L5_TTPC*', '')
                )[:1]
 neurons += glob(os.path.join('hoc_combos_syn.1_0_10.allzips', 'L5_MC*', '')
-               )[:1]
+                )[:1]
 neurons += glob(os.path.join('hoc_combos_syn.1_0_10.allzips', 'L5_LBC*', '')
-               )[:1]
+                )[:1]
 neurons += glob(os.path.join('hoc_combos_syn.1_0_10.allzips', 'L5_NBC*', '')
-               )[:1]
+                )[:1]
 
 # flag for cell template file to switch on (inactive) synapses
 add_synapses = False
