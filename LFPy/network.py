@@ -1013,15 +1013,15 @@ class Network(object):
         If ``model`` is ``'inf'`` (default), potentials are computed as
         (:math:`r_i` is the position of a compartment :math:`i`,
         :math:`r_n` is the position of an electrode :math:`n`,
-        :math:`\sigma` is the conductivity of the medium):
+        :math:`\\sigma` is the conductivity of the medium):
 
         .. math::
-            V_e(r_i) = \sum_n \\frac{I_n}{4 \pi \sigma |r_i - r_n|}
+            V_e(r_i) = \\sum_n \\frac{I_n}{4 \\pi \\sigma |r_i - r_n|}
 
         If ``model`` is ``'semi'``, the method of images is used:
 
         .. math::
-            V_e(r_i) = \sum_n \\frac{I_n}{2 \pi \sigma |r_i - r_n|}
+            V_e(r_i) = \\sum_n \\frac{I_n}{2 \\pi \\sigma |r_i - r_n|}
 
         Parameters
         ----------
