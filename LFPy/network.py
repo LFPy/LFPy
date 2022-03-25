@@ -159,6 +159,9 @@ class NetworkCell(TemplateCell):
         for sec in self.somalist:
             self.somav.record(sec(0.5)._ref_v)
 
+    def __finitialize__(self):
+        pass
+
     def create_synapse(self, cell, sec, x=0.5, syntype=neuron.h.ExpSyn,
                        synparams=dict(tau=2., e=0.),
                        assert_syn_values=False):
@@ -395,7 +398,7 @@ class NetworkPopulation(object):
         # as structured array.
         if RANK == 0:
             populationData = flattenlist(COMM.gather(
-                zip(self.gids, self.soma_pos, self.rotations)))
+                zip(self.gids, self.soma_pos, self.rotations), root=0))
 
             # create structured array for storing data
             dtype = [('gid', 'i8'), ('x', float), ('y', float), ('z', float),
@@ -420,7 +423,7 @@ class NetworkPopulation(object):
             f[self.name] = popDataArray
             f.close()
         else:
-            COMM.gather(zip(self.gids, self.soma_pos, self.rotations))
+            COMM.gather(zip(self.gids, self.soma_pos, self.rotations), root=0)
 
         # sync
         COMM.Barrier()
