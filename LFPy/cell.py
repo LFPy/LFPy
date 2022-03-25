@@ -294,9 +294,12 @@ class Cell(object):
                       % (neuron.h.celsius, celsius))
             neuron.h.celsius = celsius
 
+        self.__finitialize__()
+        self._neuron_tvec = None
+
+    def __finitialize__(self):
         # initialize membrane voltage in all segments.
         neuron.h.finitialize(self.v_init * units.mV)
-        self._neuron_tvec = None
 
     def __del__(self):
         """Cell finalizer"""
