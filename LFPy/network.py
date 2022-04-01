@@ -625,7 +625,8 @@ class Network(object):
 
             # record spike events
             population._hoc_spike_vectors.append(neuron.h.Vector())
-            cell._hoc_sd_netconlist[-1].record(population._hoc_spike_vectors[-1])
+            cell._hoc_sd_netconlist[-1].record(
+                population._hoc_spike_vectors[-1])
 
         # add population object to dictionary of populations
         self.populations[name] = population
