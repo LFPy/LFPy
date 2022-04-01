@@ -1888,18 +1888,30 @@ class Cell(object):
     def get_idx_parent_children(self, parent="soma[0]"):
         """
         Get all idx of segments of parent and children sections, i.e. segment
-        idx of sections connected to parent-argument, and also of the parent
+        idx of sections connected to parent-segment, and also of the parent
         segments
 
         Parameters
         ----------
         parent: str
-            name-pattern matching a sectionname. Defaults to "soma[0]"
+            name-pattern matching a valid section name. Defaults to "soma[0]"
 
         Returns
         -------
         ndarray, dtype=int
+
+        Raises
+        ------
+        Exception
+            In case keyword argument ``parent`` is invalid
         """
+        err_mssg = f'keyword argument {parent} must be a string'
+        if type(parent) is not str:
+            raise ValueError(err_mssg)
+        if parent not in self.allsecnames:
+            err_mssg = f'keyword argument {parent} not in Cell.allsecnames'
+            raise ValueError(err_mssg)
+
         seclist = [parent]
         for sec in self.allseclist:
             if sec.name() == parent:

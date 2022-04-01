@@ -361,7 +361,7 @@ class NetworkPopulation(object):
         COMM.Barrier()
 
         # container of Vector objects used to record times of action potentials
-        self.spike_vectors = []
+        self._hoc_spike_vectors = []
 
         # set up population of cells on this RANK
         self.gids = [
@@ -624,8 +624,9 @@ class Network(object):
             self.pc.cell(gid, cell._hoc_sd_netconlist[-1])
 
             # record spike events
-            population.spike_vectors.append(neuron.h.Vector())
-            cell._hoc_sd_netconlist[-1].record(population.spike_vectors[-1])
+            population._hoc_spike_vectors.append(neuron.h.Vector())
+            cell._hoc_sd_netconlist[-1].record(
+                population._hoc_spike_vectors[-1])
 
         # add population object to dictionary of populations
         self.populations[name] = population
@@ -1211,9 +1212,10 @@ class Network(object):
         # Collect spike trains across all RANKs to RANK 0
         for name in self.population_names:
             population = self.populations[name]
-            for i in range(len(population.spike_vectors)):
-                population.spike_vectors[i] = \
-                    np.array(population.spike_vectors[i])
+            population.spike_vectors = []
+            for i in range(len(population._hoc_spike_vectors)):
+                population.spike_vectors += \
+                    [population._hoc_spike_vectors[i].as_numpy()]
         if RANK == 0:
             times = []
             gids = []
