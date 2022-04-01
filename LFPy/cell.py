@@ -1905,11 +1905,11 @@ class Cell(object):
         Exception
             In case keyword argument ``parent`` is invalid
         """
-        err_mssg = f'keyword argument parent={parent} must be a string'
+        err_mssg = f'keyword argument {parent} must be a string'
         if type(parent) is not str:
             raise ValueError(err_mssg)
         if parent not in self.allsecnames:
-            err_mssg = f'keyword argument parent={parent} not in Cell.allsecnames'
+            err_mssg = f'keyword argument {parent} not in Cell.allsecnames'
             raise ValueError(err_mssg)
 
         seclist = [parent]
