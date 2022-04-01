@@ -597,6 +597,17 @@ class testCell(unittest.TestCase):
                 section=[
                     'soma[0]', 'dend[0]']))
 
+    def test_cell_get_idx_parent_children_01(self):
+        cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
+                                                 'ball_and_sticks.hoc'))
+        for bad_value in [123, 'no_section']:
+            try:
+                cell.get_idx_parent_children(parent=bad_value)
+            except ValueError:
+                pass
+
+
+
     def test_cell_get_idx_name_00(self):
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
                                                  'ball_and_sticks.hoc'))
