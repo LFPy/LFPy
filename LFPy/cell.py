@@ -267,7 +267,8 @@ class Cell(object):
         # and position in space as in our simulations, assuming RH rule, which
         # NEURON do NOT use in shape plot
         if self.pt3d:
-            self.x3d, self.y3d, self.z3d, self.diam3d = self._collect_pt3d()
+            self.x3d, self.y3d, self.z3d, self.diam3d, self.arc3d = \
+                self._collect_pt3d()
 
         # Gather geometry, set position morphology
         if self.pt3d:
@@ -1964,38 +1965,50 @@ class Cell(object):
         return np.array(allsegnames, dtype=object)[idx][0]
 
     def _collect_pt3d(self):
-        """collect the pt3d info, for each section"""
-        x = []
-        y = []
-        z = []
-        d = []
+        """collect the pt3d info, for each section
+
+        Returns
+        -------
+        x3d: list of ndarray
+            x-coordinates from h.x3d()
+        y3d: list of ndarray
+            y-coordinates from h.y3d()
+        z3d: list of ndarray
+            z-coordinates from h.z3d()
+        diam3d: list of ndarray
+            diameter from h.diam3d()
+        arc3d: list of ndarray
+            arclength from h.arc3d()
+        """
+        x3d, y3d, z3d, diam3d, arc3d = [], [], [], [], []
 
         for sec in self.allseclist:
             n3d = int(neuron.h.n3d(sec=sec))
-            x_i, y_i, z_i = np.zeros(n3d), np.zeros(n3d), np.zeros(n3d),
-            d_i = np.zeros(n3d)
+            x3d_i, y3d_i, z3d_i, diam3d_i, arc3d_i = np.zeros((5, n3d))
             for i in range(n3d):
-                x_i[i] = neuron.h.x3d(i, sec=sec)
-                y_i[i] = neuron.h.y3d(i, sec=sec)
-                z_i[i] = neuron.h.z3d(i, sec=sec)
-                d_i[i] = neuron.h.diam3d(i, sec=sec)
+                x3d_i[i] = neuron.h.x3d(i, sec=sec)
+                y3d_i[i] = neuron.h.y3d(i, sec=sec)
+                z3d_i[i] = neuron.h.z3d(i, sec=sec)
+                diam3d_i[i] = neuron.h.diam3d(i, sec=sec)
+                arc3d_i[i] = neuron.h.arc3d(i, sec=sec)
 
-            x.append(x_i)
-            y.append(y_i)
-            z.append(z_i)
-            d.append(d_i)
+            x3d.append(x3d_i)
+            y3d.append(y3d_i)
+            z3d.append(z3d_i)
+            diam3d.append(diam3d_i)
+            arc3d.append(arc3d_i)
 
         # remove offsets which may be present if soma is centred in Origo
-        if len(x) > 1:
-            xoff = x[0].mean()
-            yoff = y[0].mean()
-            zoff = z[0].mean()
-            for i in range(len(x)):
-                x[i] -= xoff
-                y[i] -= yoff
-                z[i] -= zoff
+        if len(x3d) > 1:
+            xoff = x3d[0].mean()
+            yoff = y3d[0].mean()
+            zoff = z3d[0].mean()
+            for i in range(len(x3d)):
+                x3d[i] -= xoff
+                y3d[i] -= yoff
+                z3d[i] -= zoff
 
-        return x, y, z, d
+        return x3d, y3d, z3d, diam3d, arc3d
 
     def _update_pt3d(self):
         """
