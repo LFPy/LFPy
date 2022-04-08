@@ -2158,8 +2158,10 @@ class Cell(object):
         y_grad = np.gradient(y)
         theta = np.arctan2(y_grad, x_grad)
 
-        xp = np.r_[(x + 0.5 * d * np.sin(theta)).ravel(), (x - 0.5 * d * np.sin(theta)).ravel()[::-1]]
-        yp = np.r_[(y - 0.5 * d * np.cos(theta)).ravel(), (y + 0.5 * d * np.cos(theta)).ravel()[::-1]]
+        xp = np.r_[(x + 0.5 * d * np.sin(theta)).ravel(),
+                   (x - 0.5 * d * np.sin(theta)).ravel()[::-1]]
+        yp = np.r_[(y - 0.5 * d * np.cos(theta)).ravel(),
+                   (y + 0.5 * d * np.cos(theta)).ravel()[::-1]]
 
         return xp, yp
 
