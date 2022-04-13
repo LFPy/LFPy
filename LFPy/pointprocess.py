@@ -226,9 +226,9 @@ class StimIntElectrode(PointProcess):
     such as VClamp, SEClamp and ICLamp.
 
     Membrane currents will no longer sum to zero if these mechanisms are used,
-    as the equivalent circuit is akin to a current input to the compartment
+    as the equivalent circuit is akin to a current input to the segment
     from a far away extracellular location ("ground"), not immediately from
-    the surface to the inside of the compartment as with transmembrane
+    the surface to the inside of the segment as with transmembrane
     currents.
 
     Refer to NEURON documentation @ neuron.yale.edu for keyword arguments or

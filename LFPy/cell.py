@@ -70,7 +70,7 @@ class Cell(object):
     tstop: float
         Stop time for simulation > 0 ms. Defaults to 100 ms.
     nsegs_method: 'lambda100' or 'lambda_f' or 'fixed_length' or None
-        nseg rule, used by NEURON to determine number of compartments.
+        nseg rule, used by NEURON to determine number of segments.
         Defaults to 'lambda100'
     max_nsegs_length: float or None
         Maximum segment length for method 'fixed_length'. Defaults to None
@@ -529,7 +529,7 @@ class Cell(object):
         Parameters
         ----------
         idx: int
-            Index of compartment where synapse is inserted
+            Index of segment where synapse is inserted
         syntype: str
             Type of synapse. Built-in types in NEURON: ExpSyn, Exp2Syn
         record_current: bool
@@ -607,7 +607,7 @@ class Cell(object):
         Parameters
         ----------
         idx: int
-            Index of compartment where point process is inserted
+            Index of segment where point process is inserted
         pptype: str
             Type of pointprocess. Examples: SEClamp, VClamp,
             IClamp, SinIClamp, ChirpIClamp
@@ -708,7 +708,7 @@ class Cell(object):
 
     def get_idx(self, section='allsec', z_min=-np.inf, z_max=np.inf):
         """
-        Returns compartment idx of segments from sections with names that match
+        Returns segment idx of segments from sections with names that match
         the pattern defined in input section on interval [z_min, z_max].
 
         Parameters
@@ -908,7 +908,7 @@ class Cell(object):
         mechanism. Extracellular potentials are computed from electrode
         currents using the point-source approximation.
         If ``model`` is ``'inf'`` (default), potentials are computed as
-        (:math:`r_i` is the position of a compartment :math:`i`,
+        (:math:`r_i` is the position of a segment :math:`i`,
         :math:`r_n` is the position of an electrode :math:`n`,
         :math:`\\sigma` is the conductivity of the medium):
 
@@ -1006,7 +1006,7 @@ class Cell(object):
         probes: list of :obj:, optional
             None or list of LFPykit.RecExtElectrode like object instances that
             each have a public method `get_transformation_matrix` returning
-            a matrix that linearly maps each compartments' transmembrane
+            a matrix that linearly maps each segments' transmembrane
             current to corresponding measurement as
 
             .. math:: \\mathbf{P} = \\mathbf{M} \\mathbf{I}
@@ -1845,7 +1845,7 @@ class Cell(object):
             raise ValueError(ERRMSG)
 
     def get_idx_children(self, parent="soma[0]"):
-        """Get the idx of parent's children sections, i.e. compartments ids
+        """Get the idx of parent's children sections, i.e. segments ids
         of sections connected to parent-argument
 
         Parameters
@@ -1952,7 +1952,7 @@ class Cell(object):
         # ensure all idx are valid
         if np.any(idx >= self.totnsegs):
             wrongidx = idx[np.where(idx >= self.totnsegs)]
-            raise Exception('idx %s >= number of compartments' % str(wrongidx))
+            raise Exception('idx %s >= number of segments' % str(wrongidx))
 
         # create list of seg names:
         allsegnames = []
@@ -2306,13 +2306,13 @@ class Cell(object):
     def insert_v_ext(self, v_ext, t_ext):
         """Set external extracellular potential around cell.
         Playback of some extracellular potential v_ext on each cell.totnseg
-        compartments. Assumes that the "extracellular"-mechanism is inserted
-        on each compartment.
+        segments. Assumes that the "extracellular"-mechanism is inserted
+        on each segment.
         Can be used to study ephaptic effects and similar
         The inputs will be copied and attached to the cell object as
         cell.v_ext, cell.t_ext, and converted
         to (list of) neuron.h.Vector types, to allow playback into each
-        compartment e_extracellular reference.
+        segment e_extracellular reference.
         Can not be deleted prior to running cell.simulate()
 
         Parameters
@@ -2531,7 +2531,7 @@ class Cell(object):
 
     def get_axial_resistance(self):
         """
-        Return NEURON axial resistance for all cell compartments.
+        Return NEURON axial resistance for all cell segments.
 
         Returns
         -------
@@ -2692,7 +2692,7 @@ class Cell(object):
         the neuron geometry along each axis.
         This method does not affect the underlying cable properties of the
         cell, only predictions of extracellular measurements (by affecting the
-        relative locations of sources representing the compartments).
+        relative locations of sources representing the segments).
 
         Parameters
         ----------

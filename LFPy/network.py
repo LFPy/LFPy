@@ -84,7 +84,7 @@ class NetworkCell(TemplateCell):
     tstop: float
         stop time for simulation > 0 ms. Defaults to 100.
     nsegs_method: 'lambda100' or 'lambda_f' or 'fixed_length' or None
-        nseg rule, used by NEURON to determine number of compartments.
+        nseg rule, used by NEURON to determine number of segments.
         Defaults to 'lambda100'
     max_nsegs_length: float or None
         max segment length for method 'fixed_length'. Defaults to None
@@ -773,7 +773,7 @@ class Network(object):
             ``weight`` connection weight, ``delay`` connection delay,
             ``sec`` section name, ``sec.x`` relative location on section,
             and ``x``, ``y``, ``z`` the corresponding
-            midpoint coordinates of the target compartment.
+            midpoint coordinates of the target segment.
 
         Returns
         -------
@@ -1012,7 +1012,7 @@ class Network(object):
         mechanism. Extracellular potentials are computed from electrode
         currents using the point-source approximation.
         If ``model`` is ``'inf'`` (default), potentials are computed as
-        (:math:`r_i` is the position of a compartment :math:`i`,
+        (:math:`r_i` is the position of a segment :math:`i`,
         :math:`r_n` is the position of an electrode :math:`n`,
         :math:`\\sigma` is the conductivity of the medium):
 
@@ -1076,7 +1076,7 @@ class Network(object):
         probes: list of :obj:, optional
             None or list of LFPykit.RecExtElectrode like object instances that
             each have a public method `get_transformation_matrix` returning
-            a matrix that linearly maps each compartments' transmembrane
+            a matrix that linearly maps each segments' transmembrane
             current to corresponding measurement as
 
             .. math:: \\mathbf{P} = \\mathbf{M} \\mathbf{I}
@@ -1394,7 +1394,7 @@ class Network(object):
         probes: list of :obj:, optional
             None or list of LFPykit.RecExtElectrode like object instances that
             each have a public method `get_transformation_matrix` returning
-            a matrix that linearly maps each compartments' transmembrane
+            a matrix that linearly maps each segments' transmembrane
             current to corresponding measurement as
 
             .. math:: \\mathbf{P} = \\mathbf{M} \\mathbf{I}

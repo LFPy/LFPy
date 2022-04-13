@@ -27,16 +27,16 @@ cpdef np.ndarray[long, ndim=1, negative_indices=False] alias_method(
     Parameters
     ----------
     idx: np.ndarray
-        compartment indices as array of ints
+        segment indices as array of ints
     probs: np.ndarray
-        compartment areas as array of floats
+        segment areas as array of floats
     nsyn: int
-        number of randomized compartment indices
+        number of randomized segment indices
 
     Returns
     -------
     out: np.ndarray
-        integer array of randomly drawn compartment indices
+        integer array of randomly drawn segment indices
 
     """
     assert idx.size == probs.size, 'length of idx and probs arrays must be equal'
@@ -77,7 +77,7 @@ cpdef alias_setup(np.ndarray[DTYPE_t, ndim=1, negative_indices=False] probs):
     Parameters
     ----------
     probs: np.ndarray
-        float array of compartment areas
+        float array of segment areas
 
     Returns
     -------

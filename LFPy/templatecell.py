@@ -62,7 +62,7 @@ class TemplateCell(Cell):
     tstop : float
         stop time for simulation > 0 ms. Defaults to 100.
     nsegs_method : 'lambda100' or 'lambda_f' or 'fixed_length' or None
-        nseg rule, used by NEURON to determine number of compartments.
+        nseg rule, used by NEURON to determine number of segments.
         Defaults to 'lambda100'
     max_nsegs_length : float or None
         max segment length for method 'fixed_length'. Defaults to None
