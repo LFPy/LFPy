@@ -108,7 +108,7 @@ class FourSphereVolumeConductor(lfpykit.eegmegcalc.FourSphereVolumeConductor):
 
         By multiple current dipoles we mean the dipoles computed from all
         axial currents in a neuron simulation, typically two
-        axial currents per compartment, except for the root compartment.
+        axial currents per segment, except for the root segment.
 
         Parameters
         ----------
@@ -215,7 +215,7 @@ class InfiniteVolumeConductor(lfpykit.eegmegcalc.InfiniteVolumeConductor):
 
         The multiple current dipoles corresponds to dipoles computed from all
         axial currents in a neuron simulation, typically two
-        axial currents per compartment, excluding the root compartment.
+        axial currents per segment, excluding the root segment.
 
         Parameters
         ----------
