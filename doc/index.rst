@@ -3,7 +3,7 @@
     You can adapt this file completely to your liking, but it should at least
     contain the root `toctree` directive.
 
-.. image:: Logo_liten.png
+.. image:: LFPy-logo.svg
 
 Welcome to LFPy's documentation!
 ================================
