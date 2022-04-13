@@ -48,7 +48,12 @@ GNU General Public License for more details.
     four-sphere head model (brain, CSF, skull, scalp)
   * ``InfiniteVolumeConductor`` - To compute extracellular potentials with
     current dipoles in infinite volume conductor
-  * ``MEG`` - Class for computing magnetic field from current dipole moment
+  * ``InfiniteHomogeneousVolCondMEG`` - Class for computing magnetic field from
+    current dipole moment assuming an infinite homogeneous volume conductor
+  * ``SphericallySymmetricVolCondMEG`` - Class for computing magnetic field
+    from current dipole moment assuming a spherically symmetric volume
+    conductor
+
 :Modules:
   * ``lfpcalc`` - Misc. functions used by RecExtElectrode class
   * ``tools`` - Some convenient functions
@@ -68,7 +73,7 @@ from .templatecell import TemplateCell
 from .network import NetworkCell, NetworkPopulation, Network
 from .test import _test as run_tests
 from .eegmegcalc import FourSphereVolumeConductor, InfiniteVolumeConductor, \
-    MEG, InfiniteHomogeneousVolCondMEG, SphericallySymmetricVolCondMEG, \
+    InfiniteHomogeneousVolCondMEG, SphericallySymmetricVolCondMEG, \
     NYHeadModel
 from lfpykit import lfpcalc
 from . import tools

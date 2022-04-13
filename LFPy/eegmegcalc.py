@@ -274,17 +274,6 @@ class InfiniteVolumeConductor(lfpykit.eegmegcalc.InfiniteVolumeConductor):
         return potentials
 
 
-class MEG(lfpykit.eegmegcalc.InfiniteHomogeneousVolCondMEG):
-    def __init__(self, sensor_locations, mu=4 * np.pi * 1E-7):
-        warn(
-            "class MEG is deprecated and will be removed. Use "
-            "InfiniteHomogeneousVolCondMEG or SphericallySymmetricVolCondMEG "
-            "instead",
-            DeprecationWarning, 2
-        )
-        super().__init__(sensor_locations, mu)
-
-
 class InfiniteHomogeneousVolCondMEG(
         lfpykit.eegmegcalc.InfiniteHomogeneousVolCondMEG):
     """
