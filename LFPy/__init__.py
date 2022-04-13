@@ -50,8 +50,10 @@ GNU General Public License for more details.
     current dipoles in infinite volume conductor
   * ``InfiniteHomogeneousVolCondMEG`` - Class for computing magnetic field from
     current dipole moment assuming an infinite homogeneous volume conductor
-    ``SphericallySymmetricVolCondMEG`` - Class for computing magnetic field from
-      current dipole moment assuming a spherically symmetric volume conductor
+  * ``SphericallySymmetricVolCondMEG`` - Class for computing magnetic field
+    from current dipole moment assuming a spherically symmetric volume
+    conductor
+
 :Modules:
   * ``lfpcalc`` - Misc. functions used by RecExtElectrode class
   * ``tools`` - Some convenient functions
