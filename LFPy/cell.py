@@ -1293,16 +1293,16 @@ class Cell(object):
                      'No somav attribute will be set.')
         elif self.nsomasec == 1:
             if dt is not None:
-                self.somav = neuron.h.Vector(int(self.tstop / self.dt + 1))
+                self.somav = neuron.h.Vector()
                 for sec in self.somalist:
-                    self.somav.record(sec(0.5)._ref_v, self.dt)
+                    self.somav.record(sec(0.5)._ref_v, dt)
             else:
                 self.somav = neuron.h.Vector()
                 for sec in self.somalist:
                     self.somav.record(sec(0.5)._ref_v)
         elif self.nsomasec > 1:
             if dt is not None:
-                self.somav = neuron.h.Vector(int(self.tstop / self.dt + 1))
+                self.somav = neuron.h.Vector()
                 nseg = self.get_idx('soma').size
                 i, j = divmod(nseg, 2)
                 k = 1
@@ -1310,11 +1310,11 @@ class Cell(object):
                     for seg in sec:
                         if nseg == 2 and k == 1:
                             # if 2 segments, record from the first one:
-                            self.somav.record(seg._ref_v, self.dt)
+                            self.somav.record(seg._ref_v, dt)
                         else:
                             if k == i * 2:
                                 # record from one of the middle segments:
-                                self.somav.record(seg._ref_v, self.dt)
+                                self.somav.record(seg._ref_v, dt)
                         k += 1
             else:
                 self.somav = neuron.h.Vector()
@@ -1340,8 +1340,8 @@ class Cell(object):
         for sec in self.allseclist:
             for seg in sec:
                 if dt is not None:
-                    memirec = neuron.h.Vector(int(self.tstop / self.dt + 1))
-                    memirec.record(seg._ref_i_membrane_, self.dt)
+                    memirec = neuron.h.Vector()
+                    memirec.record(seg._ref_i_membrane_, dt)
                 else:
                     memirec = neuron.h.Vector()
                     memirec.record(seg._ref_i_membrane_)
@@ -1352,8 +1352,8 @@ class Cell(object):
         Record time of simulation
         """
         if dt is not None:
-            self._neuron_tvec = neuron.h.Vector(int(self.tstop / self.dt + 1))
-            self._neuron_tvec.record(neuron.h._ref_t, self.dt)
+            self._neuron_tvec = neuron.h.Vector()
+            self._neuron_tvec.record(neuron.h._ref_t, dt)
         else:
             self._neuron_tvec = neuron.h.Vector()
             self._neuron_tvec.record(neuron.h._ref_t)
@@ -1366,8 +1366,8 @@ class Cell(object):
         for sec in self.allseclist:
             for seg in sec:
                 if dt is not None:
-                    memipasrec = neuron.h.Vector(int(self.tstop / self.dt + 1))
-                    memipasrec.record(seg._ref_i_pas, self.dt)
+                    memipasrec = neuron.h.Vector()
+                    memipasrec.record(seg._ref_i_pas, dt)
                 else:
                     memipasrec = neuron.h.Vector()
                     memipasrec.record(seg._ref_i_pas)
@@ -1381,8 +1381,8 @@ class Cell(object):
         for sec in self.allseclist:
             for seg in sec:
                 if dt is not None:
-                    memicaprec = neuron.h.Vector(int(self.tstop / self.dt + 1))
-                    memicaprec.record(seg._ref_i_cap, self.dt)
+                    memicaprec = neuron.h.Vector()
+                    memicaprec.record(seg._ref_i_cap, dt)
                 else:
                     memicaprec = neuron.h.Vector()
                     memicaprec.record(seg._ref_i_cap)
@@ -1397,8 +1397,8 @@ class Cell(object):
             if idx in self._stimitorecord:
                 stim = self._hoc_stimlist[idx]
                 if dt is not None:
-                    stimirec = neuron.h.Vector(int(self.tstop / self.dt + 1))
-                    stimirec.record(stim._ref_i, self.dt)
+                    stimirec = neuron.h.Vector()
+                    stimirec.record(stim._ref_i, dt)
                 else:
                     stimirec = neuron.h.Vector()
                     stimirec.record(stim._ref_i)
@@ -1416,8 +1416,8 @@ class Cell(object):
                 stim = self._hoc_stimlist[idx]
                 seg = stim.get_segment()
                 if dt is not None:
-                    stimvrec = neuron.h.Vector(int(self.tstop / self.dt + 1))
-                    stimvrec.record(seg._ref_v, self.dt)
+                    stimvrec = neuron.h.Vector()
+                    stimvrec.record(seg._ref_v, dt)
                 else:
                     stimvrec = neuron.h.Vector()
                     stimvrec.record(seg._ref_v)
@@ -1434,8 +1434,8 @@ class Cell(object):
             if idx in self._synitorecord:
                 syn = self._hoc_synlist[idx]
                 if dt is not None:
-                    synirec = neuron.h.Vector(int(self.tstop / self.dt + 1))
-                    synirec.record(syn._ref_i, self.dt)
+                    synirec = neuron.h.Vector()
+                    synirec.record(syn._ref_i, dt)
                 else:
                     synirec = neuron.h.Vector()
                     synirec.record(syn._ref_i)
@@ -1453,8 +1453,8 @@ class Cell(object):
                 syn = self._hoc_synlist[idx]
                 seg = syn.get_segment()
                 if dt is not None:
-                    synvrec = neuron.h.Vector(int(self.tstop / self.dt + 1))
-                    synvrec.record(seg._ref_v, self.dt)
+                    synvrec = neuron.h.Vector()
+                    synvrec.record(seg._ref_v, dt)
                 else:
                     synvrec = neuron.h.Vector()
                     synvrec.record(seg._ref_v)
@@ -1470,8 +1470,8 @@ class Cell(object):
         for sec in self.allseclist:
             for seg in sec:
                 if dt is not None:
-                    memvrec = neuron.h.Vector(int(self.tstop / self.dt + 1))
-                    memvrec.record(seg._ref_v, self.dt)
+                    memvrec = neuron.h.Vector()
+                    memvrec.record(seg._ref_v, dt)
                 else:
                     memvrec = neuron.h.Vector()
                     memvrec.record(seg._ref_v)
