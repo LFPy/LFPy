@@ -627,8 +627,6 @@ class testCell(unittest.TestCase):
             except ValueError:
                 pass
 
-
-
     def test_cell_get_idx_name_00(self):
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
                                                  'ball_and_sticks.hoc'))

@@ -54,6 +54,7 @@ with tempfile.TemporaryDirectory() as tmpdir:
             neuron.load_mechanisms('.')
         os.chdir(CWD)
 
+
 class testNetworkCell(unittest.TestCase):
     """
 
