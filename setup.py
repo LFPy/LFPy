@@ -4,10 +4,8 @@
 
 """
 
-from distutils.spawn import spawn
 import os
 import sys
-import shutil
 
 d = {}
 exec(open(os.path.join('LFPy', 'version.py')).read(), None, d)
@@ -34,28 +32,6 @@ except ImportError:
     print("simulations in LFPy may run slower")
     cmdclass = {}
     ext_modules = []
-
-
-# try and locate the nrnivmodl or mknrndll script of NEURON in PATH so that the
-# NEURON NMODL files LFPy/test/*.mod can be compiled in place and be copied
-# as part of the package_data, allowing unit tests to run
-if not any(arg in sys.argv for arg in ['sdist', 'upload']):
-    if shutil.which('nrnivmodl') is not None:
-        os.chdir(os.path.join('LFPy', 'test'))
-        for path in ['x86_64', 'arm64', 'aarch64']:
-            if os.path.isdir(path):
-                shutil.rmtree(path)
-        spawn([shutil.which('nrnivmodl')])
-        os.chdir(os.path.join('..', '..'))
-    elif shutil.which('mknrndll') is not None:
-        os.chdir(os.path.join('LFPy', 'test'))
-        if os.path.isfile("nrnmech.dll"):
-            os.remove("nrnmech.dll")
-        spawn([shutil.which('mknrndll')])
-        os.chdir(os.path.join('..', '..'))
-    else:
-        print("nrnivmodl/mknrndll script not found in PATH, thus NMODL " +
-              "files could not be compiled. LFPy.test() functions will fail")
 
 
 with open('README.md') as file:

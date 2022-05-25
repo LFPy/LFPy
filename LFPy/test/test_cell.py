@@ -18,6 +18,10 @@ GNU General Public License for more details.
 import os
 import posixpath
 import sys
+import tempfile
+import shutil
+from distutils.spawn import spawn
+from pkg_resources import working_set
 import unittest
 import numpy as np
 import LFPy
@@ -26,15 +30,32 @@ import pickle
 import random
 from copy import copy
 
-# for nosetests to run load mechanisms
-if "win32" in sys.platform:
-    pth = os.path.join(LFPy.__path__[0], 'test', 'nrnmech.dll')
-    pth = pth.replace(os.sep, posixpath.sep)
-    if pth not in neuron.nrn_dll_loaded:
-        neuron.h.nrn_load_dll(pth)
-        neuron.nrn_dll_loaded.append(pth)
-else:
-    neuron.load_mechanisms(os.path.join(LFPy.__path__[0], 'test'))
+
+# compile NMODL files required by tests in a temporary folder
+with tempfile.TemporaryDirectory() as tmpdir:
+    lfpypath = working_set.by_key['lfpy'].location
+    nrnpath = working_set.by_key['neuron'].location
+    if not hasattr(neuron.h, 'ExpSynI'):
+        CWD = os.getcwd()
+        os.chdir(tmpdir)
+        if "win32" in sys.platform:
+            if shutil.which('mknrndll') is not None:
+                spawn([shutil.which('mknrndll'),
+                       os.path.join(lfpypath, 'LFPy', 'test')])
+                neuron.h.nrn_load_dll(pth)
+        else:
+            # check if nrnivmodl is in PATH
+            if shutil.which('nrnivmodl') is not None:
+                spawn([shutil.which('nrnivmodl'),
+                       os.path.join(lfpypath, 'LFPy', 'test')])
+            else:
+                # likely location of NEURON binaries:
+                nrnivmodl = os.path.join(nrnpath.split('lib')[0],
+                                         'bin', 'nrnivmodl')
+                if os.path.isfile(nrnivmodl):
+                    spawn([nrnivmodl, os.path.join(lfpypath, 'LFPy', 'test')])
+            neuron.load_mechanisms('.')
+        os.chdir(CWD)
 
 
 class testCell(unittest.TestCase):
