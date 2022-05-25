@@ -40,7 +40,7 @@ with tempfile.TemporaryDirectory() as tmpdir:
             if shutil.which('mknrndll') is not None:
                 spawn([shutil.which('mknrndll'),
                        os.path.join(lfpypath, 'LFPy', 'test')])
-                neuron.h.nrn_load_dll(pth)
+                neuron.h.nrn_load_dll(tmpdir)
         else:
             # check if nrnivmodl is in PATH
             if shutil.which('nrnivmodl') is not None:
