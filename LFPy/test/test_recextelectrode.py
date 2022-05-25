@@ -17,43 +17,16 @@ GNU General Public License for more details.
 import sys
 import os
 import posixpath
-import tempfile
-import shutil
-from distutils.spawn import spawn
-from pkg_resources import working_set
 import unittest
 import numpy as np
 import LFPy
 import neuron
 from LFPy.test.common import stickSimulation, \
     stickSimulationAveragingElectrode, analytical_LFP
+from .common import build_test_NMODL_files
 
-
-# compile NMODL files required by tests in a temporary folder
-with tempfile.TemporaryDirectory() as tmpdir:
-    lfpypath = working_set.by_key['lfpy'].location
-    nrnpath = working_set.by_key['neuron'].location
-    if not hasattr(neuron.h, 'ExpSynI'):
-        CWD = os.getcwd()
-        os.chdir(tmpdir)
-        if "win32" in sys.platform:
-            if shutil.which('mknrndll') is not None:
-                spawn([shutil.which('mknrndll'),
-                       os.path.join(lfpypath, 'LFPy', 'test')])
-                neuron.h.nrn_load_dll(tmpdir)
-        else:
-            # check if nrnivmodl is in PATH
-            if shutil.which('nrnivmodl') is not None:
-                spawn([shutil.which('nrnivmodl'),
-                       os.path.join(lfpypath, 'LFPy', 'test')])
-            else:
-                # likely location of NEURON binaries:
-                nrnivmodl = os.path.join(nrnpath.split('lib')[0],
-                                         'bin', 'nrnivmodl')
-                if os.path.isfile(nrnivmodl):
-                    spawn([nrnivmodl, os.path.join(lfpypath, 'LFPy', 'test')])
-            neuron.load_mechanisms('.')
-        os.chdir(CWD)
+# compile and import NMODL files used by tests
+build_test_NMODL_files()
 
 
 class testRecExtElectrode(unittest.TestCase):
