@@ -21,7 +21,6 @@ from numpy import real, imag
 import tempfile
 import shutil
 from distutils.spawn import spawn
-from pkg_resources import working_set
 import LFPy
 import neuron
 
@@ -31,8 +30,8 @@ def build_test_NMODL_files():
     '''compile NMODL files required by tests in a temporary folder,
     and import the mechanisms'''
     with tempfile.TemporaryDirectory() as tmpdir:
-        lfpypath = working_set.by_key['lfpy'].location
-        nrnpath = working_set.by_key['neuron'].location
+        lfpypath = os.path.abspath(LFPy.__path__[0])
+        nrnpath = os.path.abspath(neuron.__path__[0])
         if not hasattr(neuron.h, 'ExpSynI'):
             CWD = os.getcwd()
             os.chdir(tmpdir)
