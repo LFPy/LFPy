@@ -51,7 +51,8 @@ def build_test_NMODL_files():
                     nrnivmodl = os.path.join(nrnpath.split('lib')[0],
                                              'bin', 'nrnivmodl')
                     if os.path.isfile(nrnivmodl):
-                        spawn([nrnivmodl, os.path.join(lfpypath, 'LFPy', 'test')])
+                        spawn([nrnivmodl,
+                               os.path.join(lfpypath, 'LFPy', 'test')])
                 neuron.load_mechanisms('.')
             os.chdir(CWD)
 
