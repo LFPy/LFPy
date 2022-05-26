@@ -108,15 +108,10 @@ if not os.path.isdir(FIGS):
     os.mkdir(FIGS)
 
 
-# load the LFPy SinSyn mechanism for stimulus
-if "win32" in sys.platform:
-    pth = os.path.join(LFPy.__path__[0], "test").replace(os.sep, posixpath.sep)
-    if pth not in neuron.nrn_dll_loaded:
-        neuron.h.nrn_load_dll(pth + "/nrnmech.dll")
-    neuron.nrn_dll_loaded.append(pth)
-else:
-    neuron.load_mechanisms(os.path.join(LFPy.__path__[0], "test"))
-
+# load the LFPy-provided SinSyn mechanism for stimulus
+# TODO: make copy of sinsyn.mod to ./mod/ and compile in place
+from LFPy.test.common import build_test_NMODL_files
+build_test_NMODL_files()
 
 def posixpth(pth):
     """
