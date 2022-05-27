@@ -34,7 +34,9 @@ from warnings import warn
 import scipy.signal as ss
 import neuron
 import LFPy
+from LFPy.test.common import build_test_NMODL_files
 from mpi4py import MPI
+
 
 
 plt.rcParams.update({
@@ -110,7 +112,6 @@ if not os.path.isdir(FIGS):
 
 # load the LFPy-provided SinSyn mechanism for stimulus
 # TODO: make copy of sinsyn.mod to ./mod/ and compile in place
-from LFPy.test.common import build_test_NMODL_files
 build_test_NMODL_files()
 
 def posixpth(pth):
