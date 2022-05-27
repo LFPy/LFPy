@@ -16,8 +16,6 @@ GNU General Public License for more details.
 """
 
 import os
-import posixpath
-import sys
 import unittest
 import numpy as np
 import LFPy
@@ -25,16 +23,10 @@ import neuron
 import pickle
 import random
 from copy import copy
+from .common import build_test_NMODL_files
 
-# for nosetests to run load mechanisms
-if "win32" in sys.platform:
-    pth = os.path.join(LFPy.__path__[0], 'test', 'nrnmech.dll')
-    pth = pth.replace(os.sep, posixpath.sep)
-    if pth not in neuron.nrn_dll_loaded:
-        neuron.h.nrn_load_dll(pth)
-        neuron.nrn_dll_loaded.append(pth)
-else:
-    neuron.load_mechanisms(os.path.join(LFPy.__path__[0], 'test'))
+# compile and import NMODL files used by tests
+build_test_NMODL_files()
 
 
 class testCell(unittest.TestCase):
@@ -605,8 +597,6 @@ class testCell(unittest.TestCase):
                 cell.get_idx_parent_children(parent=bad_value)
             except ValueError:
                 pass
-
-
 
     def test_cell_get_idx_name_00(self):
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',

@@ -4,19 +4,21 @@
 
 """
 
-from distutils.spawn import spawn
 import os
-import sys
-import shutil
+from distutils.util import convert_path
 
 d = {}
-exec(open(os.path.join('LFPy', 'version.py')).read(), None, d)
+ver_path = convert_path(os.path.join('LFPy', 'version.py'))
+with open(ver_path, 'rt') as f:
+    exec(f.read(), d)
 version = d['version']
 
 try:
     from setuptools import setup, Extension
-except ImportError as ie:
-    raise ie('please install setuptools')
+except ImportError as err:
+    print(f'please install setuptools: {err}')
+    raise
+
 try:
     import numpy
     from Cython.Distutils import build_ext
@@ -36,29 +38,7 @@ except ImportError:
     ext_modules = []
 
 
-# try and locate the nrnivmodl or mknrndll script of NEURON in PATH so that the
-# NEURON NMODL files LFPy/test/*.mod can be compiled in place and be copied
-# as part of the package_data, allowing unit tests to run
-if not any(arg in sys.argv for arg in ['sdist', 'upload']):
-    if shutil.which('nrnivmodl') is not None:
-        os.chdir(os.path.join('LFPy', 'test'))
-        for path in ['x86_64', 'arm64', 'aarch64']:
-            if os.path.isdir(path):
-                shutil.rmtree(path)
-        spawn([shutil.which('nrnivmodl')])
-        os.chdir(os.path.join('..', '..'))
-    elif shutil.which('mknrndll') is not None:
-        os.chdir(os.path.join('LFPy', 'test'))
-        if os.path.isfile("nrnmech.dll"):
-            os.remove("nrnmech.dll")
-        spawn([shutil.which('mknrndll')])
-        os.chdir(os.path.join('..', '..'))
-    else:
-        print("nrnivmodl/mknrndll script not found in PATH, thus NMODL " +
-              "files could not be compiled. LFPy.test() functions will fail")
-
-
-with open('README.md') as file:
+with open('README.md', 'rt') as file:
     long_description = file.read()
 
 setup(
@@ -77,7 +57,7 @@ setup(
     cmdclass=cmdclass,
     ext_modules=ext_modules,
     url='http://LFPy.readthedocs.io',
-    download_url='https://github.com/LFPy/LFPy/tarball/v{}'.format(version),
+    download_url=f'https://github.com/LFPy/LFPy/tarball/v{version}',
     license='LICENSE',
     description=('A module for modeling extracellular potentials of '
                  'multicompartment neuron models built on NEURON'),

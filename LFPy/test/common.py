@@ -14,13 +14,52 @@ GNU General Public License for more details.
 
 """
 import os
+import sys
 import numpy as np
 from scipy.integrate import quad
 from numpy import real, imag
+import tempfile
+import shutil
+from distutils.spawn import spawn
+import posixpath
 import LFPy
+import neuron
 
 
 # ####### Functions used by tests: ########################################
+def build_test_NMODL_files():
+    '''compile NMODL files required by tests in a temporary folder,
+    and import the mechanisms'''
+    tmpdir = tempfile.mkdtemp()
+    lfpypath = os.path.abspath(LFPy.__path__[0])
+    nrnpath = os.path.abspath(neuron.__path__[0])
+    if not hasattr(neuron.h, 'ExpSynI'):
+        CWD = os.getcwd()
+        os.chdir(tmpdir)
+        if "win32" in sys.platform:
+            if shutil.which('mknrndll') is not None:
+                spawn([shutil.which('mknrndll'),
+                       os.path.join(lfpypath, 'test')])
+                pth = os.path.join(lfpypath, 'test', 'nrnmech.dll')
+                pth = pth.replace(os.sep, posixpath.sep)
+                neuron.h.nrn_load_dll(pth)
+                neuron.nrn_dll_loaded.append(pth)
+        else:
+            # check if nrnivmodl is in PATH
+            if shutil.which('nrnivmodl') is not None:
+                spawn([shutil.which('nrnivmodl'),
+                       os.path.join(lfpypath, 'test')])
+            else:
+                # likely location of NEURON binaries:
+                nrnivmodl = os.path.join(nrnpath.split('lib')[0],
+                                         'bin', 'nrnivmodl')
+                if os.path.isfile(nrnivmodl):
+                    spawn([nrnivmodl,
+                           os.path.join(lfpypath, 'test')])
+            neuron.load_mechanisms(tmpdir)
+        os.chdir(CWD)
+    shutil.rmtree(tmpdir)
+
 def stickSimulation(method):
     stickParams = {
         'morphology': os.path.join(LFPy.__path__[0], 'test', 'stick.hoc'),

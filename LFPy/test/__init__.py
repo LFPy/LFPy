@@ -38,6 +38,10 @@ def _test(verbosity=2):
     $ nosetests-2.7 LFPy/test/test_cell.py
 
     """
+    from .common import build_test_NMODL_files
+    # compile and import NMODL files used by tests
+    build_test_NMODL_files()
+
     # import methods here to avoid polluting LFPy.test namespace
     from .test_cell import testCell
     from .test_eegmegcalc import testInfiniteHomogeneousVolCondMEG, \
