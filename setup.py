@@ -16,7 +16,7 @@ version = d['version']
 try:
     from setuptools import setup, Extension
 except ImportError as err:
-    print(f'please install setuptools: {err=}')
+    print(f'please install setuptools: {err}')
     raise
 
 try:
