@@ -21,6 +21,7 @@ from numpy import real, imag
 import tempfile
 import shutil
 from distutils.spawn import spawn
+import posixpath
 import LFPy
 import neuron
 
@@ -39,7 +40,10 @@ def build_test_NMODL_files():
             if shutil.which('mknrndll') is not None:
                 spawn([shutil.which('mknrndll'),
                        os.path.join(lfpypath, 'test')])
-                neuron.h.nrn_load_dll(tmpdir)
+                pth = os.path.join(lfpypath, 'test', 'nrnmech.dll')
+                pth = pth.replace(os.sep, posixpath.sep)
+                neuron.h.nrn_load_dll(pth)
+                neuron.nrn_dll_loaded.append(pth)
         else:
             # check if nrnivmodl is in PATH
             if shutil.which('nrnivmodl') is not None:
@@ -55,7 +59,6 @@ def build_test_NMODL_files():
             neuron.load_mechanisms(tmpdir)
         os.chdir(CWD)
     shutil.rmtree(tmpdir)
-
 
 def stickSimulation(method):
     stickParams = {
