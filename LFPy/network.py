@@ -1674,6 +1674,7 @@ class Network(object):
         if to_file:
             outputfile.close()
 
+
 # conditional definition based on mpi availability
 if HAVE_MPI:
     def ReduceStructArray(sendbuf, op=MPI.SUM):
@@ -1703,9 +1704,10 @@ if HAVE_MPI:
 
         if RANK == 0:
             reduced = np.zeros(shape,
-                            dtype=list(zip(dtype_names,
-                                            ['f8' for i in range(len(dtype_names)
-                                                                )])))
+                               dtype=list(zip(dtype_names,
+                                          ['f8' for i in
+                                           range(len(dtype_names))]))
+                               )
         else:
             reduced = None
         for name in dtype_names:
