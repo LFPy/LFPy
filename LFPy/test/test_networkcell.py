@@ -25,7 +25,14 @@ from .common import build_test_NMODL_files
 # compile and import NMODL files used by tests
 build_test_NMODL_files()
 
+try:
+    import mpi4py
+    HAVE_MPI = True
+except ImportError:
+    HAVE_MPI = False
 
+
+@unittest.skipIf(not HAVE_MPI, "MPI not installed")
 class testNetworkCell(unittest.TestCase):
     """
 

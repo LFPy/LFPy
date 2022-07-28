@@ -20,17 +20,22 @@ import numpy as np
 import os
 import scipy.stats as stats
 import h5py
-from mpi4py import MPI
 import neuron
 from neuron import units
 from .templatecell import TemplateCell
 import scipy.sparse as ss
 from warnings import warn, filterwarnings
 
-# set up MPI environment
-COMM = MPI.COMM_WORLD
-SIZE = COMM.Get_size()
-RANK = COMM.Get_rank()
+try:
+    from mpi4py import MPI
+
+    # set up MPI environment
+    COMM = MPI.COMM_WORLD
+    SIZE = COMM.Get_size()
+    RANK = COMM.Get_rank()
+    HAVE_MPI = True
+except ImportError:
+    HAVE_MPI = False
 
 
 def flattenlist(lst):
@@ -341,6 +346,8 @@ class NetworkPopulation(object):
                  cell_args=None, pop_args=None,
                  rotation_args=None,
                  OUTPUTPATH='example_parallel_network'):
+        assert HAVE_MPI, ("NetworkPopulation objects require mpi4py. "
+                          "You can install it with: >>> pip install LFPy[mpi]")
         # set class attributes
         self.CWD = CWD
         self.CELLPATH = CELLPATH
@@ -529,6 +536,8 @@ class Network(object):
             celsius=6.3,
             OUTPUTPATH='example_parallel_network',
             verbose=False):
+        assert HAVE_MPI, ("Network objects require mpi4py. "
+                          "You can install it with: >>> pip install LFPy[mpi]")
         # set attributes
         self.dt = dt
         self.tstart = tstart
@@ -1665,45 +1674,46 @@ class Network(object):
         if to_file:
             outputfile.close()
 
+# conditional definition based on mpi availability
+if HAVE_MPI:
+    def ReduceStructArray(sendbuf, op=MPI.SUM):
+        """
+        simplify MPI Reduce for structured ndarrays with floating point numbers
 
-def ReduceStructArray(sendbuf, op=MPI.SUM):
-    """
-    simplify MPI Reduce for structured ndarrays with floating point numbers
+        Parameters
+        ----------
+        sendbuf: structured ndarray
+            Array data to be reduced (default: summed)
+        op: mpi4py.MPI.Op object
+            MPI_Reduce function. Default is mpi4py.MPI.SUM
 
-    Parameters
-    ----------
-    sendbuf: structured ndarray
-        Array data to be reduced (default: summed)
-    op: mpi4py.MPI.Op object
-        MPI_Reduce function. Default is mpi4py.MPI.SUM
-
-    Returns
-    -------
-    recvbuf: structured ndarray or None
-        Reduced array on RANK 0, None on all other RANKs
-    """
-    if RANK == 0:
-        shape = sendbuf.shape
-        dtype_names = sendbuf.dtype.names
-    else:
-        shape = None
-        dtype_names = None
-    shape = COMM.bcast(shape)
-    dtype_names = COMM.bcast(dtype_names)
-
-    if RANK == 0:
-        reduced = np.zeros(shape,
-                           dtype=list(zip(dtype_names,
-                                          ['f8' for i in range(len(dtype_names)
-                                                               )])))
-    else:
-        reduced = None
-    for name in dtype_names:
+        Returns
+        -------
+        recvbuf: structured ndarray or None
+            Reduced array on RANK 0, None on all other RANKs
+        """
         if RANK == 0:
-            recvbuf = np.zeros(shape)
+            shape = sendbuf.shape
+            dtype_names = sendbuf.dtype.names
         else:
-            recvbuf = None
-        COMM.Reduce(np.array(sendbuf[name]), recvbuf, op=op, root=0)
+            shape = None
+            dtype_names = None
+        shape = COMM.bcast(shape)
+        dtype_names = COMM.bcast(dtype_names)
+
         if RANK == 0:
-            reduced[name] = recvbuf
-    return reduced
+            reduced = np.zeros(shape,
+                            dtype=list(zip(dtype_names,
+                                            ['f8' for i in range(len(dtype_names)
+                                                                )])))
+        else:
+            reduced = None
+        for name in dtype_names:
+            if RANK == 0:
+                recvbuf = np.zeros(shape)
+            else:
+                recvbuf = None
+            COMM.Reduce(np.array(sendbuf[name]), recvbuf, op=op, root=0)
+            if RANK == 0:
+                reduced[name] = recvbuf
+        return reduced
