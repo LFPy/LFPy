@@ -20,7 +20,7 @@ import numpy as np
 import os
 import scipy.stats as stats
 import h5py
-from mpi4py import MPI
+# from mpi4py import MPI
 import neuron
 from neuron import units
 from .templatecell import TemplateCell
@@ -28,9 +28,14 @@ import scipy.sparse as ss
 from warnings import warn, filterwarnings
 
 # set up MPI environment
-COMM = MPI.COMM_WORLD
-SIZE = COMM.Get_size()
-RANK = COMM.Get_rank()
+# COMM = MPI.COMM_WORLD
+# SIZE = COMM.Get_size()
+# RANK = COMM.Get_rank()
+
+# neuron.h.nrnmpi_init()
+pc = neuron.h.ParallelContext()
+SIZE = pc.nhost()
+RANK = pc.id()
 
 
 def flattenlist(lst):
@@ -358,7 +363,8 @@ class NetworkPopulation(object):
         if RANK == 0:
             if not os.path.isdir(OUTPUTPATH):
                 os.mkdir(OUTPUTPATH)
-        COMM.Barrier()
+        # COMM.Barrier()
+        pc.barrier()
 
         # container of Vector objects used to record times of action potentials
         self._hoc_spike_vectors = []
@@ -397,8 +403,10 @@ class NetworkPopulation(object):
         # gather gids, soma positions and cell rotations to RANK 0, and write
         # as structured array.
         if RANK == 0:
-            populationData = flattenlist(COMM.gather(
-                zip(self.gids, self.soma_pos, self.rotations), root=0))
+            # populationData = flattenlist(COMM.gather(
+            #     zip(self.gids, self.soma_pos, self.rotations), root=0))
+            populationData = flattenlist(pc.py_allgather(
+                zip(self.gids, self.soma_pos, self.rotations)))
 
             # create structured array for storing data
             dtype = [('gid', 'i8'), ('x', float), ('y', float), ('z', float),
@@ -423,10 +431,12 @@ class NetworkPopulation(object):
             f[self.name] = popDataArray
             f.close()
         else:
-            COMM.gather(zip(self.gids, self.soma_pos, self.rotations), root=0)
+            # COMM.gather(zip(self.gids, self.soma_pos, self.rotations), root=0)
+            _ = pc.py_allgather(zip(self.gids, self.soma_pos, self.rotations))
 
         # sync
-        COMM.Barrier()
+        # COMM.Barrier()
+        pc.barrier()
 
     def draw_rand_pos(self, POP_SIZE, radius, loc, scale, cap=None):
         """
@@ -539,7 +549,9 @@ class Network(object):
         self.verbose = verbose
 
         # we need NEURON's ParallelContext for communicating NetCon events
-        self.pc = neuron.h.ParallelContext()
+        # self.pc = neuron.h.ParallelContext()
+        self.pc = pc
+
 
         # create empty list for connections between cells (not to be confused
         # with each cell's list of netcons _hoc_netconlist)
@@ -940,8 +952,10 @@ class Network(object):
 
                 syncount += nidx
 
-        conncount = COMM.reduce(conncount, op=MPI.SUM, root=0)
-        syncount = COMM.reduce(syncount, op=MPI.SUM, root=0)
+        # conncount = COMM.reduce(conncount, op=MPI.SUM, root=0)
+        # syncount = COMM.reduce(syncount, op=MPI.SUM, root=0)
+        conncount = self.pc.allreduce(conncount, 1)
+        syncount = self.pc.allreduce(syncount, 1)
 
         if RANK == 0:
             print('Connected population {} to {}'.format(pre, post),
@@ -954,7 +968,8 @@ class Network(object):
         # gather and write syn_idx_pos data
         if save_connections:
             if RANK == 0:
-                synData = flattenlist(COMM.gather(syn_idx_pos))
+                # synData = flattenlist(COMM.gather(syn_idx_pos))
+                synData = flattenlist(self.pc.py_allgather(syn_idx_pos))
 
                 # convert to structured array
                 dtype = [('gid_pre', 'i8'),
@@ -1001,9 +1016,11 @@ class Network(object):
                     for key, value in synparams.items():
                         subgrp[key] = value
             else:
-                COMM.gather(syn_idx_pos)
+                # COMM.gather(syn_idx_pos)
+                _ = self.pc.py_allgather(syn_idx_pos)
 
-        return COMM.bcast([conncount, syncount])
+        # return COMM.bcast([conncount, syncount])
+        return self.pc.py_broadcast([conncount, syncount], 0)
 
     def enable_extracellular_stimulation(self, electrode, t_ext=None, n=1,
                                          model='inf'):
@@ -1216,6 +1233,7 @@ class Network(object):
             for i in range(len(population._hoc_spike_vectors)):
                 population.spike_vectors += \
                     [population._hoc_spike_vectors[i].as_numpy()]
+        '''
         if RANK == 0:
             times = []
             gids = []
@@ -1235,11 +1253,27 @@ class Network(object):
                           dest=0, tag=13)
                 COMM.send([x for x in self.populations[name].gids],
                           dest=0, tag=14)
-
+        '''
+        if RANK == 0:
+            times = []
+            gids = []
+        else:
+            times = None
+            gids = None
+        for i, name in enumerate(self.population_names):
+            times_send = [x for x in self.populations[name].spike_vectors]
+            gids_send = [x for x in self.populations[name].gids]
+            if RANK == 0:
+                times += flattenlist(self.pc.py_gather(times_send))
+                gids += flattenlist(self.pc.py_gather(gids_send))
+            else:
+                _ = self.pc.py_gather(times_send)
+                _ = self.pc.py_gather(gids_send)
+            
         # create final output file, summing up single RANK output from
         # temporary files
         if to_file and probes is not None:
-            op = MPI.SUM
+            # op = MPI.SUM
             fname = os.path.join(self.OUTPUTPATH,
                                  'tmp_output_RANK_{:03d}.h5'.format(RANK))
             f0 = h5py.File(fname, 'r')
@@ -1257,14 +1291,19 @@ class Network(object):
                         continue
                     f1[grp] = np.zeros(shape, dtype=dtype)
                 for key, value in f0[grp].items():
+                    # if RANK == 0:
+                    #     recvbuf = np.zeros(shape, dtype=float)
+                    # else:
+                    #     recvbuf = None
+                    # COMM.Reduce(value[()].astype(float), recvbuf,
+                    #             op=op, root=0)
+
+                    recvbuf = neuron.h.Vector(value[()].astype(float).flatten())
+                    self.pc.allreduce(recvbuf, 1)
                     if RANK == 0:
-                        recvbuf = np.zeros(shape, dtype=float)
+                        f1[grp][key] = np.array(recvbuf).reshape(value.shape)
                     else:
                         recvbuf = None
-                    COMM.Reduce(value[()].astype(float), recvbuf,
-                                op=op, root=0)
-                    if RANK == 0:
-                        f1[grp][key] = recvbuf
             f0.close()
             if RANK == 0:
                 f1.close()
@@ -1666,7 +1705,8 @@ class Network(object):
             outputfile.close()
 
 
-def ReduceStructArray(sendbuf, op=MPI.SUM):
+# def ReduceStructArray(sendbuf, op=MPI.SUM):
+def ReduceStructArray(sendbuf):
     """
     simplify MPI Reduce for structured ndarrays with floating point numbers
 
@@ -1688,8 +1728,12 @@ def ReduceStructArray(sendbuf, op=MPI.SUM):
     else:
         shape = None
         dtype_names = None
+    '''
     shape = COMM.bcast(shape)
     dtype_names = COMM.bcast(dtype_names)
+    '''
+    shape = pc.py_broadcast(shape, 0)
+    dtype_names = pc.py_broadcast(dtype_names, 0)
 
     if RANK == 0:
         reduced = np.zeros(shape,
@@ -1699,11 +1743,14 @@ def ReduceStructArray(sendbuf, op=MPI.SUM):
     else:
         reduced = None
     for name in dtype_names:
+        # if RANK == 0:
+        #     recvbuf = np.zeros(shape)
+        # else:
+        #     recvbuf = None
+        # COMM.Reduce(np.array(sendbuf[name]), recvbuf, op=op, root=0)
+        recvbuf = neuron.h.Vector(sendbuf[name].flatten())
+        pc.allreduce(recvbuf, 1)
         if RANK == 0:
-            recvbuf = np.zeros(shape)
-        else:
-            recvbuf = None
-        COMM.Reduce(np.array(sendbuf[name]), recvbuf, op=op, root=0)
-        if RANK == 0:
-            reduced[name] = recvbuf
+            # reduced[name] = recvbuf
+            reduced[name] = np.array(recvbuf).reshape(shape)
     return reduced
