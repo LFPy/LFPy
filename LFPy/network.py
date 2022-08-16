@@ -33,9 +33,9 @@ from warnings import warn, filterwarnings
 # RANK = COMM.Get_rank()
 
 # neuron.h.nrnmpi_init()
-pc = neuron.h.ParallelContext()
+'''pc = neuron.h.ParallelContext()
 SIZE = pc.nhost()
-RANK = pc.id()
+RANK = pc.id()'''
 
 
 def flattenlist(lst):
@@ -359,12 +359,19 @@ class NetworkPopulation(object):
             else dict()
         self.OUTPUTPATH = OUTPUTPATH
 
+        # set up ParallelContext
+
+        self.pc = neuron.h.ParallelContext()
+        self.SIZE = self.pc.nhost()
+        self.RANK = self.pc.id()
+
+
         # create folder for output if it does not exist
-        if RANK == 0:
+        if self.RANK == 0:
             if not os.path.isdir(OUTPUTPATH):
                 os.mkdir(OUTPUTPATH)
         # COMM.Barrier()
-        pc.barrier()
+        self.pc.barrier()
 
         # container of Vector objects used to record times of action potentials
         self._hoc_spike_vectors = []
@@ -375,7 +382,7 @@ class NetworkPopulation(object):
              first_gid) for i in range(POP_SIZE) if (
                 i +
                 first_gid) %
-            SIZE == RANK]
+            self.SIZE == self.RANK]
 
         # we have to enter the cell's corresponding file directory to
         # create cell because how EPFL set their code up
@@ -402,10 +409,10 @@ class NetworkPopulation(object):
 
         # gather gids, soma positions and cell rotations to RANK 0, and write
         # as structured array.
-        if RANK == 0:
+        if self.RANK == 0:
             # populationData = flattenlist(COMM.gather(
             #     zip(self.gids, self.soma_pos, self.rotations), root=0))
-            populationData = flattenlist(pc.py_allgather(
+            populationData = flattenlist(self.pc.py_allgather(
                 zip(self.gids, self.soma_pos, self.rotations)))
 
             # create structured array for storing data
@@ -432,11 +439,11 @@ class NetworkPopulation(object):
             f.close()
         else:
             # COMM.gather(zip(self.gids, self.soma_pos, self.rotations), root=0)
-            _ = pc.py_allgather(zip(self.gids, self.soma_pos, self.rotations))
+            _ = self.pc.py_allgather(zip(self.gids, self.soma_pos, self.rotations))
 
         # sync
         # COMM.Barrier()
-        pc.barrier()
+        self.pc.barrier()
 
     def draw_rand_pos(self, POP_SIZE, radius, loc, scale, cap=None):
         """
@@ -549,9 +556,10 @@ class Network(object):
         self.verbose = verbose
 
         # we need NEURON's ParallelContext for communicating NetCon events
-        # self.pc = neuron.h.ParallelContext()
-        self.pc = pc
-
+        self.pc = neuron.h.ParallelContext()
+        # self.pc = pc
+        self.SIZE = self.pc.nhost()
+        self.RANK = self.pc.id()
 
         # create empty list for connections between cells (not to be confused
         # with each cell's list of netcons _hoc_netconlist)
@@ -625,7 +633,7 @@ class Network(object):
         # associate gids of cells on this RANK such that NEURON can look up
         # at which RANK different cells are created when connecting the network
         for gid in population.gids:
-            self.pc.set_gid2node(gid, RANK)
+            self.pc.set_gid2node(gid, self.RANK)
 
         # Prepare connection targets by iterating over local neurons in pop.
         for gid, cell in zip(population.gids, population.cells):
@@ -686,14 +694,14 @@ class Network(object):
                 # avoid self connections.
                 gids_pre, gids_post = np.where(C)
                 gids_pre += self.populations[pre].first_gid
-                gids_post *= SIZE  # asssume round-robin distribution of gids
+                gids_post *= self.SIZE  # asssume round-robin distribution of gids
                 gids_post += self.populations[post].gids[0]
                 inds = gids_pre != gids_post
                 gids_pre = gids_pre[inds]
                 gids_pre -= self.populations[pre].first_gid
                 gids_post = gids_post[inds]
                 gids_post -= self.populations[post].gids[0]
-                gids_post //= SIZE
+                gids_post //=self.SIZE
                 c = np.c_[gids_pre, gids_post]
                 # create boolean matrix
                 C = ss.csr_matrix((np.ones(gids_pre.shape[0], dtype=bool),
@@ -835,7 +843,7 @@ class Network(object):
                 if gid_post == gid_pre:
                     print(
                         'connecting cell w. gid {} to itself (RANK {})'.format(
-                            gid_post, RANK))
+                            gid_post, self.RANK))
 
                 # assess number of synapses
                 if multapsefun is None:
@@ -957,7 +965,7 @@ class Network(object):
         conncount = self.pc.allreduce(conncount, 1)
         syncount = self.pc.allreduce(syncount, 1)
 
-        if RANK == 0:
+        if self.RANK == 0:
             print('Connected population {} to {}'.format(pre, post),
                   'by {} connections and {} synapses'.format(conncount,
                                                              syncount))
@@ -967,7 +975,7 @@ class Network(object):
 
         # gather and write syn_idx_pos data
         if save_connections:
-            if RANK == 0:
+            if self.RANK == 0:
                 # synData = flattenlist(COMM.gather(syn_idx_pos))
                 synData = flattenlist(self.pc.py_allgather(syn_idx_pos))
 
@@ -1254,7 +1262,7 @@ class Network(object):
                 COMM.send([x for x in self.populations[name].gids],
                           dest=0, tag=14)
         '''
-        if RANK == 0:
+        if self.RANK == 0:
             times = []
             gids = []
         else:
@@ -1263,7 +1271,7 @@ class Network(object):
         for i, name in enumerate(self.population_names):
             times_send = [x for x in self.populations[name].spike_vectors]
             gids_send = [x for x in self.populations[name].gids]
-            if RANK == 0:
+            if self.RANK == 0:
                 times.append([])
                 gids.append([])
                 times[i] += flattenlist(self.pc.py_gather(times_send))
@@ -1279,15 +1287,15 @@ class Network(object):
         if to_file and probes is not None:
             # op = MPI.SUM
             fname = os.path.join(self.OUTPUTPATH,
-                                 'tmp_output_RANK_{:03d}.h5'.format(RANK))
+                                 'tmp_output_RANK_{:03d}.h5'.format(self.RANK))
             f0 = h5py.File(fname, 'r')
-            if RANK == 0:
+            if self.RANK == 0:
                 f1 = h5py.File(os.path.join(self.OUTPUTPATH, file_name), 'w')
             dtype = []
             for key, value in f0[list(f0.keys())[0]].items():
                 dtype.append((str(key), float))
             for grp in f0.keys():
-                if RANK == 0:
+                if self.RANK == 0:
                     # get shape from the first dataset
                     # (they should all be equal):
                     for value in f0[grp].values():
@@ -1304,12 +1312,12 @@ class Network(object):
 
                     recvbuf = neuron.h.Vector(value[()].astype(float).flatten())
                     self.pc.allreduce(recvbuf, 1)
-                    if RANK == 0:
+                    if self.RANK == 0:
                         f1[grp][key] = np.array(recvbuf).reshape(value.shape)
                     else:
                         recvbuf = None
             f0.close()
-            if RANK == 0:
+            if self.RANK == 0:
                 f1.close()
             os.remove(fname)
 
@@ -1584,7 +1592,7 @@ class Network(object):
             if file_name.split('.')[-1] != 'h5':
                 file_name += '.h5'
             outputfile = h5py.File(os.path.join(self.OUTPUTPATH,
-                                                file_name.format(RANK)), 'w')
+                                                file_name.format(self.RANK)), 'w')
 
             # define unique group names for each probe
             names = []
@@ -1673,7 +1681,7 @@ class Network(object):
                 tstep += 1
             neuron.h.fadvance()
             if neuron.h.t % 100. == 0.:
-                if RANK == 0:
+                if self.RANK == 0:
                     print('t = {} ms'.format(neuron.h.t))
 
         try:
@@ -1726,6 +1734,10 @@ def ReduceStructArray(sendbuf):
     recvbuf: structured ndarray or None
         Reduced array on RANK 0, None on all other RANKs
     """
+    pc = neuron.h.ParallelContext()
+    SIZE = pc.nhost()
+    RANK = pc.id()
+
     if RANK == 0:
         shape = sendbuf.shape
         dtype_names = sendbuf.dtype.names
