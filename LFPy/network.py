@@ -676,7 +676,7 @@ class Network(object):
                 # avoid self connections.
                 gids_pre, gids_post = np.where(C)
                 gids_pre += self.populations[pre].first_gid
-                gids_post *= self._SIZE  # asssume round-robin distribution of gids
+                gids_post *= self._SIZE  # assume round-robin dist. of gids
                 gids_post += self.populations[post].gids[0]
                 inds = gids_pre != gids_post
                 gids_pre = gids_pre[inds]
