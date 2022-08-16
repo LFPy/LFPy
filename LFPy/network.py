@@ -26,6 +26,7 @@ from .templatecell import TemplateCell
 import scipy.sparse as ss
 from warnings import warn, filterwarnings
 
+
 def flattenlist(lst):
     return [item for sublist in lst for item in sublist]
 
@@ -421,7 +422,8 @@ class NetworkPopulation(object):
             f[self.name] = popDataArray
             f.close()
         else:
-            _ = self.pc.py_allgather(zip(self.gids, self.soma_pos, self.rotations))
+            _ = self.pc.py_allgather(
+                zip(self.gids, self.soma_pos, self.rotations))
 
         # sync
         self.pc.barrier()
@@ -681,7 +683,7 @@ class Network(object):
                 gids_pre -= self.populations[pre].first_gid
                 gids_post = gids_post[inds]
                 gids_post -= self.populations[post].gids[0]
-                gids_post //=self._SIZE
+                gids_post //= self._SIZE
                 c = np.c_[gids_pre, gids_post]
                 # create boolean matrix
                 C = ss.csr_matrix((np.ones(gids_pre.shape[0], dtype=bool),
@@ -1237,13 +1239,15 @@ class Network(object):
             else:
                 _ = self.pc.py_gather(times_send)
                 _ = self.pc.py_gather(gids_send)
-            
+
         # create final output file, summing up single RANK output from
         # temporary files
         if to_file and probes is not None:
             # op = MPI.SUM
-            fname = os.path.join(self.OUTPUTPATH,
-                                 'tmp_output_RANK_{:03d}.h5'.format(self._RANK))
+            fname = os.path.join(
+                self.OUTPUTPATH,
+                'tmp_output_RANK_{:03d}.h5'.format(
+                    self._RANK))
             f0 = h5py.File(fname, 'r')
             if self._RANK == 0:
                 f1 = h5py.File(os.path.join(self.OUTPUTPATH, file_name), 'w')
@@ -1259,7 +1263,8 @@ class Network(object):
                         continue
                     f1[grp] = np.zeros(shape, dtype=dtype)
                 for key, value in f0[grp].items():
-                    recvbuf = neuron.h.Vector(value[()].astype(float).flatten())
+                    recvbuf = neuron.h.Vector(
+                        value[()].astype(float).flatten())
                     self.pc.allreduce(recvbuf, 1)
                     if self._RANK == 0:
                         f1[grp][key] = np.array(recvbuf).reshape(value.shape)
@@ -1540,8 +1545,12 @@ class Network(object):
             # ensure right ending:
             if file_name.split('.')[-1] != 'h5':
                 file_name += '.h5'
-            outputfile = h5py.File(os.path.join(self.OUTPUTPATH,
-                                                file_name.format(self._RANK)), 'w')
+            outputfile = h5py.File(
+                os.path.join(
+                    self.OUTPUTPATH,
+                    file_name.format(
+                        self._RANK)),
+                'w')
 
             # define unique group names for each probe
             names = []
@@ -1681,7 +1690,6 @@ def ReduceStructArray(sendbuf):
         Reduced array on RANK 0, None on all other RANKs
     """
     pc = neuron.h.ParallelContext()
-    SIZE = pc.nhost()
     RANK = pc.id()
 
     if RANK == 0:
