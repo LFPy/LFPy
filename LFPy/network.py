@@ -1264,8 +1264,12 @@ class Network(object):
             times_send = [x for x in self.populations[name].spike_vectors]
             gids_send = [x for x in self.populations[name].gids]
             if RANK == 0:
-                times += flattenlist(self.pc.py_gather(times_send))
-                gids += flattenlist(self.pc.py_gather(gids_send))
+                times.append([])
+                gids.append([])
+                times[i] += flattenlist(self.pc.py_gather(times_send))
+                gids[i] += flattenlist(self.pc.py_gather(gids_send))
+
+                assert len(times[-1]) == len(gids[-1])
             else:
                 _ = self.pc.py_gather(times_send)
                 _ = self.pc.py_gather(gids_send)
