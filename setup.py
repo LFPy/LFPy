@@ -86,7 +86,7 @@ setup(
         'scipy>=0.14',
         'Cython>=0.20',
         'h5py>=2.5',
-        'lfpykit@git+https://github.com/LFPy/LFPykit.git#egg=lfpykit'
+        'lfpykit>=0.5'
     ],
     extras_require={'tests': ['pytest'],
                     'docs': ['sphinx', 'numpydoc', 'sphinx_rtd_theme']
