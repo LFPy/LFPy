@@ -576,13 +576,17 @@ class SphericallySymmetricVolCondMEG(
             of the magnetic field :math:`\\mathbf{H}` in units of (nA/µm)
         """
         i_axial, d_vectors, pos_vectors = cell.get_axial_currents_from_vmem()
-        R = self.r
-        H = np.zeros((R.shape[0], 3, cell.tvec.size))
-
-        for i, R_ in enumerate(R):
-            for i_, d_, r_ in zip(i_axial, d_vectors.T, pos_vectors):
-                r_rel = R_ - r_
-                H[i, :, :] += (i_.reshape((-1, 1))
-                               @ np.cross(d_, r_rel).reshape((1, -1))).T \
-                    / (4 * np.pi * np.sqrt((r_rel**2).sum())**3)
-        return H
+        R = self.sensor_locations
+        F = np.zeros((R.shape[0], 3, i_axial.shape[0]))
+        # TODO: Need to implement same formulas as in parent class
+        # lfpykit.InfiniteHomogeneousVolCondMEG.get_transformation_matrix
+        # Raising an NotImplementedError until 
+        # https://github.com/LFPy/LFPy/issues/436
+        # has been properly dealt with. 
+        msg = f'{self.__str__}.calculate_H_from_iaxial() not implemented (cf. issue#436)'
+        raise NotImplementedError(msg)
+        # for i, R_ in enumerate(R):
+        #     r_rel = R_ - pos_vectors
+        #     F[i, ] = np.cross(d_vectors.T, r_rel).T / \
+        #         (4 * np.pi * np.linalg.norm(r_rel, axis=-1)**3)
+        # return F @ i_axial
