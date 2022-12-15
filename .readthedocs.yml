@@ -9,7 +9,7 @@ conda:
   environment: doc/environment.yml
 
 python:
-    version: 3
+    version: "3"
     install:
         - method: pip
           path: .

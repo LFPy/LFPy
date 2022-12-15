@@ -8,7 +8,7 @@ authors:
     given-names: "Torbjørn V."
     orcid: "https://orcid.org/0000-0001-9080-8502"
 title: "LFPy"
-version: 2.2.5
-doi: "10.5281/zenodo.6346541"
-date-released: 2021-11-17
+version: 2.2.6
+doi: "10.5281/zenodo.6414521"
+date-released: 2022-04-05
 url: "https://github.com/LFPy/LFPy"
