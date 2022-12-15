@@ -23,7 +23,7 @@ RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 10 && 
     update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 10
 
 # --- Install LFPy ----
-RUN pip install --no-cache-dir mpi4py
-RUN pip install --no-cache-dir jupyterlab==3.5.1
-RUN pip install --no-cache-dir git+https://github.com/LFPy/LFPy@master#egg=LFPy
+RUN pip install --no-cache-dir mpi4py && \
+  pip install --no-cache-dir jupyterlab==3.5.1 && \
+  pip install --no-cache-dir git+https://github.com/LFPy/LFPy@master#egg=LFPy
 RUN pip cache purge
