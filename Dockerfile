@@ -1,52 +1,29 @@
 # -------- base ---------
-FROM buildpack-deps:hirsute AS base
+FROM buildpack-deps:jammy AS base
 
 RUN apt-get update && \
     apt-get install --no-install-recommends -y \
-    python3-dev=3.9.4-1 \
-    python3-scipy=1.6.0-2 \
-    python3-matplotlib=3.3.4-1 \
-    python3-pytest=6.0.2-2ubuntu1 \
-    python3-pip=20.3.4-1ubuntu2 \
-    python3-pandas=1.1.5+dfsg-2 \
-    cython3=0.29.21-1ubuntu3 \
-    jupyter=4.7.1-1\
-    jupyter-notebook=6.2.0-1 \
-    ipython3=7.20.0-1 \
-    cmake=3.18.4-2ubuntu1 \
-    bison=2:3.7.5+dfsg-1 \
-    flex=2.6.4-8 \
-    libmpich-dev=3.4.1-3build1 \
-    libncurses-dev=6.2+20201114-2build1 \
+    python3-dev=3.10.6-1~22.04 \
+    python3-scipy=1.8.0-1exp2ubuntu1 \
+    python3-matplotlib=3.5.1-2build1 \
+    python3-pytest=6.2.5-1ubuntu2 \
+    python3-pip=22.0.2+dfsg-1 \
+    python3-pandas=1.3.5+dfsg-3 \
+    python3-h5py=3.6.0-2build1 \
+    cython3=0.29.28-1ubuntu3 \
+    cmake=3.22.1-1ubuntu1.22.04.1 \
+    bison=2:3.8.2+dfsg-1build1 \
+    flex=2.6.4-8build2 \
+    libmpich-dev=4.0-3 \
+    libncurses-dev=6.3-2 \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
 RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 10 && \
-    update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 10 && \
-    update-alternatives --install /usr/bin/ipython ipython /usr/bin/ipython3 10
-
-# --- install NEURON from source
-# (only way to get builds on arm64/aarch64 hosts working) -------
-RUN git clone --depth 1 -b 8.0.0 https://github.com/neuronsimulator/nrn.git /usr/src/nrn
-RUN mkdir nrn-bld
-
-RUN cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr/local/ \
-  -DCURSES_NEED_NCURSES=ON \
-  -DNRN_ENABLE_INTERVIEWS=OFF \
-  -DNRN_ENABLE_MPI=ON \
-  -DNRN_ENABLE_RX3D=ON \
-  -DNRN_ENABLE_PYTHON=ON \
-  -S /usr/src/nrn \
-  -B nrn-bld
-
-RUN cmake --build nrn-bld --parallel 4 --target install
-
-# add nrnpython to PYTHONPATH
-ENV PYTHONPATH /usr/local/lib/python:${PYTHONPATH}
-
-# clean up
-RUN rm -r /usr/src/nrn
-RUN rm -r nrn-bld
+    update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 10
 
 # --- Install LFPy ----
-RUN pip install git+https://github.com/LFPy/LFPy@master#egg=LFPy
+RUN pip install --no-cache-dir mpi4py
+RUN pip install --no-cache-dir jupyterlab==3.5.1
+RUN pip install --no-cache-dir git+https://github.com/LFPy/LFPy@master#egg=LFPy
+RUN pip cache purge
