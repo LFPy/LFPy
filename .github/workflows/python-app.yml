@@ -30,7 +30,7 @@ jobs:
             brew install openmpi
         elif [ "$RUNNER_OS" == "Linux" ]; then
             sudo apt-get update
-            sudo apt install build-essential libopenmpi-dev openmpi-bin libgcc1 libreadline8
+            sudo apt install build-essential libopenmpi-dev openmpi-bin libgcc1 libreadline8 libhdf5-dev
         else
             echo "$RUNNER_OS not supported"
             exit 1
