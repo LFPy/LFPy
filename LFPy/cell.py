@@ -290,7 +290,7 @@ class Cell(object):
                 warn(mssg)
 
         if celsius is not None:
-            if neuron.h.celsius != 6.3:
+            if (neuron.h.celsius != 6.3) and (neuron.h.celsius != celsius):
                 print("Changing temperature %1.2f to %1.2f"
                       % (neuron.h.celsius, celsius))
             neuron.h.celsius = celsius
