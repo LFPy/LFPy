@@ -2744,7 +2744,7 @@ class Cell(object):
                 np.sqrt(np.diff(self.d, axis=-1)**2 + self.length**2)
 
     def get_multi_current_dipole_moments(self, timepoints=None):
-        '''
+        """
         Return 3D current dipole moment vector and middle position vector
         from each axial current in space.
 
@@ -2785,7 +2785,7 @@ class Cell(object):
         >>> timepoints = np.array([1,2,3,4])
         >>> multi_dipoles, dipole_locs = cell.get_multi_current_dipole_moments(
         >>>     timepoints=timepoints)
-        '''
+        """
         i_axial, d_axial, pos_axial = self.get_axial_currents_from_vmem(
             timepoints=timepoints)
         Ni, Nt = i_axial.shape
@@ -2793,12 +2793,10 @@ class Cell(object):
         multi_dipoles = np.zeros((Ni, 3, Nt))
         for i in range(Ni):
             multi_dipoles[i, ] = (i_axial[i][:, np.newaxis] * d_axial[:, i]).T
-
         return multi_dipoles, pos_axial
 
     def _find_parent_and_segment_M(self, M, seg_idx, parent_idx, bottom_seg,
-                                   branch, parentsec,
-                                   conn_point, sec):
+                                   branch, parentsec, conn_point, sec):
         """
         Finds matrix elements of transfer matrix M from membrane potential
         to membrane currents, for given segment and parent indexes.
@@ -2816,7 +2814,6 @@ class Cell(object):
 
         Parameters
         ----------
-
         M: ndarray, dtype=float
             Tranfrormation matrix that is modified inplace
         seg_idx: int
@@ -2857,7 +2854,8 @@ class Cell(object):
             else:
                 # if branch point, need to account for effect of siblings
                 [sib_idcs] = np.take(self.children_dict[parentsec.name()],
-                                     np.where(self.children_dict[parentsec.name()]
+                                     np.where(self.children_dict[
+                                                  parentsec.name()]
                                               != seg_idx))
                 sibs = [self.get_idx_name(sib_idcs)[i][1]
                         for i in range(len(sib_idcs))]
@@ -2887,8 +2885,8 @@ class Cell(object):
             M[seg_idx, seg_idx] += - 1 / ri_
             M[parent_idx, seg_idx] += + 1 / ri_
 
-            # When multiplied with cell.vmem, this gives the (equal but opposite)
-            # membrane current of the parent segment
+            # When multiplied with cell.vmem, this gives the
+            # equal but opposite membrane current of the parent segment
             M[parent_idx, parent_idx] += - 1 / ri_
             M[seg_idx, parent_idx] += + 1 / ri_
 
@@ -2956,7 +2954,8 @@ class Cell(object):
                     internal_parent_idx = 0  # first seg in sec
                 else:
                     # if parentseg is not first or last seg in parentsec
-                    segment_xlist = np.array([segment.x for segment in parentsec])
+                    segment_xlist = np.array([segment.x
+                                              for segment in parentsec])
                     internal_parent_idx = np.abs(segment_xlist -
                                                  conn_point).argmin()
 
