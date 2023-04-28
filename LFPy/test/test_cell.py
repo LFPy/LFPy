@@ -1316,7 +1316,7 @@ class testCell(unittest.TestCase):
             'record_potential': True
         }
 
-        synapse = LFPy.StimIntElectrode(cell, idx=0, **stimParams)
+        _ = LFPy.StimIntElectrode(cell, idx=0, **stimParams)
         cell.simulate(rec_vmem=True, rec_imem=True)
 
         imem = cell.get_transformation_matrix_vmem_to_imem() @ cell.vmem

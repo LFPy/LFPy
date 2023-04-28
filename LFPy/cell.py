@@ -2809,8 +2809,8 @@ class Cell(object):
         because of current conservation.
 
         This means that for every axial current we modify four entries in M.
-        Note however that branch point are more complex, see Hagen et al. (2018)
-        For a brief discussion.
+        Note however that branch point are more complex, see
+        Hagen et al. (2018) for a brief discussion.
 
         Parameters
         ----------
@@ -2968,8 +2968,8 @@ class Cell(object):
                     first_sec = False
                     continue
                 self._find_parent_and_segment_M(M, seg_idx, parent_idx,
-                                           bottom_seg, branch, parentsec,
-                                           conn_point, sec)
+                                                bottom_seg, branch, parentsec,
+                                                conn_point, sec)
                 parent_idx = seg_idx
                 seg_idx += 1
                 branch = False
