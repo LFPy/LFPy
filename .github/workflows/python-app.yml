@@ -16,21 +16,21 @@ jobs:
     strategy:
         matrix:
             os: [ubuntu-latest, macOS-latest]
-            python-version: ["3.7", "3.8", "3.9", "3.10"]
+            python-version: ["3.7", "3.8", "3.9", "3.10", "3.11"]
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Set up Python 3
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
       run: |
         if [ "$RUNNER_OS" == "macOS" ]; then
-            brew install openmpi
+            brew install hdf5
         elif [ "$RUNNER_OS" == "Linux" ]; then
             sudo apt-get update
-            sudo apt install build-essential libopenmpi-dev openmpi-bin libgcc1 libreadline8
+            sudo apt install build-essential libgcc1 libreadline8 libhdf5-dev
         else
             echo "$RUNNER_OS not supported"
             exit 1
@@ -38,7 +38,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install flake8 pytest wheel pytest-cov coveralls coverage
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-        python setup.py install
+        pip install .
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names

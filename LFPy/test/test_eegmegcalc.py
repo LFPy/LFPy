@@ -28,7 +28,7 @@ class testInfiniteHomogeneousVolCondMEG(unittest.TestCase):
     """
 
     def test_InfiniteHomogeneousVolCondMEG_00(self):
-        '''test eegmegcalc.MEG.calculate_H()'''
+        '''test eegmegcalc.InfiniteHomogeneousVolCondMEG.calculate_H()'''
         current_dipole_moment = np.zeros((3, 11))
         current_dipole_moment[0, :] += 1.
         dipole_location = np.zeros(3)
@@ -46,7 +46,7 @@ class testInfiniteHomogeneousVolCondMEG(unittest.TestCase):
                                                     dipole_location))
 
     def test_InfiniteHomogeneousVolCondMEG_01(self):
-        '''test eegmegcalc.MEG.calculate_H()'''
+        '''test eegmegcalc.InfiniteHomogeneousVolCondMEG.calculate_H()'''
         current_dipole_moment = np.zeros((3, 11))
         current_dipole_moment[1, :] += 1.
         dipole_location = np.zeros(3)
@@ -64,7 +64,7 @@ class testInfiniteHomogeneousVolCondMEG(unittest.TestCase):
                                                     dipole_location))
 
     def test_InfiniteHomogeneousVolCondMEG_02(self):
-        '''test eegmegcalc.MEG.calculate_H()'''
+        '''test eegmegcalc.InfiniteHomogeneousVolCondMEG.calculate_H()'''
         current_dipole_moment = np.zeros((3, 11))
         current_dipole_moment[2, :] += 1.
         dipole_location = np.zeros(3)
@@ -83,7 +83,7 @@ class testInfiniteHomogeneousVolCondMEG(unittest.TestCase):
                                                     dipole_location))
 
     def test_InfiniteHomogeneousVolCondMEG_03(self):
-        '''test eegmegcalc.MEG.calculate_H()'''
+        '''test eegmegcalc.InfiniteHomogeneousVolCondMEG.calculate_H()'''
         current_dipole_moment = np.zeros((3, 1))
         current_dipole_moment[0, :] += 1.
         dipole_location = np.zeros(3)
@@ -101,7 +101,7 @@ class testInfiniteHomogeneousVolCondMEG(unittest.TestCase):
                                                     dipole_location))
 
     def test_InfiniteHomogeneousVolCondMEG_04(self):
-        '''test eegmegcalc.MEG.calculate_H()'''
+        '''test eegmegcalc.InfiniteHomogeneousVolCondMEG.calculate_H()'''
         current_dipole_moment = np.zeros((3, 1))
         current_dipole_moment[1, :] += 1.
         dipole_location = np.zeros(3)
@@ -119,7 +119,7 @@ class testInfiniteHomogeneousVolCondMEG(unittest.TestCase):
                                                     dipole_location))
 
     def test_InfiniteHomogeneousVolCondMEG_05(self):
-        '''test eegmegcalc.MEG.calculate_H()'''
+        '''test eegmegcalc.InfiniteHomogeneousVolCondMEG.calculate_H()'''
         current_dipole_moment = np.zeros((3, 1))
         current_dipole_moment[2, :] += 1.
         dipole_location = np.zeros(3)
@@ -137,7 +137,9 @@ class testInfiniteHomogeneousVolCondMEG(unittest.TestCase):
                                                     dipole_location))
 
     def test_InfiniteHomogeneousVolCondMEG_06(self):
-        '''test eegmegcalc.MEG.get_transformation_matrix()'''
+        '''test 
+        eegmegcalc.InfiniteHomogeneousVolCondMEG.get_transformation_matrix()
+        '''
         current_dipole_moment = np.c_[np.eye(3), -np.eye(3)]
 
         dipole_location = np.zeros(3)

@@ -16,7 +16,6 @@ GNU General Public License for more details.
 import lfpykit
 from lfpykit.eegmegcalc import NYHeadModel  # noqa: F401
 import numpy as np
-from warnings import warn
 
 
 class FourSphereVolumeConductor(lfpykit.eegmegcalc.FourSphereVolumeConductor):
@@ -157,7 +156,7 @@ class FourSphereVolumeConductor(lfpykit.eegmegcalc.FourSphereVolumeConductor):
         multi_p, multi_p_locs = cell.get_multi_current_dipole_moments(
             timepoints)
         N_elec = self.rxyz.shape[0]
-        Ni, Nd, Nt = multi_p.shape
+        Ni, _, Nt = multi_p.shape
         potential = np.zeros((N_elec, Nt))
         for i in range(Ni):
             pot = self.get_dipole_potential(multi_p[i], multi_p_locs[i])
@@ -264,7 +263,7 @@ class InfiniteVolumeConductor(lfpykit.eegmegcalc.InfiniteVolumeConductor):
         multi_p, multi_p_locs = cell.get_multi_current_dipole_moments(
             timepoints=timepoints)
         N_elec = electrode_locs.shape[0]
-        Ni, Nd, Nt = multi_p.shape
+        Ni, _, Nt = multi_p.shape
         potentials = np.zeros((N_elec, Nt))
         for i in range(Ni):
             p = multi_p[i]
@@ -426,15 +425,13 @@ class InfiniteHomogeneousVolCondMEG(
         """
         i_axial, d_vectors, pos_vectors = cell.get_axial_currents_from_vmem()
         R = self.sensor_locations
-        H = np.zeros((R.shape[0], 3, cell.tvec.size))
-
+        F = np.zeros((R.shape[0], 3, i_axial.shape[0]))
         for i, R_ in enumerate(R):
-            for i_, d_, r_ in zip(i_axial, d_vectors.T, pos_vectors):
-                r_rel = R_ - r_
-                H[i, :, :] += (i_.reshape((-1, 1))
-                               @ np.cross(d_, r_rel).reshape((1, -1))).T \
-                    / (4 * np.pi * np.sqrt((r_rel**2).sum())**3)
-        return H
+            r_rel = R_ - pos_vectors
+            F[i, ] = np.cross(d_vectors.T, r_rel).T / \
+                (4 * np.pi * np.linalg.norm(r_rel, axis=-1)**3)
+
+        return F @ i_axial
 
 
 class SphericallySymmetricVolCondMEG(
@@ -579,13 +576,17 @@ class SphericallySymmetricVolCondMEG(
             of the magnetic field :math:`\\mathbf{H}` in units of (nA/µm)
         """
         i_axial, d_vectors, pos_vectors = cell.get_axial_currents_from_vmem()
-        R = self.r
-        H = np.zeros((R.shape[0], 3, cell.tvec.size))
-
-        for i, R_ in enumerate(R):
-            for i_, d_, r_ in zip(i_axial, d_vectors.T, pos_vectors):
-                r_rel = R_ - r_
-                H[i, :, :] += (i_.reshape((-1, 1))
-                               @ np.cross(d_, r_rel).reshape((1, -1))).T \
-                    / (4 * np.pi * np.sqrt((r_rel**2).sum())**3)
-        return H
+        R = self.sensor_locations
+        F = np.zeros((R.shape[0], 3, i_axial.shape[0]))
+        # TODO: Need to implement same formulas as in parent class
+        # lfpykit.InfiniteHomogeneousVolCondMEG.get_transformation_matrix
+        # Raising an NotImplementedError until 
+        # https://github.com/LFPy/LFPy/issues/436
+        # has been properly dealt with. 
+        msg = f'{self.__str__}.calculate_H_from_iaxial() not implemented (cf. issue#436)'
+        raise NotImplementedError(msg)
+        # for i, R_ in enumerate(R):
+        #     r_rel = R_ - pos_vectors
+        #     F[i, ] = np.cross(d_vectors.T, r_rel).T / \
+        #         (4 * np.pi * np.linalg.norm(r_rel, axis=-1)**3)
+        # return F @ i_axial

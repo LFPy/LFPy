@@ -6,5 +6,4 @@ Cython>=0.20
 h5py>=2.5
 matplotlib>=2.0
 neuron>=7.7.2
-# LFPykit>=0.5.dev
-git+https://github.com/LFPy/LFPykit@master#egg=lfpykit
+LFPykit>=0.5
