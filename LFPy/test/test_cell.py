@@ -171,20 +171,20 @@ class testCell(unittest.TestCase):
             pass
 
     def test_cell_set_pos_00(self):
-        '''test LFPy.Cell.set_pos'''
+        """test LFPy.Cell.set_pos"""
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
                                                  'ball_and_sticks.hoc'))
         np.testing.assert_allclose(cell.somapos, [0, 0, 0])
 
     def test_cell_set_pos_01(self):
-        '''test LFPy.Cell.set_pos'''
+        """test LFPy.Cell.set_pos"""
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
                                                  'ball_and_sticks.hoc'))
         cell.set_pos(10., 20., -30.)
         np.testing.assert_allclose(cell.somapos, [10., 20., -30.])
 
     def test_cell_set_pos_02(self):
-        '''test LFPy.Cell.set_pos'''
+        """test LFPy.Cell.set_pos"""
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
                                                  'ball_and_sticks.hoc'),
                          pt3d=True)
@@ -192,7 +192,7 @@ class testCell(unittest.TestCase):
         np.testing.assert_allclose(cell.somapos, [10., 20., -30.])
 
     def test_cell_set_pos_03(self):
-        '''test LFPy.Cell.set_pos'''
+        """test LFPy.Cell.set_pos"""
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
                                                  'ball_and_sticks.hoc'))
         cell.set_pos(10., 20., -30.)
@@ -201,7 +201,7 @@ class testCell(unittest.TestCase):
         np.testing.assert_allclose(cell.somapos, [10., 20., -30.])
 
     def test_cell_set_pos_04(self):
-        '''test LFPy.Cell.set_pos'''
+        """test LFPy.Cell.set_pos"""
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
                                                  'ball_and_sticks.hoc'),
                          pt3d=True)
@@ -211,7 +211,7 @@ class testCell(unittest.TestCase):
         np.testing.assert_allclose(cell.somapos, [10., 20., -30.])
 
     def test_cell_set_pos_05(self):
-        '''test LFPy.Cell.set_pos'''
+        """test LFPy.Cell.set_pos"""
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
                                                  'ball_and_sticks.hoc'))
         np.testing.assert_allclose(cell.somapos,
@@ -220,7 +220,7 @@ class testCell(unittest.TestCase):
                                     cell.z[0].mean(axis=-1)])
 
     def test_cell_set_pos_06(self):
-        '''test LFPy.Cell.set_pos'''
+        """test LFPy.Cell.set_pos"""
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
                                                  'ball_and_sticks.hoc'),
                          pt3d=True)
@@ -230,7 +230,7 @@ class testCell(unittest.TestCase):
                                     cell.z[0].mean(axis=-1)])
 
     def test_cell_set_rotation_00(self):
-        '''test LFPy.Cell.set_rotation()'''
+        """test LFPy.Cell.set_rotation()"""
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
                                                  'ball_and_sticks.hoc'))
 
@@ -252,7 +252,7 @@ class testCell(unittest.TestCase):
         np.testing.assert_allclose(cell.z[:, -1], -zends, atol=1e-07)
 
     def test_cell_set_rotation_01(self):
-        '''test LFPy.Cell.set_rotation()'''
+        """test LFPy.Cell.set_rotation()"""
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
                                                  'ball_and_sticks.hoc'))
 
@@ -274,7 +274,7 @@ class testCell(unittest.TestCase):
         np.testing.assert_allclose(cell.z[:, -1], -zends, atol=1e-07)
 
     def test_cell_set_rotation_02(self):
-        '''test LFPy.Cell.set_rotation()'''
+        """test LFPy.Cell.set_rotation()"""
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
                                                  'ball_and_sticks.hoc'))
         xstarts = cell.x[:, 0].copy()
@@ -295,7 +295,7 @@ class testCell(unittest.TestCase):
         np.testing.assert_allclose(cell.y[:, -1], -yends, atol=1e-07)
 
     def test_cell_set_rotation_03(self):
-        '''test LFPy.Cell.set_rotation()'''
+        """test LFPy.Cell.set_rotation()"""
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
                                                  'ball_and_sticks.hoc'),
                          pt3d=True)
@@ -318,7 +318,7 @@ class testCell(unittest.TestCase):
         np.testing.assert_allclose(cell.z[:, -1], -zends, atol=1e-07)
 
     def test_cell_set_rotation_04(self):
-        '''test LFPy.Cell.set_rotation()'''
+        """test LFPy.Cell.set_rotation()"""
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
                                                  'ball_and_sticks.hoc'),
                          pt3d=True)
@@ -341,7 +341,7 @@ class testCell(unittest.TestCase):
         np.testing.assert_allclose(cell.z[:, -1], -zends, atol=1e-07)
 
     def test_cell_set_rotation_05(self):
-        '''test LFPy.Cell.set_rotation()'''
+        """test LFPy.Cell.set_rotation()"""
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
                                                  'ball_and_sticks.hoc'),
                          pt3d=True)
@@ -364,7 +364,7 @@ class testCell(unittest.TestCase):
         np.testing.assert_allclose(cell.y[:, -1], -yends, atol=1e-07)
 
     def test_cell_set_rotation_06(self):
-        '''test LFPy.Cell.set_rotation()'''
+        """test LFPy.Cell.set_rotation()"""
         cell = LFPy.Cell(
             morphology=os.path.join(
                 LFPy.__path__[0],
@@ -403,7 +403,7 @@ class testCell(unittest.TestCase):
         np.testing.assert_allclose(cell.z[:, -1], zends, atol=1e-07)
 
     def test_cell_chiral_morphology_00(self):
-        '''test LFPy.Cell.chiral_morphology()'''
+        """test LFPy.Cell.chiral_morphology()"""
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
                                                  'ball_and_sticks.hoc'))
 
@@ -431,7 +431,7 @@ class testCell(unittest.TestCase):
         np.testing.assert_allclose(cell.z[:, -1], zends, atol=1e-07)
 
     def test_cell_chiral_morphology_01(self):
-        '''test LFPy.Cell.chiral_morphology()'''
+        """test LFPy.Cell.chiral_morphology()"""
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
                                                  'ball_and_sticks.hoc'))
 
@@ -459,7 +459,7 @@ class testCell(unittest.TestCase):
         np.testing.assert_allclose(cell.z[:, -1], zends, atol=1e-07)
 
     def test_cell_chiral_morphology_02(self):
-        '''test LFPy.Cell.chiral_morphology()'''
+        """test LFPy.Cell.chiral_morphology()"""
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
                                                  'ball_and_sticks.hoc'))
 
@@ -487,7 +487,7 @@ class testCell(unittest.TestCase):
         np.testing.assert_allclose(cell.z[:, -1], -zends, atol=1e-07)
 
     def test_cell_get_rand_prob_area_norm_00(self):
-        '''test LFPy.Cell.get_rand_prob_area_norm()'''
+        """test LFPy.Cell.get_rand_prob_area_norm()"""
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
                                                  'ball_and_sticks.hoc'))
         p = cell.get_rand_prob_area_norm()
@@ -505,7 +505,7 @@ class testCell(unittest.TestCase):
             p.tolist())
 
     def test_cell_get_rand_prob_area_norm_from_idx_00(self):
-        '''test LFPy.Cell.get_rand_prob_area_norm()'''
+        """test LFPy.Cell.get_rand_prob_area_norm()"""
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
                                                  'ball_and_sticks.hoc'))
         p = cell.get_rand_prob_area_norm_from_idx(idx=np.array([0]))
@@ -672,9 +672,9 @@ class testCell(unittest.TestCase):
                                  type(getattr(pickled_cell, attribute)))
 
     def test_cell_get_axial_currents_from_vmem_00(self):
-        '''
+        """
         Check Kirchhoff in single dend.
-        '''
+        """
         neuron.h('forall delete_section()')
         dend1 = neuron.h.Section(name='dend1')
         dend2 = neuron.h.Section(name='dend2')
@@ -690,10 +690,26 @@ class testCell(unittest.TestCase):
         np.testing.assert_almost_equal(iaxial[1], imem[1], decimal=9)
         np.testing.assert_allclose(iaxial[1], imem[1], rtol=1E-5)
 
+    def test_cell_get_imem_from_vmem_00(self):
+        """
+        Check Kirchhoff in single dend.
+        """
+        neuron.h('forall delete_section()')
+        dend1 = neuron.h.Section(name='dend1')
+        dend2 = neuron.h.Section(name='dend2')
+        dend2.connect(dend1(1.), 0)
+        morphology = neuron.h.SectionList()
+        morphology.wholetree()
+        cell = cell_w_synapse_from_sections(morphology)
+
+        imem = cell.get_transformation_matrix_vmem_to_imem() @ cell.vmem
+
+        np.testing.assert_almost_equal(imem, cell.imem, decimal=9)
+
     def test_cell_get_axial_currents_from_vmem_01(self):
-        '''
+        """
         Check Kirchhoff in soma when single dend connected to soma mid.
-        '''
+        """
         neuron.h('forall delete_section()')
         soma = neuron.h.Section(name='soma')
         dend = neuron.h.Section(name='dend')
@@ -710,10 +726,25 @@ class testCell(unittest.TestCase):
         np.testing.assert_allclose(-iaxial[0], imem[0], rtol=1E-4)
         np.testing.assert_allclose(-iaxial[1], imem[0], rtol=1E-4)
 
+    def test_cell_get_imem_from_vmem_01(self):
+        """
+        Check Kirchhoff in soma when single dend connected to soma mid.
+        """
+        neuron.h('forall delete_section()')
+        soma = neuron.h.Section(name='soma')
+        dend = neuron.h.Section(name='dend')
+        dend.connect(soma(0.5), 0)
+        morphology = neuron.h.SectionList()
+        morphology.wholetree()
+        cell = cell_w_synapse_from_sections(morphology)
+        imem = cell.get_transformation_matrix_vmem_to_imem() @ cell.vmem
+
+        np.testing.assert_almost_equal(imem, cell.imem, decimal=9)
+
     def test_cell_get_axial_currents_from_vmem_02(self):
-        '''
+        """
         Check Kirchhoff in soma when single dend connected to soma end.
-        '''
+        """
         neuron.h.topology()
         neuron.h('forall delete_section()')
         soma = neuron.h.Section(name='soma')
@@ -732,11 +763,27 @@ class testCell(unittest.TestCase):
         np.testing.assert_almost_equal(iaxial[0], iaxial[1], decimal=9)
         np.testing.assert_allclose(iaxial[0], iaxial[1], rtol=1E-4)
 
+    def test_cell_get_imem_from_vmem_02(self):
+        """
+        Check Kirchhoff in soma when single dend connected to soma end.
+        """
+        neuron.h.topology()
+        neuron.h('forall delete_section()')
+        soma = neuron.h.Section(name='soma')
+        dend = neuron.h.Section(name='dend')
+        dend.connect(soma(1.0), 0)
+        morphology = neuron.h.SectionList()
+        morphology.wholetree()
+        cell = cell_w_synapse_from_sections(morphology)
+
+        imem = cell.get_transformation_matrix_vmem_to_imem() @ cell.vmem
+        np.testing.assert_almost_equal(imem, cell.imem, decimal=9)
+
     def test_cell_get_axial_currents_from_vmem_03(self):
-        '''
+        """
         Check Kirchhoff in soma when single dend connected to random
         soma point.
-        '''
+        """
         neuron.h('forall delete_section()')
         soma = neuron.h.Section(name='soma')
         dend = neuron.h.Section(name='dend')
@@ -754,10 +801,25 @@ class testCell(unittest.TestCase):
         np.testing.assert_almost_equal(iaxial[0], iaxial[1], decimal=9)
         np.testing.assert_allclose(iaxial[0], iaxial[1], rtol=1E-4)
 
+    def test_cell_get_imem_from_vmem_03(self):
+        """
+        Check Kirchhoff in soma when single dend connected to random
+        soma point.
+        """
+        neuron.h('forall delete_section()')
+        soma = neuron.h.Section(name='soma')
+        dend = neuron.h.Section(name='dend')
+        dend.connect(soma(random.uniform(1e-2, 1.)), 0)
+        morphology = neuron.h.SectionList()
+        morphology.wholetree()
+        cell = cell_w_synapse_from_sections(morphology)
+        imem = cell.get_transformation_matrix_vmem_to_imem() @ cell.vmem
+        np.testing.assert_almost_equal(imem, cell.imem, decimal=9)
+
     def test_cell_get_axial_currents_from_vmem_04(self):
-        '''
+        """
         Check Kirchhoff in soma when two dends connected to soma mid.
-        '''
+        """
         neuron.h('forall delete_section()')
         soma = neuron.h.Section(name='soma')
         dend1 = neuron.h.Section(name='dend1')
@@ -778,10 +840,27 @@ class testCell(unittest.TestCase):
         np.testing.assert_almost_equal(iaxial[2], iaxial[3], decimal=9)
         np.testing.assert_allclose(iaxial[2], iaxial[3], rtol=1E-4)
 
+    def test_cell_get_imem_from_vmem_04(self):
+        """
+        Check Kirchhoff in soma when two dends connected to soma mid.
+        """
+        neuron.h('forall delete_section()')
+        soma = neuron.h.Section(name='soma')
+        dend1 = neuron.h.Section(name='dend1')
+        dend2 = neuron.h.Section(name='dend2')
+        dend1.connect(soma(0.5), 0)
+        dend2.connect(soma(0.5), 0)
+        morphology = neuron.h.SectionList()
+        morphology.wholetree()
+        cell = cell_w_synapse_from_sections(morphology)
+
+        imem = cell.get_transformation_matrix_vmem_to_imem() @ cell.vmem
+        np.testing.assert_almost_equal(imem, cell.imem, decimal=9)
+
     def test_cell_get_axial_currents_from_vmem_05(self):
-        '''
+        """
         Check Kirchhoff in soma when two dends connected to soma end.
-        '''
+        """
         neuron.h('forall delete_section()')
         soma = neuron.h.Section(name='soma')
         dend1 = neuron.h.Section(name='dend1')
@@ -807,10 +886,26 @@ class testCell(unittest.TestCase):
             iaxial[1] + iaxial[3],
             rtol=1E-4)
 
+    def test_cell_get_imem_from_vmem_05(self):
+        """
+        Check Kirchhoff in soma when two dends connected to soma end.
+        """
+        neuron.h('forall delete_section()')
+        soma = neuron.h.Section(name='soma')
+        dend1 = neuron.h.Section(name='dend1')
+        dend2 = neuron.h.Section(name='dend2')
+        dend1.connect(soma(1.), 0)
+        dend2.connect(soma(1.), 0)
+        morphology = neuron.h.SectionList()
+        morphology.wholetree()
+        cell = cell_w_synapse_from_sections(morphology)
+        imem = cell.get_transformation_matrix_vmem_to_imem() @ cell.vmem
+        np.testing.assert_almost_equal(imem, cell.imem, decimal=9)
+
     def test_cell_get_axial_currents_from_vmem_06(self):
-        '''
+        """
         Check Kirchhoff in soma when two dends connected to diff soma points.
-        '''
+        """
         neuron.h('forall delete_section()')
         soma = neuron.h.Section(name='soma')
         dend1 = neuron.h.Section(name='dend1')
@@ -831,10 +926,26 @@ class testCell(unittest.TestCase):
         np.testing.assert_almost_equal(iaxial[2], iaxial[3], decimal=9)
         np.testing.assert_allclose(iaxial[2], iaxial[3], rtol=1E-4)
 
+    def test_cell_get_imem_from_vmem_06(self):
+        """
+        Check Kirchhoff in soma when two dends connected to diff soma points.
+        """
+        neuron.h('forall delete_section()')
+        soma = neuron.h.Section(name='soma')
+        dend1 = neuron.h.Section(name='dend1')
+        dend2 = neuron.h.Section(name='dend2')
+        dend1.connect(soma(1.0), 0)
+        dend2.connect(soma(.5), 0)
+        morphology = neuron.h.SectionList()
+        morphology.wholetree()
+        cell = cell_w_synapse_from_sections(morphology)
+        imem = cell.get_transformation_matrix_vmem_to_imem() @ cell.vmem
+        np.testing.assert_almost_equal(imem, cell.imem, decimal=9)
+
     def test_cell_get_axial_currents_from_vmem_07(self):
-        '''
+        """
         Check Kirchhoff in mid dend when two dends connected to dend.
-        '''
+        """
         neuron.h('forall delete_section()')
         soma = neuron.h.Section(name='soma')
         dend1 = neuron.h.Section(name='dend1')
@@ -863,10 +974,28 @@ class testCell(unittest.TestCase):
         np.testing.assert_allclose(-iaxial[1] +
                                    iaxial[2] + iaxial[4], -imem[1], rtol=1E-4)
 
+    def test_cell_get_imem_from_vmem_07(self):
+        """
+        Check Kirchhoff in mid dend when two dends connected to dend.
+        """
+        neuron.h('forall delete_section()')
+        soma = neuron.h.Section(name='soma')
+        dend1 = neuron.h.Section(name='dend1')
+        dend2 = neuron.h.Section(name='dend2')
+        dend3 = neuron.h.Section(name='dend3')
+        dend1.connect(soma(1.0), 0)
+        dend2.connect(dend1(.5), 0)
+        dend3.connect(dend1(1.), 0)
+        morphology = neuron.h.SectionList()
+        morphology.wholetree()
+        cell = cell_w_synapse_from_sections(morphology)
+        imem = cell.get_transformation_matrix_vmem_to_imem() @ cell.vmem
+        np.testing.assert_almost_equal(imem, cell.imem, decimal=9)
+
     def test_cell_get_axial_currents_from_vmem_08(self):
-        '''
+        """
         Check Kirchhoff in soma when three dends connected to soma.
-        '''
+        """
         neuron.h('forall delete_section()')
         soma = neuron.h.Section(name='soma')
         dend1 = neuron.h.Section(name='dend1')
@@ -887,10 +1016,28 @@ class testCell(unittest.TestCase):
         np.testing.assert_allclose(-iaxial[0] -
                                    iaxial[2] - iaxial[4], imem[0], rtol=1E-3)
 
+    def test_cell_get_imem_from_vmem_08(self):
+        """
+        Check Kirchhoff in soma when three dends connected to soma.
+        """
+        neuron.h('forall delete_section()')
+        soma = neuron.h.Section(name='soma')
+        dend1 = neuron.h.Section(name='dend1')
+        dend2 = neuron.h.Section(name='dend2')
+        dend3 = neuron.h.Section(name='dend3')
+        dend1.connect(soma(1.0), 0)
+        dend2.connect(soma(.5), 0)
+        dend3.connect(soma(.8), 0)
+        morphology = neuron.h.SectionList()
+        morphology.wholetree()
+        cell = cell_w_synapse_from_sections(morphology)
+        imem = cell.get_transformation_matrix_vmem_to_imem() @ cell.vmem
+        np.testing.assert_almost_equal(imem, cell.imem, decimal=9)
+
     def test_cell_get_axial_currents_from_vmem_09(self):
-        '''
+        """
         Check Kirchhoff in 2-comp model where dend 0 is connected to soma 0.
-        '''
+        """
         neuron.h('forall delete_section()')
         soma = neuron.h.Section(name='soma')
         dend1 = neuron.h.Section(name='dend1')
@@ -907,10 +1054,24 @@ class testCell(unittest.TestCase):
         np.testing.assert_allclose(iaxial[0], -imem[0], rtol=1E-3)
         np.testing.assert_allclose(iaxial[0], imem[1], rtol=1E-3)
 
+    def test_cell_get_imem_from_vmem_09(self):
+        """
+        Check Kirchhoff in 2-comp model where dend 0 is connected to soma 0.
+        """
+        neuron.h('forall delete_section()')
+        soma = neuron.h.Section(name='soma')
+        dend1 = neuron.h.Section(name='dend1')
+        dend1.connect(soma(0.0), 0)
+        morphology = neuron.h.SectionList()
+        morphology.wholetree()
+        cell = cell_w_synapse_from_sections(morphology)
+        imem = cell.get_transformation_matrix_vmem_to_imem() @ cell.vmem
+        np.testing.assert_almost_equal(imem, cell.imem, decimal=9)
+
     def test_cell_get_axial_currents_from_vmem_10(self):
-        '''
+        """
         Check that len(iaxial) = (cell.totnsegs - 1)*2
-        '''
+        """
         soma = neuron.h.Section(name='soma[0]')
         dend1 = neuron.h.Section(name='dend1[0]')
         dend2 = neuron.h.Section(name='dend2[0]')
@@ -927,9 +1088,9 @@ class testCell(unittest.TestCase):
         self.assertEqual(iaxial.shape[0], (totnsegs - 1) * 2)
 
     def test_cell_get_axial_currents_from_vmem_11(self):
-        '''
+        """
         Check Kirchhoff in soma when three dends connected to soma mid.
-        '''
+        """
         neuron.h('forall delete_section()')
         soma = neuron.h.Section(name='soma')
         dend1 = neuron.h.Section(name='dend1')
@@ -950,15 +1111,33 @@ class testCell(unittest.TestCase):
         np.testing.assert_allclose(-iaxial[0] -
                                    iaxial[2] - iaxial[4], imem[0], rtol=1E-3)
 
+    def test_cell_get_imem_from_vmem_11(self):
+        """
+        Check Kirchhoff in soma when three dends connected to soma mid.
+        """
+        neuron.h('forall delete_section()')
+        soma = neuron.h.Section(name='soma')
+        dend1 = neuron.h.Section(name='dend1')
+        dend2 = neuron.h.Section(name='dend2')
+        dend3 = neuron.h.Section(name='dend3')
+        dend1.connect(soma(0.5), 0)
+        dend2.connect(soma(0.5), 0)
+        dend3.connect(soma(0.5), 0)
+        morphology = neuron.h.SectionList()
+        morphology.wholetree()
+        cell = cell_w_synapse_from_sections(morphology)
+        imem = cell.get_transformation_matrix_vmem_to_imem() @ cell.vmem
+        np.testing.assert_almost_equal(imem, cell.imem, decimal=9)
+
     def test_cell_get_axial_currents_from_vmem_12(self):
-        '''
+        """
         Check Kirchhoff in morph where secs are connected to arc length 0.5.
-        '''
+        """
         morphology = os.path.join(
             LFPy.__path__[0],
             'test',
             'sticks_not_connected_head_to_toe.hoc')
-        cell = cell_w_synapse_from_sections(morphology)
+        cell = cell_w_synapse_from_sections(morphology, delete_sections=True)
         iaxial, d_list, pos_list = cell.get_axial_currents_from_vmem()
 
         # some cleanup of Python-created section references
@@ -973,15 +1152,27 @@ class testCell(unittest.TestCase):
             iaxial[5],
             rtol=1E-5)
 
-    def test_cell_get_axial_currents_from_vmem_13(self):
-        '''
-        Check Kirchhoff in morph where secs are connected to arc length 0.7.
-        '''
+    def test_cell_get_imem_from_vmem_12(self):
+        """
+        Check Kirchhoff in morph where secs are connected to arc length 0.5.
+        """
         morphology = os.path.join(
             LFPy.__path__[0],
             'test',
             'sticks_not_connected_head_to_toe.hoc')
-        cell = cell_w_synapse_from_sections(morphology)
+        cell = cell_w_synapse_from_sections(morphology, delete_sections=True)
+        imem = cell.get_transformation_matrix_vmem_to_imem() @ cell.vmem
+        np.testing.assert_almost_equal(imem, cell.imem, decimal=9)
+
+    def test_cell_get_axial_currents_from_vmem_13(self):
+        """
+        Check Kirchhoff in morph where secs are connected to arc length 0.7.
+        """
+        morphology = os.path.join(
+            LFPy.__path__[0],
+            'test',
+            'sticks_not_connected_head_to_toe.hoc')
+        cell = cell_w_synapse_from_sections(morphology, delete_sections=True)
         iaxial, d_list, pos_list = cell.get_axial_currents_from_vmem()
         imem = copy(cell.imem)
 
@@ -995,9 +1186,9 @@ class testCell(unittest.TestCase):
             rtol=1E-5)
 
     def test_cell_get_axial_currents_from_vmem_14(self):
-        '''
+        """
         Check iaxial current mid positions in three-section stick.
-        '''
+        """
         neuron.h('forall delete_section()')
         soma = neuron.h.Section(name='soma')
         dend1 = neuron.h.Section(name='dend1')
@@ -1032,9 +1223,9 @@ class testCell(unittest.TestCase):
         np.testing.assert_allclose(mid_current_positions, pos_list2, rtol=1E-4)
 
     def test_cell_get_axial_currents_from_vmem_15(self):
-        '''
+        """
         Check iaxial current mid positions in ball-n-y.
-        '''
+        """
         neuron.h('forall delete_section()')
         soma = neuron.h.Section(name='soma')
         dend1 = neuron.h.Section(name='dend1')
@@ -1072,9 +1263,9 @@ class testCell(unittest.TestCase):
         np.testing.assert_allclose(mid_current_positions, pos_list2, rtol=1E-4)
 
     def test_cell_get_axial_currents_from_vmem_16(self):
-        '''
+        """
         Check Kirchhoff in soma when three dends connected to soma end.
-        '''
+        """
         neuron.h('forall delete_section()')
         soma = neuron.h.Section(name='soma')
         dend1 = neuron.h.Section(name='dend1')
@@ -1095,6 +1286,71 @@ class testCell(unittest.TestCase):
         np.testing.assert_allclose(-imem[0],
                                    iaxial[1] + iaxial[3] + iaxial[5],
                                    rtol=1E-3)
+
+    def test_imem_from_vmem_13(self):
+        """ Test if vmem_to_imem works for (synaptic current) injection """
+        stickParams = {
+            'morphology': os.path.join(LFPy.__path__[0], 'test', 'stick.hoc'),
+            'cm': 1,
+            'Ra': 150,
+            'v_init': -65,
+            'passive': True,
+            'passive_parameters': {'g_pas': 1. / 30000, 'e_pas': -65},
+            'tstart': 0,
+            'tstop': 100,
+            'dt': 2**-4,
+            'nsegs_method': 'lambda_f',
+            'lambda_f': 100,
+        }
+
+        cell = LFPy.Cell(**stickParams)
+        stimParams = {
+            'pptype': 'SinSyn',
+            'delay': 0.,
+            'dur': 1000.,
+            'pkamp': 1.,
+            'freq': 100.,
+            'phase': 0,
+            'bias': 0.,
+            'record_current': True,
+            'record_potential': True
+        }
+
+        _ = LFPy.StimIntElectrode(cell, idx=0, **stimParams)
+        cell.simulate(rec_vmem=True, rec_imem=True)
+
+        imem = cell.get_transformation_matrix_vmem_to_imem() @ cell.vmem
+        np.testing.assert_almost_equal(imem, cell.imem, decimal=9)
+
+    def test_imem_from_vmem_14(self):
+        stickParams = {
+            'morphology': os.path.join(LFPy.__path__[0], 'test',
+                                       'ball_and_sticks.hoc'),
+            'cm': 1,
+            'Ra': 150,
+            'v_init': -65,
+            'passive': True,
+            'passive_parameters': {'g_pas': 1. / 30000, 'e_pas': -65},
+            'tstart': 0,
+            'tstop': 100,
+            'dt': 2**-4,
+            'nsegs_method': 'lambda_f',
+            'lambda_f': 100,
+        }
+        stimParams = {
+            'e': 0,                                # reversal potential
+            'syntype': 'Exp2Syn',                   # synapse type
+            'tau1': 0.1,                              # syn. time constant
+            'tau2': 2.,                              # syn. time constant
+            'weight': 0.01,
+        }
+        cell = LFPy.Cell(**stickParams)
+        synapse = LFPy.Synapse(cell, idx=2, **stimParams)
+        synapse.set_spike_times(np.array([10., 20., 30., 40., 50.]))
+
+        cell.simulate(rec_vmem=True, rec_imem=True)
+        imem = cell.get_transformation_matrix_vmem_to_imem() @ cell.vmem
+        np.testing.assert_almost_equal(imem, cell.imem, decimal=9)
 
     def test_cell_simulate_recorder_00(self):
         stickParams = {
@@ -1743,7 +1999,8 @@ class testCell(unittest.TestCase):
         morphology = os.path.join(LFPy.__path__[0], 'test',
                                   'ball_and_sticks.hoc')
         cell = cell_w_synapse_from_sections(morphology,
-                                            rec_current_dipole_moment=True)
+                                            rec_current_dipole_moment=True,
+                                            delete_sections=True)
         dipoles, dipole_locs = cell.get_multi_current_dipole_moments()
         t_point = -1
         P_from_multi_dipoles = np.sum(dipoles[:, :, t_point], axis=0)
@@ -1783,10 +2040,12 @@ def stickSimulationTesttvec(**kwargs):
     return stick.tvec
 
 
-def cell_w_synapse_from_sections(morphology, rec_current_dipole_moment=False):
-    '''
+def cell_w_synapse_from_sections(morphology,
+                                 rec_current_dipole_moment=False,
+                                 delete_sections=False):
+    """
     Make cell and synapse objects, set spike, simulate and return cell
-    '''
+    """
     cellParams = {
         'morphology': morphology,
         'cm': 1,
@@ -1797,7 +2056,7 @@ def cell_w_synapse_from_sections(morphology, rec_current_dipole_moment=False):
         'dt': 2**-6,
         'tstart': -50,
         'tstop': 50,
-        'delete_sections': False
+        'delete_sections': delete_sections
     }
 
     synapse_parameters = {'e': 0.,
