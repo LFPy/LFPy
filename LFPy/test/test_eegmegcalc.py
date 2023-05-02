@@ -625,7 +625,7 @@ class testInfiniteVolumeConductor(unittest.TestCase):
             LFPy.__path__[0], 'test', 'ball_and_sticks.hoc')
         electrode_locs = np.array([[0., 0., 10000.]])
         cell, electrode, cdm = cell_w_synapse_from_sections_w_electrode(
-            morphology, electrode_locs)
+            morphology, electrode_locs, delete_sections=True)
         sigma = 0.3
 
         MD_inf = LFPy.InfiniteVolumeConductor(sigma)
@@ -640,7 +640,7 @@ class testInfiniteVolumeConductor(unittest.TestCase):
             LFPy.__path__[0], 'test', 'ball_and_sticks.hoc')
         electrode_locs = np.array([[0., 0., 10000.]])
         cell, electrode, cdm = cell_w_synapse_from_sections_w_electrode(
-            morphology, electrode_locs)
+            morphology, electrode_locs, delete_sections=True)
         sigma = 0.3
         t_point = [10, 100, 1000]
 
@@ -825,7 +825,8 @@ def cell_w_synapse_from_sections(morphology, rec_current_dipole_moment=False):
     return cell
 
 
-def cell_w_synapse_from_sections_w_electrode(morphology, electrode_locs):
+def cell_w_synapse_from_sections_w_electrode(morphology, electrode_locs,
+                                             delete_sections=False):
     '''
     Make cell and synapse objects, set spike, simulate and return cell
     '''
@@ -839,7 +840,7 @@ def cell_w_synapse_from_sections_w_electrode(morphology, electrode_locs):
         'dt': 2**-6,
         'tstart': -50,
         'tstop': 50,
-        'delete_sections': False
+        'delete_sections': delete_sections
     }
 
     electrodeParams = {'sigma': 0.3,

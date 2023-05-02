@@ -1137,7 +1137,7 @@ class testCell(unittest.TestCase):
             LFPy.__path__[0],
             'test',
             'sticks_not_connected_head_to_toe.hoc')
-        cell = cell_w_synapse_from_sections(morphology)
+        cell = cell_w_synapse_from_sections(morphology, delete_sections=True)
         iaxial, d_list, pos_list = cell.get_axial_currents_from_vmem()
 
         # some cleanup of Python-created section references
@@ -1160,7 +1160,7 @@ class testCell(unittest.TestCase):
             LFPy.__path__[0],
             'test',
             'sticks_not_connected_head_to_toe.hoc')
-        cell = cell_w_synapse_from_sections(morphology)
+        cell = cell_w_synapse_from_sections(morphology, delete_sections=True)
         imem = cell.get_transformation_matrix_vmem_to_imem() @ cell.vmem
         np.testing.assert_almost_equal(imem, cell.imem, decimal=9)
 
@@ -1172,7 +1172,7 @@ class testCell(unittest.TestCase):
             LFPy.__path__[0],
             'test',
             'sticks_not_connected_head_to_toe.hoc')
-        cell = cell_w_synapse_from_sections(morphology)
+        cell = cell_w_synapse_from_sections(morphology, delete_sections=True)
         iaxial, d_list, pos_list = cell.get_axial_currents_from_vmem()
         imem = copy(cell.imem)
 
@@ -1999,7 +1999,8 @@ class testCell(unittest.TestCase):
         morphology = os.path.join(LFPy.__path__[0], 'test',
                                   'ball_and_sticks.hoc')
         cell = cell_w_synapse_from_sections(morphology,
-                                            rec_current_dipole_moment=True)
+                                            rec_current_dipole_moment=True,
+                                            delete_sections=True)
         dipoles, dipole_locs = cell.get_multi_current_dipole_moments()
         t_point = -1
         P_from_multi_dipoles = np.sum(dipoles[:, :, t_point], axis=0)
@@ -2039,7 +2040,9 @@ def stickSimulationTesttvec(**kwargs):
     return stick.tvec
 
 
-def cell_w_synapse_from_sections(morphology, rec_current_dipole_moment=False):
+def cell_w_synapse_from_sections(morphology,
+                                 rec_current_dipole_moment=False,
+                                 delete_sections=False):
     """
     Make cell and synapse objects, set spike, simulate and return cell
     """
@@ -2053,7 +2056,7 @@ def cell_w_synapse_from_sections(morphology, rec_current_dipole_moment=False):
         'dt': 2**-6,
         'tstart': -50,
         'tstop': 50,
-        'delete_sections': False
+        'delete_sections': delete_sections
     }
 
     synapse_parameters = {'e': 0.,
