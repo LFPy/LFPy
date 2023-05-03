@@ -2744,7 +2744,7 @@ class Cell(object):
                 np.sqrt(np.diff(self.d, axis=-1)**2 + self.length**2)
 
     def get_multi_current_dipole_moments(self, timepoints=None):
-        '''
+        """
         Return 3D current dipole moment vector and middle position vector
         from each axial current in space.
 
@@ -2785,7 +2785,7 @@ class Cell(object):
         >>> timepoints = np.array([1,2,3,4])
         >>> multi_dipoles, dipole_locs = cell.get_multi_current_dipole_moments(
         >>>     timepoints=timepoints)
-        '''
+        """
         i_axial, d_axial, pos_axial = self.get_axial_currents_from_vmem(
             timepoints=timepoints)
         Ni, Nt = i_axial.shape
@@ -2793,5 +2793,186 @@ class Cell(object):
         multi_dipoles = np.zeros((Ni, 3, Nt))
         for i in range(Ni):
             multi_dipoles[i, ] = (i_axial[i][:, np.newaxis] * d_axial[:, i]).T
-
         return multi_dipoles, pos_axial
+
+    def _find_parent_and_segment_M(self, M, seg_idx, parent_idx, bottom_seg,
+                                   branch, parentsec, conn_point, sec):
+        """
+        Finds matrix elements of transfer matrix M from membrane potential
+        to membrane currents, for given segment and parent indexes.
+
+        We find the axial resistance ri between the current segment and the
+        parent segment, so that the axial current is
+        I_axial = (V_par - V_seg) / ri.
+        This current is then added to both the current segment
+        and with opposite sign to the parent segment
+        because of current conservation.
+
+        This means that for every axial current we modify four entries in M.
+        Note however that branch point are more complex, see
+        Hagen et al. (2018) for a brief discussion.
+
+        Parameters
+        ----------
+        M: ndarray, dtype=float
+            Tranfrormation matrix that is modified inplace
+        seg_idx: int
+            Segment index
+        parent_idx: int
+            Parent index
+        bottom_seg: boolean
+            True if this is the first segment in a section
+        branch: boolean
+            True if this is a branch point, in which case 'siblings' must be
+            taken into account
+        parentsec: neuron.Section object
+            parent section
+        conn_point: float
+            relative connection point on section in the interval [0, 1].
+        sec: neuron.Section object
+            current section needed by NEURON
+        """
+        # axial resistance between segment mid and parent node
+        seg_ri = self._ri_list[seg_idx]
+
+        # if segment is the first in its section, and it is connected to
+        # top or bottom of parent section, we need to find parent_ri explicitly
+        if bottom_seg and (conn_point == 0 or conn_point == 1):
+            if conn_point == 0:
+                parent_ri = self._ri_list[parent_idx]
+            else:
+                parent_ri = neuron.h.ri(0, sec=sec)
+            if not branch:
+                ri_ = parent_ri + seg_ri
+
+                # When multiplied by cell.vmem
+                M[seg_idx, seg_idx] += -1 / ri_
+                M[parent_idx, seg_idx] += +1 / ri_
+
+                M[parent_idx, parent_idx] += -1 / ri_
+                M[seg_idx, parent_idx] += +1 / ri_
+            else:
+                # if branch point, need to account for effect of siblings
+                [sib_idcs] = np.take(self.children_dict[parentsec.name()],
+                                     np.where(self.children_dict[
+                                                  parentsec.name()]
+                                              != seg_idx))
+                sibs = [self.get_idx_name(sib_idcs)[i][1]
+                        for i in range(len(sib_idcs))]
+
+                rho_branch = 1. / parent_ri + 1. / seg_ri
+                for sib_idx, sib in zip(sib_idcs, sibs):
+                    if self.connection_dict[sib] == conn_point:
+                        rho_branch += 1. / self._ri_list[sib_idx]
+
+                for sib_idx, sib in zip(sib_idcs, sibs):
+                    if self.connection_dict[sib] == conn_point:
+                        sib_ri = seg_ri * self._ri_list[sib_idx] * rho_branch
+                        M[seg_idx, sib_idx] += 1 / sib_ri
+                        M[parent_idx, sib_idx] += -1 / sib_ri
+
+                seg_ri_branch_1 = seg_ri * seg_ri * rho_branch
+                M[seg_idx, seg_idx] += 1 / seg_ri_branch_1 - 1 / seg_ri
+                M[parent_idx, seg_idx] += - (1 / seg_ri_branch_1 - 1 / seg_ri)
+
+                seg_ri_branch_2 = seg_ri * parent_ri * rho_branch
+                M[parent_idx, parent_idx] += -1 / seg_ri_branch_2
+                M[seg_idx, parent_idx] += +1 / seg_ri_branch_2
+        else:
+            ri_ = seg_ri
+            # When multiplied with cell.vmem, this gives the membrane current
+            # of the current segment
+            M[seg_idx, seg_idx] += - 1 / ri_
+            M[parent_idx, seg_idx] += + 1 / ri_
+
+            # When multiplied with cell.vmem, this gives the
+            # equal but opposite membrane current of the parent segment
+            M[parent_idx, parent_idx] += - 1 / ri_
+            M[seg_idx, parent_idx] += + 1 / ri_
+
+    def get_transformation_matrix_vmem_to_imem(self):
+        """ Get transformation matrix to calculate membrane currents
+        from membrane potential. Can be used in cases where for whatever
+        reason membrane currents are not available, while membrane potentials
+        are.
+
+        Returns
+        -------
+        M: ndarray, dtype=float
+            Shape (cell.totnsegs, cell.totnsegs) transformation matrix
+            to get membrane currents from membrane potentials
+            I_m = M @ cell.vmem
+            should be identical to cell.imem
+
+        Examples
+        --------
+        Get membrane currents from membrane potentials:
+        >>> import LFPy
+        >>> import numpy as np
+        >>> cell = LFPy.Cell(os.path.join(LFPy.__path__[0],
+        >>>                               'test', 'ball_and_sticks.hoc'))
+        >>> syn = LFPy.Synapse(cell, idx=cell.get_closest_idx(0,0,1000),
+        >>>                   syntype='ExpSyn', e=0., tau=1., weight=0.001)
+        >>> syn.set_spike_times(np.mgrid[20:100:20])
+        >>> cell.simulate(rec_vmem=True, rec_imem=False)
+        >>> M = cell.et_transformation_matrix_vmem_to_imem()
+        >>> imem = M @ cell.vmem
+        """
+        self._ri_list = self.get_axial_resistance()
+
+        M = np.zeros((self.totnsegs, self.totnsegs))
+        self.connection_dict = self.get_dict_parent_connections()
+        self.children_dict = self.get_dict_of_children_idx()
+        for sec in self.allseclist:
+            if not neuron.h.SectionRef(sec=sec).has_parent():
+                if sec.nseg == 1:
+                    # skip soma, since soma is an orphan
+                    continue
+                else:
+                    # the first segment has more than one segment,
+                    # need to compute axial currents within this section.
+                    seg_idx = 1
+                    parent_idx = 0
+                    bottom_seg = False
+                    first_sec = True
+                    branch = False
+                    parentsec = None
+                    conn_point = 1
+            else:
+                # section has parent section
+                first_sec = False
+                bottom_seg = True
+                secref = neuron.h.SectionRef(sec=sec)
+                parentseg = secref.parent()
+                parentsec = parentseg.sec
+                branch = len(self.children_dict[parentsec.name()]) > 1
+                conn_point = self.connection_dict[sec.name()]
+                # find parent index
+                if conn_point == 1 or parentsec.nseg == 1:
+                    internal_parent_idx = -1  # last seg in sec
+                elif conn_point == 0:
+                    internal_parent_idx = 0  # first seg in sec
+                else:
+                    # if parentseg is not first or last seg in parentsec
+                    segment_xlist = np.array([segment.x
+                                              for segment in parentsec])
+                    internal_parent_idx = np.abs(segment_xlist -
+                                                 conn_point).argmin()
+
+                parent_idx = self.get_idx(section=parentsec.name())[
+                    internal_parent_idx]
+                seg_idx = self.get_idx(section=sec.name())[0]
+
+            for _ in sec:
+                if first_sec:
+                    first_sec = False
+                    continue
+                self._find_parent_and_segment_M(M, seg_idx, parent_idx,
+                                                bottom_seg, branch, parentsec,
+                                                conn_point, sec)
+                parent_idx = seg_idx
+                seg_idx += 1
+                branch = False
+                bottom_seg = False
+
+        return M
