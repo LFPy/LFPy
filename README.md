@@ -15,6 +15,7 @@ Just updated LFPy? Please check the latest release notes: <https://github.com/LF
 
 Usage
 -----
+A brief video tutorial on LFPy is available here: <https://youtu.be/gCQkyTHZ1lw>
 
 A basic simulation of extracellular potentials of a multicompartment neuron model set up with LFPy:
 
