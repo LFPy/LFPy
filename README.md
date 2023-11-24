@@ -17,6 +17,13 @@ Usage
 -----
 A brief video tutorial on LFPy is available here: <https://youtu.be/gCQkyTHZ1lw>
 
+LFPy is preinstalled at the EBRAINS collaboratory, and you can test LFPy online without installation, by clicking this button:
+
+[![](https://nest-simulator.org/TryItOnEBRAINS.png)](https://lab.ebrains.eu/hub/user-redirect/git-pull?repo=https%3A%2F%2Fgithub.com%2FLFPy%2Ftutorial_at_EBRAINS&urlpath=tree%2Ftutorial_at_EBRAINS%2F&branch=main)
+
+Note that you might need to be logged into an EBRAINS account for the link to work.
+To get a free EBRAINS account, sign up here: https://www.ebrains.eu/page/sign-up
+
 A basic simulation of extracellular potentials of a multicompartment neuron model set up with LFPy:
 
     >>> # import modules
@@ -59,9 +66,6 @@ A basic simulation of extracellular potentials of a multicompartment neuron mode
     >>> axes[2].pcolormesh(cell.tvec, lsp.z, lsp.data, shading='auto')
     >>> axes[2].set_ylabel('z (µm)')
     >>> axes[2].set_xlabel('t (ms)')
-
-You can now test some LFPy examples online without installation:
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/LFPy/LFPy_binder_examples/master)
 
 Code status
 -----------
