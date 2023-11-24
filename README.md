@@ -17,6 +17,11 @@ Usage
 -----
 A brief video tutorial on LFPy is available here: <https://youtu.be/gCQkyTHZ1lw>
 
+LFPy is preinstalled at the EBRAINS collaboratory, and you can test LFPy online without installation, by clicking this button:
+
+[![](https://nest-simulator.org/TryItOnEBRAINS.png)](https://lab.ebrains.eu/hub/user-redirect/git-pull?repo=https%3A%2F%2Fgithub.com%2FLFPy%2Ftutorial_at_EBRAINS&urlpath=tree%2Ftutorial_at_EBRAINS%2F&branch=main)
+
+
 A basic simulation of extracellular potentials of a multicompartment neuron model set up with LFPy:
 
     >>> # import modules
