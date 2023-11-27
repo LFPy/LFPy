@@ -10,9 +10,6 @@ sphinx:
 
 formats: all
 
-conda:
-  environment: doc/environment.yml
-
 python:
     install:
         - method: pip
