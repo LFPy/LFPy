@@ -38,7 +38,7 @@ except ImportError:
     ext_modules = []
 
 
-with open('README.md', 'rt') as file:
+with open('README.md', 'rt', encoding='UTF-8') as file:
     long_description = file.read()
 
 setup(

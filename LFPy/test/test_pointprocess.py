@@ -34,7 +34,7 @@ class testPointProcess(unittest.TestCase):
         cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
                                                  'ball_and_sticks.hoc'))
         pp = LFPy.PointProcess(cell=cell, idx=0)
-        self.assertTrue(np.alltrue(
+        self.assertTrue(np.all(
             np.array([pp.x, pp.y, pp.z]) == cell.somapos))
         self.assertEqual(pp.idx, 0)
 
