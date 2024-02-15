@@ -2433,7 +2433,9 @@ class Cell(object):
                      self.y[:, -1] - self.y.mean(axis=-1),
                      self.z[:, -1] - self.z.mean(axis=-1)]
 
-        # children_dict = self.get_dict_of_children_idx()
+        self.children_dict = self.get_dict_of_children_idx()
+        self.connection_dict = self.get_dict_parent_connections()
+
         for sec in self.allseclist:
             if not neuron.h.SectionRef(sec=sec).has_parent():
                 if sec.nseg == 1:
@@ -2448,8 +2450,6 @@ class Cell(object):
                     first_sec = True
                     branch = False
                     parentsec = None
-                    children_dict = None
-                    connection_dict = None
                     conn_point = 1
             else:
                 # section has parent section
@@ -2458,10 +2458,8 @@ class Cell(object):
                 secref = neuron.h.SectionRef(sec=sec)
                 parentseg = secref.parent()
                 parentsec = parentseg.sec
-                children_dict = self.get_dict_of_children_idx()
-                branch = len(children_dict[parentsec.name()]) > 1
-                connection_dict = self.get_dict_parent_connections()
-                conn_point = connection_dict[sec.name()]
+                branch = len(self.children_dict[parentsec.name()]) > 1
+                conn_point = self.connection_dict[sec.name()]
                 # find parent index
                 if conn_point == 1 or parentsec.nseg == 1:
                     internal_parent_idx = -1  # last seg in sec
@@ -2486,8 +2484,6 @@ class Cell(object):
                                                               bottom_seg,
                                                               branch,
                                                               parentsec,
-                                                              children_dict,
-                                                              connection_dict,
                                                               conn_point,
                                                               timepoints,
                                                               sec
@@ -2599,7 +2595,6 @@ class Cell(object):
 
     def _parent_and_segment_current(self, seg_idx, parent_idx, bottom_seg,
                                     branch=False, parentsec=None,
-                                    children_dict=None, connection_dict=None,
                                     conn_point=1, timepoints=None, sec=None):
         """
         Return axial current from segment (seg_idx) mid to segment start,
@@ -2615,10 +2610,6 @@ class Cell(object):
         branch: boolean
         parentsec: neuron.Section object
             parent section
-        children_dict: dict or None
-            Default None
-        connection_dict: dict or None
-            Default None
         conn_point: float
             relative connection point on section in the interval [0, 1].
             Defaults to 1
@@ -2659,8 +2650,8 @@ class Cell(object):
                 ipar = iseg
             else:
                 # if branch, need to compute iseg and ipar separately
-                [sib_idcs] = np.take(children_dict[parentsec.name()],
-                                     np.where(children_dict[parentsec.name()]
+                [sib_idcs] = np.take(self.children_dict[parentsec.name()],
+                                     np.where(self.children_dict[parentsec.name()]
                                               != seg_idx))
                 sibs = [self.get_idx_name(sib_idcs)[i][1]
                         for i in range(len(sib_idcs))]
@@ -2668,7 +2659,7 @@ class Cell(object):
                 v_branch_num = vpar / parent_ri + vseg / seg_ri
                 v_branch_denom = 1. / parent_ri + 1. / seg_ri
                 for sib_idx, sib in zip(sib_idcs, sibs):
-                    sib_conn_point = connection_dict[sib]
+                    sib_conn_point = self.connection_dict[sib]
                     if sib_conn_point == conn_point:
                         v_branch_num += vmem[sib_idx] / self._ri_list[sib_idx]
                         v_branch_denom += 1. / self._ri_list[sib_idx]
