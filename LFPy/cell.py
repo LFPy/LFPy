@@ -2651,7 +2651,7 @@ class Cell(object):
             else:
                 # if branch, need to compute iseg and ipar separately
                 [sib_idcs] = np.take(self.children_dict[parentsec.name()],
-                                     np.where(self.children_dict[parentsec.name()]
+                                 np.where(self.children_dict[parentsec.name()]
                                               != seg_idx))
                 sibs = [self.get_idx_name(sib_idcs)[i][1]
                         for i in range(len(sib_idcs))]
