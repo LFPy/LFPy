@@ -146,3 +146,5 @@ examples/bioRxiv281717/figure_7_8/parameters
 x86_64
 arm64
 aarch64
+# ignoring downloaded model folder of Hay model for examples/LFPy-example-04.ipynb
+examples/139653/

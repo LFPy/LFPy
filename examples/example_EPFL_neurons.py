@@ -3,7 +3,7 @@
 """
 Test implementation using cell models of the Blue Brain Project with LFPy.
 The example assumes that the complete set of cell models available from
-https://bbpnmc.epfl.ch/nmc-portal/downloads is unzipped in this folder.
+https://bbp.epfl.ch/nmc-portal/downloads.html is unzipped in this folder.
 
 Execution:
 
