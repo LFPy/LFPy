@@ -29,13 +29,6 @@ import matplotlib.pyplot as plt
 from matplotlib.collections import LineCollection
 import os
 from os.path import join
-import sys
-if sys.version < '3':
-    from urllib2 import urlopen
-else:
-    from urllib.request import urlopen
-import zipfile
-import ssl
 import LFPy
 from mpi4py import MPI
 
@@ -67,25 +60,16 @@ def stationary_poisson(nsyn, lambd, tstart, tstop):
 
 
 # Fetch Mainen&Sejnowski 1996 model files
-if not os.path.isfile(join('cells', 'cells', 'j4a.hoc')) and RANK == 0:
+if not os.path.isfile(join('2488', 'cells', 'j4a.hoc')) and RANK == 0:
     # get the model files:
-    url = '{}{}'.format('http://senselab.med.yale.edu/ModelDB/eavBinDown.asp',
-                        '?o=2488&a=23&mime=application/zip')
-    u = urlopen(url, context=ssl._create_unverified_context())
-    localFile = open('patdemo.zip', 'w')
-    localFile.write(u.read())
-    localFile.close()
-    # unzip:
-    myzip = zipfile.ZipFile('patdemo.zip', 'r')
-    myzip.extractall('.')
-    myzip.close()
+    os.system('git clone https://github.com/ModelDBRepository/2488.git')
 
 # resync MPI threads
 COMM.Barrier()
 
 # Define cell parameters
 cell_parameters = {          # various cell parameters,
-    'morphology': join('cells', 'cells', 'j4a.hoc'),  # Mainen&Sejnowski, 1996
+    'morphology': join('2488', 'cells', 'j4a.hoc'),  # Mainen&Sejnowski, 1996
     'cm': 1.0,         # membrane capacitance
     'Ra': 150,         # axial resistance
     'v_init': -65.,    # initial crossmembrane potential
@@ -229,7 +213,7 @@ if RANK == 0:
     plt.axis('off')
 
     for i_cell in range(n_cells):
-        cell = LFPy.Cell(join('cells', 'cells', 'j4a.hoc'),
+        cell = LFPy.Cell(join('2488', 'cells', 'j4a.hoc'),
                          nsegs_method='lambda_f',
                          lambda_f=5)
         cell.set_rotation(z=z_rotation[i_cell], **xy_rotations)
