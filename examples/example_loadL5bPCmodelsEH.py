@@ -37,28 +37,12 @@ import neuron
 import matplotlib.pyplot as plt
 import os
 import sys
-if sys.version < '3':
-    from urllib2 import urlopen
-else:
-    from urllib.request import urlopen
-import zipfile
-import ssl
 from warnings import warn
 
 
 # Fetch Hay et al. 2011 model files
 if not os.path.isfile('139653/morphologies/cell1.asc'):
     # get the model files:
-    # url = '{}{}'.format('http://senselab.med.yale.edu/ModelDB/eavBinDown.asp',
-    #                     '?o=139653&a=23&mime=application/zip')
-    # u = urlopen(url, context=ssl._create_unverified_context())
-    # localFile = open('L5bPCmodelsEH.zip', 'wb')
-    # localFile.write(u.read())
-    # localFile.close()
-    # # unzip:
-    # myzip = zipfile.ZipFile('L5bPCmodelsEH.zip', 'r')
-    # myzip.extractall('.')
-    # myzip.close()
     os.system('git clone https://github.com/ModelDBRepository/139653.git')
 
 # compile mod files every time, because of incompatibility with Mainen96 files:

@@ -39,7 +39,7 @@ class TemplateCell(Cell):
         File with cell template definition(s)
     templatename : str
         Cell template-name used for this cell object
-    templateargs : None, str, int, list of arguments
+    templateargs : None, str, int or list of arguments
         Parameters provided to template-definition
     v_init : float
         Initial membrane potential. Default to -65.
