@@ -154,10 +154,10 @@ class TemplateCell(Cell):
         if self.templateargs is None:
             self.template = getattr(neuron.h, self.templatename)()
         elif isinstance(self.templateargs, (str, int)):
-            self.template = getattr(neuron.h, 
+            self.template = getattr(neuron.h,
                                     self.templatename)(self.templateargs)
         elif isinstance(self.templateargs, (list, tuple)):
-            self.template = getattr(neuron.h, 
+            self.template = getattr(neuron.h,
                                     self.templatename)(*self.templateargs)
         else:
             msg = "templateargs must be None, int, str, list or tuple"
