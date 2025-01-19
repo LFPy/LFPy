@@ -154,11 +154,14 @@ class TemplateCell(Cell):
         if self.templateargs is None:
             self.template = getattr(neuron.h, self.templatename)()
         elif isinstance(self.templateargs, (str, int)):
-            self.template = getattr(neuron.h, self.templatename)(self.templateargs)
+            self.template = getattr(neuron.h, 
+                                    self.templatename)(self.templateargs)
         elif isinstance(self.templateargs, (list, tuple)):
-            self.template = getattr(neuron.h, self.templatename)(*self.templateargs)
+            self.template = getattr(neuron.h, 
+                                    self.templatename)(*self.templateargs)
         else:
-            raise ValueError("templateargs must be None, int, str, list or tuple")
+            msg = "templateargs must be None, int, str, list or tuple"
+            raise ValueError(msg)
 
         # perform a test if the morphology is already loaded:
         seccount = 0
