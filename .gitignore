@@ -146,3 +146,8 @@ examples/bioRxiv281717/figure_7_8/parameters
 x86_64
 arm64
 aarch64
+# ignoring downloaded model folders from GitHub for
+# examples/LFPy-example-03.ipynb and others
+examples/2488/
+# examples/LFPy-example-04.ipynb and others
+examples/139653/

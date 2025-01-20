@@ -39,12 +39,6 @@ import LFPy
 from LFPy.inputgenerators import get_activation_times_from_distribution
 import neuron
 import sys
-if sys.version < '3':
-    from urllib2 import urlopen
-else:
-    from urllib.request import urlopen
-import zipfile
-import ssl
 from warnings import warn
 from mpi4py import MPI
 
@@ -54,25 +48,15 @@ SIZE = COMM.Get_size()
 RANK = COMM.Get_rank()
 
 # Fetch Mainen&Sejnowski 1996 model files
-if not os.path.isfile(join('cells', 'cells', 'j4a.hoc')) and RANK == 0:
-
+if not os.path.isfile(join('2488', 'cells', 'j4a.hoc')) and RANK == 0:
     # get the model files:
-    url = '{}{}'.format('http://senselab.med.yale.edu/ModelDB/eavBinDown.asp',
-                        '?o=2488&a=23&mime=application/zip')
-    u = urlopen(url, context=ssl._create_unverified_context())
-    localFile = open('patdemo.zip', 'w')
-    localFile.write(u.read())
-    localFile.close()
-    # unzip:
-    myzip = zipfile.ZipFile('patdemo.zip', 'r')
-    myzip.extractall('.')
-    myzip.close()
+    os.system('git clone https://github.com/ModelDBRepository/2488.git')
 
 # compile mod files every time, because of incompatibility with Hay2011 files:
 if "win32" in sys.platform:
-    pth = "cells"
+    pth = "2488"  # path to folder
     warn("no autompile of NMODL (.mod) files on Windows. "
-         + "Run mknrndll from NEURON bash in the folder cells and "
+         + "Run mknrndll from NEURON bash in the folder 2488 and "
          + "rerun example script")
     if pth not in neuron.nrn_dll_loaded:
         neuron.h.nrn_load_dll(pth + "/nrnmech.dll")
@@ -80,11 +64,11 @@ if "win32" in sys.platform:
 else:
     if RANK == 0:
         os.system('''
-                  cd cells
+                  cd 2488
                   nrnivmodl
                   ''')
     COMM.Barrier()
-    neuron.load_mechanisms('cells')
+    neuron.load_mechanisms('2488')
 
 
 # set one global seed, ensure all randomizations are set on RANK 0 in script!
@@ -199,7 +183,8 @@ class Population:
         return COMM.bcast(cellPositions, root=0)
 
     def drawRandCellRotations(self):
-        '''draw and distribute random cell rotations for all cells in population
+        '''draw and distribute random cell rotations
+        for all cells in population
         '''
         if RANK == 0:
             cellRotations = np.random.rand(self.POPULATION_SIZE) * np.pi * 2
