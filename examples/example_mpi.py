@@ -54,7 +54,7 @@ if not os.path.isfile(join('2488', 'cells', 'j4a.hoc')) and RANK == 0:
 
 # compile mod files every time, because of incompatibility with Hay2011 files:
 if "win32" in sys.platform:
-    pth = "2488" # path to folder
+    pth = "2488"  # path to folder
     warn("no autompile of NMODL (.mod) files on Windows. "
          + "Run mknrndll from NEURON bash in the folder 2488 and "
          + "rerun example script")
@@ -183,7 +183,8 @@ class Population:
         return COMM.bcast(cellPositions, root=0)
 
     def drawRandCellRotations(self):
-        '''draw and distribute random cell rotations for all cells in population
+        '''draw and distribute random cell rotations
+        for all cells in population
         '''
         if RANK == 0:
             cellRotations = np.random.rand(self.POPULATION_SIZE) * np.pi * 2
