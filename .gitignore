@@ -133,6 +133,7 @@ dmypy.json
 
 # macos stuff
 .DS_Store
+__MACOSX
 
 # misc
 examples/hoc_combos*
