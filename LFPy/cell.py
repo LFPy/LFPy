@@ -197,9 +197,9 @@ class Cell(object):
             else:
                 raise Exception('non-existent file %s' % self.morphology)
         else:
-            assert isinstance(self.morphology, type(neuron.h.SectionList)), \
-                ("Could not recognize Cell keyword argument morphology as " +
-                 "neuron.h.SectionList instance")
+            if not hasattr(self.morphology, "wholetree"):
+                raise TypeError ("Could not recognize Cell keyword argument morphology as " +
+                                "neuron.h.SectionList instance")
 
             # instantiate 3D geometry of all sections
             neuron.h.define_shape()
