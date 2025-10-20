@@ -170,13 +170,13 @@ class Cell(object):
             neuron.h.load_file('stdrun.hoc')  # NEURON stdrun library
 
         if delete_sections:
-            if not isinstance(morphology, type(neuron.h.SectionList)):
+            if not hasattr(morphology, "wholetree"):
                 if self.verbose:
                     print('%s existing sections deleted from memory' %
                           sum(1 for sec in neuron.h.allsec()))
                 neuron.h('forall delete_section()')
         else:
-            if not isinstance(morphology, type(neuron.h.SectionList)):
+            if not hasattr(morphology, "wholetree"):
                 mssg = "%s sections detected! " % sum(
                     1 for sec in neuron.h.allsec()) \
                     + "Consider setting 'delete_sections=True'"
@@ -308,15 +308,15 @@ class Cell(object):
 
     def strip_hoc_objects(self):
         """Destroy any NEURON hoc objects in the cell object"""
-        if not (isinstance(neuron, type(None)) or
-                isinstance(neuron.nrn, type(None))):
-            nrntypes = (neuron.nrn.Segment, neuron.nrn.Section,
-                        neuron.nrn.Mechanism, type(neuron.h.List()))
-            for key in self.__dict__.keys():
-                if isinstance(getattr(self, key), nrntypes):
-                    setattr(self, key, None)
-                    if self.verbose:
-                        print('{}.{} = None'.format(self.__name__, key))
+        for key, val in list(self.__dict__.items()):
+            try:
+                hoc_type = neuron.hoc.HocObject
+            except AttributeError:
+                hoc_type = None
+            if (hoc_type is not None) and isinstance(val, hoc_type):
+                setattr(self, key, None)
+                if self.verbose:
+                    print('{}.{} = None'.format("self", key))
 
     def _load_geometry(self):
         """Load the morphology-file in NEURON"""
@@ -413,7 +413,7 @@ class Cell(object):
         """Create section lists for different kinds of sections"""
         # list with all sections
         self.allsecnames = []
-        if not isinstance(self.morphology, type(neuron.h.SectionList)):
+        if not hasattr(self.morphology, "wholetree"):
             self.allseclist = neuron.h.SectionList()
             for sec in neuron.h.allsec():
                 self.allsecnames.append(sec.name())
@@ -2442,7 +2442,7 @@ class Cell(object):
                     # skip soma, since soma is an orphan
                     continue
                 else:
-                    # the first segment has more than one segment,
+                    # the first section has more than one segment,
                     # need to compute axial currents within this section.
                     seg_idx = 1
                     parent_idx = 0
