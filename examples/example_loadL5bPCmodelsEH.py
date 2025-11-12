@@ -9,7 +9,7 @@ This script assume that the model files is downloaded and unzipped inside
 this folder from ModelDB:
 http://senselab.med.yale.edu/modeldb/ShowModel.asp?model=139653
 
-The mod-files inside /L5bPCmodelsEH/mod/ must be compiled using nrnivmodl.
+The mod-files inside /139653/mod/ must be compiled using nrnivmodl.
 
 Note that LFPy can only deal with one cell at the time, creating several
 cell objects will slow everything down, but each cell *should* get the correct
@@ -37,44 +37,29 @@ import neuron
 import matplotlib.pyplot as plt
 import os
 import sys
-if sys.version < '3':
-    from urllib2 import urlopen
-else:
-    from urllib.request import urlopen
-import zipfile
-import ssl
 from warnings import warn
 
 
 # Fetch Hay et al. 2011 model files
-if not os.path.isfile('L5bPCmodelsEH/morphologies/cell1.asc'):
+if not os.path.isfile('139653/morphologies/cell1.asc'):
     # get the model files:
-    url = '{}{}'.format('http://senselab.med.yale.edu/ModelDB/eavBinDown.asp',
-                        '?o=139653&a=23&mime=application/zip')
-    u = urlopen(url, context=ssl._create_unverified_context())
-    localFile = open('L5bPCmodelsEH.zip', 'wb')
-    localFile.write(u.read())
-    localFile.close()
-    # unzip:
-    myzip = zipfile.ZipFile('L5bPCmodelsEH.zip', 'r')
-    myzip.extractall('.')
-    myzip.close()
+    os.system('git clone https://github.com/ModelDBRepository/139653.git')
 
 # compile mod files every time, because of incompatibility with Mainen96 files:
 if "win32" in sys.platform:
-    pth = "L5bPCmodelsEH/mod/"
+    pth = "139653/mod/"
     warn("no autompile of NMODL (.mod) files on Windows."
          + "Run mknrndll from NEURON bash in the folder "
-         + "L5bPCmodelsEH/mod and rerun example script")
+         + "139653/mod and rerun example script")
     if pth not in neuron.nrn_dll_loaded:
         neuron.h.nrn_load_dll(pth + "nrnmech.dll")
     neuron.nrn_dll_loaded.append(pth)
 else:
     os.system('''
-              cd L5bPCmodelsEH/mod/
+              cd 139653/mod/
               nrnivmodl
               ''')
-    neuron.load_mechanisms('L5bPCmodelsEH/mod/')
+    neuron.load_mechanisms('139653/mod/')
 
 # remove cells from previous script executions
 neuron.h('forall delete_section()')
@@ -84,11 +69,11 @@ neuron.h('forall delete_section()')
 # 'templateargs'!
 # Reason is LFPy looks for a default rotation .rot-file.
 cellParams = {
-    'morphology': 'L5bPCmodelsEH/morphologies/cell1.asc',
-    'templatefile': ['L5bPCmodelsEH/models/L5PCbiophys3.hoc',
-                     'L5bPCmodelsEH/models/L5PCtemplate.hoc'],
+    'morphology': '139653/morphologies/cell1.asc',
+    'templatefile': ['139653/models/L5PCbiophys3.hoc',
+                     '139653/models/L5PCtemplate.hoc'],
     'templatename': 'L5PCtemplate',
-    'templateargs': 'L5bPCmodelsEH/morphologies/cell1.asc',
+    'templateargs': '139653/morphologies/cell1.asc',
     'nsegs_method': None,
     'v_init': -80,
     'tstart': 0,

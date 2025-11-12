@@ -39,7 +39,7 @@ class TemplateCell(Cell):
         File with cell template definition(s)
     templatename : str
         Cell template-name used for this cell object
-    templateargs : str
+    templateargs : None, str, int or list of arguments
         Parameters provided to template-definition
     v_init : float
         Initial membrane potential. Default to -65.
@@ -150,7 +150,18 @@ class TemplateCell(Cell):
     def _load_geometry(self):
         """Load the morphology-file in NEURON"""
         # the python cell object we are loading the morphology into:
-        self.template = getattr(neuron.h, self.templatename)(self.templateargs)
+        # Check templateargs arguments
+        if self.templateargs is None:
+            self.template = getattr(neuron.h, self.templatename)()
+        elif isinstance(self.templateargs, (str, int)):
+            self.template = getattr(neuron.h,
+                                    self.templatename)(self.templateargs)
+        elif isinstance(self.templateargs, (list, tuple)):
+            self.template = getattr(neuron.h,
+                                    self.templatename)(*self.templateargs)
+        else:
+            msg = "templateargs must be None, int, str, list or tuple"
+            raise ValueError(msg)
 
         # perform a test if the morphology is already loaded:
         seccount = 0

@@ -25,9 +25,6 @@ GNU General Public License for more details.
 """
 import os
 from os.path import join
-from urllib.request import urlopen
-import zipfile
-import ssl
 import LFPy
 import numpy as np
 import matplotlib.pyplot as plt
@@ -188,18 +185,9 @@ def mark_subplots(axes, letters='ABCDEFGHIJKLMNOPQRSTUVWXYZ',
 
 
 # Fetch Mainen&Sejnowski 1996 model files
-if not os.path.isfile(join('cells', 'cells', 'j4a.hoc')):
+if not os.path.isfile(join('2488', 'cells', 'j4a.hoc')):
     # get the model files:
-    url = '{}{}'.format('http://senselab.med.yale.edu/ModelDB/eavBinDown.asp',
-                        '?o=2488&a=23&mime=application/zip')
-    u = urlopen(url, context=ssl._create_unverified_context())
-    localFile = open('patdemo.zip', 'wb')
-    localFile.write(u.read())
-    localFile.close()
-    # unzip:
-    myzip = zipfile.ZipFile('patdemo.zip', 'r')
-    myzip.extractall('.')
-    myzip.close()
+    os.system('git clone https://github.com/ModelDBRepository/2488.git')
 
 ##########################################################################
 # Main script, set parameters and create cell, synapse and electrode objects
@@ -208,7 +196,7 @@ if not os.path.isfile(join('cells', 'cells', 'j4a.hoc')):
 # Define cell parameters
 cell_parameters = {
     # from Mainen & Sejnowski, J Comput Neurosci, 1996
-    'morphology': join('cells', 'cells', 'j4a.hoc'),
+    'morphology': join('2488', 'cells', 'j4a.hoc'),
     'cm': 1.0,         # membrane capacitance
     'Ra': 150.,        # axial resistance
     'v_init': -65.,    # initial crossmembrane potential
