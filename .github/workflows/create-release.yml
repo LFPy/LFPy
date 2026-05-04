@@ -1,0 +1,91 @@
+# This workflow automatically creates a GitHub release when a push to master
+# changes the version in lfpykit/version.py (e.g., when a PR is merged).
+# The release tag follows the convention v{version} (e.g., v0.6.0) and the
+# release name follows the convention LFPykit-{version}.
+# After a new release is created, the deploy job publishes the package to PyPI.
+# Note: releases created via GITHUB_TOKEN do not trigger the separate
+# python-publish.yml workflow, so the publish steps are included here directly.
+
+name: Create GitHub Release
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  release:
+
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    outputs:
+      released: ${{ steps.set_released.outputs.released }}
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Get version from version.py
+      id: get_version
+      run: |
+        version=$(grep -oP '(?<=version = ")[^"]+' LFPy/version.py)
+        echo "version=${version}" >> $GITHUB_OUTPUT
+
+    - name: Check if release tag already exists
+      id: check_tag
+      run: |
+        if git ls-remote --exit-code --tags origin "refs/tags/v${{ steps.get_version.outputs.version }}" > /dev/null 2>&1; then
+          echo "exists=true" >> $GITHUB_OUTPUT
+        else
+          echo "exists=false" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Create GitHub Release
+      if: steps.check_tag.outputs.exists == 'false'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        gh release create "v${{ steps.get_version.outputs.version }}" \
+          --title "LFPy-${{ steps.get_version.outputs.version }}" \
+          --generate-notes
+
+    - name: Set released output
+      id: set_released
+      run: |
+        echo "released=${{ steps.check_tag.outputs.exists == 'false' }}" >> $GITHUB_OUTPUT
+
+  deploy:
+
+    needs: release
+    if: needs.release.outputs.released == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install poetry twine
+    - name: Build package
+      run: |
+        poetry build
+    - name: Build and publish to Test PyPI
+      env:
+        TWINE_USERNAME: __token__
+        TWINE_PASSWORD: ${{ secrets.GH_TESTPYPI_LFPY_TOKEN }}
+      run: |
+        twine upload --repository-url https://test.pypi.org/legacy/ dist/* --verbose
+    - name: Publish to PyPI
+      env:
+        TWINE_USERNAME: __token__
+        TWINE_PASSWORD: ${{ secrets.GH_PYPI_LFPY_TOKEN }}
+      run: |
+        twine upload dist/* --verbose
