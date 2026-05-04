@@ -54,7 +54,8 @@ pytest = {version = ">=7.0", optional = true}
 sphinx = {version = "*", optional = true}
 numpydoc = {version = "*", optional = true}
 sphinx-rtd-theme = {version = "*", optional = true}
+m2r2 = {version = "*", optional = true}
 
 [tool.poetry.extras]
 tests = ["pytest"]
-docs = ["sphinx", "numpydoc", "sphinx-rtd-theme"]
+docs = ["sphinx", "numpydoc", "sphinx-rtd-theme", "m2r2"]
