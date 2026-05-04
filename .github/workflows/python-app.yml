@@ -20,8 +20,6 @@ jobs:
             include:
               - os: macOS-latest
                 python-version: "3.14"
-              - os: windows-latest
-                python-version: "3.14"
 
     steps:
     - uses: actions/checkout@v4
