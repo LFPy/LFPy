@@ -1,0 +1,61 @@
+[build-system]
+requires = ["poetry-core>=1.0.0", "Cython>=3.0", "numpy"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "LFPy"
+version = "2.3.7"
+description = "A module for modeling extracellular potentials of multicompartment neuron models built on NEURON"
+authors = ["LFPy-team <lfpy@users.noreply.github.com>"]
+license = "GPL-3.0-or-later"
+readme = "README.md"
+homepage = "http://LFPy.readthedocs.io"
+repository = "https://github.com/LFPy/LFPy"
+packages = [{include = "LFPy"}]
+include = [
+    "LFPy/*.pyx",
+    "LFPy/test/*.hoc",
+    "LFPy/test/*.py",
+    "LFPy/test/sinsyn.mod",
+    "LFPy/test/expsyni.mod",
+]
+classifiers = [
+    "License :: OSI Approved :: GNU General Public License (GPL)",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Programming Language :: Cython",
+    "Operating System :: OS Independent",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Scientific/Engineering :: Physics",
+    "Topic :: Utilities",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Development Status :: 5 - Production/Stable",
+]
+
+[tool.poetry.build]
+script = "build.py"
+generate-setup-file = false
+
+[tool.poetry.dependencies]
+python = "^3.10"
+neuron = ">=9.0.1"
+numpy = ">=1.8"
+scipy = ">=0.14"
+Cython = ">=3.0"
+h5py = ">=2.5"
+lfpykit = ">=0.6.2"
+pytest = {version = ">=7.0", optional = true}
+sphinx = {version = "*", optional = true}
+numpydoc = {version = "*", optional = true}
+sphinx-rtd-theme = {version = "*", optional = true}
+m2r2 = {version = "*", optional = true}
+
+[tool.poetry.extras]
+tests = ["pytest"]
+docs = ["sphinx", "numpydoc", "sphinx-rtd-theme", "m2r2"]

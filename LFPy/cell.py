@@ -2227,7 +2227,7 @@ class Cell(object):
         # calculate angles
         dx = np.diff(x)
         dz = np.diff(z)
-        theta = np.arctan2(dz, dx)
+        theta = np.arctan2(dz, dx)[0]
 
         x = np.r_[x, x[::-1]]
         z = np.r_[z, z[::-1]]
