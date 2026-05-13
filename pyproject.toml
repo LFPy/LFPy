@@ -18,6 +18,7 @@ include = [
     "LFPy/test/*.py",
     "LFPy/test/sinsyn.mod",
     "LFPy/test/expsyni.mod",
+    { path = "LFPy/**/*.so", format = "wheel" }
 ]
 classifiers = [
     "License :: OSI Approved :: GNU General Public License (GPL)",
@@ -40,7 +41,7 @@ classifiers = [
 
 [tool.poetry.build]
 script = "build.py"
-generate-setup-file = true
+generate-setup-file = false
 
 [tool.poetry.dependencies]
 python = "^3.10"
