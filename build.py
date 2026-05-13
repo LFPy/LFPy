@@ -12,7 +12,7 @@ def main():
         from Cython.Build import cythonize
         from Cython.Distutils import build_ext
         from setuptools import Distribution, Extension
-        
+
         print("Building Cython extensions")
         ext_modules = [
             Extension(
