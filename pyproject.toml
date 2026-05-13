@@ -1,5 +1,5 @@
 [build-system]
-requires = ["poetry-core>=1.0.0", "Cython>=3.0", "numpy"]
+requires = ["poetry-core>=1.0.0", "setuptools", "Cython>=3.0", "numpy"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
@@ -40,7 +40,7 @@ classifiers = [
 
 [tool.poetry.build]
 script = "build.py"
-generate-setup-file = false
+generate-setup-file = true
 
 [tool.poetry.dependencies]
 python = "^3.10"
