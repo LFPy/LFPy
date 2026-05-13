@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "LFPy"
-version = "2.3.9rc1"
+version = "2.3.9rc2"
 description = "A module for modeling extracellular potentials of multicompartment neuron models built on NEURON"
 authors = ["LFPy-team <lfpy@users.noreply.github.com>"]
 license = "GPL-3.0-or-later"
