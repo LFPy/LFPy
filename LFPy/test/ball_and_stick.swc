@@ -1,0 +1,7 @@
+# Minimal test morphology in SWC format (www.neuromorpho.org):
+# a spherical soma with a single unbranched dendrite.
+# Columns: id type x y z radius parent
+# Units are um, as expected by NEURON's Import3d_SWC_read.
+1 1 0.0 0.0 0.0 10.0 -1
+2 3 0.0 0.0 10.0 1.0 1
+3 3 0.0 0.0 1010.0 1.0 2
