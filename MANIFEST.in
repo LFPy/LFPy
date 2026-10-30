@@ -4,6 +4,7 @@ include LICENSE
 recursive-include LFPy *.pyx
 recursive-include LFPy/test *.py
 recursive-include LFPy/test *.hoc
+recursive-include LFPy/test *.swc
 recursive-include LFPy/test *.mod
 recursive-include LFPy/test *.npz
 
