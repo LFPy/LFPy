@@ -171,7 +171,7 @@ class TemplateCell(Cell):
             # import the morphology, try and determine format
             fileEnding = self.morphology.split('.')[-1]
 
-            if not fileEnding == 'hoc' or fileEnding == 'HOC':
+            if not (fileEnding == 'hoc' or fileEnding == 'HOC'):
                 # create objects for importing morphologies of different
                 # formats
                 if fileEnding == 'asc' or fileEnding == 'ASC':
@@ -184,35 +184,37 @@ class TemplateCell(Cell):
                     Import = neuron.h.Import3d_MorphML()
                 else:
                     raise ValueError(
-                        '%s not a recognised morphology format'
-                        % self.morphology).with_traceback(
-                        'Should be either .hoc, .asc, .swc, .xml')
+                        '%s not a recognised morphology format. '
+                        'Should be either .hoc, .asc, .swc or .xml'
+                        % self.morphology)
 
                 # assuming now that morphology file is the correct format
                 try:
                     Import.input(self.morphology)
-                except BaseException:
+                except Exception as e:
                     if not hasattr(neuron, 'neuroml'):
                         raise Exception(
                             'Can not import, try and copy the ' +
                             'nrn/share/lib/python/neuron/neuroml ' +
                             'folder into %s' %
-                            neuron.__path__[0])
+                            neuron.__path__[0]) from e
                     else:
                         raise Exception(
-                            'something wrong with file, see output')
+                            'something wrong with file, see output') from e
                 try:
                     imprt = neuron.h.Import3d_GUI(Import, 0)
-                except BaseException:
-                    raise Exception('See output, try to correct the file')
+                except Exception as e:
+                    raise Exception(
+                        'See output, try to correct the file') from e
 
                 # instantiate the cell object
                 if fileEnding == 'xml' or fileEnding == 'XML':
                     # can not currently assign xml to cell template
                     try:
                         imprt.instantiate(self.template)
-                    except BaseException:
-                        raise Exception("this xml file is not supported")
+                    except Exception as e:
+                        raise Exception(
+                            "this xml file is not supported") from e
                 else:
                     imprt.instantiate(self.template)
 

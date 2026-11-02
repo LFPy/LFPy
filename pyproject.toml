@@ -15,6 +15,7 @@ packages = [{include = "LFPy"}]
 include = [
     "LFPy/*.pyx",
     "LFPy/test/*.hoc",
+    "LFPy/test/*.swc",
     "LFPy/test/*.py",
     "LFPy/test/sinsyn.mod",
     "LFPy/test/expsyni.mod",
