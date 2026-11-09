@@ -56,5 +56,5 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        py.test -v LFPy --cov=LFPy/test/
+        py.test -v LFPy --cov=LFPy
         coveralls --service=github

@@ -15,9 +15,11 @@ packages = [{include = "LFPy"}]
 include = [
     "LFPy/*.pyx",
     "LFPy/test/*.hoc",
+    "LFPy/test/*.swc",
     "LFPy/test/*.py",
     "LFPy/test/sinsyn.mod",
     "LFPy/test/expsyni.mod",
+    { path = "LFPy/**/*.so", format = "wheel" }
 ]
 classifiers = [
     "License :: OSI Approved :: GNU General Public License (GPL)",

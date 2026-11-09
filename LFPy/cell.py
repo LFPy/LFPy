@@ -335,24 +335,28 @@ class Cell(object):
             elif fileEnding == 'xml' or fileEnding == 'XML':
                 Import = neuron.h.Import3d_MorphML()
             else:
-                raise ValueError('%s not a recognised morphology file format'
-                                 % self.morphology).with_traceback(
-                    'Should be either .hoc, .asc, .swc, .xml')
+                raise ValueError(
+                    '%s not a recognised morphology file format. '
+                    'Should be either .hoc, .asc, .swc or .xml'
+                    % self.morphology)
 
             # assuming now that morphologies file is the correct format
             try:
                 Import.input(self.morphology)
-            except BaseException:
+            except Exception as e:
                 if not hasattr(neuron, 'neuroml'):
                     raise Exception('Can not import, try and copy the '
                                     'nrn/share/lib/python/neuron/neuroml '
-                                    'folder into %s' % neuron.__path__[0])
+                                    'folder into %s'
+                                    % neuron.__path__[0]) from e
                 else:
-                    raise Exception('something wrong with file, see output')
+                    raise Exception(
+                        'something wrong with file, see output') from e
             try:
                 imprt = neuron.h.Import3d_GUI(Import, 0)
-            except BaseException:
-                raise Exception('See output, try to correct the file')
+            except Exception as e:
+                raise Exception(
+                    'See output, try to correct the file') from e
             imprt.instantiate(neuron.h.this)
 
         neuron.h.define_shape()
