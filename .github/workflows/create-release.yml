@@ -1,8 +1,10 @@
 # This workflow automatically creates a GitHub release when a push to master
-# changes the version in lfpykit/version.py (e.g., when a PR is merged).
-# The release tag follows the convention v{version} (e.g., v0.6.0) and the
-# release name follows the convention LFPykit-{version}.
-# After a new release is created, the deploy job publishes the package to PyPI.
+# changes the version in LFPy/version.py (e.g., when a PR is merged).
+# The release tag follows the convention v{version} (e.g., v2.3.9 or v2.3.9rc1)
+# and the release name follows the convention LFPy-{version}.
+# Pre-release versions (aN, bN, rcN, .devN) are marked as GitHub pre-releases.
+# After a new release is created, the publish job uploads the package to
+# TestPyPI and PyPI.
 # Note: releases created via GITHUB_TOKEN do not trigger the separate
 # python-publish.yml workflow, so the publish steps are included here directly.
 
@@ -33,6 +35,14 @@ jobs:
         version=$(grep -oP '(?<=version = ")[^"]+' LFPy/version.py)
         echo "version=${version}" >> $GITHUB_OUTPUT
 
+    - name: Check version.py matches pyproject.toml
+      run: |
+        pyproject_version=$(grep -m1 -oP '^version = "\K[^"]+' pyproject.toml)
+        if [ "${pyproject_version}" != "${{ steps.get_version.outputs.version }}" ]; then
+          echo "::error::Version mismatch: LFPy/version.py=${{ steps.get_version.outputs.version }}, pyproject.toml=${pyproject_version}"
+          exit 1
+        fi
+
     - name: Check if release tag already exists
       id: check_tag
       run: |
@@ -46,10 +56,16 @@ jobs:
       if: steps.check_tag.outputs.exists == 'false'
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        VERSION: ${{ steps.get_version.outputs.version }}
       run: |
-        gh release create "v${{ steps.get_version.outputs.version }}" \
-          --title "LFPy-${{ steps.get_version.outputs.version }}" \
-          --generate-notes
+        prerelease_flag=""
+        if [[ "${VERSION}" =~ [0-9](a|b|rc|\.dev)[0-9]*$ ]]; then
+          prerelease_flag="--prerelease"
+        fi
+        gh release create "v${VERSION}" \
+          --title "LFPy-${VERSION}" \
+          --generate-notes \
+          ${prerelease_flag}
 
     - name: Set released output
       id: set_released
@@ -67,7 +83,7 @@ jobs:
         include:
           - os: ubuntu-latest
             cibw_archs: x86_64 aarch64
-          - os: macos-13
+          - os: macos-15-intel
             cibw_archs: x86_64
           - os: macos-14
             cibw_archs: arm64
@@ -86,7 +102,7 @@ jobs:
       shell: bash
       run: |
         python -m pip install --upgrade pip
-        pip install cibuildwheel>=3.1.0
+        pip install "cibuildwheel>=3.1.0"
     - name: Build wheels
       shell: bash
       env:
@@ -157,7 +173,7 @@ jobs:
         TWINE_USERNAME: __token__
         TWINE_PASSWORD: ${{ secrets.GH_TESTPYPI_LFPY_TOKEN }}
       run: |
-        twine upload --repository-url https://test.pypi.org/legacy/ dist/* --verbose
+        twine upload --repository-url https://test.pypi.org/legacy/ --skip-existing dist/* --verbose
     - name: Publish to PyPI
       shell: bash
       env:
