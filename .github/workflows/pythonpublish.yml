@@ -1,5 +1,9 @@
 name: Upload Python Package
 
+# Builds wheels + sdist and uploads to (Test)PyPI when a release is created
+# manually with a tag starting with "v". Note: releases created by
+# create-release.yml via GITHUB_TOKEN do not trigger this workflow.
+
 on:
   release:
     types: [created]
@@ -9,12 +13,13 @@ permissions:
 
 jobs:
   build_wheels:
+    if: startsWith(github.event.release.tag_name, 'v')
     strategy:
       matrix:
         include:
           - os: ubuntu-latest
             cibw_archs: x86_64 aarch64
-          - os: macos-13
+          - os: macos-15-intel
             cibw_archs: x86_64
           - os: macos-14
             cibw_archs: arm64
@@ -33,12 +38,13 @@ jobs:
       shell: bash
       run: |
         python -m pip install --upgrade pip
-        pip install cibuildwheel>=3.1.0
+        pip install "cibuildwheel>=3.1.0"
     - name: Build wheels
       shell: bash
       env:
         CIBW_BUILD: cp310-* cp311-* cp312-* cp313-* cp314-*
         CIBW_ARCHS: ${{ matrix.cibw_archs }}
+        CIBW_BUILD_FRONTEND: build
       run: |
         python -m cibuildwheel --output-dir wheelhouse
     - name: Upload wheels
@@ -48,10 +54,22 @@ jobs:
         path: ./wheelhouse/*.whl
 
   build_sdist:
+    if: startsWith(github.event.release.tag_name, 'v')
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v4
+    - name: Check release tag matches package versions
+      shell: bash
+      env:
+        TAG: ${{ github.event.release.tag_name }}
+      run: |
+        version_py=$(grep -oP '(?<=version = ")[^"]+' LFPy/version.py)
+        pyproject_version=$(grep -m1 -oP '^version = "\K[^"]+' pyproject.toml)
+        if [ "${TAG}" != "v${version_py}" ] || [ "${TAG}" != "v${pyproject_version}" ]; then
+          echo "::error::Version mismatch: tag=${TAG}, LFPy/version.py=${version_py}, pyproject.toml=${pyproject_version}"
+          exit 1
+        fi
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
@@ -90,11 +108,17 @@ jobs:
       with:
         path: dist
         merge-multiple: true
-    - name: Publish to Test PYPI
+    - name: Publish to Test PyPI
       shell: bash
+      env:
+        TWINE_USERNAME: __token__
+        TWINE_PASSWORD: ${{ secrets.GH_TESTPYPI_LFPY_TOKEN }}
       run: |
-        twine upload -u __token__ -p ${{ secrets.GH_TESTPYPI_LFPY_TOKEN }} --repository-url https://test.pypi.org/legacy/ dist/* --verbose
-    - name: Publish to PYPI
+        twine upload --repository-url https://test.pypi.org/legacy/ --skip-existing dist/* --verbose
+    - name: Publish to PyPI
       shell: bash
+      env:
+        TWINE_USERNAME: __token__
+        TWINE_PASSWORD: ${{ secrets.GH_PYPI_LFPY_TOKEN }}
       run: |
-        twine upload -u __token__ -p ${{ secrets.GH_PYPI_LFPY_TOKEN }} dist/* --verbose
+        twine upload dist/* --verbose

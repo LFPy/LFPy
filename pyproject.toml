@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "LFPy"
-version = "2.3.9rc2"
+version = "2.3.9rc3"
 description = "A module for modeling extracellular potentials of multicompartment neuron models built on NEURON"
 authors = ["LFPy-team <lfpy@users.noreply.github.com>"]
 license = "GPL-3.0-or-later"
@@ -18,8 +18,7 @@ include = [
     "LFPy/test/*.swc",
     "LFPy/test/*.py",
     "LFPy/test/sinsyn.mod",
-    "LFPy/test/expsyni.mod",
-    { path = "LFPy/**/*.so", format = "wheel" }
+    "LFPy/test/expsyni.mod"
 ]
 classifiers = [
     "License :: OSI Approved :: GNU General Public License (GPL)",
@@ -41,8 +40,8 @@ classifiers = [
 ]
 
 [tool.poetry.build]
-script = "build.py"
-generate-setup-file = false
+script = "build_cython.py"
+generate-setup-file = true
 
 [tool.poetry.dependencies]
 python = "^3.10"

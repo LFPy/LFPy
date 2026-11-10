@@ -15,7 +15,7 @@ LFPy is a Python package for calculating extracellular potentials and related me
 ## Packaging
 
 - The project uses **Poetry** with `pyproject.toml` as the single source of truth for metadata, dependencies, and build configuration.
-- A `build.py` script handles Cython extension compilation under the Poetry build system.
+- A `build_cython.py` script handles Cython extension compilation under the Poetry build system.
 - Do **not** modify or re-introduce `setup.py` or `setup.cfg`.
 - Minimum dependency versions are pinned in `pyproject.toml`; update them there (not in `requirements.txt`, which is kept only for legacy reference).
 - Optional dependency groups: `tests` (pytest) and `docs` (sphinx, numpydoc, sphinx-rtd-theme, m2r2).
@@ -44,7 +44,7 @@ LFPy is a Python package for calculating extracellular potentials and related me
 ## Cython extensions
 
 - `.pyx` source files are in `LFPy/`. Compiled `.so`/`.pyd` files are build artefacts and must not be committed.
-- Always build extensions before running tests that depend on them: `python build.py build_ext --inplace` or `pip install -e .`.
+- Always build extensions before running tests that depend on them: `python build_cython.py build_ext --inplace` or `pip install -e .`.
 
 ## CI (GitHub Actions)
 

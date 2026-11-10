@@ -5,30 +5,39 @@ import shutil
 from pathlib import Path
 
 
+def build(setup_kwargs):
+    """Provide Cython extensions to Poetry's generated setup script."""
+    import numpy as np
+    from Cython.Build import cythonize
+    from setuptools import Extension
+
+    ext_modules = [
+        Extension(
+            'LFPy.run_simulation',
+            [os.path.join('LFPy', 'run_simulation.pyx')],
+            include_dirs=[np.get_include()],
+        ),
+        Extension(
+            'LFPy.alias_method',
+            [os.path.join('LFPy', 'alias_method.pyx')],
+            include_dirs=[np.get_include()],
+        ),
+    ]
+    setup_kwargs["ext_modules"] = cythonize(ext_modules)
+
+
 def main():
-    """Build Cython extensions when invoked by poetry."""
+    """Build Cython extensions in place."""
     try:
-        import numpy as np
-        from Cython.Build import cythonize
         from Cython.Distutils import build_ext
-        from setuptools import Distribution, Extension
+        from setuptools import Distribution
 
         print("Building Cython extensions")
-        ext_modules = [
-            Extension(
-                'LFPy.run_simulation',
-                [os.path.join('LFPy', 'run_simulation.pyx')],
-                include_dirs=[np.get_include()],
-            ),
-            Extension(
-                'LFPy.alias_method',
-                [os.path.join('LFPy', 'alias_method.pyx')],
-                include_dirs=[np.get_include()],
-            ),
-        ]
+        setup_kwargs = {}
+        build(setup_kwargs)
         distribution = Distribution({
             "name": "LFPy",
-            "ext_modules": cythonize(ext_modules),
+            **setup_kwargs,
         })
 
         cmd = build_ext(distribution)
