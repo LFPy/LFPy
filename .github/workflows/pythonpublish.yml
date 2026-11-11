@@ -19,10 +19,8 @@ jobs:
         include:
           - os: ubuntu-latest
             cibw_archs: x86_64 aarch64
-          - os: macos-latest-intel
-            cibw_archs: x86_64
           - os: macos-latest
-            cibw_archs: arm64
+            cibw_archs: x86_64 arm64
     runs-on: ${{ matrix.os }}
 
     steps:
