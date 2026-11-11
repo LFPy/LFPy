@@ -25,7 +25,7 @@ jobs:
       released: ${{ steps.set_released.outputs.released }}
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
       with:
         fetch-depth: 0
 
@@ -90,7 +90,7 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
     - name: Set up QEMU
       if: runner.os == 'Linux'
       uses: docker/setup-qemu-action@v3
@@ -126,7 +126,7 @@ jobs:
       contents: read
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
